@@ -1,16 +1,10 @@
 from __future__ import annotations
 
 import hashlib
-import sys
-from pathlib import Path
 from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
-
-ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
 
 from dewey_service.app import create_app
 from dewey_service.settings import Settings
@@ -46,7 +40,9 @@ class FakeDeweyService:
             return code, body
         return None
 
-    def _remember(self, op: str, key: str, payload: dict[str, Any], code: int, body: dict[str, Any]) -> None:
+    def _remember(
+        self, op: str, key: str, payload: dict[str, Any], code: int, body: dict[str, Any]
+    ) -> None:
         lookup = f"{op}:{key}"
         self.idempotency[lookup] = (self._fp(payload), code, dict(body))
 
@@ -83,7 +79,14 @@ class FakeDeweyService:
         self._remember("artifact.register", idempotency_key, payload, 201, item)
         return 201, dict(item)
 
-    def import_artifact_from_uri(self, *, artifact_type: str, storage_uri: str, metadata: dict[str, Any], idempotency_key: str):
+    def import_artifact_from_uri(
+        self,
+        *,
+        artifact_type: str,
+        storage_uri: str,
+        metadata: dict[str, Any],
+        idempotency_key: str,
+    ):
         if not storage_uri.startswith("s3://"):
             raise ValueError("import currently supports s3:// URIs only")
         bucket_and_key = storage_uri[5:]
@@ -113,7 +116,13 @@ class FakeDeweyService:
             raise DeweyNotFoundError(f"Artifact not found: {artifact_euid}")
         return dict(self.artifacts[artifact_euid])
 
-    def list_artifacts(self, *, artifact_type: str | None = None, producer_system: str | None = None, limit: int = 200):
+    def list_artifacts(
+        self,
+        *,
+        artifact_type: str | None = None,
+        producer_system: str | None = None,
+        limit: int = 200,
+    ):
         rows = list(self.artifacts.values())
         if artifact_type:
             rows = [row for row in rows if row["artifact_type"] == artifact_type]
@@ -121,7 +130,14 @@ class FakeDeweyService:
             rows = [row for row in rows if row.get("producer_system") == producer_system]
         return rows[:limit]
 
-    def create_artifact_set(self, *, artifact_set_type: str, label: str | None, description: str | None, idempotency_key: str):
+    def create_artifact_set(
+        self,
+        *,
+        artifact_set_type: str,
+        label: str | None,
+        description: str | None,
+        idempotency_key: str,
+    ):
         payload = {
             "artifact_set_type": artifact_set_type,
             "label": label,
@@ -145,7 +161,9 @@ class FakeDeweyService:
         self._remember("artifact_set.create", idempotency_key, payload, 201, item)
         return 201, dict(item)
 
-    def add_artifact_set_member(self, *, artifact_set_euid: str, artifact_euid: str, idempotency_key: str):
+    def add_artifact_set_member(
+        self, *, artifact_set_euid: str, artifact_euid: str, idempotency_key: str
+    ):
         from dewey_service.service import DeweyNotFoundError
 
         if artifact_set_euid not in self.artifact_sets:
@@ -163,7 +181,9 @@ class FakeDeweyService:
         self._remember("artifact_set.member.add", idempotency_key, payload, 200, dict(aset))
         return 200, dict(aset)
 
-    def remove_artifact_set_member(self, *, artifact_set_euid: str, artifact_euid: str, idempotency_key: str):
+    def remove_artifact_set_member(
+        self, *, artifact_set_euid: str, artifact_euid: str, idempotency_key: str
+    ):
         from dewey_service.service import DeweyNotFoundError
 
         if artifact_set_euid not in self.artifact_sets:
@@ -318,7 +338,9 @@ class FakeDeweyService:
         self._remember("external_object_relation.attach", idempotency_key, payload, 201, row)
         return 201, row
 
-    def list_external_object_relations(self, *, target_type: str, target_euid: str, limit: int = 200):
+    def list_external_object_relations(
+        self, *, target_type: str, target_euid: str, limit: int = 200
+    ):
         rows = [
             row
             for row in self.external_relations

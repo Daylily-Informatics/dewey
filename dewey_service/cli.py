@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -65,7 +66,7 @@ def info() -> None:
 
 @server_app.command("start")
 def server_start(
-    host: str = typer.Option("0.0.0.0", "--host", help="Host to bind"),
+    host: str = typer.Option("127.0.0.1", "--host", help="Host to bind"),
     port: int = typer.Option(8913, "--port", "-p", help="Port to bind"),
     reload: bool = typer.Option(False, "--reload/--no-reload", help="Enable autoreload"),
     ssl: bool = typer.Option(True, "--ssl/--no-ssl", help="Serve over HTTPS"),
@@ -96,7 +97,9 @@ def db_build(
     cluster: str = typer.Option("", "--cluster", help="Aurora cluster ID for aurora target"),
     profile: str = typer.Option(DEFAULT_AWS_PROFILE, "--profile", help="AWS profile"),
     region: str = typer.Option(DEFAULT_AWS_REGION, "--region", help="AWS region"),
-    namespace: str = typer.Option(DEFAULT_TAPDB_DATABASE_NAME, "--namespace", help="TapDB namespace"),
+    namespace: str = typer.Option(
+        DEFAULT_TAPDB_DATABASE_NAME, "--namespace", help="TapDB namespace"
+    ),
 ) -> None:
     """Bootstrap TapDB runtime and apply Dewey overlay."""
     ensure_tapdb_version()
@@ -115,7 +118,15 @@ def db_build(
             if not cluster.strip():
                 raise TapDBRuntimeError("--cluster is required for aurora target")
             result = run_tapdb_cli(
-                ["bootstrap", "aurora", "--cluster", cluster.strip(), "--region", region, "--no-gui"],
+                [
+                    "bootstrap",
+                    "aurora",
+                    "--cluster",
+                    cluster.strip(),
+                    "--region",
+                    region,
+                    "--no-gui",
+                ],
                 target=target,
                 client_id=DEFAULT_TAPDB_CLIENT_ID,
                 profile=profile,
@@ -135,7 +146,9 @@ def db_build(
         console.print(f"[green]DATABASE_URL[/green] resolved: [dim]{db_url}[/dim]")
 
         # Overlay step: bootstrap Dewey templates through app service.
-        subprocess.run([sys.executable, "-m", "dewey_service.db_seed"], cwd=PROJECT_ROOT, check=True)
+        subprocess.run(
+            [sys.executable, "-m", "dewey_service.db_seed"], cwd=PROJECT_ROOT, check=True
+        )
         console.print("[green]Dewey TapDB overlay complete[/green]")
     except (TapDBRuntimeError, subprocess.CalledProcessError) as exc:
         console.print(f"[red]DB build failed:[/red] {exc}")
@@ -146,7 +159,9 @@ def db_build(
 def db_seed() -> None:
     """Apply Dewey TapDB template overlay only."""
     try:
-        subprocess.run([sys.executable, "-m", "dewey_service.db_seed"], cwd=PROJECT_ROOT, check=True)
+        subprocess.run(
+            [sys.executable, "-m", "dewey_service.db_seed"], cwd=PROJECT_ROOT, check=True
+        )
     except subprocess.CalledProcessError as exc:
         raise typer.Exit(exc.returncode) from exc
 
@@ -157,7 +172,9 @@ def db_reset(
     target: str = typer.Option("local", "--target", help="TapDB target: local|aurora"),
     profile: str = typer.Option(DEFAULT_AWS_PROFILE, "--profile", help="AWS profile"),
     region: str = typer.Option(DEFAULT_AWS_REGION, "--region", help="AWS region"),
-    namespace: str = typer.Option(DEFAULT_TAPDB_DATABASE_NAME, "--namespace", help="TapDB namespace"),
+    namespace: str = typer.Option(
+        DEFAULT_TAPDB_DATABASE_NAME, "--namespace", help="TapDB namespace"
+    ),
 ) -> None:
     """Delete and rebuild TapDB target then apply Dewey overlay."""
     if not force and not typer.confirm("This will delete the current TapDB DB target. Continue?"):
@@ -188,7 +205,9 @@ def tapdb_run(
     target: str = typer.Option("local", "--target", help="TapDB target: local|aurora"),
     profile: str = typer.Option(DEFAULT_AWS_PROFILE, "--profile", help="AWS profile"),
     region: str = typer.Option(DEFAULT_AWS_REGION, "--region", help="AWS region"),
-    namespace: str = typer.Option(DEFAULT_TAPDB_DATABASE_NAME, "--namespace", help="TapDB namespace"),
+    namespace: str = typer.Option(
+        DEFAULT_TAPDB_DATABASE_NAME, "--namespace", help="TapDB namespace"
+    ),
 ) -> None:
     """Run raw tapdb CLI arguments through Dewey runtime context."""
     if not ctx.args:
@@ -218,9 +237,13 @@ def tapdb_run(
 @cognito_app.command("status")
 def cognito_status() -> None:
     """Show daycog status for Dewey runtime."""
+    daycog_path = shutil.which("daycog")
+    if not daycog_path:
+        console.print("[red]daycog not found in PATH[/red]")
+        raise typer.Exit(1)
     try:
         proc = subprocess.run(
-            ["daycog", "status"],
+            [daycog_path, "status"],
             capture_output=True,
             text=True,
             check=False,
@@ -242,7 +265,7 @@ def test_run(
     pytest_args: list[str] = typer.Argument(
         None,
         help="Optional pytest arguments, e.g. tests/test_app_boot.py -q",
-    )
+    ),
 ) -> None:
     """Run Dewey tests."""
     args = list(pytest_args or ["-q"])
@@ -257,12 +280,16 @@ def test_run(
 @quality_app.command("lint")
 def quality_lint() -> None:
     """Run Ruff lint checks."""
-    proc = subprocess.run([sys.executable, "-m", "ruff", "check", "."], cwd=PROJECT_ROOT, check=False)
+    proc = subprocess.run(
+        [sys.executable, "-m", "ruff", "check", "."], cwd=PROJECT_ROOT, check=False
+    )
     raise typer.Exit(proc.returncode)
 
 
 @quality_app.command("format")
-def quality_format(check: bool = typer.Option(True, "--check/--fix", help="Check or apply formatting")) -> None:
+def quality_format(
+    check: bool = typer.Option(True, "--check/--fix", help="Check or apply formatting"),
+) -> None:
     """Run Ruff formatter."""
     cmd = [sys.executable, "-m", "ruff", "format", "."]
     if check:
@@ -274,7 +301,9 @@ def quality_format(check: bool = typer.Option(True, "--check/--fix", help="Check
 @quality_app.command("check")
 def quality_check() -> None:
     """Run lint then tests."""
-    lint = subprocess.run([sys.executable, "-m", "ruff", "check", "."], cwd=PROJECT_ROOT, check=False)
+    lint = subprocess.run(
+        [sys.executable, "-m", "ruff", "check", "."], cwd=PROJECT_ROOT, check=False
+    )
     if lint.returncode != 0:
         raise typer.Exit(lint.returncode)
     tests = subprocess.run([sys.executable, "-m", "pytest", "-q"], cwd=PROJECT_ROOT, check=False)
@@ -285,8 +314,12 @@ def quality_check() -> None:
 def config_path() -> None:
     """Print resolved Dewey config paths."""
     settings = get_settings()
-    console.print(f"DEWEY config path: [cyan]{os.environ.get('XDG_CONFIG_HOME', '~/.config')}/dewey/config.yaml[/cyan]")
-    console.print(f"TAPDB config path: [cyan]{settings.tapdb_config_path or os.environ.get('TAPDB_CONFIG_PATH', '')}[/cyan]")
+    console.print(
+        f"DEWEY config path: [cyan]{os.environ.get('XDG_CONFIG_HOME', '~/.config')}/dewey/config.yaml[/cyan]"
+    )
+    console.print(
+        f"TAPDB config path: [cyan]{settings.tapdb_config_path or os.environ.get('TAPDB_CONFIG_PATH', '')}[/cyan]"
+    )
 
 
 @config_app.command("show")

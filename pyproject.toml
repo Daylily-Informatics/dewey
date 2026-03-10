@@ -6,6 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "dewey-service"
 version = "0.1.0"
 description = "LSMC Dewey canonical artifact registry service"
+readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "daylily-tapdb==0.1.35",
@@ -25,6 +26,9 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    "bandit[toml]>=1.8.0",
+    "build>=1.2.0",
+    "pre-commit>=3.8.0",
     "pytest>=8.0.0",
     "ruff>=0.9.0",
 ]
@@ -38,3 +42,20 @@ include = ["dewey_service*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501"]
+
+[tool.bandit]
+targets = ["dewey_service"]
+exclude_dirs = ["tests", "dist", "build"]
+skips = [
+    "B105",  # false positives on config field names and placeholder defaults
+    "B404",  # CLI wrappers intentionally use subprocess for trusted local tools
+    "B603",  # subprocess calls execute trusted local commands without shell=True
+]
