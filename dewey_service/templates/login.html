@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title }}</title>
+    <style>
+      body { font-family: 'IBM Plex Sans', sans-serif; margin: 0; background: linear-gradient(135deg, #e6f7f6, #f4fbff); }
+      .wrap { max-width: 520px; margin: 8rem auto; background: #fff; border-radius: 16px; padding: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+      h1 { margin-top: 0; }
+      a.btn { display: inline-block; text-decoration: none; background: #0f766e; color: #fff; padding: 0.75rem 1.25rem; border-radius: 8px; font-weight: 600; }
+      p { color: #334155; }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <h1>Dewey Operator Login</h1>
+      <p>Operator access is authenticated through Cognito Hosted UI.</p>
+      <a class="btn" href="{{ cognito_login_url }}">Sign In with Cognito</a>
+    </main>
+  </body>
+</html>

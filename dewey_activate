@@ -1,0 +1,136 @@
+#!/usr/bin/env bash
+# Dewey environment activation script
+# Usage: source dewey_activate
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  echo "Error: This script must be sourced, not executed."
+  echo "Usage: source dewey_activate"
+  exit 1
+fi
+
+_dewey_script_path() {
+  if [[ -n "${ZSH_VERSION:-}" ]]; then
+    printf '%s\n' "${(%):-%x}"
+  elif [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+    printf '%s\n' "${BASH_SOURCE[0]}"
+  else
+    printf '%s\n' "$0"
+  fi
+}
+
+_DEWEY_SCRIPT_PATH="$(_dewey_script_path)"
+DEWEY_ROOT="$(cd "$(dirname "${_DEWEY_SCRIPT_PATH}")" && pwd)"
+unset -f _dewey_script_path
+unset _DEWEY_SCRIPT_PATH
+
+_GREEN='\033[0;32m'
+_YELLOW='\033[1;33m'
+_BLUE='\033[0;34m'
+_CYAN='\033[0;36m'
+_NC='\033[0m'
+_DEWEY_PYTHON=""
+
+echo -e "${_BLUE}Activating Dewey environment...${_NC}"
+
+if command -v conda &> /dev/null; then
+  source "$(conda info --base)/etc/profile.d/conda.sh" 2>/dev/null || true
+  if conda info --envs | grep -q "DEWEY"; then
+    echo -e "  ${_GREEN}✓${_NC} Activating conda environment: DEWEY"
+    conda activate DEWEY
+    if [[ -n "${CONDA_PREFIX:-}" ]] && [[ -d "${CONDA_PREFIX}/bin" ]]; then
+      export PATH="${CONDA_PREFIX}/bin:$PATH"
+    fi
+  else
+    echo -e "  ${_YELLOW}⚠${_NC} Conda environment 'DEWEY' not found."
+    if [[ -f "$DEWEY_ROOT/dewey_env.yaml" ]]; then
+      echo -e "  ${_CYAN}→${_NC} Installing conda environment from dewey_env.yaml..."
+      if conda env create -f "$DEWEY_ROOT/dewey_env.yaml"; then
+        echo -e "  ${_GREEN}✓${_NC} Activating conda environment: DEWEY"
+        conda activate DEWEY
+        if [[ -n "${CONDA_PREFIX:-}" ]] && [[ -d "${CONDA_PREFIX}/bin" ]]; then
+          export PATH="${CONDA_PREFIX}/bin:$PATH"
+        fi
+      else
+        echo -e "  ${_YELLOW}⚠${_NC} Failed to create conda environment."
+      fi
+    fi
+  fi
+fi
+
+if [[ -n "${CONDA_PREFIX:-}" ]] && [[ -x "${CONDA_PREFIX}/bin/python" ]]; then
+  _DEWEY_PYTHON="${CONDA_PREFIX}/bin/python"
+elif command -v python &> /dev/null; then
+  _DEWEY_PYTHON="$(command -v python)"
+fi
+
+if [[ -n "${_DEWEY_PYTHON}" ]]; then
+  _DEWEY_PYTHON_BIN="$(dirname "${_DEWEY_PYTHON}")"
+  export PATH="${_DEWEY_PYTHON_BIN}:$PATH"
+fi
+
+if ! command -v dewey &> /dev/null || ! "${_DEWEY_PYTHON:-python}" -m pip show dewey-service &> /dev/null 2>&1; then
+  echo -e "  ${_CYAN}→${_NC} Installing dewey CLI..."
+  "${_DEWEY_PYTHON:-python}" -m pip install -e "$DEWEY_ROOT" -q
+  echo -e "  ${_GREEN}✓${_NC} Installed 'dewey' CLI command"
+else
+  echo -e "  ${_GREEN}✓${_NC} 'dewey' CLI already installed"
+fi
+
+if [[ -n "$ZSH_VERSION" ]]; then
+  eval "$(dewey --show-completion zsh 2>/dev/null)" 2>/dev/null
+elif [[ -n "$BASH_VERSION" ]]; then
+  eval "$(dewey --show-completion bash 2>/dev/null)" 2>/dev/null
+fi
+
+export DEWEY_ROOT
+export AWS_PROFILE="${AWS_PROFILE:-lsmc}"
+export AWS_REGION="${AWS_REGION:-us-west-2}"
+export DATABASE_BACKEND="${DATABASE_BACKEND:-tapdb}"
+export DATABASE_TARGET="${DATABASE_TARGET:-local}"
+export TAPDB_CLIENT_ID="${TAPDB_CLIENT_ID:-dewey}"
+export TAPDB_DATABASE_NAME="${TAPDB_DATABASE_NAME:-dewey}"
+export TAPDB_ENV="${TAPDB_ENV:-dev}"
+export TAPDB_STRICT_NAMESPACE="${TAPDB_STRICT_NAMESPACE:-1}"
+_DEWEY_DEFAULT_TAPDB_CONFIG_PATH="$DEWEY_ROOT/config/tapdb-config-${TAPDB_DATABASE_NAME}.yaml"
+export TAPDB_CONFIG_PATH="${TAPDB_CONFIG_PATH:-$_DEWEY_DEFAULT_TAPDB_CONFIG_PATH}"
+
+if [[ -z "${DEWEY_API_BEARER_TOKEN:-}" ]]; then
+  export DEWEY_API_BEARER_TOKEN="dewey-dev-token"
+fi
+
+if [[ ! -f "$TAPDB_CONFIG_PATH" ]]; then
+  echo -e "  ${_YELLOW}⚠${_NC} TapDB scoped config not found at ${TAPDB_CONFIG_PATH}"
+fi
+
+dewey_deactivate() {
+  unset DEWEY_ROOT
+  if [[ "$CONDA_DEFAULT_ENV" == "DEWEY" ]]; then
+    conda deactivate 2>/dev/null
+  fi
+  echo "Dewey environment deactivated."
+  unset -f dewey_deactivate
+}
+
+echo -e "  ${_GREEN}✓${_NC} AWS_PROFILE=${AWS_PROFILE}"
+echo -e "  ${_GREEN}✓${_NC} AWS_REGION=${AWS_REGION}"
+echo -e "  ${_GREEN}✓${_NC} TAPDB_CLIENT_ID=${TAPDB_CLIENT_ID}"
+echo -e "  ${_GREEN}✓${_NC} TAPDB_DATABASE_NAME=${TAPDB_DATABASE_NAME}"
+echo -e "  ${_GREEN}✓${_NC} TAPDB_ENV=${TAPDB_ENV}"
+echo -e "  ${_GREEN}✓${_NC} TAPDB_STRICT_NAMESPACE=${TAPDB_STRICT_NAMESPACE}"
+echo -e "  ${_GREEN}✓${_NC} TAPDB_CONFIG_PATH=${TAPDB_CONFIG_PATH}"
+echo ""
+echo -e "${_CYAN}Dewey environment activated!${_NC}"
+echo ""
+
+echo "Command groups:"
+echo -e "  ${_CYAN}dewey server${_NC}    start"
+echo -e "  ${_CYAN}dewey db${_NC}        build, seed, reset"
+echo -e "  ${_CYAN}dewey tapdb${_NC}     run"
+echo -e "  ${_CYAN}dewey cognito${_NC}   status"
+echo -e "  ${_CYAN}dewey test${_NC}      run"
+echo -e "  ${_CYAN}dewey quality${_NC}   lint, format, check"
+echo -e "  ${_CYAN}dewey config${_NC}    path, show, validate"
+echo -e "  ${_CYAN}dewey env${_NC}       status, activate, deactivate"
+echo ""
+echo -e "  ${_GREEN}dewey --help${_NC}        Show all commands"
+echo -e "  ${_GREEN}dewey_deactivate${_NC}  Deactivate this environment"

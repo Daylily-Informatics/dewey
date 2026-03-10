@@ -1,38 +1,37 @@
 from __future__ import annotations
 
-from fastapi.testclient import TestClient
-
-from dewey_service.app import create_app
-from dewey_service.settings import Settings
-from dewey_service.store import InMemoryArtifactStore
+from urllib.parse import parse_qs, urlparse
 
 
-def _app():
-    settings = Settings(
-        api_bearer_token="token-123",
-        operator_username="operator",
-        operator_password="pw-123",
-        session_secret_key="session-secret",
-    )
-    return create_app(settings=settings, store=InMemoryArtifactStore())
-
-
-def test_ui_requires_session_login() -> None:
-    with TestClient(_app()) as client:
-        response = client.get("/ui")
+def test_ui_requires_session_login(client) -> None:
+    response = client.get("/ui")
     assert response.status_code == 401
 
 
-def test_login_sets_session_and_allows_ui() -> None:
-    with TestClient(_app()) as client:
-        login = client.post(
-            "/login",
-            data={"username": "operator", "password": "pw-123"},
-            follow_redirects=False,
-        )
-        assert login.status_code == 303
-        assert login.headers["location"] == "/ui"
+def test_cognito_callback_sets_session(monkeypatch, client) -> None:
+    monkeypatch.setattr(
+        "dewey_service.app.exchange_code",
+        lambda settings, code: {"id_token": "header.payload.sig"},
+    )
+    monkeypatch.setattr(
+        "dewey_service.app.decode_jwt_claims_noverify",
+        lambda token: {"email": "operator@example.com", "sub": "sub-1"},
+    )
 
-        ui = client.get("/ui")
-        assert ui.status_code == 200
-        assert "Dewey Artifacts" in ui.text
+    login = client.get("/auth/login", follow_redirects=False)
+    assert login.status_code in {307, 302}
+    redirect_url = login.headers["location"]
+    parsed = urlparse(redirect_url)
+    state = parse_qs(parsed.query)["state"][0]
+
+    callback = client.get(
+        "/auth/callback",
+        params={"code": "code-1", "state": state},
+        follow_redirects=False,
+    )
+    assert callback.status_code == 303
+    assert callback.headers["location"] == "/ui"
+
+    ui = client.get("/ui")
+    assert ui.status_code == 200
+    assert "Dewey Operator Console" in ui.text
