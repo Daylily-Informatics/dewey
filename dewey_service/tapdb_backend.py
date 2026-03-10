@@ -9,12 +9,9 @@ from dataclasses import dataclass
 from hashlib import sha256
 from typing import Any, Generator, Optional, cast
 
-from sqlalchemy import and_
-from sqlalchemy.orm import Session
-
 from daylily_tapdb import (
-    TAPDBConnection,
     InstanceFactory,
+    TAPDBConnection,
     TemplateManager,
     generic_instance,
     generic_instance_lineage,
@@ -23,6 +20,8 @@ from daylily_tapdb import (
 from daylily_tapdb.cli.context import resolve_context
 from daylily_tapdb.cli.db_config import get_db_config_for_env
 from daylily_tapdb.sequences import ensure_instance_prefix_sequence
+from sqlalchemy import and_
+from sqlalchemy.orm import Session
 
 
 def utc_now_iso() -> str:
@@ -221,7 +220,9 @@ class TapDBBackend:
         session.flush()
         return instance
 
-    def update_instance_json(self, session: Session, instance: generic_instance, updates: dict[str, Any]) -> None:
+    def update_instance_json(
+        self, session: Session, instance: generic_instance, updates: dict[str, Any]
+    ) -> None:
         payload = dict(instance.json_addl or {})
         payload.update(updates)
         instance.json_addl = payload
@@ -283,7 +284,10 @@ class TapDBBackend:
         query = self._template_query(session, template_code=template_code)
         if query is None:
             return []
-        return cast(list[generic_instance], query.order_by(generic_instance.created_dt.desc()).limit(limit).all())
+        return cast(
+            list[generic_instance],
+            query.order_by(generic_instance.created_dt.desc()).limit(limit).all(),
+        )
 
     def create_lineage(
         self,
@@ -446,7 +450,9 @@ def normalize_instance_payload(instance: generic_instance) -> dict[str, Any]:
     payload.setdefault("name", instance.name)
     payload.setdefault(
         "created_at",
-        instance.created_dt.isoformat().replace("+00:00", "Z") if instance.created_dt else utc_now_iso(),
+        instance.created_dt.isoformat().replace("+00:00", "Z")
+        if instance.created_dt
+        else utc_now_iso(),
     )
     payload.setdefault(
         "updated_at",

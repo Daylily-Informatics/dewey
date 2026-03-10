@@ -46,11 +46,7 @@ def ensure_tapdb_version(required_version: str = TAPDB_REQUIRED_VERSION) -> str:
     if installed_version != required_version:
         required_tuple = _parse_semver_tuple(required_version)
         installed_tuple = _parse_semver_tuple(installed_version)
-        if (
-            required_tuple is None
-            or installed_tuple is None
-            or installed_tuple < required_tuple
-        ):
+        if required_tuple is None or installed_tuple is None or installed_tuple < required_tuple:
             raise TapDBRuntimeError(
                 "daylily-tapdb version mismatch. "
                 f"Required baseline: {required_version}, installed: {installed_version}."
@@ -73,9 +69,7 @@ def _resolve_tapdb_config_path(*, namespace: str, client_id: str) -> str | None:
     normalized_namespace = (
         namespace or DEFAULT_TAPDB_DATABASE_NAME
     ).strip() or DEFAULT_TAPDB_DATABASE_NAME
-    normalized_client_id = (
-        client_id or DEFAULT_TAPDB_CLIENT_ID
-    ).strip() or DEFAULT_TAPDB_CLIENT_ID
+    normalized_client_id = (client_id or DEFAULT_TAPDB_CLIENT_ID).strip() or DEFAULT_TAPDB_CLIENT_ID
 
     repo_root = Path(__file__).resolve().parents[2]
     repo_scoped = repo_root / "config" / f"tapdb-config-{normalized_namespace}.yaml"

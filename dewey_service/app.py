@@ -205,7 +205,9 @@ def create_app(
         return RedirectResponse(url=logout_url, status_code=status.HTTP_303_SEE_OTHER)
 
     @app.get("/ui", include_in_schema=False)
-    async def ui_home(request: Request, profile: dict[str, Any] = Depends(require_ui_session)) -> HTMLResponse:
+    async def ui_home(
+        request: Request, profile: dict[str, Any] = Depends(require_ui_session)
+    ) -> HTMLResponse:
         artifacts = service.list_artifacts(limit=100)
         artifact_sets = service.list_artifact_sets(limit=100)
         return templates.TemplateResponse(

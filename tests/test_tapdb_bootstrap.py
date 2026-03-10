@@ -4,7 +4,6 @@ from typer.testing import CliRunner
 
 from dewey_service.cli import cli
 
-
 runner = CliRunner()
 
 

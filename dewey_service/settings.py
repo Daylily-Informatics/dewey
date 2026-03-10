@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from pydantic import Field, field_validator, model_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -90,7 +90,7 @@ class Settings(BaseSettings):
     api_bearer_token: str = "dewey-dev-token"
     api_bearer_tokens: str = ""
     session_secret_key: str = "dewey-session-secret-change-me"
-    host: str = "0.0.0.0"
+    host: str = "127.0.0.1"
     port: int = 8913
     verify_ssl: bool = True
 
@@ -158,9 +158,7 @@ class Settings(BaseSettings):
         if not str(self.cognito_redirect_uri or "").strip():
             missing.append("cognito_redirect_uri")
         if missing:
-            raise ValueError(
-                "Cognito UI auth is required; missing settings: " + ", ".join(missing)
-            )
+            raise ValueError("Cognito UI auth is required; missing settings: " + ", ".join(missing))
         self.cognito_domain = _require_https_url(
             self.cognito_domain,
             field_name="cognito_domain",

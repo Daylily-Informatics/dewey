@@ -92,7 +92,9 @@ class DeweyService:
             version_id=None,
             size=metadata.get("size"),
             checksums=dict(metadata.get("checksums") or {}),
-            content_type=str(metadata.get("content_type") or metadata.get("mime_type") or "").strip()
+            content_type=str(
+                metadata.get("content_type") or metadata.get("mime_type") or ""
+            ).strip()
             or None,
             original_filename=str(metadata.get("original_filename") or "").strip() or None,
             producer_system=str(metadata.get("producer_system") or "").strip() or None,
@@ -248,7 +250,10 @@ class DeweyService:
                 payload = normalize_instance_payload(item)
                 if clean_type and str(payload.get("artifact_type") or "").lower() != clean_type:
                     continue
-                if clean_producer and str(payload.get("producer_system") or "").lower() != clean_producer:
+                if (
+                    clean_producer
+                    and str(payload.get("producer_system") or "").lower() != clean_producer
+                ):
                     continue
                 rows.append(self._artifact_response(item))
             return rows
@@ -560,9 +565,7 @@ class DeweyService:
             raise ValueError("external_object_id is required")
 
         fingerprint = self._fingerprint(payload)
-        identity_key = (
-            f"{payload['external_system']}:{payload['external_object_type']}:{payload['external_object_id']}"
-        )
+        identity_key = f"{payload['external_system']}:{payload['external_object_type']}:{payload['external_object_id']}"
 
         with self.backend.session_scope(commit=True) as session:
             replay = self._idempotency_replay(
