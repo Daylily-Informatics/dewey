@@ -33,8 +33,8 @@
 - Bloom -> Dewey
   - run output artifact registration
 - Ursa -> Dewey
-  - analysis artifact register/resolve
-  - portal file/manifest routes implemented via Dewey artifacts/artifact_sets
+  - analysis artifact resolve by Dewey `artifact_euid`
+  - portal/workset surfaces consume Dewey artifact references only (no Ursa local registry ownership)
 
 ## Legacy Deletion Targets
 
@@ -45,8 +45,8 @@
   - remove `/internal/artifacts` and `/internal/artifacts/bulk`
   - remove Atlas-local artifact ownership writes where superseded by Dewey
 - Bloom
-  - remove superseded `file`/`file_set` ownership internals and docs
-  - remove Dewey-owned UI residue served from Bloom
+  - remove superseded local registry ownership internals and docs
+  - keep Dewey artifacts/artifact_sets as the only active runtime artifact model
 - Ursa
   - remove redundant artifact registry ownership
-  - reimplement portal file/manifest internals on Dewey-backed model
+  - remove portal local-registry operations and rely on Dewey EUID references
