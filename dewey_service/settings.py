@@ -87,6 +87,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    environment: str = "development"
     api_bearer_token: str = "dewey-dev-token"
     api_bearer_tokens: str = ""
     session_secret_key: str = "dewey-session-secret-change-me"
@@ -148,6 +149,16 @@ class Settings(BaseSettings):
             raise ValueError("api_bearer_token is required")
         return normalized
 
+    @field_validator("environment")
+    @classmethod
+    def validate_environment(cls, value: str) -> str:
+        normalized = str(value or "").strip().lower()
+        if normalized not in {"development", "staging", "production", "testing"}:
+            raise ValueError(
+                "environment must be one of: development, staging, production, testing"
+            )
+        return normalized
+
     @model_validator(mode="after")
     def validate_cognito_contract(self) -> "Settings":
         missing: list[str] = []
@@ -172,6 +183,10 @@ class Settings(BaseSettings):
             if cleaned:
                 tokens.add(cleaned)
         return {item for item in tokens if item}
+
+    @property
+    def is_production(self) -> bool:
+        return self.environment == "production"
 
 
 def get_config_file_path() -> Path:

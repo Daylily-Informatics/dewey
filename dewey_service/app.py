@@ -6,10 +6,12 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, ConfigDict, Field
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from dewey_service.auth import (
     AuthError,
@@ -20,6 +22,11 @@ from dewey_service.auth import (
     generate_state,
     require_api_auth,
     require_ui_session,
+)
+from dewey_service.domain_access import (
+    build_allowed_origin_regex,
+    build_trusted_hosts,
+    is_allowed_origin,
 )
 from dewey_service.service import DeweyConflictError, DeweyNotFoundError, DeweyService
 from dewey_service.settings import Settings, get_settings
@@ -115,6 +122,7 @@ def create_app(
     service: DeweyService | None = None,
 ) -> FastAPI:
     settings = settings or get_settings()
+    allow_local_domain_access = not settings.is_production
 
     if service is None:
         backend = TapDBBackend(app_username="dewey")
@@ -131,11 +139,32 @@ def create_app(
     )
     app.state.settings = settings
     app.state.service = service
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=build_trusted_hosts(allow_local=allow_local_domain_access),
+    )
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[],
+        allow_origin_regex=build_allowed_origin_regex(
+            allow_local=allow_local_domain_access
+        ),
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["*"],
+    )
     app.add_middleware(SessionMiddleware, secret_key=settings.session_secret_key)
 
     templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent / "templates"))
 
     api_auth_dep = require_api_auth(settings)
+
+    @app.middleware("http")
+    async def _enforce_origin_allowlist(request: Request, call_next):
+        origin = request.headers.get("origin")
+        if origin and not is_allowed_origin(origin, allow_local=allow_local_domain_access):
+            return HTMLResponse(status_code=403, content="Origin not allowed")
+        return await call_next(request)
 
     def _require_idempotency_key(value: str | None) -> str:
         normalized = str(value or "").strip()
