@@ -146,9 +146,7 @@ def create_app(
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[],
-        allow_origin_regex=build_allowed_origin_regex(
-            allow_local=allow_local_domain_access
-        ),
+        allow_origin_regex=build_allowed_origin_regex(allow_local=allow_local_domain_access),
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["*"],
