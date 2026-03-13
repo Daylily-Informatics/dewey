@@ -4,8 +4,11 @@ from __future__ import annotations
 
 import os
 import shutil
+import signal
 import subprocess
 import sys
+import time
+from datetime import UTC, datetime
 from pathlib import Path
 
 import typer
@@ -48,6 +51,143 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CERT_DIR = PROJECT_ROOT / "certs"
 CERT_FILE = CERT_DIR / "localhost.pem"
 KEY_FILE = CERT_DIR / "localhost-key.pem"
+CONFIG_DIR = Path.home() / ".config" / "dewey"
+LOG_DIR = CONFIG_DIR / "logs"
+PID_FILE = CONFIG_DIR / "server.pid"
+
+
+def _ensure_runtime_dirs() -> None:
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def _get_log_file(prefix: str = "server") -> Path:
+    ts = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
+    return LOG_DIR / f"{prefix}_{ts}.log"
+
+
+def _get_latest_log(prefix: str = "server") -> Path | None:
+    logs = sorted(LOG_DIR.glob(f"{prefix}_*.log"), reverse=True)
+    return logs[0] if logs else None
+
+
+def _get_pid(pid_file: Path = PID_FILE) -> int | None:
+    if pid_file.exists():
+        try:
+            pid = int(pid_file.read_text().strip())
+            os.kill(pid, 0)
+            return pid
+        except (ValueError, ProcessLookupError, PermissionError):
+            pid_file.unlink(missing_ok=True)
+    return None
+
+
+def _start_server(
+    *,
+    host: str,
+    port: int,
+    reload: bool,
+    ssl: bool,
+    background: bool,
+) -> None:
+    _ensure_runtime_dirs()
+
+    if ssl and (not CERT_FILE.exists() or not KEY_FILE.exists()):
+        raise typer.BadParameter(
+            "HTTPS certs are missing. Create certs at certs/localhost.pem and certs/localhost-key.pem"
+        )
+
+    pid = _get_pid(PID_FILE)
+    if pid:
+        protocol = "https" if ssl else "http"
+        display_host = "localhost" if host == "127.0.0.1" else host
+        console.print(f"[yellow]⚠[/yellow] Server already running (PID {pid})")
+        console.print(f"   URL: [cyan]{protocol}://{display_host}:{port}[/cyan]")
+        return
+
+    if background:
+        python = shutil.which("python") or sys.executable
+        cmd = [
+            python,
+            "-m",
+            "uvicorn",
+            "dewey_service.app:create_app",
+            "--factory",
+            "--host",
+            host,
+            "--port",
+            str(port),
+        ]
+        if reload:
+            cmd.append("--reload")
+        if ssl:
+            cmd.extend(["--ssl-certfile", str(CERT_FILE), "--ssl-keyfile", str(KEY_FILE)])
+
+        log_file = _get_log_file()
+        env = os.environ.copy()
+        env["PYTHONUNBUFFERED"] = "1"
+        with open(log_file, "w", buffering=1) as log_f:
+            proc = subprocess.Popen(
+                cmd,
+                stdout=log_f,
+                stderr=subprocess.STDOUT,
+                start_new_session=True,
+                cwd=PROJECT_ROOT,
+                env=env,
+            )
+
+        time.sleep(2)
+        if proc.poll() is not None:
+            console.print("[red]✗[/red] Server failed to start. Check logs:")
+            console.print(f"   [dim]{log_file}[/dim]")
+            raise typer.Exit(1)
+
+        PID_FILE.write_text(str(proc.pid))
+        protocol = "https" if ssl else "http"
+        display_host = "localhost" if host == "127.0.0.1" else host
+        console.print(f"[green]✓[/green] Server started (PID {proc.pid})")
+        console.print(f"   URL: [cyan]{protocol}://{display_host}:{port}[/cyan]")
+        console.print(f"   Logs: [dim]{log_file}[/dim]")
+        return
+
+    uvicorn_kwargs = {
+        "app": "dewey_service.app:create_app",
+        "factory": True,
+        "host": host,
+        "port": port,
+        "reload": reload,
+    }
+    if ssl:
+        uvicorn_kwargs["ssl_certfile"] = str(CERT_FILE)
+        uvicorn_kwargs["ssl_keyfile"] = str(KEY_FILE)
+
+    uvicorn.run(**uvicorn_kwargs)
+
+
+def _stop_server(pid_file: Path = PID_FILE) -> None:
+    pid = _get_pid(pid_file)
+    if not pid:
+        console.print("[yellow]⚠[/yellow] No server running")
+        return
+
+    try:
+        os.kill(pid, signal.SIGTERM)
+        for _ in range(10):
+            time.sleep(0.5)
+            try:
+                os.kill(pid, 0)
+            except ProcessLookupError:
+                break
+        else:
+            os.kill(pid, signal.SIGKILL)
+        pid_file.unlink(missing_ok=True)
+        console.print(f"[green]✓[/green] Server stopped (was PID {pid})")
+    except ProcessLookupError:
+        pid_file.unlink(missing_ok=True)
+        console.print("[yellow]⚠[/yellow] Server was not running")
+    except PermissionError as exc:
+        console.print(f"[red]✗[/red] Permission denied stopping PID {pid}")
+        raise typer.Exit(1) from exc
 
 
 @cli.command("info")
@@ -70,25 +210,50 @@ def server_start(
     port: int = typer.Option(8913, "--port", "-p", help="Port to bind"),
     reload: bool = typer.Option(False, "--reload/--no-reload", help="Enable autoreload"),
     ssl: bool = typer.Option(True, "--ssl/--no-ssl", help="Serve over HTTPS"),
+    background: bool = typer.Option(
+        False,
+        "--background/--foreground",
+        help="Run in background",
+    ),
 ) -> None:
     """Start Dewey API/UI server."""
-    if ssl and (not CERT_FILE.exists() or not KEY_FILE.exists()):
-        raise typer.BadParameter(
-            "HTTPS certs are missing. Create certs at certs/localhost.pem and certs/localhost-key.pem"
-        )
+    _start_server(host=host, port=port, reload=reload, ssl=ssl, background=background)
 
-    uvicorn_kwargs = {
-        "app": "dewey_service.app:create_app",
-        "factory": True,
-        "host": host,
-        "port": port,
-        "reload": reload,
-    }
-    if ssl:
-        uvicorn_kwargs["ssl_certfile"] = str(CERT_FILE)
-        uvicorn_kwargs["ssl_keyfile"] = str(KEY_FILE)
 
-    uvicorn.run(**uvicorn_kwargs)
+@server_app.command("stop")
+def server_stop() -> None:
+    """Stop the Dewey API/UI server."""
+    _stop_server()
+
+
+@server_app.command("status")
+def server_status() -> None:
+    """Show Dewey API/UI server status."""
+    pid = _get_pid(PID_FILE)
+    if pid:
+        port = os.environ.get("DEWEY_PORT", "8913")
+        host = os.environ.get("DEWEY_HOST", "127.0.0.1")
+        protocol = "https" if CERT_FILE.exists() and KEY_FILE.exists() else "http"
+        display_host = "localhost" if host == "127.0.0.1" else host
+        log_file = _get_latest_log()
+        console.print(f"[green]●[/green] Server is [green]running[/green] (PID {pid})")
+        console.print(f"   URL: [cyan]{protocol}://{display_host}:{port}[/cyan]")
+        if log_file:
+            console.print(f"   Logs: [dim]{log_file}[/dim]")
+        return
+    console.print("[dim]○[/dim] Server is [dim]not running[/dim]")
+
+
+@server_app.command("restart")
+def server_restart(
+    host: str = typer.Option("127.0.0.1", "--host", help="Host to bind"),
+    port: int = typer.Option(8913, "--port", "-p", help="Port to bind"),
+    ssl: bool = typer.Option(True, "--ssl/--no-ssl", help="Serve over HTTPS"),
+) -> None:
+    """Restart the Dewey API/UI server in background mode."""
+    _stop_server()
+    time.sleep(1)
+    _start_server(host=host, port=port, reload=False, ssl=ssl, background=True)
 
 
 @db_app.command("build")
