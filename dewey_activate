@@ -33,6 +33,7 @@ _DEWEY_PYTHON=""
 echo -e "${_BLUE}Activating Dewey environment...${_NC}"
 
 if command -v conda &> /dev/null; then
+  _DEWEY_CONDA_BASE="$(conda info --base 2>/dev/null)"
   source "$(conda info --base)/etc/profile.d/conda.sh" 2>/dev/null || true
   if conda info --envs | grep -q "DEWEY"; then
     echo -e "  ${_GREEN}✓${_NC} Activating conda environment: DEWEY"
@@ -56,6 +57,11 @@ if command -v conda &> /dev/null; then
     fi
   fi
 fi
+
+if [[ -n "${_DEWEY_CONDA_BASE:-}" ]] && [[ -d "${_DEWEY_CONDA_BASE}/bin" ]]; then
+  export PATH="${_DEWEY_CONDA_BASE}/bin:$PATH"
+fi
+unset _DEWEY_CONDA_BASE
 
 if [[ -n "${CONDA_PREFIX:-}" ]] && [[ -x "${CONDA_PREFIX}/bin/python" ]]; then
   _DEWEY_PYTHON="${CONDA_PREFIX}/bin/python"
@@ -83,6 +89,10 @@ elif [[ -n "$BASH_VERSION" ]]; then
 fi
 
 export DEWEY_ROOT
+export DEWEY_COGNITO_DOMAIN="${DEWEY_COGNITO_DOMAIN:-https://dewey-auth.localhost}"
+export DEWEY_COGNITO_APP_CLIENT_ID="${DEWEY_COGNITO_APP_CLIENT_ID:-dewey-local-client}"
+export DEWEY_COGNITO_REDIRECT_URI="${DEWEY_COGNITO_REDIRECT_URI:-https://localhost:8913/auth/callback}"
+export DEWEY_COGNITO_LOGOUT_URL="${DEWEY_COGNITO_LOGOUT_URL:-https://localhost:8913/login}"
 export AWS_PROFILE="${AWS_PROFILE:-lsmc}"
 export AWS_REGION="${AWS_REGION:-us-west-2}"
 export DATABASE_BACKEND="${DATABASE_BACKEND:-tapdb}"
