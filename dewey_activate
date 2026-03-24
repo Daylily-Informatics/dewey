@@ -82,9 +82,9 @@ else
   echo -e "  ${_GREEN}✓${_NC} 'dewey' CLI already installed"
 fi
 
-if [[ -n "$ZSH_VERSION" ]]; then
+if [[ -n "${ZSH_VERSION:-}" ]]; then
   eval "$(dewey --show-completion zsh 2>/dev/null)" 2>/dev/null
-elif [[ -n "$BASH_VERSION" ]]; then
+elif [[ -n "${BASH_VERSION:-}" ]]; then
   eval "$(dewey --show-completion bash 2>/dev/null)" 2>/dev/null
 fi
 
