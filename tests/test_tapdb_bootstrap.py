@@ -26,7 +26,7 @@ def test_db_build_invokes_overlay(monkeypatch) -> None:
         calls["seed"] += 1
         return _Result()
 
-    monkeypatch.setattr("dewey_service.cli.ensure_tapdb_version", lambda: "0.1.35")
+    monkeypatch.setattr("dewey_service.cli.ensure_tapdb_version", lambda: "0.2.5")
     monkeypatch.setattr("dewey_service.cli.run_tapdb_cli", _fake_tapdb)
     monkeypatch.setattr("dewey_service.cli.export_database_url_for_target", _fake_db_url)
     monkeypatch.setattr("dewey_service.cli.subprocess.run", _fake_run)
