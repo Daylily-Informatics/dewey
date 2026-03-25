@@ -217,6 +217,9 @@ def server_start(
     ),
 ) -> None:
     """Start Dewey API/UI server."""
+    # Allow env vars to override CLI defaults (same pattern as Ursa)
+    port = int(os.environ.get("DEWEY_PORT", port))
+    host = os.environ.get("DEWEY_HOST", host)
     _start_server(host=host, port=port, reload=reload, ssl=ssl, background=background)
 
 
@@ -251,6 +254,9 @@ def server_restart(
     ssl: bool = typer.Option(True, "--ssl/--no-ssl", help="Serve over HTTPS"),
 ) -> None:
     """Restart the Dewey API/UI server in background mode."""
+    # Allow env vars to override CLI defaults (same pattern as Ursa)
+    port = int(os.environ.get("DEWEY_PORT", port))
+    host = os.environ.get("DEWEY_HOST", host)
     _stop_server()
     time.sleep(1)
     _start_server(host=host, port=port, reload=False, ssl=ssl, background=True)
