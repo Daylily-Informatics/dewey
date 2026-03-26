@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dewey-service"
-version = "0.1.5"
+version = "0.1.6"
 description = "LSMC Dewey canonical artifact registry service"
 readme = "README.md"
 requires-python = ">=3.11"
