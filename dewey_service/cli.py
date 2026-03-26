@@ -4,15 +4,23 @@ from __future__ import annotations
 
 import os
 import shutil
-import signal
 import subprocess
 import sys
 import time
-from datetime import UTC, datetime
 from pathlib import Path
 
 import typer
 import uvicorn
+from cli_core_yo.oauth import runtime_oauth_host, validate_uri_list_ports
+from cli_core_yo.server import (
+    display_host,
+    latest_log,
+    list_logs,
+    new_log_path,
+    read_pid,
+    stop_pid,
+    write_pid,
+)
 from rich.console import Console
 
 from dewey_service.integrations.tapdb_runtime import (
@@ -49,37 +57,48 @@ cli.add_typer(env_app, name="env")
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CERT_DIR = PROJECT_ROOT / "certs"
-CERT_FILE = CERT_DIR / "localhost.pem"
-KEY_FILE = CERT_DIR / "localhost-key.pem"
+CERT_FILE = CERT_DIR / "cert.pem"
+KEY_FILE = CERT_DIR / "key.pem"
 CONFIG_DIR = Path.home() / ".config" / "dewey"
 LOG_DIR = CONFIG_DIR / "logs"
 PID_FILE = CONFIG_DIR / "server.pid"
 
 
+def _validate_cognito_uris_for_port(port: int, host: str) -> None:
+    """Warn if Cognito redirect/logout URIs don't match the runtime port."""
+    try:
+        settings = get_settings()
+    except Exception:
+        return  # Settings validation will catch errors later
+
+    oauth_host = runtime_oauth_host(host)
+    uris_to_check = [
+        (settings.cognito_redirect_uri, "cognito_redirect_uri"),
+        (settings.cognito_logout_url, "cognito_logout_url"),
+    ]
+    all_errors: list[str] = []
+    for uri, label in uris_to_check:
+        if not uri:
+            continue
+        errors = validate_uri_list_ports(
+            uris=[uri],
+            label=label,
+            expected_port=port,
+            runtime_host=oauth_host,
+        )
+        all_errors.extend(errors)
+
+    if all_errors:
+        console.print("[yellow]⚠[/yellow]  Cognito URI port mismatches detected:")
+        for err in all_errors:
+            console.print(f"   • {err}")
+        console.print(f"   Server is starting on port [cyan]{port}[/cyan]")
+        console.print("   Update Cognito config or use [dim]--no-check-cognito-uris[/dim] to skip\n")
+
+
 def _ensure_runtime_dirs() -> None:
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     LOG_DIR.mkdir(parents=True, exist_ok=True)
-
-
-def _get_log_file(prefix: str = "server") -> Path:
-    ts = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
-    return LOG_DIR / f"{prefix}_{ts}.log"
-
-
-def _get_latest_log(prefix: str = "server") -> Path | None:
-    logs = sorted(LOG_DIR.glob(f"{prefix}_*.log"), reverse=True)
-    return logs[0] if logs else None
-
-
-def _get_pid(pid_file: Path = PID_FILE) -> int | None:
-    if pid_file.exists():
-        try:
-            pid = int(pid_file.read_text().strip())
-            os.kill(pid, 0)
-            return pid
-        except (ValueError, ProcessLookupError, PermissionError):
-            pid_file.unlink(missing_ok=True)
-    return None
 
 
 def _start_server(
@@ -94,15 +113,15 @@ def _start_server(
 
     if ssl and (not CERT_FILE.exists() or not KEY_FILE.exists()):
         raise typer.BadParameter(
-            "HTTPS certs are missing. Create certs at certs/localhost.pem and certs/localhost-key.pem"
+            "HTTPS certs are missing. Create certs at certs/cert.pem and certs/key.pem"
         )
 
-    pid = _get_pid(PID_FILE)
+    pid = read_pid(PID_FILE)
     if pid:
         protocol = "https" if ssl else "http"
-        display_host = "localhost" if host == "127.0.0.1" else host
+        dh = display_host(host)
         console.print(f"[yellow]⚠[/yellow] Server already running (PID {pid})")
-        console.print(f"   URL: [cyan]{protocol}://{display_host}:{port}[/cyan]")
+        console.print(f"   URL: [cyan]{protocol}://{dh}:{port}[/cyan]")
         return
 
     if background:
@@ -123,7 +142,7 @@ def _start_server(
         if ssl:
             cmd.extend(["--ssl-certfile", str(CERT_FILE), "--ssl-keyfile", str(KEY_FILE)])
 
-        log_file = _get_log_file()
+        log_file = new_log_path(LOG_DIR)
         env = os.environ.copy()
         env["PYTHONUNBUFFERED"] = "1"
         with open(log_file, "w", buffering=1) as log_f:
@@ -142,11 +161,11 @@ def _start_server(
             console.print(f"   [dim]{log_file}[/dim]")
             raise typer.Exit(1)
 
-        PID_FILE.write_text(str(proc.pid))
+        write_pid(PID_FILE, proc.pid)
         protocol = "https" if ssl else "http"
-        display_host = "localhost" if host == "127.0.0.1" else host
+        dh = display_host(host)
         console.print(f"[green]✓[/green] Server started (PID {proc.pid})")
-        console.print(f"   URL: [cyan]{protocol}://{display_host}:{port}[/cyan]")
+        console.print(f"   URL: [cyan]{protocol}://{dh}:{port}[/cyan]")
         console.print(f"   Logs: [dim]{log_file}[/dim]")
         return
 
@@ -165,29 +184,14 @@ def _start_server(
 
 
 def _stop_server(pid_file: Path = PID_FILE) -> None:
-    pid = _get_pid(pid_file)
-    if not pid:
-        console.print("[yellow]⚠[/yellow] No server running")
-        return
-
-    try:
-        os.kill(pid, signal.SIGTERM)
-        for _ in range(10):
-            time.sleep(0.5)
-            try:
-                os.kill(pid, 0)
-            except ProcessLookupError:
-                break
-        else:
-            os.kill(pid, signal.SIGKILL)
-        pid_file.unlink(missing_ok=True)
-        console.print(f"[green]✓[/green] Server stopped (was PID {pid})")
-    except ProcessLookupError:
-        pid_file.unlink(missing_ok=True)
-        console.print("[yellow]⚠[/yellow] Server was not running")
-    except PermissionError as exc:
-        console.print(f"[red]✗[/red] Permission denied stopping PID {pid}")
-        raise typer.Exit(1) from exc
+    stopped, msg = stop_pid(pid_file)
+    if stopped:
+        console.print(f"[green]✓[/green] {msg}")
+    elif "Permission" in msg:
+        console.print(f"[red]✗[/red] {msg}")
+        raise typer.Exit(1)
+    else:
+        console.print(f"[yellow]⚠[/yellow] {msg}")
 
 
 @cli.command("info")
@@ -206,14 +210,19 @@ def info() -> None:
 
 @server_app.command("start")
 def server_start(
-    host: str = typer.Option("127.0.0.1", "--host", help="Host to bind"),
+    host: str = typer.Option("0.0.0.0", "--host", help="Host to bind"),
     port: int = typer.Option(8913, "--port", "-p", help="Port to bind"),
     reload: bool = typer.Option(False, "--reload/--no-reload", help="Enable autoreload"),
     ssl: bool = typer.Option(True, "--ssl/--no-ssl", help="Serve over HTTPS"),
     background: bool = typer.Option(
-        False,
+        True,
         "--background/--foreground",
-        help="Run in background",
+        help="Run in background (default)",
+    ),
+    check_cognito_uris: bool = typer.Option(
+        True,
+        "--check-cognito-uris/--no-check-cognito-uris",
+        help="Validate Cognito callback/logout URI ports before startup",
     ),
 ) -> None:
     """Start Dewey API/UI server."""
@@ -232,24 +241,56 @@ def server_stop() -> None:
 @server_app.command("status")
 def server_status() -> None:
     """Show Dewey API/UI server status."""
-    pid = _get_pid(PID_FILE)
+    pid = read_pid(PID_FILE)
     if pid:
-        port = os.environ.get("DEWEY_PORT", "8913")
-        host = os.environ.get("DEWEY_HOST", "127.0.0.1")
+        port = os.environ.get("DEWEY_RUNTIME__PORT", "8913")
+        host = os.environ.get("DEWEY_RUNTIME__HOST", "0.0.0.0")
         protocol = "https" if CERT_FILE.exists() and KEY_FILE.exists() else "http"
-        display_host = "localhost" if host == "127.0.0.1" else host
-        log_file = _get_latest_log()
+        dh = display_host(host)
+        log_file = latest_log(LOG_DIR)
         console.print(f"[green]●[/green] Server is [green]running[/green] (PID {pid})")
-        console.print(f"   URL: [cyan]{protocol}://{display_host}:{port}[/cyan]")
+        console.print(f"   URL: [cyan]{protocol}://{dh}:{port}[/cyan]")
         if log_file:
             console.print(f"   Logs: [dim]{log_file}[/dim]")
         return
     console.print("[dim]○[/dim] Server is [dim]not running[/dim]")
 
 
+@server_app.command("logs")
+def server_logs(
+    lines: int = typer.Option(50, "--lines", "-n", help="Number of lines to show"),
+    all_logs: bool = typer.Option(False, "--all", "-a", help="List all log files"),
+) -> None:
+    """View and follow server logs (Ctrl+C to stop)."""
+    _ensure_runtime_dirs()
+
+    if all_logs:
+        log_entries = list_logs(LOG_DIR)
+        if not log_entries:
+            console.print("[yellow]⚠[/yellow] No log files found.")
+            return
+        console.print(f"[bold]Server log files ({len(log_entries)}):[/bold]")
+        for lf in log_entries[:20]:
+            size = lf.stat().st_size
+            console.print(f"  {lf.name}  [dim]({size:,} bytes)[/dim]")
+        return
+
+    log_file = latest_log(LOG_DIR)
+    if not log_file:
+        console.print("[yellow]⚠[/yellow] No log file found. Start the server first.")
+        return
+
+    console.print(f"[dim]Following {log_file.name} (Ctrl+C to stop)[/dim]\n")
+    try:
+        subprocess.run(["tail", "-f", "-n", str(lines), str(log_file)])
+    except KeyboardInterrupt:
+        console.print("\n")
+
+
+
 @server_app.command("restart")
 def server_restart(
-    host: str = typer.Option("127.0.0.1", "--host", help="Host to bind"),
+    host: str = typer.Option("0.0.0.0", "--host", help="Host to bind"),
     port: int = typer.Option(8913, "--port", "-p", help="Port to bind"),
     ssl: bool = typer.Option(True, "--ssl/--no-ssl", help="Serve over HTTPS"),
 ) -> None:

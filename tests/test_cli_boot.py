@@ -24,7 +24,9 @@ def test_cli_info_renders(monkeypatch) -> None:
 
 
 def test_server_status_reports_not_running(monkeypatch) -> None:
-    monkeypatch.setattr(cli_module, "_get_pid", lambda _pid_file=cli_module.PID_FILE: None)
+    from cli_core_yo import server as server_mod
+
+    monkeypatch.setattr(server_mod, "read_pid", lambda _pid_file: None)
     result = runner.invoke(cli, ["server", "status"])
     assert result.exit_code == 0
     assert "not running" in result.stdout
@@ -53,7 +55,7 @@ def test_server_restart_uses_background_start(monkeypatch) -> None:
         (
             "start",
             {
-                "host": "127.0.0.1",
+                "host": "0.0.0.0",
                 "port": 8913,
                 "reload": False,
                 "ssl": True,
