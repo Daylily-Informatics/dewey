@@ -174,6 +174,15 @@ def create_app(
     async def _not_found_handler(_request: Request, exc: DeweyNotFoundError):
         return HTMLResponse(status_code=404, content=str(exc))
 
+    @app.exception_handler(HTTPException)
+    async def _http_exception_handler(request: Request, exc: HTTPException):
+        """Redirect unauthenticated browser requests to the login page."""
+        if exc.status_code == 401:
+            accept = request.headers.get("accept", "")
+            if "text/html" in accept:
+                return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+        return HTMLResponse(status_code=exc.status_code, content=exc.detail or "")
+
     @app.get("/", include_in_schema=False)
     async def root() -> RedirectResponse:
         return RedirectResponse(url="/ui", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
