@@ -53,20 +53,25 @@ def build_cognito_login_url(*, settings: Settings, state: str) -> str:
     )
 
 
-def build_cognito_logout_url(*, settings: Settings) -> str:
+def build_cognito_logout_url(*, settings: Settings, state: str | None = None) -> str:
+    import urllib.parse
     domain = str(settings.cognito_domain or "").strip().rstrip("/")
     if domain.startswith("https://"):
         domain = domain[len("https://") :]
     if domain.startswith("http://"):
         domain = domain[len("http://") :]
-    target = settings.cognito_logout_url or settings.cognito_redirect_uri.replace(
-        "/auth/callback", ""
-    )
-    return daycog_build_logout_url(
-        domain=domain,
-        client_id=settings.cognito_app_client_id,
-        logout_uri=target,
-    )
+    # Cognito managed login /logout requires redirect_uri (must be a registered
+    # CallbackURL) + response_type=code instead of the old logout_uri param.
+    logout_target = settings.cognito_redirect_uri
+    query: dict[str, str] = {
+        "client_id": settings.cognito_app_client_id,
+        "redirect_uri": logout_target.rstrip("/"),
+        "response_type": "code",
+    }
+    if state:
+        query["state"] = state
+    params = urllib.parse.urlencode(query)
+    return f"https://{domain}/logout?{params}"
 
 
 def exchange_code(*, settings: Settings, code: str) -> dict[str, Any]:
