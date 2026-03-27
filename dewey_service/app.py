@@ -228,7 +228,11 @@ def create_app(
     @app.post("/logout", include_in_schema=False)
     async def logout(request: Request) -> RedirectResponse:
         request.session.clear()
-        logout_url = build_cognito_logout_url(settings=settings)
+        # Generate a fresh OAuth state so the callback can validate CSRF
+        # after the user re-authenticates through Cognito managed login.
+        state = generate_state()
+        request.session["oauth_state"] = state
+        logout_url = build_cognito_logout_url(settings=settings, state=state)
         return RedirectResponse(url=logout_url, status_code=status.HTTP_303_SEE_OTHER)
 
     @app.get("/ui", include_in_schema=False)
