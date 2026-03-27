@@ -52,12 +52,12 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
     _write("", config)
 
     remap = {
-        "application_api_bearer_token": "api_bearer_token",
-        "application_api_bearer_tokens": "api_bearer_tokens",
-        "application_session_secret_key": "session_secret_key",
-        "application_host": "host",
-        "application_port": "port",
-        "application_verify_ssl": "verify_ssl",
+        "runtime_api_bearer_token": "api_bearer_token",
+        "runtime_api_bearer_tokens": "api_bearer_tokens",
+        "runtime_session_secret_key": "session_secret_key",
+        "runtime_host": "host",
+        "runtime_port": "port",
+        "runtime_verify_ssl": "verify_ssl",
         "database_backend": "database_backend",
         "database_target": "database_target",
         "database_namespace": "tapdb_database_name",
@@ -201,11 +201,37 @@ def load_settings(config_path: Path | None = None) -> Settings:
         if isinstance(raw, dict):
             seed = _flatten_config(raw)
 
-    env_override = {
-        key[len("DEWEY_") :].lower(): value
-        for key, value in os.environ.items()
-        if key.startswith("DEWEY_")
+    env_override: dict[str, Any] = {}
+    env_key_remap = {
+        "runtime__host": "host",
+        "runtime__port": "port",
+        "runtime__verify_ssl": "verify_ssl",
+        "runtime__api_bearer_token": "api_bearer_token",
+        "runtime__api_bearer_tokens": "api_bearer_tokens",
+        "runtime__session_secret_key": "session_secret_key",
+        "auth__cognito__domain": "cognito_domain",
+        "auth__cognito__app_client_id": "cognito_app_client_id",
+        "auth__cognito__app_client_secret": "cognito_app_client_secret",
+        "auth__cognito__redirect_uri": "cognito_redirect_uri",
+        "auth__cognito__logout_url": "cognito_logout_url",
+        "auth__cognito__user_pool_id": "cognito_user_pool_id",
+        "auth__cognito__region": "cognito_region",
+        "tapdb__client_id": "tapdb_client_id",
+        "tapdb__database_name": "tapdb_database_name",
+        "tapdb__env": "tapdb_env",
+        "tapdb__config_path": "tapdb_config_path",
+        "aws__profile": "aws_profile",
+        "aws__region": "aws_region",
+        "application__environment": "environment",
+        "features__default_share_reference_ttl_seconds": "default_share_reference_ttl_seconds",
     }
+    for key, value in os.environ.items():
+        if not key.startswith("DEWEY_"):
+            continue
+        raw_key = key[len("DEWEY_") :].lower()
+        mapped_key = env_key_remap.get(raw_key)
+        if mapped_key:
+            env_override[mapped_key] = value
     merged = {**seed, **env_override}
     return Settings(**merged)
 

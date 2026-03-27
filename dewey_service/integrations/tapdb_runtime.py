@@ -71,11 +71,6 @@ def _resolve_tapdb_config_path(*, namespace: str, client_id: str) -> str | None:
     ).strip() or DEFAULT_TAPDB_DATABASE_NAME
     normalized_client_id = (client_id or DEFAULT_TAPDB_CLIENT_ID).strip() or DEFAULT_TAPDB_CLIENT_ID
 
-    repo_root = Path(__file__).resolve().parents[2]
-    repo_scoped = repo_root / "config" / f"tapdb-config-{normalized_namespace}.yaml"
-    if repo_scoped.exists():
-        return str(repo_scoped)
-
     user_scoped = (
         Path.home()
         / ".config"

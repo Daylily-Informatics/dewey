@@ -23,17 +23,19 @@ def test_settings_loads_yaml(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     cfg.write_text(
         """
 application:
+  environment: development
+runtime:
   api_bearer_token: yaml-token
 auth:
   cognito:
     domain: https://auth.example.com
     app_client_id: client-1
     redirect_uri: https://localhost:8913/auth/callback
-""",
+    """,
         encoding="utf-8",
     )
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
-    monkeypatch.delenv("DEWEY_API_BEARER_TOKEN", raising=False)
+    monkeypatch.delenv("DEWEY_RUNTIME__API_BEARER_TOKEN", raising=False)
     loaded = load_settings()
     assert loaded.api_bearer_token == "yaml-token"
     assert loaded.cognito_domain == "https://auth.example.com"

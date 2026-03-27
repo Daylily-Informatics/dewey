@@ -21,6 +21,7 @@ from cli_core_yo.server import (
     stop_pid,
     write_pid,
 )
+import yaml
 from rich.console import Console
 
 from dewey_service.integrations.tapdb_runtime import (
@@ -226,9 +227,8 @@ def server_start(
     ),
 ) -> None:
     """Start Dewey API/UI server."""
-    # Allow env vars to override CLI defaults (same pattern as Ursa)
-    port = int(os.environ.get("DEWEY_PORT", port))
-    host = os.environ.get("DEWEY_HOST", host)
+    port = int(os.environ.get("DEWEY_RUNTIME__PORT", port))
+    host = os.environ.get("DEWEY_RUNTIME__HOST", host)
     _start_server(host=host, port=port, reload=reload, ssl=ssl, background=background)
 
 
@@ -295,9 +295,8 @@ def server_restart(
     ssl: bool = typer.Option(True, "--ssl/--no-ssl", help="Serve over HTTPS"),
 ) -> None:
     """Restart the Dewey API/UI server in background mode."""
-    # Allow env vars to override CLI defaults (same pattern as Ursa)
-    port = int(os.environ.get("DEWEY_PORT", port))
-    host = os.environ.get("DEWEY_HOST", host)
+    port = int(os.environ.get("DEWEY_RUNTIME__PORT", port))
+    host = os.environ.get("DEWEY_RUNTIME__HOST", host)
     _stop_server()
     time.sleep(1)
     _start_server(host=host, port=port, reload=False, ssl=ssl, background=True)
@@ -541,11 +540,148 @@ def config_show() -> None:
     console.print(settings.model_dump_json(indent=2))
 
 
+@config_app.command("show-effective")
+def config_show_effective() -> None:
+    """Show loaded runtime settings."""
+    config_show()
+
+
 @config_app.command("validate")
 def config_validate() -> None:
     """Validate runtime settings load."""
     get_settings()
     console.print("[green]Configuration is valid[/green]")
+
+
+@config_app.command("init")
+def config_init(
+    force: bool = typer.Option(False, "--force", help="Overwrite existing config"),
+) -> None:
+    """Create the canonical Dewey config file."""
+    config_path = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config") / "dewey" / "config.yaml"
+    if config_path.exists() and not force:
+        console.print(f"[yellow]⚠[/yellow] Config already exists: {config_path}")
+        raise typer.Exit(1)
+    payload = {
+        "application": {
+            "environment": "development",
+        },
+        "runtime": {
+            "api_bearer_token": "dewey-dev-token",
+            "session_secret_key": "dewey-session-secret-change-me",
+            "host": "127.0.0.1",
+            "port": 8913,
+            "verify_ssl": True,
+        },
+        "aws": {"profile": "lsmc", "region": "us-west-2"},
+        "auth": {
+            "cognito": {
+                "domain": "",
+                "app_client_id": "",
+                "app_client_secret": "",
+                "redirect_uri": "https://localhost:8913/auth/callback",
+                "logout_url": "https://localhost:8913/login",
+                "user_pool_id": "",
+                "region": "us-west-2",
+            }
+        },
+        "tapdb": {
+            "client_id": "dewey",
+            "database_name": "dewey",
+            "env": "dev",
+            "config_path": "",
+        },
+        "features": {},
+        "ui": {},
+    }
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
+    console.print(f"[green]✓[/green] Created {config_path}")
+
+
+@config_app.command("migrate")
+def config_migrate() -> None:
+    """Write the current effective settings back to the canonical YAML file."""
+    settings = get_settings()
+    config_path = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config") / "dewey" / "config.yaml"
+    payload = {
+        "application": {
+            "environment": settings.environment,
+        },
+        "runtime": {
+            "api_bearer_token": settings.api_bearer_token,
+            "api_bearer_tokens": settings.api_bearer_tokens,
+            "session_secret_key": settings.session_secret_key,
+            "host": settings.host,
+            "port": settings.port,
+            "verify_ssl": settings.verify_ssl,
+        },
+        "aws": {"profile": settings.aws_profile, "region": settings.aws_region},
+        "auth": {
+            "cognito": {
+                "domain": settings.cognito_domain,
+                "app_client_id": settings.cognito_app_client_id,
+                "app_client_secret": settings.cognito_app_client_secret,
+                "redirect_uri": settings.cognito_redirect_uri,
+                "logout_url": settings.cognito_logout_url,
+                "user_pool_id": settings.cognito_user_pool_id,
+                "region": settings.cognito_region,
+            }
+        },
+        "tapdb": {
+            "client_id": settings.tapdb_client_id,
+            "database_name": settings.tapdb_database_name,
+            "env": settings.tapdb_env,
+            "config_path": settings.tapdb_config_path,
+        },
+    }
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
+    console.print(f"[green]✓[/green] Wrote {config_path}")
+
+
+@config_app.command("import-auth")
+def config_import_auth(
+    source: str = typer.Option("daycog", "--from", help="Source to import from"),
+) -> None:
+    """Import Cognito settings into Dewey YAML config."""
+    if str(source or "").strip().lower() != "daycog":
+        console.print("[red]✗[/red] Only --from daycog is supported")
+        raise typer.Exit(1)
+
+    values: dict[str, str] = {}
+    yaml_path = Path.home() / ".config" / "daycog" / "config.yaml"
+    if yaml_path.exists():
+        raw = yaml.safe_load(yaml_path.read_text(encoding="utf-8")) or {}
+        if isinstance(raw, dict):
+            active_name = str(raw.get("active_context") or "").strip()
+            contexts = raw.get("contexts") if isinstance(raw.get("contexts"), dict) else {}
+            active = contexts.get(active_name) if isinstance(contexts, dict) else {}
+            if isinstance(active, dict):
+                values = {str(k): str(v) for k, v in active.items() if v is not None}
+    if not values:
+        console.print("[red]✗[/red] No daycog config found to import")
+        raise typer.Exit(1)
+
+    config_path = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config") / "dewey" / "config.yaml"
+    payload = {}
+    if config_path.exists():
+        raw = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+        payload = raw if isinstance(raw, dict) else {}
+    payload.setdefault("auth", {}).setdefault("cognito", {})
+    payload["auth"]["cognito"]["domain"] = values.get("COGNITO_DOMAIN") or ""
+    payload["auth"]["cognito"]["app_client_id"] = values.get("COGNITO_APP_CLIENT_ID") or ""
+    payload["auth"]["cognito"]["app_client_secret"] = values.get("COGNITO_APP_CLIENT_SECRET") or ""
+    payload["auth"]["cognito"]["redirect_uri"] = values.get("COGNITO_CALLBACK_URL") or ""
+    payload["auth"]["cognito"]["logout_url"] = values.get("COGNITO_LOGOUT_URL") or ""
+    payload["auth"]["cognito"]["user_pool_id"] = values.get("COGNITO_USER_POOL_ID") or ""
+    payload["auth"]["cognito"]["region"] = values.get("COGNITO_REGION") or values.get("AWS_REGION") or ""
+    payload.setdefault("aws", {})
+    payload["aws"]["profile"] = values.get("AWS_PROFILE") or payload["aws"].get("profile", "lsmc")
+    payload["aws"]["region"] = values.get("AWS_REGION") or payload["aws"].get("region", "us-west-2")
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
+    console.print(f"[green]✓[/green] Imported auth settings into {config_path}")
 
 
 @env_app.command("status")
