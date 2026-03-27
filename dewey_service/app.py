@@ -8,6 +8,7 @@ from typing import Any
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, ConfigDict, Field
 from starlette.middleware.sessions import SessionMiddleware
@@ -154,8 +155,18 @@ def create_app(
     app.add_middleware(SessionMiddleware, secret_key=settings.session_secret_key)
 
     templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent / "templates"))
+    static_dir = Path(__file__).resolve().parent / "static"
+    if static_dir.exists():
+        app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
     api_auth_dep = require_api_auth(settings)
+
+    def _template_context(**kwargs: Any) -> dict[str, Any]:
+        context = {
+            "deployment": settings.deployment,
+        }
+        context.update(kwargs)
+        return context
 
     @app.middleware("http")
     async def _enforce_origin_allowlist(request: Request, call_next):
@@ -186,6 +197,10 @@ def create_app(
     @app.get("/", include_in_schema=False)
     async def root() -> RedirectResponse:
         return RedirectResponse(url="/ui", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+
+    @app.get("/favicon.ico", include_in_schema=False)
+    async def favicon() -> RedirectResponse:
+        return RedirectResponse(url="/static/favicon.svg", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
 
     @app.get("/auth/login", include_in_schema=False)
     async def auth_login(request: Request) -> RedirectResponse:
@@ -228,10 +243,10 @@ def create_app(
         return templates.TemplateResponse(
             request,
             "login.html",
-            {
-                "cognito_login_url": "/auth/login",
-                "title": "Dewey Operator Login",
-            },
+            _template_context(
+                cognito_login_url="/auth/login",
+                title="Dewey Operator Login",
+            ),
         )
 
     @app.post("/logout", include_in_schema=False)
@@ -253,11 +268,11 @@ def create_app(
         return templates.TemplateResponse(
             request,
             "ui_home.html",
-            {
-                "profile": profile,
-                "artifacts": artifacts,
-                "artifact_sets": artifact_sets,
-            },
+            _template_context(
+                profile=profile,
+                artifacts=artifacts,
+                artifact_sets=artifact_sets,
+            ),
         )
 
     @app.get(

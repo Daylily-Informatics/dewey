@@ -1,0 +1,34 @@
+application:
+  environment: development
+  api_bearer_token: dewey-dev-token
+  session_secret_key: dewey-session-secret-change-me
+  host: 127.0.0.1
+  port: 8914
+  verify_ssl: true
+
+auth:
+  cognito:
+    domain: https://dewey-auth.example.com
+    app_client_id: dewey-client-id
+    app_client_secret: ""
+    redirect_uri: https://localhost:8914/auth/callback
+    logout_url: https://localhost:8914/login
+    user_pool_id: us-west-2_example
+    region: us-west-2
+
+database:
+  backend: tapdb
+  target: local
+  client_id: dewey
+  namespace: dewey
+  env: dev
+  config_path: ""
+
+aws:
+  profile: lsmc
+  region: us-west-2
+
+deployment:
+  name: dev
+  color: "#0f766e"
+  is_production: false

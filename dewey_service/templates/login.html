@@ -4,8 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ title }}</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
     <style>
       body { font-family: 'IBM Plex Sans', sans-serif; margin: 0; background: linear-gradient(135deg, #e6f7f6, #f4fbff); }
+      .deployment-banner { height: 18px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; }
       .wrap { max-width: 520px; margin: 8rem auto; background: #fff; border-radius: 16px; padding: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
       h1 { margin-top: 0; }
       a.btn { display: inline-block; text-decoration: none; background: #0f766e; color: #fff; padding: 0.75rem 1.25rem; border-radius: 8px; font-weight: 600; }
@@ -13,6 +15,9 @@
     </style>
   </head>
   <body>
+    {% if deployment.name and not deployment.is_production %}
+    <div class="deployment-banner" style="background: {{ deployment.color }};">{{ deployment.name|upper }}</div>
+    {% endif %}
     <main class="wrap">
       <h1>Dewey Operator Login</h1>
       <p>Operator access is authenticated through Cognito Hosted UI.</p>

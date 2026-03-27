@@ -106,22 +106,20 @@ def _start_server(
     host: str,
     port: int,
     reload: bool,
-    ssl: bool,
     background: bool,
 ) -> None:
     _ensure_runtime_dirs()
 
-    if ssl and (not CERT_FILE.exists() or not KEY_FILE.exists()):
+    if not CERT_FILE.exists() or not KEY_FILE.exists():
         raise typer.BadParameter(
             "HTTPS certs are missing. Create certs at certs/cert.pem and certs/key.pem"
         )
 
     pid = read_pid(PID_FILE)
     if pid:
-        protocol = "https" if ssl else "http"
         dh = display_host(host)
         console.print(f"[yellow]⚠[/yellow] Server already running (PID {pid})")
-        console.print(f"   URL: [cyan]{protocol}://{dh}:{port}[/cyan]")
+        console.print(f"   URL: [cyan]https://{dh}:{port}[/cyan]")
         return
 
     if background:
@@ -139,8 +137,7 @@ def _start_server(
         ]
         if reload:
             cmd.append("--reload")
-        if ssl:
-            cmd.extend(["--ssl-certfile", str(CERT_FILE), "--ssl-keyfile", str(KEY_FILE)])
+        cmd.extend(["--ssl-certfile", str(CERT_FILE), "--ssl-keyfile", str(KEY_FILE)])
 
         log_file = new_log_path(LOG_DIR)
         env = os.environ.copy()
@@ -162,10 +159,9 @@ def _start_server(
             raise typer.Exit(1)
 
         write_pid(PID_FILE, proc.pid)
-        protocol = "https" if ssl else "http"
         dh = display_host(host)
         console.print(f"[green]✓[/green] Server started (PID {proc.pid})")
-        console.print(f"   URL: [cyan]{protocol}://{dh}:{port}[/cyan]")
+        console.print(f"   URL: [cyan]https://{dh}:{port}[/cyan]")
         console.print(f"   Logs: [dim]{log_file}[/dim]")
         return
 
@@ -175,11 +171,9 @@ def _start_server(
         "host": host,
         "port": port,
         "reload": reload,
+        "ssl_certfile": str(CERT_FILE),
+        "ssl_keyfile": str(KEY_FILE),
     }
-    if ssl:
-        uvicorn_kwargs["ssl_certfile"] = str(CERT_FILE)
-        uvicorn_kwargs["ssl_keyfile"] = str(KEY_FILE)
-
     uvicorn.run(**uvicorn_kwargs)
 
 
@@ -211,9 +205,8 @@ def info() -> None:
 @server_app.command("start")
 def server_start(
     host: str = typer.Option("0.0.0.0", "--host", help="Host to bind"),
-    port: int = typer.Option(8913, "--port", "-p", help="Port to bind"),
+    port: int = typer.Option(8914, "--port", "-p", help="Port to bind"),
     reload: bool = typer.Option(False, "--reload/--no-reload", help="Enable autoreload"),
-    ssl: bool = typer.Option(True, "--ssl/--no-ssl", help="Serve over HTTPS"),
     background: bool = typer.Option(
         True,
         "--background/--foreground",
@@ -225,11 +218,13 @@ def server_start(
         help="Validate Cognito callback/logout URI ports before startup",
     ),
 ) -> None:
-    """Start Dewey API/UI server."""
+    """Start Dewey API/UI server over HTTPS."""
     # Allow env vars to override CLI defaults (same pattern as Ursa)
     port = int(os.environ.get("DEWEY_PORT", port))
     host = os.environ.get("DEWEY_HOST", host)
-    _start_server(host=host, port=port, reload=reload, ssl=ssl, background=background)
+    if check_cognito_uris:
+        _validate_cognito_uris_for_port(port=port, host=host)
+    _start_server(host=host, port=port, reload=reload, background=background)
 
 
 @server_app.command("stop")
@@ -243,13 +238,12 @@ def server_status() -> None:
     """Show Dewey API/UI server status."""
     pid = read_pid(PID_FILE)
     if pid:
-        port = os.environ.get("DEWEY_RUNTIME__PORT", "8913")
+        port = os.environ.get("DEWEY_RUNTIME__PORT", "8914")
         host = os.environ.get("DEWEY_RUNTIME__HOST", "0.0.0.0")
-        protocol = "https" if CERT_FILE.exists() and KEY_FILE.exists() else "http"
         dh = display_host(host)
         log_file = latest_log(LOG_DIR)
         console.print(f"[green]●[/green] Server is [green]running[/green] (PID {pid})")
-        console.print(f"   URL: [cyan]{protocol}://{dh}:{port}[/cyan]")
+        console.print(f"   URL: [cyan]https://{dh}:{port}[/cyan]")
         if log_file:
             console.print(f"   Logs: [dim]{log_file}[/dim]")
         return
@@ -291,16 +285,22 @@ def server_logs(
 @server_app.command("restart")
 def server_restart(
     host: str = typer.Option("0.0.0.0", "--host", help="Host to bind"),
-    port: int = typer.Option(8913, "--port", "-p", help="Port to bind"),
-    ssl: bool = typer.Option(True, "--ssl/--no-ssl", help="Serve over HTTPS"),
+    port: int = typer.Option(8914, "--port", "-p", help="Port to bind"),
+    check_cognito_uris: bool = typer.Option(
+        True,
+        "--check-cognito-uris/--no-check-cognito-uris",
+        help="Validate Cognito callback/logout URI ports before startup",
+    ),
 ) -> None:
-    """Restart the Dewey API/UI server in background mode."""
+    """Restart the Dewey API/UI server in background mode over HTTPS."""
     # Allow env vars to override CLI defaults (same pattern as Ursa)
     port = int(os.environ.get("DEWEY_PORT", port))
     host = os.environ.get("DEWEY_HOST", host)
     _stop_server()
     time.sleep(1)
-    _start_server(host=host, port=port, reload=False, ssl=ssl, background=True)
+    if check_cognito_uris:
+        _validate_cognito_uris_for_port(port=port, host=host)
+    _start_server(host=host, port=port, reload=False, background=True)
 
 
 @db_app.command("build")

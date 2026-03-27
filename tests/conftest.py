@@ -357,8 +357,8 @@ def test_settings() -> Settings:
         cognito_domain="https://dewey-auth.example.com",
         cognito_app_client_id="client-123",
         cognito_app_client_secret="secret-123",
-        cognito_redirect_uri="https://localhost:8913/auth/callback",
-        cognito_logout_url="https://localhost:8913/login",
+        cognito_redirect_uri="https://localhost:8914/auth/callback",
+        cognito_logout_url="https://localhost:8914/login",
     )
 
 

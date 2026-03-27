@@ -89,10 +89,6 @@ elif [[ -n "${BASH_VERSION:-}" ]]; then
 fi
 
 export DEWEY_ROOT
-export DEWEY_COGNITO_DOMAIN="${DEWEY_COGNITO_DOMAIN:-https://dewey-auth.localhost}"
-export DEWEY_COGNITO_APP_CLIENT_ID="${DEWEY_COGNITO_APP_CLIENT_ID:-dewey-local-client}"
-export DEWEY_COGNITO_REDIRECT_URI="${DEWEY_COGNITO_REDIRECT_URI:-https://localhost:8914/auth/callback}"
-export DEWEY_COGNITO_LOGOUT_URL="${DEWEY_COGNITO_LOGOUT_URL:-https://localhost:8914/login}"
 export AWS_PROFILE="${AWS_PROFILE:-lsmc}"
 export AWS_REGION="${AWS_REGION:-us-west-2}"
 export DATABASE_BACKEND="${DATABASE_BACKEND:-tapdb}"

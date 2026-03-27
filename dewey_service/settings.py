@@ -73,6 +73,9 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "auth_cognito_logout_url": "cognito_logout_url",
         "auth_cognito_user_pool_id": "cognito_user_pool_id",
         "auth_cognito_region": "cognito_region",
+        "deployment_name": "deployment_name",
+        "deployment_color": "deployment_color",
+        "deployment_is_production": "deployment_is_production",
     }
     normalized: dict[str, Any] = {}
     for key, value in out.items():
@@ -92,17 +95,21 @@ class Settings(BaseSettings):
     api_bearer_tokens: str = ""
     session_secret_key: str = "dewey-session-secret-change-me"
     host: str = "127.0.0.1"
-    port: int = 8913
+    port: int = 8914
     verify_ssl: bool = True
 
     # Cognito-backed operator UI auth
     cognito_domain: str = ""
     cognito_app_client_id: str = ""
     cognito_app_client_secret: str = ""
-    cognito_redirect_uri: str = "https://localhost:8913/auth/callback"
-    cognito_logout_url: str = "https://localhost:8913/login"
+    cognito_redirect_uri: str = "https://localhost:8914/auth/callback"
+    cognito_logout_url: str = "https://localhost:8914/login"
     cognito_user_pool_id: str = ""
     cognito_region: str = "us-west-2"
+
+    deployment_name: str = ""
+    deployment_color: str = "#0f766e"
+    deployment_is_production: bool = False
 
     # TapDB runtime
     database_backend: str = "tapdb"
@@ -168,6 +175,8 @@ class Settings(BaseSettings):
             missing.append("cognito_app_client_id")
         if not str(self.cognito_redirect_uri or "").strip():
             missing.append("cognito_redirect_uri")
+        if not str(self.cognito_logout_url or "").strip():
+            missing.append("cognito_logout_url")
         if missing:
             raise ValueError("Cognito UI auth is required; missing settings: " + ", ".join(missing))
         self.cognito_domain = _require_https_url(
@@ -188,6 +197,14 @@ class Settings(BaseSettings):
     def is_production(self) -> bool:
         return self.environment == "production"
 
+    @property
+    def deployment(self) -> dict[str, Any]:
+        return {
+            "name": self.deployment_name,
+            "color": self.deployment_color,
+            "is_production": self.deployment_is_production,
+        }
+
 
 def get_config_file_path() -> Path:
     return _default_config_path()
@@ -201,15 +218,34 @@ def load_settings(config_path: Path | None = None) -> Settings:
         if isinstance(raw, dict):
             seed = _flatten_config(raw)
 
+    yaml_only_defaults = {
+        "cognito_domain": "",
+        "cognito_app_client_id": "",
+        "cognito_app_client_secret": "",
+        "cognito_redirect_uri": "https://localhost:8914/auth/callback",
+        "cognito_logout_url": "https://localhost:8914/login",
+        "cognito_user_pool_id": "",
+        "cognito_region": "us-west-2",
+        "deployment_name": "",
+        "deployment_color": "#0f766e",
+        "deployment_is_production": False,
+    }
     env_override = {
         key[len("DEWEY_") :].lower(): value
         for key, value in os.environ.items()
         if key.startswith("DEWEY_")
+        and key[len("DEWEY_") :].lower() not in yaml_only_defaults
     }
     merged = {**seed, **env_override}
+    for key, default in yaml_only_defaults.items():
+        merged[key] = seed.get(key, default)
     return Settings(**merged)
 
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     return load_settings()
+
+
+def clear_settings_cache() -> None:
+    get_settings.cache_clear()

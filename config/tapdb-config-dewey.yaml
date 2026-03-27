@@ -8,7 +8,7 @@ environments:
     engine_type: local
     host: localhost
     port: "5439"
-    ui_port: "8913"
+    ui_port: "8914"
     database: dewey_dev
     audit_log_euid_prefix: DWA
     support_email: support@lsmc.bio
@@ -18,7 +18,7 @@ environments:
     engine_type: aurora
     host: dewey.cluster-REPLACE.us-west-2.rds.amazonaws.com
     port: "5432"
-    ui_port: "8913"
+    ui_port: "8914"
     user: tapdb_admin
     password: ""
     database: dewey_prod

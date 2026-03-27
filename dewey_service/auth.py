@@ -43,8 +43,6 @@ def build_cognito_login_url(*, settings: Settings, state: str) -> str:
     domain = str(settings.cognito_domain or "").strip().rstrip("/")
     if domain.startswith("https://"):
         domain = domain[len("https://") :]
-    if domain.startswith("http://"):
-        domain = domain[len("http://") :]
     return build_authorization_url(
         domain=domain,
         client_id=settings.cognito_app_client_id,
@@ -58,11 +56,7 @@ def build_cognito_logout_url(*, settings: Settings, state: str | None = None) ->
     domain = str(settings.cognito_domain or "").strip().rstrip("/")
     if domain.startswith("https://"):
         domain = domain[len("https://") :]
-    if domain.startswith("http://"):
-        domain = domain[len("http://") :]
-    # Cognito managed login /logout requires redirect_uri (must be a registered
-    # CallbackURL) + response_type=code instead of the old logout_uri param.
-    logout_target = settings.cognito_redirect_uri
+    logout_target = settings.cognito_logout_url
     query: dict[str, str] = {
         "client_id": settings.cognito_app_client_id,
         "redirect_uri": logout_target.rstrip("/"),
@@ -78,8 +72,6 @@ def exchange_code(*, settings: Settings, code: str) -> dict[str, Any]:
     domain = str(settings.cognito_domain or "").strip().rstrip("/")
     if domain.startswith("https://"):
         domain = domain[len("https://") :]
-    if domain.startswith("http://"):
-        domain = domain[len("http://") :]
     try:
         return exchange_authorization_code(
             domain=domain,

@@ -76,11 +76,12 @@ Primary groups:
 ```bash
 source dewey_activate
 pip install -e .[dev]
+cp config/dewey-config.example.yaml ~/.config/dewey/config.yaml
 dewey db build --target local
-dewey server start --port 8913 --no-ssl
+dewey server start --port 8914
 ```
 
-For production-like local HTTPS, place certs at `certs/localhost.pem` and `certs/localhost-key.pem` and omit `--no-ssl`.
+HTTPS is mandatory. Place certs at `certs/cert.pem` and `certs/key.pem` before starting the server.
 
 ## Current Docs
 

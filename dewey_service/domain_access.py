@@ -48,7 +48,7 @@ def is_allowed_origin(origin: str, *, allow_local: bool) -> bool:
     if not candidate:
         return False
     parsed = urlsplit(candidate)
-    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+    if parsed.scheme != "https" or not parsed.netloc:
         return False
     host = _normalize_host(candidate)
     if not host:
@@ -69,5 +69,5 @@ def build_allowed_origin_regex(*, allow_local: bool) -> str:
         rf"https://(?:[A-Za-z0-9-]+\.)*(?:{domain_expr})(?::\d+)?",
     ]
     if allow_local:
-        patterns.append(r"https?://(?:localhost|127\.0\.0\.1|testserver|\[::1\])(?::\d+)?")
+        patterns.append(r"https://(?:localhost|127\.0\.0\.1|testserver|\[::1\])(?::\d+)?")
     return rf"^(?:{'|'.join(patterns)})$"

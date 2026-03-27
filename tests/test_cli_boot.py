@@ -4,6 +4,7 @@ from typer.testing import CliRunner
 
 import dewey_service.cli as cli_module
 from dewey_service.cli import cli
+from dewey_service.settings import Settings
 
 runner = CliRunner()
 
@@ -15,9 +16,16 @@ def test_cli_help_renders() -> None:
 
 
 def test_cli_info_renders(monkeypatch) -> None:
-    monkeypatch.setenv("DEWEY_COGNITO_DOMAIN", "https://auth.example.com")
-    monkeypatch.setenv("DEWEY_COGNITO_APP_CLIENT_ID", "client-1")
-    monkeypatch.setenv("DEWEY_COGNITO_REDIRECT_URI", "https://localhost:8913/auth/callback")
+    monkeypatch.setattr(
+        cli_module,
+        "get_settings",
+        lambda: Settings(
+            cognito_domain="https://auth.example.com",
+            cognito_app_client_id="client-1",
+            cognito_redirect_uri="https://localhost:8914/auth/callback",
+            cognito_logout_url="https://localhost:8914/login",
+        ),
+    )
     result = runner.invoke(cli, ["info"])
     assert result.exit_code == 0
     assert "Dewey Runtime" in result.stdout
@@ -45,6 +53,7 @@ def test_server_restart_uses_background_start(monkeypatch) -> None:
         "_start_server",
         lambda **kwargs: calls.append(("start", kwargs)),
     )
+    monkeypatch.setattr(cli_module, "_validate_cognito_uris_for_port", lambda **kwargs: None)
     monkeypatch.setattr(cli_module.time, "sleep", lambda _seconds: None)
 
     result = runner.invoke(cli, ["server", "restart"])
@@ -56,9 +65,8 @@ def test_server_restart_uses_background_start(monkeypatch) -> None:
             "start",
             {
                 "host": "0.0.0.0",
-                "port": 8913,
+                "port": 8914,
                 "reload": False,
-                "ssl": True,
                 "background": True,
             },
         ),
