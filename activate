@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Dewey environment activation script
-# Usage: source dewey_activate
+# Usage: source ./activate
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   echo "Error: This script must be sourced, not executed."
-  echo "Usage: source dewey_activate"
+  echo "Usage: source ./activate"
   exit 1
 fi
 
@@ -33,6 +33,72 @@ _DEWEY_PYTHON=""
 _dewey_fail() {
   echo -e "  ${_YELLOW}⚠${_NC} $1" >&2
   return 1
+}
+
+_dewey_resolve_local_repo() {
+  local module_dir="$1"
+  shift
+  local candidate=""
+  local candidate_path=""
+  local fallback=""
+  for candidate in "$@"; do
+    [[ -d "$candidate" ]] || continue
+    candidate_path="$(cd "$candidate" 2>/dev/null && pwd)"
+    [[ -n "$candidate_path" ]] || continue
+    [[ -d "${candidate_path}/${module_dir}" ]] || continue
+    if [[ -d "${candidate_path}/.git" ]]; then
+      printf '%s\n' "$candidate_path"
+      return 0
+    fi
+    if [[ -z "$fallback" ]]; then
+      fallback="$candidate_path"
+    fi
+  done
+  [[ -n "$fallback" ]] && printf '%s\n' "$fallback"
+}
+
+_dewey_module_is_from_repo() {
+  local module_name="$1"
+  local repo_root="$2"
+  "${_DEWEY_PYTHON:-python}" - "$module_name" "$repo_root" <<'PY' >/dev/null 2>&1
+import importlib
+import pathlib
+import sys
+
+module = importlib.import_module(sys.argv[1])
+repo_root = pathlib.Path(sys.argv[2]).resolve()
+module_file = getattr(module, "__file__", "")
+if not module_file:
+    raise SystemExit(1)
+module_path = pathlib.Path(module_file).resolve()
+raise SystemExit(0 if module_path == repo_root or repo_root in module_path.parents else 1)
+PY
+}
+
+_dewey_ensure_editable_repo() {
+  local label="$1"
+  local module_name="$2"
+  local repo_root="$3"
+  local extras="${4:-}"
+  local install_target=""
+  if [[ -z "$repo_root" ]]; then
+    return 0
+  fi
+  if _dewey_module_is_from_repo "$module_name" "$repo_root"; then
+    echo -e "  ${_GREEN}✓${_NC} Using local ${label} checkout: ${repo_root}"
+    return 0
+  fi
+  install_target="${repo_root}${extras}"
+  echo -e "  ${_CYAN}→${_NC} Installing local ${label} checkout..."
+  if ! "${_DEWEY_PYTHON:-python}" -m pip install --no-deps -e "$install_target" -q; then
+    _dewey_fail "Failed to install local ${label} checkout from ${repo_root}"
+    return 1
+  fi
+  if ! _dewey_module_is_from_repo "$module_name" "$repo_root"; then
+    _dewey_fail "${label} still resolves outside ${repo_root}"
+    return 1
+  fi
+  echo -e "  ${_GREEN}✓${_NC} Using local ${label} checkout: ${repo_root}"
 }
 
 echo -e "${_BLUE}Activating Dewey environment...${_NC}"
@@ -126,18 +192,41 @@ if [[ -n "${_DEWEY_PYTHON}" ]]; then
   export PATH="${_DEWEY_PYTHON_BIN}:$PATH"
 fi
 
-if ! "${_DEWEY_PYTHON:-python}" -m pip show dewey-service &> /dev/null 2>&1; then
-  echo -e "  ${_CYAN}→${_NC} Installing dewey CLI..."
-  "${_DEWEY_PYTHON:-python}" -m pip install -e "$DEWEY_ROOT" -q
-  echo -e "  ${_GREEN}✓${_NC} Installed 'dewey' CLI command"
-else
-  echo -e "  ${_GREEN}✓${_NC} 'dewey' CLI already installed"
+if ! _dewey_ensure_editable_repo "Dewey" "dewey_service" "$DEWEY_ROOT"; then
+  return 1
 fi
 
-if [[ -n "${_DEWEY_PYTHON}" ]]; then
-  dewey() {
-    "${_DEWEY_PYTHON}" -c 'from dewey_service.cli import main; main()' "$@"
-  }
+_DEWEY_TAPDB_REPO="$(_dewey_resolve_local_repo \
+  daylily_tapdb \
+  "$DEWEY_ROOT/../daylily-tapdb" \
+  "$DEWEY_ROOT/../lims_repos/daylily-tapdb"
+)"
+if ! _dewey_ensure_editable_repo "daylily-tapdb" "daylily_tapdb" "${_DEWEY_TAPDB_REPO:-}" "[cli,admin,aurora,dev]"; then
+  return 1
+fi
+
+_DEWEY_DAYCOG_REPO="$(_dewey_resolve_local_repo \
+  daylily_cognito \
+  "$DEWEY_ROOT/../daylily-cognito" \
+  "$DEWEY_ROOT/../lims_repos/daylily-cognito"
+)"
+if ! _dewey_ensure_editable_repo "daylily-cognito" "daylily_cognito" "${_DEWEY_DAYCOG_REPO:-}"; then
+  return 1
+fi
+
+_DEWEY_CLI_CORE_REPO="$(_dewey_resolve_local_repo \
+  cli_core_yo \
+  "$DEWEY_ROOT/../cli-core-yo" \
+  "$DEWEY_ROOT/../lims_repos/cli-core-yo"
+)"
+if ! _dewey_ensure_editable_repo "cli-core-yo" "cli_core_yo" "${_DEWEY_CLI_CORE_REPO:-}"; then
+  return 1
+fi
+
+if command -v rehash >/dev/null 2>&1; then
+  rehash
+elif command -v hash >/dev/null 2>&1; then
+  hash -r 2>/dev/null || true
 fi
 
 if [[ "$-" == *i* ]]; then
@@ -204,10 +293,14 @@ echo -e "  ${_CYAN}dewey config${_NC}          path, init, show, validate, edit,
 echo -e "  ${_CYAN}dewey env${_NC}             status, activate, deactivate, reset"
 echo -e "  ${_CYAN}dewey server${_NC}          start, stop, status, logs, restart"
 echo -e "  ${_CYAN}dewey db${_NC}              build, seed, reset"
-echo -e "  ${_CYAN}dewey tapdb${_NC}           run"
-echo -e "  ${_CYAN}dewey cognito${_NC}         status"
+echo -e "  ${_CYAN}tapdb${_NC}                 shared DB/runtime lifecycle"
+echo -e "  ${_CYAN}daycog${_NC}                shared Cognito lifecycle"
 echo -e "  ${_CYAN}dewey test${_NC}            run"
 echo -e "  ${_CYAN}dewey quality${_NC}         lint, format, check"
 echo ""
 echo -e "  ${_GREEN}dewey --help${_NC}        Show all commands"
 echo -e "  ${_GREEN}dewey_deactivate${_NC}  Deactivate this environment"
+
+unset _DEWEY_CLI_CORE_REPO
+unset _DEWEY_DAYCOG_REPO
+unset _DEWEY_TAPDB_REPO

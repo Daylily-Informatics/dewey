@@ -74,14 +74,12 @@ Primary plugin groups:
 
 - `dewey server`: start the API/UI server
 - `dewey db`: build, seed, reset Dewey on top of TapDB
-- `dewey tapdb`: pass through TapDB commands in Dewey runtime context
-- `dewey cognito`: Cognito/daycog helper commands
 - `dewey test`, `dewey quality`
 
 ## Quick Start
 
 ```bash
-source dewey_activate
+source ./activate
 pip install -e .[dev]
 dewey config init
 dewey db build --target local
@@ -91,6 +89,8 @@ dewey server start --port 8914
 HTTPS is mandatory. Place certs at `certs/cert.pem` and `certs/key.pem` before starting the server.
 
 `dewey config show` now prints raw YAML. Use `dewey config status` to inspect merged runtime settings.
+
+Use `tapdb` directly for shared DB/runtime lifecycle and `daycog` directly for shared Cognito lifecycle. Dewey keeps only Dewey-specific overlay build/seed/reset behavior.
 
 ## Current Docs
 
