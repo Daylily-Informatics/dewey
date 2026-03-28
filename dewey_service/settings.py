@@ -58,6 +58,7 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "application_host": "host",
         "application_port": "port",
         "application_verify_ssl": "verify_ssl",
+        "application_search_export_max_rows": "search_export_max_rows",
         "database_backend": "database_backend",
         "database_target": "database_target",
         "database_namespace": "tapdb_database_name",
@@ -66,6 +67,9 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "database_config_path": "tapdb_config_path",
         "aws_profile": "aws_profile",
         "aws_region": "aws_region",
+        "storage_managed_bucket": "managed_storage_bucket",
+        "storage_managed_prefix": "managed_storage_prefix",
+        "storage_upload_session_ttl_seconds": "upload_session_ttl_seconds",
         "auth_cognito_domain": "cognito_domain",
         "auth_cognito_app_client_id": "cognito_app_client_id",
         "auth_cognito_app_client_secret": "cognito_app_client_secret",
@@ -124,8 +128,14 @@ class Settings(BaseSettings):
     aws_profile: str = "lsmc"
     aws_region: str = "us-west-2"
 
+    # Dewey-managed storage
+    managed_storage_bucket: str = ""
+    managed_storage_prefix: str = "artifacts"
+    upload_session_ttl_seconds: int = 900
+
     # Share reference defaults
     default_share_reference_ttl_seconds: int = 3600
+    search_export_max_rows: int = 1000
 
     @field_validator("cognito_redirect_uri", "cognito_logout_url")
     @classmethod

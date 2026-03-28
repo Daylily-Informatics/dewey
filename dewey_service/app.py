@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import csv
+import io
+import json
 from pathlib import Path
 from typing import Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, ConfigDict, Field
@@ -29,6 +32,7 @@ from dewey_service.domain_access import (
     build_trusted_hosts,
     is_allowed_origin,
 )
+from dewey_service.storage import S3StorageClient
 from dewey_service.service import DeweyConflictError, DeweyNotFoundError, DeweyService
 from dewey_service.settings import Settings, get_settings
 from dewey_service.tapdb_backend import TapDBBackend
@@ -57,7 +61,32 @@ class ArtifactImportRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     artifact_type: str
-    storage_uri: str
+    storage_uri: str | None = None
+    source_uri: str | None = None
+    import_mode: str = Field(default="reference", pattern="^(copy|reference)$")
+    lock_after_import: bool = False
+    producer_system: str | None = None
+    producer_object_euid: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class UploadSessionCreateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    artifact_type: str
+    original_filename: str
+    content_type: str | None = None
+    producer_system: str | None = None
+    producer_object_euid: str | None = None
+    lock_after_import: bool = False
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class UploadSessionCompleteRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    upload_token: str | None = None
+    checksums: dict[str, Any] = Field(default_factory=dict)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -96,6 +125,15 @@ class ShareReferenceCreateRequest(BaseModel):
     scope: str | None = None
     expires_at: str | None = None
     issued_by: str | None = None
+    transport: str = Field(default="presigned_s3", pattern="^(presigned_s3)$")
+    ttl_seconds: int | None = None
+
+
+class ArtifactStorageLockRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    mode: str = "GOVERNANCE"
+    retain_until: str
 
 
 class ExternalObjectCreateRequest(BaseModel):
@@ -118,6 +156,33 @@ class ExternalObjectRelationCreateRequest(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
+class SearchPropertyFilterRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    path: str
+    op: str = "eq"
+    value: Any = None
+
+
+class SearchQueryRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    q: str | None = None
+    scopes: list[str] | None = None
+    page: int = 1
+    page_size: int = 25
+    sort_field: str = "created_at"
+    sort_dir: str = "desc"
+    property_filters: list[SearchPropertyFilterRequest] = Field(default_factory=list)
+    created_at_start: str | None = None
+    created_at_end: str | None = None
+
+
+class SearchExportRequest(SearchQueryRequest):
+    format: str = Field(default="json", pattern="^(json|tsv)$")
+    max_rows: int | None = None
+
+
 def create_app(
     settings: Settings | None = None,
     service: DeweyService | None = None,
@@ -127,9 +192,19 @@ def create_app(
 
     if service is None:
         backend = TapDBBackend(app_username="dewey")
+        storage_client = S3StorageClient(
+            profile=settings.aws_profile,
+            region=settings.aws_region,
+        )
         service = DeweyService(
             backend,
             default_share_ttl_seconds=settings.default_share_reference_ttl_seconds,
+            storage_client=storage_client,
+            managed_storage_bucket=settings.managed_storage_bucket,
+            managed_storage_prefix=settings.managed_storage_prefix,
+            upload_session_ttl_seconds=settings.upload_session_ttl_seconds,
+            upload_token_secret=settings.session_secret_key,
+            search_export_max_rows=settings.search_export_max_rows,
         )
         service.bootstrap()
 
@@ -167,6 +242,80 @@ def create_app(
         }
         context.update(kwargs)
         return context
+
+    def _with_search_alias_headers(response: Response, successor: str) -> None:
+        response.headers["Deprecation"] = "true"
+        response.headers["Sunset"] = "Wed, 30 Sep 2026 00:00:00 GMT"
+        response.headers["Link"] = f"<{successor}>; rel=\"successor-version\""
+
+    def _search_payload_to_tsv(items: list[dict[str, Any]]) -> str:
+        fields = [
+            "record_type",
+            "source_kind",
+            "euid",
+            "name",
+            "created_at",
+            "modified_at",
+            "artifact_type",
+            "producer_system",
+            "storage_backend",
+            "storage_uri",
+            "availability_status",
+            "import_mode",
+            "target_type",
+            "target_euid",
+            "transport",
+            "status",
+            "expires_at",
+            "metadata",
+        ]
+        buffer = io.StringIO()
+        writer = csv.DictWriter(buffer, fieldnames=fields, delimiter="\t", extrasaction="ignore")
+        writer.writeheader()
+        for item in items:
+            row = dict(item)
+            row["metadata"] = json.dumps(item.get("metadata") or {}, sort_keys=True, default=str)
+            writer.writerow(row)
+        return buffer.getvalue()
+
+    def _search_form_payload(request: Request) -> dict[str, Any]:
+        params = request.query_params
+        property_filters: list[dict[str, Any]] = []
+        for field_name in [
+            "artifact_type",
+            "producer_system",
+            "availability_status",
+            "import_mode",
+            "transport",
+            "status",
+        ]:
+            value = str(params.get(field_name) or "").strip()
+            if value:
+                property_filters.append({"path": field_name, "op": "eq", "value": value})
+
+        external_object_id = str(params.get("external_object_id") or "").strip()
+        if external_object_id:
+            property_filters.append(
+                {
+                    "path": "external_objects.external_object_id",
+                    "op": "eq",
+                    "value": external_object_id,
+                }
+            )
+
+        raw_scopes = params.getlist("scope")
+        scopes = [item for item in raw_scopes if item]
+        return {
+            "q": str(params.get("q") or "").strip() or None,
+            "scopes": scopes or ["artifact", "share_reference"],
+            "page": int(params.get("page") or 1),
+            "page_size": int(params.get("page_size") or 25),
+            "sort_field": str(params.get("sort_field") or "created_at"),
+            "sort_dir": str(params.get("sort_dir") or "desc"),
+            "property_filters": property_filters,
+            "created_at_start": str(params.get("created_at_start") or "").strip() or None,
+            "created_at_end": str(params.get("created_at_end") or "").strip() or None,
+        }
 
     @app.middleware("http")
     async def _enforce_origin_allowlist(request: Request, call_next):
@@ -268,15 +417,75 @@ def create_app(
         request: Request, profile: dict[str, Any] = Depends(require_ui_session)
     ) -> HTMLResponse:
         artifacts = service.list_artifacts(limit=100)
-        artifact_sets = service.list_artifact_sets(limit=100)
+        share_references = service.list_share_references(limit=100)
+        active_share_count = sum(1 for item in share_references if item.get("status") == "active")
+        verification_failures = sum(
+            1 for item in artifacts if item.get("storage_status") in {"missing", "error"}
+        )
+        recent_imports = sum(
+            1 for item in artifacts if item.get("import_mode") in {"copy", "reference", "upload"}
+        )
         return templates.TemplateResponse(
             request,
             "ui_home.html",
             _template_context(
                 profile=profile,
                 artifacts=artifacts,
-                artifact_sets=artifact_sets,
+                share_references=share_references[:12],
+                metrics={
+                    "artifact_count": len(artifacts),
+                    "active_share_count": active_share_count,
+                    "recent_import_count": recent_imports,
+                    "verification_failures": verification_failures,
+                },
             ),
+        )
+
+    @app.get("/search", include_in_schema=False)
+    async def search_page(
+        request: Request, profile: dict[str, Any] = Depends(require_ui_session)
+    ) -> HTMLResponse:
+        form = _search_form_payload(request)
+        result = service.query_search_v2(form)
+        return templates.TemplateResponse(
+            request,
+            "search.html",
+            _template_context(
+                profile=profile,
+                form=form,
+                result=result,
+                export_payload_json=json.dumps(form),
+            ),
+        )
+
+    @app.get("/search/export", include_in_schema=False)
+    async def search_export_page(
+        request: Request, _profile: dict[str, Any] = Depends(require_ui_session)
+    ) -> Response:
+        payload = _search_form_payload(request)
+        export_format = str(request.query_params.get("format") or "json").strip().lower() or "json"
+        payload["format"] = export_format
+        if request.query_params.get("max_rows"):
+            payload["max_rows"] = int(request.query_params["max_rows"])
+        items, timing_ms, truncated = service.collect_search_export_rows(payload)
+        if export_format == "json":
+            return JSONResponse(
+                content={
+                    "items": items,
+                    "row_count": len(items),
+                    "timing_ms": timing_ms,
+                    "truncated": truncated,
+                }
+            )
+        return Response(
+            content=_search_payload_to_tsv(items),
+            media_type="text/tab-separated-values",
+            headers={
+                "Content-Disposition": 'attachment; filename="dewey_search_v2.tsv"',
+                "X-Row-Count": str(len(items)),
+                "X-Truncated": str(truncated).lower(),
+                "X-Timing-Ms": str(timing_ms),
+            },
         )
 
     @app.get(
@@ -288,6 +497,55 @@ def create_app(
             return service.get_artifact(artifact_euid)
         except DeweyNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post(
+        "/api/v1/artifacts/{artifact_euid}/storage/verify",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def verify_artifact_storage(
+        artifact_euid: str,
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ) -> dict[str, Any]:
+        try:
+            status_code, payload = service.verify_artifact_storage(
+                artifact_euid=artifact_euid,
+                idempotency_key=_require_idempotency_key(idempotency_key),
+            )
+            return {"status_code": status_code, **payload}
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except DeweyConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except RuntimeError as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    @app.post(
+        "/api/v1/artifacts/{artifact_euid}/storage/lock",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def lock_artifact_storage(
+        artifact_euid: str,
+        body: ArtifactStorageLockRequest,
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ) -> dict[str, Any]:
+        try:
+            status_code, payload = service.lock_artifact_storage(
+                artifact_euid=artifact_euid,
+                mode=body.mode,
+                retain_until=body.retain_until,
+                idempotency_key=_require_idempotency_key(idempotency_key),
+            )
+            return {"status_code": status_code, **payload}
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except DeweyConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except RuntimeError as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
 
     @app.get(
         "/api/v1/artifacts",
@@ -349,6 +607,11 @@ def create_app(
             status_code, payload = service.import_artifact_from_uri(
                 artifact_type=body.artifact_type,
                 storage_uri=body.storage_uri,
+                source_uri=body.source_uri,
+                import_mode=body.import_mode,
+                lock_after_import=body.lock_after_import,
+                producer_system=body.producer_system,
+                producer_object_euid=body.producer_object_euid,
                 metadata=body.metadata,
                 idempotency_key=_require_idempotency_key(idempotency_key),
             )
@@ -357,6 +620,61 @@ def create_app(
             raise HTTPException(status_code=409, detail=str(exc)) from exc
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except RuntimeError as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    @app.post(
+        "/api/v1/artifacts/upload-sessions",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def create_upload_session(
+        body: UploadSessionCreateRequest,
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ) -> dict[str, Any]:
+        try:
+            status_code, payload = service.create_upload_session(
+                artifact_type=body.artifact_type,
+                original_filename=body.original_filename,
+                content_type=body.content_type,
+                producer_system=body.producer_system,
+                producer_object_euid=body.producer_object_euid,
+                metadata=body.metadata,
+                lock_after_import=body.lock_after_import,
+                idempotency_key=_require_idempotency_key(idempotency_key),
+            )
+            return {"status_code": status_code, **payload}
+        except DeweyConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except RuntimeError as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    @app.post(
+        "/api/v1/artifacts/upload-sessions/{upload_token}/complete",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def complete_upload_session(
+        upload_token: str,
+        body: UploadSessionCompleteRequest,
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ) -> dict[str, Any]:
+        try:
+            status_code, payload = service.complete_upload_session(
+                upload_token=upload_token or body.upload_token,
+                checksums=body.checksums,
+                metadata=body.metadata,
+                idempotency_key=_require_idempotency_key(idempotency_key),
+            )
+            return {"status_code": status_code, **payload}
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except DeweyConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except RuntimeError as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
 
     @app.get(
         "/api/v1/artifact-sets/{artifact_set_euid}",
@@ -485,6 +803,8 @@ def create_app(
                 scope=body.scope,
                 expires_at=body.expires_at,
                 issued_by=body.issued_by,
+                transport=body.transport,
+                ttl_seconds=body.ttl_seconds,
                 idempotency_key=_require_idempotency_key(idempotency_key),
             )
             return {"status_code": status_code, **payload}
@@ -494,6 +814,98 @@ def create_app(
             raise HTTPException(status_code=409, detail=str(exc)) from exc
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except RuntimeError as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    @app.get(
+        "/api/v1/share-references/{share_reference_euid}",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def get_share_reference(share_reference_euid: str) -> dict[str, Any]:
+        try:
+            return service.get_share_reference(share_reference_euid)
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.get(
+        "/api/v1/artifacts/{artifact_euid}/share-references",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def list_artifact_share_references(
+        artifact_euid: str,
+        limit: int = Query(default=200, ge=1, le=2000),
+    ) -> dict[str, Any]:
+        try:
+            rows = service.list_share_references(
+                target_type="artifact",
+                target_euid=artifact_euid,
+                limit=limit,
+            )
+            return {"items": rows, "total": len(rows)}
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post(
+        "/api/search/v2/query",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def search_v2_query(body: SearchQueryRequest) -> dict[str, Any]:
+        try:
+            return service.query_search_v2(body.model_dump())
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post(
+        "/api/v1/search/v2/query",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def search_v2_query_alias(body: SearchQueryRequest) -> Response:
+        try:
+            response = JSONResponse(content=service.query_search_v2(body.model_dump()))
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        _with_search_alias_headers(response, "/api/search/v2/query")
+        return response
+
+    @app.post(
+        "/api/search/v2/export",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def search_v2_export(body: SearchExportRequest) -> Response:
+        try:
+            items, timing_ms, truncated = service.collect_search_export_rows(body.model_dump())
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        if body.format == "json":
+            return JSONResponse(
+                content={
+                    "items": items,
+                    "row_count": len(items),
+                    "timing_ms": timing_ms,
+                    "truncated": truncated,
+                }
+            )
+        return Response(
+            content=_search_payload_to_tsv(items),
+            media_type="text/tab-separated-values",
+            headers={
+                "Content-Disposition": 'attachment; filename="dewey_search_v2.tsv"',
+                "X-Row-Count": str(len(items)),
+                "X-Truncated": str(truncated).lower(),
+                "X-Timing-Ms": str(timing_ms),
+            },
+        )
+
+    @app.post(
+        "/api/v1/search/v2/export",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def search_v2_export_alias(body: SearchExportRequest) -> Response:
+        response = await search_v2_export(body)
+        _with_search_alias_headers(response, "/api/search/v2/export")
+        return response
 
     @app.post(
         "/api/v1/external-objects",

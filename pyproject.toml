@@ -4,11 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dewey-service"
-version = "0.1.13"
+version = "0.1.14"
 description = "LSMC Dewey canonical artifact registry service"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "boto3>=1.35.0",
     "cli-core-yo>=0.2.1",
     "daylily-tapdb==3.0.2",
     "daylily-cognito==0.1.28",
@@ -41,7 +42,7 @@ dewey = "dewey_service.cli:main"
 include = ["dewey_service*"]
 
 [tool.setuptools.package-data]
-dewey_service = ["etc/*.yaml"]
+dewey_service = ["etc/*.yaml", "templates/*.html", "static/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

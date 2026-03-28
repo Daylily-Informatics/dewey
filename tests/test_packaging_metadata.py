@@ -17,4 +17,4 @@ def test_pyproject_packages_dewey_config_template() -> None:
     pyproject = tomllib.loads((repo_root / "pyproject.toml").read_text(encoding="utf-8"))
     package_data = pyproject["tool"]["setuptools"]["package-data"]
 
-    assert package_data["dewey_service"] == ["etc/*.yaml"]
+    assert package_data["dewey_service"] == ["etc/*.yaml", "templates/*.html", "static/*"]

@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dewey Search</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/console.css" />
+  </head>
+  <body>
+    {% if deployment.name and not deployment.is_production %}
+    <div class="deployment-banner" style="background: {{ deployment.color }};">{{ deployment.name|upper }}</div>
+    {% endif %}
+    <div class="shell">
+      <header class="topbar">
+        <div class="brandline">
+          <div class="eyebrow">Dewey Unified Search</div>
+          <h1 class="title">Artifact and Share Search</h1>
+          <div class="subtitle">{{ profile.email }}</div>
+        </div>
+        <div class="navlinks">
+          <a class="navlink" href="/ui">Dashboard</a>
+          <form class="logout-form" method="post" action="/logout">
+            <button type="submit">Logout</button>
+          </form>
+        </div>
+      </header>
+
+      <main class="page">
+        <section class="hero">
+          <div class="hero-copy">
+            <div class="eyebrow">Search V2</div>
+            <h2>Query Dewey records, then export the result set cleanly.</h2>
+            <p>
+              Search spans artifact records and share-reference records with focused filters
+              for lifecycle status, producer identity, and external-object linkage.
+            </p>
+          </div>
+              <div class="results-meta">
+            <span class="pill pill-active">{{ result["total"] }} matches</span>
+            <span class="pill">{{ result["timing_ms"] }} ms</span>
+              </div>
+            </section>
+
+        <section class="content-grid" style="grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.4fr);">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Query Composer</h3>
+                <div class="panel-copy">Compact filters for the parity-critical file surface.</div>
+              </div>
+            </div>
+            <form method="get" action="/search">
+              <div class="form-grid">
+                <div class="field field-wide">
+                  <label for="q">Full Text</label>
+                  <input id="q" name="q" type="text" value="{{ form.q or '' }}" placeholder="Artifact EUID, filename, producer, target..." />
+                </div>
+                <div class="field">
+                  <label for="artifact_type">Artifact Type</label>
+                  <input id="artifact_type" name="artifact_type" type="text" value="{{ request.query_params.get('artifact_type', '') }}" placeholder="fastq, vcf, report" />
+                </div>
+                <div class="field">
+                  <label for="producer_system">Producer System</label>
+                  <input id="producer_system" name="producer_system" type="text" value="{{ request.query_params.get('producer_system', '') }}" placeholder="bloom, atlas, ursa" />
+                </div>
+                <div class="field">
+                  <label for="availability_status">Availability</label>
+                  <select id="availability_status" name="availability_status">
+                    <option value="">Any</option>
+                    <option value="available" {% if request.query_params.get('availability_status') == 'available' %}selected{% endif %}>available</option>
+                    <option value="missing" {% if request.query_params.get('availability_status') == 'missing' %}selected{% endif %}>missing</option>
+                    <option value="ready" {% if request.query_params.get('availability_status') == 'ready' %}selected{% endif %}>ready</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="import_mode">Import Mode</label>
+                  <select id="import_mode" name="import_mode">
+                    <option value="">Any</option>
+                    <option value="register" {% if request.query_params.get('import_mode') == 'register' %}selected{% endif %}>register</option>
+                    <option value="reference" {% if request.query_params.get('import_mode') == 'reference' %}selected{% endif %}>reference</option>
+                    <option value="copy" {% if request.query_params.get('import_mode') == 'copy' %}selected{% endif %}>copy</option>
+                    <option value="upload" {% if request.query_params.get('import_mode') == 'upload' %}selected{% endif %}>upload</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="transport">Share Transport</label>
+                  <select id="transport" name="transport">
+                    <option value="">Any</option>
+                    <option value="presigned_s3" {% if request.query_params.get('transport') == 'presigned_s3' %}selected{% endif %}>presigned_s3</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="status">Share Status</label>
+                  <select id="status" name="status">
+                    <option value="">Any</option>
+                    <option value="active" {% if request.query_params.get('status') == 'active' %}selected{% endif %}>active</option>
+                    <option value="pending" {% if request.query_params.get('status') == 'pending' %}selected{% endif %}>pending</option>
+                    <option value="error" {% if request.query_params.get('status') == 'error' %}selected{% endif %}>error</option>
+                  </select>
+                </div>
+                <div class="field field-wide">
+                  <label for="external_object_id">External Object ID</label>
+                  <input id="external_object_id" name="external_object_id" type="text" value="{{ request.query_params.get('external_object_id', '') }}" placeholder="Filter artifacts linked to a known external object id" />
+                </div>
+                <div class="field">
+                  <label for="created_at_start">Created After</label>
+                  <input id="created_at_start" name="created_at_start" type="datetime-local" value="{{ request.query_params.get('created_at_start', '') }}" />
+                </div>
+                <div class="field">
+                  <label for="created_at_end">Created Before</label>
+                  <input id="created_at_end" name="created_at_end" type="datetime-local" value="{{ request.query_params.get('created_at_end', '') }}" />
+                </div>
+                <div class="field">
+                  <label for="page_size">Page Size</label>
+                  <select id="page_size" name="page_size">
+                    <option value="25" {% if request.query_params.get('page_size', '25') == '25' %}selected{% endif %}>25</option>
+                    <option value="50" {% if request.query_params.get('page_size') == '50' %}selected{% endif %}>50</option>
+                    <option value="100" {% if request.query_params.get('page_size') == '100' %}selected{% endif %}>100</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Scopes</label>
+                  <div class="stack">
+                    <label class="pill"><input type="checkbox" name="scope" value="artifact" {% if not request.query_params.getlist('scope') or 'artifact' in request.query_params.getlist('scope') %}checked{% endif %} /> Artifact</label>
+                    <label class="pill"><input type="checkbox" name="scope" value="share_reference" {% if not request.query_params.getlist('scope') or 'share_reference' in request.query_params.getlist('scope') %}checked{% endif %} /> Share Reference</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button class="button button-primary" type="submit">Run Search</button>
+                <a class="button" href="/search">Reset</a>
+              </div>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Result Surface</h3>
+                <div class="panel-copy">Filtered Dewey rows with export-ready normalized output.</div>
+              </div>
+              <div class="form-actions" style="margin-top: 0;">
+                <a class="button" href="/search/export?{{ request.url.query }}{% if request.url.query %}&{% endif %}format=json">Export JSON</a>
+                <a class="button" href="/search/export?{{ request.url.query }}{% if request.url.query %}&{% endif %}format=tsv">Export TSV</a>
+              </div>
+            </div>
+
+            <div class="results-meta">
+              <span class="pill pill-active">Artifacts {{ result["facets"]["artifact"] }}</span>
+              <span class="pill">Share Refs {{ result["facets"]["share_reference"] }}</span>
+              <span class="pill">Page {{ result["page"] }}</span>
+            </div>
+
+            {% if result["items"] %}
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Record</th>
+                    <th>Primary</th>
+                    <th>Secondary</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in result["items"] %}
+                  <tr>
+                    <td>
+                      <div class="mono">{{ item.euid }}</div>
+                      <div>{{ item.record_type }}</div>
+                    </td>
+                    <td>
+                      {% if item.record_type == "artifact" %}
+                      <div>{{ item.original_filename or item.name }}</div>
+                      <div class="note">{{ item.artifact_type }} / {{ item.import_mode or "register" }}</div>
+                      {% else %}
+                      <div>{{ item.target_euid }}</div>
+                      <div class="note">{{ item.transport or "share" }}</div>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if item.record_type == "artifact" %}
+                      <div class="mono">{{ item.storage_uri }}</div>
+                      <div class="note">{{ item.producer_system or "No producer" }}</div>
+                      {% else %}
+                      <div class="mono">{{ item.access_url or "No access url" }}</div>
+                      <div class="note">{{ item.expires_at or "No expiry" }}</div>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if item.record_type == "artifact" %}
+                        {% if item.storage_status == "verified" %}
+                        <span class="pill pill-active">verified</span>
+                        {% elif item.storage_status in ["missing", "error"] %}
+                        <span class="pill pill-alert">{{ item.storage_status }}</span>
+                        {% else %}
+                        <span class="pill">{{ item.storage_status or "registered" }}</span>
+                        {% endif %}
+                      {% else %}
+                        {% if item.status == "active" %}
+                        <span class="pill pill-active">active</span>
+                        {% elif item.status == "error" %}
+                        <span class="pill pill-alert">error</span>
+                        {% else %}
+                        <span class="pill">{{ item.status or "pending" }}</span>
+                        {% endif %}
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% else %}
+            <div class="empty-state">No rows matched the current search.</div>
+            {% endif %}
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
