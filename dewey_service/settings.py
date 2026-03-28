@@ -133,6 +133,12 @@ class Settings(BaseSettings):
     managed_storage_prefix: str = "artifacts"
     upload_session_ttl_seconds: int = 900
 
+    # Literature integration
+    literature_managed_copy_allowed_domains: str = "europepmc.org,ncbi.nlm.nih.gov"
+    literature_metapub_cache_dir: str = ""
+    literature_request_timeout_seconds: int = 10
+    literature_max_redirects: int = 3
+
     # Share reference defaults
     default_share_reference_ttl_seconds: int = 3600
     search_export_max_rows: int = 1000
@@ -215,6 +221,14 @@ class Settings(BaseSettings):
             "is_production": self.deployment_is_production,
         }
 
+    @property
+    def literature_allowed_domains(self) -> set[str]:
+        return {
+            str(item or "").strip().lower()
+            for item in str(self.literature_managed_copy_allowed_domains or "").split(",")
+            if str(item or "").strip()
+        }
+
 
 def get_config_file_path() -> Path:
     return _default_config_path()
@@ -243,8 +257,7 @@ def load_settings(config_path: Path | None = None) -> Settings:
     env_override = {
         key[len("DEWEY_") :].lower(): value
         for key, value in os.environ.items()
-        if key.startswith("DEWEY_")
-        and key[len("DEWEY_") :].lower() not in yaml_only_defaults
+        if key.startswith("DEWEY_") and key[len("DEWEY_") :].lower() not in yaml_only_defaults
     }
     merged = {**seed, **env_override}
     for key, default in yaml_only_defaults.items():

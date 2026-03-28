@@ -19,6 +19,7 @@
           <div class="subtitle">{{ profile.email }}</div>
         </div>
         <div class="navlinks">
+          <a class="navlink" href="/literature">Literature Search</a>
           <a class="navlink" href="/search">Unified Search</a>
           <form class="logout-form" method="post" action="/logout">
             <button type="submit">Logout</button>
@@ -69,7 +70,10 @@
                 <h3>Recent Artifacts</h3>
                 <div class="panel-copy">Latest canonical artifact registrations and imports.</div>
               </div>
-              <a class="button" href="/search">Open Search</a>
+              <div class="form-actions" style="margin-top: 0;">
+                <a class="button" href="/literature">Open Literature</a>
+                <a class="button" href="/search">Open Search</a>
+              </div>
             </div>
             <div class="table-wrap">
               <table>

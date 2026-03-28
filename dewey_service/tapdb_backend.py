@@ -54,6 +54,7 @@ ARTIFACT_SET_TEMPLATE = "dewey/data/artifact_set/1.0/"
 SHARE_REFERENCE_TEMPLATE = "dewey/data/share_reference/1.0/"
 EXTERNAL_OBJECT_TEMPLATE = "dewey/integration/external_object/1.0/"
 EXTERNAL_OBJECT_RELATION_TEMPLATE = "dewey/integration/external_object_relation/1.0/"
+LITERATURE_SAVE_TEMPLATE = "dewey/access/literature_save/1.0/"
 IDEMPOTENCY_TEMPLATE = "dewey/system/idempotency_request/1.0/"
 
 
@@ -92,6 +93,13 @@ TEMPLATE_DEFINITIONS: tuple[TemplateDefinition, ...] = (
         "data_instance",
         "ER",
         "Dewey External Object Relation",
+    ),
+    TemplateDefinition(
+        LITERATURE_SAVE_TEMPLATE,
+        "data_template",
+        "data_instance",
+        "LS",
+        "Dewey Literature Save",
     ),
     TemplateDefinition(
         IDEMPOTENCY_TEMPLATE,
