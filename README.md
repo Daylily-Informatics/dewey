@@ -63,25 +63,34 @@ UI/auth routes:
 
 ## CLI Surface
 
-Primary groups:
+Primary root commands:
+
+- `dewey version`
+- `dewey info`
+- `dewey config`
+- `dewey env`
+
+Primary plugin groups:
 
 - `dewey server`: start the API/UI server
 - `dewey db`: build, seed, reset Dewey on top of TapDB
 - `dewey tapdb`: pass through TapDB commands in Dewey runtime context
 - `dewey cognito`: Cognito/daycog helper commands
-- `dewey test`, `dewey quality`, `dewey config`, `dewey env`
+- `dewey test`, `dewey quality`
 
 ## Quick Start
 
 ```bash
 source dewey_activate
 pip install -e .[dev]
-cp config/dewey-config.example.yaml ~/.config/dewey/config.yaml
+dewey config init
 dewey db build --target local
 dewey server start --port 8914
 ```
 
 HTTPS is mandatory. Place certs at `certs/cert.pem` and `certs/key.pem` before starting the server.
+
+`dewey config show` now prints raw YAML. Use `dewey config status` to inspect merged runtime settings.
 
 ## Current Docs
 

@@ -65,16 +65,22 @@ unset _DEWEY_CONDA_BASE
 
 if [[ -n "${CONDA_PREFIX:-}" ]] && [[ -x "${CONDA_PREFIX}/bin/python" ]]; then
   _DEWEY_PYTHON="${CONDA_PREFIX}/bin/python"
+elif command -v python3 &> /dev/null; then
+  _DEWEY_PYTHON="$(command -v python3)"
 elif command -v python &> /dev/null; then
   _DEWEY_PYTHON="$(command -v python)"
 fi
 
 if [[ -n "${_DEWEY_PYTHON}" ]]; then
   _DEWEY_PYTHON_BIN="$(dirname "${_DEWEY_PYTHON}")"
+  _DEWEY_SCRIPTS_DIR="$("${_DEWEY_PYTHON}" -c 'import sysconfig; print(sysconfig.get_path("scripts") or "")' 2>/dev/null || true)"
+  if [[ -n "${_DEWEY_SCRIPTS_DIR}" ]] && [[ -d "${_DEWEY_SCRIPTS_DIR}" ]]; then
+    export PATH="${_DEWEY_SCRIPTS_DIR}:$PATH"
+  fi
   export PATH="${_DEWEY_PYTHON_BIN}:$PATH"
 fi
 
-if ! command -v dewey &> /dev/null || ! "${_DEWEY_PYTHON:-python}" -m pip show dewey-service &> /dev/null 2>&1; then
+if ! "${_DEWEY_PYTHON:-python}" -m pip show dewey-service &> /dev/null 2>&1; then
   echo -e "  ${_CYAN}→${_NC} Installing dewey CLI..."
   "${_DEWEY_PYTHON:-python}" -m pip install -e "$DEWEY_ROOT" -q
   echo -e "  ${_GREEN}✓${_NC} Installed 'dewey' CLI command"
@@ -82,13 +88,29 @@ else
   echo -e "  ${_GREEN}✓${_NC} 'dewey' CLI already installed"
 fi
 
-if [[ -n "${ZSH_VERSION:-}" ]]; then
-  eval "$(dewey --show-completion zsh 2>/dev/null)" 2>/dev/null
-elif [[ -n "${BASH_VERSION:-}" ]]; then
-  eval "$(dewey --show-completion bash 2>/dev/null)" 2>/dev/null
+if [[ -n "${_DEWEY_PYTHON}" ]]; then
+  dewey() {
+    "${_DEWEY_PYTHON}" -c 'from dewey_service.cli import main; main()' "$@"
+  }
+fi
+
+if [[ "$-" == *i* ]]; then
+  if [[ -n "${ZSH_VERSION:-}" ]]; then
+    if _DEWEY_COMPLETION="$(dewey --show-completion zsh 2>/dev/null)" && eval "${_DEWEY_COMPLETION}" 2>/dev/null; then
+      echo -e "  ${_GREEN}✓${_NC} Enabled tab completion for 'dewey' (zsh)"
+    fi
+    unset _DEWEY_COMPLETION
+  elif [[ -n "${BASH_VERSION:-}" ]]; then
+    if _DEWEY_COMPLETION="$(dewey --show-completion bash 2>/dev/null)" && eval "${_DEWEY_COMPLETION}" 2>/dev/null; then
+      echo -e "  ${_GREEN}✓${_NC} Enabled tab completion for 'dewey' (bash)"
+    fi
+    unset _DEWEY_COMPLETION
+  fi
 fi
 
 export DEWEY_ROOT
+export DEWEY_ACTIVE=1
+export DEWEY_PROJECT_ROOT="$DEWEY_ROOT"
 export AWS_PROFILE="${AWS_PROFILE:-lsmc}"
 export AWS_REGION="${AWS_REGION:-us-west-2}"
 export DATABASE_BACKEND="${DATABASE_BACKEND:-tapdb}"
@@ -104,18 +126,17 @@ if [[ -z "${DEWEY_API_BEARER_TOKEN:-}" ]]; then
   export DEWEY_API_BEARER_TOKEN="dewey-dev-token"
 fi
 
+export PATH="$DEWEY_ROOT:$PATH"
+
 if [[ ! -f "$TAPDB_CONFIG_PATH" ]]; then
   echo -e "  ${_YELLOW}⚠${_NC} TapDB scoped config not found at ${TAPDB_CONFIG_PATH}"
 fi
 
-dewey_deactivate() {
-  unset DEWEY_ROOT
-  if [[ "$CONDA_DEFAULT_ENV" == "DEWEY" ]]; then
-    conda deactivate 2>/dev/null
-  fi
-  echo "Dewey environment deactivated."
-  unset -f dewey_deactivate
-}
+if [[ -f "$DEWEY_ROOT/dewey_deactivate" ]]; then
+  dewey_deactivate() {
+    source "$DEWEY_ROOT/dewey_deactivate"
+  }
+fi
 
 echo -e "  ${_GREEN}✓${_NC} AWS_PROFILE=${AWS_PROFILE}"
 echo -e "  ${_GREEN}✓${_NC} AWS_REGION=${AWS_REGION}"
@@ -124,19 +145,23 @@ echo -e "  ${_GREEN}✓${_NC} TAPDB_DATABASE_NAME=${TAPDB_DATABASE_NAME}"
 echo -e "  ${_GREEN}✓${_NC} TAPDB_ENV=${TAPDB_ENV}"
 echo -e "  ${_GREEN}✓${_NC} TAPDB_STRICT_NAMESPACE=${TAPDB_STRICT_NAMESPACE}"
 echo -e "  ${_GREEN}✓${_NC} TAPDB_CONFIG_PATH=${TAPDB_CONFIG_PATH}"
+echo -e "  ${_GREEN}✓${_NC} DEWEY_ACTIVE=${DEWEY_ACTIVE}"
+echo -e "  ${_GREEN}✓${_NC} DEWEY_PROJECT_ROOT=${DEWEY_PROJECT_ROOT}"
 echo ""
 echo -e "${_CYAN}Dewey environment activated!${_NC}"
 echo ""
 
-echo "Command groups:"
-echo -e "  ${_CYAN}dewey server${_NC}    start"
-echo -e "  ${_CYAN}dewey db${_NC}        build, seed, reset"
-echo -e "  ${_CYAN}dewey tapdb${_NC}     run"
-echo -e "  ${_CYAN}dewey cognito${_NC}   status"
-echo -e "  ${_CYAN}dewey test${_NC}      run"
-echo -e "  ${_CYAN}dewey quality${_NC}   lint, format, check"
-echo -e "  ${_CYAN}dewey config${_NC}    path, show, validate"
-echo -e "  ${_CYAN}dewey env${_NC}       status, activate, deactivate"
+echo "Commands:"
+echo -e "  ${_CYAN}dewey version${_NC}         Show version"
+echo -e "  ${_CYAN}dewey info${_NC}            Show runtime info"
+echo -e "  ${_CYAN}dewey config${_NC}          path, init, show, validate, edit, reset, status"
+echo -e "  ${_CYAN}dewey env${_NC}             status, activate, deactivate, reset"
+echo -e "  ${_CYAN}dewey server${_NC}          start, stop, status, logs, restart"
+echo -e "  ${_CYAN}dewey db${_NC}              build, seed, reset"
+echo -e "  ${_CYAN}dewey tapdb${_NC}           run"
+echo -e "  ${_CYAN}dewey cognito${_NC}         status"
+echo -e "  ${_CYAN}dewey test${_NC}            run"
+echo -e "  ${_CYAN}dewey quality${_NC}         lint, format, check"
 echo ""
 echo -e "  ${_GREEN}dewey --help${_NC}        Show all commands"
 echo -e "  ${_GREEN}dewey_deactivate${_NC}  Deactivate this environment"

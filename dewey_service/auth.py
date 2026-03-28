@@ -8,7 +8,6 @@ import secrets
 from typing import Any
 
 from daylily_cognito import build_authorization_url, exchange_authorization_code
-from daylily_cognito import build_logout_url as daycog_build_logout_url
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
