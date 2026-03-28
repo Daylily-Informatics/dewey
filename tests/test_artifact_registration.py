@@ -43,3 +43,32 @@ def test_import_artifact_from_s3_uri(client) -> None:
     assert payload["status_code"] == 201
     assert payload["bucket"] == "bucket-2"
     assert payload["key"] == "path/sample.vcf.gz"
+    assert payload["import_mode"] == "reference"
+
+
+def test_upload_session_round_trip(client) -> None:
+    create = client.post(
+        "/api/v1/artifacts/upload-sessions",
+        headers={"Authorization": "Bearer token-123", "Idempotency-Key": "idem-upload-create"},
+        json={
+            "artifact_type": "report",
+            "original_filename": "case-report.pdf",
+            "content_type": "application/pdf",
+            "producer_system": "atlas",
+            "producer_object_euid": "REL-1",
+        },
+    )
+    assert create.status_code == 200
+    created = create.json()
+    assert created["status_code"] == 201
+    assert created["upload_token"].startswith("upload-")
+
+    complete = client.post(
+        f"/api/v1/artifacts/upload-sessions/{created['upload_token']}/complete",
+        headers={"Authorization": "Bearer token-123", "Idempotency-Key": "idem-upload-complete"},
+        json={"checksums": {"sha256": "abc123"}},
+    )
+    assert complete.status_code == 200
+    payload = complete.json()
+    assert payload["status_code"] == 201
+    assert payload["import_mode"] == "upload"

@@ -5,23 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ title }}</title>
     <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
-    <style>
-      body { font-family: 'IBM Plex Sans', sans-serif; margin: 0; background: linear-gradient(135deg, #e6f7f6, #f4fbff); }
-      .deployment-banner { height: 18px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; }
-      .wrap { max-width: 520px; margin: 8rem auto; background: #fff; border-radius: 16px; padding: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
-      h1 { margin-top: 0; }
-      a.btn { display: inline-block; text-decoration: none; background: #0f766e; color: #fff; padding: 0.75rem 1.25rem; border-radius: 8px; font-weight: 600; }
-      p { color: #334155; }
-    </style>
+    <link rel="stylesheet" href="/static/console.css" />
   </head>
   <body>
     {% if deployment.name and not deployment.is_production %}
     <div class="deployment-banner" style="background: {{ deployment.color }};">{{ deployment.name|upper }}</div>
     {% endif %}
-    <main class="wrap">
-      <h1>Dewey Operator Login</h1>
-      <p>Operator access is authenticated through Cognito Hosted UI.</p>
-      <a class="btn" href="{{ cognito_login_url }}">Sign In with Cognito</a>
+    <main class="shell">
+      <div class="page" style="max-width: 720px; padding-top: 10vh;">
+        <section class="panel" style="padding: 2rem;">
+          <div class="eyebrow">Dewey Console</div>
+          <h1 class="title" style="font-size: 2.3rem; margin-top: 0.45rem;">Dewey Operator Login</h1>
+          <p class="panel-copy" style="font-size: 1rem; max-width: 52ch;">
+            Canonical artifact intake, lifecycle, sharing, and search for Dewey operators.
+            Authentication is handled through Cognito Hosted UI.
+          </p>
+          <div class="form-actions" style="margin-top: 1.5rem;">
+            <a class="button button-primary" href="{{ cognito_login_url }}">Sign In with Cognito</a>
+            <span class="pill">Control Room UI</span>
+          </div>
+        </section>
+      </div>
     </main>
   </body>
 </html>

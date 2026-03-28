@@ -8,6 +8,7 @@ from typing import Any
 import pytest
 
 from dewey_service.service import DeweyConflictError, DeweyNotFoundError, DeweyService
+from dewey_service.storage import StorageObject, StorageObjectNotFoundError
 from dewey_service.tapdb_backend import (
     ARTIFACT_SET_TEMPLATE,
     ARTIFACT_TEMPLATE,
@@ -91,6 +92,11 @@ class _InMemoryBackend:
         self.instances.setdefault(template_code, []).append(instance)
         return instance
 
+    def update_instance_json(self, session, instance: _FakeInstance, updates: dict[str, Any]) -> None:
+        payload = dict(instance.json_addl or {})
+        payload.update(updates)
+        instance.json_addl = payload
+
     def find_by_json_field(self, session, *, template_code: str, field: str, value: str):
         for instance in self.instances.get(template_code, []):
             if instance.is_deleted:
@@ -163,14 +169,135 @@ class _InMemoryBackend:
         return rows
 
 
+class _FakeStorageClient:
+    def __init__(self) -> None:
+        self.objects: dict[tuple[str, str], StorageObject] = {}
+        self.tags: dict[tuple[str, str], dict[str, str]] = {}
+        self.retentions: dict[tuple[str, str], dict[str, str]] = {}
+
+    def seed_object(
+        self,
+        *,
+        bucket: str,
+        key: str,
+        size: int = 128,
+        content_type: str | None = "application/octet-stream",
+        storage_class: str | None = "STANDARD",
+        version_id: str | None = None,
+    ) -> StorageObject:
+        obj = StorageObject(
+            bucket=bucket,
+            key=key,
+            version_id=version_id,
+            size=size,
+            content_type=content_type,
+            storage_class=storage_class,
+            etag="etag-1",
+        )
+        self.objects[(bucket, key)] = obj
+        return obj
+
+    def head_object(self, *, bucket: str, key: str, version_id: str | None = None) -> StorageObject:
+        obj = self.objects.get((bucket, key))
+        if obj is None:
+            raise StorageObjectNotFoundError(f"{bucket}/{key}")
+        return obj
+
+    def copy_object(
+        self,
+        *,
+        source_bucket: str,
+        source_key: str,
+        dest_bucket: str,
+        dest_key: str,
+    ) -> StorageObject:
+        source = self.head_object(bucket=source_bucket, key=source_key)
+        return self.seed_object(
+            bucket=dest_bucket,
+            key=dest_key,
+            size=source.size or 0,
+            content_type=source.content_type,
+            storage_class=source.storage_class,
+            version_id=source.version_id,
+        )
+
+    def put_bytes(
+        self,
+        *,
+        bucket: str,
+        key: str,
+        body: bytes,
+        content_type: str | None = None,
+    ) -> StorageObject:
+        return self.seed_object(
+            bucket=bucket,
+            key=key,
+            size=len(body),
+            content_type=content_type,
+            storage_class="STANDARD",
+        )
+
+    def put_object_tags(self, *, bucket: str, key: str, tags: dict[str, str]) -> None:
+        self.head_object(bucket=bucket, key=key)
+        merged = dict(self.tags.get((bucket, key), {}))
+        merged.update(tags)
+        self.tags[(bucket, key)] = merged
+
+    def set_retention(self, *, bucket: str, key: str, mode: str, retain_until: datetime) -> None:
+        self.head_object(bucket=bucket, key=key)
+        self.retentions[(bucket, key)] = {
+            "mode": mode,
+            "retain_until": retain_until.isoformat(),
+        }
+
+    def generate_presigned_get_url(
+        self,
+        *,
+        bucket: str,
+        key: str,
+        expires_in: int,
+        version_id: str | None = None,
+    ) -> str:
+        self.head_object(bucket=bucket, key=key)
+        return f"https://downloads.example.com/{bucket}/{key}?expires_in={expires_in}"
+
+    def generate_presigned_upload(
+        self,
+        *,
+        bucket: str,
+        key: str,
+        expires_in: int,
+        content_type: str | None = None,
+    ) -> dict[str, Any]:
+        return {
+            "method": "PUT",
+            "url": f"https://uploads.example.com/{bucket}/{key}",
+            "headers": {"Content-Type": content_type} if content_type else {},
+        }
+
+
 @pytest.fixture
 def backend() -> _InMemoryBackend:
     return _InMemoryBackend()
 
 
 @pytest.fixture
-def service(backend: _InMemoryBackend) -> DeweyService:
-    return DeweyService(backend, default_share_ttl_seconds=120)
+def storage() -> _FakeStorageClient:
+    return _FakeStorageClient()
+
+
+@pytest.fixture
+def service(backend: _InMemoryBackend, storage: _FakeStorageClient) -> DeweyService:
+    return DeweyService(
+        backend,
+        default_share_ttl_seconds=120,
+        storage_client=storage,
+        managed_storage_bucket="managed-bucket",
+        managed_storage_prefix="artifacts",
+        upload_session_ttl_seconds=900,
+        upload_token_secret="upload-secret",
+        search_export_max_rows=1000,
+    )
 
 
 def test_register_artifact_replay_and_identity_reuse(service: DeweyService) -> None:
@@ -239,11 +366,14 @@ def test_register_artifact_replay_and_identity_reuse(service: DeweyService) -> N
     assert service.list_artifacts(artifact_type="fastq", producer_system="atlas") == [created]
 
 
-def test_import_artifact_and_validation_errors(service: DeweyService) -> None:
+def test_import_artifact_and_validation_errors(
+    service: DeweyService,
+    storage: _FakeStorageClient,
+) -> None:
     with pytest.raises(ValueError, match="s3://"):
         service.import_artifact_from_uri(
             artifact_type="fastq",
-            storage_uri="gs://bucket/object",
+            source_uri="gs://bucket/object",
             metadata={},
             idempotency_key="idem-import-bad",
         )
@@ -267,9 +397,16 @@ def test_import_artifact_and_validation_errors(service: DeweyService) -> None:
             idempotency_key="idem-invalid",
         )
 
+    storage.seed_object(
+        bucket="bucket-2",
+        key="reads/r2.fastq.gz",
+        size=256,
+        content_type="application/gzip",
+    )
     status_code, imported = service.import_artifact_from_uri(
         artifact_type="fastq",
-        storage_uri="s3://bucket-2/reads/r2.fastq.gz",
+        source_uri="s3://bucket-2/reads/r2.fastq.gz",
+        import_mode="reference",
         metadata={"content_type": "application/gzip", "producer_system": "ursa"},
         idempotency_key="idem-import-good",
     )
@@ -277,6 +414,21 @@ def test_import_artifact_and_validation_errors(service: DeweyService) -> None:
     assert status_code == 201
     assert imported["bucket"] == "bucket-2"
     assert imported["producer_system"] == "ursa"
+    assert imported["storage_status"] == "verified"
+
+    copy_code, copied = service.import_artifact_from_uri(
+        artifact_type="fastq",
+        source_uri="s3://bucket-2/reads/r2.fastq.gz",
+        import_mode="copy",
+        lock_after_import=True,
+        metadata={"content_type": "application/gzip"},
+        idempotency_key="idem-import-copy",
+    )
+
+    assert copy_code == 201
+    assert copied["bucket"] == "managed-bucket"
+    assert copied["import_mode"] == "copy"
+    assert copied["retention_mode"] == "GOVERNANCE"
 
 
 def test_artifact_set_member_lifecycle(service: DeweyService) -> None:
@@ -326,7 +478,8 @@ def test_artifact_set_member_lifecycle(service: DeweyService) -> None:
         service.get_artifact_set("AS-999999")
 
 
-def test_share_reference_behaviors(service: DeweyService) -> None:
+def test_share_reference_behaviors(service: DeweyService, storage: _FakeStorageClient) -> None:
+    storage.seed_object(bucket="bucket-4", key="alignments/sample.bam", size=1024)
     _, artifact = service.register_artifact(
         artifact_type="bam",
         storage_backend="s3",
@@ -352,6 +505,8 @@ def test_share_reference_behaviors(service: DeweyService) -> None:
         scope=None,
         expires_at=None,
         issued_by="tester@example.com",
+        transport="presigned_s3",
+        ttl_seconds=120,
         idempotency_key="idem-share-auto",
     )
     explicit_code, explicit_share = service.create_share_reference(
@@ -361,6 +516,7 @@ def test_share_reference_behaviors(service: DeweyService) -> None:
         scope="internal",
         expires_at="2026-04-01T00:00:00Z",
         issued_by=None,
+        transport="presigned_s3",
         idempotency_key="idem-share-explicit",
     )
 
@@ -368,6 +524,11 @@ def test_share_reference_behaviors(service: DeweyService) -> None:
     assert explicit_code == 201
     assert auto_share["issued_by"] == "tester@example.com"
     assert explicit_share["expires_at"] == "2026-04-01T00:00:00Z"
+    assert auto_share["access_url"].startswith("https://downloads.example.com/")
+    assert service.list_share_references(
+        target_type="artifact",
+        target_euid=artifact["artifact_euid"],
+    )[0]["share_reference_euid"] == auto_share["share_reference_euid"]
 
     with pytest.raises(ValueError, match="target_type must be artifact or artifact_set"):
         service.create_share_reference(
@@ -377,6 +538,7 @@ def test_share_reference_behaviors(service: DeweyService) -> None:
             scope=None,
             expires_at=None,
             issued_by=None,
+            transport="presigned_s3",
             idempotency_key="idem-share-bad-target",
         )
 
@@ -388,8 +550,81 @@ def test_share_reference_behaviors(service: DeweyService) -> None:
             scope=None,
             expires_at="not-a-date",
             issued_by=None,
+            transport="presigned_s3",
             idempotency_key="idem-share-bad-expiry",
         )
+
+
+def test_upload_complete_verify_lock_and_search(
+    service: DeweyService,
+    storage: _FakeStorageClient,
+) -> None:
+    session_code, upload_session = service.create_upload_session(
+        artifact_type="report",
+        original_filename="case-report.pdf",
+        content_type="application/pdf",
+        producer_system="atlas",
+        producer_object_euid="REL-1",
+        metadata={"case_id": "CASE-1"},
+        lock_after_import=False,
+        idempotency_key="idem-upload-create",
+    )
+    assert session_code == 201
+
+    storage.seed_object(
+        bucket=upload_session["bucket"],
+        key=upload_session["key"],
+        size=2048,
+        content_type="application/pdf",
+    )
+    complete_code, artifact = service.complete_upload_session(
+        upload_token=upload_session["upload_token"],
+        checksums={"sha256": "abc123"},
+        metadata={"case_id": "CASE-1"},
+        idempotency_key="idem-upload-complete",
+    )
+    assert complete_code == 201
+    assert artifact["import_mode"] == "upload"
+    assert artifact["storage_status"] == "verified"
+
+    verify_code, verified = service.verify_artifact_storage(
+        artifact_euid=artifact["artifact_euid"],
+        idempotency_key="idem-verify-1",
+    )
+    assert verify_code == 200
+    assert verified["storage_status"] == "verified"
+
+    lock_code, locked = service.lock_artifact_storage(
+        artifact_euid=artifact["artifact_euid"],
+        mode="GOVERNANCE",
+        retain_until="2027-01-01T00:00:00Z",
+        idempotency_key="idem-lock-1",
+    )
+    assert lock_code == 200
+    assert locked["retention_mode"] == "GOVERNANCE"
+
+    query = service.query_search_v2(
+        {
+            "q": "CASE-1",
+            "scopes": ["artifact"],
+            "page": 1,
+            "page_size": 25,
+            "property_filters": [{"path": "import_mode", "op": "eq", "value": "upload"}],
+        }
+    )
+    assert query["total"] == 1
+    assert query["items"][0]["artifact_euid"] == artifact["artifact_euid"]
+
+    export_rows, timing_ms, truncated = service.collect_search_export_rows(
+        {
+            "scopes": ["artifact"],
+            "page_size": 25,
+            "max_rows": 25,
+        }
+    )
+    assert timing_ms >= 0
+    assert truncated is False
+    assert export_rows[0]["record_type"] == "artifact"
 
 
 def test_external_object_relation_lifecycle(service: DeweyService) -> None:
