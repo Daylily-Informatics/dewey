@@ -201,7 +201,7 @@ def test_server_command_wrappers(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_db_cli_error_branches(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(db_cli, "ensure_tapdb_version", lambda: "3.0.2")
+    monkeypatch.setattr(db_cli, "ensure_tapdb_version", lambda: "3.0.3")
 
     with pytest.raises(typer.Exit) as exc:
         db_cli.build(target="aurora", cluster="", profile="lsmc", region="us-west-2", namespace="dewey")

@@ -8,14 +8,14 @@ from dewey_service.integrations import tapdb_runtime
 
 
 def test_ensure_tapdb_version_accepts_exact(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(tapdb_runtime.importlib.metadata, "version", lambda _name: "3.0.2")
-    assert tapdb_runtime.ensure_tapdb_version("3.0.2") == "3.0.2"
+    monkeypatch.setattr(tapdb_runtime.importlib.metadata, "version", lambda _name: "3.0.3")
+    assert tapdb_runtime.ensure_tapdb_version("3.0.3") == "3.0.3"
 
 
 def test_ensure_tapdb_version_rejects_lower_version(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(tapdb_runtime.importlib.metadata, "version", lambda _name: "3.0.1")
+    monkeypatch.setattr(tapdb_runtime.importlib.metadata, "version", lambda _name: "3.0.2")
     with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="version mismatch"):
-        tapdb_runtime.ensure_tapdb_version("3.0.2")
+        tapdb_runtime.ensure_tapdb_version("3.0.3")
 
 
 def test_tapdb_env_for_target_and_sqlalchemy_url() -> None:
@@ -54,7 +54,7 @@ def test_resolve_runtime_env_sets_expected_values(monkeypatch: pytest.MonkeyPatc
 
 
 def test_export_database_url_for_target_sets_environment(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda required_version=tapdb_runtime.TAPDB_REQUIRED_VERSION: "3.0.2")
+    monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda required_version=tapdb_runtime.TAPDB_REQUIRED_VERSION: "3.0.3")
     monkeypatch.setattr(
         tapdb_runtime,
         "_get_tapdb_db_config_for_env",
@@ -74,7 +74,7 @@ def test_export_database_url_for_target_sets_environment(monkeypatch: pytest.Mon
 
 
 def test_run_tapdb_cli_builds_command_and_raises_on_failure(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda required_version=tapdb_runtime.TAPDB_REQUIRED_VERSION: "3.0.2")
+    monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda required_version=tapdb_runtime.TAPDB_REQUIRED_VERSION: "3.0.3")
     calls: list[tuple[list[str], dict[str, str]]] = []
 
     def fake_run(cmd, cwd=None, env=None, text=None, capture_output=None):
@@ -98,7 +98,7 @@ def test_run_tapdb_cli_builds_command_and_raises_on_failure(monkeypatch: pytest.
 
 
 def test_run_tapdb_cli_returns_process_when_check_disabled(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda required_version=tapdb_runtime.TAPDB_REQUIRED_VERSION: "3.0.2")
+    monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda required_version=tapdb_runtime.TAPDB_REQUIRED_VERSION: "3.0.3")
     monkeypatch.setattr(
         tapdb_runtime.subprocess,
         "run",
