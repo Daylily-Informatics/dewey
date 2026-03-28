@@ -6,7 +6,7 @@ import subprocess
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-ACTIVATE_SCRIPT = PROJECT_ROOT / "dewey_activate"
+ACTIVATE_SCRIPT = PROJECT_ROOT / "activate"
 
 
 def _write_executable(path: Path, content: str) -> None:
@@ -110,6 +110,8 @@ def test_activate_requires_conda_on_path(tmp_path: Path) -> None:
 
     env = os.environ.copy()
     env["PATH"] = "/usr/bin:/bin"
+    env.pop("CONDA_DEFAULT_ENV", None)
+    env.pop("CONDA_PREFIX", None)
 
     result = _source_activate(env)
 
@@ -124,6 +126,8 @@ def test_activate_hardfails_when_conda_env_creation_fails(tmp_path: Path) -> Non
     env["PATH"] = f"{conda_base / 'bin'}:/usr/bin:/bin"
     env["FAKE_DEWEY_ENV_PRESENT"] = "0"
     env["FAKE_CONDA_ENV_CREATE_FAIL"] = "1"
+    env.pop("CONDA_DEFAULT_ENV", None)
+    env.pop("CONDA_PREFIX", None)
 
     result = _source_activate(env)
 
@@ -138,6 +142,8 @@ def test_activate_hardfails_when_conda_activation_fails(tmp_path: Path) -> None:
     env = os.environ.copy()
     env["PATH"] = f"{conda_base / 'bin'}:/usr/bin:/bin"
     env["FAKE_CONDA_ACTIVATE_FAIL"] = "1"
+    env.pop("CONDA_DEFAULT_ENV", None)
+    env.pop("CONDA_PREFIX", None)
 
     result = _source_activate(env)
 

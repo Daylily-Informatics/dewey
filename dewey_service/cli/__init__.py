@@ -12,7 +12,7 @@ from cli_core_yo.spec import CliSpec, ConfigSpec, EnvSpec, PluginSpec, XdgSpec
 from dewey_service.settings import Settings, _flatten_config, clear_settings_cache, get_settings
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-ACTIVATE_SCRIPT = PROJECT_ROOT / "dewey_activate"
+ACTIVATE_SCRIPT = PROJECT_ROOT / "activate"
 DEACTIVATE_SCRIPT = PROJECT_ROOT / "dewey_deactivate"
 
 _YAML_ONLY_DEFAULTS = {
@@ -144,8 +144,6 @@ spec = CliSpec(
         explicit=[
             "dewey_service.cli.server.register",
             "dewey_service.cli.db.register",
-            "dewey_service.cli.tapdb.register",
-            "dewey_service.cli.cognito.register",
             "dewey_service.cli.test.register",
             "dewey_service.cli.quality.register",
             "dewey_service.cli.config_extra.register",
