@@ -30,33 +30,79 @@ _CYAN='\033[0;36m'
 _NC='\033[0m'
 _DEWEY_PYTHON=""
 
+_dewey_fail() {
+  echo -e "  ${_YELLOW}⚠${_NC} $1" >&2
+  return 1
+}
+
 echo -e "${_BLUE}Activating Dewey environment...${_NC}"
 
-if command -v conda &> /dev/null; then
-  _DEWEY_CONDA_BASE="$(conda info --base 2>/dev/null)"
-  source "$(conda info --base)/etc/profile.d/conda.sh" 2>/dev/null || true
-  if conda info --envs | grep -q "DEWEY"; then
+if ! command -v conda &> /dev/null; then
+  _dewey_fail "Conda is required but was not found on PATH."
+  unset -f _dewey_fail
+  return 1
+fi
+
+_DEWEY_CONDA_BASE="$(conda info --base 2>/dev/null)"
+if [[ -z "${_DEWEY_CONDA_BASE}" ]] || [[ ! -f "${_DEWEY_CONDA_BASE}/etc/profile.d/conda.sh" ]]; then
+  _dewey_fail "Unable to locate conda.sh from 'conda info --base'."
+  unset _DEWEY_CONDA_BASE
+  unset -f _dewey_fail
+  return 1
+fi
+
+source "${_DEWEY_CONDA_BASE}/etc/profile.d/conda.sh" 2>/dev/null || {
+  _dewey_fail "Failed to source conda.sh from ${_DEWEY_CONDA_BASE}."
+  unset _DEWEY_CONDA_BASE
+  unset -f _dewey_fail
+  return 1
+}
+
+if [[ "${CONDA_DEFAULT_ENV:-}" == "DEWEY" ]] || [[ "${CONDA_PREFIX:-}" == "${_DEWEY_CONDA_BASE}/envs/DEWEY" ]]; then
+  echo -e "  ${_GREEN}✓${_NC} Conda environment already active: DEWEY"
+elif conda info --envs | grep -Eq '(^|[[:space:]])DEWEY([[:space:]]|$)'; then
+  echo -e "  ${_GREEN}✓${_NC} Activating conda environment: DEWEY"
+  if ! conda activate DEWEY; then
+    _dewey_fail "Failed to activate conda environment: DEWEY"
+    unset _DEWEY_CONDA_BASE
+    unset -f _dewey_fail
+    return 1
+  fi
+else
+  echo -e "  ${_YELLOW}⚠${_NC} Conda environment 'DEWEY' not found."
+  if [[ -f "$DEWEY_ROOT/dewey_env.yaml" ]]; then
+    echo -e "  ${_CYAN}→${_NC} Installing conda environment from dewey_env.yaml..."
+    if ! conda env create -f "$DEWEY_ROOT/dewey_env.yaml"; then
+      _dewey_fail "Failed to create conda environment from dewey_env.yaml."
+      unset _DEWEY_CONDA_BASE
+      unset -f _dewey_fail
+      return 1
+    fi
+
     echo -e "  ${_GREEN}✓${_NC} Activating conda environment: DEWEY"
-    conda activate DEWEY
-    if [[ -n "${CONDA_PREFIX:-}" ]] && [[ -d "${CONDA_PREFIX}/bin" ]]; then
-      export PATH="${CONDA_PREFIX}/bin:$PATH"
+    if ! conda activate DEWEY; then
+      _dewey_fail "Failed to activate conda environment: DEWEY"
+      unset _DEWEY_CONDA_BASE
+      unset -f _dewey_fail
+      return 1
     fi
   else
-    echo -e "  ${_YELLOW}⚠${_NC} Conda environment 'DEWEY' not found."
-    if [[ -f "$DEWEY_ROOT/dewey_env.yaml" ]]; then
-      echo -e "  ${_CYAN}→${_NC} Installing conda environment from dewey_env.yaml..."
-      if conda env create -f "$DEWEY_ROOT/dewey_env.yaml"; then
-        echo -e "  ${_GREEN}✓${_NC} Activating conda environment: DEWEY"
-        conda activate DEWEY
-        if [[ -n "${CONDA_PREFIX:-}" ]] && [[ -d "${CONDA_PREFIX}/bin" ]]; then
-          export PATH="${CONDA_PREFIX}/bin:$PATH"
-        fi
-      else
-        echo -e "  ${_YELLOW}⚠${_NC} Failed to create conda environment."
-      fi
-    fi
+    _dewey_fail "Conda environment 'DEWEY' was not found and dewey_env.yaml is missing."
+    unset _DEWEY_CONDA_BASE
+    unset -f _dewey_fail
+    return 1
   fi
 fi
+
+if [[ -z "${CONDA_PREFIX:-}" ]] || [[ ! -d "${CONDA_PREFIX}/bin" ]]; then
+  _dewey_fail "Conda environment 'DEWEY' is not active after activation."
+  unset _DEWEY_CONDA_BASE
+  unset -f _dewey_fail
+  return 1
+fi
+
+export PATH="${CONDA_PREFIX}/bin:$PATH"
+unset -f _dewey_fail
 
 if [[ -n "${_DEWEY_CONDA_BASE:-}" ]] && [[ -d "${_DEWEY_CONDA_BASE}/bin" ]]; then
   export PATH="${_DEWEY_CONDA_BASE}/bin:$PATH"
