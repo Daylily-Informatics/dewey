@@ -61,18 +61,69 @@ _dewey_module_is_from_repo() {
   local module_name="$1"
   local repo_root="$2"
   "${_DEWEY_PYTHON:-python}" - "$module_name" "$repo_root" <<'PY' >/dev/null 2>&1
-import importlib
+import importlib.util
 import pathlib
 import sys
 
-module = importlib.import_module(sys.argv[1])
-repo_root = pathlib.Path(sys.argv[2]).resolve()
-module_file = getattr(module, "__file__", "")
-if not module_file:
+spec = importlib.util.find_spec(sys.argv[1])
+if spec is None:
     raise SystemExit(1)
-module_path = pathlib.Path(module_file).resolve()
-raise SystemExit(0 if module_path == repo_root or repo_root in module_path.parents else 1)
+repo_root = pathlib.Path(sys.argv[2]).resolve()
+locations = []
+if spec.origin:
+    locations.append(pathlib.Path(spec.origin).resolve())
+for entry in spec.submodule_search_locations or ():
+    locations.append(pathlib.Path(entry).resolve())
+for path in locations:
+    if path == repo_root or repo_root in path.parents:
+        raise SystemExit(0)
+raise SystemExit(1)
 PY
+}
+
+_dewey_install_main_repo() {
+  echo -e "  ${_CYAN}→${_NC} Installing local Dewey checkout with dependencies..."
+  if ! "${_DEWEY_PYTHON:-python}" -m pip install -e "${DEWEY_ROOT}[dev]" -q; then
+    _dewey_fail "Failed to install local Dewey checkout from ${DEWEY_ROOT}"
+    return 1
+  fi
+  if ! _dewey_module_is_from_repo "dewey_service" "$DEWEY_ROOT"; then
+    _dewey_fail "Dewey still resolves outside ${DEWEY_ROOT}"
+    return 1
+  fi
+  echo -e "  ${_GREEN}✓${_NC} Using local Dewey checkout: ${DEWEY_ROOT}"
+}
+
+_dewey_prepare_tapdb_config_path() {
+  local client_id="$1"
+  local namespace="$2"
+  local explicit_path="${TAPDB_CONFIG_PATH:-}"
+  local xdg_config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+  local user_dir="${xdg_config_home}/tapdb/${client_id}/${namespace}"
+  local user_path="${user_dir}/tapdb-config.yaml"
+  local repo_template="$DEWEY_ROOT/config/tapdb-config-${namespace}.yaml"
+
+  if [[ -n "$explicit_path" ]]; then
+    printf '%s\n' "$explicit_path"
+    return 0
+  fi
+
+  if [[ -f "$user_path" ]]; then
+    chmod 600 "$user_path" 2>/dev/null || true
+    printf '%s\n' "$user_path"
+    return 0
+  fi
+
+  if [[ ! -f "$repo_template" ]]; then
+    printf '%s\n' "$user_path"
+    return 0
+  fi
+
+  mkdir -p "$user_dir" || return 1
+  cp "$repo_template" "$user_path" || return 1
+  chmod 600 "$user_path" || return 1
+  echo -e "  ${_CYAN}→${_NC} Created secure TapDB config copy: ${user_path}" >&2
+  printf '%s\n' "$user_path"
 }
 
 _dewey_ensure_editable_repo() {
@@ -168,7 +219,6 @@ if [[ -z "${CONDA_PREFIX:-}" ]] || [[ ! -d "${CONDA_PREFIX}/bin" ]]; then
 fi
 
 export PATH="${CONDA_PREFIX}/bin:$PATH"
-unset -f _dewey_fail
 
 if [[ -n "${_DEWEY_CONDA_BASE:-}" ]] && [[ -d "${_DEWEY_CONDA_BASE}/bin" ]]; then
   export PATH="${_DEWEY_CONDA_BASE}/bin:$PATH"
@@ -192,7 +242,7 @@ if [[ -n "${_DEWEY_PYTHON}" ]]; then
   export PATH="${_DEWEY_PYTHON_BIN}:$PATH"
 fi
 
-if ! _dewey_ensure_editable_repo "Dewey" "dewey_service" "$DEWEY_ROOT"; then
+if ! _dewey_install_main_repo; then
   return 1
 fi
 
@@ -243,6 +293,8 @@ if [[ "$-" == *i* ]]; then
   fi
 fi
 
+unset -f _dewey_fail
+
 export DEWEY_ROOT
 export DEWEY_ACTIVE=1
 export DEWEY_PROJECT_ROOT="$DEWEY_ROOT"
@@ -254,8 +306,11 @@ export TAPDB_CLIENT_ID="${TAPDB_CLIENT_ID:-dewey}"
 export TAPDB_DATABASE_NAME="${TAPDB_DATABASE_NAME:-dewey}"
 export TAPDB_ENV="${TAPDB_ENV:-dev}"
 export TAPDB_STRICT_NAMESPACE="${TAPDB_STRICT_NAMESPACE:-1}"
-_DEWEY_DEFAULT_TAPDB_CONFIG_PATH="$DEWEY_ROOT/config/tapdb-config-${TAPDB_DATABASE_NAME}.yaml"
-export TAPDB_CONFIG_PATH="${TAPDB_CONFIG_PATH:-$_DEWEY_DEFAULT_TAPDB_CONFIG_PATH}"
+_DEWEY_USER_TAPDB_CONFIG_PATH="$(_dewey_prepare_tapdb_config_path "$TAPDB_CLIENT_ID" "$TAPDB_DATABASE_NAME")" || {
+  _dewey_fail "Failed to prepare secure TapDB config path."
+  return 1
+}
+export TAPDB_CONFIG_PATH="${_DEWEY_USER_TAPDB_CONFIG_PATH}"
 
 if [[ -z "${DEWEY_API_BEARER_TOKEN:-}" ]]; then
   export DEWEY_API_BEARER_TOKEN="dewey-dev-token"
@@ -304,3 +359,4 @@ echo -e "  ${_GREEN}dewey_deactivate${_NC}  Deactivate this environment"
 unset _DEWEY_CLI_CORE_REPO
 unset _DEWEY_DAYCOG_REPO
 unset _DEWEY_TAPDB_REPO
+unset _DEWEY_USER_TAPDB_CONFIG_PATH

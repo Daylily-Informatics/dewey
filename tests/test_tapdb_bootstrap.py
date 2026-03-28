@@ -31,7 +31,7 @@ def test_db_build_invokes_overlay(monkeypatch, capsys) -> None:
         calls["seed"] += 1
         return _Result()
 
-    monkeypatch.setattr(db_cli, "ensure_tapdb_version", lambda: "3.0.3")
+    monkeypatch.setattr(db_cli, "ensure_tapdb_version", lambda: "3.0.6")
     monkeypatch.setattr(db_cli, "run_tapdb_cli", _fake_tapdb)
     monkeypatch.setattr(db_cli, "export_database_url_for_target", _fake_db_url)
     monkeypatch.setattr(db_cli.subprocess, "run", _fake_run)

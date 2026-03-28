@@ -80,7 +80,6 @@ Primary plugin groups:
 
 ```bash
 source ./activate
-pip install -e .[dev]
 dewey config init
 dewey db build --target local
 dewey server start --port 8914
@@ -91,6 +90,9 @@ HTTPS is mandatory. Place certs at `certs/cert.pem` and `certs/key.pem` before s
 `dewey config show` now prints raw YAML. Use `dewey config status` to inspect merged runtime settings.
 
 Use `tapdb` directly for shared DB/runtime lifecycle and `daycog` directly for shared Cognito lifecycle. Dewey keeps only Dewey-specific overlay build/seed/reset behavior.
+
+Dewey template definitions are authored as JSON packs under
+`config/tapdb_templates/` and loaded through TapDB during Dewey bootstrap.
 
 Literature search/save flows require `metapub` to be installed separately from the forked source repo identified for this workspace. Dewey keeps that dependency optional at runtime and will return a clear 503 on literature endpoints when it is not installed.
 

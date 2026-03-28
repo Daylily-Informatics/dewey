@@ -11,7 +11,7 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from urllib.parse import quote
 
-TAPDB_REQUIRED_VERSION = "3.0.3"
+TAPDB_REQUIRED_VERSION = "3.0.6"
 DEFAULT_AWS_PROFILE = "lsmc"
 DEFAULT_AWS_REGION = "us-west-2"
 DEFAULT_TAPDB_CLIENT_ID = "dewey"
@@ -71,11 +71,6 @@ def _resolve_tapdb_config_path(*, namespace: str, client_id: str) -> str | None:
     ).strip() or DEFAULT_TAPDB_DATABASE_NAME
     normalized_client_id = (client_id or DEFAULT_TAPDB_CLIENT_ID).strip() or DEFAULT_TAPDB_CLIENT_ID
 
-    repo_root = Path(__file__).resolve().parents[2]
-    repo_scoped = repo_root / "config" / f"tapdb-config-{normalized_namespace}.yaml"
-    if repo_scoped.exists():
-        return str(repo_scoped)
-
     user_scoped = (
         Path.home()
         / ".config"
@@ -86,6 +81,11 @@ def _resolve_tapdb_config_path(*, namespace: str, client_id: str) -> str | None:
     )
     if user_scoped.exists():
         return str(user_scoped)
+
+    repo_root = Path(__file__).resolve().parents[2]
+    repo_scoped = repo_root / "config" / f"tapdb-config-{normalized_namespace}.yaml"
+    if repo_scoped.exists():
+        return str(repo_scoped)
 
     return None
 

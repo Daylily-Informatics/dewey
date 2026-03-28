@@ -73,7 +73,7 @@
       "type": "access",
       "subtype": "literature_save",
       "version": "1.0",
-      "instance_prefix": "LS",
+      "instance_prefix": "SAV",
       "instance_polymorphic_identity": "data_instance",
       "bstatus": "active",
       "is_singleton": false,

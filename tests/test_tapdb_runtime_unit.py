@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -8,14 +9,14 @@ from dewey_service.integrations import tapdb_runtime
 
 
 def test_ensure_tapdb_version_accepts_exact(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(tapdb_runtime.importlib.metadata, "version", lambda _name: "3.0.3")
-    assert tapdb_runtime.ensure_tapdb_version("3.0.3") == "3.0.3"
+    monkeypatch.setattr(tapdb_runtime.importlib.metadata, "version", lambda _name: "3.0.6")
+    assert tapdb_runtime.ensure_tapdb_version("3.0.6") == "3.0.6"
 
 
 def test_ensure_tapdb_version_rejects_lower_version(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(tapdb_runtime.importlib.metadata, "version", lambda _name: "3.0.2")
     with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="version mismatch"):
-        tapdb_runtime.ensure_tapdb_version("3.0.3")
+        tapdb_runtime.ensure_tapdb_version("3.0.6")
 
 
 def test_tapdb_env_for_target_and_sqlalchemy_url() -> None:
@@ -36,6 +37,14 @@ def test_resolve_tapdb_config_path_prefers_explicit_env(monkeypatch: pytest.Monk
 
 def test_resolve_runtime_env_sets_expected_values(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("TAPDB_CONFIG_PATH", raising=False)
+    user_config = (
+        Path.home() / ".config" / "tapdb" / "dewey" / "dewey" / "tapdb-config.yaml"
+    )
+    monkeypatch.setattr(
+        tapdb_runtime.Path,
+        "home",
+        classmethod(lambda cls: user_config.parents[4]),
+    )
     env = tapdb_runtime._resolve_runtime_env(
         target="local",
         client_id="dewey",
@@ -50,11 +59,11 @@ def test_resolve_runtime_env_sets_expected_values(monkeypatch: pytest.MonkeyPatc
     assert env["TAPDB_DATABASE_NAME"] == "dewey"
     assert env["TAPDB_ENV"] == "dev"
     assert env["TAPDB_STRICT_NAMESPACE"] == "1"
-    assert env["TAPDB_CONFIG_PATH"].endswith("config/tapdb-config-dewey.yaml")
+    assert env["TAPDB_CONFIG_PATH"].endswith(".config/tapdb/dewey/dewey/tapdb-config.yaml")
 
 
 def test_export_database_url_for_target_sets_environment(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda required_version=tapdb_runtime.TAPDB_REQUIRED_VERSION: "3.0.3")
+    monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda required_version=tapdb_runtime.TAPDB_REQUIRED_VERSION: "3.0.6")
     monkeypatch.setattr(
         tapdb_runtime,
         "_get_tapdb_db_config_for_env",
@@ -74,7 +83,7 @@ def test_export_database_url_for_target_sets_environment(monkeypatch: pytest.Mon
 
 
 def test_run_tapdb_cli_builds_command_and_raises_on_failure(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda required_version=tapdb_runtime.TAPDB_REQUIRED_VERSION: "3.0.3")
+    monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda required_version=tapdb_runtime.TAPDB_REQUIRED_VERSION: "3.0.6")
     calls: list[tuple[list[str], dict[str, str]]] = []
 
     def fake_run(cmd, cwd=None, env=None, text=None, capture_output=None):
@@ -98,7 +107,7 @@ def test_run_tapdb_cli_builds_command_and_raises_on_failure(monkeypatch: pytest.
 
 
 def test_run_tapdb_cli_returns_process_when_check_disabled(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda required_version=tapdb_runtime.TAPDB_REQUIRED_VERSION: "3.0.3")
+    monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda required_version=tapdb_runtime.TAPDB_REQUIRED_VERSION: "3.0.6")
     monkeypatch.setattr(
         tapdb_runtime.subprocess,
         "run",

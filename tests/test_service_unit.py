@@ -63,7 +63,7 @@ class _InMemoryBackend:
             SHARE_REFERENCE_TEMPLATE: "SH",
             EXTERNAL_OBJECT_TEMPLATE: "EX",
             EXTERNAL_OBJECT_RELATION_TEMPLATE: "ER",
-            LITERATURE_SAVE_TEMPLATE: "LS",
+            LITERATURE_SAVE_TEMPLATE: "SAV",
             IDEMPOTENCY_TEMPLATE: "KDP",
         }
 

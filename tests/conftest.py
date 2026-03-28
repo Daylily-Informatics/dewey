@@ -745,7 +745,7 @@ class FakeDeweyService:
             None,
         )
         if save is None:
-            euid = f"LS-{self._literature_save_seq:06d}"
+            euid = f"SAV-{self._literature_save_seq:06d}"
             self._literature_save_seq += 1
             save = {
                 "literature_save_euid": euid,
