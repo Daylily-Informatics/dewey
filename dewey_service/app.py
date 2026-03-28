@@ -32,9 +32,10 @@ from dewey_service.domain_access import (
     build_trusted_hosts,
     is_allowed_origin,
 )
-from dewey_service.storage import S3StorageClient
+from dewey_service.literature import LiteratureUnavailableError, MetapubAdapter, ViewerContext
 from dewey_service.service import DeweyConflictError, DeweyNotFoundError, DeweyService
 from dewey_service.settings import Settings, get_settings
+from dewey_service.storage import S3StorageClient
 from dewey_service.tapdb_backend import TapDBBackend
 
 
@@ -183,6 +184,41 @@ class SearchExportRequest(SearchQueryRequest):
     max_rows: int | None = None
 
 
+class LiteratureSearchRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    query: str
+    page: int = 1
+    page_size: int = 20
+
+
+class LiteratureSaveRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    pmid: str
+    save_mode: str = Field(
+        default="auto",
+        pattern="^(auto|managed_artifact|external_reference)$",
+    )
+    visibility_scope: str = Field(
+        default="private",
+        pattern="^(private|restricted|all_users)$",
+    )
+    allowed_users: list[str] = Field(default_factory=list)
+    allowed_groups: list[str] = Field(default_factory=list)
+
+
+class LiteratureSaveVisibilityRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    visibility_scope: str = Field(
+        default="private",
+        pattern="^(private|restricted|all_users)$",
+    )
+    allowed_users: list[str] = Field(default_factory=list)
+    allowed_groups: list[str] = Field(default_factory=list)
+
+
 def create_app(
     settings: Settings | None = None,
     service: DeweyService | None = None,
@@ -196,6 +232,15 @@ def create_app(
             profile=settings.aws_profile,
             region=settings.aws_region,
         )
+        literature_adapter = None
+        try:
+            literature_adapter = MetapubAdapter(
+                cache_dir=settings.literature_metapub_cache_dir,
+                request_timeout_seconds=settings.literature_request_timeout_seconds,
+                max_redirects=settings.literature_max_redirects,
+            )
+        except LiteratureUnavailableError:
+            literature_adapter = None
         service = DeweyService(
             backend,
             default_share_ttl_seconds=settings.default_share_reference_ttl_seconds,
@@ -205,6 +250,9 @@ def create_app(
             upload_session_ttl_seconds=settings.upload_session_ttl_seconds,
             upload_token_secret=settings.session_secret_key,
             search_export_max_rows=settings.search_export_max_rows,
+            literature_adapter=literature_adapter,
+            literature_allowed_domains=settings.literature_allowed_domains,
+            literature_request_timeout_seconds=settings.literature_request_timeout_seconds,
         )
         service.bootstrap()
 
@@ -243,10 +291,13 @@ def create_app(
         context.update(kwargs)
         return context
 
+    def _viewer_context(profile: dict[str, Any]) -> ViewerContext:
+        return ViewerContext.from_operator_profile(profile)
+
     def _with_search_alias_headers(response: Response, successor: str) -> None:
         response.headers["Deprecation"] = "true"
         response.headers["Sunset"] = "Wed, 30 Sep 2026 00:00:00 GMT"
-        response.headers["Link"] = f"<{successor}>; rel=\"successor-version\""
+        response.headers["Link"] = f'<{successor}>; rel="successor-version"'
 
     def _search_payload_to_tsv(items: list[dict[str, Any]]) -> str:
         fields = [
@@ -257,11 +308,18 @@ def create_app(
             "created_at",
             "modified_at",
             "artifact_type",
+            "title",
+            "pmid",
+            "doi",
             "producer_system",
             "storage_backend",
             "storage_uri",
             "availability_status",
             "import_mode",
+            "storage_mode",
+            "saved_by_me",
+            "saved_by_others_count",
+            "visible_owner_labels",
             "target_type",
             "target_euid",
             "transport",
@@ -275,6 +333,11 @@ def create_app(
         for item in items:
             row = dict(item)
             row["metadata"] = json.dumps(item.get("metadata") or {}, sort_keys=True, default=str)
+            row["visible_owner_labels"] = json.dumps(
+                item.get("visible_owner_labels") or [],
+                sort_keys=True,
+                default=str,
+            )
             writer.writerow(row)
         return buffer.getvalue()
 
@@ -336,6 +399,12 @@ def create_app(
             return JSONResponse(status_code=404, content={"detail": str(exc)})
         return HTMLResponse(status_code=404, content=str(exc))
 
+    @app.exception_handler(LiteratureUnavailableError)
+    async def _literature_unavailable_handler(_request: Request, exc: LiteratureUnavailableError):
+        if _request.url.path.startswith("/api/"):
+            return JSONResponse(status_code=503, content={"detail": str(exc)})
+        return HTMLResponse(status_code=503, content=str(exc))
+
     @app.exception_handler(HTTPException)
     async def _http_exception_handler(request: Request, exc: HTTPException):
         """Redirect unauthenticated browser requests to the login page."""
@@ -353,7 +422,9 @@ def create_app(
 
     @app.get("/favicon.ico", include_in_schema=False)
     async def favicon() -> RedirectResponse:
-        return RedirectResponse(url="/static/favicon.svg", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+        return RedirectResponse(
+            url="/static/favicon.svg", status_code=status.HTTP_307_TEMPORARY_REDIRECT
+        )
 
     @app.get("/auth/login", include_in_schema=False)
     async def auth_login(request: Request) -> RedirectResponse:
@@ -441,12 +512,50 @@ def create_app(
             ),
         )
 
+    @app.get("/literature", include_in_schema=False)
+    async def literature_page(
+        request: Request, profile: dict[str, Any] = Depends(require_ui_session)
+    ) -> HTMLResponse:
+        viewer = _viewer_context(profile)
+        query = str(request.query_params.get("q") or "").strip()
+        page = int(request.query_params.get("page") or 1)
+        page_size = int(request.query_params.get("page_size") or 20)
+        result = {
+            "items": [],
+            "total": 0,
+            "page": page,
+            "page_size": page_size,
+            "has_more": False,
+            "timing_ms": 0,
+        }
+        if query:
+            result = service.search_literature(
+                viewer=viewer,
+                query=query,
+                page=page,
+                page_size=page_size,
+            )
+        elif service.literature is None:
+            raise LiteratureUnavailableError(
+                "Literature endpoints require metapub to be installed from the forked source repo."
+            )
+        return templates.TemplateResponse(
+            request,
+            "literature.html",
+            _template_context(
+                profile=profile,
+                query=query,
+                result=result,
+                page_size=page_size,
+            ),
+        )
+
     @app.get("/search", include_in_schema=False)
     async def search_page(
         request: Request, profile: dict[str, Any] = Depends(require_ui_session)
     ) -> HTMLResponse:
         form = _search_form_payload(request)
-        result = service.query_search_v2(form)
+        result = service.query_search_v2(form, viewer_context=_viewer_context(profile))
         return templates.TemplateResponse(
             request,
             "search.html",
@@ -460,14 +569,17 @@ def create_app(
 
     @app.get("/search/export", include_in_schema=False)
     async def search_export_page(
-        request: Request, _profile: dict[str, Any] = Depends(require_ui_session)
+        request: Request, profile: dict[str, Any] = Depends(require_ui_session)
     ) -> Response:
         payload = _search_form_payload(request)
         export_format = str(request.query_params.get("format") or "json").strip().lower() or "json"
         payload["format"] = export_format
         if request.query_params.get("max_rows"):
             payload["max_rows"] = int(request.query_params["max_rows"])
-        items, timing_ms, truncated = service.collect_search_export_rows(payload)
+        items, timing_ms, truncated = service.collect_search_export_rows(
+            payload,
+            viewer_context=_viewer_context(profile),
+        )
         if export_format == "json":
             return JSONResponse(
                 content={
@@ -487,6 +599,78 @@ def create_app(
                 "X-Timing-Ms": str(timing_ms),
             },
         )
+
+    @app.post("/api/v1/literature/search")
+    async def literature_search(
+        body: LiteratureSearchRequest,
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> dict[str, Any]:
+        try:
+            return service.search_literature(
+                viewer=_viewer_context(profile),
+                query=body.query,
+                page=body.page,
+                page_size=body.page_size,
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post("/api/v1/literature/save")
+    async def literature_save(
+        body: LiteratureSaveRequest,
+        profile: dict[str, Any] = Depends(require_ui_session),
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ) -> dict[str, Any]:
+        try:
+            status_code, payload = service.save_literature(
+                viewer=_viewer_context(profile),
+                pmid=body.pmid,
+                save_mode=body.save_mode,
+                visibility_scope=body.visibility_scope,
+                allowed_users=body.allowed_users,
+                allowed_groups=body.allowed_groups,
+                idempotency_key=_require_idempotency_key(idempotency_key),
+            )
+            return {"status_code": status_code, **payload}
+        except DeweyConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.patch("/api/v1/literature/saves/{literature_save_euid}")
+    async def literature_save_visibility(
+        literature_save_euid: str,
+        body: LiteratureSaveVisibilityRequest,
+        profile: dict[str, Any] = Depends(require_ui_session),
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ) -> dict[str, Any]:
+        try:
+            status_code, payload = service.update_literature_save_visibility(
+                viewer=_viewer_context(profile),
+                literature_save_euid=literature_save_euid,
+                visibility_scope=body.visibility_scope,
+                allowed_users=body.allowed_users,
+                allowed_groups=body.allowed_groups,
+                idempotency_key=_require_idempotency_key(idempotency_key),
+            )
+            return {"status_code": status_code, **payload}
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except DeweyConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.get("/api/v1/literature/saves/mine")
+    async def my_literature_saves(
+        profile: dict[str, Any] = Depends(require_ui_session),
+        limit: int = Query(default=200, ge=1, le=2000),
+    ) -> dict[str, Any]:
+        rows = service.list_my_literature_saves(
+            viewer=_viewer_context(profile),
+            limit=limit,
+        )
+        return {"items": rows, "total": len(rows)}
 
     @app.get(
         "/api/v1/artifacts/{artifact_euid}",

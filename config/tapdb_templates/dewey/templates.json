@@ -67,6 +67,19 @@
       "json_addl": {}
     },
     {
+      "name": "Dewey Literature Save",
+      "polymorphic_discriminator": "data_template",
+      "category": "dewey",
+      "type": "access",
+      "subtype": "literature_save",
+      "version": "1.0",
+      "instance_prefix": "LS",
+      "instance_polymorphic_identity": "data_instance",
+      "bstatus": "active",
+      "is_singleton": false,
+      "json_addl": {}
+    },
+    {
       "name": "Dewey Idempotency",
       "polymorphic_discriminator": "data_template",
       "category": "dewey",

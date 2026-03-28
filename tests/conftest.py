@@ -18,12 +18,36 @@ class FakeDeweyService:
         self._share_seq = 1
         self._external_seq = 1
         self._external_rel_seq = 1
+        self._literature_save_seq = 1
         self._upload_seq = 1
+        self.literature = object()
         self.artifacts: dict[str, dict[str, Any]] = {}
         self.artifact_sets: dict[str, dict[str, Any]] = {}
         self.share_references: dict[str, dict[str, Any]] = {}
         self.external_objects: dict[str, dict[str, Any]] = {}
         self.external_relations: list[dict[str, Any]] = []
+        self.literature_saves: dict[str, dict[str, Any]] = {}
+        self.literature_records: dict[str, dict[str, Any]] = {
+            "123456": {
+                "pmid": "123456",
+                "doi": "10.1000/example-123456",
+                "pmcid": "PMC123456",
+                "title": "Gene Therapy For Example Disease",
+                "journal": "Example Journal",
+                "year": "2024",
+                "authors": ["Example A", "Author B"],
+                "abstract_snippet": "Example abstract snippet for Dewey literature tests.",
+                "source_urls": [
+                    "https://pubmed.ncbi.nlm.nih.gov/123456/",
+                    "https://doi.org/10.1000/example-123456",
+                ],
+                "best_fulltext_url": "https://europepmc.org/articles/PMC123456?pdf=render",
+                "findit_reason": None,
+                "storage_mode": "managed",
+                "downloadable": True,
+                "external_link_only": False,
+            }
+        }
         self.upload_sessions: dict[str, dict[str, Any]] = {}
         self.idempotency: dict[str, tuple[str, int, dict[str, Any]]] = {}
 
@@ -52,6 +76,64 @@ class FakeDeweyService:
 
     def bootstrap(self) -> None:
         return
+
+    def _require_literature(self) -> None:
+        if self.literature is None:
+            from dewey_service.literature import LiteratureUnavailableError
+
+            raise LiteratureUnavailableError(
+                "Literature endpoints require metapub to be installed from the forked source repo."
+            )
+
+    def _literature_record(self, pmid: str) -> dict[str, Any]:
+        key = str(pmid).strip()
+        if key not in self.literature_records:
+            self.literature_records[key] = {
+                "pmid": key,
+                "doi": f"10.1000/{key}",
+                "pmcid": f"PMC{key}",
+                "title": f"Literature Record {key}",
+                "journal": "Example Journal",
+                "year": "2024",
+                "authors": ["Example Author"],
+                "abstract_snippet": f"Abstract snippet for PMID {key}.",
+                "source_urls": [f"https://pubmed.ncbi.nlm.nih.gov/{key}/"],
+                "best_fulltext_url": f"https://europepmc.org/articles/PMC{key}?pdf=render",
+                "findit_reason": None,
+                "storage_mode": "managed",
+                "downloadable": True,
+                "external_link_only": False,
+            }
+        return dict(self.literature_records[key])
+
+    def _literature_visibility(self, artifact_euid: str, viewer) -> dict[str, Any]:
+        saved_by_me = False
+        visible_owner_labels: list[str] = []
+        viewer_email = str(getattr(viewer, "email", "") or "").strip().lower()
+        viewer_subject = str(getattr(viewer, "subject", "") or "").strip()
+        viewer_groups = set(getattr(viewer, "groups", ()) or ())
+        for save in self.literature_saves.values():
+            if save["artifact_euid"] != artifact_euid:
+                continue
+            scope = save["visibility_scope"]
+            visible = save["owner_subject"] == viewer_subject
+            if scope == "all_users":
+                visible = True
+            elif scope == "restricted":
+                visible = viewer_email in set(save["allowed_users"]) or bool(
+                    viewer_groups & set(save["allowed_groups"])
+                )
+            if not visible:
+                continue
+            if save["owner_subject"] == viewer_subject:
+                saved_by_me = True
+            elif save["owner_label"] not in visible_owner_labels:
+                visible_owner_labels.append(save["owner_label"])
+        return {
+            "saved_by_me": saved_by_me,
+            "saved_by_others_count": len(visible_owner_labels),
+            "visible_owner_labels": visible_owner_labels,
+        }
 
     def register_artifact(self, *, idempotency_key: str, **kwargs):
         payload = dict(kwargs)
@@ -539,13 +621,231 @@ class FakeDeweyService:
         ]
         return rows[:limit]
 
-    def query_search_v2(self, request: dict[str, Any] | None):
+    def search_literature(self, *, viewer, query: str, page: int = 1, page_size: int = 20):
+        self._require_literature()
+        rows = []
+        lowered = str(query or "").strip().lower()
+        for record in self.literature_records.values():
+            haystack = json.dumps(record, sort_keys=True).lower()
+            if lowered and lowered not in haystack:
+                continue
+            artifact = next(
+                (
+                    item
+                    for item in self.artifacts.values()
+                    if item["artifact_type"] == "literature"
+                    and item.get("metadata", {}).get("pmid") == record["pmid"]
+                ),
+                None,
+            )
+            visibility = (
+                self._literature_visibility(artifact["artifact_euid"], viewer)
+                if artifact
+                else {
+                    "saved_by_me": False,
+                    "saved_by_others_count": 0,
+                    "visible_owner_labels": [],
+                }
+            )
+            rows.append(
+                {
+                    **record,
+                    "artifact_euid": artifact["artifact_euid"] if artifact else None,
+                    "already_in_dewey": artifact is not None,
+                    **visibility,
+                }
+            )
+        return {
+            "items": rows[:page_size],
+            "total": len(rows),
+            "page": page,
+            "page_size": page_size,
+            "has_more": len(rows) > page_size,
+            "timing_ms": 1,
+        }
+
+    def save_literature(
+        self,
+        *,
+        viewer,
+        pmid: str,
+        save_mode: str,
+        visibility_scope: str,
+        allowed_users: list[str] | None,
+        allowed_groups: list[str] | None,
+        idempotency_key: str,
+    ):
+        self._require_literature()
+        payload = {
+            "viewer_subject": viewer.subject,
+            "pmid": pmid,
+            "save_mode": save_mode,
+            "visibility_scope": visibility_scope,
+            "allowed_users": list(allowed_users or []),
+            "allowed_groups": list(allowed_groups or []),
+        }
+        replay = self._idempotent("literature.save", idempotency_key, payload)
+        if replay:
+            return replay
+
+        record = self._literature_record(pmid)
+        artifact = next(
+            (
+                item
+                for item in self.artifacts.values()
+                if item["artifact_type"] == "literature"
+                and item.get("metadata", {}).get("pmid") == record["pmid"]
+            ),
+            None,
+        )
+        if artifact is None:
+            artifact_code, artifact = self.register_artifact(
+                artifact_type="literature",
+                storage_backend="s3" if save_mode != "external_reference" else "https",
+                bucket="managed-bucket"
+                if save_mode != "external_reference"
+                else "pubmed.ncbi.nlm.nih.gov",
+                key=f"literature/{record['pmid']}.pdf"
+                if save_mode != "external_reference"
+                else record["pmid"],
+                version_id=None,
+                size=None,
+                checksums={},
+                content_type="application/pdf" if save_mode != "external_reference" else None,
+                original_filename=record["title"],
+                producer_system="pubmed",
+                producer_object_euid=record["pmid"],
+                storage_class=None,
+                availability_status="available"
+                if save_mode != "external_reference"
+                else "external_only",
+                metadata={
+                    **record,
+                    "record_family": "literature",
+                    "storage_mode": "managed"
+                    if save_mode != "external_reference"
+                    else "external_reference",
+                    "acquisition_mode": save_mode,
+                    "fulltext_status": "downloadable"
+                    if save_mode != "external_reference"
+                    else "external_link_only",
+                },
+                idempotency_key=f"lit-artifact-{record['pmid']}",
+            )
+        else:
+            artifact_code = 200
+
+        save = next(
+            (
+                item
+                for item in self.literature_saves.values()
+                if item["artifact_euid"] == artifact["artifact_euid"]
+                and item["owner_subject"] == viewer.subject
+            ),
+            None,
+        )
+        if save is None:
+            euid = f"LS-{self._literature_save_seq:06d}"
+            self._literature_save_seq += 1
+            save = {
+                "literature_save_euid": euid,
+                "artifact_euid": artifact["artifact_euid"],
+                "owner_subject": viewer.subject,
+                "owner_email": viewer.email,
+                "owner_label": viewer.email or viewer.subject,
+                "visibility_scope": visibility_scope,
+                "allowed_users": [
+                    str(item).strip().lower() for item in allowed_users or [] if str(item).strip()
+                ],
+                "allowed_groups": [
+                    str(item).strip() for item in allowed_groups or [] if str(item).strip()
+                ],
+                "artifact": {
+                    "artifact_euid": artifact["artifact_euid"],
+                    "title": artifact["metadata"]["title"],
+                    "pmid": artifact["metadata"]["pmid"],
+                    "doi": artifact["metadata"]["doi"],
+                    "pmcid": artifact["metadata"]["pmcid"],
+                    "storage_mode": artifact["metadata"]["storage_mode"],
+                    "fulltext_status": artifact["metadata"]["fulltext_status"],
+                },
+                "created_at": "2026-03-10T00:00:00Z",
+                "updated_at": "2026-03-10T00:00:00Z",
+            }
+            self.literature_saves[euid] = save
+            save_code = 201
+        else:
+            save["visibility_scope"] = visibility_scope
+            save["allowed_users"] = [
+                str(item).strip().lower() for item in allowed_users or [] if str(item).strip()
+            ]
+            save["allowed_groups"] = [
+                str(item).strip() for item in allowed_groups or [] if str(item).strip()
+            ]
+            save_code = 200
+        body = {"artifact": artifact, "literature_save": dict(save)}
+        code = 201 if artifact_code == 201 or save_code == 201 else 200
+        self._remember("literature.save", idempotency_key, payload, code, body)
+        return code, body
+
+    def update_literature_save_visibility(
+        self,
+        *,
+        viewer,
+        literature_save_euid: str,
+        visibility_scope: str,
+        allowed_users: list[str] | None,
+        allowed_groups: list[str] | None,
+        idempotency_key: str,
+    ):
+        payload = {
+            "viewer_subject": viewer.subject,
+            "literature_save_euid": literature_save_euid,
+            "visibility_scope": visibility_scope,
+            "allowed_users": list(allowed_users or []),
+            "allowed_groups": list(allowed_groups or []),
+        }
+        replay = self._idempotent("literature.save.visibility.update", idempotency_key, payload)
+        if replay:
+            return replay
+        if literature_save_euid not in self.literature_saves:
+            from dewey_service.service import DeweyNotFoundError
+
+            raise DeweyNotFoundError(f"Literature save not found: {literature_save_euid}")
+        save = self.literature_saves[literature_save_euid]
+        save["visibility_scope"] = visibility_scope
+        save["allowed_users"] = [
+            str(item).strip().lower() for item in allowed_users or [] if str(item).strip()
+        ]
+        save["allowed_groups"] = [
+            str(item).strip() for item in allowed_groups or [] if str(item).strip()
+        ]
+        self._remember(
+            "literature.save.visibility.update",
+            idempotency_key,
+            payload,
+            200,
+            dict(save),
+        )
+        return 200, dict(save)
+
+    def list_my_literature_saves(self, *, viewer, limit: int = 200):
+        self._require_literature()
+        rows = [
+            dict(item)
+            for item in self.literature_saves.values()
+            if item["owner_subject"] == viewer.subject
+        ]
+        return rows[:limit]
+
+    def query_search_v2(self, request: dict[str, Any] | None, *, viewer_context=None):
         query = dict(request or {})
         scopes = query.get("scopes") or ["artifact", "share_reference"]
+        viewer = viewer_context
         rows: list[dict[str, Any]] = []
         if "artifact" in scopes:
-            rows.extend(
-                {
+            for row in self.artifacts.values():
+                search_row = {
                     "record_type": "artifact",
                     "source_kind": "dewey.artifact",
                     "euid": row["artifact_euid"],
@@ -554,8 +854,19 @@ class FakeDeweyService:
                     "modified_at": row["created_at"],
                     **row,
                 }
-                for row in self.artifacts.values()
-            )
+                if row["artifact_type"] == "literature":
+                    metadata = dict(row.get("metadata") or {})
+                    search_row.update(
+                        {
+                            "title": metadata.get("title"),
+                            "pmid": metadata.get("pmid"),
+                            "doi": metadata.get("doi"),
+                            "storage_mode": metadata.get("storage_mode"),
+                        }
+                    )
+                    if viewer is not None:
+                        search_row.update(self._literature_visibility(row["artifact_euid"], viewer))
+                rows.append(search_row)
         if "share_reference" in scopes:
             rows.extend(
                 {
@@ -571,7 +882,9 @@ class FakeDeweyService:
             )
         q = str(query.get("q") or "").strip().lower()
         if q:
-            rows = [row for row in rows if q in json.dumps(row, sort_keys=True, default=str).lower()]
+            rows = [
+                row for row in rows if q in json.dumps(row, sort_keys=True, default=str).lower()
+            ]
         page_size = int(query.get("page_size") or 25)
         return {
             "items": rows[:page_size],
@@ -588,8 +901,8 @@ class FakeDeweyService:
             "timing_ms": 1,
         }
 
-    def collect_search_export_rows(self, request: dict[str, Any] | None):
-        result = self.query_search_v2(request)
+    def collect_search_export_rows(self, request: dict[str, Any] | None, *, viewer_context=None):
+        result = self.query_search_v2(request, viewer_context=viewer_context)
         return list(result["items"]), 1, False
 
 

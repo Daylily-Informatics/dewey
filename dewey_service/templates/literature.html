@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dewey Literature Search</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/console.css" />
+  </head>
+  <body>
+    {% if deployment.name and not deployment.is_production %}
+    <div class="deployment-banner" style="background: {{ deployment.color }};">{{ deployment.name|upper }}</div>
+    {% endif %}
+    <div class="shell">
+      <header class="topbar">
+        <div class="brandline">
+          <div class="eyebrow">Dewey Literature</div>
+          <h1 class="title">PubMed Search And Save</h1>
+          <div class="subtitle">{{ profile.email }}</div>
+        </div>
+        <div class="navlinks">
+          <a class="navlink" href="/ui">Dashboard</a>
+          <a class="navlink" href="/search">Unified Search</a>
+          <form class="logout-form" method="post" action="/logout">
+            <button type="submit">Logout</button>
+          </form>
+        </div>
+      </header>
+
+      <main class="page">
+        <section class="hero">
+          <div class="hero-copy">
+            <div class="eyebrow">PubMed Discovery</div>
+            <h2>Search PubMed, then register canonical literature artifacts in Dewey.</h2>
+            <p>
+              Search uses metapub for metadata and full-text discovery while Dewey stays the
+              canonical system of record for saved papers and visibility.
+            </p>
+          </div>
+          <div class="results-meta">
+            <span class="pill pill-active">{{ result["total"] }} results</span>
+            <span class="pill">{{ result["timing_ms"] }} ms</span>
+          </div>
+        </section>
+
+        <section class="content-grid" style="grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.4fr);">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Search PubMed</h3>
+                <div class="panel-copy">Use the existing Dewey operator surface with minimal client logic.</div>
+              </div>
+            </div>
+            <form method="get" action="/literature">
+              <div class="form-grid">
+                <div class="field field-wide">
+                  <label for="q">Query</label>
+                  <input id="q" name="q" type="text" value="{{ query }}" placeholder="gene therapy cardiomyopathy" />
+                </div>
+                <div class="field">
+                  <label for="page">Page</label>
+                  <input id="page" name="page" type="number" min="1" value="{{ result['page'] }}" />
+                </div>
+                <div class="field">
+                  <label for="page_size">Page Size</label>
+                  <select id="page_size" name="page_size">
+                    <option value="10" {% if page_size == 10 %}selected{% endif %}>10</option>
+                    <option value="20" {% if page_size == 20 %}selected{% endif %}>20</option>
+                    <option value="50" {% if page_size == 50 %}selected{% endif %}>50</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button class="button button-primary" type="submit">Search</button>
+                <a class="button" href="/literature">Reset</a>
+              </div>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Results</h3>
+                <div class="panel-copy">Search results stay read-mostly until you explicitly save them into Dewey.</div>
+              </div>
+            </div>
+
+            {% if result["items"] %}
+            <div class="stack">
+              {% for item in result["items"] %}
+              <article class="panel" style="padding: 1rem 1.05rem; background: rgba(11, 17, 32, 0.78);">
+                <div class="eyebrow">PMID {{ item.pmid }}</div>
+                <h3 style="margin: 0 0 0.35rem 0;">{{ item.title }}</h3>
+                <div class="note">
+                  {% if item.journal %}{{ item.journal }}{% endif %}
+                  {% if item.year %} / {{ item.year }}{% endif %}
+                </div>
+                {% if item.authors %}
+                <div class="note" style="margin-top: 0.35rem;">{{ item.authors|join(", ") }}</div>
+                {% endif %}
+                {% if item.abstract_snippet %}
+                <p style="margin: 0.75rem 0 0.75rem 0;">{{ item.abstract_snippet }}</p>
+                {% endif %}
+                <div class="results-meta">
+                  {% if item.already_in_dewey %}
+                  <span class="pill pill-active">already in Dewey</span>
+                  {% endif %}
+                  {% if item.saved_by_me %}
+                  <span class="pill pill-active">saved by me</span>
+                  {% endif %}
+                  {% if item.saved_by_others_count %}
+                  <span class="pill">saved by {{ item.saved_by_others_count }} other{% if item.saved_by_others_count != 1 %}s{% endif %}</span>
+                  {% endif %}
+                  {% for label in item.visible_owner_labels or [] %}
+                  <span class="pill">{{ label }}</span>
+                  {% endfor %}
+                  {% if item.downloadable %}
+                  <span class="pill pill-active">downloadable</span>
+                  {% elif item.external_link_only %}
+                  <span class="pill">external-link only</span>
+                  {% endif %}
+                </div>
+                <div class="results-meta" style="margin-top: 0.55rem;">
+                  {% if item.doi %}
+                  <span class="pill">DOI {{ item.doi }}</span>
+                  {% endif %}
+                  {% if item.pmcid %}
+                  <span class="pill">{{ item.pmcid }}</span>
+                  {% endif %}
+                  {% if item.best_fulltext_url %}
+                  <a class="button" href="{{ item.best_fulltext_url }}" target="_blank" rel="noreferrer">Open Full Text</a>
+                  {% endif %}
+                </div>
+
+                <div class="form-grid" style="margin-top: 0.85rem;" data-save-form data-pmid="{{ item.pmid }}">
+                  <div class="field">
+                    <label>Save Mode</label>
+                    <select data-save-mode>
+                      <option value="auto">auto</option>
+                      <option value="managed_artifact">managed artifact</option>
+                      <option value="external_reference">external reference</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>Visibility</label>
+                    <select data-visibility-scope>
+                      <option value="private">private</option>
+                      <option value="restricted">selected users/groups</option>
+                      <option value="all_users">all users</option>
+                    </select>
+                  </div>
+                  <div class="field field-wide">
+                    <label>Allowed Users</label>
+                    <input data-allowed-users type="text" placeholder="user1@example.com, user2@example.com" />
+                  </div>
+                  <div class="field field-wide">
+                    <label>Allowed Groups</label>
+                    <input data-allowed-groups type="text" placeholder="operators, reviewers" />
+                  </div>
+                </div>
+                <div class="form-actions" style="margin-top: 0.75rem;">
+                  <button class="button button-primary" type="button" onclick="submitLiteratureSave(this)">Save To Dewey</button>
+                  <span class="note" data-save-status></span>
+                </div>
+              </article>
+              {% endfor %}
+            </div>
+            {% elif query %}
+            <div class="empty-state">No PubMed results matched the current query.</div>
+            {% else %}
+            <div class="empty-state">Enter a PubMed query to begin.</div>
+            {% endif %}
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      function splitCsv(value) {
+        return value
+          .split(",")
+          .map((item) => item.trim())
+          .filter((item) => item.length > 0);
+      }
+
+      async function submitLiteratureSave(button) {
+        const card = button.closest("article");
+        const form = card.querySelector("[data-save-form]");
+        const status = card.querySelector("[data-save-status]");
+        status.textContent = "Saving…";
+        const payload = {
+          pmid: form.dataset.pmid,
+          save_mode: form.querySelector("[data-save-mode]").value,
+          visibility_scope: form.querySelector("[data-visibility-scope]").value,
+          allowed_users: splitCsv(form.querySelector("[data-allowed-users]").value),
+          allowed_groups: splitCsv(form.querySelector("[data-allowed-groups]").value),
+        };
+        const response = await fetch("/api/v1/literature/save", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Idempotency-Key": crypto.randomUUID(),
+          },
+          body: JSON.stringify(payload),
+        });
+        const body = await response.json();
+        if (!response.ok) {
+          status.textContent = body.detail || "Save failed";
+          return;
+        }
+        status.textContent = "Saved.";
+        window.location.reload();
+      }
+    </script>
+  </body>
+</html>

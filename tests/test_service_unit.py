@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -7,6 +8,7 @@ from typing import Any
 
 import pytest
 
+from dewey_service.literature import ViewerContext
 from dewey_service.service import DeweyConflictError, DeweyNotFoundError, DeweyService
 from dewey_service.storage import StorageObject, StorageObjectNotFoundError
 from dewey_service.tapdb_backend import (
@@ -15,6 +17,7 @@ from dewey_service.tapdb_backend import (
     EXTERNAL_OBJECT_RELATION_TEMPLATE,
     EXTERNAL_OBJECT_TEMPLATE,
     IDEMPOTENCY_TEMPLATE,
+    LITERATURE_SAVE_TEMPLATE,
     SHARE_REFERENCE_TEMPLATE,
 )
 
@@ -51,6 +54,7 @@ class _InMemoryBackend:
             SHARE_REFERENCE_TEMPLATE: 1,
             EXTERNAL_OBJECT_TEMPLATE: 1,
             EXTERNAL_OBJECT_RELATION_TEMPLATE: 1,
+            LITERATURE_SAVE_TEMPLATE: 1,
             IDEMPOTENCY_TEMPLATE: 1,
         }
         self.prefixes = {
@@ -59,6 +63,7 @@ class _InMemoryBackend:
             SHARE_REFERENCE_TEMPLATE: "SH",
             EXTERNAL_OBJECT_TEMPLATE: "EX",
             EXTERNAL_OBJECT_RELATION_TEMPLATE: "ER",
+            LITERATURE_SAVE_TEMPLATE: "LS",
             IDEMPOTENCY_TEMPLATE: "KDP",
         }
 
@@ -92,7 +97,9 @@ class _InMemoryBackend:
         self.instances.setdefault(template_code, []).append(instance)
         return instance
 
-    def update_instance_json(self, session, instance: _FakeInstance, updates: dict[str, Any]) -> None:
+    def update_instance_json(
+        self, session, instance: _FakeInstance, updates: dict[str, Any]
+    ) -> None:
         payload = dict(instance.json_addl or {})
         payload.update(updates)
         instance.json_addl = payload
@@ -141,7 +148,9 @@ class _InMemoryBackend:
         self.lineages.append(lineage)
         return lineage
 
-    def delete_lineage(self, session, *, parent: _FakeInstance, child: _FakeInstance, relationship_type: str):
+    def delete_lineage(
+        self, session, *, parent: _FakeInstance, child: _FakeInstance, relationship_type: str
+    ):
         for lineage in self.lineages:
             if (
                 lineage.parent_uid == parent.uid
@@ -153,7 +162,9 @@ class _InMemoryBackend:
                 return True
         return False
 
-    def list_children(self, session, *, parent: _FakeInstance, relationship_type: str | None = None):
+    def list_children(
+        self, session, *, parent: _FakeInstance, relationship_type: str | None = None
+    ):
         child_uids = [
             lineage.child_uid
             for lineage in self.lineages
@@ -165,6 +176,21 @@ class _InMemoryBackend:
         for template_rows in self.instances.values():
             for row in template_rows:
                 if row.uid in child_uids and not row.is_deleted:
+                    rows.append(row)
+        return rows
+
+    def list_parents(self, session, *, child: _FakeInstance, relationship_type: str | None = None):
+        parent_uids = [
+            lineage.parent_uid
+            for lineage in self.lineages
+            if lineage.child_uid == child.uid
+            and not lineage.is_deleted
+            and (relationship_type is None or lineage.relationship_type == relationship_type)
+        ]
+        rows: list[_FakeInstance] = []
+        for template_rows in self.instances.values():
+            for row in template_rows:
+                if row.uid in parent_uids and not row.is_deleted:
                     rows.append(row)
         return rows
 
@@ -276,6 +302,51 @@ class _FakeStorageClient:
         }
 
 
+class _FakeLiteratureAdapter:
+    def __init__(self) -> None:
+        self.records = {
+            "123456": {
+                "pmid": "123456",
+                "doi": "10.1000/example-123456",
+                "pmcid": "PMC123456",
+                "title": "Gene Therapy For Example Disease",
+                "journal": "Example Journal",
+                "year": "2024",
+                "authors": ["Example A", "Author B"],
+                "abstract": "Long abstract for example paper.",
+                "abstract_snippet": "Long abstract for example paper.",
+                "source_urls": [
+                    "https://pubmed.ncbi.nlm.nih.gov/123456/",
+                    "https://doi.org/10.1000/example-123456",
+                ],
+                "best_fulltext_url": "https://europepmc.org/articles/PMC123456?pdf=render",
+                "findit_reason": None,
+            },
+            "789012": {
+                "pmid": "789012",
+                "doi": "10.1000/example-789012",
+                "pmcid": "PMC789012",
+                "title": "External Reference Only Example",
+                "journal": "Example Journal",
+                "year": "2023",
+                "authors": ["Example C"],
+                "abstract": "External-only abstract.",
+                "abstract_snippet": "External-only abstract.",
+                "source_urls": ["https://pubmed.ncbi.nlm.nih.gov/789012/"],
+                "best_fulltext_url": "https://publisher.example.com/article.pdf",
+                "findit_reason": "PAYWALL: publisher requires subscription",
+            },
+        }
+
+    def search(self, *, query: str, page: int = 1, page_size: int = 20) -> list[dict[str, Any]]:
+        lowered = str(query or "").strip().lower()
+        rows = [row for row in self.records.values() if lowered in json.dumps(row).lower()]
+        return rows[:page_size]
+
+    def fetch_record(self, pmid: str) -> dict[str, Any]:
+        return dict(self.records[str(pmid)])
+
+
 @pytest.fixture
 def backend() -> _InMemoryBackend:
     return _InMemoryBackend()
@@ -297,6 +368,9 @@ def service(backend: _InMemoryBackend, storage: _FakeStorageClient) -> DeweyServ
         upload_session_ttl_seconds=900,
         upload_token_secret="upload-secret",
         search_export_max_rows=1000,
+        literature_adapter=_FakeLiteratureAdapter(),
+        literature_allowed_domains={"europepmc.org", "ncbi.nlm.nih.gov"},
+        literature_request_timeout_seconds=5,
     )
 
 
@@ -362,7 +436,10 @@ def test_register_artifact_replay_and_identity_reuse(service: DeweyService) -> N
     assert replay["artifact_euid"] == created["artifact_euid"]
     assert reused_code == 200
     assert reused["artifact_euid"] == created["artifact_euid"]
-    assert service.get_artifact(created["artifact_euid"])["storage_uri"] == "s3://bucket-1/reads/r1.fastq.gz"
+    assert (
+        service.get_artifact(created["artifact_euid"])["storage_uri"]
+        == "s3://bucket-1/reads/r1.fastq.gz"
+    )
     assert service.list_artifacts(artifact_type="fastq", producer_system="atlas") == [created]
 
 
@@ -469,7 +546,9 @@ def test_artifact_set_member_lifecycle(service: DeweyService) -> None:
 
     assert add_code == 200
     assert updated["artifact_euids"] == [artifact["artifact_euid"]]
-    assert service.get_artifact_set(artifact_set["artifact_set_euid"])["artifact_set_type"] == "bundle"
+    assert (
+        service.get_artifact_set(artifact_set["artifact_set_euid"])["artifact_set_type"] == "bundle"
+    )
     assert service.list_artifact_sets(artifact_set_type="bundle")[0]["label"] == "Case Bundle"
     assert remove_code == 200
     assert removed["artifact_euids"] == []
@@ -525,10 +604,13 @@ def test_share_reference_behaviors(service: DeweyService, storage: _FakeStorageC
     assert auto_share["issued_by"] == "tester@example.com"
     assert explicit_share["expires_at"] == "2026-04-01T00:00:00Z"
     assert auto_share["access_url"].startswith("https://downloads.example.com/")
-    assert service.list_share_references(
-        target_type="artifact",
-        target_euid=artifact["artifact_euid"],
-    )[0]["share_reference_euid"] == auto_share["share_reference_euid"]
+    assert (
+        service.list_share_references(
+            target_type="artifact",
+            target_euid=artifact["artifact_euid"],
+        )[0]["share_reference_euid"]
+        == auto_share["share_reference_euid"]
+    )
 
     with pytest.raises(ValueError, match="target_type must be artifact or artifact_set"):
         service.create_share_reference(
@@ -684,7 +766,10 @@ def test_external_object_relation_lifecycle(service: DeweyService) -> None:
     assert replay_external["external_object_euid"] == external_object["external_object_euid"]
     assert relation_code == 201
     assert existing_code == 200
-    assert existing_relation["external_object_relation_euid"] == relation["external_object_relation_euid"]
+    assert (
+        existing_relation["external_object_relation_euid"]
+        == relation["external_object_relation_euid"]
+    )
     assert service.list_external_object_relations(
         target_type="artifact",
         target_euid=artifact["artifact_euid"],
@@ -702,3 +787,134 @@ def test_external_object_relation_lifecycle(service: DeweyService) -> None:
             metadata={"source": "changed"},
             idempotency_key="idem-external-relation",
         )
+
+
+def test_literature_save_reuses_artifact_and_hides_private_saves(
+    service: DeweyService,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class _PdfResponse:
+        status_code = 200
+        headers = {"content-type": "application/pdf"}
+        content = b"%PDF-1.7 test pdf"
+
+        def raise_for_status(self) -> None:
+            return
+
+    monkeypatch.setattr(
+        "dewey_service.service.requests.get", lambda *args, **kwargs: _PdfResponse()
+    )
+
+    owner = ViewerContext(subject="sub-1", email="owner@example.com", groups=("operators",))
+    collaborator = ViewerContext(subject="sub-2", email="collab@example.com", groups=("reviewers",))
+    auditor = ViewerContext(subject="sub-3", email="auditor@example.com", groups=("reviewers",))
+
+    code1, first = service.save_literature(
+        viewer=owner,
+        pmid="123456",
+        save_mode="auto",
+        visibility_scope="private",
+        allowed_users=[],
+        allowed_groups=[],
+        idempotency_key="lit-save-1",
+    )
+    code2, second = service.save_literature(
+        viewer=collaborator,
+        pmid="123456",
+        save_mode="external_reference",
+        visibility_scope="restricted",
+        allowed_users=[auditor.email],
+        allowed_groups=[],
+        idempotency_key="lit-save-2",
+    )
+
+    assert code1 == 201
+    assert code2 == 201
+    assert first["artifact"]["artifact_euid"] == second["artifact"]["artifact_euid"]
+    assert service.list_my_literature_saves(viewer=owner)[0]["artifact"]["pmid"] == "123456"
+
+    owner_search = service.search_literature(viewer=owner, query="Gene Therapy")
+    assert owner_search["items"][0]["saved_by_me"] is True
+    assert owner_search["items"][0]["saved_by_others_count"] == 0
+
+    auditor_search = service.search_literature(viewer=auditor, query="Gene Therapy")
+    assert auditor_search["items"][0]["saved_by_me"] is False
+    assert auditor_search["items"][0]["saved_by_others_count"] == 1
+    assert auditor_search["items"][0]["visible_owner_labels"] == ["collab@example.com"]
+
+
+def test_literature_external_artifact_promotes_in_place(
+    service: DeweyService,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    viewer = ViewerContext(subject="sub-1", email="owner@example.com", groups=("operators",))
+
+    first_code, first = service.save_literature(
+        viewer=viewer,
+        pmid="789012",
+        save_mode="external_reference",
+        visibility_scope="private",
+        allowed_users=[],
+        allowed_groups=[],
+        idempotency_key="lit-promote-1",
+    )
+    assert first_code == 201
+    assert first["artifact"]["metadata"]["storage_mode"] == "external_reference"
+
+    service.literature.records["789012"]["best_fulltext_url"] = (
+        "https://europepmc.org/articles/PMC789012?pdf=render"
+    )
+    service.literature.records["789012"]["findit_reason"] = None
+
+    class _PdfResponse:
+        status_code = 200
+        headers = {"content-type": "application/pdf"}
+        content = b"%PDF-1.7 promoted"
+
+        def raise_for_status(self) -> None:
+            return
+
+    monkeypatch.setattr(
+        "dewey_service.service.requests.get", lambda *args, **kwargs: _PdfResponse()
+    )
+
+    second_code, second = service.save_literature(
+        viewer=viewer,
+        pmid="789012",
+        save_mode="managed_artifact",
+        visibility_scope="private",
+        allowed_users=[],
+        allowed_groups=[],
+        idempotency_key="lit-promote-2",
+    )
+
+    assert second_code == 200
+    assert second["artifact"]["artifact_euid"] == first["artifact"]["artifact_euid"]
+    assert second["artifact"]["metadata"]["storage_mode"] == "managed"
+    assert second["artifact"]["storage_backend"] == "s3"
+
+
+def test_literature_query_search_v2_enrichment(service: DeweyService) -> None:
+    viewer = ViewerContext(subject="sub-1", email="owner@example.com", groups=("operators",))
+
+    service.save_literature(
+        viewer=viewer,
+        pmid="789012",
+        save_mode="external_reference",
+        visibility_scope="all_users",
+        allowed_users=[],
+        allowed_groups=[],
+        idempotency_key="lit-search-1",
+    )
+
+    result = service.query_search_v2(
+        {"q": "789012", "scopes": ["artifact"], "page": 1, "page_size": 25},
+        viewer_context=viewer,
+    )
+
+    assert result["total"] == 1
+    item = result["items"][0]
+    assert item["artifact_type"] == "literature"
+    assert item["pmid"] == "789012"
+    assert item["storage_mode"] == "external_reference"
+    assert item["saved_by_me"] is True

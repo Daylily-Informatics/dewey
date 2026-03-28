@@ -215,6 +215,7 @@ def test_template_definitions_are_required_codes() -> None:
         backend_mod.SHARE_REFERENCE_TEMPLATE,
         backend_mod.EXTERNAL_OBJECT_TEMPLATE,
         backend_mod.EXTERNAL_OBJECT_RELATION_TEMPLATE,
+        backend_mod.LITERATURE_SAVE_TEMPLATE,
         backend_mod.IDEMPOTENCY_TEMPLATE,
     )
 

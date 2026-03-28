@@ -19,6 +19,7 @@
           <div class="subtitle">{{ profile.email }}</div>
         </div>
         <div class="navlinks">
+          <a class="navlink" href="/literature">Literature Search</a>
           <a class="navlink" href="/ui">Dashboard</a>
           <form class="logout-form" method="post" action="/logout">
             <button type="submit">Logout</button>
@@ -172,8 +173,15 @@
                     </td>
                     <td>
                       {% if item.record_type == "artifact" %}
+                        {% if item.artifact_type == "literature" %}
+                      <div>{{ item.title or item.name }}</div>
+                      <div class="note">
+                        literature{% if item.journal %} / {{ item.journal }}{% endif %}{% if item.year %} / {{ item.year }}{% endif %}
+                      </div>
+                        {% else %}
                       <div>{{ item.original_filename or item.name }}</div>
                       <div class="note">{{ item.artifact_type }} / {{ item.import_mode or "register" }}</div>
+                        {% endif %}
                       {% else %}
                       <div>{{ item.target_euid }}</div>
                       <div class="note">{{ item.transport or "share" }}</div>
@@ -181,8 +189,17 @@
                     </td>
                     <td>
                       {% if item.record_type == "artifact" %}
+                        {% if item.artifact_type == "literature" %}
+                      <div class="mono">
+                        PMID {{ item.pmid or "n/a" }}{% if item.doi %} / DOI {{ item.doi }}{% endif %}
+                      </div>
+                      <div class="note">
+                        {% if item.authors %}{{ item.authors|join(", ") }}{% elif item.abstract_snippet %}{{ item.abstract_snippet }}{% else %}Literature artifact{% endif %}
+                      </div>
+                        {% else %}
                       <div class="mono">{{ item.storage_uri }}</div>
                       <div class="note">{{ item.producer_system or "No producer" }}</div>
+                        {% endif %}
                       {% else %}
                       <div class="mono">{{ item.access_url or "No access url" }}</div>
                       <div class="note">{{ item.expires_at or "No expiry" }}</div>
@@ -190,12 +207,36 @@
                     </td>
                     <td>
                       {% if item.record_type == "artifact" %}
+                        {% if item.artifact_type == "literature" %}
+                          {% if item.storage_mode == "managed" %}
+                        <span class="pill pill-active">managed</span>
+                          {% elif item.storage_mode %}
+                        <span class="pill">{{ item.storage_mode }}</span>
+                          {% endif %}
+                          {% if item.saved_by_me %}
+                        <span class="pill pill-active">saved by me</span>
+                          {% endif %}
+                          {% if item.saved_by_others_count %}
+                        <span class="pill">saved by {{ item.saved_by_others_count }} other{% if item.saved_by_others_count != 1 %}s{% endif %}</span>
+                          {% endif %}
+                          {% for label in item.visible_owner_labels or [] %}
+                        <span class="pill">{{ label }}</span>
+                          {% endfor %}
                         {% if item.storage_status == "verified" %}
                         <span class="pill pill-active">verified</span>
                         {% elif item.storage_status in ["missing", "error"] %}
                         <span class="pill pill-alert">{{ item.storage_status }}</span>
                         {% else %}
                         <span class="pill">{{ item.storage_status or "registered" }}</span>
+                        {% endif %}
+                        {% else %}
+                          {% if item.storage_status == "verified" %}
+                        <span class="pill pill-active">verified</span>
+                          {% elif item.storage_status in ["missing", "error"] %}
+                        <span class="pill pill-alert">{{ item.storage_status }}</span>
+                          {% else %}
+                        <span class="pill">{{ item.storage_status or "registered" }}</span>
+                          {% endif %}
                         {% endif %}
                       {% else %}
                         {% if item.status == "active" %}

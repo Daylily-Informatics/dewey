@@ -92,6 +92,8 @@ HTTPS is mandatory. Place certs at `certs/cert.pem` and `certs/key.pem` before s
 
 Use `tapdb` directly for shared DB/runtime lifecycle and `daycog` directly for shared Cognito lifecycle. Dewey keeps only Dewey-specific overlay build/seed/reset behavior.
 
+Literature search/save flows require `metapub` to be installed separately from the forked source repo identified for this workspace. Dewey keeps that dependency optional at runtime and will return a clear 503 on literature endpoints when it is not installed.
+
 ## Current Docs
 
 - [Docs index](docs/README.md)
