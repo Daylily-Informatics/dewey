@@ -5,7 +5,6 @@ from __future__ import annotations
 import datetime as dt
 import os
 from contextlib import contextmanager
-from dataclasses import dataclass
 from hashlib import sha256
 from typing import Any, Generator, Optional, cast
 
@@ -15,11 +14,9 @@ from daylily_tapdb import (
     TemplateManager,
     generic_instance,
     generic_instance_lineage,
-    generic_template,
 )
 from daylily_tapdb.cli.context import resolve_context
 from daylily_tapdb.cli.db_config import get_db_config_for_env
-from daylily_tapdb.sequences import ensure_instance_prefix_sequence
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
@@ -40,15 +37,6 @@ def _parse_template_code(template_code: str) -> tuple[str, str, str, str]:
     return parts[0], parts[1], parts[2], parts[3]
 
 
-@dataclass(frozen=True)
-class TemplateDefinition:
-    template_code: str
-    template_discriminator: str
-    instance_discriminator: str
-    instance_prefix: str
-    name: str
-
-
 ARTIFACT_TEMPLATE = "dewey/data/artifact/1.0/"
 ARTIFACT_SET_TEMPLATE = "dewey/data/artifact_set/1.0/"
 SHARE_REFERENCE_TEMPLATE = "dewey/data/share_reference/1.0/"
@@ -58,56 +46,14 @@ LITERATURE_SAVE_TEMPLATE = "dewey/access/literature_save/1.0/"
 IDEMPOTENCY_TEMPLATE = "dewey/system/idempotency_request/1.0/"
 
 
-TEMPLATE_DEFINITIONS: tuple[TemplateDefinition, ...] = (
-    TemplateDefinition(
-        ARTIFACT_TEMPLATE,
-        "data_template",
-        "data_instance",
-        "AT",
-        "Dewey Artifact",
-    ),
-    TemplateDefinition(
-        ARTIFACT_SET_TEMPLATE,
-        "data_template",
-        "data_instance",
-        "AS",
-        "Dewey Artifact Set",
-    ),
-    TemplateDefinition(
-        SHARE_REFERENCE_TEMPLATE,
-        "data_template",
-        "data_instance",
-        "SH",
-        "Dewey Share Reference",
-    ),
-    TemplateDefinition(
-        EXTERNAL_OBJECT_TEMPLATE,
-        "data_template",
-        "data_instance",
-        "EX",
-        "Dewey External Object",
-    ),
-    TemplateDefinition(
-        EXTERNAL_OBJECT_RELATION_TEMPLATE,
-        "data_template",
-        "data_instance",
-        "ER",
-        "Dewey External Object Relation",
-    ),
-    TemplateDefinition(
-        LITERATURE_SAVE_TEMPLATE,
-        "data_template",
-        "data_instance",
-        "LS",
-        "Dewey Literature Save",
-    ),
-    TemplateDefinition(
-        IDEMPOTENCY_TEMPLATE,
-        "data_template",
-        "data_instance",
-        "KDP",
-        "Dewey Idempotency",
-    ),
+TEMPLATE_DEFINITIONS: tuple[str, ...] = (
+    ARTIFACT_TEMPLATE,
+    ARTIFACT_SET_TEMPLATE,
+    SHARE_REFERENCE_TEMPLATE,
+    EXTERNAL_OBJECT_TEMPLATE,
+    EXTERNAL_OBJECT_RELATION_TEMPLATE,
+    LITERATURE_SAVE_TEMPLATE,
+    IDEMPOTENCY_TEMPLATE,
 )
 
 
@@ -155,45 +101,18 @@ class TapDBBackend:
         with self.connection.session_scope(commit=commit) as session:
             yield session
 
-    def _normalize_prefix(self, prefix: str) -> str:
-        return prefix.strip().upper()
-
     def ensure_templates(self, session: Session) -> None:
-        for spec in TEMPLATE_DEFINITIONS:
-            self._ensure_template(session, spec)
-        for spec in TEMPLATE_DEFINITIONS:
-            ensure_instance_prefix_sequence(session, self._normalize_prefix(spec.instance_prefix))
-
-    def _ensure_template(self, session: Session, spec: TemplateDefinition) -> generic_template:
-        template = self.templates.get_template(session, spec.template_code)
-        if template is not None:
-            if template.instance_prefix != spec.instance_prefix:
-                template.instance_prefix = spec.instance_prefix
-                session.flush()
-            if template.instance_polymorphic_identity != spec.instance_discriminator:
-                template.instance_polymorphic_identity = spec.instance_discriminator
-                session.flush()
-            return template
-
-        category, type_, subtype, version = _parse_template_code(spec.template_code)
-        template = generic_template(
-            name=spec.name,
-            polymorphic_discriminator=spec.template_discriminator,
-            category=category,
-            type=type_,
-            subtype=subtype,
-            version=version,
-            bstatus="active",
-            json_addl={},
-            is_singleton=False,
-            instance_prefix=spec.instance_prefix,
-            instance_polymorphic_identity=spec.instance_discriminator,
-            json_addl_schema=None,
-        )
-        session.add(template)
-        session.flush()
-        self.templates.clear_cache()
-        return template
+        missing = [
+            template_code
+            for template_code in TEMPLATE_DEFINITIONS
+            if self.templates.get_template(session, template_code) is None
+        ]
+        if missing:
+            joined = ", ".join(missing)
+            raise RuntimeError(
+                "Missing Dewey templates. Seed the Dewey TapDB JSON pack before "
+                f"running the service: {joined}"
+            )
 
     def create_instance(
         self,
@@ -206,14 +125,7 @@ class TapDBBackend:
     ) -> generic_instance:
         template = self.templates.get_template(session, template_code)
         if template is None:
-            self.ensure_templates(session)
-            template = self.templates.get_template(session, template_code)
-        if template is None:
             raise RuntimeError(f"Missing template: {template_code}")
-
-        prefix = str(template.instance_prefix or "").strip()
-        if prefix:
-            ensure_instance_prefix_sequence(session, self._normalize_prefix(prefix))
 
         instance = self.factory.create_instance(
             session=session,

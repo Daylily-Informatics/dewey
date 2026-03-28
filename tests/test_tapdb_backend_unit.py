@@ -184,7 +184,7 @@ def test_backend_helpers_cover_utility_functions() -> None:
         backend_mod._parse_template_code("bad/template")
 
 
-def test_session_scope_and_normalize_prefix() -> None:
+def test_session_scope() -> None:
     backend = _backend()
     events: list[tuple[str, bool | None]] = []
 
@@ -206,68 +206,45 @@ def test_session_scope_and_normalize_prefix() -> None:
         assert session == "session"
 
     assert events == [("enter", True), ("exit", True)]
-    assert backend._normalize_prefix(" at ") == "AT"
 
 
-def test_ensure_templates_calls_all_specs(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_template_definitions_are_required_codes() -> None:
+    assert backend_mod.TEMPLATE_DEFINITIONS == (
+        backend_mod.ARTIFACT_TEMPLATE,
+        backend_mod.ARTIFACT_SET_TEMPLATE,
+        backend_mod.SHARE_REFERENCE_TEMPLATE,
+        backend_mod.EXTERNAL_OBJECT_TEMPLATE,
+        backend_mod.EXTERNAL_OBJECT_RELATION_TEMPLATE,
+        backend_mod.LITERATURE_SAVE_TEMPLATE,
+        backend_mod.IDEMPOTENCY_TEMPLATE,
+    )
+
+
+def test_ensure_templates_raises_on_missing() -> None:
     backend = _backend()
-    session = object()
-    ensured: list[str] = []
-    prefixed: list[str] = []
+    session = _FakeSession()
+    backend.templates = SimpleNamespace(get_template=lambda session, code: None)
 
-    monkeypatch.setattr(backend, "_ensure_template", lambda session, spec: ensured.append(spec.template_code))
-    monkeypatch.setattr(backend_mod, "ensure_instance_prefix_sequence", lambda session, prefix: prefixed.append(prefix))
+    with pytest.raises(RuntimeError, match="Missing Dewey templates"):
+        backend.ensure_templates(session)
+
+
+def test_ensure_templates_passes_when_seeded() -> None:
+    backend = _backend()
+    session = _FakeSession()
+    backend.templates = SimpleNamespace(get_template=lambda session, code: SimpleNamespace(uid=1))
 
     backend.ensure_templates(session)
 
-    assert len(ensured) == len(backend_mod.TEMPLATE_DEFINITIONS)
-    assert prefixed == [spec.instance_prefix for spec in backend_mod.TEMPLATE_DEFINITIONS]
 
-
-def test_ensure_template_updates_existing_template() -> None:
-    backend = _backend()
-    template = SimpleNamespace(instance_prefix="OLD", instance_polymorphic_identity="old")
-    backend.templates = SimpleNamespace(get_template=lambda session, code: template)
-    session = _FakeSession()
-
-    result = backend._ensure_template(session, backend_mod.TEMPLATE_DEFINITIONS[0])
-
-    assert result is template
-    assert template.instance_prefix == "AT"
-    assert template.instance_polymorphic_identity == "data_instance"
-    assert session.flush_count == 2
-
-
-def test_ensure_template_creates_missing_template(monkeypatch: pytest.MonkeyPatch) -> None:
-    backend = _backend()
-    clear_calls: list[str] = []
-    backend.templates = SimpleNamespace(get_template=lambda session, code: None, clear_cache=lambda: clear_calls.append("cleared"))
-
-    created_template = SimpleNamespace(instance_prefix="AT", instance_polymorphic_identity="data_instance")
-    monkeypatch.setattr(backend_mod, "generic_template", lambda **kwargs: created_template)
-    session = _FakeSession()
-
-    result = backend._ensure_template(session, backend_mod.TEMPLATE_DEFINITIONS[0])
-
-    assert result is created_template
-    assert session.added == [created_template]
-    assert session.flush_count == 1
-    assert clear_calls == ["cleared"]
-
-
-def test_create_instance_covers_success_and_missing_template(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_create_instance_covers_success_and_missing_template() -> None:
     backend = _backend()
     session = _FakeSession()
-    ensure_calls: list[str] = []
-    prefix_calls: list[str] = []
     created = SimpleNamespace(json_addl={}, bstatus="", is_singleton=True)
     template = SimpleNamespace(instance_prefix=" AT ", uid=11)
 
-    templates: list[object | None] = [None, template]
-    backend.templates = SimpleNamespace(get_template=lambda session, code: templates.pop(0))
+    backend.templates = SimpleNamespace(get_template=lambda session, code: template)
     backend.factory = SimpleNamespace(create_instance=lambda **kwargs: created)
-    monkeypatch.setattr(backend, "ensure_templates", lambda session: ensure_calls.append("ensure"))
-    monkeypatch.setattr(backend_mod, "ensure_instance_prefix_sequence", lambda session, prefix: prefix_calls.append(prefix))
 
     instance = backend.create_instance(
         session,
@@ -277,8 +254,6 @@ def test_create_instance_covers_success_and_missing_template(monkeypatch: pytest
     )
 
     assert instance is created
-    assert ensure_calls == ["ensure"]
-    assert prefix_calls == ["AT"]
     assert created.json_addl == {"foo": "bar"}
     assert created.bstatus == "active"
     assert created.is_singleton is False
@@ -287,7 +262,6 @@ def test_create_instance_covers_success_and_missing_template(monkeypatch: pytest
     backend_missing = _backend()
     backend_missing.templates = SimpleNamespace(get_template=lambda session, code: None)
     backend_missing.factory = SimpleNamespace()
-    monkeypatch.setattr(backend_missing, "ensure_templates", lambda session: None)
     with pytest.raises(RuntimeError, match="Missing template"):
         backend_missing.create_instance(
             session,

@@ -1,0 +1,96 @@
+{
+  "$comment": "Canonical Dewey TapDB template pack",
+  "templates": [
+    {
+      "name": "Dewey Artifact",
+      "polymorphic_discriminator": "data_template",
+      "category": "dewey",
+      "type": "data",
+      "subtype": "artifact",
+      "version": "1.0",
+      "instance_prefix": "AT",
+      "instance_polymorphic_identity": "data_instance",
+      "bstatus": "active",
+      "is_singleton": false,
+      "json_addl": {}
+    },
+    {
+      "name": "Dewey Artifact Set",
+      "polymorphic_discriminator": "data_template",
+      "category": "dewey",
+      "type": "data",
+      "subtype": "artifact_set",
+      "version": "1.0",
+      "instance_prefix": "AS",
+      "instance_polymorphic_identity": "data_instance",
+      "bstatus": "active",
+      "is_singleton": false,
+      "json_addl": {}
+    },
+    {
+      "name": "Dewey Share Reference",
+      "polymorphic_discriminator": "data_template",
+      "category": "dewey",
+      "type": "data",
+      "subtype": "share_reference",
+      "version": "1.0",
+      "instance_prefix": "SH",
+      "instance_polymorphic_identity": "data_instance",
+      "bstatus": "active",
+      "is_singleton": false,
+      "json_addl": {}
+    },
+    {
+      "name": "Dewey External Object",
+      "polymorphic_discriminator": "data_template",
+      "category": "dewey",
+      "type": "integration",
+      "subtype": "external_object",
+      "version": "1.0",
+      "instance_prefix": "EX",
+      "instance_polymorphic_identity": "data_instance",
+      "bstatus": "active",
+      "is_singleton": false,
+      "json_addl": {}
+    },
+    {
+      "name": "Dewey External Object Relation",
+      "polymorphic_discriminator": "data_template",
+      "category": "dewey",
+      "type": "integration",
+      "subtype": "external_object_relation",
+      "version": "1.0",
+      "instance_prefix": "ER",
+      "instance_polymorphic_identity": "data_instance",
+      "bstatus": "active",
+      "is_singleton": false,
+      "json_addl": {}
+    },
+    {
+      "name": "Dewey Literature Save",
+      "polymorphic_discriminator": "data_template",
+      "category": "dewey",
+      "type": "access",
+      "subtype": "literature_save",
+      "version": "1.0",
+      "instance_prefix": "LS",
+      "instance_polymorphic_identity": "data_instance",
+      "bstatus": "active",
+      "is_singleton": false,
+      "json_addl": {}
+    },
+    {
+      "name": "Dewey Idempotency",
+      "polymorphic_discriminator": "data_template",
+      "category": "dewey",
+      "type": "system",
+      "subtype": "idempotency_request",
+      "version": "1.0",
+      "instance_prefix": "KDP",
+      "instance_polymorphic_identity": "data_instance",
+      "bstatus": "active",
+      "is_singleton": false,
+      "json_addl": {}
+    }
+  ]
+}
