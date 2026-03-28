@@ -1,4 +1,10 @@
-# Deprecated example: use `dewey config init` to create the authoritative template.
+# Dewey Configuration
+# ===================
+# Create this file with:
+#   dewey config init
+#
+# Stored by default at ~/.config/dewey/config.yaml unless XDG_CONFIG_HOME is set.
+
 application:
   environment: development
   api_bearer_token: dewey-dev-token

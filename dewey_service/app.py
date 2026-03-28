@@ -7,7 +7,7 @@ from typing import Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, ConfigDict, Field
@@ -183,6 +183,8 @@ def create_app(
 
     @app.exception_handler(DeweyNotFoundError)
     async def _not_found_handler(_request: Request, exc: DeweyNotFoundError):
+        if _request.url.path.startswith("/api/"):
+            return JSONResponse(status_code=404, content={"detail": str(exc)})
         return HTMLResponse(status_code=404, content=str(exc))
 
     @app.exception_handler(HTTPException)
@@ -190,8 +192,10 @@ def create_app(
         """Redirect unauthenticated browser requests to the login page."""
         if exc.status_code == 401:
             accept = request.headers.get("accept", "")
-            if "text/html" in accept:
+            if "text/html" in accept and not request.url.path.startswith("/api/"):
                 return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+        if request.url.path.startswith("/api/"):
+            return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail or ""})
         return HTMLResponse(status_code=exc.status_code, content=exc.detail or "")
 
     @app.get("/", include_in_schema=False)

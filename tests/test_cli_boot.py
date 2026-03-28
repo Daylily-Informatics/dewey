@@ -1,21 +1,43 @@
 from __future__ import annotations
 
-from typer.testing import CliRunner
+import importlib.metadata
+from pathlib import Path
+
+from cli_core_yo import output
+from cli_core_yo.app import run as run_cli
 
 import dewey_service.cli as cli_module
-from dewey_service.cli import cli
+import dewey_service.cli.server as server_cli
 from dewey_service.settings import Settings
 
-runner = CliRunner()
+
+def _invoke(argv: list[str]) -> int:
+    output._reset_console()
+    return run_cli(cli_module.spec, argv)
 
 
-def test_cli_help_renders() -> None:
-    result = runner.invoke(cli, ["--help"])
-    assert result.exit_code == 0
-    assert "Dewey service commands" in result.stdout
+def test_cli_help_renders(capsys) -> None:
+    exit_code = _invoke(["--help"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "Usage:" in captured.out
+    assert "version" in captured.out
+    assert "info" in captured.out
+    assert "config" in captured.out
+    assert "env" in captured.out
+    assert "server" in captured.out
 
 
-def test_cli_info_renders(monkeypatch) -> None:
+def test_cli_version_renders(capsys) -> None:
+    exit_code = _invoke(["version"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert importlib.metadata.version("dewey-service") in captured.out
+
+
+def test_cli_info_renders(monkeypatch, capsys) -> None:
     monkeypatch.setattr(
         cli_module,
         "get_settings",
@@ -26,39 +48,46 @@ def test_cli_info_renders(monkeypatch) -> None:
             cognito_logout_url="https://localhost:8914/login",
         ),
     )
-    result = runner.invoke(cli, ["info"])
-    assert result.exit_code == 0
-    assert "Dewey Runtime" in result.stdout
+
+    exit_code = _invoke(["info"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "Dewey Info" in captured.out
+    assert "Database Backend" in captured.out
+    assert "TapDB Client" in captured.out
 
 
-def test_server_status_reports_not_running(monkeypatch) -> None:
-    from cli_core_yo import server as server_mod
+def test_server_status_reports_not_running(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(server_cli, "read_pid", lambda _pid_file: None)
 
-    monkeypatch.setattr(server_mod, "read_pid", lambda _pid_file: None)
-    result = runner.invoke(cli, ["server", "status"])
-    assert result.exit_code == 0
-    assert "not running" in result.stdout
+    exit_code = _invoke(["server", "status"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "not running" in captured.out
 
 
-def test_server_restart_uses_background_start(monkeypatch) -> None:
+def test_server_restart_uses_background_start(monkeypatch, capsys) -> None:
     calls: list[tuple[str, object]] = []
 
     monkeypatch.setattr(
-        cli_module,
+        server_cli,
         "_stop_server",
-        lambda _pid_file=cli_module.PID_FILE: calls.append(("stop", None)),
+        lambda: calls.append(("stop", None)),
     )
     monkeypatch.setattr(
-        cli_module,
+        server_cli,
         "_start_server",
         lambda **kwargs: calls.append(("start", kwargs)),
     )
-    monkeypatch.setattr(cli_module, "_validate_cognito_uris_for_port", lambda **kwargs: None)
-    monkeypatch.setattr(cli_module.time, "sleep", lambda _seconds: None)
+    monkeypatch.setattr(server_cli, "_validate_cognito_uris_for_port", lambda **kwargs: None)
+    monkeypatch.setattr(server_cli.time, "sleep", lambda _seconds: None)
 
-    result = runner.invoke(cli, ["server", "restart"])
+    exit_code = _invoke(["server", "restart"])
+    capsys.readouterr()
 
-    assert result.exit_code == 0
+    assert exit_code == 0
     assert calls == [
         ("stop", None),
         (
@@ -71,3 +100,60 @@ def test_server_restart_uses_background_start(monkeypatch) -> None:
             },
         ),
     ]
+
+
+def test_config_init_show_validate_and_status(monkeypatch, tmp_path: Path, capsys) -> None:
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
+
+    init_exit = _invoke(["config", "init"])
+    init_output = capsys.readouterr().out
+    config_path = tmp_path / "dewey" / "config.yaml"
+
+    assert init_exit == 0
+    assert "Config file created" in init_output
+    assert config_path.exists()
+
+    show_exit = _invoke(["config", "show"])
+    show_output = capsys.readouterr().out
+    assert show_exit == 0
+    assert "application:" in show_output
+    assert "database:" in show_output
+
+    validate_exit = _invoke(["config", "validate"])
+    validate_output = capsys.readouterr().out
+    assert validate_exit == 0
+    assert "Config is valid" in validate_output
+
+    status_exit = _invoke(["config", "status"])
+    status_output = capsys.readouterr().out
+    assert status_exit == 0
+    assert "Config path:" in status_output
+    assert "config.yaml" in status_output
+    assert '"tapdb_database_name": "dewey"' in status_output
+
+
+def test_env_commands_render(monkeypatch, capsys) -> None:
+    monkeypatch.setenv("DEWEY_ACTIVE", "1")
+    monkeypatch.setenv("DEWEY_PROJECT_ROOT", "/tmp/dewey")
+
+    status_exit = _invoke(["env", "status"])
+    status_output = capsys.readouterr().out
+    assert status_exit == 0
+    assert "active" in status_output
+    assert "/tmp/dewey" in status_output
+
+    activate_exit = _invoke(["env", "activate"])
+    activate_output = capsys.readouterr().out
+    assert activate_exit == 0
+    assert f"source {cli_module.ACTIVATE_SCRIPT}" in activate_output
+
+    deactivate_exit = _invoke(["env", "deactivate"])
+    deactivate_output = capsys.readouterr().out
+    assert deactivate_exit == 0
+    assert f"source {cli_module.DEACTIVATE_SCRIPT}" in deactivate_output
+
+    reset_exit = _invoke(["env", "reset"])
+    reset_output = capsys.readouterr().out
+    assert reset_exit == 0
+    assert f"source {cli_module.DEACTIVATE_SCRIPT}" in reset_output
+    assert f"source {cli_module.ACTIVATE_SCRIPT}" in reset_output

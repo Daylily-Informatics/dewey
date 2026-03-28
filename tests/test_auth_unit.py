@@ -1,0 +1,121 @@
+from __future__ import annotations
+
+import base64
+import json
+from types import SimpleNamespace
+
+import pytest
+from fastapi import HTTPException
+from fastapi.security import HTTPAuthorizationCredentials
+
+import dewey_service.auth as auth_mod
+from dewey_service.settings import Settings
+
+
+def _settings() -> Settings:
+    return Settings(
+        cognito_domain="https://auth.example.com",
+        cognito_app_client_id="client-1",
+        cognito_app_client_secret="secret-1",
+        cognito_redirect_uri="https://localhost:8914/auth/callback",
+        cognito_logout_url="https://localhost:8914/login",
+    )
+
+
+def _jwt(payload: dict[str, object]) -> str:
+    raw = json.dumps(payload).encode("utf-8")
+    encoded = base64.urlsafe_b64encode(raw).decode("utf-8").rstrip("=")
+    return f"header.{encoded}.signature"
+
+
+def test_decode_jwt_claims_noverify_handles_valid_and_invalid_tokens() -> None:
+    assert auth_mod.decode_jwt_claims_noverify(_jwt({"email": "user@example.com"})) == {
+        "email": "user@example.com"
+    }
+    assert auth_mod.decode_jwt_claims_noverify("not-a-jwt") == {}
+    assert auth_mod.decode_jwt_claims_noverify("header.invalid.signature") == {}
+
+
+def test_generate_state_returns_unique_nonce() -> None:
+    first = auth_mod.generate_state()
+    second = auth_mod.generate_state()
+
+    assert first
+    assert second
+    assert first != second
+
+
+def test_build_cognito_login_url_strips_scheme(monkeypatch: pytest.MonkeyPatch) -> None:
+    seen: dict[str, str] = {}
+
+    def fake_build_authorization_url(**kwargs: str) -> str:
+        seen.update(kwargs)
+        return "https://login.example.com/oauth2/authorize"
+
+    monkeypatch.setattr(auth_mod, "build_authorization_url", fake_build_authorization_url)
+
+    url = auth_mod.build_cognito_login_url(settings=_settings(), state="state-123")
+
+    assert url == "https://login.example.com/oauth2/authorize"
+    assert seen == {
+        "domain": "auth.example.com",
+        "client_id": "client-1",
+        "redirect_uri": "https://localhost:8914/auth/callback",
+        "state": "state-123",
+    }
+
+
+def test_build_cognito_logout_url_includes_state() -> None:
+    url = auth_mod.build_cognito_logout_url(settings=_settings(), state="logout-state")
+
+    assert url.startswith("https://auth.example.com/logout?")
+    assert "client_id=client-1" in url
+    assert "redirect_uri=https%3A%2F%2Flocalhost%3A8914%2Flogin" in url
+    assert "response_type=code" in url
+    assert "state=logout-state" in url
+
+
+def test_exchange_code_success_and_error_wrapping(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        auth_mod,
+        "exchange_authorization_code",
+        lambda **kwargs: {"id_token": "abc", "access_token": "xyz"},
+    )
+
+    payload = auth_mod.exchange_code(settings=_settings(), code="code-123")
+    assert payload["id_token"] == "abc"
+
+    def fail_exchange(**kwargs: str) -> dict[str, str]:
+        raise RuntimeError("exchange failed")
+
+    monkeypatch.setattr(auth_mod, "exchange_authorization_code", fail_exchange)
+    with pytest.raises(auth_mod.AuthError, match="exchange failed"):
+        auth_mod.exchange_code(settings=_settings(), code="bad-code")
+
+
+def test_require_api_auth_validates_tokens() -> None:
+    dependency = auth_mod.require_api_auth(_settings())
+    good = HTTPAuthorizationCredentials(scheme="Bearer", credentials="dewey-dev-token")
+    bad = HTTPAuthorizationCredentials(scheme="Bearer", credentials="wrong-token")
+
+    assert dependency(good) == "dewey-dev-token"
+
+    with pytest.raises(HTTPException) as missing_exc:
+        dependency(None)
+    assert missing_exc.value.status_code == 401
+    assert missing_exc.value.detail == "Missing bearer token"
+
+    with pytest.raises(HTTPException) as invalid_exc:
+        dependency(bad)
+    assert invalid_exc.value.status_code == 401
+    assert invalid_exc.value.detail == "Invalid bearer token"
+
+
+def test_require_ui_session_requires_operator_profile() -> None:
+    request = SimpleNamespace(session={"operator_profile": {"email": "user@example.com"}})
+    assert auth_mod.require_ui_session(request) == {"email": "user@example.com"}
+
+    with pytest.raises(HTTPException) as exc:
+        auth_mod.require_ui_session(SimpleNamespace(session={}))
+    assert exc.value.status_code == 401
+    assert exc.value.detail == "Login required"

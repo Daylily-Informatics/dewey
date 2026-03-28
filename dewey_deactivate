@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Dewey environment deactivation script
+# Usage: source /path/to/dewey_deactivate
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  echo "Error: This script must be sourced, not executed."
+  echo "Usage: source dewey_deactivate"
+  exit 1
+fi
+
+unset DEWEY_ACTIVE
+unset DEWEY_PROJECT_ROOT
+unset DEWEY_ROOT
+unset DATABASE_URL
+
+if [[ "$CONDA_DEFAULT_ENV" == "DEWEY" ]]; then
+  conda deactivate 2>/dev/null
+fi
+
+unset -f dewey 2>/dev/null || true
+unset -f dewey_deactivate 2>/dev/null || true
+
+echo "Dewey environment deactivated."
