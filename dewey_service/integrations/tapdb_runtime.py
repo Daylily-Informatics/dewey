@@ -11,7 +11,7 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from urllib.parse import quote
 
-TAPDB_REQUIRED_VERSION = "0.2.7"
+TAPDB_REQUIRED_VERSION = "3.0.2"
 DEFAULT_AWS_PROFILE = "lsmc"
 DEFAULT_AWS_REGION = "us-west-2"
 DEFAULT_TAPDB_CLIENT_ID = "dewey"
