@@ -19,12 +19,14 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from dewey_service.auth import (
     AuthError,
+    build_session_profile,
     build_cognito_login_url,
     build_cognito_logout_url,
     decode_jwt_claims_noverify,
     exchange_code,
     generate_state,
     require_api_auth,
+    require_ui_admin_session,
     require_ui_session,
 )
 from dewey_service.domain_access import (
@@ -33,6 +35,7 @@ from dewey_service.domain_access import (
     is_allowed_origin,
 )
 from dewey_service.literature import LiteratureUnavailableError, MetapubAdapter, ViewerContext
+from dewey_service.rbac import Role, profile_has_role
 from dewey_service.service import DeweyConflictError, DeweyNotFoundError, DeweyService
 from dewey_service.settings import Settings, get_settings
 from dewey_service.storage import S3StorageClient
@@ -294,6 +297,9 @@ def create_app(
     def _viewer_context(profile: dict[str, Any]) -> ViewerContext:
         return ViewerContext.from_operator_profile(profile)
 
+    def _is_admin(profile: dict[str, Any]) -> bool:
+        return profile_has_role(profile, Role.ADMIN)
+
     def _with_search_alias_headers(response: Response, successor: str) -> None:
         response.headers["Deprecation"] = "true"
         response.headers["Sunset"] = "Wed, 30 Sep 2026 00:00:00 GMT"
@@ -454,11 +460,12 @@ def create_app(
         if not email:
             raise HTTPException(status_code=401, detail="Cognito response missing email claim")
 
-        request.session["operator_profile"] = {
-            "email": email,
-            "sub": sub,
-            "groups": groups if isinstance(groups, list) else [],
-        }
+        request.session["operator_profile"] = build_session_profile(
+            settings=settings,
+            email=email,
+            sub=sub,
+            groups=groups if isinstance(groups, list) else [],
+        )
         request.session.pop("oauth_state", None)
         return RedirectResponse(url="/ui", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -469,7 +476,7 @@ def create_app(
             "login.html",
             _template_context(
                 cognito_login_url="/auth/login",
-                title="Dewey Operator Login",
+                title="Dewey Access Login",
             ),
         )
 
@@ -509,6 +516,20 @@ def create_app(
                     "recent_import_count": recent_imports,
                     "verification_failures": verification_failures,
                 },
+                is_admin=_is_admin(profile),
+            ),
+        )
+
+    @app.get("/admin", include_in_schema=False)
+    async def admin_page(
+        request: Request, profile: dict[str, Any] = Depends(require_ui_admin_session)
+    ) -> HTMLResponse:
+        return templates.TemplateResponse(
+            request,
+            "admin.html",
+            _template_context(
+                profile=profile,
+                is_admin=True,
             ),
         )
 
@@ -547,6 +568,7 @@ def create_app(
                 query=query,
                 result=result,
                 page_size=page_size,
+                is_admin=_is_admin(profile),
             ),
         )
 
@@ -564,6 +586,7 @@ def create_app(
                 form=form,
                 result=result,
                 export_payload_json=json.dumps(form),
+                is_admin=_is_admin(profile),
             ),
         )
 

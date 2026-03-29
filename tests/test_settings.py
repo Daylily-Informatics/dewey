@@ -31,6 +31,11 @@ auth:
     app_client_id: client-1
     redirect_uri: https://localhost:8914/auth/callback
     logout_url: https://localhost:8914/login
+    group_role_map:
+      platform-admin: ADMIN
+      dewey-admin: ADMIN
+      dewey-readwrite: READ_WRITE
+      dewey-readonly: READ_ONLY
 deployment:
   name: staging
   color: "#124e78"
@@ -45,6 +50,12 @@ deployment:
     assert loaded.cognito_domain == "https://auth.example.com"
     assert loaded.cognito_redirect_uri == "https://localhost:8914/auth/callback"
     assert loaded.cognito_logout_url == "https://localhost:8914/login"
+    assert loaded.cognito_group_role_map == {
+        "platform-admin": "ADMIN",
+        "dewey-admin": "ADMIN",
+        "dewey-readwrite": "READ_WRITE",
+        "dewey-readonly": "READ_ONLY",
+    }
     assert loaded.deployment == {
         "name": "staging",
         "color": "#124e78",
@@ -66,6 +77,9 @@ auth:
     app_client_id: yaml-client
     redirect_uri: https://localhost:8914/auth/callback
     logout_url: https://localhost:8914/login
+    group_role_map:
+      platform-admin: ADMIN
+      dewey-admin: ADMIN
 """,
         encoding="utf-8",
     )

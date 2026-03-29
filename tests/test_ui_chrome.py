@@ -33,6 +33,7 @@ def test_login_page_renders_banner_and_favicon(fake_service) -> None:
     assert "staging".upper() in response.text
     assert "#124e78" in response.text
     assert "/static/favicon.svg" in response.text
+    assert "Dewey Access Login" in response.text
 
 
 def test_ui_page_renders_banner_after_login(monkeypatch, fake_service) -> None:
@@ -44,7 +45,11 @@ def test_ui_page_renders_banner_after_login(monkeypatch, fake_service) -> None:
     )
     monkeypatch.setattr(
         "dewey_service.app.decode_jwt_claims_noverify",
-        lambda token: {"email": "operator@example.com", "sub": "sub-1"},
+        lambda token: {
+            "email": "operator@example.com",
+            "sub": "sub-1",
+            "cognito:groups": ["platform-admin"],
+        },
     )
 
     with TestClient(app) as client:
@@ -59,10 +64,14 @@ def test_ui_page_renders_banner_after_login(monkeypatch, fake_service) -> None:
         assert callback.status_code == 303
 
         ui = client.get("/ui")
+        admin = client.get("/admin")
 
     assert ui.status_code == 200
     assert "STAGING" in ui.text
     assert "/static/favicon.svg" in ui.text
+    assert "/admin" in ui.text
+    assert admin.status_code == 200
+    assert "Stub Admin Surface" in admin.text
 
 
 def test_favicon_route_redirects_to_svg(fake_service) -> None:

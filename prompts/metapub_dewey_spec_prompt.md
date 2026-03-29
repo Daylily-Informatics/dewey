@@ -111,7 +111,7 @@ Determine and state clearly:
 - Do not redesign Dewey into a generic research knowledge platform.
 - Do not redesign metapub into a full web application framework unless the repos strongly justify it.
 - Keep Dewey the canonical system of record for saved artifacts / references.
-- Respect Dewey’s existing FastAPI + TapDB + Cognito-backed operator UI structure if that is what the repo shows.
+- Respect Dewey’s existing FastAPI + TapDB + Cognito-backed browser UI structure if that is what the repo shows.
 - Respect existing Dewey idempotency patterns if present.
 - Respect existing Dewey search surface and decide how to extend it rather than inventing an unrelated second search stack.
 - Do not assume relational side tables outside TapDB if Dewey is TapDB-only in practice.

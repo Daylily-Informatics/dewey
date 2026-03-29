@@ -8,7 +8,7 @@ That is the fastest robust path from the actual repos.
 
 Why:
 
-- `dewey/README.md` and `dewey/dewey_service/app.py` show Dewey already owns the web surface, Cognito-backed operator UI, TapDB persistence, S3-managed artifact handling, and the canonical artifact/search APIs.
+- `dewey/README.md` and `dewey/dewey_service/app.py` show Dewey already owns the web surface, Cognito-backed browser UI, TapDB persistence, S3-managed artifact handling, and the canonical artifact/search APIs.
 - `dewey/dewey_service/service.py` already has the right mutation primitives: persisted idempotency, artifact registration, external-object linking, and direct `http(s)`/`s3` copy into managed S3.
 - `metapub/README.md`, `metapub/metapub/pubmedfetcher.py`, `metapub/metapub/pubmedarticle.py`, and `metapub/metapub/findit/*` show metapub is a lookup/discovery library plus CLI utilities, not a web app framework.
 - I found no FastAPI/Flask/Django web module in metapub. Putting UI/auth/persistence there would create a second conflicting stack and invert Dewey’s stated ownership boundary.
@@ -143,7 +143,7 @@ Plain answers up front:
 
 ### Assumptions and trade-offs I am making
 
-1. **This ships first as an operator UI feature.**  
+1. **This ships first as a browser UI feature.**  
    That is consistent with Dewey’s current real auth/UI surface.
 
 2. **The library source of truth is the inspected metapub repo, not PyPI behavior.**  
@@ -193,7 +193,7 @@ This is **not** a metapub feature. It is a Dewey feature that calls metapub.
    - whether current user already saved it
    - whether another visible user saved it
    - whether Dewey can manage-copy it under current copy-eligibility rules
-5. Dewey renders the results in the existing operator UI style.
+5. Dewey renders the results in the existing browser UI style.
 
 #### B. Save/register flow
 
@@ -240,7 +240,7 @@ Because the metapub repo does not justify it:
 Because the fastest robust path is to keep the feature where the real boundary already is:
 
 - Dewey already owns saved-object identity
-- Dewey already owns the operator UI
+- Dewey already owns the browser UI
 - Dewey already owns artifact persistence and search
 - the metapub seam can be one small adapter class inside Dewey
 
@@ -592,7 +592,7 @@ That is the minimal privacy-respecting interpretation consistent with the prompt
 
 Why:
 
-- Dewey already has session auth for operators
+- Dewey already has session auth for browser users
 - Dewey bearer-token API auth is currently machine-token based, not user-subject based
 - trying to make the generic bearer APIs permission-aware in MVP would create a second auth story and slow the feature down
 
@@ -923,7 +923,7 @@ This is the recommended MVP.
 
 1. Add a Dewey-local metapub adapter
 2. Add `literature_save` TapDB template
-3. Add `/literature` operator UI
+3. Add `/literature` browser UI
 4. Add session-authenticated search/save/update-visibility endpoints
 5. Save PubMed results into Dewey as canonical `artifact_type="literature"`
 6. Support both:
@@ -948,7 +948,7 @@ This is the recommended MVP.
 2. Add delete/archive/un-save behavior
 3. Add better viewer filtering to more generic artifact APIs if product needs it
 4. Add richer `/search` filters for literature fields (PMID, DOI, journal, year, owner)
-5. Add better operator UI for editing selected users/groups
+5. Add better browser UI for editing selected users/groups
 6. Add persistent server-side user defaults/preferences if they become necessary
 
 ### Phase 3 — extraction / broader platform work

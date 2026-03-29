@@ -3,14 +3,18 @@ from __future__ import annotations
 from urllib.parse import parse_qs, urlparse
 
 
-def _login_operator(monkeypatch, client) -> None:
+def _login_user(monkeypatch, client, groups: list[str] | None = None) -> None:
     monkeypatch.setattr(
         "dewey_service.app.exchange_code",
         lambda settings, code: {"id_token": "header.payload.sig"},
     )
     monkeypatch.setattr(
         "dewey_service.app.decode_jwt_claims_noverify",
-        lambda token: {"email": "operator@example.com", "sub": "sub-1"},
+        lambda token: {
+            "email": "operator@example.com",
+            "sub": "sub-1",
+            "cognito:groups": groups or ["dewey-readwrite"],
+        },
     )
 
     login = client.get("/auth/login", follow_redirects=False)
@@ -36,15 +40,28 @@ def test_ui_requires_session_login(client) -> None:
 
 
 def test_cognito_callback_sets_session(monkeypatch, client) -> None:
-    _login_operator(monkeypatch, client)
+    _login_user(monkeypatch, client)
 
     ui = client.get("/ui")
     assert ui.status_code == 200
-    assert "Dewey Operator Console" in ui.text
+    assert "Dewey Console" in ui.text
+    assert "/admin" not in ui.text
+
+
+def test_admin_session_exposes_admin_tab_and_page(monkeypatch, client) -> None:
+    _login_user(monkeypatch, client, groups=["platform-admin"])
+
+    ui = client.get("/ui")
+    assert ui.status_code == 200
+    assert "/admin" in ui.text
+
+    admin = client.get("/admin")
+    assert admin.status_code == 200
+    assert "Stub Admin Surface" in admin.text
 
 
 def test_logout_clears_session_and_redirects_to_cognito(monkeypatch, client, test_settings) -> None:
-    _login_operator(monkeypatch, client)
+    _login_user(monkeypatch, client)
 
     logout = client.post("/logout", follow_redirects=False)
     assert logout.status_code == 303

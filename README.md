@@ -25,7 +25,7 @@ Primary entrypoints:
 - app factory: `dewey_service.app:create_app`
 - CLI command: `dewey`
 
-The service exposes both API routes and a small Cognito-backed operator UI.
+The service exposes both API routes and a small Cognito-backed browser UI.
 
 ## API Surface
 
@@ -59,7 +59,7 @@ UI/auth routes:
 
 - API routes require `Authorization: Bearer <token>`
 - mutating API routes require `Idempotency-Key`
-- operator UI uses Cognito Hosted UI session auth
+- browser UI uses Cognito Hosted UI session auth
 
 ## CLI Surface
 

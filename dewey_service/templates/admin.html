@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dewey Admin</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/console.css" />
+  </head>
+  <body>
+    {% if deployment.name and not deployment.is_production %}
+    <div class="deployment-banner" style="background: {{ deployment.color }};">{{ deployment.name|upper }}</div>
+    {% endif %}
+    <div class="shell">
+      <header class="topbar">
+        <div class="brandline">
+          <div class="eyebrow">Dewey Admin</div>
+          <h1 class="title">Stub Admin Surface</h1>
+          <div class="subtitle">{{ profile.email }}</div>
+        </div>
+        <div class="navlinks">
+          <a class="navlink" href="/ui">Dashboard</a>
+          <a class="navlink" href="/literature">Literature Search</a>
+          <a class="navlink" href="/search">Unified Search</a>
+          <form class="logout-form" method="post" action="/logout">
+            <button type="submit">Logout</button>
+          </form>
+        </div>
+      </header>
+
+      <main class="page">
+        <section class="panel" style="max-width: 760px; margin: 0 auto;">
+          <div class="eyebrow">ADMIN ONLY</div>
+          <h2>Admin tools will live here.</h2>
+          <p>
+            This page is intentionally stubbed. The gate is in place so Dewey can distinguish
+            <code>platform-admin</code> and <code>dewey-admin</code> users from ordinary
+            read/write users.
+          </p>
+          <div class="stack" style="margin-top: 1rem;">
+            <span class="pill pill-active">ADMIN</span>
+            <span class="pill">platform-admin / dewey-admin</span>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
