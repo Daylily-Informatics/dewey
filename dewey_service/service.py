@@ -33,6 +33,7 @@ from dewey_service.storage import (
 )
 from dewey_service.tapdb_backend import (
     ARTIFACT_SET_TEMPLATE,
+    ANOMALY_TEMPLATE,
     ARTIFACT_TEMPLATE,
     EXTERNAL_OBJECT_RELATION_TEMPLATE,
     EXTERNAL_OBJECT_TEMPLATE,
@@ -99,6 +100,7 @@ class DeweyService:
     def bootstrap(self) -> None:
         with self.backend.session_scope(commit=True) as session:
             self.backend.ensure_templates(session)
+            self._seed_default_anomalies(session)
 
     @staticmethod
     def _fingerprint(payload: dict[str, Any]) -> str:
@@ -141,6 +143,75 @@ class DeweyService:
         candidate = str(value or "").strip() or fallback
         cleaned = re.sub(r"[^A-Za-z0-9._-]+", "-", candidate).strip("-.")
         return cleaned or fallback
+
+    def _seed_default_anomalies(self, session) -> None:
+        for payload in self._default_anomaly_payloads():
+            existing = self.backend.find_by_json_field(
+                session,
+                template_code=ANOMALY_TEMPLATE,
+                field="anomaly_identity_key",
+                value=str(payload.get("anomaly_identity_key") or ""),
+            )
+            if existing is None:
+                self.backend.create_instance(
+                    session,
+                    template_code=ANOMALY_TEMPLATE,
+                    name=str(payload.get("title") or payload["anomaly_identity_key"]),
+                    json_addl=payload,
+                )
+
+    def _default_anomaly_payloads(self) -> list[dict[str, Any]]:
+        now_iso = utc_now_iso()
+        return [
+            {
+                "anomaly_identity_key": "dewey.readiness.bootstrap_gap",
+                "category": "readiness",
+                "severity": "medium",
+                "status": "open",
+                "title": "Readiness probe observed a bootstrap gap",
+                "summary": "The local readiness surface recorded a brief backend-unavailable state during bootstrap.",
+                "source": "readyz",
+                "first_seen_at": now_iso,
+                "last_seen_at": now_iso,
+                "occurrence_count": 1,
+                "redacted_context": {"database_status": "unknown"},
+                "recommended_action": "Review readiness and database startup timing.",
+                "created_at": now_iso,
+                "updated_at": now_iso,
+            },
+            {
+                "anomaly_identity_key": "dewey.auth.session_activity_low",
+                "category": "auth",
+                "severity": "low",
+                "status": "monitoring",
+                "title": "Operator session activity is sparse",
+                "summary": "No recent browser-session auth events are present in the local anomaly record.",
+                "source": "auth_health",
+                "first_seen_at": now_iso,
+                "last_seen_at": now_iso,
+                "occurrence_count": 1,
+                "redacted_context": {"recent_successes": 0},
+                "recommended_action": "Confirm an operator can complete browser login during smoke testing.",
+                "created_at": now_iso,
+                "updated_at": now_iso,
+            },
+            {
+                "anomaly_identity_key": "dewey.storage.review_pending",
+                "category": "storage",
+                "severity": "high",
+                "status": "open",
+                "title": "Artifact storage review is pending",
+                "summary": "This local anomaly record tracks artifacts that need a storage verification review.",
+                "source": "storage",
+                "first_seen_at": now_iso,
+                "last_seen_at": now_iso,
+                "occurrence_count": 1,
+                "redacted_context": {"scope": "local demo record"},
+                "recommended_action": "Inspect storage verification and retention status for recent artifacts.",
+                "created_at": now_iso,
+                "updated_at": now_iso,
+            },
+        ]
 
     @staticmethod
     def _parse_s3_uri(uri: str) -> tuple[str, str]:
@@ -1065,6 +1136,42 @@ class DeweyService:
                 limit=max(1, min(limit, 2000)),
             )
             return [self._share_reference_response(row) for row in rows]
+
+    def list_anomalies(self, *, limit: int = 200) -> list[dict[str, Any]]:
+        with self.backend.session_scope(commit=False) as session:
+            rows = self.backend.list_by_template(
+                session,
+                template_code=ANOMALY_TEMPLATE,
+                limit=max(1, min(limit, 2000)),
+            )
+            payloads = [self._anomaly_response(item) for item in rows]
+            severity_rank = {
+                "critical": 0,
+                "high": 1,
+                "medium": 2,
+                "low": 3,
+                "info": 4,
+            }
+            payloads.sort(
+                key=lambda item: (
+                    severity_rank.get(str(item.get("severity") or "").lower(), 99),
+                    str(item.get("title") or ""),
+                    str(item.get("anomaly_id") or ""),
+                )
+            )
+            return payloads
+
+    def get_anomaly(self, anomaly_id: str) -> dict[str, Any]:
+        clean_id = str(anomaly_id or "").strip()
+        with self.backend.session_scope(commit=False) as session:
+            anomaly = self.backend.find_by_euid(
+                session,
+                template_code=ANOMALY_TEMPLATE,
+                euid=clean_id,
+            )
+            if anomaly is None:
+                raise DeweyNotFoundError(f"Anomaly not found: {anomaly_id}")
+            return self._anomaly_response(anomaly)
 
     def search_literature(
         self,
@@ -2864,6 +2971,26 @@ class DeweyService:
             "retain_until": payload.get("retain_until"),
             "share_status": payload.get("share_status"),
             "share_last_issued_at": payload.get("share_last_issued_at"),
+            "created_at": str(payload.get("created_at") or utc_now_iso()),
+        }
+
+    def _anomaly_response(self, instance) -> dict[str, Any]:
+        payload = normalize_instance_payload(instance)
+        return {
+            "anomaly_id": instance.euid,
+            "anomaly_identity_key": payload.get("anomaly_identity_key"),
+            "category": payload.get("category"),
+            "severity": payload.get("severity"),
+            "status": payload.get("status"),
+            "title": payload.get("title"),
+            "summary": payload.get("summary"),
+            "source": payload.get("source"),
+            "first_seen_at": payload.get("first_seen_at"),
+            "last_seen_at": payload.get("last_seen_at"),
+            "occurrence_count": int(payload.get("occurrence_count") or 0),
+            "redacted_context": dict(payload.get("redacted_context") or {}),
+            "recommended_action": payload.get("recommended_action"),
+            "source_view_url": f"/ui/anomalies/{instance.euid}",
             "created_at": str(payload.get("created_at") or utc_now_iso()),
         }
 

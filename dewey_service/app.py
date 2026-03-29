@@ -634,6 +634,26 @@ def create_app(
         projection, payload = app.state.observability.auth_health()
         return build_auth_health_payload(request, projection=projection, auth_rollup=payload)
 
+    @app.get(
+        "/api/anomalies",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def list_anomalies(
+        limit: int = Query(default=200, ge=1, le=2000),
+    ) -> dict[str, Any]:
+        rows = service.list_anomalies(limit=limit)
+        return {"items": rows, "total": len(rows)}
+
+    @app.get(
+        "/api/anomalies/{anomaly_id}",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def get_anomaly(anomaly_id: str) -> dict[str, Any]:
+        try:
+            return service.get_anomaly(anomaly_id)
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
     @app.get("/ui", include_in_schema=False)
     async def ui_home(
         request: Request, profile: dict[str, Any] = Depends(require_ui_session)
@@ -664,15 +684,52 @@ def create_app(
             ),
         )
 
+    @app.get("/ui/anomalies", include_in_schema=False)
+    async def anomalies_page(
+        request: Request, profile: dict[str, Any] = Depends(require_ui_session)
+    ) -> HTMLResponse:
+        anomalies = service.list_anomalies(limit=100)
+        return templates.TemplateResponse(
+            request,
+            "anomalies.html",
+            _template_context(
+                profile=profile,
+                anomalies=anomalies,
+                is_admin=_is_admin(profile),
+            ),
+        )
+
+    @app.get("/ui/anomalies/{anomaly_id}", include_in_schema=False)
+    async def anomaly_detail_page(
+        request: Request,
+        anomaly_id: str,
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> HTMLResponse:
+        try:
+            anomaly = service.get_anomaly(anomaly_id)
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        return templates.TemplateResponse(
+            request,
+            "anomaly_detail.html",
+            _template_context(
+                profile=profile,
+                anomaly=anomaly,
+                is_admin=_is_admin(profile),
+            ),
+        )
+
     @app.get("/admin", include_in_schema=False)
     async def admin_page(
         request: Request, profile: dict[str, Any] = Depends(require_ui_admin_session)
     ) -> HTMLResponse:
+        anomalies = service.list_anomalies(limit=100)
         return templates.TemplateResponse(
             request,
             "admin.html",
             _template_context(
                 profile=profile,
+                anomalies=anomalies,
                 is_admin=True,
             ),
         )
@@ -704,6 +761,7 @@ def create_app(
                     projection=api_projection,
                     families=api_families,
                 ),
+                anomalies=service.list_anomalies(limit=25),
                 endpoint_health_payload=build_endpoint_health_payload(
                     request,
                     projection=endpoint_projection,

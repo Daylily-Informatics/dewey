@@ -55,6 +55,8 @@ def test_privileged_observability_routes_require_auth(client) -> None:
         "/endpoint_health",
         "/db_health",
         "/auth_health",
+        "/api/anomalies",
+        "/api/anomalies/ANM-000001",
     ]:
         response = client.get(path)
         assert response.status_code == 401, path
@@ -75,7 +77,14 @@ def test_obs_services_advertises_canonical_capabilities(client) -> None:
         {"path": "/db_health", "auth": "operator_or_service_token", "kind": "database"},
         {"path": "/my_health", "auth": "authenticated_self", "kind": "self"},
         {"path": "/auth_health", "auth": "operator_or_service_token", "kind": "auth"},
+        {"path": "/api/anomalies", "auth": "operator_or_service_token", "kind": "anomaly_list"},
+        {
+            "path": "/api/anomalies/{anomaly_id}",
+            "auth": "operator_or_service_token",
+            "kind": "anomaly_detail",
+        },
     ]
+    assert body["extensions"] == ["dewey.operator_ui", "dewey.anomalies_v1"]
 
 
 def test_health_payload_is_service_token_accessible(client) -> None:

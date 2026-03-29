@@ -198,8 +198,14 @@ class DeweyObservabilityStore:
                 {"path": "/db_health", "auth": "operator_or_service_token", "kind": "database"},
                 {"path": "/my_health", "auth": "authenticated_self", "kind": "self"},
                 {"path": "/auth_health", "auth": "operator_or_service_token", "kind": "auth"},
+                {"path": "/api/anomalies", "auth": "operator_or_service_token", "kind": "anomaly_list"},
+                {
+                    "path": "/api/anomalies/{anomaly_id}",
+                    "auth": "operator_or_service_token",
+                    "kind": "anomaly_detail",
+                },
             ],
-            "extensions": ["dewey.operator_ui"],
+            "extensions": ["dewey.operator_ui", "dewey.anomalies_v1"],
             "observed_at": self._started_at,
         }
 

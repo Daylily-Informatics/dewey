@@ -22,6 +22,7 @@
           <a class="navlink" href="/ui">Home</a>
           <a class="navlink" href="/literature">Literature Search</a>
           <a class="navlink" href="/search">Unified Search</a>
+          <a class="navlink" href="/ui/anomalies">Anomalies</a>
           <form class="logout-form" method="post" action="/logout">
             <button type="submit">Logout</button>
           </form>
@@ -213,6 +214,24 @@
               </div>
             </section>
           </section>
+        </section>
+
+        <section class="panel" style="margin-bottom: 1rem;">
+          <div class="panel-header">
+            <div>
+              <h3>Local Anomalies</h3>
+              <div class="panel-copy">Read-only local anomaly records persisted in TapDB.</div>
+            </div>
+            <a class="button" href="/ui/anomalies">Open anomaly view</a>
+          </div>
+          <div class="results-meta">
+            {% for anomaly in anomalies[:3] %}
+            <span class="pill">{{ anomaly.severity }}: {{ anomaly.title }}</span>
+            {% endfor %}
+            {% if not anomalies %}
+            <span class="pill">No anomalies recorded yet</span>
+            {% endif %}
+          </div>
         </section>
       </main>
     </div>

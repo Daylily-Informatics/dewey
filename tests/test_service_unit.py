@@ -12,6 +12,7 @@ from dewey_service.literature import ViewerContext
 from dewey_service.service import DeweyConflictError, DeweyNotFoundError, DeweyService
 from dewey_service.storage import StorageObject, StorageObjectNotFoundError
 from dewey_service.tapdb_backend import (
+    ANOMALY_TEMPLATE,
     ARTIFACT_SET_TEMPLATE,
     ARTIFACT_TEMPLATE,
     EXTERNAL_OBJECT_RELATION_TEMPLATE,
@@ -49,6 +50,7 @@ class _InMemoryBackend:
         self.lineages: list[_FakeLineage] = []
         self.next_uid = 1
         self.next_by_prefix = {
+            ANOMALY_TEMPLATE: 1,
             ARTIFACT_TEMPLATE: 1,
             ARTIFACT_SET_TEMPLATE: 1,
             SHARE_REFERENCE_TEMPLATE: 1,
@@ -58,6 +60,7 @@ class _InMemoryBackend:
             IDEMPOTENCY_TEMPLATE: 1,
         }
         self.prefixes = {
+            ANOMALY_TEMPLATE: "ANM",
             ARTIFACT_TEMPLATE: "AT",
             ARTIFACT_SET_TEMPLATE: "AS",
             SHARE_REFERENCE_TEMPLATE: "SH",
@@ -441,6 +444,22 @@ def test_register_artifact_replay_and_identity_reuse(service: DeweyService) -> N
         == "s3://bucket-1/reads/r1.fastq.gz"
     )
     assert service.list_artifacts(artifact_type="fastq", producer_system="atlas") == [created]
+
+
+def test_bootstrap_seeds_and_reads_local_anomalies(service: DeweyService) -> None:
+    service.bootstrap()
+
+    anomalies = service.list_anomalies()
+    assert len(anomalies) == 3
+    assert anomalies[0]["anomaly_id"].startswith("ANM-")
+    assert anomalies[0]["source_view_url"].startswith("/ui/anomalies/")
+
+    anomaly = service.get_anomaly(anomalies[0]["anomaly_id"])
+    assert anomaly["anomaly_id"] == anomalies[0]["anomaly_id"]
+    assert anomaly["severity"] in {"high", "medium", "low"}
+
+    with pytest.raises(DeweyNotFoundError):
+        service.get_anomaly("ANM-999999")
 
 
 def test_import_artifact_and_validation_errors(
