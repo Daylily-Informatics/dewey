@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dewey Observability</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/console.css" />
+  </head>
+  <body>
+    {% if deployment.name and not deployment.is_production %}
+    <div class="deployment-banner" style="background: {{ deployment.color }};">{{ deployment.name|upper }}</div>
+    {% endif %}
+    <div class="shell">
+      <header class="topbar">
+        <div class="brandline">
+          <div class="eyebrow">Dewey Operator Console</div>
+          <h1 class="title">Observability</h1>
+          <div class="subtitle">{{ profile.email }}</div>
+        </div>
+        <div class="navlinks">
+          <a class="navlink" href="/ui">Home</a>
+          <a class="navlink" href="/literature">Literature Search</a>
+          <a class="navlink" href="/search">Unified Search</a>
+          <form class="logout-form" method="post" action="/logout">
+            <button type="submit">Logout</button>
+          </form>
+        </div>
+      </header>
+
+      <main class="page">
+        <section class="hero">
+          <div class="hero-copy">
+            <div class="eyebrow">Service-local telemetry</div>
+            <h2>API, endpoint, DB, and auth health for this Dewey instance.</h2>
+            <p>These summaries are generated from Dewey-local request and backend activity.</p>
+          </div>
+          <span class="pill pill-active">{{ obs_services_payload.status|upper }}</span>
+        </section>
+
+        <section class="metrics">
+          <article class="metric-card">
+            <div class="metric-label">API Families</div>
+            <div class="metric-value">{{ api_health_payload.families|length }}</div>
+            <div class="metric-caption">Tracked request families</div>
+          </article>
+          <article class="metric-card">
+            <div class="metric-label">Endpoints</div>
+            <div class="metric-value">{{ endpoint_health_payload.page.total }}</div>
+            <div class="metric-caption">Route templates in the current window</div>
+          </article>
+          <article class="metric-card">
+            <div class="metric-label">DB Status</div>
+            <div class="metric-value">{{ db_health_payload.database.status }}</div>
+            <div class="metric-caption">Latest readiness probe result</div>
+          </article>
+          <article class="metric-card">
+            <div class="metric-label">Auth Events</div>
+            <div class="metric-value">{{ auth_health_payload.auth.recent|length }}</div>
+            <div class="metric-caption">Recent auth checks</div>
+          </article>
+        </section>
+
+        <section class="content-grid">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Published Capability Surface</h3>
+                <div class="panel-copy">The endpoints Dewey advertises through `/obs_services`.</div>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Path</th>
+                    <th>Auth</th>
+                    <th>Kind</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for endpoint in obs_services_payload.endpoints %}
+                  <tr>
+                    <td class="mono">{{ endpoint.path }}</td>
+                    <td>{{ endpoint.auth }}</td>
+                    <td>{{ endpoint.kind }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>API Rollups</h3>
+                <div class="panel-copy">Most active request families.</div>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Family</th>
+                    <th>Requests</th>
+                    <th>Errors</th>
+                    <th>p95 ms</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for family in api_health_payload.families %}
+                  <tr>
+                    <td>{{ family.family }}</td>
+                    <td>{{ family.request_count }}</td>
+                    <td>{{ family.error_count }}</td>
+                    <td>{{ family.p95_ms }}</td>
+                  </tr>
+                  {% endfor %}
+                  {% if not api_health_payload.families %}
+                  <tr>
+                    <td colspan="4"><div class="empty-state">No request traffic captured yet.</div></td>
+                  </tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="content-grid">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Endpoint Rollups</h3>
+                <div class="panel-copy">Normalized route-template performance and status counts.</div>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Method</th>
+                    <th>Route</th>
+                    <th>Requests</th>
+                    <th>p95 ms</th>
+                    <th>5xx</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in endpoint_health_payload["items"] %}
+                  <tr>
+                    <td>{{ item.method }}</td>
+                    <td class="mono">{{ item.route_template }}</td>
+                    <td>{{ item.request_count }}</td>
+                    <td>{{ item.p95_ms }}</td>
+                    <td>{{ item.status_class_counts.get('5xx', 0) }}</td>
+                  </tr>
+                  {% endfor %}
+                  {% if not endpoint_health_payload["items"] %}
+                  <tr>
+                    <td colspan="5"><div class="empty-state">No route-level traffic captured yet.</div></td>
+                  </tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="stack">
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Database</h3>
+                  <div class="panel-copy">Probe status plus hot and slow operation families.</div>
+                </div>
+              </div>
+              <div class="stack">
+                <span class="pill">{{ db_health_payload.database.status }}</span>
+                {% if db_health_payload.database.latest %}
+                <span class="note mono">Latest: {{ db_health_payload.database.latest.fingerprint }}</span>
+                {% endif %}
+                {% for item in db_health_payload.database.slowest %}
+                <article class="panel" style="padding: 0.85rem 0.95rem; background: rgba(11, 17, 32, 0.78);">
+                  <div class="mono">{{ item.label }}</div>
+                  <div class="results-meta" style="margin-top: 0.55rem;">
+                    <span class="pill">p95 {{ item.p95_ms }} ms</span>
+                    <span class="pill">{{ item.request_count }} calls</span>
+                  </div>
+                </article>
+                {% endfor %}
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Auth</h3>
+                  <div class="panel-copy">Recent auth events for session and bearer access.</div>
+                </div>
+              </div>
+              <div class="stack">
+                <span class="pill">Configured: {{ auth_health_payload.auth.cognito_configured }}</span>
+                {% for event in auth_health_payload.auth.recent %}
+                <article class="panel" style="padding: 0.85rem 0.95rem; background: rgba(11, 17, 32, 0.78);">
+                  <div>{{ event.status }} via {{ event.mode }}</div>
+                  <div class="note mono">{{ event.fingerprint }}</div>
+                </article>
+                {% endfor %}
+                {% if not auth_health_payload.auth.recent %}
+                <div class="empty-state">No auth events captured yet.</div>
+                {% endif %}
+              </div>
+            </section>
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

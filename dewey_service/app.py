@@ -6,6 +6,7 @@ import csv
 import io
 import json
 from pathlib import Path
+from time import monotonic
 from typing import Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, status
@@ -25,6 +26,7 @@ from dewey_service.auth import (
     exchange_code,
     generate_state,
     require_api_auth,
+    require_observability_access,
     require_ui_session,
 )
 from dewey_service.domain_access import (
@@ -37,6 +39,19 @@ from dewey_service.service import DeweyConflictError, DeweyNotFoundError, DeweyS
 from dewey_service.settings import Settings, get_settings
 from dewey_service.storage import S3StorageClient
 from dewey_service.tapdb_backend import TapDBBackend
+from dewey_service.observability import (
+    DeweyObservabilityStore,
+    build_api_health_payload,
+    build_auth_health_payload,
+    build_db_health_payload,
+    build_endpoint_health_payload,
+    build_health_payload,
+    build_my_health_payload,
+    build_obs_services_payload,
+    hash_identifier,
+    probe_database,
+    route_template_from_request,
+)
 
 
 class ArtifactRegisterRequest(BaseModel):
@@ -263,6 +278,10 @@ def create_app(
     )
     app.state.settings = settings
     app.state.service = service
+    app.state.observability = DeweyObservabilityStore(settings, version=app.version)
+    backend = getattr(service, "backend", None)
+    if backend is not None and hasattr(backend, "observability"):
+        backend.observability = app.state.observability
     app.add_middleware(
         TrustedHostMiddleware,
         allowed_hosts=build_trusted_hosts(allow_local=allow_local_domain_access),
@@ -283,6 +302,7 @@ def create_app(
         app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
     api_auth_dep = require_api_auth(settings)
+    observability_auth_dep = require_observability_access(settings)
 
     def _template_context(**kwargs: Any) -> dict[str, Any]:
         context = {
@@ -387,6 +407,34 @@ def create_app(
             return HTMLResponse(status_code=403, content="Origin not allowed")
         return await call_next(request)
 
+    @app.middleware("http")
+    async def _capture_observability(request: Request, call_next):
+        request_id = str(request.headers.get("x-request-id") or "").strip() or generate_state()
+        correlation_source = (
+            str(request.headers.get("x-correlation-id") or "").strip()
+            or str(request.headers.get("traceparent") or "").strip()
+            or request_id
+        )
+        request.state.request_id = request_id
+        request.state.correlation_id = hash_identifier(correlation_source)
+        started = monotonic()
+        response = None
+        status_code = 500
+        try:
+            response = await call_next(request)
+            status_code = response.status_code
+            response.headers["X-Request-Id"] = request_id
+            response.headers["X-Correlation-Id"] = request.state.correlation_id
+            return response
+        finally:
+            app.state.observability.record_http_request(
+                method=request.method,
+                route_template=route_template_from_request(request),
+                status_code=status_code,
+                duration_ms=(monotonic() - started) * 1000,
+                path=request.url.path,
+            )
+
     def _require_idempotency_key(value: str | None) -> str:
         normalized = str(value or "").strip()
         if not normalized:
@@ -483,6 +531,102 @@ def create_app(
         logout_url = build_cognito_logout_url(settings=settings, state=state)
         return RedirectResponse(url=logout_url, status_code=status.HTTP_303_SEE_OTHER)
 
+    @app.get("/healthz")
+    async def healthz() -> dict[str, str]:
+        return {"status": "ok", "version": app.version}
+
+    @app.get("/readyz")
+    async def readyz(request: Request) -> JSONResponse:
+        probe = probe_database(service)
+        app.state.observability.record_db_probe(
+            status=str(probe["status"]),
+            latency_ms=float(probe["latency_ms"]),
+            detail=str(probe["detail"]),
+        )
+        payload = {
+            "status": "ok" if probe["status"] == "ok" else "degraded",
+            "version": app.version,
+            "database": probe,
+        }
+        return JSONResponse(status_code=200 if probe["status"] == "ok" else 503, content=payload)
+
+    @app.get("/health")
+    async def health(
+        request: Request,
+        _auth: dict[str, Any] = Depends(observability_auth_dep),
+    ) -> dict[str, Any]:
+        latest_db = app.state.observability.latest_db_probe()
+        projection = app.state.observability.projection(
+            observed_at=(latest_db or {}).get("observed_at")
+        )
+        return build_health_payload(
+            request,
+            projection=projection,
+            health_snapshot=app.state.observability.health_snapshot(),
+        )
+
+    @app.get("/obs_services")
+    async def obs_services(
+        request: Request,
+        _auth: dict[str, Any] = Depends(observability_auth_dep),
+    ) -> dict[str, Any]:
+        projection, snapshot = app.state.observability.obs_services_snapshot()
+        return build_obs_services_payload(request, projection=projection, snapshot=snapshot)
+
+    @app.get("/api_health")
+    async def api_health(
+        request: Request,
+        _auth: dict[str, Any] = Depends(observability_auth_dep),
+    ) -> dict[str, Any]:
+        projection, families = app.state.observability.api_health()
+        return build_api_health_payload(request, projection=projection, families=families)
+
+    @app.get("/endpoint_health")
+    async def endpoint_health(
+        request: Request,
+        offset: int = Query(0, ge=0),
+        limit: int = Query(25, ge=1, le=200),
+        _auth: dict[str, Any] = Depends(observability_auth_dep),
+    ) -> dict[str, Any]:
+        projection, payload = app.state.observability.endpoint_health(offset=offset, limit=limit)
+        return build_endpoint_health_payload(
+            request,
+            projection=projection,
+            total=int(payload["total"]),
+            offset=int(payload["offset"]),
+            limit=int(payload["limit"]),
+            items=list(payload["items"]),
+        )
+
+    @app.get("/db_health")
+    async def db_health(
+        request: Request,
+        _auth: dict[str, Any] = Depends(observability_auth_dep),
+    ) -> dict[str, Any]:
+        probe = probe_database(service)
+        app.state.observability.record_db_probe(
+            status=str(probe["status"]),
+            latency_ms=float(probe["latency_ms"]),
+            detail=str(probe["detail"]),
+        )
+        projection, payload = app.state.observability.db_health()
+        return build_db_health_payload(request, projection=projection, db_health=payload)
+
+    @app.get("/my_health")
+    async def my_health(
+        request: Request,
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> dict[str, Any]:
+        return build_my_health_payload(request, profile)
+
+    @app.get("/auth_health")
+    async def auth_health(
+        request: Request,
+        _auth: dict[str, Any] = Depends(observability_auth_dep),
+    ) -> dict[str, Any]:
+        projection, payload = app.state.observability.auth_health()
+        return build_auth_health_payload(request, projection=projection, auth_rollup=payload)
+
     @app.get("/ui", include_in_schema=False)
     async def ui_home(
         request: Request, profile: dict[str, Any] = Depends(require_ui_session)
@@ -509,6 +653,54 @@ def create_app(
                     "recent_import_count": recent_imports,
                     "verification_failures": verification_failures,
                 },
+            ),
+        )
+
+    @app.get("/ui/observability", include_in_schema=False)
+    async def observability_page(
+        request: Request, profile: dict[str, Any] = Depends(require_ui_session)
+    ) -> HTMLResponse:
+        obs_projection, obs_snapshot = app.state.observability.obs_services_snapshot()
+        api_projection, api_families = app.state.observability.api_health()
+        endpoint_projection, endpoint_page = app.state.observability.endpoint_health(
+            offset=0,
+            limit=25,
+        )
+        db_projection, db_payload = app.state.observability.db_health()
+        auth_projection, auth_payload = app.state.observability.auth_health()
+        return templates.TemplateResponse(
+            request,
+            "observability.html",
+            _template_context(
+                profile=profile,
+                obs_services_payload=build_obs_services_payload(
+                    request,
+                    projection=obs_projection,
+                    snapshot=obs_snapshot,
+                ),
+                api_health_payload=build_api_health_payload(
+                    request,
+                    projection=api_projection,
+                    families=api_families,
+                ),
+                endpoint_health_payload=build_endpoint_health_payload(
+                    request,
+                    projection=endpoint_projection,
+                    total=int(endpoint_page["total"]),
+                    offset=int(endpoint_page["offset"]),
+                    limit=int(endpoint_page["limit"]),
+                    items=list(endpoint_page["items"]),
+                ),
+                db_health_payload=build_db_health_payload(
+                    request,
+                    projection=db_projection,
+                    db_health=db_payload,
+                ),
+                auth_health_payload=build_auth_health_payload(
+                    request,
+                    projection=auth_projection,
+                    auth_rollup=auth_payload,
+                ),
             ),
         )
 

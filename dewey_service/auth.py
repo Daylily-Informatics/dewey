@@ -110,5 +110,73 @@ def require_api_auth(settings: Settings):
 def require_ui_session(request: Request) -> dict[str, Any]:
     profile = request.session.get("operator_profile")
     if not isinstance(profile, dict):
+        store = getattr(request.app.state, "observability", None)
+        if store is not None:
+            store.record_auth_event(
+                status="denied",
+                mode="anonymous",
+                detail="ui_session",
+                service_principal=False,
+            )
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Login required")
+    store = getattr(request.app.state, "observability", None)
+    if store is not None:
+        store.record_auth_event(
+            status="ok",
+            mode="cognito",
+            detail="ui_session",
+            service_principal=False,
+        )
+    request.state.auth_mode = "cognito"
     return profile
+
+
+def require_observability_access(settings: Settings):
+    bearer = HTTPBearer(auto_error=False)
+
+    def _require_observability_access(
+        request: Request,
+        credentials: HTTPAuthorizationCredentials | None = Depends(bearer),
+    ) -> dict[str, Any]:
+        profile = request.session.get("operator_profile")
+        if isinstance(profile, dict):
+            store = getattr(request.app.state, "observability", None)
+            if store is not None:
+                store.record_auth_event(
+                    status="ok",
+                    mode="cognito",
+                    detail="session",
+                    service_principal=False,
+                )
+            request.state.auth_mode = "cognito"
+            return {"auth_mode": "cognito", "service_principal": False, "profile": profile}
+
+        if credentials is not None:
+            token = str(credentials.credentials or "").strip()
+            if token in settings.api_tokens():
+                store = getattr(request.app.state, "observability", None)
+                if store is not None:
+                    store.record_auth_event(
+                        status="ok",
+                        mode="service_token",
+                        detail="bearer",
+                        service_principal=True,
+                    )
+                request.state.auth_mode = "service_token"
+                return {"auth_mode": "service_token", "service_principal": True}
+
+        store = getattr(request.app.state, "observability", None)
+        if store is not None:
+            store.record_auth_event(
+                status="denied",
+                mode="anonymous",
+                detail="observability",
+                service_principal=False,
+            )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing bearer token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return _require_observability_access

@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import datetime as dt
+import inspect
 import os
 from contextlib import contextmanager
 from hashlib import sha256
+from time import monotonic
 from typing import Any, Generator, Optional, cast
 
 from daylily_tapdb import (
@@ -95,11 +97,32 @@ class TapDBBackend:
         )
         self.templates = TemplateManager()
         self.factory = InstanceFactory(self.templates)
+        self.observability = None
 
     @contextmanager
     def session_scope(self, commit: bool = False) -> Generator[Session, None, None]:
-        with self.connection.session_scope(commit=commit) as session:
-            yield session
+        started = monotonic()
+        success = False
+        try:
+            with self.connection.session_scope(commit=commit) as session:
+                yield session
+                success = True
+        finally:
+            if self.observability is not None:
+                self.observability.record_db_operation(
+                    label=self._operation_label(),
+                    duration_ms=(monotonic() - started) * 1000,
+                    success=success,
+                )
+
+    def _operation_label(self) -> str:
+        for frame_info in inspect.stack(context=0):
+            filename = str(frame_info.filename or "")
+            if filename.endswith("/dewey_service/service.py"):
+                return f"service:{frame_info.function}"
+            if filename.endswith("/dewey_service/app.py"):
+                return f"app:{frame_info.function}"
+        return "tapdb_session"
 
     def ensure_templates(self, session: Session) -> None:
         missing = [
