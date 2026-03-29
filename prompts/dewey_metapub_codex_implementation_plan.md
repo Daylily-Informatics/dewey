@@ -4,7 +4,7 @@
 
 - Target document: `prompts/dewey_metapub_codex_implementation_plan.md`. When execution starts, first create feature branch `codex/dewey-metapub-mvp` from the current detached `HEAD`, then write this document into that path before code changes.
 - Add a Dewey-first literature workflow on the existing FastAPI + TapDB + Cognito stack only: PubMed search, canonical literature artifact creation/reuse, per-user save/visibility records, and literature-aware `/search` enrichment.
-- Keep `metapub` external to Dewey. Do not vendor it and do not pin a guessed version in project dependencies. Use an optional runtime import guard plus a README note pointing operators at the pip-installable forked repo source the user identified.
+- Keep `metapub` external to Dewey. Do not vendor it and do not pin a guessed version in project dependencies. Use an optional runtime import guard plus a README note pointing maintainers at the pip-installable forked repo source the user identified.
 
 ## Public Interfaces
 

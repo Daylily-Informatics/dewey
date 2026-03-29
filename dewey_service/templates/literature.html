@@ -21,6 +21,9 @@
         <div class="navlinks">
           <a class="navlink" href="/ui">Dashboard</a>
           <a class="navlink" href="/search">Unified Search</a>
+          {% if is_admin %}
+          <a class="navlink" href="/admin">Admin</a>
+          {% endif %}
           <form class="logout-form" method="post" action="/logout">
             <button type="submit">Logout</button>
           </form>
@@ -48,7 +51,7 @@
             <div class="panel-header">
               <div>
                 <h3>Search PubMed</h3>
-                <div class="panel-copy">Use the existing Dewey operator surface with minimal client logic.</div>
+                <div class="panel-copy">Use the existing Dewey browser surface with minimal client logic.</div>
               </div>
             </div>
             <form method="get" action="/literature">
@@ -153,10 +156,10 @@
                     <label>Allowed Users</label>
                     <input data-allowed-users type="text" placeholder="user1@example.com, user2@example.com" />
                   </div>
-                  <div class="field field-wide">
-                    <label>Allowed Groups</label>
-                    <input data-allowed-groups type="text" placeholder="operators, reviewers" />
-                  </div>
+                <div class="field field-wide">
+                  <label>Allowed Groups</label>
+                    <input data-allowed-groups type="text" placeholder="dewey-readwrite, dewey-admin" />
+                </div>
                 </div>
                 <div class="form-actions" style="margin-top: 0.75rem;">
                   <button class="button button-primary" type="button" onclick="submitLiteratureSave(this)">Save To Dewey</button>

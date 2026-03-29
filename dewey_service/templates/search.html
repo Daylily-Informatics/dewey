@@ -21,6 +21,9 @@
         <div class="navlinks">
           <a class="navlink" href="/literature">Literature Search</a>
           <a class="navlink" href="/ui">Dashboard</a>
+          {% if is_admin %}
+          <a class="navlink" href="/admin">Admin</a>
+          {% endif %}
           <form class="logout-form" method="post" action="/logout">
             <button type="submit">Logout</button>
           </form>
@@ -29,14 +32,14 @@
 
       <main class="page">
         <section class="hero">
-          <div class="hero-copy">
-            <div class="eyebrow">Search V2</div>
-            <h2>Query Dewey records, then export the result set cleanly.</h2>
-            <p>
-              Search spans artifact records and share-reference records with focused filters
-              for lifecycle status, producer identity, and external-object linkage.
-            </p>
-          </div>
+            <div class="hero-copy">
+              <div class="eyebrow">Search V2</div>
+              <h2>Query Dewey records, then export the result set cleanly.</h2>
+              <p>
+                Search spans artifact records and share-reference records with focused filters
+                for lifecycle status, producer identity, and external-object linkage.
+              </p>
+            </div>
               <div class="results-meta">
             <span class="pill pill-active">{{ result["total"] }} matches</span>
             <span class="pill">{{ result["timing_ms"] }} ms</span>

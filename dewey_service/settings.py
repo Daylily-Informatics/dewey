@@ -8,8 +8,10 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from pydantic import field_validator, model_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from dewey_service.rbac import DEFAULT_COGNITO_GROUP_ROLE_MAP, normalize_group_role_map
 
 
 def _require_https_url(value: str, *, field_name: str) -> str:
@@ -44,7 +46,9 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
     def _write(prefix: str, payload: dict[str, Any]) -> None:
         for key, value in payload.items():
             merged = f"{prefix}_{key}" if prefix else str(key)
-            if isinstance(value, dict):
+            if merged == "auth_cognito_group_role_map" and isinstance(value, dict):
+                out[merged] = value
+            elif isinstance(value, dict):
                 _write(merged, value)
             else:
                 out[merged] = value
@@ -77,6 +81,7 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "auth_cognito_logout_url": "cognito_logout_url",
         "auth_cognito_user_pool_id": "cognito_user_pool_id",
         "auth_cognito_region": "cognito_region",
+        "auth_cognito_group_role_map": "cognito_group_role_map",
         "deployment_name": "deployment_name",
         "deployment_color": "deployment_color",
         "deployment_is_production": "deployment_is_production",
@@ -102,7 +107,7 @@ class Settings(BaseSettings):
     port: int = 8914
     verify_ssl: bool = True
 
-    # Cognito-backed operator UI auth
+    # Cognito-backed browser UI auth
     cognito_domain: str = ""
     cognito_app_client_id: str = ""
     cognito_app_client_secret: str = ""
@@ -110,6 +115,9 @@ class Settings(BaseSettings):
     cognito_logout_url: str = "https://localhost:8914/login"
     cognito_user_pool_id: str = ""
     cognito_region: str = "us-west-2"
+    cognito_group_role_map: dict[str, str] = Field(
+        default_factory=lambda: dict(DEFAULT_COGNITO_GROUP_ROLE_MAP)
+    )
 
     deployment_name: str = ""
     deployment_color: str = "#0f766e"
@@ -172,6 +180,11 @@ class Settings(BaseSettings):
             raise ValueError("api_bearer_token is required")
         return normalized
 
+    @field_validator("cognito_group_role_map", mode="before")
+    @classmethod
+    def validate_cognito_group_role_map(cls, value: Any) -> dict[str, str]:
+        return normalize_group_role_map(value)
+
     @field_validator("environment")
     @classmethod
     def validate_environment(cls, value: str) -> str:
@@ -229,7 +242,6 @@ class Settings(BaseSettings):
             if str(item or "").strip()
         }
 
-
 def get_config_file_path() -> Path:
     return _default_config_path()
 
@@ -250,6 +262,7 @@ def load_settings(config_path: Path | None = None) -> Settings:
         "cognito_logout_url": "https://localhost:8914/login",
         "cognito_user_pool_id": "",
         "cognito_region": "us-west-2",
+        "cognito_group_role_map": dict(DEFAULT_COGNITO_GROUP_ROLE_MAP),
         "deployment_name": "",
         "deployment_color": "#0f766e",
         "deployment_is_production": False,

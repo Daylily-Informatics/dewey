@@ -3,7 +3,7 @@ from __future__ import annotations
 from urllib.parse import parse_qs, urlparse
 
 
-def _login_operator(monkeypatch, client) -> None:
+def _login_user(monkeypatch, client, groups: list[str] | None = None) -> None:
     monkeypatch.setattr(
         "dewey_service.app.exchange_code",
         lambda settings, code: {"id_token": "header.payload.sig"},
@@ -13,7 +13,7 @@ def _login_operator(monkeypatch, client) -> None:
         lambda token: {
             "email": "operator@example.com",
             "sub": "sub-1",
-            "cognito:groups": ["operators"],
+            "cognito:groups": groups or ["dewey-readwrite"],
         },
     )
     login = client.get("/auth/login", follow_redirects=False)
@@ -32,7 +32,7 @@ def test_literature_page_requires_login(client) -> None:
 
 
 def test_literature_page_and_search_render_after_login(monkeypatch, client) -> None:
-    _login_operator(monkeypatch, client)
+    _login_user(monkeypatch, client)
 
     response = client.get("/literature", params={"q": "gene therapy"})
     assert response.status_code == 200
@@ -41,7 +41,7 @@ def test_literature_page_and_search_render_after_login(monkeypatch, client) -> N
 
 
 def test_literature_search_and_save_routes(monkeypatch, client) -> None:
-    _login_operator(monkeypatch, client)
+    _login_user(monkeypatch, client)
 
     search = client.post(
         "/api/v1/literature/search",
@@ -64,7 +64,7 @@ def test_literature_search_and_save_routes(monkeypatch, client) -> None:
             "save_mode": "auto",
             "visibility_scope": "restricted",
             "allowed_users": ["auditor@example.com"],
-            "allowed_groups": ["reviewers"],
+            "allowed_groups": ["dewey-readwrite"],
         },
     )
     assert saved.status_code == 200
@@ -94,7 +94,7 @@ def test_literature_search_and_save_routes(monkeypatch, client) -> None:
 
 
 def test_literature_search_page_shows_saved_badges(monkeypatch, client) -> None:
-    _login_operator(monkeypatch, client)
+    _login_user(monkeypatch, client)
 
     client.post(
         "/api/v1/literature/save",
@@ -115,7 +115,7 @@ def test_literature_endpoints_return_503_when_unavailable(
     monkeypatch, client, fake_service
 ) -> None:
     fake_service.literature = None
-    _login_operator(monkeypatch, client)
+    _login_user(monkeypatch, client)
 
     response = client.post(
         "/api/v1/literature/search",
