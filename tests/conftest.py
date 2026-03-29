@@ -20,6 +20,7 @@ class FakeDeweyService:
         self._external_rel_seq = 1
         self._literature_save_seq = 1
         self._upload_seq = 1
+        self._anomaly_seq = 1
         self.literature = object()
         self.artifacts: dict[str, dict[str, Any]] = {}
         self.artifact_sets: dict[str, dict[str, Any]] = {}
@@ -27,6 +28,42 @@ class FakeDeweyService:
         self.external_objects: dict[str, dict[str, Any]] = {}
         self.external_relations: list[dict[str, Any]] = []
         self.literature_saves: dict[str, dict[str, Any]] = {}
+        self.anomalies: dict[str, dict[str, Any]] = {
+            "ANM-000001": {
+                "anomaly_id": "ANM-000001",
+                "anomaly_identity_key": "dewey.readiness.bootstrap_gap",
+                "category": "readiness",
+                "severity": "medium",
+                "status": "open",
+                "title": "Readiness probe observed a bootstrap gap",
+                "summary": "The local readiness surface recorded a brief backend-unavailable state during bootstrap.",
+                "source": "readyz",
+                "first_seen_at": "2026-03-10T00:00:00Z",
+                "last_seen_at": "2026-03-10T00:00:00Z",
+                "occurrence_count": 1,
+                "redacted_context": {"database_status": "unknown"},
+                "recommended_action": "Review readiness and database startup timing.",
+                "source_view_url": "/ui/anomalies/ANM-000001",
+                "created_at": "2026-03-10T00:00:00Z",
+            },
+            "ANM-000002": {
+                "anomaly_id": "ANM-000002",
+                "anomaly_identity_key": "dewey.auth.session_activity_low",
+                "category": "auth",
+                "severity": "low",
+                "status": "monitoring",
+                "title": "Operator session activity is sparse",
+                "summary": "No recent browser-session auth events are present in the local anomaly record.",
+                "source": "auth_health",
+                "first_seen_at": "2026-03-10T00:00:00Z",
+                "last_seen_at": "2026-03-10T00:00:00Z",
+                "occurrence_count": 1,
+                "redacted_context": {"recent_successes": 0},
+                "recommended_action": "Confirm an operator can complete browser login during smoke testing.",
+                "source_view_url": "/ui/anomalies/ANM-000002",
+                "created_at": "2026-03-10T00:00:00Z",
+            },
+        }
         self.literature_records: dict[str, dict[str, Any]] = {
             "123456": {
                 "pmid": "123456",
@@ -532,6 +569,16 @@ class FakeDeweyService:
         if target_euid:
             rows = [row for row in rows if row["target_euid"] == target_euid]
         return rows[:limit]
+
+    def list_anomalies(self, *, limit: int = 200):
+        return list(self.anomalies.values())[:limit]
+
+    def get_anomaly(self, anomaly_id: str):
+        from dewey_service.service import DeweyNotFoundError
+
+        if anomaly_id not in self.anomalies:
+            raise DeweyNotFoundError(f"Anomaly not found: {anomaly_id}")
+        return dict(self.anomalies[anomaly_id])
 
     def create_external_object(
         self,

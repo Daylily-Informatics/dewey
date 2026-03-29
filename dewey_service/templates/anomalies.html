@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dewey Anomalies</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/console.css" />
+  </head>
+  <body>
+    {% if deployment.name and not deployment.is_production %}
+    <div class="deployment-banner" style="background: {{ deployment.color }};">{{ deployment.name|upper }}</div>
+    {% endif %}
+    <div class="shell">
+      <header class="topbar">
+        <div class="brandline">
+          <div class="eyebrow">Dewey Operator Console</div>
+          <h1 class="title">Anomalies</h1>
+          <div class="subtitle">{{ profile.email }}</div>
+        </div>
+        <div class="navlinks">
+          <a class="navlink" href="/ui">Dashboard</a>
+          <a class="navlink" href="/ui/observability">Observability</a>
+          <a class="navlink" href="/admin">Admin</a>
+          <form class="logout-form" method="post" action="/logout">
+            <button type="submit">Logout</button>
+          </form>
+        </div>
+      </header>
+
+      <main class="page">
+        <section class="hero">
+          <div class="hero-copy">
+            <div class="eyebrow">Read-only local records</div>
+            <h2>Persisted anomaly records for this Dewey instance.</h2>
+            <p>
+              These are local operational summaries only. They are not release authority and they
+              do not mutate backend state.
+            </p>
+          </div>
+          <span class="pill pill-active">{{ anomalies|length }} records</span>
+        </section>
+
+        <section class="panel">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Anomaly</th>
+                  <th>Severity</th>
+                  <th>Status</th>
+                  <th>Source</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in anomalies %}
+                <tr>
+                  <td>
+                    <div class="mono">{{ item.anomaly_id }}</div>
+                    <div>{{ item.title }}</div>
+                  </td>
+                  <td>{{ item.severity }}</td>
+                  <td>{{ item.status }}</td>
+                  <td class="mono">{{ item.source }}</td>
+                  <td><a class="button" href="/ui/anomalies/{{ item.anomaly_id }}">Open</a></td>
+                </tr>
+                {% endfor %}
+                {% if not anomalies %}
+                <tr>
+                  <td colspan="5"><div class="empty-state">No anomalies recorded yet.</div></td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

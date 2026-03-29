@@ -45,6 +45,7 @@ SHARE_REFERENCE_TEMPLATE = "dewey/data/share_reference/1.0/"
 EXTERNAL_OBJECT_TEMPLATE = "dewey/integration/external_object/1.0/"
 EXTERNAL_OBJECT_RELATION_TEMPLATE = "dewey/integration/external_object_relation/1.0/"
 LITERATURE_SAVE_TEMPLATE = "dewey/access/literature_save/1.0/"
+ANOMALY_TEMPLATE = "dewey/operational/anomaly/1.0/"
 IDEMPOTENCY_TEMPLATE = "dewey/system/idempotency_request/1.0/"
 
 
@@ -55,6 +56,7 @@ TEMPLATE_DEFINITIONS: tuple[str, ...] = (
     EXTERNAL_OBJECT_TEMPLATE,
     EXTERNAL_OBJECT_RELATION_TEMPLATE,
     LITERATURE_SAVE_TEMPLATE,
+    ANOMALY_TEMPLATE,
     IDEMPOTENCY_TEMPLATE,
 )
 
