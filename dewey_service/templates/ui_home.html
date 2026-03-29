@@ -14,7 +14,7 @@
     <div class="shell">
       <header class="topbar">
         <div class="brandline">
-          <div class="eyebrow">Dewey Operator Console</div>
+          <div class="eyebrow">Dewey Console</div>
           <h1 class="title">Artifact Control Room</h1>
           <div class="subtitle">{{ profile.email }}</div>
         </div>
@@ -22,6 +22,9 @@
           <a class="navlink" href="/literature">Literature Search</a>
           <a class="navlink" href="/search">Unified Search</a>
           <a class="navlink" href="/ui/observability">Observability</a>
+          {% if is_admin %}
+          <a class="navlink" href="/admin">Admin</a>
+          {% endif %}
           <form class="logout-form" method="post" action="/logout">
             <button type="submit">Logout</button>
           </form>
@@ -38,7 +41,7 @@
               leaving the Dewey surface.
             </p>
           </div>
-          <span class="pill pill-active">Authenticated Operator View</span>
+          <span class="pill pill-active">Authenticated User View</span>
         </section>
 
         <section class="metrics">
@@ -157,7 +160,7 @@
             <section class="panel">
               <div class="panel-header">
                 <div>
-                  <h3>Operator Notes</h3>
+                  <h3>User Notes</h3>
                   <div class="panel-copy">
                     File parity is now centered on artifact registration, storage lifecycle,
                     sharing, and search. File sets stay incidental.

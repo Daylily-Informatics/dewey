@@ -9,6 +9,7 @@ from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 
 import dewey_service.auth as auth_mod
+from dewey_service.rbac import Role
 from dewey_service.settings import Settings
 
 
@@ -111,11 +112,47 @@ def test_require_api_auth_validates_tokens() -> None:
     assert invalid_exc.value.detail == "Invalid bearer token"
 
 
-def test_require_ui_session_requires_operator_profile() -> None:
-    request = SimpleNamespace(session={"operator_profile": {"email": "user@example.com"}})
-    assert auth_mod.require_ui_session(request) == {"email": "user@example.com"}
+def test_require_ui_session_requires_profile() -> None:
+    request = SimpleNamespace(
+        session={
+            "operator_profile": {
+                "email": "user@example.com",
+                "sub": "sub-1",
+                "groups": ["dewey-readwrite"],
+            }
+        }
+    )
+    profile = auth_mod.require_ui_session(request)
+    assert profile["email"] == "user@example.com"
+    assert profile["roles"] == [Role.READ_WRITE.value]
 
     with pytest.raises(HTTPException) as exc:
         auth_mod.require_ui_session(SimpleNamespace(session={}))
     assert exc.value.status_code == 401
     assert exc.value.detail == "Login required"
+
+
+def test_require_ui_admin_session_requires_admin_role() -> None:
+    request = SimpleNamespace(
+        session={
+            "operator_profile": {
+                "email": "user@example.com",
+                "roles": [Role.ADMIN.value],
+            }
+        }
+    )
+    assert auth_mod.require_ui_admin_session(request)["email"] == "user@example.com"
+
+    with pytest.raises(HTTPException) as exc:
+        auth_mod.require_ui_admin_session(
+            SimpleNamespace(
+                session={
+                    "operator_profile": {
+                        "email": "user@example.com",
+                        "sub": "sub-1",
+                        "groups": ["dewey-readwrite"],
+                    }
+                }
+            )
+        )
+    assert exc.value.status_code == 403

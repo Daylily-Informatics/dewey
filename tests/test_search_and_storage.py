@@ -3,14 +3,14 @@ from __future__ import annotations
 from urllib.parse import parse_qs, urlparse
 
 
-def _login_operator(monkeypatch, client) -> None:
+def _login_user(monkeypatch, client, groups: list[str] | None = None) -> None:
     monkeypatch.setattr(
         "dewey_service.app.exchange_code",
         lambda settings, code: {"id_token": "header.payload.sig"},
     )
     monkeypatch.setattr(
         "dewey_service.app.decode_jwt_claims_noverify",
-        lambda token: {"email": "operator@example.com", "sub": "sub-1"},
+        lambda token: {"email": "operator@example.com", "sub": "sub-1", "cognito:groups": groups or ["dewey-readwrite"]},
     )
     login = client.get("/auth/login", follow_redirects=False)
     parsed = urlparse(login.headers["location"])
@@ -116,7 +116,7 @@ def test_search_api_query_and_export(client) -> None:
 
 
 def test_search_page_renders_after_login(monkeypatch, client) -> None:
-    _login_operator(monkeypatch, client)
+    _login_user(monkeypatch, client)
 
     response = client.get("/search")
     assert response.status_code == 200
@@ -135,7 +135,7 @@ def test_search_export_page_returns_authenticated_json_results(monkeypatch, clie
             "original_filename": "operator-view.pdf",
         },
     )
-    _login_operator(monkeypatch, client)
+    _login_user(monkeypatch, client)
 
     response = client.get(
         "/search/export",

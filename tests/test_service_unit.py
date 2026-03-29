@@ -805,7 +805,11 @@ def test_literature_save_reuses_artifact_and_hides_private_saves(
         "dewey_service.service.requests.get", lambda *args, **kwargs: _PdfResponse()
     )
 
-    owner = ViewerContext(subject="sub-1", email="owner@example.com", groups=("operators",))
+    owner = ViewerContext(
+        subject="sub-1",
+        email="owner@example.com",
+        groups=("dewey-readwrite",),
+    )
     collaborator = ViewerContext(subject="sub-2", email="collab@example.com", groups=("reviewers",))
     auditor = ViewerContext(subject="sub-3", email="auditor@example.com", groups=("reviewers",))
 
@@ -847,7 +851,11 @@ def test_literature_external_artifact_promotes_in_place(
     service: DeweyService,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    viewer = ViewerContext(subject="sub-1", email="owner@example.com", groups=("operators",))
+    viewer = ViewerContext(
+        subject="sub-1",
+        email="owner@example.com",
+        groups=("dewey-readwrite",),
+    )
 
     first_code, first = service.save_literature(
         viewer=viewer,
@@ -895,7 +903,11 @@ def test_literature_external_artifact_promotes_in_place(
 
 
 def test_literature_query_search_v2_enrichment(service: DeweyService) -> None:
-    viewer = ViewerContext(subject="sub-1", email="owner@example.com", groups=("operators",))
+    viewer = ViewerContext(
+        subject="sub-1",
+        email="owner@example.com",
+        groups=("dewey-readwrite",),
+    )
 
     service.save_literature(
         viewer=viewer,

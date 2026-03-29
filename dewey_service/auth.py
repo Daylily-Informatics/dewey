@@ -1,4 +1,4 @@
-"""Authentication helpers for Dewey API and operator UI."""
+"""Authentication helpers for Dewey API and browser UI."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ from daylily_cognito import build_authorization_url, exchange_authorization_code
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from dewey_service.rbac import Role, normalize_session_profile, profile_has_role
 from dewey_service.settings import Settings
 
 
@@ -128,7 +129,38 @@ def require_ui_session(request: Request) -> dict[str, Any]:
             service_principal=False,
         )
     request.state.auth_mode = "cognito"
+    if "roles" not in profile:
+        return normalize_session_profile(
+            email=profile.get("email"),
+            sub=profile.get("sub"),
+            groups=profile.get("groups"),
+        )
     return profile
+
+
+def require_ui_admin_session(request: Request) -> dict[str, Any]:
+    profile = require_ui_session(request)
+    if not profile_has_role(profile, Role.ADMIN):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
+    return profile
+
+
+def build_session_profile(
+    *,
+    settings: Settings,
+    email: str,
+    sub: str,
+    groups: list[str] | tuple[str, ...] | None,
+) -> dict[str, Any]:
+    return normalize_session_profile(
+        email=email,
+        sub=sub,
+        groups=groups,
+        group_role_map=settings.cognito_group_role_map,
+    )
 
 
 def require_observability_access(settings: Settings):
