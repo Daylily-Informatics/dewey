@@ -191,7 +191,7 @@ class MetapubAdapter:
     ) -> None:
         if PubMedFetcher is None or FindIt is None:
             raise LiteratureUnavailableError(
-                "Literature endpoints require metapub to be installed from the forked source repo."
+                "Literature endpoints require metapub to be installed in the Dewey environment."
             ) from METAPUB_IMPORT_ERROR
         cachedir = str(cache_dir or "").strip() or None
         if cachedir:

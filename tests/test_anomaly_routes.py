@@ -36,6 +36,11 @@ def test_anomaly_api_requires_bearer_token(client) -> None:
     assert response.status_code == 401
 
 
+def test_anomaly_ui_requires_login(client) -> None:
+    response = client.get("/ui/anomalies", follow_redirects=False)
+    assert response.status_code == 401
+
+
 def test_anomaly_api_and_ui_view_round_trip(monkeypatch, client) -> None:
     _login_operator(monkeypatch, client)
 

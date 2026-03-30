@@ -808,7 +808,7 @@ def create_app(
             )
         elif service.literature is None:
             raise LiteratureUnavailableError(
-                "Literature endpoints require metapub to be installed from the forked source repo."
+                "Literature endpoints require metapub to be installed in the Dewey environment."
             )
         return templates.TemplateResponse(
             request,

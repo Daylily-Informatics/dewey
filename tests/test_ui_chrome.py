@@ -69,9 +69,15 @@ def test_ui_page_renders_banner_after_login(monkeypatch, fake_service) -> None:
     assert ui.status_code == 200
     assert "STAGING" in ui.text
     assert "/static/favicon.svg" in ui.text
+    assert "/literature" in ui.text
+    assert "/search" in ui.text
+    assert "/ui/anomalies" in ui.text
     assert "/admin" in ui.text
+    assert "Register/upload/import via API or CLI only" in ui.text
     assert admin.status_code == 200
-    assert "Stub Admin Surface" in admin.text
+    assert "Dewey Admin" in admin.text
+    assert "Operator Anomalies" in admin.text
+    assert "Open anomaly view" in admin.text
 
 
 def test_favicon_route_redirects_to_svg(fake_service) -> None:
