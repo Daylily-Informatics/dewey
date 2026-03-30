@@ -34,14 +34,17 @@
 
       <main class="page">
         <section class="hero">
-          <div class="hero-copy">
-            <div class="eyebrow">PubMed Discovery</div>
-            <h2>Search PubMed, then register canonical literature artifacts in Dewey.</h2>
-            <p>
-              Search uses metapub for metadata and full-text discovery while Dewey stays the
-              canonical system of record for saved papers and visibility.
-            </p>
-          </div>
+            <div class="hero-copy">
+              <div class="eyebrow">PubMed Discovery</div>
+              <h2>Search PubMed, then register canonical literature artifacts in Dewey.</h2>
+              <p>
+                Search uses metapub for metadata and full-text discovery while Dewey stays the
+                canonical system of record for saved papers and visibility.
+              </p>
+              <p class="note">
+                This browser flow is for search and save only. Dewey does not expose a browser upload/register-S3 path here; use the API or CLI for artifact ingestion.
+              </p>
+            </div>
           <div class="results-meta">
             <span class="pill pill-active">{{ result["total"] }} results</span>
             <span class="pill">{{ result["timing_ms"] }} ms</span>

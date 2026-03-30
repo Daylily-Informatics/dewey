@@ -38,6 +38,8 @@ def test_literature_page_and_search_render_after_login(monkeypatch, client) -> N
     assert response.status_code == 200
     assert "PubMed Search And Save" in response.text
     assert "Gene Therapy For Example Disease" in response.text
+    assert "browser upload/register-S3" in response.text
+    assert "metapub" in response.text.lower()
 
 
 def test_literature_search_and_save_routes(monkeypatch, client) -> None:

@@ -57,7 +57,8 @@ def test_admin_session_exposes_admin_tab_and_page(monkeypatch, client) -> None:
 
     admin = client.get("/admin")
     assert admin.status_code == 200
-    assert "Stub Admin Surface" in admin.text
+    assert "Dewey Admin" in admin.text
+    assert "Operator Anomalies" in admin.text
 
 
 def test_logout_clears_session_and_redirects_to_cognito(monkeypatch, client, test_settings) -> None:
