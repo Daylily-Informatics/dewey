@@ -30,6 +30,7 @@ from cli_core_yo.server import (
 )
 
 from dewey_service.cli.common import PROJECT_ROOT, console
+from dewey_service.defaults import DEFAULT_APP_PORT
 from dewey_service.settings import clear_settings_cache, get_settings
 
 server_app = typer.Typer(help="HTTPS API/UI server commands")
@@ -215,7 +216,7 @@ def _stop_server() -> None:
 @server_app.command("start")
 def start(
     host: str = typer.Option("0.0.0.0", "--host", help="Host to bind"),
-    port: int = typer.Option(8914, "--port", "-p", help="Port to bind"),
+    port: int = typer.Option(DEFAULT_APP_PORT, "--port", "-p", help="Port to bind"),
     reload: bool = typer.Option(False, "--reload/--no-reload", help="Enable autoreload"),
     background: bool = typer.Option(
         True,
@@ -291,7 +292,7 @@ def logs(
 @server_app.command("restart")
 def restart(
     host: str = typer.Option("0.0.0.0", "--host", help="Host to bind"),
-    port: int = typer.Option(8914, "--port", "-p", help="Port to bind"),
+    port: int = typer.Option(DEFAULT_APP_PORT, "--port", "-p", help="Port to bind"),
     check_cognito_uris: bool = typer.Option(
         True,
         "--check-cognito-uris/--no-check-cognito-uris",

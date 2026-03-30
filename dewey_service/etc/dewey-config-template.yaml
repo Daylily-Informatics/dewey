@@ -3,7 +3,7 @@
 # Create this file with:
 #   dewey config init
 #
-# Stored by default at ~/.config/dewey/config.yaml unless XDG_CONFIG_HOME is set.
+# Stored by default at ~/.config/dewey-<deployment>/dewey-config-<deployment>.yaml unless XDG_CONFIG_HOME is set.
 
 application:
   environment: development

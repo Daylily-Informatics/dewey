@@ -70,6 +70,10 @@
                 <div class="panel-copy">The endpoints Dewey advertises through `/obs_services`.</div>
               </div>
             </div>
+            <div class="results-meta" style="margin-bottom: 0.85rem;">
+              <span class="pill">Configured deps: {{ obs_services_payload.dependencies.configured_services|length }}</span>
+              <span class="pill">Observed deps: {{ obs_services_payload.dependencies.observed_services|length }}</span>
+            </div>
             <div class="table-wrap">
               <table>
                 <thead>
@@ -181,6 +185,10 @@
                 {% if db_health_payload.database.latest %}
                 <span class="note mono">Latest: {{ db_health_payload.database.latest.fingerprint }}</span>
                 {% endif %}
+                {% if db_health_payload.database.schema_drift %}
+                <span class="pill">Schema drift: {{ db_health_payload.database.schema_drift.status }}</span>
+                <span class="note mono">{{ db_health_payload.database.schema_drift.summary }}</span>
+                {% endif %}
                 {% for item in db_health_payload.database.slowest %}
                 <article class="panel" style="padding: 0.85rem 0.95rem; background: rgba(11, 17, 32, 0.78);">
                   <div class="mono">{{ item.label }}</div>
@@ -202,6 +210,7 @@
               </div>
               <div class="stack">
                 <span class="pill">Configured: {{ auth_health_payload.auth.cognito_configured }}</span>
+                <span class="pill">Sessions supported: {{ auth_health_payload.auth.sessions.supported }}</span>
                 {% for event in auth_health_payload.auth.recent %}
                 <article class="panel" style="padding: 0.85rem 0.95rem; background: rgba(11, 17, 32, 0.78);">
                   <div>{{ event.status }} via {{ event.mode }}</div>

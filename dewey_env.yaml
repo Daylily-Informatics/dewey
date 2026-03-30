@@ -1,4 +1,4 @@
-name: DEWEY
+name: DEWEY-local
 channels:
   - conda-forge
   - defaults
@@ -6,4 +6,8 @@ dependencies:
   - python=3.13
   - pip
   - pip:
-      - metapub
+      - daylily-cognito==0.1.30
+      - daylily-tapdb==3.0.9
+      - playwright>=1.42.0
+      - pytest>=8.0.0
+      - pytest-playwright>=0.4.4

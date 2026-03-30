@@ -85,6 +85,10 @@ def test_obs_services_advertises_canonical_capabilities(client) -> None:
         },
     ]
     assert body["extensions"] == ["dewey.operator_ui", "dewey.anomalies_v1"]
+    assert body["dependencies"] == {
+        "configured_services": [],
+        "observed_services": [],
+    }
 
 
 def test_health_payload_is_service_token_accessible(client) -> None:
@@ -127,6 +131,12 @@ def test_db_health_reports_probe_and_rollups(client) -> None:
     assert body["projection"]["state"] == "ready"
     assert body["database"]["status"] == "unknown"
     assert body["database"]["latest"]["fingerprint"]
+    assert body["database"]["schema_drift"]["status"] in {
+        "clean",
+        "drift",
+        "check_failed",
+        "not_run",
+    }
 
 
 def test_my_health_requires_session_and_rejects_bearer(monkeypatch, client) -> None:
@@ -156,6 +166,8 @@ def test_auth_health_reports_session_and_service_token_modes(monkeypatch, client
     modes = {item["mode"] for item in body["auth"]["recent"]}
     assert "service_token" in modes
     assert "cognito" in modes
+    assert body["auth"]["sessions"]["supported"] is False
+    assert body["auth"]["sessions"]["active_session_count"] is None
 
 
 def test_observability_page_renders_for_logged_in_operator(monkeypatch, client) -> None:
@@ -167,3 +179,5 @@ def test_observability_page_renders_for_logged_in_operator(monkeypatch, client) 
     assert "Observability" in response.text
     assert "/obs_services" in response.text
     assert "/api/v1/artifacts" in response.text
+    assert "Schema drift:" in response.text
+    assert "Sessions supported:" in response.text

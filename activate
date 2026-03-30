@@ -29,6 +29,29 @@ _BLUE='\033[0;34m'
 _CYAN='\033[0;36m'
 _NC='\033[0m'
 _DEWEY_PYTHON=""
+_DEWEY_CONDA_ENV_BASE="DEWEY"
+
+_dewey_truthy() {
+  case "${1:-}" in
+    1|true|TRUE|yes|YES|on|ON) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+_dewey_sanitize_deployment_code() {
+  local raw_value="$1"
+  local sanitized=""
+  sanitized="$(printf '%s' "$raw_value" | LC_ALL=C sed -E 's/[^A-Za-z0-9._-]+/-/g; s/^-+//; s/-+$//')"
+  if [[ -z "$sanitized" ]]; then
+    sanitized="local"
+  fi
+  printf '%s\n' "$sanitized"
+}
+
+_dewey_deployment_code="${DEWEY_DEPLOYMENT_CODE:-${DEPLOYMENT_CODE:-${LSMC_DEPLOYMENT_CODE:-local}}}"
+_dewey_deployment_code="$(_dewey_sanitize_deployment_code "${_dewey_deployment_code}")"
+_DEWEY_CONDA_ENV_NAME="${_DEWEY_CONDA_ENV_BASE}-${_dewey_deployment_code}"
+unset _dewey_deployment_code
 
 _dewey_fail() {
   echo -e "  ${_YELLOW}⚠${_NC} $1" >&2
@@ -99,7 +122,11 @@ _dewey_prepare_tapdb_config_path() {
   local namespace="$2"
   local explicit_path="${TAPDB_CONFIG_PATH:-}"
   local xdg_config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
-  local user_dir="${xdg_config_home}/tapdb/${client_id}/${namespace}"
+  local deployment_code="${DEWEY_DEPLOYMENT_CODE:-${DEPLOYMENT_CODE:-${LSMC_DEPLOYMENT_CODE:-local}}}"
+  local scoped_namespace=""
+  deployment_code="$(_dewey_sanitize_deployment_code "${deployment_code}")"
+  scoped_namespace="${namespace}-${deployment_code}"
+  local user_dir="${xdg_config_home}/tapdb/${client_id}/${scoped_namespace}"
   local user_path="${user_dir}/tapdb-config.yaml"
   local repo_template="$DEWEY_ROOT/config/tapdb-config-${namespace}.yaml"
 
@@ -175,36 +202,36 @@ source "${_DEWEY_CONDA_BASE}/etc/profile.d/conda.sh" 2>/dev/null || {
   return 1
 }
 
-if [[ "${CONDA_DEFAULT_ENV:-}" == "DEWEY" ]] || [[ "${CONDA_PREFIX:-}" == "${_DEWEY_CONDA_BASE}/envs/DEWEY" ]]; then
-  echo -e "  ${_GREEN}✓${_NC} Conda environment already active: DEWEY"
-elif conda info --envs | grep -Eq '(^|[[:space:]])DEWEY([[:space:]]|$)'; then
-  echo -e "  ${_GREEN}✓${_NC} Activating conda environment: DEWEY"
-  if ! conda activate DEWEY; then
-    _dewey_fail "Failed to activate conda environment: DEWEY"
+if [[ "${CONDA_DEFAULT_ENV:-}" == "${_DEWEY_CONDA_ENV_NAME}" ]] || [[ "${CONDA_PREFIX:-}" == "${_DEWEY_CONDA_BASE}/envs/${_DEWEY_CONDA_ENV_NAME}" ]]; then
+  echo -e "  ${_GREEN}✓${_NC} Conda environment already active: ${_DEWEY_CONDA_ENV_NAME}"
+elif conda info --envs | grep -Eq "(^|[[:space:]])${_DEWEY_CONDA_ENV_NAME}([[:space:]]|$)"; then
+  echo -e "  ${_GREEN}✓${_NC} Activating conda environment: ${_DEWEY_CONDA_ENV_NAME}"
+  if ! conda activate "${_DEWEY_CONDA_ENV_NAME}"; then
+    _dewey_fail "Failed to activate conda environment: ${_DEWEY_CONDA_ENV_NAME}"
     unset _DEWEY_CONDA_BASE
     unset -f _dewey_fail
     return 1
   fi
 else
-  echo -e "  ${_YELLOW}⚠${_NC} Conda environment 'DEWEY' not found."
+  echo -e "  ${_YELLOW}⚠${_NC} Conda environment '${_DEWEY_CONDA_ENV_NAME}' not found."
   if [[ -f "$DEWEY_ROOT/dewey_env.yaml" ]]; then
     echo -e "  ${_CYAN}→${_NC} Installing conda environment from dewey_env.yaml..."
-    if ! conda env create -f "$DEWEY_ROOT/dewey_env.yaml"; then
+    if ! conda env create -n "${_DEWEY_CONDA_ENV_NAME}" -f "$DEWEY_ROOT/dewey_env.yaml"; then
       _dewey_fail "Failed to create conda environment from dewey_env.yaml."
       unset _DEWEY_CONDA_BASE
       unset -f _dewey_fail
       return 1
     fi
 
-    echo -e "  ${_GREEN}✓${_NC} Activating conda environment: DEWEY"
-    if ! conda activate DEWEY; then
-      _dewey_fail "Failed to activate conda environment: DEWEY"
+    echo -e "  ${_GREEN}✓${_NC} Activating conda environment: ${_DEWEY_CONDA_ENV_NAME}"
+    if ! conda activate "${_DEWEY_CONDA_ENV_NAME}"; then
+      _dewey_fail "Failed to activate conda environment: ${_DEWEY_CONDA_ENV_NAME}"
       unset _DEWEY_CONDA_BASE
       unset -f _dewey_fail
       return 1
     fi
   else
-    _dewey_fail "Conda environment 'DEWEY' was not found and dewey_env.yaml is missing."
+    _dewey_fail "Conda environment '${_DEWEY_CONDA_ENV_NAME}' was not found and dewey_env.yaml is missing."
     unset _DEWEY_CONDA_BASE
     unset -f _dewey_fail
     return 1
@@ -212,7 +239,7 @@ else
 fi
 
 if [[ -z "${CONDA_PREFIX:-}" ]] || [[ ! -d "${CONDA_PREFIX}/bin" ]]; then
-  _dewey_fail "Conda environment 'DEWEY' is not active after activation."
+  _dewey_fail "Conda environment '${_DEWEY_CONDA_ENV_NAME}' is not active after activation."
   unset _DEWEY_CONDA_BASE
   unset -f _dewey_fail
   return 1
@@ -251,8 +278,12 @@ _DEWEY_TAPDB_REPO="$(_dewey_resolve_local_repo \
   "$DEWEY_ROOT/../daylily-tapdb" \
   "$DEWEY_ROOT/../lims_repos/daylily-tapdb"
 )"
-if ! _dewey_ensure_editable_repo "daylily-tapdb" "daylily_tapdb" "${_DEWEY_TAPDB_REPO:-}" "[cli,admin,aurora,dev]"; then
-  return 1
+if _dewey_truthy "${USE_LOCAL_DAYLILY_TAPDB:-0}"; then
+  if ! _dewey_ensure_editable_repo "daylily-tapdb" "daylily_tapdb" "${_DEWEY_TAPDB_REPO:-}" "[cli,admin,aurora,dev]"; then
+    return 1
+  fi
+else
+  echo -e "  ${_GREEN}✓${_NC} Using packaged daylily-tapdb from ${_DEWEY_CONDA_ENV_NAME}"
 fi
 
 _DEWEY_DAYCOG_REPO="$(_dewey_resolve_local_repo \
@@ -260,8 +291,12 @@ _DEWEY_DAYCOG_REPO="$(_dewey_resolve_local_repo \
   "$DEWEY_ROOT/../daylily-cognito" \
   "$DEWEY_ROOT/../lims_repos/daylily-cognito"
 )"
-if ! _dewey_ensure_editable_repo "daylily-cognito" "daylily_cognito" "${_DEWEY_DAYCOG_REPO:-}"; then
-  return 1
+if _dewey_truthy "${USE_LOCAL_DAYLILY_COGNITO:-0}"; then
+  if ! _dewey_ensure_editable_repo "daylily-cognito" "daylily_cognito" "${_DEWEY_DAYCOG_REPO:-}"; then
+    return 1
+  fi
+else
+  echo -e "  ${_GREEN}✓${_NC} Using packaged daylily-cognito from ${_DEWEY_CONDA_ENV_NAME}"
 fi
 
 _DEWEY_CLI_CORE_REPO="$(_dewey_resolve_local_repo \
@@ -269,8 +304,12 @@ _DEWEY_CLI_CORE_REPO="$(_dewey_resolve_local_repo \
   "$DEWEY_ROOT/../cli-core-yo" \
   "$DEWEY_ROOT/../lims_repos/cli-core-yo"
 )"
-if ! _dewey_ensure_editable_repo "cli-core-yo" "cli_core_yo" "${_DEWEY_CLI_CORE_REPO:-}"; then
-  return 1
+if _dewey_truthy "${USE_LOCAL_CLI_CORE_YO:-0}"; then
+  if ! _dewey_ensure_editable_repo "cli-core-yo" "cli_core_yo" "${_DEWEY_CLI_CORE_REPO:-}"; then
+    return 1
+  fi
+else
+  echo -e "  ${_GREEN}✓${_NC} Using packaged cli-core-yo from ${_DEWEY_CONDA_ENV_NAME}"
 fi
 
 if command -v rehash >/dev/null 2>&1; then

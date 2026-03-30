@@ -18,9 +18,10 @@ def test_settings_requires_https_cognito_domain() -> None:
 
 
 def test_settings_loads_yaml(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    cfg_dir = tmp_path / "dewey"
+    monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "local")
+    cfg_dir = tmp_path / "dewey-local"
     cfg_dir.mkdir(parents=True)
-    cfg = cfg_dir / "config.yaml"
+    cfg = cfg_dir / "dewey-config-local.yaml"
     cfg.write_text(
         """
 application:
@@ -64,9 +65,10 @@ deployment:
 
 
 def test_settings_ignore_dewey_cognito_env_overrides(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    cfg_dir = tmp_path / "dewey"
+    monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "local")
+    cfg_dir = tmp_path / "dewey-local"
     cfg_dir.mkdir(parents=True)
-    cfg = cfg_dir / "config.yaml"
+    cfg = cfg_dir / "dewey-config-local.yaml"
     cfg.write_text(
         """
 application:

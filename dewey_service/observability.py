@@ -16,6 +16,7 @@ from typing import Any
 from fastapi import Request
 from sqlalchemy import text
 
+from dewey_service.schema_drift import load_schema_drift_payload
 from dewey_service.settings import Settings
 
 CONTRACT_VERSION = "v3"
@@ -183,6 +184,9 @@ class DeweyObservabilityStore:
         self._db_probes: deque[dict[str, Any]] = deque(maxlen=25)
         self._auth_recent: deque[dict[str, Any]] = deque(maxlen=25)
         self._auth_status_counts: Counter[str] = Counter()
+        self._configured_dependencies: tuple[str, ...] = tuple()
+        self._observed_dependencies: set[str] = set()
+        self._schema_drift = load_schema_drift_payload(settings)
         self._obs_services_snapshot = self._build_obs_services_snapshot()
 
     def _build_obs_services_snapshot(self) -> dict[str, Any]:
@@ -206,6 +210,10 @@ class DeweyObservabilityStore:
                 },
             ],
             "extensions": ["dewey.operator_ui", "dewey.anomalies_v1"],
+            "dependencies": {
+                "configured_services": list(self._configured_dependencies),
+                "observed_services": sorted(self._observed_dependencies),
+            },
             "observed_at": self._started_at,
         }
 
@@ -348,6 +356,7 @@ class DeweyObservabilityStore:
             "recent": recent[:25],
             "slowest": slowest,
             "hottest": hottest,
+            "schema_drift": dict(self._schema_drift),
             "observed_at": observed_at,
         }
 
@@ -367,6 +376,12 @@ class DeweyObservabilityStore:
             "app_client_id_present": bool(self.settings.cognito_app_client_id),
             "recent": recent,
             "status_counts": status_counts,
+            "sessions": {
+                "supported": False,
+                "active_session_count": None,
+                "recent_user_count": None,
+                "observed_at": observed_at,
+            },
             "observed_at": observed_at,
         }
 
@@ -453,6 +468,7 @@ def build_obs_services_payload(
     )
     payload["endpoints"] = list(snapshot.get("endpoints") or [])
     payload["extensions"] = list(snapshot.get("extensions") or [])
+    payload["dependencies"] = dict(snapshot.get("dependencies") or {})
     payload["projection"] = projection.model_dump()
     return payload
 
@@ -518,6 +534,7 @@ def build_auth_health_payload(
         "app_client_id_present": bool(auth_rollup.get("app_client_id_present", False)),
         "recent": list(auth_rollup.get("recent") or []),
         "status_counts": dict(auth_rollup.get("status_counts") or {}),
+        "sessions": dict(auth_rollup.get("sessions") or {}),
     }
     payload["projection"] = projection.model_dump()
     return payload

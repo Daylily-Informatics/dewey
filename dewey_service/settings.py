@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -11,6 +12,11 @@ import yaml
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from dewey_service.defaults import (
+    DEFAULT_APP_PORT,
+    default_cognito_logout_url,
+    default_cognito_redirect_uri,
+)
 from dewey_service.rbac import DEFAULT_COGNITO_GROUP_ROLE_MAP, normalize_group_role_map
 
 
@@ -34,7 +40,30 @@ def _validate_optional_https_url(value: str, *, field_name: str) -> str:
 
 def _default_config_path() -> Path:
     root = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
-    return root / "dewey" / "config.yaml"
+    return root / _config_dir_name() / _config_filename()
+
+
+def _sanitize_deployment_code(value: str) -> str:
+    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "-", str(value or "").strip()).strip("-")
+    return cleaned or "local"
+
+
+def _resolve_deployment_code() -> str:
+    return _sanitize_deployment_code(
+        os.environ.get("DEWEY_DEPLOYMENT_CODE")
+        or os.environ.get("DEPLOYMENT_CODE")
+        or os.environ.get("LSMC_DEPLOYMENT_CODE")
+        or "local"
+    )
+
+
+def _config_dir_name() -> str:
+    return f"dewey-{_resolve_deployment_code()}"
+
+
+def _config_filename() -> str:
+    deployment = _resolve_deployment_code()
+    return f"dewey-config-{deployment}.yaml"
 
 
 def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
@@ -104,15 +133,15 @@ class Settings(BaseSettings):
     api_bearer_tokens: str = ""
     session_secret_key: str = "dewey-session-secret-change-me"
     host: str = "127.0.0.1"
-    port: int = 8914
+    port: int = DEFAULT_APP_PORT
     verify_ssl: bool = True
 
     # Cognito-backed browser UI auth
     cognito_domain: str = ""
     cognito_app_client_id: str = ""
     cognito_app_client_secret: str = ""
-    cognito_redirect_uri: str = "https://localhost:8914/auth/callback"
-    cognito_logout_url: str = "https://localhost:8914/login"
+    cognito_redirect_uri: str = default_cognito_redirect_uri()
+    cognito_logout_url: str = default_cognito_logout_url()
     cognito_user_pool_id: str = ""
     cognito_region: str = "us-west-2"
     cognito_group_role_map: dict[str, str] = Field(
@@ -258,8 +287,8 @@ def load_settings(config_path: Path | None = None) -> Settings:
         "cognito_domain": "",
         "cognito_app_client_id": "",
         "cognito_app_client_secret": "",
-        "cognito_redirect_uri": "https://localhost:8914/auth/callback",
-        "cognito_logout_url": "https://localhost:8914/login",
+        "cognito_redirect_uri": default_cognito_redirect_uri(),
+        "cognito_logout_url": default_cognito_logout_url(),
         "cognito_user_pool_id": "",
         "cognito_region": "us-west-2",
         "cognito_group_role_map": dict(DEFAULT_COGNITO_GROUP_ROLE_MAP),

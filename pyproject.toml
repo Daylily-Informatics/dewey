@@ -30,8 +30,10 @@ dependencies = [
 dev = [
     "bandit[toml]>=1.8.0",
     "build>=1.2.0",
+    "playwright>=1.42.0",
     "pre-commit>=3.8.0",
     "pytest>=8.0.0",
+    "pytest-playwright>=0.4.4",
     "ruff>=0.9.0",
 ]
 
@@ -47,6 +49,9 @@ dewey_service = ["etc/*.yaml", "templates/*.html", "static/*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+markers = [
+    "e2e: marks tests as end-to-end tests requiring playwright",
+]
 
 [tool.ruff]
 line-length = 100

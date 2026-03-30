@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.metadata
 from pathlib import Path
 
+import pytest
 from cli_core_yo import output
 from cli_core_yo.app import run as run_cli
 
@@ -104,10 +105,11 @@ def test_server_restart_uses_background_start(monkeypatch, capsys) -> None:
 
 def test_config_init_show_validate_and_status(monkeypatch, tmp_path: Path, capsys) -> None:
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
+    monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "local")
 
     init_exit = _invoke(["config", "init"])
     init_output = capsys.readouterr().out
-    config_path = tmp_path / "dewey" / "config.yaml"
+    config_path = tmp_path / "dewey-local" / "dewey-config-local.yaml"
 
     assert init_exit == 0
     assert "Config file created" in init_output
@@ -119,6 +121,42 @@ def test_config_init_show_validate_and_status(monkeypatch, tmp_path: Path, capsy
     assert "application:" in show_output
     assert "database:" in show_output
 
+
+def test_cli_requires_hyphenated_conda_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("CONDA_DEFAULT_ENV", "DEWEY")
+    with pytest.raises(SystemExit, match="deployment-scoped conda environment name with '-'"):
+        cli_module._enforce_conda_env_contract(["server", "status"])
+
+
+def test_cli_requires_active_conda_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("CONDA_DEFAULT_ENV", raising=False)
+    with pytest.raises(
+        SystemExit, match="requires an active deployment-scoped conda environment"
+    ):
+        cli_module._enforce_conda_env_contract(["server", "status"])
+
+
+def test_cli_accepts_hyphenated_conda_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("CONDA_DEFAULT_ENV", "DEWEY-local2")
+    cli_module._enforce_conda_env_contract(["server", "status"])
+
+
+def test_cli_skip_conda_env_check_flag_is_stripped() -> None:
+    args, skip = cli_module._strip_skip_conda_env_check_flag(
+        ["--skip-conda-env-check", "server", "status"]
+    )
+    assert skip is True
+    assert args == ["server", "status"]
+
+
+def test_config_validate_and_status(monkeypatch, tmp_path: Path, capsys) -> None:
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
+    monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "local")
+
+    init_exit = _invoke(["config", "init"])
+    capsys.readouterr()
+    assert init_exit == 0
+
     validate_exit = _invoke(["config", "validate"])
     validate_output = capsys.readouterr().out
     assert validate_exit == 0
@@ -128,7 +166,7 @@ def test_config_init_show_validate_and_status(monkeypatch, tmp_path: Path, capsy
     status_output = capsys.readouterr().out
     assert status_exit == 0
     assert "Config path:" in status_output
-    assert "config.yaml" in status_output
+    assert "dewey-config-local.yaml" in status_output
     assert '"tapdb_database_name": "dewey"' in status_output
 
 

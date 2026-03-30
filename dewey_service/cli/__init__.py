@@ -3,13 +3,26 @@
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 
 import yaml
 from cli_core_yo.app import create_app, run
 from cli_core_yo.spec import CliSpec, ConfigSpec, EnvSpec, PluginSpec, XdgSpec
 
-from dewey_service.settings import Settings, _flatten_config, clear_settings_cache, get_settings
+from dewey_service.defaults import (
+    build_default_config_template,
+    default_cognito_logout_url,
+    default_cognito_redirect_uri,
+)
+from dewey_service.settings import (
+    Settings,
+    _config_dir_name,
+    _config_filename,
+    _flatten_config,
+    clear_settings_cache,
+    get_settings,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 ACTIVATE_SCRIPT = PROJECT_ROOT / "activate"
@@ -19,8 +32,8 @@ _YAML_ONLY_DEFAULTS = {
     "cognito_domain": "",
     "cognito_app_client_id": "",
     "cognito_app_client_secret": "",
-    "cognito_redirect_uri": "https://localhost:8914/auth/callback",
-    "cognito_logout_url": "https://localhost:8914/login",
+    "cognito_redirect_uri": default_cognito_redirect_uri(),
+    "cognito_logout_url": default_cognito_logout_url(),
     "cognito_user_pool_id": "",
     "cognito_region": "us-west-2",
     "deployment_name": "",
@@ -128,10 +141,10 @@ spec = CliSpec(
     app_display_name="Dewey",
     dist_name="dewey-service",
     root_help="Dewey — Development CLI for the canonical artifact registry service.",
-    xdg=XdgSpec(app_dir_name="dewey"),
+    xdg=XdgSpec(app_dir_name=_config_dir_name()),
     config=ConfigSpec(
-        primary_filename="config.yaml",
-        template_resource=("dewey_service", "etc/dewey-config-template.yaml"),
+        primary_filename=_config_filename(),
+        template_bytes=build_default_config_template(),
         validator=_validate_dewey_config,
     ),
     env=EnvSpec(
@@ -155,7 +168,45 @@ spec = CliSpec(
 app = create_app(spec)
 cli = app
 
+_SKIP_CONDA_ENV_CHECK_FLAG = "--skip-conda-env-check"
+_CONDA_ENV_CHECK_EXEMPT_COMMANDS = frozenset({"version", "info", "env", "help"})
+
+
+def _strip_skip_conda_env_check_flag(args: list[str]) -> tuple[list[str], bool]:
+    filtered = [arg for arg in args if arg != _SKIP_CONDA_ENV_CHECK_FLAG]
+    return filtered, len(filtered) != len(args)
+
+
+def _command_requires_conda_env_check(args: list[str]) -> bool:
+    if not args or "--help" in args or "-h" in args:
+        return False
+    for arg in args:
+        if not arg or arg.startswith("-"):
+            continue
+        return arg not in _CONDA_ENV_CHECK_EXEMPT_COMMANDS
+    return False
+
+
+def _enforce_conda_env_contract(args: list[str]) -> None:
+    if not _command_requires_conda_env_check(args):
+        return
+    active_env = os.environ.get("CONDA_DEFAULT_ENV", "").strip()
+    if not active_env:
+        raise SystemExit(
+            "Dewey CLI requires an active deployment-scoped conda environment. "
+            "Activate an env named like 'DEWEY-local2', or pass "
+            "--skip-conda-env-check to override."
+        )
+    if "-" not in active_env:
+        raise SystemExit(
+            f"Dewey CLI requires a deployment-scoped conda environment name with '-'. "
+            f"Current CONDA_DEFAULT_ENV='{active_env}'. Pass --skip-conda-env-check to override."
+        )
+
 
 def main() -> None:
     """Main CLI entry point."""
-    raise SystemExit(run(spec))
+    args, skip_conda_env_check = _strip_skip_conda_env_check_flag(sys.argv[1:])
+    if not skip_conda_env_check:
+        _enforce_conda_env_contract(args)
+    raise SystemExit(run(spec, args))
