@@ -97,6 +97,8 @@ Approximate only.
 - Use `dewey ...` for Dewey-owned operations
 - Use `tapdb ...` for shared DB/runtime lifecycle when Dewey explicitly delegates it
 - Use `daycog ...` for shared Cognito lifecycle when Dewey explicitly delegates it
+- `dewey db reset --target local` deletes the current local TapDB target and rebuilds it
+- `dewey db nuke --target local` deletes the current local TapDB target without rebuilding
 
 Useful checks:
 

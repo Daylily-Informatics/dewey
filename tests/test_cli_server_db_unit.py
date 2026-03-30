@@ -235,6 +235,10 @@ def test_db_cli_error_branches(monkeypatch: pytest.MonkeyPatch) -> None:
         db_cli.reset(force=False)
     assert exc.value.exit_code == 0
 
+    with pytest.raises(typer.Exit) as exc:
+        db_cli.nuke(force=False)
+    assert exc.value.exit_code == 0
+
     monkeypatch.setattr(db_cli.typer, "confirm", lambda message: True)
     monkeypatch.setattr(
         db_cli,
@@ -281,3 +285,21 @@ def test_db_cli_reset_success_path(monkeypatch: pytest.MonkeyPatch) -> None:
             },
         ),
     ]
+
+
+def test_db_cli_nuke_success_path(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[tuple[str, object]] = []
+    monkeypatch.setattr(
+        db_cli,
+        "run_tapdb_cli",
+        lambda args, **kwargs: calls.append(("delete", args)) or _proc(returncode=0, stdout="deleted"),
+    )
+    monkeypatch.setattr(
+        db_cli,
+        "build",
+        lambda **kwargs: calls.append(("build", kwargs)),
+    )
+
+    db_cli.nuke(force=True, target="aurora", profile="lsmc", region="us-west-2", namespace="dewey")
+
+    assert calls == [("delete", ["db", "delete", "prod", "--force"])]

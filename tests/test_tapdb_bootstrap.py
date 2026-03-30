@@ -43,3 +43,30 @@ def test_db_build_invokes_overlay(monkeypatch, capsys) -> None:
     assert calls["tapdb"] == 1
     assert calls["dburl"] == 1
     assert calls["seed"] == 1
+
+
+def test_db_nuke_invokes_delete_only(monkeypatch, capsys) -> None:
+    calls: dict[str, int] = {"tapdb": 0, "build": 0}
+
+    class _Result:
+        returncode = 0
+        stdout = "deleted"
+
+    def _fake_tapdb(*args, **kwargs):
+        calls["tapdb"] += 1
+        return _Result()
+
+    def _fail_build(**kwargs):
+        calls["build"] += 1
+        raise AssertionError("build should not be called by db nuke")
+
+    monkeypatch.setattr(db_cli, "ensure_tapdb_version", lambda: "3.0.6")
+    monkeypatch.setattr(db_cli, "run_tapdb_cli", _fake_tapdb)
+    monkeypatch.setattr(db_cli, "build", _fail_build)
+
+    exit_code = _invoke(["db", "nuke", "--target", "local", "--force"])
+    capsys.readouterr()
+
+    assert exit_code == 0
+    assert calls["tapdb"] == 1
+    assert calls["build"] == 0

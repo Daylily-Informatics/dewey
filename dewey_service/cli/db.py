@@ -29,6 +29,38 @@ from dewey_service.integrations.tapdb_runtime import (
 db_app = typer.Typer(help="TapDB lifecycle and Dewey overlay commands")
 
 
+def _confirm_db_delete(force: bool) -> bool:
+    if force:
+        return True
+    return typer.confirm("This will delete the current TapDB DB target. Continue?")
+
+
+def _delete_db_target(
+    *,
+    force: bool,
+    target: str,
+    profile: str,
+    region: str,
+    namespace: str,
+) -> None:
+    if not _confirm_db_delete(force):
+        raise typer.Exit(0)
+
+    try:
+        run_tapdb_cli(
+            ["db", "delete", tapdb_env_for_target(target), "--force"],
+            target=target,
+            client_id=DEFAULT_TAPDB_CLIENT_ID,
+            profile=profile,
+            region=region,
+            namespace=namespace,
+            cwd=PROJECT_ROOT,
+        )
+    except TapDBRuntimeError as exc:
+        console.print(f"[red]Delete failed:[/red] {exc}")
+        raise typer.Exit(1) from exc
+
+
 @db_app.command("build")
 def build(
     target: str = typer.Option("local", "--target", help="TapDB target: local|aurora"),
@@ -112,24 +144,35 @@ def reset(
     ),
 ) -> None:
     """Delete and rebuild the TapDB target, then apply the Dewey overlay."""
-    if not force and not typer.confirm("This will delete the current TapDB DB target. Continue?"):
-        raise typer.Exit(0)
-
-    try:
-        run_tapdb_cli(
-            ["db", "delete", tapdb_env_for_target(target), "--force"],
-            target=target,
-            client_id=DEFAULT_TAPDB_CLIENT_ID,
-            profile=profile,
-            region=region,
-            namespace=namespace,
-            cwd=PROJECT_ROOT,
-        )
-    except TapDBRuntimeError as exc:
-        console.print(f"[red]Delete failed:[/red] {exc}")
-        raise typer.Exit(1) from exc
+    _delete_db_target(
+        force=force,
+        target=target,
+        profile=profile,
+        region=region,
+        namespace=namespace,
+    )
 
     build(target=target, cluster=cluster, profile=profile, region=region, namespace=namespace)
+
+
+@db_app.command("nuke")
+def nuke(
+    force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
+    target: str = typer.Option("local", "--target", help="TapDB target: local|aurora"),
+    profile: str = typer.Option(DEFAULT_AWS_PROFILE, "--profile", help="AWS profile"),
+    region: str = typer.Option(DEFAULT_AWS_REGION, "--region", help="AWS region"),
+    namespace: str = typer.Option(
+        DEFAULT_TAPDB_DATABASE_NAME, "--namespace", help="TapDB namespace"
+    ),
+) -> None:
+    """Delete the TapDB target without rebuilding."""
+    _delete_db_target(
+        force=force,
+        target=target,
+        profile=profile,
+        region=region,
+        namespace=namespace,
+    )
 
 
 def register(registry: CommandRegistry, spec: CliSpec) -> None:

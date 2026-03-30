@@ -166,4 +166,5 @@ def test_activate_accepts_preloaded_dewey_conda_env(tmp_path: Path) -> None:
 
     assert result.returncode == 0
     assert "Conda environment already active: DEWEY-local" in result.stdout
+    assert "build, seed, reset, nuke" in result.stdout
     assert not call_log.exists()
