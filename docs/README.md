@@ -1,12 +1,12 @@
 # Dewey Docs
 
-## Current Reference Docs
+## Start Here
 
-- [../README.md](../README.md): current service overview and API summary
+- [../README.md](../README.md): repo overview, quickstart, object model, and API shape
 
-## Historical / Planning Docs
+## Historical And Planning Docs
 
 - `dewey_cutover_execution_plan.md`
 - `bloom_dewey_vs_solo_dewey_gap_report.md`
 
-That plan is retained for migration context. Treat the code and repo `README.md` as authoritative for current behavior.
+These files are retained for migration context. Prefer the current code and root README when they disagree with older planning material.
