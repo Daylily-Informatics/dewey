@@ -299,11 +299,12 @@ def load_settings(config_path: Path | None = None) -> Settings:
     env_override = {
         key[len("DEWEY_") :].lower(): value
         for key, value in os.environ.items()
-        if key.startswith("DEWEY_") and key[len("DEWEY_") :].lower() not in yaml_only_defaults
+        if key.startswith("DEWEY_")
     }
-    merged = {**seed, **env_override}
+    merged = {**seed}
     for key, default in yaml_only_defaults.items():
         merged[key] = seed.get(key, default)
+    merged.update(env_override)
     return Settings(**merged)
 
 

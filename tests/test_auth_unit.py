@@ -71,8 +71,7 @@ def test_build_cognito_logout_url_includes_state() -> None:
 
     assert url.startswith("https://auth.example.com/logout?")
     assert "client_id=client-1" in url
-    assert "redirect_uri=https%3A%2F%2Flocalhost%3A8914%2Flogin" in url
-    assert "response_type=code" in url
+    assert "logout_uri=https%3A%2F%2Flocalhost%3A8914%2Flogin" in url
     assert "state=logout-state" in url
 
 

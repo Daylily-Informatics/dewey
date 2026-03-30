@@ -73,8 +73,7 @@ def test_logout_clears_session_and_redirects_to_cognito(monkeypatch, client, tes
     assert parsed.netloc == "dewey-auth.example.com"
     assert parsed.path == "/logout"
     assert params["client_id"] == [test_settings.cognito_app_client_id]
-    assert params["redirect_uri"] == [test_settings.cognito_logout_url.rstrip("/")]
-    assert params["response_type"] == ["code"]
+    assert params["logout_uri"] == [test_settings.cognito_logout_url.rstrip("/")]
     assert params["state"][0]
 
     ui = client.get("/ui")

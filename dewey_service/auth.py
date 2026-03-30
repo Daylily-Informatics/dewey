@@ -59,8 +59,7 @@ def build_cognito_logout_url(*, settings: Settings, state: str | None = None) ->
     logout_target = settings.cognito_logout_url
     query: dict[str, str] = {
         "client_id": settings.cognito_app_client_id,
-        "redirect_uri": logout_target.rstrip("/"),
-        "response_type": "code",
+        "logout_uri": logout_target.rstrip("/"),
     }
     if state:
         query["state"] = state
