@@ -66,6 +66,52 @@ class S3StorageClient:
             raise self._translate_error(exc, bucket=bucket, key=key) from exc
         return self._to_storage_object(bucket=bucket, key=key, response=response)
 
+    def list_objects(
+        self,
+        *,
+        bucket: str,
+        prefix: str,
+        limit: int = 1000,
+    ) -> list[StorageObject]:
+        paginator = self._client.get_paginator("list_objects_v2")
+        rows: list[StorageObject] = []
+        try:
+            pages = paginator.paginate(Bucket=bucket, Prefix=prefix)
+            for page in pages:
+                for item in page.get("Contents", []):
+                    rows.append(
+                        StorageObject(
+                            bucket=bucket,
+                            key=str(item.get("Key") or ""),
+                            version_id=None,
+                            size=item.get("Size"),
+                            content_type=None,
+                            storage_class=item.get("StorageClass"),
+                            etag=str(item.get("ETag") or "").strip('"') or None,
+                        )
+                    )
+                    if len(rows) >= max(1, int(limit)):
+                        return rows
+        except self._client_error as exc:
+            raise self._translate_error(exc, bucket=bucket, key=prefix) from exc
+        return rows
+
+    def get_object_bytes(
+        self,
+        *,
+        bucket: str,
+        key: str,
+        version_id: str | None = None,
+    ) -> bytes:
+        params: dict[str, Any] = {"Bucket": bucket, "Key": key}
+        if version_id:
+            params["VersionId"] = version_id
+        try:
+            response = self._client.get_object(**params)
+        except self._client_error as exc:
+            raise self._translate_error(exc, bucket=bucket, key=key) from exc
+        return bytes(response["Body"].read())
+
     def copy_object(
         self,
         *,

@@ -1,0 +1,11 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]: LSMCDEV1
+  - main [ref=e3]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: Dewey Console
+      - heading "Dewey Access Login" [level=1] [ref=e7]
+      - paragraph [ref=e8]: Canonical artifact intake, lifecycle, sharing, and search for Dewey users and admins. Authentication is handled through Cognito Hosted UI.
+      - generic [ref=e9]:
+        - link "Sign In with Cognito" [ref=e10] [cursor=pointer]:
+          - /url: /auth/login
+        - generic [ref=e11]: Control Room UI

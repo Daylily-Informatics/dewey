@@ -386,6 +386,31 @@ td {
   margin-bottom: 0.8rem;
 }
 
+.section-tabs {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.section-tab {
+  opacity: 0.8;
+}
+
+.section-tab-active {
+  border-color: rgba(59, 130, 246, 0.75);
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.24), rgba(29, 78, 216, 0.2));
+  opacity: 1;
+}
+
+.section-pane {
+  display: none;
+}
+
+.section-pane-active {
+  display: block;
+}
+
 .note {
   color: var(--mist);
   font-size: 0.88rem;

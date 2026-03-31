@@ -1,0 +1,146 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]: LSMCDEV1
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]: Dewey Artifacts
+        - heading "Register, Search, Download, And Share" [level=1] [ref=e7]
+        - generic [ref=e8]: operator@example.com
+      - generic [ref=e9]:
+        - link "Dashboard" [ref=e10] [cursor=pointer]:
+          - /url: /ui
+        - link "Literature Search" [ref=e11] [cursor=pointer]:
+          - /url: /literature
+        - link "Unified Search" [ref=e12] [cursor=pointer]:
+          - /url: /search
+        - link "Anomalies" [ref=e13] [cursor=pointer]:
+          - /url: /ui/anomalies
+        - link "Observability" [ref=e14] [cursor=pointer]:
+          - /url: /ui/observability
+        - link "Admin" [ref=e15] [cursor=pointer]:
+          - /url: /admin
+        - button "Logout" [ref=e17] [cursor=pointer]
+    - main [ref=e18]:
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - generic [ref=e21]: Artifact Operations
+          - heading "Bring legacy Dewey intake and file handling back into the current console." [level=2] [ref=e22]
+          - paragraph [ref=e23]: This browser surface restores artifact intake, search, download, and artifact-set workflows while keeping the current Dewey visual system and backend contracts.
+        - generic [ref=e24]:
+          - generic [ref=e25]: Register 0
+          - generic [ref=e26]: Artifacts 0
+          - generic [ref=e27]: Artifact Sets 0
+      - generic [ref=e28]:
+        - button "Register" [ref=e29] [cursor=pointer]
+        - button "Search Artifacts" [ref=e30] [cursor=pointer]
+        - button "Artifact Sets" [ref=e31] [cursor=pointer]
+      - generic [ref=e33]:
+        - generic [ref=e34]:
+          - generic [ref=e36]:
+            - heading "Register And Upload" [level=3] [ref=e37]
+            - generic [ref=e38]: Single files, flat directories, public URLs, S3 URIs, and optional artifact-set grouping.
+          - generic [ref=e39]:
+            - generic [ref=e40]:
+              - generic [ref=e41]:
+                - generic [ref=e42]: Artifact Type
+                - combobox "Artifact Type" [ref=e43]:
+                  - option "Select" [selected]
+                  - option "bam"
+                  - option "csv"
+                  - option "fastq"
+                  - option "json"
+                  - option "pdf"
+                  - option "report"
+                  - option "tsv"
+                  - option "vcf"
+              - generic [ref=e44]:
+                - generic [ref=e45]: Producer System
+                - textbox "Producer System" [ref=e46]:
+                  - /placeholder: atlas, bloom, ursa
+              - generic [ref=e47]:
+                - generic [ref=e48]: Producer Object EUID
+                - textbox "Producer Object EUID" [ref=e49]:
+                  - /placeholder: REL-123
+              - generic [ref=e50]:
+                - generic [ref=e51]: Lock After Import
+                - combobox "Lock After Import" [ref=e52]:
+                  - option "no" [selected]
+                  - option "yes"
+              - generic [ref=e53]:
+                - generic [ref=e54]: Local File
+                - button "Local File" [ref=e55]
+              - generic [ref=e56]:
+                - generic [ref=e57]: Directory Of Files
+                - button "Directory Of Files" [ref=e58]
+              - generic [ref=e59]:
+                - generic [ref=e60]: Public URLs
+                - textbox "Public URLs" [ref=e61]:
+                  - /placeholder: One URL per line
+              - generic [ref=e62]:
+                - generic [ref=e63]: S3 Mode
+                - combobox "S3 Mode" [ref=e64]:
+                  - option "register existing object"
+                  - option "reference" [selected]
+                  - option "copy"
+              - generic [ref=e65]:
+                - generic [ref=e66]: S3 URIs Or Prefixes
+                - textbox "S3 URIs Or Prefixes" [ref=e67]:
+                  - /placeholder: s3://bucket/key or s3://bucket/prefix/
+              - generic [ref=e68]:
+                - generic [ref=e69]: Artifact Set Grouping
+                - combobox "Artifact Set Grouping" [ref=e70]:
+                  - option "none" [selected]
+                  - option "create a set"
+                  - option "use existing"
+              - generic [ref=e71]:
+                - generic [ref=e72]: Title
+                - textbox "Title" [ref=e73]
+              - generic [ref=e74]:
+                - generic [ref=e75]: Sample ID
+                - textbox "Sample ID" [ref=e76]
+              - generic [ref=e77]:
+                - generic [ref=e78]: Study ID
+                - textbox "Study ID" [ref=e79]
+              - generic [ref=e80]:
+                - generic [ref=e81]: Assay
+                - textbox "Assay" [ref=e82]
+              - generic [ref=e83]:
+                - generic [ref=e84]: Pipeline
+                - textbox "Pipeline" [ref=e85]
+              - generic [ref=e86]:
+                - generic [ref=e87]: Recorded At
+                - textbox "Recorded At" [ref=e88]
+              - generic [ref=e89]:
+                - generic [ref=e90]: Tags
+                - textbox "Tags" [ref=e91]
+              - generic [ref=e92]:
+                - generic [ref=e93]: Notes
+                - textbox "Notes" [ref=e94]
+              - generic [ref=e95]:
+                - generic [ref=e96]: Additional Metadata JSON
+                - textbox "Additional Metadata JSON" [ref=e97]:
+                  - /placeholder: "{\"case_id\":\"CASE-1\"}"
+            - button "Run Intake" [ref=e99] [cursor=pointer]
+        - generic [ref=e100]:
+          - generic [ref=e101]:
+            - generic [ref=e102]:
+              - generic [ref=e103]:
+                - heading "Bulk TSV Intake" [level=3] [ref=e104]
+                - generic [ref=e105]: Use the template to register or import many remote artifacts at once.
+              - link "Download Template" [ref=e106] [cursor=pointer]:
+                - /url: /artifacts/bulk-template.tsv
+            - generic [ref=e107]:
+              - generic [ref=e109]:
+                - generic [ref=e110]: TSV File
+                - button "TSV File" [ref=e111]
+              - button "Run Bulk Intake" [ref=e113] [cursor=pointer]
+          - generic [ref=e114]:
+            - generic [ref=e116]:
+              - heading "Registration Report" [level=3] [ref=e117]
+              - generic [ref=e118]: Each attempted item reports its Dewey outcome and resolved storage location.
+            - generic [ref=e119]: No register/upload/import run yet.
+          - generic [ref=e120]:
+            - generic [ref=e122]:
+              - heading "Bulk Report" [level=3] [ref=e123]
+              - generic [ref=e124]: Row-level results for TSV-driven intake.
+            - generic [ref=e125]: No bulk TSV run yet.

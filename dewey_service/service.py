@@ -2,16 +2,20 @@
 
 from __future__ import annotations
 
+import io
 import json
 import re
+import zipfile
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from hashlib import sha256
+from pathlib import Path
 from time import perf_counter
 from typing import Any
 from urllib.parse import urlparse
 
 import requests
+import yaml
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
 from dewey_service.literature import (
@@ -232,6 +236,109 @@ class DeweyService:
         parsed = urlparse(str(source_uri or "").strip())
         candidate = str(parsed.path or "").strip().rstrip("/").split("/")[-1]
         return candidate or "artifact.bin"
+
+    def expand_s3_sources(self, source_uri: str, *, limit: int = 1000) -> list[str]:
+        bucket, key = self._parse_s3_uri(source_uri)
+        storage = self._require_storage()
+        clean_uri = str(source_uri or "").strip()
+        if clean_uri.endswith("/"):
+            objects = storage.list_objects(bucket=bucket, prefix=key, limit=limit)
+            if not objects:
+                raise DeweyNotFoundError(f"No S3 objects found for prefix: {source_uri}")
+            return [self._storage_uri("s3", bucket, item.key) for item in objects]
+        try:
+            storage.head_object(bucket=bucket, key=key)
+            return [self._storage_uri("s3", bucket, key)]
+        except StorageObjectNotFoundError:
+            prefix = key.rstrip("/") + "/"
+            objects = storage.list_objects(bucket=bucket, prefix=prefix, limit=limit)
+            if not objects:
+                raise DeweyNotFoundError(f"S3 object or prefix not found: {source_uri}")
+            return [self._storage_uri("s3", bucket, item.key) for item in objects]
+
+    @staticmethod
+    def _filename_suffix(value: str) -> str:
+        candidate = str(value or "").strip()
+        if not candidate:
+            return ""
+        suffixes = Path(candidate).suffixes
+        return "".join(suffixes) if suffixes else ""
+
+    @staticmethod
+    def _dedupe_filename(filename: str, used: set[str]) -> str:
+        if filename not in used:
+            used.add(filename)
+            return filename
+        stem = Path(filename).stem or "artifact"
+        suffix = "".join(Path(filename).suffixes)
+        counter = 2
+        while True:
+            candidate = f"{stem}-{counter}{suffix}"
+            if candidate not in used:
+                used.add(candidate)
+                return candidate
+            counter += 1
+
+    def _download_filename(self, artifact: dict[str, Any], naming_mode: str) -> str:
+        clean_mode = str(naming_mode or "hybrid").strip().lower() or "hybrid"
+        original_name = self._safe_filename(
+            artifact.get("original_filename"),
+            fallback=f"{artifact['artifact_euid']}.bin",
+        )
+        suffix = self._filename_suffix(original_name)
+        if clean_mode == "dewey":
+            return self._safe_filename(f"{artifact['artifact_euid']}{suffix or '.bin'}")
+        if clean_mode == "orig":
+            return original_name
+        return self._safe_filename(f"{artifact['artifact_euid']}.{original_name}")
+
+    def _download_artifact_bytes(self, artifact: dict[str, Any]) -> bytes:
+        backend = str(artifact.get("storage_backend") or "").strip().lower()
+        if backend == "s3":
+            return self._require_storage().get_object_bytes(
+                bucket=str(artifact.get("bucket") or ""),
+                key=str(artifact.get("key") or ""),
+                version_id=str(artifact.get("version_id") or "").strip() or None,
+            )
+        source_uri = str(artifact.get("source_uri") or "").strip()
+        if source_uri.startswith(("https://", "http://")):
+            response = requests.get(source_uri, timeout=60)
+            response.raise_for_status()
+            return bytes(response.content)
+        raise ValueError(f"direct download unsupported for storage backend: {backend or 'unknown'}")
+
+    def build_artifact_download_archive(
+        self,
+        *,
+        artifact_euids: list[str],
+        naming_mode: str = "hybrid",
+        include_metadata: bool = True,
+    ) -> tuple[str, bytes]:
+        selected = [str(item or "").strip() for item in artifact_euids if str(item or "").strip()]
+        if not selected:
+            raise ValueError("at least one artifact_euid is required")
+        seen: set[str] = set()
+        buffer = io.BytesIO()
+        archive_name = f"dewey-artifacts-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}.zip"
+        with zipfile.ZipFile(buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+            for artifact_euid in selected:
+                artifact = self.get_artifact(artifact_euid)
+                filename = self._dedupe_filename(
+                    self._download_filename(artifact, naming_mode),
+                    seen,
+                )
+                zf.writestr(filename, self._download_artifact_bytes(artifact))
+                if include_metadata:
+                    metadata_name = self._dedupe_filename(f"{filename}.dewey.yaml", seen)
+                    zf.writestr(
+                        metadata_name,
+                        yaml.safe_dump(
+                            artifact,
+                            sort_keys=True,
+                            allow_unicode=False,
+                        ),
+                    )
+        return archive_name, buffer.getvalue()
 
     def _managed_key(self, *, namespace: str, seed: str, filename: str) -> str:
         prefix = "/".join(
@@ -853,6 +960,43 @@ class DeweyService:
                 response=body,
             )
             return status_code, body
+
+    def upload_artifact_bytes(
+        self,
+        *,
+        artifact_type: str,
+        original_filename: str,
+        body: bytes,
+        content_type: str | None,
+        producer_system: str | None,
+        producer_object_euid: str | None,
+        metadata: dict[str, Any] | None,
+        lock_after_import: bool,
+        idempotency_key: str,
+        checksums: dict[str, Any] | None = None,
+    ) -> tuple[int, dict[str, Any]]:
+        _, upload = self.create_upload_session(
+            artifact_type=artifact_type,
+            original_filename=original_filename,
+            content_type=content_type,
+            producer_system=producer_system,
+            producer_object_euid=producer_object_euid,
+            metadata=metadata,
+            lock_after_import=lock_after_import,
+            idempotency_key=f"{idempotency_key}:create",
+        )
+        self._require_storage().put_bytes(
+            bucket=str(upload.get("bucket") or ""),
+            key=str(upload.get("key") or ""),
+            body=body,
+            content_type=content_type,
+        )
+        return self.complete_upload_session(
+            upload_token=str(upload.get("upload_token") or ""),
+            checksums=checksums,
+            metadata=metadata,
+            idempotency_key=f"{idempotency_key}:complete",
+        )
 
     def register_artifact(
         self,
@@ -2045,6 +2189,8 @@ class DeweyService:
             rows: list[dict[str, Any]] = []
             if "artifact" in scopes:
                 rows.extend(self._search_artifact_items(session, viewer_context=viewer_context))
+            if "artifact_set" in scopes:
+                rows.extend(self._search_artifact_set_items(session))
             if "share_reference" in scopes:
                 rows.extend(self._search_share_reference_items(session))
 
@@ -2057,6 +2203,7 @@ class DeweyService:
         timing_ms = int((perf_counter() - started) * 1000)
         facets = {
             "artifact": sum(1 for row in filtered if row["record_type"] == "artifact"),
+            "artifact_set": sum(1 for row in filtered if row["record_type"] == "artifact_set"),
             "share_reference": sum(
                 1 for row in filtered if row["record_type"] == "share_reference"
             ),
@@ -2097,7 +2244,7 @@ class DeweyService:
 
     @staticmethod
     def _normalize_search_scopes(raw: Any) -> list[str]:
-        allowed = {"artifact", "share_reference"}
+        allowed = {"artifact", "artifact_set", "share_reference"}
         if raw is None:
             return ["artifact", "share_reference"]
         values = raw if isinstance(raw, list) else [raw]
@@ -2207,6 +2354,28 @@ class DeweyService:
             )
         return items
 
+    def _search_artifact_set_items(self, session) -> list[dict[str, Any]]:
+        rows = self.backend.list_by_template(
+            session,
+            template_code=ARTIFACT_SET_TEMPLATE,
+            limit=5000,
+        )
+        items: list[dict[str, Any]] = []
+        for row in rows:
+            payload = self._artifact_set_response(session, row)
+            items.append(
+                {
+                    "record_type": "artifact_set",
+                    "source_kind": "dewey.artifact_set",
+                    "euid": payload["artifact_set_euid"],
+                    "name": payload.get("label") or payload["artifact_set_euid"],
+                    "created_at": payload.get("created_at"),
+                    "modified_at": payload.get("created_at"),
+                    **payload,
+                }
+            )
+        return items
+
     def _apply_search_filters(
         self,
         rows: list[dict[str, Any]],
@@ -2240,6 +2409,9 @@ class DeweyService:
             str(row.get("euid") or ""),
             str(row.get("name") or ""),
             str(row.get("artifact_type") or ""),
+            str(row.get("artifact_set_type") or ""),
+            str(row.get("label") or ""),
+            str(row.get("description") or ""),
             str(row.get("producer_system") or ""),
             str(row.get("title") or ""),
             str(row.get("pmid") or ""),
@@ -2251,6 +2423,8 @@ class DeweyService:
             str(row.get("target_euid") or ""),
             str(row.get("purpose") or ""),
             json.dumps(row.get("metadata") or {}, sort_keys=True),
+            json.dumps(row.get("manifest") or [], sort_keys=True),
+            json.dumps(row.get("connection") or {}, sort_keys=True),
             json.dumps(row.get("external_objects") or [], sort_keys=True),
             json.dumps(row.get("visible_owner_labels") or [], sort_keys=True),
         ]
@@ -2356,6 +2530,7 @@ class DeweyService:
         artifact_set_type: str,
         label: str | None,
         description: str | None,
+        metadata: dict[str, Any] | None,
         idempotency_key: str,
     ) -> tuple[int, dict[str, Any]]:
         clean_type = str(artifact_set_type or "").strip().lower()
@@ -2366,6 +2541,7 @@ class DeweyService:
             "artifact_set_type": clean_type,
             "label": str(label or "").strip() or None,
             "description": str(description or "").strip() or None,
+            "metadata": dict(metadata or {}),
         }
         fingerprint = self._fingerprint(payload)
 
@@ -2389,6 +2565,7 @@ class DeweyService:
                     "artifact_set_type": clean_type,
                     "label": payload["label"],
                     "description": payload["description"],
+                    "metadata": payload["metadata"],
                     "created_at": now_iso,
                 },
             )
@@ -2573,6 +2750,7 @@ class DeweyService:
         expires_at: str | None,
         issued_by: str | None,
         transport: str | None = None,
+        transport_config: dict[str, Any] | None = None,
         ttl_seconds: int | None = None,
         idempotency_key: str,
     ) -> tuple[int, dict[str, Any]]:
@@ -2583,8 +2761,10 @@ class DeweyService:
         if not clean_target_euid:
             raise ValueError("target_euid is required")
         clean_transport = str(transport or "presigned_s3").strip().lower() or "presigned_s3"
-        if clean_transport != "presigned_s3":
-            raise ValueError("transport must be presigned_s3")
+        allowed_transports = {"presigned_s3", "rclone_http", "rclone_sftp"}
+        if clean_transport not in allowed_transports:
+            raise ValueError("transport must be presigned_s3, rclone_http, or rclone_sftp")
+        clean_transport_config = dict(transport_config or {})
         expiry = self._normalize_expiry(expires_at, ttl_seconds=ttl_seconds)
         starts_at = utc_now_iso()
         payload = {
@@ -2595,6 +2775,7 @@ class DeweyService:
             "expires_at": expiry,
             "issued_by": str(issued_by or "").strip() or None,
             "transport": clean_transport,
+            "transport_config": clean_transport_config,
             "ttl_seconds": int(ttl_seconds) if ttl_seconds is not None else None,
         }
         fingerprint = self._fingerprint(payload)
@@ -2628,7 +2809,12 @@ class DeweyService:
 
             access_url: str | None = None
             status_value = "active"
+            manifest: list[dict[str, Any]] = []
+            connection: dict[str, Any] | None = None
+            member_count = 0
             if clean_target_type == "artifact":
+                if clean_transport != "presigned_s3":
+                    raise ValueError("artifact sharing requires transport presigned_s3")
                 artifact_payload = normalize_instance_payload(target)
                 if str(artifact_payload.get("storage_backend") or "").lower() != "s3":
                     raise ValueError("artifact sharing requires an s3-backed artifact")
@@ -2660,7 +2846,74 @@ class DeweyService:
                     },
                 )
             else:
-                status_value = "pending"
+                members = self.backend.list_children(
+                    session,
+                    parent=target,
+                    relationship_type="artifact_set_member",
+                )
+                member_count = len(members)
+                if clean_transport == "presigned_s3":
+                    expires_dt = datetime.fromisoformat(expiry.replace("Z", "+00:00"))
+                    ttl_value = max(
+                        60,
+                        int((expires_dt - datetime.now(timezone.utc)).total_seconds()),
+                    )
+                    errors = 0
+                    for member in members:
+                        artifact_payload = normalize_instance_payload(member)
+                        entry = {
+                            "artifact_euid": member.euid,
+                            "filename": str(
+                                artifact_payload.get("original_filename") or member.euid
+                            ),
+                            "storage_uri": str(artifact_payload.get("storage_uri") or ""),
+                        }
+                        if str(artifact_payload.get("storage_backend") or "").lower() != "s3":
+                            entry["status"] = "error"
+                            entry["detail"] = "artifact is not s3-backed"
+                            errors += 1
+                        else:
+                            try:
+                                self._require_storage().head_object(
+                                    bucket=str(artifact_payload.get("bucket") or ""),
+                                    key=str(artifact_payload.get("key") or ""),
+                                    version_id=str(artifact_payload.get("version_id") or "").strip()
+                                    or None,
+                                )
+                                entry["status"] = "active"
+                                entry["access_url"] = self._require_storage().generate_presigned_get_url(
+                                    bucket=str(artifact_payload.get("bucket") or ""),
+                                    key=str(artifact_payload.get("key") or ""),
+                                    version_id=str(artifact_payload.get("version_id") or "").strip()
+                                    or None,
+                                    expires_in=ttl_value,
+                                )
+                            except StorageObjectNotFoundError:
+                                entry["status"] = "error"
+                                entry["detail"] = "artifact object missing"
+                                errors += 1
+                        manifest.append(entry)
+                    status_value = "error" if errors == member_count and member_count else "active"
+                else:
+                    host = str(clean_transport_config.get("host") or "0.0.0.0").strip() or "0.0.0.0"
+                    port = int(clean_transport_config.get("port") or (8080 if clean_transport == "rclone_http" else 8022))
+                    username = str(clean_transport_config.get("user") or clean_transport_config.get("username") or "user").strip() or "user"
+                    password = str(clean_transport_config.get("passwd") or clean_transport_config.get("password") or "passwd").strip() or "passwd"
+                    bucket = str(clean_transport_config.get("bucket") or self.managed_storage_bucket or "").strip() or None
+                    endpoint = (
+                        f"http://{host}:{port}/"
+                        if clean_transport == "rclone_http"
+                        else f"sftp://{username}@{host}:{port}/"
+                    )
+                    connection = {
+                        "host": host,
+                        "port": port,
+                        "bucket": bucket,
+                        "username": username,
+                        "password": password,
+                        "endpoint": endpoint,
+                    }
+                    access_url = endpoint if clean_transport == "rclone_http" else None
 
             instance = self.backend.create_instance(
                 session,
@@ -2677,6 +2930,10 @@ class DeweyService:
                     "expires_at": payload["expires_at"],
                     "access_url": access_url,
                     "issued_by": payload["issued_by"],
+                    "manifest": manifest,
+                    "connection": connection or {},
+                    "member_count": member_count,
+                    "transport_config": clean_transport_config,
                     "created_at": utc_now_iso(),
                 },
             )
@@ -3007,7 +3264,9 @@ class DeweyService:
             "artifact_set_type": str(payload.get("artifact_set_type") or ""),
             "label": payload.get("label"),
             "description": payload.get("description"),
+            "metadata": dict(payload.get("metadata") or {}),
             "artifact_euids": artifact_euids,
+            "member_count": len(artifact_euids),
             "members": [self._artifact_response(member) for member in members],
             "created_at": str(payload.get("created_at") or utc_now_iso()),
         }
@@ -3025,6 +3284,10 @@ class DeweyService:
             "starts_at": payload.get("starts_at"),
             "expires_at": payload.get("expires_at"),
             "access_url": payload.get("access_url"),
+            "manifest": list(payload.get("manifest") or []),
+            "connection": dict(payload.get("connection") or {}),
+            "member_count": int(payload.get("member_count") or 0),
+            "transport_config": dict(payload.get("transport_config") or {}),
             "issued_by": payload.get("issued_by"),
             "created_at": payload.get("created_at"),
         }

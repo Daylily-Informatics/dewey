@@ -1,0 +1,144 @@
+- generic [ref=e1]:
+  - generic [ref=e2]: LSMCDEV1
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]: Dewey Artifacts
+        - heading "Register, Search, Download, And Share" [level=1] [ref=e7]
+        - generic [ref=e8]: operator@example.com
+      - generic [ref=e9]:
+        - link "Dashboard" [ref=e10] [cursor=pointer]:
+          - /url: /ui
+        - link "Literature Search" [ref=e11] [cursor=pointer]:
+          - /url: /literature
+        - link "Unified Search" [ref=e12] [cursor=pointer]:
+          - /url: /search
+        - link "Anomalies" [ref=e13] [cursor=pointer]:
+          - /url: /ui/anomalies
+        - link "Observability" [ref=e14] [cursor=pointer]:
+          - /url: /ui/observability
+        - link "Admin" [ref=e15] [cursor=pointer]:
+          - /url: /admin
+        - button "Logout" [ref=e17] [cursor=pointer]
+    - main [ref=e18]:
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - generic [ref=e21]: Artifact Operations
+          - heading "Bring legacy Dewey intake and file handling back into the current console." [level=2] [ref=e22]
+          - paragraph [ref=e23]: This browser surface restores artifact intake, search, download, and artifact-set workflows while keeping the current Dewey visual system and backend contracts.
+        - generic [ref=e24]:
+          - generic [ref=e25]: Register 0
+          - generic [ref=e26]: Artifacts 0
+          - generic [ref=e27]: Artifact Sets 0
+      - generic [ref=e28]:
+        - button "Register" [ref=e29] [cursor=pointer]
+        - button "Search Artifacts" [ref=e30] [cursor=pointer]
+        - button "Artifact Sets" [active] [ref=e31] [cursor=pointer]
+      - generic [ref=e207]:
+        - generic [ref=e209]:
+          - generic [ref=e211]:
+            - heading "Create Artifact Set" [level=3] [ref=e212]
+            - generic [ref=e213]: Create a set from scratch or use the search-results action to build one from selected artifacts.
+          - generic [ref=e214]:
+            - generic [ref=e215]:
+              - generic [ref=e216]:
+                - generic [ref=e217]: Set Type
+                - combobox "Set Type" [ref=e218]:
+                  - option "analysis_output"
+                  - option "batch"
+                  - option "collection" [selected]
+                  - option "delivery"
+                  - option "release"
+              - generic [ref=e219]:
+                - generic [ref=e220]: Label
+                - textbox "Label" [ref=e221]
+              - generic [ref=e222]:
+                - generic [ref=e223]: Description
+                - textbox "Description" [ref=e224]
+              - generic [ref=e225]:
+                - generic [ref=e226]: Program
+                - textbox [ref=e227]
+              - generic [ref=e228]:
+                - generic [ref=e229]: Cohort
+                - textbox [ref=e230]
+              - generic [ref=e231]:
+                - generic [ref=e232]: Release Label
+                - textbox [ref=e233]
+              - generic [ref=e234]:
+                - generic [ref=e235]: Recorded At
+                - textbox [ref=e236]
+              - generic [ref=e237]:
+                - generic [ref=e238]: Tags
+                - textbox [ref=e239]
+              - generic [ref=e240]:
+                - generic [ref=e241]: Notes
+                - textbox [ref=e242]
+              - generic [ref=e243]:
+                - generic [ref=e244]: Additional Set Metadata JSON
+                - textbox [ref=e245]
+            - button "Create Artifact Set" [ref=e247] [cursor=pointer]
+        - generic [ref=e248]:
+          - generic [ref=e250]:
+            - heading "Search Artifact Sets" [level=3] [ref=e251]
+            - generic [ref=e252]: Query set labels, descriptions, metadata, and created-at ranges, then issue share references for a selected set.
+          - generic [ref=e253]:
+            - generic [ref=e254]:
+              - generic [ref=e255]:
+                - generic [ref=e256]: Full Text
+                - textbox "Full Text" [ref=e257]:
+                  - /placeholder: artifact set EUID, label, description, metadata...
+              - generic [ref=e258]:
+                - generic [ref=e259]: Artifact Set EUIDs
+                - textbox "Artifact Set EUIDs" [ref=e260]
+              - generic [ref=e261]:
+                - generic [ref=e262]: Set Type
+                - combobox "Set Type" [ref=e263]:
+                  - option "Any" [selected]
+                  - option "analysis_output"
+                  - option "batch"
+                  - option "collection"
+                  - option "delivery"
+                  - option "release"
+              - generic [ref=e264]:
+                - generic [ref=e265]: Label
+                - textbox "Label" [ref=e266]
+              - generic [ref=e267]:
+                - generic [ref=e268]: Description
+                - textbox "Description" [ref=e269]
+              - generic [ref=e270]:
+                - generic [ref=e271]: Match Mode
+                - combobox "Match Mode" [ref=e272]:
+                  - option "greedy" [selected]
+                  - option "exact"
+              - generic [ref=e273]:
+                - generic [ref=e274]: Created After
+                - textbox "Created After" [ref=e275]
+              - generic [ref=e276]:
+                - generic [ref=e277]: Created Before
+                - textbox "Created Before" [ref=e278]
+              - generic [ref=e279]:
+                - generic [ref=e280]: Program
+                - textbox "Program" [ref=e281]
+              - generic [ref=e282]:
+                - generic [ref=e283]: Cohort
+                - textbox "Cohort" [ref=e284]
+              - generic [ref=e285]:
+                - generic [ref=e286]: Release Label
+                - textbox "Release Label" [ref=e287]
+              - generic [ref=e288]:
+                - generic [ref=e289]: Recorded At Start
+                - textbox "Recorded At Start" [ref=e290]
+              - generic [ref=e291]:
+                - generic [ref=e292]: Recorded At End
+                - textbox "Recorded At End" [ref=e293]
+              - generic [ref=e294]:
+                - generic [ref=e295]: Tags
+                - textbox "Tags" [ref=e296]
+              - generic [ref=e297]:
+                - generic [ref=e298]: Notes
+                - textbox "Notes" [ref=e299]
+            - generic [ref=e300]:
+              - button "Search" [ref=e301] [cursor=pointer]
+              - button "Export TSV" [ref=e302] [cursor=pointer]
+              - button "Export JSON" [ref=e303] [cursor=pointer]
+          - generic [ref=e304]: Run an artifact-set search to review or share matching sets.
