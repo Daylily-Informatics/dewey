@@ -29,6 +29,7 @@ def _login_user(monkeypatch, client, groups: list[str] | None = None) -> None:
         follow_redirects=False,
     )
     assert callback.status_code == 303
+    assert callback.headers["location"] == "/artifacts"
 
 
 def test_artifacts_page_requires_login_and_serves_bulk_template(monkeypatch, client) -> None:
@@ -41,6 +42,9 @@ def test_artifacts_page_requires_login_and_serves_bulk_template(monkeypatch, cli
     assert page.status_code == 200
     assert "Register, Search, Download, And Share" in page.text
     assert "Artifact Sets" in page.text
+    assert "Recent Artifacts" in page.text
+    assert 'href="/artifacts"' in page.text
+    assert 'section=recent_artifacts#section-recent_artifacts' in page.text
 
     template = client.get("/artifacts/bulk-template.tsv")
     assert template.status_code == 200
@@ -143,6 +147,11 @@ def test_artifacts_register_search_download_and_artifact_share(
     assert share.status_code == 200
     assert "Issued Artifact Links" in share.text
     assert len(fake_service.share_references) == 2
+
+    recent = client.get("/artifacts?section=recent_artifacts")
+    assert recent.status_code == 200
+    assert "Recent Artifacts" in recent.text
+    assert "local-report.txt" in recent.text
 
 
 def test_artifacts_bulk_directory_limit_and_artifact_set_routes(

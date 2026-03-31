@@ -37,7 +37,7 @@
         <section class="hero">
           <div class="hero-copy">
             <div class="eyebrow">Artifact Operations</div>
-            <h2>Bring legacy Dewey intake and file handling back into the current console.</h2>
+            <h2>Data Artifact Management</h2>
             <p>
               This browser surface restores artifact intake, search, download, and artifact-set
               workflows while keeping the current Dewey visual system and backend contracts.
@@ -51,9 +51,10 @@
         </section>
 
         <section class="section-tabs">
-          <button class="section-tab {% if active_section == 'register' %}section-tab-active{% endif %}" type="button" data-target="register">Register</button>
-          <button class="section-tab {% if active_section == 'search' %}section-tab-active{% endif %}" type="button" data-target="search">Search Artifacts</button>
-          <button class="section-tab {% if active_section == 'artifact_sets' %}section-tab-active{% endif %}" type="button" data-target="artifact_sets">Artifact Sets</button>
+          <a class="button section-tab {% if active_section == 'register' %}section-tab-active{% endif %}" href="/artifacts" data-target="register">Register</a>
+          <a class="button section-tab {% if active_section == 'search' %}section-tab-active{% endif %}" href="/artifacts?section=search#section-search" data-target="search">Search Artifacts</a>
+          <a class="button section-tab {% if active_section == 'artifact_sets' %}section-tab-active{% endif %}" href="/artifacts?section=artifact_sets#section-artifact_sets" data-target="artifact_sets">Artifact Sets</a>
+          <a class="button section-tab {% if active_section == 'recent_artifacts' %}section-tab-active{% endif %}" href="/artifacts?section=recent_artifacts#section-recent_artifacts" data-target="recent_artifacts">Recent Artifacts</a>
         </section>
 
         <section class="section-pane {% if active_section == 'register' %}section-pane-active{% endif %}" id="section-register">
@@ -857,6 +858,62 @@
               <div class="empty-state" style="margin-top: 1rem;">Run an artifact-set search to review or share matching sets.</div>
               {% endif %}
             </section>
+          </section>
+        </section>
+
+        <section class="section-pane {% if active_section == 'recent_artifacts' %}section-pane-active{% endif %}" id="section-recent_artifacts">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Recent Artifacts</h3>
+                <div class="panel-copy">Most recent Dewey artifact records across register, upload, copy, and reference flows.</div>
+              </div>
+              <div class="form-actions" style="margin-top: 0;">
+                <a class="button" href="/artifacts?section=search#section-search">Search Artifacts</a>
+                <a class="button" href="/artifacts">Register</a>
+              </div>
+            </div>
+            {% if recent_artifacts %}
+            <div class="table-wrap">
+              <table data-sortable>
+                <thead>
+                  <tr>
+                    <th>Artifact</th>
+                    <th>Type</th>
+                    <th>Mode</th>
+                    <th>Producer</th>
+                    <th>Status</th>
+                    <th>Storage</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in recent_artifacts %}
+                  <tr>
+                    <td>
+                      <div class="mono">{{ item.artifact_euid }}</div>
+                      <div>{{ item.original_filename or item.key }}</div>
+                    </td>
+                    <td>{{ item.artifact_type }}</td>
+                    <td>{{ item.import_mode or "register" }}</td>
+                    <td>{{ item.producer_system or "n/a" }}</td>
+                    <td>
+                      {% if item.storage_status == "verified" %}
+                      <span class="pill pill-active">verified</span>
+                      {% elif item.storage_status in ["missing", "error"] %}
+                      <span class="pill pill-alert">{{ item.storage_status }}</span>
+                      {% else %}
+                      <span class="pill">{{ item.storage_status or "registered" }}</span>
+                      {% endif %}
+                    </td>
+                    <td class="mono">{{ item.storage_uri }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% else %}
+            <div class="empty-state">No recent artifacts yet.</div>
+            {% endif %}
           </section>
         </section>
       </main>

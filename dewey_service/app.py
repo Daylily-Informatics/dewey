@@ -557,6 +557,11 @@ def create_app(
             "timing_ms": 0,
         }
 
+    def _normalize_artifact_section(value: Any) -> str:
+        allowed = {"register", "search", "artifact_sets", "recent_artifacts"}
+        candidate = str(value or "").strip().lower() or "register"
+        return candidate if candidate in allowed else "register"
+
     def _default_artifact_page_context(profile: dict[str, Any]) -> dict[str, Any]:
         return {
             "profile": profile,
@@ -575,6 +580,7 @@ def create_app(
             "artifact_set_search_form_json": "{}",
             "register_report": [],
             "bulk_report": [],
+            "recent_artifacts": service.list_artifacts(limit=20),
             "artifact_share_results": [],
             "artifact_set_share_result": None,
             "artifact_set_create_result": None,
@@ -699,7 +705,7 @@ def create_app(
 
     @app.get("/", include_in_schema=False)
     async def root() -> RedirectResponse:
-        return RedirectResponse(url="/ui", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+        return RedirectResponse(url="/artifacts", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
 
     @app.get("/favicon.ico", include_in_schema=False)
     async def favicon() -> RedirectResponse:
@@ -742,7 +748,7 @@ def create_app(
             groups=groups if isinstance(groups, list) else [],
         )
         request.session.pop("oauth_state", None)
-        return RedirectResponse(url="/ui", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(url="/artifacts", status_code=status.HTTP_303_SEE_OTHER)
 
     @app.get("/login", include_in_schema=False)
     async def login_page(request: Request) -> HTMLResponse:
@@ -1102,9 +1108,15 @@ def create_app(
 
     @app.get("/artifacts", include_in_schema=False)
     async def artifacts_page(
-        request: Request, profile: dict[str, Any] = Depends(require_ui_session)
+        request: Request,
+        section: str | None = Query(default=None),
+        profile: dict[str, Any] = Depends(require_ui_session),
     ) -> HTMLResponse:
-        return _artifact_page_response(request, profile=profile)
+        return _artifact_page_response(
+            request,
+            profile=profile,
+            active_section=_normalize_artifact_section(section),
+        )
 
     @app.get("/artifacts/bulk-template.tsv", include_in_schema=False)
     async def artifacts_bulk_template(

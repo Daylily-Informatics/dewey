@@ -21,17 +21,19 @@ def _login_user(monkeypatch, client, groups: list[str] | None = None) -> None:
     redirect_url = login.headers["location"]
     parsed = urlparse(redirect_url)
     state = parse_qs(parsed.query)["state"][0]
-    client.get(
+    callback = client.get(
         "/auth/callback",
         params={"code": "code-1", "state": state},
         follow_redirects=False,
     )
+    assert callback.status_code == 303
+    assert callback.headers["location"] == "/artifacts"
 
 
-def test_root_redirects_to_ui(client) -> None:
+def test_root_redirects_to_artifacts(client) -> None:
     response = client.get("/", follow_redirects=False)
     assert response.status_code == 307
-    assert response.headers["location"] == "/ui"
+    assert response.headers["location"] == "/artifacts"
 
 
 def test_ui_requires_session_login(client) -> None:
