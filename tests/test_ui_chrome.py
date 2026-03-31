@@ -73,11 +73,16 @@ def test_ui_page_renders_banner_after_login(monkeypatch, fake_service) -> None:
     assert "/search" in ui.text
     assert "/ui/anomalies" in ui.text
     assert "/admin" in ui.text
-    assert "Artifacts has browser intake and download" in ui.text
+    assert "Quick Register" in ui.text
+    assert "Comprehensive Artifact Registry" in ui.text
+    assert "dashboard_source_url" in ui.text
+    assert "dashboard_source_s3_uri" in ui.text
+    assert "Canonical file operations with registry discipline." not in ui.text
     assert admin.status_code == 200
     assert "Dewey Admin" in admin.text
     assert "Operator Anomalies" in admin.text
     assert "Open anomaly view" in admin.text
+    assert "Managed Artifact Storage" in admin.text
 
 
 def test_favicon_route_redirects_to_svg(fake_service) -> None:

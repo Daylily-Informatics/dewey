@@ -18,6 +18,7 @@ import requests
 import yaml
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
+from dewey_service.artifact_ui import resolve_artifact_type
 from dewey_service.literature import (
     LiteratureUnavailableError,
     ViewerContext,
@@ -393,9 +394,7 @@ class DeweyService:
         share_last_issued_at: str | None = None,
         artifact_identity_key: str | None = None,
     ) -> dict[str, Any]:
-        clean_artifact_type = str(artifact_type or "").strip().lower()
-        if not clean_artifact_type:
-            raise ValueError("artifact_type is required")
+        clean_artifact_type = resolve_artifact_type(artifact_type, original_filename, key, source_uri)
         backend, bucket_value, key_value, version_value, storage_uri = self._normalize_storage(
             storage_backend=storage_backend,
             bucket=bucket,
@@ -548,8 +547,9 @@ class DeweyService:
             source_value,
             str(meta.get("original_filename") or "").strip() or None,
         )
+        resolved_artifact_type = resolve_artifact_type(artifact_type, original_filename, source_value)
         payload = {
-            "artifact_type": str(artifact_type or "").strip().lower(),
+            "artifact_type": resolved_artifact_type,
             "source_uri": source_value,
             "import_mode": mode,
             "lock_after_import": bool(lock_after_import),
@@ -772,9 +772,7 @@ class DeweyService:
     ) -> tuple[int, dict[str, Any]]:
         if not self.managed_storage_bucket:
             raise ValueError("managed_storage_bucket is required for upload sessions")
-        clean_type = str(artifact_type or "").strip().lower()
-        if not clean_type:
-            raise ValueError("artifact_type is required")
+        clean_type = resolve_artifact_type(artifact_type, original_filename)
         clean_filename = self._safe_filename(original_filename, fallback="upload.bin")
         payload = {
             "artifact_type": clean_type,

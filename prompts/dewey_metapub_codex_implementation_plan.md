@@ -51,4 +51,4 @@
 - Restricted visibility is represented as `visibility_scope="restricted"` plus explicit `allowed_users[]` and `allowed_groups[]`.
 - Owner identity is Cognito `sub` when present, with email retained for display and user-based visibility matching.
 - The metapub source of truth for behavior inspection is `/Users/jmajor/projects/daylily/metapub`, but Dewey should consume the pip-installable fork rather than a vendored checkout.
-- The current local `source ./activate` flow is failing due to a Conda prefix conflict (`bzip2` record already exists). Static planning proceeded anyway, but implementation and verification should assume a repaired or clean Dewey environment before running repo commands that depend on activation.
+- The current local `source ./activate <deploy-name>` flow is failing due to a Conda prefix conflict (`bzip2` record already exists). Static planning proceeded anyway, but implementation and verification should assume a repaired or clean Dewey environment before running repo commands that depend on activation.

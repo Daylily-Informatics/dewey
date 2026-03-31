@@ -34,17 +34,7 @@
       </header>
 
       <main class="page">
-        <section class="hero">
-          <div class="hero-copy">
-            <div class="eyebrow">Operational Summary</div>
-            <h2>Canonical file operations with registry discipline.</h2>
-            <p>
-              Monitor artifact registration, imported storage state, and issued shares without
-              leaving the Dewey surface.
-            </p>
-          </div>
-          <span class="pill pill-active">Authenticated User View</span>
-        </section>
+        <section class="dashboard-spacer" aria-hidden="true"></section>
 
         <section class="metrics">
           <article class="metric-card">
@@ -72,22 +62,64 @@
         <section class="panel">
           <div class="panel-header">
             <div>
-              <h3>Supported Browser Interactions</h3>
+              <h3>Quick Register</h3>
               <div class="panel-copy">
-                Use this GUI for artifact intake, artifact search/download, literature workflows, and operational review.
+                Register one local file, public URL, or S3 URI. Dewey infers the artifact type from the extension unless you override it.
               </div>
             </div>
+            <a class="button" href="/artifacts">Comprehensive Artifact Registry</a>
           </div>
-          <div class="stack">
-            <span class="pill pill-active">Artifact register/upload/import</span>
-            <span class="pill pill-active">Artifact search and download</span>
-            <span class="pill pill-active">Artifact set create and share</span>
-            <span class="pill pill-active">Literature search and save</span>
-            <span class="pill pill-active">Unified search and export</span>
-            <span class="pill pill-active">Anomaly browsing</span>
-            <span class="pill pill-active">Observability views</span>
-            <span class="pill pill-active">Admin stub</span>
-          </div>
+          <form method="post" action="/ui/register" enctype="multipart/form-data">
+            <div class="form-grid">
+              <div class="field">
+                <label for="dashboard_artifact_type">Artifact Type</label>
+                <select id="dashboard_artifact_type" name="artifact_type">
+                  <option value="n/a" {% if quick_register_form.get("artifact_type", "n/a") in ["", "n/a"] %}selected{% endif %}>Auto detect / n/a</option>
+                  {% for item in artifact_types %}
+                  {% if item != "n/a" %}
+                  <option value="{{ item }}" {% if quick_register_form.get("artifact_type") == item %}selected{% endif %}>{{ item }}</option>
+                  {% endif %}
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="field">
+                <label for="dashboard_file_data">Local File</label>
+                <input id="dashboard_file_data" name="file_data" type="file" />
+              </div>
+              <div class="field">
+                <label for="dashboard_source_url">Public URL</label>
+                <input
+                  id="dashboard_source_url"
+                  name="source_url"
+                  type="url"
+                  placeholder="https://example.com/report.pdf"
+                  value="{{ quick_register_form.get("source_url", "") }}"
+                />
+              </div>
+              <div class="field">
+                <label for="dashboard_source_s3_uri">S3 URI</label>
+                <input
+                  id="dashboard_source_s3_uri"
+                  name="source_s3_uri"
+                  type="text"
+                  placeholder="s3://bucket/path/file.bam"
+                  value="{{ quick_register_form.get("source_s3_uri", "") }}"
+                />
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit">Register Source</button>
+              <span class="note">Choose exactly one source. Use the full registry for S3 prefixes, bulk TSV, or artifact sets.</span>
+            </div>
+            {% if quick_register_result %}
+            <div class="{% if quick_register_result.state == 'ok' %}status-ok{% else %}status-error{% endif %}">
+              {{ quick_register_result.detail }}
+              {% if quick_register_result.artifact_euid %}
+              <span class="mono">{{ quick_register_result.artifact_euid }}</span>
+              {% endif %}
+            </div>
+            {% endif %}
+          </form>
         </section>
 
         <section class="content-grid">

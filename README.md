@@ -39,7 +39,7 @@ flowchart LR
 ### Quickstart
 
 ```bash
-source ./activate
+source ./activate <deploy-name>
 dewey config init
 dewey db build --target local
 dewey server start --port 8914
@@ -93,7 +93,7 @@ Approximate only.
 
 ## Development Notes
 
-- Canonical local entry path: `source ./activate`
+- Canonical local entry path: `source ./activate <deploy-name>`
 - Use `dewey ...` for Dewey-owned operations
 - Use `tapdb ...` for shared DB/runtime lifecycle when Dewey explicitly delegates it
 - Use `daycog ...` for shared Cognito lifecycle when Dewey explicitly delegates it
@@ -103,7 +103,7 @@ Approximate only.
 Useful checks:
 
 ```bash
-source ./activate
+source ./activate <deploy-name>
 dewey --help
 pytest -q
 ```

@@ -29,7 +29,7 @@ def _login_user(monkeypatch, client, groups: list[str] | None = None) -> None:
         follow_redirects=False,
     )
     assert callback.status_code == 303
-    assert callback.headers["location"] == "/artifacts"
+    assert callback.headers["location"] == "/ui"
 
 
 def test_artifacts_page_requires_login_and_serves_bulk_template(monkeypatch, client) -> None:
@@ -152,6 +152,26 @@ def test_artifacts_register_search_download_and_artifact_share(
     assert recent.status_code == 200
     assert "Recent Artifacts" in recent.text
     assert "local-report.txt" in recent.text
+
+
+def test_artifacts_register_infers_artifact_type_from_extension(monkeypatch, client, fake_service) -> None:
+    _login_user(monkeypatch, client)
+
+    register = client.post(
+        "/artifacts/register",
+        data={
+            "artifact_type": "n/a",
+            "url_sources": "https://example.com/reports/report-a.txt",
+            "s3_mode": "reference",
+            "s3_sources": "s3://bucket-1/data/results.json",
+        },
+        files=[("file_data", ("variants.vcf.gz", b"##fileformat=VCF", "application/gzip"))],
+    )
+
+    assert register.status_code == 200
+    assert len(fake_service.artifacts) == 3
+    artifact_types = sorted(item["artifact_type"] for item in fake_service.artifacts.values())
+    assert artifact_types == ["json", "report", "vcf"]
 
 
 def test_artifacts_bulk_directory_limit_and_artifact_set_routes(

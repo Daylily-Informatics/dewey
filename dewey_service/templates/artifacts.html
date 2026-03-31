@@ -71,9 +71,11 @@
                   <div class="field">
                     <label for="artifact_type">Artifact Type</label>
                     <select id="artifact_type" name="artifact_type">
-                      <option value="">Select</option>
+                      <option value="n/a" {% if artifact_form.get("artifact_type", "n/a") in ["", "n/a"] %}selected{% endif %}>Auto detect / n/a</option>
                       {% for item in artifact_types %}
+                      {% if item != "n/a" %}
                       <option value="{{ item }}" {% if artifact_form.get("artifact_type") == item %}selected{% endif %}>{{ item }}</option>
+                      {% endif %}
                       {% endfor %}
                     </select>
                   </div>

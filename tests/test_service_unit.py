@@ -918,6 +918,38 @@ def test_upload_complete_verify_lock_and_search(
     assert export_rows[0]["record_type"] == "artifact"
 
 
+def test_service_infers_artifact_type_from_filename_and_allows_na(
+    service: DeweyService,
+    storage: _FakeStorageClient,
+) -> None:
+    session_code, upload_session = service.create_upload_session(
+        artifact_type="n/a",
+        original_filename="variants.vcf.gz",
+        content_type="application/gzip",
+        producer_system=None,
+        producer_object_euid=None,
+        metadata={},
+        lock_after_import=False,
+        idempotency_key="idem-upload-infer",
+    )
+    assert session_code == 201
+
+    storage.seed_object(
+        bucket=upload_session["bucket"],
+        key=upload_session["key"],
+        size=1024,
+        content_type="application/gzip",
+    )
+    complete_code, artifact = service.complete_upload_session(
+        upload_token=upload_session["upload_token"],
+        checksums={},
+        metadata={},
+        idempotency_key="idem-upload-infer-complete",
+    )
+    assert complete_code == 201
+    assert artifact["artifact_type"] == "vcf"
+
+
 def test_external_object_relation_lifecycle(service: DeweyService) -> None:
     _, artifact = service.register_artifact(
         artifact_type="report",

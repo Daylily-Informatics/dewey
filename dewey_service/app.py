@@ -37,11 +37,13 @@ from dewey_service.auth import (
 from dewey_service.artifact_ui import (
     ARTIFACT_SET_TYPES,
     ARTIFACT_TYPES,
+    NA_ARTIFACT_TYPE,
     bulk_template_tsv,
     collect_metadata,
     collect_metadata_search_filters,
     metadata_fields,
     parse_json_object,
+    resolve_artifact_type,
     split_lines,
 )
 from dewey_service.domain_access import (
@@ -52,7 +54,12 @@ from dewey_service.domain_access import (
 from dewey_service.literature import LiteratureUnavailableError, MetapubAdapter, ViewerContext
 from dewey_service.rbac import Role, profile_has_role
 from dewey_service.service import DeweyConflictError, DeweyNotFoundError, DeweyService
-from dewey_service.settings import Settings, get_settings
+from dewey_service.settings import (
+    Settings,
+    get_config_file_path,
+    get_settings,
+    persist_managed_storage_bucket,
+)
 from dewey_service.storage import S3StorageClient
 from dewey_service.tapdb_backend import TapDBBackend
 from dewey_service.observability import (
@@ -562,6 +569,32 @@ def create_app(
         candidate = str(value or "").strip().lower() or "register"
         return candidate if candidate in allowed else "register"
 
+    def _admin_page_response(
+        request: Request,
+        *,
+        profile: dict[str, Any],
+        artifact_bucket_form: dict[str, Any] | None = None,
+        artifact_bucket_status: dict[str, str] | None = None,
+        status_code: int = 200,
+    ) -> HTMLResponse:
+        anomalies = service.list_anomalies(limit=100)
+        return templates.TemplateResponse(
+            request,
+            "admin.html",
+            _template_context(
+                profile=profile,
+                anomalies=anomalies,
+                is_admin=True,
+                managed_storage_bucket=str(settings.managed_storage_bucket or "").strip(),
+                managed_storage_prefix=str(settings.managed_storage_prefix or "").strip(),
+                config_path=str(get_config_file_path()),
+                artifact_bucket_form=artifact_bucket_form
+                or {"managed_storage_bucket": str(settings.managed_storage_bucket or "").strip()},
+                artifact_bucket_status=artifact_bucket_status,
+            ),
+            status_code=status_code,
+        )
+
     def _default_artifact_page_context(profile: dict[str, Any]) -> dict[str, Any]:
         return {
             "profile": profile,
@@ -587,6 +620,49 @@ def create_app(
             "bulk_template_url": "/artifacts/bulk-template.tsv",
             "active_section": "register",
         }
+
+    def _ui_home_response(
+        request: Request,
+        *,
+        profile: dict[str, Any],
+        quick_register_form: dict[str, Any] | None = None,
+        quick_register_result: dict[str, Any] | None = None,
+        status_code: int = 200,
+    ) -> HTMLResponse:
+        artifacts = service.list_artifacts(limit=100)
+        share_references = service.list_share_references(limit=100)
+        active_share_count = sum(1 for item in share_references if item.get("status") == "active")
+        verification_failures = sum(
+            1 for item in artifacts if item.get("storage_status") in {"missing", "error"}
+        )
+        recent_imports = sum(
+            1 for item in artifacts if item.get("import_mode") in {"copy", "reference", "upload"}
+        )
+        return templates.TemplateResponse(
+            request,
+            "ui_home.html",
+            _template_context(
+                profile=profile,
+                artifacts=artifacts,
+                share_references=share_references[:12],
+                metrics={
+                    "artifact_count": len(artifacts),
+                    "active_share_count": active_share_count,
+                    "recent_import_count": recent_imports,
+                    "verification_failures": verification_failures,
+                },
+                artifact_types=ARTIFACT_TYPES,
+                quick_register_form=quick_register_form
+                or {
+                    "artifact_type": NA_ARTIFACT_TYPE,
+                    "source_url": "",
+                    "source_s3_uri": "",
+                },
+                quick_register_result=quick_register_result,
+                is_admin=_is_admin(profile),
+            ),
+            status_code=status_code,
+        )
 
     def _artifact_page_response(
         request: Request,
@@ -705,7 +781,7 @@ def create_app(
 
     @app.get("/", include_in_schema=False)
     async def root() -> RedirectResponse:
-        return RedirectResponse(url="/artifacts", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+        return RedirectResponse(url="/ui", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
 
     @app.get("/favicon.ico", include_in_schema=False)
     async def favicon() -> RedirectResponse:
@@ -748,7 +824,7 @@ def create_app(
             groups=groups if isinstance(groups, list) else [],
         )
         request.session.pop("oauth_state", None)
-        return RedirectResponse(url="/artifacts", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(url="/ui", status_code=status.HTTP_303_SEE_OTHER)
 
     @app.get("/login", include_in_schema=False)
     async def login_page(request: Request) -> HTMLResponse:
@@ -891,30 +967,99 @@ def create_app(
     async def ui_home(
         request: Request, profile: dict[str, Any] = Depends(require_ui_session)
     ) -> HTMLResponse:
-        artifacts = service.list_artifacts(limit=100)
-        share_references = service.list_share_references(limit=100)
-        active_share_count = sum(1 for item in share_references if item.get("status") == "active")
-        verification_failures = sum(
-            1 for item in artifacts if item.get("storage_status") in {"missing", "error"}
-        )
-        recent_imports = sum(
-            1 for item in artifacts if item.get("import_mode") in {"copy", "reference", "upload"}
-        )
-        return templates.TemplateResponse(
-            request,
-            "ui_home.html",
-            _template_context(
+        return _ui_home_response(request, profile=profile)
+
+    @app.post("/ui/register", include_in_schema=False)
+    async def ui_quick_register(
+        request: Request, profile: dict[str, Any] = Depends(require_ui_session)
+    ) -> HTMLResponse:
+        form = await request.form(max_files=8)
+        requested_artifact_type = str(form.get("artifact_type") or "").strip().lower()
+        source_url = str(form.get("source_url") or "").strip()
+        source_s3_uri = str(form.get("source_s3_uri") or "").strip()
+        quick_form = {
+            "artifact_type": requested_artifact_type or NA_ARTIFACT_TYPE,
+            "source_url": source_url,
+            "source_s3_uri": source_s3_uri,
+        }
+        upload = form.get("file_data")
+        has_file = isinstance(upload, StarletteUploadFile) and bool(str(upload.filename or "").strip())
+        selected_sources = int(has_file) + int(bool(source_url)) + int(bool(source_s3_uri))
+        if selected_sources != 1:
+            return _ui_home_response(
+                request,
                 profile=profile,
-                artifacts=artifacts,
-                share_references=share_references[:12],
-                metrics={
-                    "artifact_count": len(artifacts),
-                    "active_share_count": active_share_count,
-                    "recent_import_count": recent_imports,
-                    "verification_failures": verification_failures,
+                quick_register_form=quick_form,
+                quick_register_result={
+                    "state": "error",
+                    "detail": "Specify exactly one source: local file, public URL, or S3 URI.",
                 },
-                is_admin=_is_admin(profile),
-            ),
+                status_code=400,
+            )
+        try:
+            if has_file:
+                file_name = Path(str(upload.filename or "").strip() or "upload.bin").name
+                artifact_type = resolve_artifact_type(requested_artifact_type, file_name)
+                _, payload = service.upload_artifact_bytes(
+                    artifact_type=artifact_type,
+                    original_filename=file_name,
+                    body=await upload.read(),
+                    content_type=str(upload.content_type or "").strip() or None,
+                    producer_system=None,
+                    producer_object_euid=None,
+                    metadata={},
+                    lock_after_import=False,
+                    idempotency_key=_new_idempotency_key("ui-home-upload"),
+                )
+                result_detail = f"Registered {file_name} as {payload['artifact_type']}."
+                quick_form = {
+                    "artifact_type": payload["artifact_type"],
+                    "source_url": "",
+                    "source_s3_uri": "",
+                }
+            elif source_url:
+                artifact_type = resolve_artifact_type(requested_artifact_type, source_url)
+                _, payload = service.import_artifact_from_uri(
+                    artifact_type=artifact_type,
+                    source_uri=source_url,
+                    import_mode="copy",
+                    lock_after_import=False,
+                    producer_system=None,
+                    producer_object_euid=None,
+                    metadata={},
+                    idempotency_key=_new_idempotency_key("ui-home-url"),
+                )
+                result_detail = f"Imported {source_url} as {payload['artifact_type']}."
+            else:
+                artifact_type = resolve_artifact_type(requested_artifact_type, source_s3_uri)
+                _, payload = service.import_artifact_from_uri(
+                    artifact_type=artifact_type,
+                    source_uri=source_s3_uri,
+                    import_mode="reference",
+                    lock_after_import=False,
+                    producer_system=None,
+                    producer_object_euid=None,
+                    metadata={},
+                    idempotency_key=_new_idempotency_key("ui-home-s3"),
+                )
+                result_detail = f"Registered {source_s3_uri} as {payload['artifact_type']}."
+        except Exception as exc:
+            return _ui_home_response(
+                request,
+                profile=profile,
+                quick_register_form=quick_form,
+                quick_register_result={"state": "error", "detail": str(exc)},
+                status_code=400,
+            )
+        return _ui_home_response(
+            request,
+            profile=profile,
+            quick_register_form=quick_form,
+            quick_register_result={
+                "state": "ok",
+                "detail": result_detail,
+                "artifact_euid": payload["artifact_euid"],
+            },
         )
 
     @app.get("/ui/anomalies", include_in_schema=False)
@@ -956,15 +1101,37 @@ def create_app(
     async def admin_page(
         request: Request, profile: dict[str, Any] = Depends(require_ui_admin_session)
     ) -> HTMLResponse:
-        anomalies = service.list_anomalies(limit=100)
-        return templates.TemplateResponse(
-            request,
-            "admin.html",
-            _template_context(
+        return _admin_page_response(request, profile=profile)
+
+    @app.post("/admin/artifact-storage", include_in_schema=False)
+    async def admin_update_artifact_storage(
+        request: Request, profile: dict[str, Any] = Depends(require_ui_admin_session)
+    ) -> HTMLResponse:
+        form = await request.form()
+        bucket_value = str(form.get("managed_storage_bucket") or "").strip()
+        bucket_form = {"managed_storage_bucket": bucket_value}
+        try:
+            config_path, normalized_bucket = persist_managed_storage_bucket(bucket_value)
+        except Exception as exc:
+            return _admin_page_response(
+                request,
                 profile=profile,
-                anomalies=anomalies,
-                is_admin=True,
-            ),
+                artifact_bucket_form=bucket_form,
+                artifact_bucket_status={"state": "error", "detail": str(exc)},
+                status_code=400,
+            )
+
+        settings.managed_storage_bucket = normalized_bucket
+        app.state.settings = settings
+        setattr(service, "managed_storage_bucket", normalized_bucket)
+        return _admin_page_response(
+            request,
+            profile=profile,
+            artifact_bucket_form={"managed_storage_bucket": normalized_bucket},
+            artifact_bucket_status={
+                "state": "ok",
+                "detail": f"Managed artifact bucket updated in {config_path}.",
+            },
         )
 
     @app.get("/ui/observability", include_in_schema=False)
@@ -1135,15 +1302,7 @@ def create_app(
     ) -> HTMLResponse:
         form = await request.form(max_files=1105)
         values = _string_form_values(form)
-        artifact_type = str(values.get("artifact_type") or "").strip().lower()
-        if not artifact_type:
-            return _artifact_page_response(
-                request,
-                profile=profile,
-                artifact_form=values,
-                register_report=[{"status": "error", "detail": "artifact_type is required"}],
-                active_section="register",
-            )
+        requested_artifact_type = str(values.get("artifact_type") or "").strip().lower()
 
         metadata = collect_metadata(
             values,
@@ -1209,7 +1368,7 @@ def create_app(
             nonlocal artifact_set_payload
             file_name = Path(str(upload.filename or "").strip() or "upload.bin").name
             payload_code, payload = service.upload_artifact_bytes(
-                artifact_type=artifact_type,
+                artifact_type=resolve_artifact_type(requested_artifact_type, file_name),
                 original_filename=file_name,
                 body=await upload.read(),
                 content_type=str(upload.content_type or "").strip() or None,
@@ -1265,7 +1424,7 @@ def create_app(
 
             for source_uri in split_lines(values.get("url_sources")):
                 _, payload = service.import_artifact_from_uri(
-                    artifact_type=artifact_type,
+                    artifact_type=resolve_artifact_type(requested_artifact_type, source_uri),
                     source_uri=source_uri,
                     import_mode="copy",
                     lock_after_import=lock_after_import,
@@ -1290,7 +1449,11 @@ def create_app(
                         parsed = expanded_source.removeprefix("s3://")
                         bucket, key = parsed.split("/", 1)
                         _, payload = service.register_artifact(
-                            artifact_type=artifact_type,
+                            artifact_type=resolve_artifact_type(
+                                requested_artifact_type,
+                                key,
+                                expanded_source,
+                            ),
                             storage_backend="s3",
                             bucket=bucket,
                             key=key,
@@ -1308,7 +1471,10 @@ def create_app(
                         )
                     else:
                         _, payload = service.import_artifact_from_uri(
-                            artifact_type=artifact_type,
+                            artifact_type=resolve_artifact_type(
+                                requested_artifact_type,
+                                expanded_source,
+                            ),
                             source_uri=expanded_source,
                             import_mode=s3_mode,
                             lock_after_import=lock_after_import,
@@ -1376,8 +1542,6 @@ def create_app(
                 source_mode = str(row.get("source_mode") or "").strip().lower()
                 artifact_type = str(row.get("artifact_type") or "").strip().lower()
                 source_uri = str(row.get("source_uri") or "").strip()
-                if not artifact_type:
-                    raise ValueError("artifact_type is required")
                 if source_mode == "register":
                     bucket = str(row.get("bucket") or "").strip()
                     key = str(row.get("key") or "").strip()
@@ -1388,7 +1552,12 @@ def create_app(
                         else:
                             raise ValueError("register rows require bucket/key or s3 source_uri")
                     _, payload = service.register_artifact(
-                        artifact_type=artifact_type,
+                        artifact_type=resolve_artifact_type(
+                            artifact_type,
+                            str(row.get("original_filename") or "").strip() or None,
+                            key,
+                            source_uri,
+                        ),
                         storage_backend="s3",
                         bucket=bucket,
                         key=key,
@@ -1408,7 +1577,11 @@ def create_app(
                     if not source_uri:
                         raise ValueError("reference/copy rows require source_uri")
                     _, payload = service.import_artifact_from_uri(
-                        artifact_type=artifact_type,
+                        artifact_type=resolve_artifact_type(
+                            artifact_type,
+                            str(row.get("original_filename") or "").strip() or None,
+                            source_uri,
+                        ),
                         source_uri=source_uri,
                         import_mode=source_mode,
                         lock_after_import=False,

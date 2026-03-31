@@ -5,7 +5,7 @@
 Always start by activating the repo environment:
 
 ```bash
-source ./activate
+source ./activate <deploy-name>
 ```
 
 ## Command Ownership
@@ -23,7 +23,7 @@ source ./activate
 
 ## Dewey Examples
 
-- Start with `source ./activate`
+- Start with `source ./activate <deploy-name>`
 - Use `dewey config init`
 - Use `dewey db build --target local`
 - Use `dewey server start --port 8914`

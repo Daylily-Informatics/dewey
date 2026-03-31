@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from dewey_service.settings import Settings, load_settings
+from dewey_service.settings import Settings, load_settings, persist_managed_storage_bucket
 
 
 def test_settings_requires_https_cognito_domain() -> None:
@@ -41,6 +41,9 @@ deployment:
   name: staging
   color: "#124e78"
   is_production: false
+storage:
+  managed_bucket: dewey-artifacts-staging
+  managed_prefix: managed
 """,
         encoding="utf-8",
     )
@@ -62,6 +65,8 @@ deployment:
         "color": "#124e78",
         "is_production": False,
     }
+    assert loaded.managed_storage_bucket == "dewey-artifacts-staging"
+    assert loaded.managed_storage_prefix == "managed"
 
 
 def test_settings_ignore_dewey_cognito_env_overrides(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -93,3 +98,20 @@ auth:
 
     assert loaded.cognito_domain == "https://yaml.example.com"
     assert loaded.cognito_app_client_id == "yaml-client"
+
+
+def test_persist_managed_storage_bucket_creates_or_updates_storage_section(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "local")
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
+
+    config_path, normalized = persist_managed_storage_bucket("s3://dewey-artifacts-local")
+    raw = config_path.read_text(encoding="utf-8")
+
+    assert normalized == "dewey-artifacts-local"
+    assert "storage:" in raw
+    assert "managed_bucket: dewey-artifacts-local" in raw
+
+    loaded = load_settings(config_path)
+    assert loaded.managed_storage_bucket == "dewey-artifacts-local"

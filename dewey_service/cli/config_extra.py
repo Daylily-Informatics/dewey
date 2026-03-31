@@ -11,7 +11,12 @@ if TYPE_CHECKING:
 import typer
 
 from dewey_service.cli.common import console
-from dewey_service.settings import clear_settings_cache, get_config_file_path, get_settings
+from dewey_service.settings import (
+    clear_settings_cache,
+    get_config_file_path,
+    get_settings,
+    persist_managed_storage_bucket,
+)
 
 
 def _status() -> None:
@@ -27,6 +32,27 @@ def _status() -> None:
     console.print(settings.model_dump_json(indent=2))
 
 
+def _set_artifact_bucket(
+    bucket: str = typer.Argument(..., help="S3 bucket name for Dewey-managed artifact copies and uploads."),
+) -> None:
+    """Persist the managed artifact bucket in the Dewey config file."""
+    try:
+        config_path, normalized = persist_managed_storage_bucket(bucket)
+        settings = get_settings()
+    except Exception as exc:
+        console.print(f"[red]✗[/red] Could not update artifact bucket: {exc}")
+        raise typer.Exit(1) from exc
+
+    console.print(f"[green]✓[/green] Updated artifact bucket in [cyan]{config_path}[/cyan]")
+    console.print(f"managed_storage_bucket={settings.managed_storage_bucket or normalized}")
+
+
 def register(registry: CommandRegistry, spec: CliSpec) -> None:
     """Register Dewey-specific config subcommands."""
     registry.add_command("config", "status", _status, "Show merged Dewey runtime settings")
+    registry.add_command(
+        "config",
+        "set-artifact-bucket",
+        _set_artifact_bucket,
+        "Set the S3 bucket Dewey uses for managed artifact storage.",
+    )

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Dewey environment activation script
-# Usage: source ./activate
+# Usage: source ./activate <deploy-name>
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   echo "Error: This script must be sourced, not executed."
-  echo "Usage: source ./activate"
+  echo "Usage: source ./activate <deploy-name>"
   exit 1
 fi
 
@@ -41,15 +41,34 @@ _dewey_truthy() {
 _dewey_sanitize_deployment_code() {
   local raw_value="$1"
   local sanitized=""
-  sanitized="$(printf '%s' "$raw_value" | LC_ALL=C sed -E 's/[^A-Za-z0-9._-]+/-/g; s/^-+//; s/-+$//')"
+  sanitized="$(printf '%s' "$raw_value" | LC_ALL=C sed -E 's/[^A-Za-z0-9-]+/-/g; s/^-+//; s/-+$//')"
   if [[ -z "$sanitized" ]]; then
     sanitized="local"
   fi
   printf '%s\n' "$sanitized"
 }
 
-_dewey_deployment_code="${DEWEY_DEPLOYMENT_CODE:-${DEPLOYMENT_CODE:-${LSMC_DEPLOYMENT_CODE:-local}}}"
-_dewey_deployment_code="$(_dewey_sanitize_deployment_code "${_dewey_deployment_code}")"
+_dewey_validate_deploy_name() {
+  local deploy_name="$1"
+  if [[ ! "$deploy_name" =~ ^[A-Za-z0-9-]{2,8}$ ]]; then
+    echo -e "  ${_YELLOW}⚠${_NC} deploy-name must match ^[A-Za-z0-9-]{2,8}$" >&2
+    return 1
+  fi
+}
+
+if [[ "$#" -ne 1 ]]; then
+  echo "Error: Dewey activation requires exactly one positional deploy-name."
+  echo "Usage: source ./activate <deploy-name>"
+  return 1
+fi
+
+_dewey_deployment_code="$1"
+if ! _dewey_validate_deploy_name "${_dewey_deployment_code}"; then
+  return 1
+fi
+export DEWEY_DEPLOYMENT_CODE="${_dewey_deployment_code}"
+export DEPLOYMENT_CODE="${_dewey_deployment_code}"
+export LSMC_DEPLOYMENT_CODE="${_dewey_deployment_code}"
 _DEWEY_CONDA_ENV_NAME="${_DEWEY_CONDA_ENV_BASE}-${_dewey_deployment_code}"
 unset _dewey_deployment_code
 
