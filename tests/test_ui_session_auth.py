@@ -2,8 +2,18 @@ from __future__ import annotations
 
 from urllib.parse import parse_qs, urlparse
 
+from fastapi.testclient import TestClient
 
-def _login_user(monkeypatch, client, groups: list[str] | None = None) -> None:
+
+def _login_user(
+    monkeypatch,
+    client,
+    *,
+    email: str = "operator@example.com",
+    sub: str = "sub-1",
+    name: str = "Operator Example",
+    groups: list[str] | None = None,
+) -> None:
     monkeypatch.setattr(
         "dewey_service.app.exchange_code",
         lambda settings, code: {"id_token": "header.payload.sig"},
@@ -11,8 +21,9 @@ def _login_user(monkeypatch, client, groups: list[str] | None = None) -> None:
     monkeypatch.setattr(
         "dewey_service.app.decode_jwt_claims_noverify",
         lambda token: {
-            "email": "operator@example.com",
-            "sub": "sub-1",
+            "email": email,
+            "sub": sub,
+            "name": name,
             "cognito:groups": groups or ["dewey-readwrite"],
         },
     )
@@ -141,3 +152,59 @@ def test_logout_clears_session_and_redirects_to_cognito(monkeypatch, client, tes
 
     ui = client.get("/ui")
     assert ui.status_code == 401
+
+
+def test_two_browsers_can_keep_distinct_authenticated_sessions(monkeypatch, client) -> None:
+    _login_user(
+        monkeypatch,
+        client,
+        email="operator-a@example.com",
+        sub="sub-a",
+        name="Operator A",
+    )
+
+    with TestClient(client.app) as other_client:
+        _login_user(
+            monkeypatch,
+            other_client,
+            email="operator-b@example.com",
+            sub="sub-b",
+            name="Operator B",
+        )
+
+        ui_a = client.get("/ui")
+        ui_b = other_client.get("/ui")
+
+        assert ui_a.status_code == 200
+        assert ui_b.status_code == 200
+        assert "operator-a@example.com" in ui_a.text
+        assert "operator-b@example.com" not in ui_a.text
+        assert "operator-b@example.com" in ui_b.text
+        assert "operator-a@example.com" not in ui_b.text
+
+
+def test_logout_from_one_browser_does_not_clear_the_other(monkeypatch, client) -> None:
+    _login_user(
+        monkeypatch,
+        client,
+        email="shared@example.com",
+        sub="sub-shared",
+        name="Shared Operator",
+    )
+
+    with TestClient(client.app) as other_client:
+        _login_user(
+            monkeypatch,
+            other_client,
+            email="shared@example.com",
+            sub="sub-shared",
+            name="Shared Operator",
+        )
+
+        logout = client.post("/logout", follow_redirects=False)
+        assert logout.status_code == 303
+
+        assert client.get("/ui").status_code == 401
+        ui_other = other_client.get("/ui")
+        assert ui_other.status_code == 200
+        assert "shared@example.com" in ui_other.text
