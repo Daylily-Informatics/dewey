@@ -98,8 +98,47 @@ def test_server_restart_uses_background_start(monkeypatch, capsys) -> None:
                 "port": 8914,
                 "reload": False,
                 "background": True,
+                "ssl_enabled": True,
+                "cert_path": None,
+                "key_path": None,
             },
         ),
+    ]
+
+
+def test_server_start_parses_tls_options(monkeypatch, capsys, tmp_path: Path) -> None:
+    calls: list[dict[str, object]] = []
+    cert = tmp_path / "tls-cert.pem"
+    key = tmp_path / "tls-key.pem"
+
+    monkeypatch.setattr(server_cli, "_validate_cognito_uris_for_port", lambda **kwargs: None)
+    monkeypatch.setattr(server_cli, "_start_server", lambda **kwargs: calls.append(kwargs))
+
+    exit_code = _invoke(
+        [
+            "server",
+            "start",
+            "--foreground",
+            "--no-ssl",
+            "--cert",
+            str(cert),
+            "--key",
+            str(key),
+        ]
+    )
+    capsys.readouterr()
+
+    assert exit_code == 0
+    assert calls == [
+        {
+            "host": "0.0.0.0",
+            "port": 8914,
+            "reload": False,
+            "background": False,
+            "ssl_enabled": False,
+            "cert_path": cert,
+            "key_path": key,
+        }
     ]
 
 

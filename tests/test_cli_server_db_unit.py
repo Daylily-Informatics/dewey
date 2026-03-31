@@ -31,6 +31,7 @@ def test_server_state_and_path_helpers(monkeypatch: pytest.MonkeyPatch, tmp_path
     assert server_cli._state_dir() == tmp_path
     assert server_cli._log_dir() == tmp_path / "logs"
     assert server_cli._pid_file() == tmp_path / "server.pid"
+    assert server_cli._runtime_meta_file() == tmp_path / "server-meta.json"
 
     server_cli._ensure_runtime_dirs()
     assert (tmp_path / "logs").exists()
@@ -82,24 +83,176 @@ def test_server_port_host_and_status_resolution(monkeypatch: pytest.MonkeyPatch)
     assert server_cli._status_bind() == ("unknown", "unknown")
 
 
+def test_tls_resolution_precedence(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    shared_dir = tmp_path / "shared"
+    repo_dir = tmp_path / "repo"
+    explicit_cert = tmp_path / "explicit-cert.pem"
+    explicit_key = tmp_path / "explicit-key.pem"
+    generic_cert = tmp_path / "generic-cert.pem"
+    generic_key = tmp_path / "generic-key.pem"
+    legacy_cert = tmp_path / "legacy-cert.pem"
+    legacy_key = tmp_path / "legacy-key.pem"
+    shared_cert = shared_dir / "cert.pem"
+    shared_key = shared_dir / "key.pem"
+    repo_cert = repo_dir / "cert.pem"
+    repo_key = repo_dir / "key.pem"
+
+    for path in (
+        explicit_cert,
+        explicit_key,
+        generic_cert,
+        generic_key,
+        legacy_cert,
+        legacy_key,
+        shared_cert,
+        shared_key,
+        repo_cert,
+        repo_key,
+    ):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("x", encoding="utf-8")
+
+    monkeypatch.setattr(server_cli, "CERT_FILE", repo_cert)
+    monkeypatch.setattr(server_cli, "KEY_FILE", repo_key)
+    monkeypatch.setattr(server_cli, "_shared_cert_dir", lambda: shared_dir)
+    monkeypatch.setattr(server_cli, "ensure_certs", lambda path: (path / "cert.pem", path / "key.pem"))
+
+    assert server_cli._resolve_tls_material(
+        ssl_enabled=True,
+        cert_path=explicit_cert,
+        key_path=explicit_key,
+    ) == (explicit_cert, explicit_key)
+
+    monkeypatch.setenv(server_cli.GENERIC_CERT_ENV, str(generic_cert))
+    monkeypatch.setenv(server_cli.GENERIC_KEY_ENV, str(generic_key))
+    assert server_cli._resolve_tls_material(
+        ssl_enabled=True,
+        cert_path=None,
+        key_path=None,
+    ) == (generic_cert, generic_key)
+
+    monkeypatch.delenv(server_cli.GENERIC_CERT_ENV, raising=False)
+    monkeypatch.delenv(server_cli.GENERIC_KEY_ENV, raising=False)
+    monkeypatch.setenv(server_cli.LEGACY_CERT_ENV, str(legacy_cert))
+    monkeypatch.setenv(server_cli.LEGACY_KEY_ENV, str(legacy_key))
+    assert server_cli._resolve_tls_material(
+        ssl_enabled=True,
+        cert_path=None,
+        key_path=None,
+    ) == (legacy_cert, legacy_key)
+
+    monkeypatch.delenv(server_cli.LEGACY_CERT_ENV, raising=False)
+    monkeypatch.delenv(server_cli.LEGACY_KEY_ENV, raising=False)
+    assert server_cli._resolve_tls_material(
+        ssl_enabled=True,
+        cert_path=None,
+        key_path=None,
+    ) == (shared_cert, shared_key)
+
+    shared_cert.unlink()
+    shared_key.unlink()
+    assert server_cli._resolve_tls_material(
+        ssl_enabled=True,
+        cert_path=None,
+        key_path=None,
+    ) == (repo_cert, repo_key)
+
+
+def test_tls_resolution_validation_and_generation(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    shared_dir = tmp_path / "shared"
+    repo_dir = tmp_path / "repo"
+    repo_cert = repo_dir / "cert.pem"
+    repo_key = repo_dir / "key.pem"
+    repo_cert.parent.mkdir(parents=True, exist_ok=True)
+    repo_key.parent.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setattr(server_cli, "CERT_FILE", repo_cert)
+    monkeypatch.setattr(server_cli, "KEY_FILE", repo_key)
+    monkeypatch.setattr(server_cli, "_shared_cert_dir", lambda: shared_dir)
+
+    with pytest.raises(typer.BadParameter, match="CLI flags requires both"):
+        server_cli._resolve_tls_material(
+            ssl_enabled=True,
+            cert_path=tmp_path / "cert-only.pem",
+            key_path=None,
+        )
+
+    monkeypatch.setenv(server_cli.GENERIC_CERT_ENV, str(tmp_path / "generic-cert.pem"))
+    monkeypatch.delenv(server_cli.GENERIC_KEY_ENV, raising=False)
+    with pytest.raises(
+        typer.BadParameter,
+        match="environment variables SSL_CERT_FILE/SSL_KEY_FILE requires both",
+    ):
+        server_cli._resolve_tls_material(
+            ssl_enabled=True,
+            cert_path=None,
+            key_path=None,
+        )
+
+    monkeypatch.delenv(server_cli.GENERIC_CERT_ENV, raising=False)
+    generated_cert = shared_dir / "cert.pem"
+    generated_key = shared_dir / "key.pem"
+    calls: list[Path] = []
+
+    def fake_ensure_certs(path: Path) -> tuple[Path, Path]:
+        calls.append(path)
+        path.mkdir(parents=True, exist_ok=True)
+        generated_cert.write_text("cert", encoding="utf-8")
+        generated_key.write_text("key", encoding="utf-8")
+        return generated_cert, generated_key
+
+    monkeypatch.setattr(server_cli, "ensure_certs", fake_ensure_certs)
+    assert server_cli._resolve_tls_material(
+        ssl_enabled=True,
+        cert_path=None,
+        key_path=None,
+    ) == (generated_cert, generated_key)
+    assert calls == [shared_dir]
+
+    monkeypatch.setattr(server_cli, "ensure_certs", lambda path: (_ for _ in ()).throw(SystemExit("mkcert missing")))
+    generated_cert.unlink()
+    generated_key.unlink()
+    with pytest.raises(typer.BadParameter, match="mkcert missing"):
+        server_cli._resolve_tls_material(
+            ssl_enabled=True,
+            cert_path=None,
+            key_path=None,
+        )
+
+    assert server_cli._resolve_tls_material(
+        ssl_enabled=False,
+        cert_path=None,
+        key_path=None,
+    ) == (None, None)
+
+
 def test_start_server_branches(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setattr(server_cli, "_ensure_runtime_dirs", lambda: None)
     monkeypatch.setattr(server_cli, "_pid_file", lambda: tmp_path / "server.pid")
     monkeypatch.setattr(server_cli, "_log_dir", lambda: tmp_path)
+    monkeypatch.setattr(server_cli, "_runtime_meta_file", lambda: tmp_path / "server-meta.json")
 
     cert = tmp_path / "cert.pem"
     key = tmp_path / "key.pem"
-    monkeypatch.setattr(server_cli, "CERT_FILE", cert)
-    monkeypatch.setattr(server_cli, "KEY_FILE", key)
-
-    with pytest.raises(typer.BadParameter, match="HTTPS certs are missing"):
-        server_cli._start_server(host="0.0.0.0", port=8914, reload=False, background=True)
-
     cert.write_text("cert", encoding="utf-8")
     key.write_text("key", encoding="utf-8")
+    monkeypatch.setattr(
+        server_cli,
+        "_resolve_tls_material",
+        lambda **kwargs: (cert, key) if kwargs["ssl_enabled"] else (None, None),
+    )
 
     monkeypatch.setattr(server_cli, "read_pid", lambda path: 321)
-    server_cli._start_server(host="0.0.0.0", port=8914, reload=False, background=True)
+    server_cli._start_server(
+        host="0.0.0.0",
+        port=8914,
+        reload=False,
+        background=True,
+        ssl_enabled=True,
+        cert_path=None,
+        key_path=None,
+    )
 
     monkeypatch.setattr(server_cli, "read_pid", lambda path: None)
     monkeypatch.setattr(server_cli, "new_log_path", lambda path: tmp_path / "server.log")
@@ -115,10 +268,19 @@ def test_start_server_branches(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) 
 
     monkeypatch.setattr(server_cli.subprocess, "Popen", lambda *args, **kwargs: FailedProc())
     with pytest.raises(typer.Exit) as exc:
-        server_cli._start_server(host="0.0.0.0", port=8914, reload=True, background=True)
+        server_cli._start_server(
+            host="0.0.0.0",
+            port=8914,
+            reload=True,
+            background=True,
+            ssl_enabled=True,
+            cert_path=None,
+            key_path=None,
+        )
     assert exc.value.exit_code == 1
 
     writes: list[int] = []
+    commands: list[list[str]] = []
 
     class RunningProc:
         pid = 555
@@ -127,23 +289,61 @@ def test_start_server_branches(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) 
         def poll():
             return None
 
-    monkeypatch.setattr(server_cli.subprocess, "Popen", lambda *args, **kwargs: RunningProc())
+    def fake_popen(cmd, *args, **kwargs):
+        commands.append(cmd)
+        return RunningProc()
+
+    monkeypatch.setattr(server_cli.subprocess, "Popen", fake_popen)
     monkeypatch.setattr(server_cli, "write_pid", lambda path, pid: writes.append(pid))
-    server_cli._start_server(host="0.0.0.0", port=8914, reload=False, background=True)
+    server_cli._start_server(
+        host="0.0.0.0",
+        port=8914,
+        reload=False,
+        background=True,
+        ssl_enabled=True,
+        cert_path=None,
+        key_path=None,
+    )
     assert writes == [555]
+    assert "--ssl-certfile" in commands[0]
+    assert "--ssl-keyfile" in commands[0]
 
     uvicorn_calls: list[dict[str, object]] = []
     monkeypatch.setattr(server_cli.uvicorn, "run", lambda **kwargs: uvicorn_calls.append(kwargs))
-    server_cli._start_server(host="127.0.0.1", port=8915, reload=True, background=False)
+    server_cli._start_server(
+        host="127.0.0.1",
+        port=8915,
+        reload=True,
+        background=False,
+        ssl_enabled=False,
+        cert_path=None,
+        key_path=None,
+    )
     assert uvicorn_calls[0]["host"] == "127.0.0.1"
     assert uvicorn_calls[0]["port"] == 8915
+    assert "ssl_certfile" not in uvicorn_calls[0]
+    assert "ssl_keyfile" not in uvicorn_calls[0]
+
+
+def test_status_scheme_meta(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setattr(server_cli, "_runtime_meta_file", lambda: tmp_path / "server-meta.json")
+    assert server_cli._status_scheme() == "https"
+
+    server_cli._write_runtime_meta(ssl_enabled=False)
+    assert server_cli._status_scheme() == "http"
+
+    server_cli._write_runtime_meta(ssl_enabled=True)
+    assert server_cli._status_scheme() == "https"
 
 
 def test_stop_server_and_logs_branches(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys) -> None:
     monkeypatch.setattr(server_cli, "_pid_file", lambda: tmp_path / "server.pid")
+    monkeypatch.setattr(server_cli, "_runtime_meta_file", lambda: tmp_path / "server-meta.json")
+    (tmp_path / "server-meta.json").write_text('{"ssl_enabled": true}', encoding="utf-8")
     monkeypatch.setattr(server_cli, "stop_pid", lambda path: (True, "Server stopped"))
     server_cli._stop_server()
     assert "Server stopped" in capsys.readouterr().out
+    assert not (tmp_path / "server-meta.json").exists()
 
     monkeypatch.setattr(server_cli, "stop_pid", lambda path: (False, "Permission denied stopping PID 1"))
     with pytest.raises(typer.Exit) as exc:
@@ -192,7 +392,15 @@ def test_server_command_wrappers(monkeypatch: pytest.MonkeyPatch) -> None:
 
     server_cli.start(reload=True, background=False)
     assert start_calls[0]["validated"] == {"port": 9002, "host": "127.0.0.1"}
-    assert start_calls[1] == {"host": "127.0.0.1", "port": 9002, "reload": True, "background": False}
+    assert start_calls[1] == {
+        "host": "127.0.0.1",
+        "port": 9002,
+        "reload": True,
+        "background": False,
+        "ssl_enabled": True,
+        "cert_path": None,
+        "key_path": None,
+    }
 
     stop_calls: list[str] = []
     monkeypatch.setattr(server_cli, "_stop_server", lambda: stop_calls.append("stop"))

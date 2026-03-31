@@ -13,10 +13,12 @@ import shutil
 import subprocess
 import sys
 import time
+import json
 from pathlib import Path
 
 import typer
 import uvicorn
+from cli_core_yo.certs import ensure_certs
 from cli_core_yo.oauth import runtime_oauth_host, validate_uri_list_ports
 from cli_core_yo.server import (
     display_host,
@@ -28,6 +30,7 @@ from cli_core_yo.server import (
     tail_follow,
     write_pid,
 )
+from typer.models import OptionInfo
 
 from dewey_service.cli.common import PROJECT_ROOT, console
 from dewey_service.defaults import DEFAULT_APP_PORT
@@ -38,6 +41,10 @@ server_app = typer.Typer(help="HTTPS API/UI server commands")
 CERT_DIR = PROJECT_ROOT / "certs"
 CERT_FILE = CERT_DIR / "cert.pem"
 KEY_FILE = CERT_DIR / "key.pem"
+GENERIC_CERT_ENV = "SSL_CERT_FILE"
+GENERIC_KEY_ENV = "SSL_KEY_FILE"
+LEGACY_CERT_ENV = "DEWEY_SSL_CERT_FILE"
+LEGACY_KEY_ENV = "DEWEY_SSL_KEY_FILE"
 
 
 def _state_dir() -> Path:
@@ -52,6 +59,10 @@ def _log_dir() -> Path:
 
 def _pid_file() -> Path:
     return _state_dir() / "server.pid"
+
+
+def _runtime_meta_file() -> Path:
+    return _state_dir() / "server-meta.json"
 
 
 def _ensure_runtime_dirs() -> None:
@@ -114,6 +125,12 @@ def _resolve_host(value: str) -> str:
     return os.environ.get("DEWEY_HOST", "").strip() or value
 
 
+def _normalize_option_default(value, fallback):
+    if isinstance(value, OptionInfo):
+        return fallback
+    return value
+
+
 def _status_bind() -> tuple[str, str]:
     host = os.environ.get("DEWEY_HOST", "").strip()
     port = os.environ.get("DEWEY_PORT", "").strip()
@@ -132,18 +149,145 @@ def _status_bind() -> tuple[str, str]:
     return resolved_host, resolved_port
 
 
-def _start_server(*, host: str, port: int, reload: bool, background: bool) -> None:
-    _ensure_runtime_dirs()
+def _resolve_deployment_code() -> str:
+    return (
+        os.environ.get("DEWEY_DEPLOYMENT_CODE", "").strip()
+        or os.environ.get("DEPLOYMENT_CODE", "").strip()
+        or os.environ.get("LSMC_DEPLOYMENT_CODE", "").strip()
+        or "local"
+    )
 
-    if not CERT_FILE.exists() or not KEY_FILE.exists():
-        raise typer.BadParameter(
-            "HTTPS certs are missing. Create certs at certs/cert.pem and certs/key.pem"
-        )
+
+def _state_home() -> Path:
+    raw = os.environ.get("XDG_STATE_HOME", "").strip()
+    if raw:
+        return Path(raw).expanduser()
+    return Path.home() / ".local" / "state"
+
+
+def _shared_cert_dir() -> Path:
+    return _state_home() / "dayhoff" / _resolve_deployment_code() / "certs"
+
+
+def _resolve_tls_pair_from_paths(
+    cert_path: Path | None,
+    key_path: Path | None,
+    *,
+    source: str,
+) -> tuple[Path, Path] | None:
+    if cert_path is None and key_path is None:
+        return None
+    if cert_path is None or key_path is None:
+        raise typer.BadParameter(f"{source} requires both a cert path and a key path")
+    cert_resolved = cert_path.expanduser()
+    key_resolved = key_path.expanduser()
+    if not cert_resolved.exists():
+        raise typer.BadParameter(f"{source} cert file does not exist: {cert_resolved}")
+    if not key_resolved.exists():
+        raise typer.BadParameter(f"{source} key file does not exist: {key_resolved}")
+    return cert_resolved, key_resolved
+
+
+def _resolve_tls_pair_from_env(
+    *,
+    cert_env: str,
+    key_env: str,
+    source: str,
+) -> tuple[Path, Path] | None:
+    cert_raw = os.environ.get(cert_env, "").strip()
+    key_raw = os.environ.get(key_env, "").strip()
+    cert_path = Path(cert_raw) if cert_raw else None
+    key_path = Path(key_raw) if key_raw else None
+    return _resolve_tls_pair_from_paths(cert_path, key_path, source=source)
+
+
+def _resolve_tls_material(
+    *,
+    ssl_enabled: bool,
+    cert_path: Path | None,
+    key_path: Path | None,
+) -> tuple[Path | None, Path | None]:
+    if not ssl_enabled:
+        return None, None
+
+    explicit = _resolve_tls_pair_from_paths(cert_path, key_path, source="CLI flags")
+    if explicit is not None:
+        return explicit
+
+    generic = _resolve_tls_pair_from_env(
+        cert_env=GENERIC_CERT_ENV,
+        key_env=GENERIC_KEY_ENV,
+        source="environment variables SSL_CERT_FILE/SSL_KEY_FILE",
+    )
+    if generic is not None:
+        return generic
+
+    legacy = _resolve_tls_pair_from_env(
+        cert_env=LEGACY_CERT_ENV,
+        key_env=LEGACY_KEY_ENV,
+        source=f"legacy environment variables {LEGACY_CERT_ENV}/{LEGACY_KEY_ENV}",
+    )
+    if legacy is not None:
+        return legacy
+
+    shared_cert = _shared_cert_dir() / "cert.pem"
+    shared_key = _shared_cert_dir() / "key.pem"
+    if shared_cert.exists() and shared_key.exists():
+        return shared_cert, shared_key
+
+    if CERT_FILE.exists() and KEY_FILE.exists():
+        return CERT_FILE, KEY_FILE
+
+    try:
+        return ensure_certs(_shared_cert_dir())
+    except SystemExit as exc:
+        raise typer.BadParameter(str(exc)) from exc
+
+
+def _write_runtime_meta(*, ssl_enabled: bool) -> None:
+    _runtime_meta_file().write_text(
+        json.dumps({"ssl_enabled": ssl_enabled}, sort_keys=True),
+        encoding="utf-8",
+    )
+
+
+def _clear_runtime_meta() -> None:
+    _runtime_meta_file().unlink(missing_ok=True)
+
+
+def _status_scheme() -> str:
+    meta_file = _runtime_meta_file()
+    if not meta_file.exists():
+        return "https"
+    try:
+        payload = json.loads(meta_file.read_text(encoding="utf-8"))
+    except (OSError, ValueError, TypeError):
+        return "https"
+    return "https" if payload.get("ssl_enabled", True) else "http"
+
+
+def _start_server(
+    *,
+    host: str,
+    port: int,
+    reload: bool,
+    background: bool,
+    ssl_enabled: bool,
+    cert_path: Path | None,
+    key_path: Path | None,
+) -> None:
+    _ensure_runtime_dirs()
+    resolved_cert, resolved_key = _resolve_tls_material(
+        ssl_enabled=ssl_enabled,
+        cert_path=cert_path,
+        key_path=key_path,
+    )
+    scheme = "https" if ssl_enabled else "http"
 
     pid = read_pid(_pid_file())
     if pid:
         console.print(f"[yellow]⚠[/yellow] Server already running (PID {pid})")
-        console.print(f"   URL: [cyan]https://{display_host(host)}:{port}[/cyan]")
+        console.print(f"   URL: [cyan]{scheme}://{display_host(host)}:{port}[/cyan]")
         return
 
     if background:
@@ -158,11 +302,16 @@ def _start_server(*, host: str, port: int, reload: bool, background: bool) -> No
             host,
             "--port",
             str(port),
-            "--ssl-certfile",
-            str(CERT_FILE),
-            "--ssl-keyfile",
-            str(KEY_FILE),
         ]
+        if ssl_enabled:
+            cmd.extend(
+                [
+                    "--ssl-certfile",
+                    str(resolved_cert),
+                    "--ssl-keyfile",
+                    str(resolved_key),
+                ]
+            )
         if reload:
             cmd.append("--reload")
 
@@ -186,25 +335,29 @@ def _start_server(*, host: str, port: int, reload: bool, background: bool) -> No
             raise typer.Exit(1)
 
         write_pid(_pid_file(), proc.pid)
+        _write_runtime_meta(ssl_enabled=ssl_enabled)
         console.print(f"[green]✓[/green] Server started (PID {proc.pid})")
-        console.print(f"   URL: [cyan]https://{display_host(host)}:{port}[/cyan]")
+        console.print(f"   URL: [cyan]{scheme}://{display_host(host)}:{port}[/cyan]")
         console.print(f"   Logs: [dim]{log_file}[/dim]")
         return
 
-    uvicorn.run(
-        app="dewey_service.app:create_app",
-        factory=True,
-        host=host,
-        port=port,
-        reload=reload,
-        ssl_certfile=str(CERT_FILE),
-        ssl_keyfile=str(KEY_FILE),
-    )
+    uvicorn_kwargs: dict[str, object] = {
+        "app": "dewey_service.app:create_app",
+        "factory": True,
+        "host": host,
+        "port": port,
+        "reload": reload,
+    }
+    if ssl_enabled:
+        uvicorn_kwargs["ssl_certfile"] = str(resolved_cert)
+        uvicorn_kwargs["ssl_keyfile"] = str(resolved_key)
+    uvicorn.run(**uvicorn_kwargs)
 
 
 def _stop_server() -> None:
     stopped, msg = stop_pid(_pid_file())
     if stopped:
+        _clear_runtime_meta()
         console.print(f"[green]✓[/green] {msg}")
         return
     if "Permission" in msg:
@@ -218,6 +371,9 @@ def start(
     host: str = typer.Option("0.0.0.0", "--host", help="Host to bind"),
     port: int = typer.Option(DEFAULT_APP_PORT, "--port", "-p", help="Port to bind"),
     reload: bool = typer.Option(False, "--reload/--no-reload", help="Enable autoreload"),
+    ssl_enabled: bool = typer.Option(True, "--ssl/--no-ssl", help="Serve over HTTPS"),
+    cert: Path | None = typer.Option(None, "--cert", help="Path to TLS certificate PEM"),
+    key: Path | None = typer.Option(None, "--key", help="Path to TLS private key PEM"),
     background: bool = typer.Option(
         True,
         "--background/--foreground",
@@ -229,12 +385,23 @@ def start(
         help="Validate Cognito callback/logout URI ports before startup",
     ),
 ) -> None:
-    """Start the Dewey API/UI server over HTTPS."""
+    """Start the Dewey API/UI server."""
+    ssl_enabled = _normalize_option_default(ssl_enabled, True)
+    cert = _normalize_option_default(cert, None)
+    key = _normalize_option_default(key, None)
     resolved_host = _resolve_host(host)
     resolved_port = _resolve_port(port)
     if check_cognito_uris:
         _validate_cognito_uris_for_port(port=resolved_port, host=resolved_host)
-    _start_server(host=resolved_host, port=resolved_port, reload=reload, background=background)
+    _start_server(
+        host=resolved_host,
+        port=resolved_port,
+        reload=reload,
+        background=background,
+        ssl_enabled=ssl_enabled,
+        cert_path=cert,
+        key_path=key,
+    )
 
 
 @server_app.command("stop")
@@ -254,7 +421,7 @@ def status() -> None:
     host, port = _status_bind()
     log_file = latest_log(_log_dir())
     console.print(f"[green]●[/green] Server is [green]running[/green] (PID {pid})")
-    console.print(f"   URL: [cyan]https://{host}:{port}[/cyan]")
+    console.print(f"   URL: [cyan]{_status_scheme()}://{host}:{port}[/cyan]")
     if log_file:
         console.print(f"   Logs: [dim]{log_file}[/dim]")
 
@@ -293,20 +460,34 @@ def logs(
 def restart(
     host: str = typer.Option("0.0.0.0", "--host", help="Host to bind"),
     port: int = typer.Option(DEFAULT_APP_PORT, "--port", "-p", help="Port to bind"),
+    ssl_enabled: bool = typer.Option(True, "--ssl/--no-ssl", help="Serve over HTTPS"),
+    cert: Path | None = typer.Option(None, "--cert", help="Path to TLS certificate PEM"),
+    key: Path | None = typer.Option(None, "--key", help="Path to TLS private key PEM"),
     check_cognito_uris: bool = typer.Option(
         True,
         "--check-cognito-uris/--no-check-cognito-uris",
         help="Validate Cognito callback/logout URI ports before startup",
     ),
 ) -> None:
-    """Restart the Dewey API/UI server in background mode over HTTPS."""
+    """Restart the Dewey API/UI server in background mode."""
+    ssl_enabled = _normalize_option_default(ssl_enabled, True)
+    cert = _normalize_option_default(cert, None)
+    key = _normalize_option_default(key, None)
     resolved_host = _resolve_host(host)
     resolved_port = _resolve_port(port)
     _stop_server()
     time.sleep(1)
     if check_cognito_uris:
         _validate_cognito_uris_for_port(port=resolved_port, host=resolved_host)
-    _start_server(host=resolved_host, port=resolved_port, reload=False, background=True)
+    _start_server(
+        host=resolved_host,
+        port=resolved_port,
+        reload=False,
+        background=True,
+        ssl_enabled=ssl_enabled,
+        cert_path=cert,
+        key_path=key,
+    )
 
 
 def register(registry: CommandRegistry, spec: CliSpec) -> None:

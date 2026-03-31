@@ -45,7 +45,15 @@ dewey db build --target local
 dewey server start --port 8914
 ```
 
-HTTPS is the expected local posture. Place certs at `certs/cert.pem` and `certs/key.pem` before starting the normal local server flow.
+HTTPS is the expected local posture. Dewey now resolves TLS material in this order:
+- explicit `--cert` and `--key`
+- generic `SSL_CERT_FILE` and `SSL_KEY_FILE`
+- legacy `DEWEY_SSL_CERT_FILE` and `DEWEY_SSL_KEY_FILE`
+- shared deployment-scoped Dayhoff certs under `~/.local/state/dayhoff/<deploy-name>/certs/`
+- repo-local `certs/cert.pem` and `certs/key.pem` as a temporary compatibility fallback
+- mkcert generation into the shared deployment-scoped Dayhoff cert directory
+
+Use `--no-ssl` only when you explicitly want an HTTP local run.
 
 ## Architecture
 
