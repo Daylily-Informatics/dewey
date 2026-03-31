@@ -1,4 +1,5 @@
 <!doctype html>
+{% import "_artifact_links.html" as artifact_links %}
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -245,8 +246,20 @@
                           {% endif %}
                         </td>
                         <td class="mono">{{ row.source or row.detail }}</td>
-                        <td class="mono">{{ row.artifact_euid or row.detail }}</td>
-                        <td class="mono">{{ row.storage_uri or row.detail }}</td>
+                        <td>
+                          {% if row.artifact_euid %}
+                          {{ artifact_links.artifact_euid_link(row.artifact_euid) }}
+                          {% else %}
+                          <span class="mono">{{ row.detail }}</span>
+                          {% endif %}
+                        </td>
+                        <td>
+                          {% if row.storage_uri and row.artifact_euid %}
+                          {{ artifact_links.artifact_storage_action(row.artifact_euid, row.storage_uri) }}
+                          {% else %}
+                          <span class="mono">{{ row.storage_uri or row.detail }}</span>
+                          {% endif %}
+                        </td>
                         <td class="mono">{{ row.artifact_set_euid or "none" }}</td>
                       </tr>
                       {% endfor %}
@@ -288,8 +301,20 @@
                           <span class="pill pill-alert">error</span>
                           {% endif %}
                         </td>
-                        <td class="mono">{{ row.artifact_euid or "n/a" }}</td>
-                        <td class="mono">{{ row.storage_uri or "n/a" }}</td>
+                        <td>
+                          {% if row.artifact_euid %}
+                          {{ artifact_links.artifact_euid_link(row.artifact_euid) }}
+                          {% else %}
+                          <span class="mono">n/a</span>
+                          {% endif %}
+                        </td>
+                        <td>
+                          {% if row.storage_uri and row.artifact_euid %}
+                          {{ artifact_links.artifact_storage_action(row.artifact_euid, row.storage_uri) }}
+                          {% else %}
+                          <span class="mono">{{ row.storage_uri or "n/a" }}</span>
+                          {% endif %}
+                        </td>
                         <td>{{ row.detail or "" }}</td>
                       </tr>
                       {% endfor %}
@@ -438,7 +463,7 @@
                           <tr>
                             <td><input type="checkbox" class="artifact-select" name="artifact_euids" value="{{ item.artifact_euid }}" /></td>
                             <td>
-                              <div class="mono">{{ item.artifact_euid }}</div>
+                              <div>{{ artifact_links.artifact_euid_link(item.artifact_euid) }}</div>
                               <div>{{ item.original_filename or item.name }}</div>
                             </td>
                             <td>{{ item.artifact_type }}</td>
@@ -452,7 +477,7 @@
                               <span class="pill">{{ item.storage_status or "registered" }}</span>
                               {% endif %}
                             </td>
-                            <td class="mono">{{ item.storage_uri }}</td>
+                            <td>{{ artifact_links.artifact_storage_action(item.artifact_euid, item.storage_uri) }}</td>
                           </tr>
                           {% endfor %}
                         </tbody>
@@ -687,7 +712,7 @@
                     <tbody>
                       {% for item in artifact_set_share_result.manifest %}
                       <tr>
-                        <td class="mono">{{ item.artifact_euid }}</td>
+                        <td>{{ artifact_links.artifact_euid_link(item.artifact_euid) }}</td>
                         <td>{{ item.status }}</td>
                         <td>
                           {% if item.access_url %}
@@ -892,7 +917,7 @@
                   {% for item in recent_artifacts %}
                   <tr>
                     <td>
-                      <div class="mono">{{ item.artifact_euid }}</div>
+                      <div>{{ artifact_links.artifact_euid_link(item.artifact_euid) }}</div>
                       <div>{{ item.original_filename or item.key }}</div>
                     </td>
                     <td>{{ item.artifact_type }}</td>
@@ -907,7 +932,7 @@
                       <span class="pill">{{ item.storage_status or "registered" }}</span>
                       {% endif %}
                     </td>
-                    <td class="mono">{{ item.storage_uri }}</td>
+                    <td>{{ artifact_links.artifact_storage_action(item.artifact_euid, item.storage_uri) }}</td>
                   </tr>
                   {% endfor %}
                 </tbody>

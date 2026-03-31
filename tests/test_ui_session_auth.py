@@ -67,6 +67,11 @@ def test_dashboard_quick_register_infers_artifact_type_for_local_file(
     artifact = next(iter(fake_service.artifacts.values()))
     assert artifact["artifact_type"] == "vcf"
 
+    ui = client.get("/ui")
+    assert ui.status_code == 200
+    assert f'href="/artifacts/euid/{artifact["artifact_euid"]}"' in ui.text
+    assert f'action="/artifacts/euid/{artifact["artifact_euid"]}/download"' in ui.text
+
 
 def test_dashboard_quick_register_imports_public_url(monkeypatch, client, fake_service) -> None:
     _login_user(monkeypatch, client)

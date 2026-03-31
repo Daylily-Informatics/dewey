@@ -101,6 +101,8 @@ def test_artifacts_register_search_download_and_artifact_share(
     assert search.status_code == 200
     assert "4 matches" in search.text
     assert "AT-000001" in search.text
+    assert 'href="/artifacts/euid/AT-000001"' in search.text
+    assert 'action="/artifacts/euid/AT-000001/download"' in search.text
 
     export = client.post(
         "/artifacts/search/export",
@@ -152,6 +154,36 @@ def test_artifacts_register_search_download_and_artifact_share(
     assert recent.status_code == 200
     assert "Recent Artifacts" in recent.text
     assert "local-report.txt" in recent.text
+    assert 'href="/artifacts/euid/AT-000001"' in recent.text
+    assert 'action="/artifacts/euid/AT-000001/download"' in recent.text
+
+
+def test_artifact_detail_page_and_direct_download_redirect(monkeypatch, client, fake_service) -> None:
+    _login_user(monkeypatch, client)
+
+    register = client.post(
+        "/artifacts/register",
+        data={"artifact_type": "report"},
+        files=[("file_data", ("detail-report.txt", b"alpha", "text/plain"))],
+    )
+    assert register.status_code == 200
+
+    artifact_euid = next(iter(fake_service.artifacts))
+
+    detail = client.get(f"/artifacts/euid/{artifact_euid}")
+    assert detail.status_code == 200
+    assert artifact_euid in detail.text
+    assert "detail-report.txt" in detail.text
+    assert "Storage URI" in detail.text
+
+    download = client.post(
+        f"/artifacts/euid/{artifact_euid}/download",
+        data={"share_ttl_hours": "24"},
+        follow_redirects=False,
+    )
+    assert download.status_code == 303
+    assert download.headers["location"] == "https://downloads.example.com/SH-000001"
+    assert len(fake_service.share_references) == 1
 
 
 def test_artifacts_register_infers_artifact_type_from_extension(monkeypatch, client, fake_service) -> None:

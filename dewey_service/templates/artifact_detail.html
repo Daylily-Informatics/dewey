@@ -1,0 +1,246 @@
+<!doctype html>
+{% import "_artifact_links.html" as artifact_links %}
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dewey Artifact Detail</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/console.css" />
+  </head>
+  <body>
+    {% if deployment.name and not deployment.is_production %}
+    <div class="deployment-banner" style="background: {{ deployment.color }};">{{ deployment.name|upper }}</div>
+    {% endif %}
+    <div class="shell">
+      <header class="topbar">
+        <div class="brandline">
+          <div class="eyebrow">Artifact Detail</div>
+          <h1 class="title">{{ artifact.original_filename or artifact.artifact_euid }}</h1>
+          <div class="subtitle">{{ profile.email }}</div>
+        </div>
+        <div class="navlinks">
+          <a class="navlink" href="/ui">Dashboard</a>
+          <a class="navlink" href="/artifacts?section=search#section-search">Artifact Search</a>
+          <a class="navlink" href="/artifacts?section=recent_artifacts#section-recent_artifacts">Recent Artifacts</a>
+          {% if is_admin %}
+          <a class="navlink" href="/admin">Admin</a>
+          {% endif %}
+          <form class="logout-form" method="post" action="/logout">
+            <button type="submit">Logout</button>
+          </form>
+        </div>
+      </header>
+
+      <main class="page">
+        <section class="hero">
+          <div class="hero-copy">
+            <div class="eyebrow">Artifact EUID</div>
+            <h2>{{ artifact.artifact_euid }}</h2>
+            <p>
+              Inspect the stored record, review metadata, and issue a fresh presigned download for
+              this artifact.
+            </p>
+          </div>
+          <div class="results-meta">
+            <span class="pill pill-active">{{ artifact.artifact_type or "n/a" }}</span>
+            <span class="pill">{{ artifact.import_mode or "register" }}</span>
+            <span class="pill">{{ artifact.storage_status or "registered" }}</span>
+          </div>
+        </section>
+
+        {% if detail_message %}
+        <div class="{% if detail_message.state == 'ok' %}status-ok{% else %}status-error{% endif %}" style="margin-bottom: 1rem;">
+          {{ detail_message.detail }}
+        </div>
+        {% endif %}
+
+        <section class="content-grid" style="grid-template-columns: minmax(320px, 1.05fr) minmax(0, 1.15fr);">
+          <section class="stack">
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Overview</h3>
+                  <div class="panel-copy">Primary Dewey record fields and storage coordinates.</div>
+                </div>
+              </div>
+              <table class="kv-table">
+                <tbody>
+                  <tr>
+                    <th>Artifact EUID</th>
+                    <td>{{ artifact_links.artifact_euid_link(artifact.artifact_euid) }}</td>
+                  </tr>
+                  <tr>
+                    <th>Filename</th>
+                    <td>{{ artifact.original_filename or "n/a" }}</td>
+                  </tr>
+                  <tr>
+                    <th>Artifact Type</th>
+                    <td>{{ artifact.artifact_type or "n/a" }}</td>
+                  </tr>
+                  <tr>
+                    <th>Producer</th>
+                    <td>{{ artifact.producer_system or "n/a" }}</td>
+                  </tr>
+                  <tr>
+                    <th>Producer Object</th>
+                    <td>{{ artifact.producer_object_euid or "n/a" }}</td>
+                  </tr>
+                  <tr>
+                    <th>Created</th>
+                    <td>{{ artifact.created_at }}</td>
+                  </tr>
+                  <tr>
+                    <th>Import Mode</th>
+                    <td>{{ artifact.import_mode or "register" }}</td>
+                  </tr>
+                  <tr>
+                    <th>Availability</th>
+                    <td>{{ artifact.availability_status or "n/a" }}</td>
+                  </tr>
+                  <tr>
+                    <th>Storage URI</th>
+                    <td>{{ artifact_links.artifact_storage_action(artifact.artifact_euid, artifact.storage_uri) }}</td>
+                  </tr>
+                  <tr>
+                    <th>Source URI</th>
+                    <td>
+                      {% if artifact.source_uri %}
+                      <span class="mono">{{ artifact.source_uri }}</span>
+                      {% else %}
+                      n/a
+                      {% endif %}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>Bucket</th>
+                    <td>{{ artifact.bucket or "n/a" }}</td>
+                  </tr>
+                  <tr>
+                    <th>Key</th>
+                    <td><span class="mono">{{ artifact.key or "n/a" }}</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Download</h3>
+                  <div class="panel-copy">Generate a fresh presigned URL and immediately download the artifact.</div>
+                </div>
+              </div>
+              <form method="post" action="/artifacts/euid/{{ artifact.artifact_euid }}/download" onsubmit="return confirm('Download {{ artifact.artifact_euid }}?');">
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="detail_share_ttl_hours">TTL Hours</label>
+                    <input id="detail_share_ttl_hours" name="share_ttl_hours" type="number" min="1" value="24" />
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button class="button button-primary" type="submit">Download</button>
+                </div>
+              </form>
+            </section>
+          </section>
+
+          <section class="stack">
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Metadata</h3>
+                  <div class="panel-copy">Registry metadata and checksum payload captured on the artifact record.</div>
+                </div>
+              </div>
+              <div class="stack">
+                <div>
+                  <div class="eyebrow">Checksums</div>
+                  <pre class="json-block">{{ artifact.checksums | tojson(indent=2) }}</pre>
+                </div>
+                <div>
+                  <div class="eyebrow">Metadata</div>
+                  <pre class="json-block">{{ artifact.metadata | tojson(indent=2) }}</pre>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Share References</h3>
+                  <div class="panel-copy">Most recent issued download/share records for this artifact.</div>
+                </div>
+              </div>
+              {% if artifact_share_references %}
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Share</th>
+                      <th>Status</th>
+                      <th>Expires</th>
+                      <th>Access</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in artifact_share_references %}
+                    <tr>
+                      <td class="mono">{{ item.share_reference_euid }}</td>
+                      <td>{{ item.status }}</td>
+                      <td>{{ item.expires_at or "n/a" }}</td>
+                      <td>
+                        {% if item.access_url %}
+                        <a class="button" href="{{ item.access_url }}" target="_blank" rel="noreferrer">Open</a>
+                        {% else %}
+                        <span class="note">No access URL</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              {% else %}
+              <div class="empty-state">No share references issued yet for this artifact.</div>
+              {% endif %}
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>External Relations</h3>
+                  <div class="panel-copy">Attached external-object links, if any.</div>
+                </div>
+              </div>
+              {% if artifact_external_relations %}
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Relation</th>
+                      <th>External Object</th>
+                      <th>Metadata</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in artifact_external_relations %}
+                    <tr>
+                      <td>{{ item.relation_type }}</td>
+                      <td class="mono">{{ item.external_object_euid }}</td>
+                      <td><pre class="json-block">{{ item.metadata | tojson(indent=2) }}</pre></td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              {% else %}
+              <div class="empty-state">No external relations attached to this artifact.</div>
+              {% endif %}
+            </section>
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
