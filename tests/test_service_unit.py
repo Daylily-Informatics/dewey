@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import io
 import json
+import zipfile
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -265,6 +267,24 @@ class _FakeStorageClient:
             content_type=content_type,
             storage_class="STANDARD",
         )
+
+    def list_objects(self, *, bucket: str, prefix: str, limit: int = 1000) -> list[StorageObject]:
+        rows = [
+            obj for (obj_bucket, _), obj in self.objects.items() if obj_bucket == bucket and obj.key.startswith(prefix)
+        ]
+        rows.sort(key=lambda item: item.key)
+        return rows[:limit]
+
+    def get_object_bytes(
+        self,
+        *,
+        bucket: str,
+        key: str,
+        version_id: str | None = None,
+    ) -> bytes:
+        _ = version_id
+        self.head_object(bucket=bucket, key=key)
+        return f"payload:{bucket}/{key}".encode("utf-8")
 
     def put_object_tags(self, *, bucket: str, key: str, tags: dict[str, str]) -> None:
         self.head_object(bucket=bucket, key=key)
@@ -549,6 +569,7 @@ def test_artifact_set_member_lifecycle(service: DeweyService) -> None:
         artifact_set_type="bundle",
         label=" Case Bundle ",
         description=" Primary bundle ",
+        metadata={"program": "oncology"},
         idempotency_key="idem-artifact-set",
     )
 
@@ -565,6 +586,7 @@ def test_artifact_set_member_lifecycle(service: DeweyService) -> None:
 
     assert add_code == 200
     assert updated["artifact_euids"] == [artifact["artifact_euid"]]
+    assert updated["metadata"] == {"program": "oncology"}
     assert (
         service.get_artifact_set(artifact_set["artifact_set_euid"])["artifact_set_type"] == "bundle"
     )
@@ -654,6 +676,174 @@ def test_share_reference_behaviors(service: DeweyService, storage: _FakeStorageC
             transport="presigned_s3",
             idempotency_key="idem-share-bad-expiry",
         )
+
+
+def test_expand_s3_sources_and_build_download_archive(
+    service: DeweyService,
+    storage: _FakeStorageClient,
+) -> None:
+    storage.seed_object(bucket="bucket-6", key="runs/batch/file-1.txt", size=4, content_type="text/plain")
+    storage.seed_object(bucket="bucket-6", key="runs/batch/file-2.txt", size=4, content_type="text/plain")
+
+    expanded = service.expand_s3_sources("s3://bucket-6/runs/batch/")
+    assert expanded == [
+        "s3://bucket-6/runs/batch/file-1.txt",
+        "s3://bucket-6/runs/batch/file-2.txt",
+    ]
+
+    _, first = service.register_artifact(
+        artifact_type="report",
+        storage_backend="s3",
+        bucket="bucket-6",
+        key="runs/batch/file-1.txt",
+        version_id=None,
+        size=4,
+        checksums=None,
+        content_type="text/plain",
+        original_filename="file-1.txt",
+        producer_system=None,
+        producer_object_euid=None,
+        storage_class=None,
+        availability_status=None,
+        metadata={"study_id": "ST-6"},
+        idempotency_key="idem-archive-artifact-1",
+    )
+    _, second = service.register_artifact(
+        artifact_type="report",
+        storage_backend="s3",
+        bucket="bucket-6",
+        key="runs/batch/file-2.txt",
+        version_id=None,
+        size=4,
+        checksums=None,
+        content_type="text/plain",
+        original_filename="file-2.txt",
+        producer_system=None,
+        producer_object_euid=None,
+        storage_class=None,
+        availability_status=None,
+        metadata={"study_id": "ST-6"},
+        idempotency_key="idem-archive-artifact-2",
+    )
+
+    archive_name, archive_bytes = service.build_artifact_download_archive(
+        artifact_euids=[first["artifact_euid"], second["artifact_euid"]],
+        naming_mode="dewey",
+        include_metadata=True,
+    )
+    assert archive_name.startswith("dewey-artifacts-")
+
+    with zipfile.ZipFile(io.BytesIO(archive_bytes)) as archive:
+        names = set(archive.namelist())
+    assert f"{first['artifact_euid']}.txt" in names
+    assert f"{first['artifact_euid']}.txt.dewey.yaml" in names
+    assert f"{second['artifact_euid']}.txt" in names
+
+
+def test_artifact_set_search_scope_and_share_transports(
+    service: DeweyService,
+    storage: _FakeStorageClient,
+) -> None:
+    storage.seed_object(bucket="bucket-8", key="release/one.txt", size=12, content_type="text/plain")
+    storage.seed_object(bucket="bucket-8", key="release/two.txt", size=12, content_type="text/plain")
+    _, first = service.register_artifact(
+        artifact_type="report",
+        storage_backend="s3",
+        bucket="bucket-8",
+        key="release/one.txt",
+        version_id=None,
+        size=12,
+        checksums=None,
+        content_type="text/plain",
+        original_filename="one.txt",
+        producer_system="atlas",
+        producer_object_euid=None,
+        storage_class=None,
+        availability_status=None,
+        metadata={"study_id": "ST-8"},
+        idempotency_key="idem-set-share-artifact-1",
+    )
+    _, second = service.register_artifact(
+        artifact_type="report",
+        storage_backend="s3",
+        bucket="bucket-8",
+        key="release/two.txt",
+        version_id=None,
+        size=12,
+        checksums=None,
+        content_type="text/plain",
+        original_filename="two.txt",
+        producer_system="atlas",
+        producer_object_euid=None,
+        storage_class=None,
+        availability_status=None,
+        metadata={"study_id": "ST-8"},
+        idempotency_key="idem-set-share-artifact-2",
+    )
+    _, artifact_set = service.create_artifact_set(
+        artifact_set_type="release",
+        label="March Release",
+        description="Artifact delivery bundle.",
+        metadata={"program": "oncology", "cohort": "A"},
+        idempotency_key="idem-set-share-create",
+    )
+    service.add_artifact_set_member(
+        artifact_set_euid=artifact_set["artifact_set_euid"],
+        artifact_euid=first["artifact_euid"],
+        idempotency_key="idem-set-share-member-1",
+    )
+    service.add_artifact_set_member(
+        artifact_set_euid=artifact_set["artifact_set_euid"],
+        artifact_euid=second["artifact_euid"],
+        idempotency_key="idem-set-share-member-2",
+    )
+
+    search = service.query_search_v2(
+        {
+            "scopes": ["artifact_set"],
+            "page_size": 25,
+            "property_filters": [{"path": "metadata.program", "op": "eq", "value": "oncology"}],
+        }
+    )
+    assert search["total"] == 1
+    assert search["items"][0]["artifact_set_euid"] == artifact_set["artifact_set_euid"]
+
+    _, presigned = service.create_share_reference(
+        target_type="artifact_set",
+        target_euid=artifact_set["artifact_set_euid"],
+        purpose="delivery",
+        scope="external",
+        expires_at=None,
+        issued_by="release@example.com",
+        transport="presigned_s3",
+        ttl_seconds=300,
+        idempotency_key="idem-set-share-presigned",
+    )
+    assert presigned["transport"] == "presigned_s3"
+    assert presigned["member_count"] == 2
+    assert len(presigned["manifest"]) == 2
+    assert all(item["status"] == "active" for item in presigned["manifest"])
+
+    _, sftp_share = service.create_share_reference(
+        target_type="artifact_set",
+        target_euid=artifact_set["artifact_set_euid"],
+        purpose="delivery",
+        scope="external",
+        expires_at=None,
+        issued_by="release@example.com",
+        transport="rclone_sftp",
+        transport_config={
+            "bucket": "managed-bucket",
+            "host": "shares.example.com",
+            "port": 9022,
+            "user": "release",
+            "passwd": "secret",
+        },
+        idempotency_key="idem-set-share-sftp",
+    )
+    assert sftp_share["transport"] == "rclone_sftp"
+    assert sftp_share["connection"]["endpoint"] == "sftp://release@shares.example.com:9022/"
+    assert sftp_share["connection"]["bucket"] == "managed-bucket"
 
 
 def test_upload_complete_verify_lock_and_search(

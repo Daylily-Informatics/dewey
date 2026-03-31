@@ -73,7 +73,7 @@ def test_ui_page_renders_banner_after_login(monkeypatch, fake_service) -> None:
     assert "/search" in ui.text
     assert "/ui/anomalies" in ui.text
     assert "/admin" in ui.text
-    assert "Register/upload/import via API or CLI only" in ui.text
+    assert "Artifacts has browser intake and download" in ui.text
     assert admin.status_code == 200
     assert "Dewey Admin" in admin.text
     assert "Operator Anomalies" in admin.text

@@ -1,0 +1,932 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dewey Artifacts</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/console.css" />
+  </head>
+  <body>
+    {% if deployment.name and not deployment.is_production %}
+    <div class="deployment-banner" style="background: {{ deployment.color }};">{{ deployment.name|upper }}</div>
+    {% endif %}
+    <div class="shell">
+      <header class="topbar">
+        <div class="brandline">
+          <div class="eyebrow">Dewey Artifacts</div>
+          <h1 class="title">Register, Search, Download, And Share</h1>
+          <div class="subtitle">{{ profile.email }}</div>
+        </div>
+        <div class="navlinks">
+          <a class="navlink" href="/ui">Dashboard</a>
+          <a class="navlink" href="/literature">Literature Search</a>
+          <a class="navlink" href="/search">Unified Search</a>
+          <a class="navlink" href="/ui/anomalies">Anomalies</a>
+          <a class="navlink" href="/ui/observability">Observability</a>
+          {% if is_admin %}
+          <a class="navlink" href="/admin">Admin</a>
+          {% endif %}
+          <form class="logout-form" method="post" action="/logout">
+            <button type="submit">Logout</button>
+          </form>
+        </div>
+      </header>
+
+      <main class="page">
+        <section class="hero">
+          <div class="hero-copy">
+            <div class="eyebrow">Artifact Operations</div>
+            <h2>Bring legacy Dewey intake and file handling back into the current console.</h2>
+            <p>
+              This browser surface restores artifact intake, search, download, and artifact-set
+              workflows while keeping the current Dewey visual system and backend contracts.
+            </p>
+          </div>
+          <div class="results-meta">
+            <span class="pill pill-active">Register {{ register_report|length }}</span>
+            <span class="pill">Artifacts {{ artifact_search_result["total"] }}</span>
+            <span class="pill">Artifact Sets {{ artifact_set_search_result["total"] }}</span>
+          </div>
+        </section>
+
+        <section class="section-tabs">
+          <button class="section-tab {% if active_section == 'register' %}section-tab-active{% endif %}" type="button" data-target="register">Register</button>
+          <button class="section-tab {% if active_section == 'search' %}section-tab-active{% endif %}" type="button" data-target="search">Search Artifacts</button>
+          <button class="section-tab {% if active_section == 'artifact_sets' %}section-tab-active{% endif %}" type="button" data-target="artifact_sets">Artifact Sets</button>
+        </section>
+
+        <section class="section-pane {% if active_section == 'register' %}section-pane-active{% endif %}" id="section-register">
+          <section class="content-grid" style="grid-template-columns: minmax(360px, 1.05fr) minmax(0, 1.3fr);">
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Register And Upload</h3>
+                  <div class="panel-copy">Single files, flat directories, public URLs, S3 URIs, and optional artifact-set grouping.</div>
+                </div>
+              </div>
+              <form method="post" action="/artifacts/register" enctype="multipart/form-data">
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="artifact_type">Artifact Type</label>
+                    <select id="artifact_type" name="artifact_type">
+                      <option value="">Select</option>
+                      {% for item in artifact_types %}
+                      <option value="{{ item }}" {% if artifact_form.get("artifact_type") == item %}selected{% endif %}>{{ item }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="producer_system">Producer System</label>
+                    <input id="producer_system" name="producer_system" type="text" value="{{ artifact_form.get('producer_system', '') }}" placeholder="atlas, bloom, ursa" />
+                  </div>
+                  <div class="field">
+                    <label for="producer_object_euid">Producer Object EUID</label>
+                    <input id="producer_object_euid" name="producer_object_euid" type="text" value="{{ artifact_form.get('producer_object_euid', '') }}" placeholder="REL-123" />
+                  </div>
+                  <div class="field">
+                    <label for="lock_after_import">Lock After Import</label>
+                    <select id="lock_after_import" name="lock_after_import">
+                      <option value="no" {% if artifact_form.get("lock_after_import", "no") == "no" %}selected{% endif %}>no</option>
+                      <option value="yes" {% if artifact_form.get("lock_after_import") == "yes" %}selected{% endif %}>yes</option>
+                    </select>
+                  </div>
+                  <div class="field field-wide">
+                    <label for="file_data">Local File</label>
+                    <input id="file_data" name="file_data" type="file" multiple />
+                  </div>
+                  <div class="field field-wide">
+                    <label for="directory_data">Directory Of Files</label>
+                    <input id="directory_data" name="directory_data" type="file" webkitdirectory directory multiple />
+                  </div>
+                  <div class="field field-wide">
+                    <label for="url_sources">Public URLs</label>
+                    <textarea id="url_sources" name="url_sources" placeholder="One URL per line">{{ artifact_form.get("url_sources", "") }}</textarea>
+                  </div>
+                  <div class="field">
+                    <label for="s3_mode">S3 Mode</label>
+                    <select id="s3_mode" name="s3_mode">
+                      <option value="register" {% if artifact_form.get("s3_mode") == "register" %}selected{% endif %}>register existing object</option>
+                      <option value="reference" {% if artifact_form.get("s3_mode", "reference") == "reference" %}selected{% endif %}>reference</option>
+                      <option value="copy" {% if artifact_form.get("s3_mode") == "copy" %}selected{% endif %}>copy</option>
+                    </select>
+                  </div>
+                  <div class="field field-wide">
+                    <label for="s3_sources">S3 URIs Or Prefixes</label>
+                    <textarea id="s3_sources" name="s3_sources" placeholder="s3://bucket/key or s3://bucket/prefix/">{{ artifact_form.get("s3_sources", "") }}</textarea>
+                  </div>
+
+                  <div class="field">
+                    <label for="grouping_mode">Artifact Set Grouping</label>
+                    <select id="grouping_mode" name="grouping_mode" data-grouping-mode>
+                      <option value="none" {% if artifact_form.get("grouping_mode", "none") == "none" %}selected{% endif %}>none</option>
+                      <option value="create" {% if artifact_form.get("grouping_mode") == "create" %}selected{% endif %}>create a set</option>
+                      <option value="use_existing" {% if artifact_form.get("grouping_mode") == "use_existing" %}selected{% endif %}>use existing</option>
+                    </select>
+                  </div>
+                  <div class="field" data-existing-set>
+                    <label for="existing_artifact_set_euid">Existing Artifact Set EUID</label>
+                    <input id="existing_artifact_set_euid" name="existing_artifact_set_euid" type="text" value="{{ artifact_form.get('existing_artifact_set_euid', '') }}" placeholder="AS-000001" />
+                  </div>
+                  <div class="field" data-create-set>
+                    <label for="artifact_set_type">Artifact Set Type</label>
+                    <select id="artifact_set_type" name="artifact_set_type">
+                      {% for item in artifact_set_types %}
+                      <option value="{{ item }}" {% if artifact_form.get("artifact_set_type", "batch") == item %}selected{% endif %}>{{ item }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="field" data-create-set>
+                    <label for="artifact_set_label">Artifact Set Label</label>
+                    <input id="artifact_set_label" name="artifact_set_label" type="text" value="{{ artifact_form.get('artifact_set_label', '') }}" placeholder="March 2026 intake" />
+                  </div>
+                  <div class="field field-wide" data-create-set>
+                    <label for="artifact_set_description">Artifact Set Description</label>
+                    <input id="artifact_set_description" name="artifact_set_description" type="text" value="{{ artifact_form.get('artifact_set_description', '') }}" placeholder="Optional grouping for this submission." />
+                  </div>
+
+                  {% for field in artifact_metadata_fields %}
+                  <div class="field {% if field.type == 'textarea' %}field-wide{% endif %}">
+                    {% if field.type == "datetime" %}
+                    <label for="artifact_meta_{{ field.name }}">{{ field.label }}</label>
+                    <input id="artifact_meta_{{ field.name }}" name="artifact_meta_{{ field.name }}" type="datetime-local" value="{{ artifact_form.get('artifact_meta_' ~ field.name, '') }}" />
+                    {% elif field.type == "textarea" %}
+                    <label for="artifact_meta_{{ field.name }}">{{ field.label }}</label>
+                    <textarea id="artifact_meta_{{ field.name }}" name="artifact_meta_{{ field.name }}">{{ artifact_form.get('artifact_meta_' ~ field.name, '') }}</textarea>
+                    {% else %}
+                    <label for="artifact_meta_{{ field.name }}">{{ field.label }}</label>
+                    <input id="artifact_meta_{{ field.name }}" name="artifact_meta_{{ field.name }}" type="text" value="{{ artifact_form.get('artifact_meta_' ~ field.name, '') }}" />
+                    {% endif %}
+                  </div>
+                  {% endfor %}
+
+                  {% for field in artifact_set_metadata_fields %}
+                  <div class="field {% if field.type == 'textarea' %}field-wide{% endif %}" data-create-set>
+                    {% if field.type == "datetime" %}
+                    <label for="artifact_set_meta_{{ field.name }}">Set {{ field.label }}</label>
+                    <input id="artifact_set_meta_{{ field.name }}" name="artifact_set_meta_{{ field.name }}" type="datetime-local" value="{{ artifact_form.get('artifact_set_meta_' ~ field.name, '') }}" />
+                    {% elif field.type == "textarea" %}
+                    <label for="artifact_set_meta_{{ field.name }}">Set {{ field.label }}</label>
+                    <textarea id="artifact_set_meta_{{ field.name }}" name="artifact_set_meta_{{ field.name }}">{{ artifact_form.get('artifact_set_meta_' ~ field.name, '') }}</textarea>
+                    {% else %}
+                    <label for="artifact_set_meta_{{ field.name }}">Set {{ field.label }}</label>
+                    <input id="artifact_set_meta_{{ field.name }}" name="artifact_set_meta_{{ field.name }}" type="text" value="{{ artifact_form.get('artifact_set_meta_' ~ field.name, '') }}" />
+                    {% endif %}
+                  </div>
+                  {% endfor %}
+
+                  <div class="field field-wide">
+                    <label for="artifact_additional_metadata_json">Additional Metadata JSON</label>
+                    <textarea id="artifact_additional_metadata_json" name="artifact_additional_metadata_json" placeholder='{"case_id":"CASE-1"}'>{{ artifact_form.get("artifact_additional_metadata_json", "") }}</textarea>
+                  </div>
+                  <div class="field field-wide" data-create-set>
+                    <label for="artifact_set_additional_metadata_json">Artifact Set Metadata JSON</label>
+                    <textarea id="artifact_set_additional_metadata_json" name="artifact_set_additional_metadata_json" placeholder='{"release_owner":"operator@example.com"}'>{{ artifact_form.get("artifact_set_additional_metadata_json", "") }}</textarea>
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button class="button button-primary" type="submit">Run Intake</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="stack">
+              <section class="panel">
+                <div class="panel-header">
+                  <div>
+                    <h3>Bulk TSV Intake</h3>
+                    <div class="panel-copy">Use the template to register or import many remote artifacts at once.</div>
+                  </div>
+                  <a class="button" href="{{ bulk_template_url }}">Download Template</a>
+                </div>
+                <form method="post" action="/artifacts/bulk-upload" enctype="multipart/form-data">
+                  <div class="form-grid">
+                    <div class="field field-wide">
+                      <label for="bulk_tsv">TSV File</label>
+                      <input id="bulk_tsv" name="bulk_tsv" type="file" accept=".tsv,text/tab-separated-values" />
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <button class="button button-primary" type="submit">Run Bulk Intake</button>
+                  </div>
+                </form>
+              </section>
+
+              <section class="panel">
+                <div class="panel-header">
+                  <div>
+                    <h3>Registration Report</h3>
+                    <div class="panel-copy">Each attempted item reports its Dewey outcome and resolved storage location.</div>
+                  </div>
+                </div>
+                {% if register_report %}
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Status</th>
+                        <th>Source</th>
+                        <th>Artifact</th>
+                        <th>Storage</th>
+                        <th>Artifact Set</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for row in register_report %}
+                      <tr>
+                        <td>
+                          {% if row.status == "success" %}
+                          <span class="pill pill-active">success</span>
+                          {% else %}
+                          <span class="pill pill-alert">error</span>
+                          {% endif %}
+                        </td>
+                        <td class="mono">{{ row.source or row.detail }}</td>
+                        <td class="mono">{{ row.artifact_euid or row.detail }}</td>
+                        <td class="mono">{{ row.storage_uri or row.detail }}</td>
+                        <td class="mono">{{ row.artifact_set_euid or "none" }}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+                {% else %}
+                <div class="empty-state">No register/upload/import run yet.</div>
+                {% endif %}
+              </section>
+
+              <section class="panel">
+                <div class="panel-header">
+                  <div>
+                    <h3>Bulk Report</h3>
+                    <div class="panel-copy">Row-level results for TSV-driven intake.</div>
+                  </div>
+                </div>
+                {% if bulk_report %}
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Row</th>
+                        <th>Status</th>
+                        <th>Artifact</th>
+                        <th>Storage</th>
+                        <th>Detail</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for row in bulk_report %}
+                      <tr>
+                        <td>{{ row.row_number }}</td>
+                        <td>
+                          {% if row.status == "success" %}
+                          <span class="pill pill-active">success</span>
+                          {% else %}
+                          <span class="pill pill-alert">error</span>
+                          {% endif %}
+                        </td>
+                        <td class="mono">{{ row.artifact_euid or "n/a" }}</td>
+                        <td class="mono">{{ row.storage_uri or "n/a" }}</td>
+                        <td>{{ row.detail or "" }}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+                {% else %}
+                <div class="empty-state">No bulk TSV run yet.</div>
+                {% endif %}
+              </section>
+            </section>
+          </section>
+        </section>
+
+        <section class="section-pane {% if active_section == 'search' %}section-pane-active{% endif %}" id="section-search">
+          <section class="content-grid" style="grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.45fr);">
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Artifact Search</h3>
+                  <div class="panel-copy">Search all artifacts, by EUID list, or by schema-driven metadata and lifecycle fields.</div>
+                </div>
+              </div>
+              <form method="post" action="/artifacts/search">
+                <div class="form-grid">
+                  <div class="field field-wide">
+                    <label for="artifact_q">Full Text</label>
+                    <input id="artifact_q" name="artifact_q" type="text" value="{{ artifact_search_form.get('artifact_q', '') }}" placeholder="artifact EUID, filename, producer, tag..." />
+                  </div>
+                  <div class="field field-wide">
+                    <label for="artifact_euids">Artifact EUIDs</label>
+                    <textarea id="artifact_euids" name="artifact_euids" placeholder="One EUID per line">{{ artifact_search_form.get("artifact_euids", "") }}</textarea>
+                  </div>
+                  <div class="field">
+                    <label for="artifact_search_artifact_type">Artifact Type</label>
+                    <select id="artifact_search_artifact_type" name="artifact_type">
+                      <option value="">Any</option>
+                      {% for item in artifact_types %}
+                      <option value="{{ item }}" {% if artifact_search_form.get("artifact_type") == item %}selected{% endif %}>{{ item }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="artifact_search_producer_system">Producer System</label>
+                    <input id="artifact_search_producer_system" name="producer_system" type="text" value="{{ artifact_search_form.get('producer_system', '') }}" placeholder="atlas, bloom, ursa" />
+                  </div>
+                  <div class="field">
+                    <label for="availability_status">Availability</label>
+                    <select id="availability_status" name="availability_status">
+                      <option value="">Any</option>
+                      <option value="available" {% if artifact_search_form.get("availability_status") == "available" %}selected{% endif %}>available</option>
+                      <option value="missing" {% if artifact_search_form.get("availability_status") == "missing" %}selected{% endif %}>missing</option>
+                      <option value="ready" {% if artifact_search_form.get("availability_status") == "ready" %}selected{% endif %}>ready</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="import_mode">Import Mode</label>
+                    <select id="import_mode" name="import_mode">
+                      <option value="">Any</option>
+                      <option value="register" {% if artifact_search_form.get("import_mode") == "register" %}selected{% endif %}>register</option>
+                      <option value="reference" {% if artifact_search_form.get("import_mode") == "reference" %}selected{% endif %}>reference</option>
+                      <option value="copy" {% if artifact_search_form.get("import_mode") == "copy" %}selected{% endif %}>copy</option>
+                      <option value="upload" {% if artifact_search_form.get("import_mode") == "upload" %}selected{% endif %}>upload</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="artifact_match_mode">Match Mode</label>
+                    <select id="artifact_match_mode" name="artifact_match_mode">
+                      <option value="greedy" {% if artifact_search_form.get("artifact_match_mode", "greedy") == "greedy" %}selected{% endif %}>greedy</option>
+                      <option value="exact" {% if artifact_search_form.get("artifact_match_mode") == "exact" %}selected{% endif %}>exact</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="external_object_id">External Object ID</label>
+                    <input id="external_object_id" name="external_object_id" type="text" value="{{ artifact_search_form.get('external_object_id', '') }}" />
+                  </div>
+                  <div class="field">
+                    <label for="artifact_created_at_start">Created After</label>
+                    <input id="artifact_created_at_start" name="artifact_created_at_start" type="datetime-local" value="{{ artifact_search_form.get('artifact_created_at_start', '') }}" />
+                  </div>
+                  <div class="field">
+                    <label for="artifact_created_at_end">Created Before</label>
+                    <input id="artifact_created_at_end" name="artifact_created_at_end" type="datetime-local" value="{{ artifact_search_form.get('artifact_created_at_end', '') }}" />
+                  </div>
+                  {% for field in artifact_metadata_fields %}
+                  {% if field.type == "datetime" %}
+                  <div class="field">
+                    <label for="artifact_filter_{{ field.name }}_start">{{ field.label }} Start</label>
+                    <input id="artifact_filter_{{ field.name }}_start" name="artifact_filter_{{ field.name }}_start" type="datetime-local" value="{{ artifact_search_form.get('artifact_filter_' ~ field.name ~ '_start', '') }}" />
+                  </div>
+                  <div class="field">
+                    <label for="artifact_filter_{{ field.name }}_end">{{ field.label }} End</label>
+                    <input id="artifact_filter_{{ field.name }}_end" name="artifact_filter_{{ field.name }}_end" type="datetime-local" value="{{ artifact_search_form.get('artifact_filter_' ~ field.name ~ '_end', '') }}" />
+                  </div>
+                  {% elif field.type == "textarea" %}
+                  <div class="field field-wide">
+                    <label for="artifact_filter_{{ field.name }}">{{ field.label }}</label>
+                    <textarea id="artifact_filter_{{ field.name }}" name="artifact_filter_{{ field.name }}">{{ artifact_search_form.get('artifact_filter_' ~ field.name, '') }}</textarea>
+                  </div>
+                  {% else %}
+                  <div class="field">
+                    <label for="artifact_filter_{{ field.name }}">{{ field.label }}</label>
+                    <input id="artifact_filter_{{ field.name }}" name="artifact_filter_{{ field.name }}" type="text" value="{{ artifact_search_form.get('artifact_filter_' ~ field.name, '') }}" />
+                  </div>
+                  {% endif %}
+                  {% endfor %}
+                </div>
+                <div class="form-actions">
+                  <button class="button button-primary" type="submit">Search</button>
+                  <button class="button" type="submit" formaction="/artifacts/search/export" name="format" value="tsv">Export TSV</button>
+                  <button class="button" type="submit" formaction="/artifacts/search/export" name="format" value="json">Export JSON</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="stack">
+              <section class="panel">
+                <div class="panel-header">
+                  <div>
+                    <h3>Artifact Results</h3>
+                    <div class="panel-copy">Select files to download, issue quick presigned links, or create an artifact set.</div>
+                  </div>
+                </div>
+                <div class="results-meta">
+                  <span class="pill pill-active">{{ artifact_search_result["total"] }} matches</span>
+                  <span class="pill">{{ artifact_search_result["timing_ms"] }} ms</span>
+                </div>
+                {% if artifact_search_result["items"] %}
+                <form method="post">
+                  <input type="hidden" name="artifact_search_form_state" value="{{ artifact_search_form_json|e }}" />
+                  <div class="content-grid" style="grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);">
+                    <div class="table-wrap">
+                      <table data-sortable>
+                        <thead>
+                          <tr>
+                            <th><input type="checkbox" data-toggle-all="artifact-select" /></th>
+                            <th>Artifact</th>
+                            <th>Type</th>
+                            <th>Producer</th>
+                            <th>Status</th>
+                            <th>Storage</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for item in artifact_search_result["items"] %}
+                          <tr>
+                            <td><input type="checkbox" class="artifact-select" name="artifact_euids" value="{{ item.artifact_euid }}" /></td>
+                            <td>
+                              <div class="mono">{{ item.artifact_euid }}</div>
+                              <div>{{ item.original_filename or item.name }}</div>
+                            </td>
+                            <td>{{ item.artifact_type }}</td>
+                            <td>{{ item.producer_system or "n/a" }}</td>
+                            <td>
+                              {% if item.storage_status == "verified" %}
+                              <span class="pill pill-active">verified</span>
+                              {% elif item.storage_status in ["missing", "error"] %}
+                              <span class="pill pill-alert">{{ item.storage_status }}</span>
+                              {% else %}
+                              <span class="pill">{{ item.storage_status or "registered" }}</span>
+                              {% endif %}
+                            </td>
+                            <td class="mono">{{ item.storage_uri }}</td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div class="stack">
+                      <section class="panel" style="padding: 0.9rem 1rem; background: rgba(11, 17, 32, 0.78);">
+                        <h3 style="margin-top: 0;">Download Selected</h3>
+                        <div class="form-grid">
+                          <div class="field">
+                            <label for="download_naming_mode">Naming Mode</label>
+                            <select id="download_naming_mode" name="download_naming_mode">
+                              <option value="dewey">dewey</option>
+                              <option value="hybrid" selected>hybrid</option>
+                              <option value="orig">orig</option>
+                            </select>
+                          </div>
+                          <div class="field">
+                            <label for="download_include_metadata">Metadata Sidecars</label>
+                            <select id="download_include_metadata" name="download_include_metadata">
+                              <option value="yes" selected>yes</option>
+                              <option value="no">no</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="form-actions">
+                          <button class="button button-primary" type="submit" formaction="/artifacts/download">Download ZIP</button>
+                        </div>
+                      </section>
+
+                      <section class="panel" style="padding: 0.9rem 1rem; background: rgba(11, 17, 32, 0.78);">
+                        <h3 style="margin-top: 0;">Quick Presigned Links</h3>
+                        <div class="field">
+                          <label for="share_ttl_hours">TTL Hours</label>
+                          <input id="share_ttl_hours" name="share_ttl_hours" type="number" min="1" value="24" />
+                        </div>
+                        <div class="form-actions">
+                          <button class="button" type="submit" formaction="/artifacts/share">Generate Links</button>
+                        </div>
+                      </section>
+
+                      <section class="panel" style="padding: 0.9rem 1rem; background: rgba(11, 17, 32, 0.78);">
+                        <h3 style="margin-top: 0;">Create Artifact Set From Selection</h3>
+                        <input type="hidden" name="artifact_set_search_form_state" value="{{ artifact_set_search_form_json|e }}" />
+                        <div class="form-grid">
+                          <div class="field">
+                            <label for="search_set_type">Set Type</label>
+                            <select id="search_set_type" name="artifact_set_type">
+                              {% for item in artifact_set_types %}
+                              <option value="{{ item }}" {% if item == "collection" %}selected{% endif %}>{{ item }}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                          <div class="field">
+                            <label for="search_set_label">Set Label</label>
+                            <input id="search_set_label" name="artifact_set_label" type="text" placeholder="Selected results" />
+                          </div>
+                          <div class="field field-wide">
+                            <label for="search_set_description">Description</label>
+                            <input id="search_set_description" name="artifact_set_description" type="text" placeholder="Artifacts selected from search results." />
+                          </div>
+                          {% for field in artifact_set_metadata_fields %}
+                          {% if field.type == "datetime" %}
+                          <div class="field">
+                            <label for="search_artifact_set_meta_{{ field.name }}">{{ field.label }}</label>
+                            <input id="search_artifact_set_meta_{{ field.name }}" name="artifact_set_meta_{{ field.name }}" type="datetime-local" />
+                          </div>
+                          {% elif field.type == "textarea" %}
+                          <div class="field field-wide">
+                            <label for="search_artifact_set_meta_{{ field.name }}">{{ field.label }}</label>
+                            <textarea id="search_artifact_set_meta_{{ field.name }}" name="artifact_set_meta_{{ field.name }}"></textarea>
+                          </div>
+                          {% else %}
+                          <div class="field">
+                            <label for="search_artifact_set_meta_{{ field.name }}">{{ field.label }}</label>
+                            <input id="search_artifact_set_meta_{{ field.name }}" name="artifact_set_meta_{{ field.name }}" type="text" />
+                          </div>
+                          {% endif %}
+                          {% endfor %}
+                          <div class="field field-wide">
+                            <label for="search_artifact_set_additional_metadata_json">Additional Set Metadata JSON</label>
+                            <textarea id="search_artifact_set_additional_metadata_json" name="artifact_set_additional_metadata_json"></textarea>
+                          </div>
+                        </div>
+                        <div class="form-actions">
+                          <button class="button" type="submit" formaction="/artifacts/sets/create">Create Set</button>
+                        </div>
+                      </section>
+                    </div>
+                  </div>
+                </form>
+                {% else %}
+                <div class="empty-state">Run an artifact search to inspect and act on matching records.</div>
+                {% endif %}
+              </section>
+
+              {% if artifact_share_results %}
+              <section class="panel">
+                <div class="panel-header">
+                  <div>
+                    <h3>Issued Artifact Links</h3>
+                    <div class="panel-copy">Immediate presigned links created from the current result selection.</div>
+                  </div>
+                </div>
+                <div class="stack">
+                  {% for row in artifact_share_results %}
+                  <article class="panel" style="padding: 0.85rem 0.95rem; background: rgba(11, 17, 32, 0.78);">
+                    <div class="mono">{{ row.share_reference_euid }}</div>
+                    <div class="note">Target {{ row.target_euid }}</div>
+                    <div class="results-meta" style="margin-top: 0.55rem;">
+                      <span class="pill pill-active">{{ row.status }}</span>
+                      {% if row.access_url %}
+                      <a class="button" href="{{ row.access_url }}" target="_blank" rel="noreferrer">Open Link</a>
+                      {% endif %}
+                    </div>
+                  </article>
+                  {% endfor %}
+                </div>
+              </section>
+              {% endif %}
+            </section>
+          </section>
+        </section>
+
+        <section class="section-pane {% if active_section == 'artifact_sets' %}section-pane-active{% endif %}" id="section-artifact_sets">
+          <section class="content-grid" style="grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.45fr);">
+            <section class="stack">
+              <section class="panel">
+                <div class="panel-header">
+                  <div>
+                    <h3>Create Artifact Set</h3>
+                    <div class="panel-copy">Create a set from scratch or use the search-results action to build one from selected artifacts.</div>
+                  </div>
+                </div>
+                <form method="post" action="/artifacts/sets/create">
+                  <div class="form-grid">
+                    <div class="field">
+                      <label for="artifact_sets_type">Set Type</label>
+                      <select id="artifact_sets_type" name="artifact_set_type">
+                        {% for item in artifact_set_types %}
+                        <option value="{{ item }}" {% if artifact_set_form.get("artifact_set_type", "collection") == item %}selected{% endif %}>{{ item }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label for="artifact_sets_label">Label</label>
+                      <input id="artifact_sets_label" name="artifact_set_label" type="text" value="{{ artifact_set_form.get('artifact_set_label', '') }}" />
+                    </div>
+                    <div class="field field-wide">
+                      <label for="artifact_sets_description">Description</label>
+                      <input id="artifact_sets_description" name="artifact_set_description" type="text" value="{{ artifact_set_form.get('artifact_set_description', '') }}" />
+                    </div>
+                    {% for field in artifact_set_metadata_fields %}
+                    {% if field.type == "datetime" %}
+                    <div class="field">
+                      <label for="artifact_set_meta_{{ field.name }}">{{ field.label }}</label>
+                      <input id="artifact_set_meta_{{ field.name }}" name="artifact_set_meta_{{ field.name }}" type="datetime-local" value="{{ artifact_set_form.get('artifact_set_meta_' ~ field.name, '') }}" />
+                    </div>
+                    {% elif field.type == "textarea" %}
+                    <div class="field field-wide">
+                      <label for="artifact_set_meta_{{ field.name }}">{{ field.label }}</label>
+                      <textarea id="artifact_set_meta_{{ field.name }}" name="artifact_set_meta_{{ field.name }}">{{ artifact_set_form.get('artifact_set_meta_' ~ field.name, '') }}</textarea>
+                    </div>
+                    {% else %}
+                    <div class="field">
+                      <label for="artifact_set_meta_{{ field.name }}">{{ field.label }}</label>
+                      <input id="artifact_set_meta_{{ field.name }}" name="artifact_set_meta_{{ field.name }}" type="text" value="{{ artifact_set_form.get('artifact_set_meta_' ~ field.name, '') }}" />
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    <div class="field field-wide">
+                      <label for="artifact_set_additional_metadata_json">Additional Set Metadata JSON</label>
+                      <textarea id="artifact_set_additional_metadata_json" name="artifact_set_additional_metadata_json">{{ artifact_set_form.get("artifact_set_additional_metadata_json", "") }}</textarea>
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <button class="button button-primary" type="submit">Create Artifact Set</button>
+                  </div>
+                </form>
+              </section>
+
+              {% if artifact_set_create_result %}
+              <section class="panel">
+                <div class="panel-header">
+                  <div>
+                    <h3>Latest Artifact Set</h3>
+                    <div class="panel-copy">The most recent create-set action completed successfully.</div>
+                  </div>
+                </div>
+                <div class="results-meta">
+                  <span class="pill pill-active">{{ artifact_set_create_result.artifact_set_euid }}</span>
+                  <span class="pill">{{ artifact_set_create_result.member_count }} members</span>
+                  <span class="pill">{{ artifact_set_create_result.artifact_set_type }}</span>
+                </div>
+                <div class="note">{{ artifact_set_create_result.label or "No label" }}</div>
+              </section>
+              {% endif %}
+
+              {% if artifact_set_share_result %}
+              <section class="panel">
+                <div class="panel-header">
+                  <div>
+                    <h3>Latest Set Share</h3>
+                    <div class="panel-copy">Presigned URL manifest or transport endpoint details for the selected artifact set.</div>
+                  </div>
+                </div>
+                <div class="results-meta">
+                  <span class="pill pill-active">{{ artifact_set_share_result.transport }}</span>
+                  <span class="pill">{{ artifact_set_share_result.status }}</span>
+                  <span class="pill">{{ artifact_set_share_result.member_count }} members</span>
+                </div>
+                {% if artifact_set_share_result.connection %}
+                <div class="stack">
+                  <div class="mono">{{ artifact_set_share_result.connection.endpoint }}</div>
+                  <div class="note">user {{ artifact_set_share_result.connection.username }}</div>
+                  {% if artifact_set_share_result.connection.bucket %}
+                  <div class="note">bucket {{ artifact_set_share_result.connection.bucket }}</div>
+                  {% endif %}
+                </div>
+                {% endif %}
+                {% if artifact_set_share_result.manifest %}
+                <div class="table-wrap" style="margin-top: 0.8rem;">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Artifact</th>
+                        <th>Status</th>
+                        <th>Link</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for item in artifact_set_share_result.manifest %}
+                      <tr>
+                        <td class="mono">{{ item.artifact_euid }}</td>
+                        <td>{{ item.status }}</td>
+                        <td>
+                          {% if item.access_url %}
+                          <a class="button" href="{{ item.access_url }}" target="_blank" rel="noreferrer">Open</a>
+                          {% else %}
+                          <span class="note">{{ item.detail or "n/a" }}</span>
+                          {% endif %}
+                        </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+                {% endif %}
+              </section>
+              {% endif %}
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Search Artifact Sets</h3>
+                  <div class="panel-copy">Query set labels, descriptions, metadata, and created-at ranges, then issue share references for a selected set.</div>
+                </div>
+              </div>
+              <form method="post" action="/artifacts/sets/search">
+                <div class="form-grid">
+                  <div class="field field-wide">
+                    <label for="artifact_set_q">Full Text</label>
+                    <input id="artifact_set_q" name="artifact_set_q" type="text" value="{{ artifact_set_search_form.get('artifact_set_q', '') }}" placeholder="artifact set EUID, label, description, metadata..." />
+                  </div>
+                  <div class="field field-wide">
+                    <label for="artifact_set_euids">Artifact Set EUIDs</label>
+                    <textarea id="artifact_set_euids" name="artifact_set_euids">{{ artifact_set_search_form.get("artifact_set_euids", "") }}</textarea>
+                  </div>
+                  <div class="field">
+                    <label for="artifact_set_type_search">Set Type</label>
+                    <select id="artifact_set_type_search" name="artifact_set_type">
+                      <option value="">Any</option>
+                      {% for item in artifact_set_types %}
+                      <option value="{{ item }}" {% if artifact_set_search_form.get("artifact_set_type") == item %}selected{% endif %}>{{ item }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="artifact_set_label_search">Label</label>
+                    <input id="artifact_set_label_search" name="artifact_set_label" type="text" value="{{ artifact_set_search_form.get('artifact_set_label', '') }}" />
+                  </div>
+                  <div class="field field-wide">
+                    <label for="artifact_set_description_search">Description</label>
+                    <input id="artifact_set_description_search" name="artifact_set_description" type="text" value="{{ artifact_set_search_form.get('artifact_set_description', '') }}" />
+                  </div>
+                  <div class="field">
+                    <label for="artifact_set_match_mode">Match Mode</label>
+                    <select id="artifact_set_match_mode" name="artifact_set_match_mode">
+                      <option value="greedy" {% if artifact_set_search_form.get("artifact_set_match_mode", "greedy") == "greedy" %}selected{% endif %}>greedy</option>
+                      <option value="exact" {% if artifact_set_search_form.get("artifact_set_match_mode") == "exact" %}selected{% endif %}>exact</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="artifact_set_created_at_start">Created After</label>
+                    <input id="artifact_set_created_at_start" name="artifact_set_created_at_start" type="datetime-local" value="{{ artifact_set_search_form.get('artifact_set_created_at_start', '') }}" />
+                  </div>
+                  <div class="field">
+                    <label for="artifact_set_created_at_end">Created Before</label>
+                    <input id="artifact_set_created_at_end" name="artifact_set_created_at_end" type="datetime-local" value="{{ artifact_set_search_form.get('artifact_set_created_at_end', '') }}" />
+                  </div>
+                  {% for field in artifact_set_metadata_fields %}
+                  {% if field.type == "datetime" %}
+                  <div class="field">
+                    <label for="artifact_set_filter_{{ field.name }}_start">{{ field.label }} Start</label>
+                    <input id="artifact_set_filter_{{ field.name }}_start" name="artifact_set_filter_{{ field.name }}_start" type="datetime-local" value="{{ artifact_set_search_form.get('artifact_set_filter_' ~ field.name ~ '_start', '') }}" />
+                  </div>
+                  <div class="field">
+                    <label for="artifact_set_filter_{{ field.name }}_end">{{ field.label }} End</label>
+                    <input id="artifact_set_filter_{{ field.name }}_end" name="artifact_set_filter_{{ field.name }}_end" type="datetime-local" value="{{ artifact_set_search_form.get('artifact_set_filter_' ~ field.name ~ '_end', '') }}" />
+                  </div>
+                  {% elif field.type == "textarea" %}
+                  <div class="field field-wide">
+                    <label for="artifact_set_filter_{{ field.name }}">{{ field.label }}</label>
+                    <textarea id="artifact_set_filter_{{ field.name }}" name="artifact_set_filter_{{ field.name }}">{{ artifact_set_search_form.get('artifact_set_filter_' ~ field.name, '') }}</textarea>
+                  </div>
+                  {% else %}
+                  <div class="field">
+                    <label for="artifact_set_filter_{{ field.name }}">{{ field.label }}</label>
+                    <input id="artifact_set_filter_{{ field.name }}" name="artifact_set_filter_{{ field.name }}" type="text" value="{{ artifact_set_search_form.get('artifact_set_filter_' ~ field.name, '') }}" />
+                  </div>
+                  {% endif %}
+                  {% endfor %}
+                </div>
+                <div class="form-actions">
+                  <button class="button button-primary" type="submit">Search</button>
+                  <button class="button" type="submit" formaction="/artifacts/sets/export" name="format" value="tsv">Export TSV</button>
+                  <button class="button" type="submit" formaction="/artifacts/sets/export" name="format" value="json">Export JSON</button>
+                </div>
+              </form>
+
+              {% if artifact_set_search_result["items"] %}
+              <form method="post" action="/artifacts/sets/share" style="margin-top: 1rem;">
+                <input type="hidden" name="artifact_set_search_form_state" value="{{ artifact_set_search_form_json|e }}" />
+                <div class="table-wrap">
+                  <table data-sortable>
+                    <thead>
+                      <tr>
+                        <th>Select</th>
+                        <th>Artifact Set</th>
+                        <th>Type</th>
+                        <th>Members</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for item in artifact_set_search_result["items"] %}
+                      <tr>
+                        <td><input type="radio" name="selected_artifact_set_euid" value="{{ item.artifact_set_euid }}" /></td>
+                        <td>
+                          <div class="mono">{{ item.artifact_set_euid }}</div>
+                          <div>{{ item.label or "No label" }}</div>
+                        </td>
+                        <td>{{ item.artifact_set_type }}</td>
+                        <td>{{ item.member_count }}</td>
+                        <td>{{ item.description or "n/a" }}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+                <div class="panel" style="padding: 0.9rem 1rem; margin-top: 1rem; background: rgba(11, 17, 32, 0.78);">
+                  <h3 style="margin-top: 0;">Share Selected Artifact Set</h3>
+                  <div class="form-grid">
+                    <div class="field">
+                      <label for="share_transport">Transport</label>
+                      <select id="share_transport" name="share_transport" data-share-transport>
+                        <option value="presigned_s3">presigned URLs</option>
+                        <option value="rclone_http">rclone HTTP</option>
+                        <option value="rclone_sftp">rclone SFTP</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label for="share_duration_days">Duration Days</label>
+                      <input id="share_duration_days" name="share_duration_days" type="number" min="1" step="1" value="1" />
+                    </div>
+                    <div class="field" data-share-config>
+                      <label for="share_bucket">Bucket</label>
+                      <input id="share_bucket" name="share_bucket" type="text" placeholder="managed-bucket" />
+                    </div>
+                    <div class="field" data-share-config>
+                      <label for="share_host">Host</label>
+                      <input id="share_host" name="share_host" type="text" value="0.0.0.0" />
+                    </div>
+                    <div class="field" data-share-config>
+                      <label for="share_port">Port</label>
+                      <input id="share_port" name="share_port" type="number" value="8080" />
+                    </div>
+                    <div class="field" data-share-config>
+                      <label for="share_user">User</label>
+                      <input id="share_user" name="share_user" type="text" value="user" />
+                    </div>
+                    <div class="field" data-share-config>
+                      <label for="share_password">Password</label>
+                      <input id="share_password" name="share_password" type="text" value="passwd" />
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <button class="button button-primary" type="submit">Share Set</button>
+                  </div>
+                </div>
+              </form>
+              {% else %}
+              <div class="empty-state" style="margin-top: 1rem;">Run an artifact-set search to review or share matching sets.</div>
+              {% endif %}
+            </section>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      function setActiveSection(target) {
+        document.querySelectorAll(".section-tab").forEach((button) => {
+          button.classList.toggle("section-tab-active", button.dataset.target === target);
+        });
+        document.querySelectorAll(".section-pane").forEach((pane) => {
+          pane.classList.toggle("section-pane-active", pane.id === `section-${target}`);
+        });
+      }
+
+      function syncGroupingMode() {
+        const mode = document.querySelector("[data-grouping-mode]");
+        if (!mode) {
+          return;
+        }
+        const value = mode.value;
+        document.querySelectorAll("[data-create-set]").forEach((node) => {
+          node.style.display = value === "create" ? "" : "none";
+        });
+        document.querySelectorAll("[data-existing-set]").forEach((node) => {
+          node.style.display = value === "use_existing" ? "" : "none";
+        });
+      }
+
+      function syncShareTransport() {
+        const mode = document.querySelector("[data-share-transport]");
+        if (!mode) {
+          return;
+        }
+        const show = mode.value !== "presigned_s3";
+        document.querySelectorAll("[data-share-config]").forEach((node) => {
+          node.style.display = show ? "" : "none";
+        });
+      }
+
+      function bindToggleAll() {
+        document.querySelectorAll("[data-toggle-all]").forEach((toggle) => {
+          toggle.addEventListener("change", () => {
+            document.querySelectorAll(`.${toggle.dataset.toggleAll}`).forEach((box) => {
+              box.checked = toggle.checked;
+            });
+          });
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll(".section-tab").forEach((button) => {
+          button.addEventListener("click", () => setActiveSection(button.dataset.target));
+        });
+        const current = document.querySelector(".section-tab-active");
+        if (current) {
+          setActiveSection(current.dataset.target);
+        }
+        const groupingMode = document.querySelector("[data-grouping-mode]");
+        if (groupingMode) {
+          groupingMode.addEventListener("change", syncGroupingMode);
+        }
+        const shareTransport = document.querySelector("[data-share-transport]");
+        if (shareTransport) {
+          shareTransport.addEventListener("change", syncShareTransport);
+        }
+        syncGroupingMode();
+        syncShareTransport();
+        bindToggleAll();
+      });
+    </script>
+  </body>
+</html>

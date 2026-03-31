@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
+import zipfile
 from typing import Any
+
+import yaml
 
 import pytest
 from fastapi.testclient import TestClient
@@ -365,6 +369,39 @@ class FakeDeweyService:
             idempotency_key=idempotency_key,
         )
 
+    def upload_artifact_bytes(
+        self,
+        *,
+        artifact_type: str,
+        original_filename: str,
+        body: bytes,
+        content_type: str | None,
+        producer_system: str | None,
+        producer_object_euid: str | None,
+        metadata: dict[str, Any] | None,
+        lock_after_import: bool,
+        idempotency_key: str,
+        checksums: dict[str, Any] | None = None,
+    ):
+        _ = body
+        self.create_upload_session(
+            artifact_type=artifact_type,
+            original_filename=original_filename,
+            content_type=content_type,
+            producer_system=producer_system,
+            producer_object_euid=producer_object_euid,
+            metadata=metadata,
+            lock_after_import=lock_after_import,
+            idempotency_key=f"{idempotency_key}:create",
+        )
+        token = f"upload-{self._upload_seq - 1:06d}"
+        return self.complete_upload_session(
+            upload_token=token,
+            checksums=checksums,
+            metadata=metadata,
+            idempotency_key=f"{idempotency_key}:complete",
+        )
+
     def verify_artifact_storage(self, *, artifact_euid: str, idempotency_key: str):
         item = self.get_artifact(artifact_euid)
         item["storage_status"] = "verified"
@@ -413,12 +450,14 @@ class FakeDeweyService:
         artifact_set_type: str,
         label: str | None,
         description: str | None,
+        metadata: dict[str, Any] | None,
         idempotency_key: str,
     ):
         payload = {
             "artifact_set_type": artifact_set_type,
             "label": label,
             "description": description,
+            "metadata": dict(metadata or {}),
         }
         replay = self._idempotent("artifact_set.create", idempotency_key, payload)
         if replay:
@@ -430,8 +469,10 @@ class FakeDeweyService:
             "artifact_set_type": artifact_set_type,
             "label": label,
             "description": description,
+            "metadata": dict(metadata or {}),
             "artifact_euids": [],
             "members": [],
+            "member_count": 0,
             "created_at": "2026-03-10T00:00:00Z",
         }
         self.artifact_sets[euid] = item
@@ -455,6 +496,7 @@ class FakeDeweyService:
         if artifact_euid not in aset["artifact_euids"]:
             aset["artifact_euids"].append(artifact_euid)
         aset["members"] = [self.artifacts[euid] for euid in aset["artifact_euids"]]
+        aset["member_count"] = len(aset["artifact_euids"])
         self._remember("artifact_set.member.add", idempotency_key, payload, 200, dict(aset))
         return 200, dict(aset)
 
@@ -474,6 +516,7 @@ class FakeDeweyService:
         aset = self.artifact_sets[artifact_set_euid]
         aset["artifact_euids"] = [e for e in aset["artifact_euids"] if e != artifact_euid]
         aset["members"] = [self.artifacts[euid] for euid in aset["artifact_euids"]]
+        aset["member_count"] = len(aset["artifact_euids"])
         self._remember("artifact_set.member.remove", idempotency_key, payload, 200, dict(aset))
         return 200, dict(aset)
 
@@ -506,6 +549,7 @@ class FakeDeweyService:
         expires_at: str | None,
         issued_by: str | None,
         transport: str | None = None,
+        transport_config: dict[str, Any] | None = None,
         ttl_seconds: int | None = None,
         idempotency_key: str,
     ):
@@ -517,17 +561,51 @@ class FakeDeweyService:
             "expires_at": expires_at,
             "issued_by": issued_by,
             "transport": transport or "presigned_s3",
+            "transport_config": dict(transport_config or {}),
             "ttl_seconds": ttl_seconds,
         }
         replay = self._idempotent("share_reference.create", idempotency_key, payload)
         if replay:
             return replay
-        if target_type == "artifact":
-            self.get_artifact(target_euid)
-        else:
-            self.get_artifact_set(target_euid)
         euid = f"SH-{self._share_seq:06d}"
         self._share_seq += 1
+        if target_type == "artifact":
+            self.get_artifact(target_euid)
+            manifest: list[dict[str, Any]] = []
+            connection: dict[str, Any] = {}
+            access_url = f"https://downloads.example.com/{euid}"
+        else:
+            artifact_set = self.get_artifact_set(target_euid)
+            if (transport or "presigned_s3") == "presigned_s3":
+                manifest = [
+                    {
+                        "artifact_euid": artifact["artifact_euid"],
+                        "status": "active",
+                        "access_url": f"https://downloads.example.com/{artifact['artifact_euid']}",
+                    }
+                    for artifact in artifact_set["members"]
+                ]
+                connection = {}
+                access_url = None
+            else:
+                host = str((transport_config or {}).get("host") or "0.0.0.0")
+                port = int((transport_config or {}).get("port") or 8080)
+                user = str((transport_config or {}).get("user") or "user")
+                password = str((transport_config or {}).get("passwd") or "passwd")
+                connection = {
+                    "endpoint": (
+                        f"http://{host}:{port}/"
+                        if (transport or "") == "rclone_http"
+                        else f"sftp://{user}@{host}:{port}/"
+                    ),
+                    "username": user,
+                    "password": password,
+                    "host": host,
+                    "port": port,
+                    "bucket": (transport_config or {}).get("bucket"),
+                }
+                manifest = []
+                access_url = connection["endpoint"] if (transport or "") == "rclone_http" else None
         body = {
             "share_reference_euid": euid,
             "target_type": target_type,
@@ -538,7 +616,11 @@ class FakeDeweyService:
             "status": "active",
             "starts_at": "2026-03-10T00:00:00Z",
             "expires_at": expires_at or "2026-03-10T12:00:00Z",
-            "access_url": f"https://downloads.example.com/{euid}",
+            "access_url": access_url,
+            "manifest": manifest,
+            "connection": connection,
+            "member_count": len(manifest) if target_type == "artifact_set" else 0,
+            "transport_config": dict(transport_config or {}),
             "issued_by": issued_by,
             "created_at": "2026-03-10T00:00:00Z",
         }
@@ -667,6 +749,35 @@ class FakeDeweyService:
             if row["target_type"] == target_type and row["target_euid"] == target_euid
         ]
         return rows[:limit]
+
+    def expand_s3_sources(self, source_uri: str, *, limit: int = 1000):
+        if source_uri.endswith("/"):
+            return [
+                f"{source_uri.rstrip('/')}/file-{index}.dat"
+                for index in range(1, min(limit, 3))
+            ]
+        return [source_uri]
+
+    def build_artifact_download_archive(
+        self,
+        *,
+        artifact_euids: list[str],
+        naming_mode: str = "hybrid",
+        include_metadata: bool = True,
+    ):
+        _ = naming_mode
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+            for artifact_euid in artifact_euids:
+                artifact = self.get_artifact(artifact_euid)
+                filename = artifact.get("original_filename") or f"{artifact_euid}.bin"
+                zf.writestr(filename, f"payload for {artifact_euid}".encode("utf-8"))
+                if include_metadata:
+                    zf.writestr(
+                        f"{filename}.dewey.yaml",
+                        yaml.safe_dump(artifact, sort_keys=True),
+                    )
+        return "dewey-artifacts-test.zip", buffer.getvalue()
 
     def search_literature(self, *, viewer, query: str, page: int = 1, page_size: int = 20):
         self._require_literature()
@@ -885,6 +996,44 @@ class FakeDeweyService:
         ]
         return rows[:limit]
 
+    @staticmethod
+    def _extract_path_values(payload: Any, path: str) -> list[Any]:
+        parts = [part for part in str(path or "").split(".") if part]
+        if not parts:
+            return []
+
+        def _walk(value: Any, remaining: list[str]) -> list[Any]:
+            if not remaining:
+                return [value]
+            head, *tail = remaining
+            if isinstance(value, list):
+                rows: list[Any] = []
+                for item in value:
+                    rows.extend(_walk(item, remaining))
+                return rows
+            if not isinstance(value, dict) or head not in value:
+                return []
+            return _walk(value[head], tail)
+
+        return _walk(payload, parts)
+
+    def _matches_property_filter(self, row: dict[str, Any], item: dict[str, Any]) -> bool:
+        path = str(item.get("path") or "").strip()
+        op = str(item.get("op") or "eq").strip().lower()
+        value = item.get("value")
+        values = self._extract_path_values(row, path)
+        if op == "in":
+            acceptable = value if isinstance(value, list) else [value]
+            return any(candidate in acceptable for candidate in values)
+        if op == "contains":
+            needle = str(value or "").lower()
+            return any(needle in str(candidate or "").lower() for candidate in values)
+        if op == "gte":
+            return any(str(candidate or "") >= str(value or "") for candidate in values)
+        if op == "lte":
+            return any(str(candidate or "") <= str(value or "") for candidate in values)
+        return any(candidate == value for candidate in values)
+
     def query_search_v2(self, request: dict[str, Any] | None, *, viewer_context=None):
         query = dict(request or {})
         scopes = query.get("scopes") or ["artifact", "share_reference"]
@@ -914,6 +1063,19 @@ class FakeDeweyService:
                     if viewer is not None:
                         search_row.update(self._literature_visibility(row["artifact_euid"], viewer))
                 rows.append(search_row)
+        if "artifact_set" in scopes:
+            rows.extend(
+                {
+                    "record_type": "artifact_set",
+                    "source_kind": "dewey.artifact_set",
+                    "euid": row["artifact_set_euid"],
+                    "name": row.get("label") or row["artifact_set_euid"],
+                    "created_at": row["created_at"],
+                    "modified_at": row["created_at"],
+                    **row,
+                }
+                for row in self.artifact_sets.values()
+            )
         if "share_reference" in scopes:
             rows.extend(
                 {
@@ -932,11 +1094,20 @@ class FakeDeweyService:
             rows = [
                 row for row in rows if q in json.dumps(row, sort_keys=True, default=str).lower()
             ]
+        created_at_start = str(query.get("created_at_start") or "").strip()
+        if created_at_start:
+            rows = [row for row in rows if str(row.get("created_at") or "") >= created_at_start]
+        created_at_end = str(query.get("created_at_end") or "").strip()
+        if created_at_end:
+            rows = [row for row in rows if str(row.get("created_at") or "") <= created_at_end]
+        for item in query.get("property_filters") or []:
+            rows = [row for row in rows if self._matches_property_filter(row, item)]
         page_size = int(query.get("page_size") or 25)
         return {
             "items": rows[:page_size],
             "facets": {
                 "artifact": sum(1 for row in rows if row["record_type"] == "artifact"),
+                "artifact_set": sum(1 for row in rows if row["record_type"] == "artifact_set"),
                 "share_reference": sum(
                     1 for row in rows if row["record_type"] == "share_reference"
                 ),

@@ -5,16 +5,19 @@ from __future__ import annotations
 import csv
 import io
 import json
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from time import monotonic
 from typing import Any
+from uuid import uuid4
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, status
+from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, Request, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, ConfigDict, Field
+from starlette.datastructures import UploadFile as StarletteUploadFile
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
@@ -30,6 +33,16 @@ from dewey_service.auth import (
     require_observability_access,
     require_ui_admin_session,
     require_ui_session,
+)
+from dewey_service.artifact_ui import (
+    ARTIFACT_SET_TYPES,
+    ARTIFACT_TYPES,
+    bulk_template_tsv,
+    collect_metadata,
+    collect_metadata_search_filters,
+    metadata_fields,
+    parse_json_object,
+    split_lines,
 )
 from dewey_service.domain_access import (
     build_allowed_origin_regex,
@@ -115,6 +128,7 @@ class ArtifactSetCreateRequest(BaseModel):
     artifact_set_type: str
     label: str | None = None
     description: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class ArtifactSetMemberRequest(BaseModel):
@@ -144,7 +158,11 @@ class ShareReferenceCreateRequest(BaseModel):
     scope: str | None = None
     expires_at: str | None = None
     issued_by: str | None = None
-    transport: str = Field(default="presigned_s3", pattern="^(presigned_s3)$")
+    transport: str = Field(
+        default="presigned_s3",
+        pattern="^(presigned_s3|rclone_http|rclone_sftp)$",
+    )
+    transport_config: dict[str, Any] = Field(default_factory=dict)
     ttl_seconds: int | None = None
 
 
@@ -334,6 +352,9 @@ def create_app(
             "created_at",
             "modified_at",
             "artifact_type",
+            "artifact_set_type",
+            "label",
+            "description",
             "title",
             "pmid",
             "doi",
@@ -343,6 +364,7 @@ def create_app(
             "availability_status",
             "import_mode",
             "storage_mode",
+            "member_count",
             "saved_by_me",
             "saved_by_others_count",
             "visible_owner_labels",
@@ -351,6 +373,8 @@ def create_app(
             "transport",
             "status",
             "expires_at",
+            "connection",
+            "manifest",
             "metadata",
         ]
         buffer = io.StringIO()
@@ -364,6 +388,8 @@ def create_app(
                 sort_keys=True,
                 default=str,
             )
+            row["connection"] = json.dumps(item.get("connection") or {}, sort_keys=True, default=str)
+            row["manifest"] = json.dumps(item.get("manifest") or [], sort_keys=True, default=str)
             writer.writerow(row)
         return buffer.getvalue()
 
@@ -405,6 +431,207 @@ def create_app(
             "created_at_start": str(params.get("created_at_start") or "").strip() or None,
             "created_at_end": str(params.get("created_at_end") or "").strip() or None,
         }
+
+    def _new_idempotency_key(prefix: str) -> str:
+        return f"{prefix}-{uuid4().hex}"
+
+    def _artifact_metadata_fields() -> list[dict[str, str]]:
+        return metadata_fields("artifact")
+
+    def _artifact_set_metadata_fields() -> list[dict[str, str]]:
+        return metadata_fields("artifact_set")
+
+    def _parse_state_json(raw: Any) -> dict[str, Any]:
+        text = str(raw or "").strip()
+        if not text:
+            return {}
+        try:
+            payload = json.loads(text)
+        except json.JSONDecodeError:
+            return {}
+        return payload if isinstance(payload, dict) else {}
+
+    def _artifact_search_payload(values: dict[str, Any]) -> dict[str, Any]:
+        greedy = str(values.get("artifact_match_mode") or "greedy").strip().lower() != "exact"
+        property_filters: list[dict[str, Any]] = []
+        for field_name in ["artifact_type", "producer_system", "availability_status", "import_mode"]:
+            value = str(values.get(field_name) or "").strip()
+            if value:
+                property_filters.append({"path": field_name, "op": "eq", "value": value})
+        artifact_euids = split_lines(values.get("artifact_euids"))
+        if artifact_euids:
+            property_filters.append({"path": "artifact_euid", "op": "in", "value": artifact_euids})
+        external_object_id = str(values.get("external_object_id") or "").strip()
+        if external_object_id:
+            property_filters.append(
+                {
+                    "path": "external_objects.external_object_id",
+                    "op": "eq",
+                    "value": external_object_id,
+                }
+            )
+        property_filters.extend(
+            collect_metadata_search_filters(
+                values,
+                fields=_artifact_metadata_fields(),
+                prefix="artifact_filter",
+                greedy=greedy,
+            )
+        )
+        return {
+            "q": str(values.get("artifact_q") or "").strip() or None,
+            "scopes": ["artifact"],
+            "page": int(values.get("artifact_page") or 1),
+            "page_size": int(values.get("artifact_page_size") or 25),
+            "sort_field": str(values.get("artifact_sort_field") or "created_at"),
+            "sort_dir": str(values.get("artifact_sort_dir") or "desc"),
+            "property_filters": property_filters,
+            "created_at_start": str(values.get("artifact_created_at_start") or "").strip() or None,
+            "created_at_end": str(values.get("artifact_created_at_end") or "").strip() or None,
+        }
+
+    def _artifact_set_search_payload(values: dict[str, Any]) -> dict[str, Any]:
+        greedy = str(values.get("artifact_set_match_mode") or "greedy").strip().lower() != "exact"
+        property_filters: list[dict[str, Any]] = []
+        artifact_set_type = str(values.get("artifact_set_type") or "").strip()
+        if artifact_set_type:
+            property_filters.append(
+                {"path": "artifact_set_type", "op": "eq", "value": artifact_set_type}
+            )
+        for field_name in ["label", "description"]:
+            value = str(values.get(f"artifact_set_{field_name}") or "").strip()
+            if value:
+                property_filters.append(
+                    {
+                        "path": field_name,
+                        "op": "contains" if greedy else "eq",
+                        "value": value,
+                    }
+                )
+        artifact_set_euids = split_lines(values.get("artifact_set_euids"))
+        if artifact_set_euids:
+            property_filters.append(
+                {"path": "artifact_set_euid", "op": "in", "value": artifact_set_euids}
+            )
+        property_filters.extend(
+            collect_metadata_search_filters(
+                values,
+                fields=_artifact_set_metadata_fields(),
+                prefix="artifact_set_filter",
+                greedy=greedy,
+            )
+        )
+        return {
+            "q": str(values.get("artifact_set_q") or "").strip() or None,
+            "scopes": ["artifact_set"],
+            "page": int(values.get("artifact_set_page") or 1),
+            "page_size": int(values.get("artifact_set_page_size") or 25),
+            "sort_field": str(values.get("artifact_set_sort_field") or "created_at"),
+            "sort_dir": str(values.get("artifact_set_sort_dir") or "desc"),
+            "property_filters": property_filters,
+            "created_at_start": str(values.get("artifact_set_created_at_start") or "").strip()
+            or None,
+            "created_at_end": str(values.get("artifact_set_created_at_end") or "").strip()
+            or None,
+        }
+
+    def _empty_artifact_search_result() -> dict[str, Any]:
+        return {
+            "items": [],
+            "facets": {"artifact": 0, "artifact_set": 0, "share_reference": 0},
+            "total": 0,
+            "page": 1,
+            "page_size": 25,
+            "has_more": False,
+            "timing_ms": 0,
+        }
+
+    def _empty_artifact_set_search_result() -> dict[str, Any]:
+        return {
+            "items": [],
+            "facets": {"artifact": 0, "artifact_set": 0, "share_reference": 0},
+            "total": 0,
+            "page": 1,
+            "page_size": 25,
+            "has_more": False,
+            "timing_ms": 0,
+        }
+
+    def _default_artifact_page_context(profile: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "profile": profile,
+            "is_admin": _is_admin(profile),
+            "artifact_types": ARTIFACT_TYPES,
+            "artifact_set_types": ARTIFACT_SET_TYPES,
+            "artifact_metadata_fields": _artifact_metadata_fields(),
+            "artifact_set_metadata_fields": _artifact_set_metadata_fields(),
+            "artifact_form": {},
+            "artifact_search_form": {},
+            "artifact_set_form": {},
+            "artifact_set_search_form": {},
+            "artifact_search_result": _empty_artifact_search_result(),
+            "artifact_set_search_result": _empty_artifact_set_search_result(),
+            "artifact_search_form_json": "{}",
+            "artifact_set_search_form_json": "{}",
+            "register_report": [],
+            "bulk_report": [],
+            "artifact_share_results": [],
+            "artifact_set_share_result": None,
+            "artifact_set_create_result": None,
+            "bulk_template_url": "/artifacts/bulk-template.tsv",
+            "active_section": "register",
+        }
+
+    def _artifact_page_response(
+        request: Request,
+        *,
+        profile: dict[str, Any],
+        **overrides: Any,
+    ) -> HTMLResponse:
+        context = _default_artifact_page_context(profile)
+        context.update(overrides)
+        if isinstance(context.get("artifact_search_form"), dict):
+            context["artifact_search_form_json"] = json.dumps(context["artifact_search_form"])
+        if isinstance(context.get("artifact_set_search_form"), dict):
+            context["artifact_set_search_form_json"] = json.dumps(
+                context["artifact_set_search_form"]
+            )
+        return templates.TemplateResponse(
+            request,
+            "artifacts.html",
+            _template_context(**context),
+        )
+
+    def _string_form_values(form) -> dict[str, Any]:
+        values: dict[str, Any] = {}
+        for key in form.keys():
+            value = form.get(key)
+            if isinstance(value, StarletteUploadFile):
+                continue
+            values[key] = value
+        return values
+
+    def _rerun_artifact_search(
+        form_state: dict[str, Any],
+        *,
+        profile: dict[str, Any],
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        if not form_state:
+            return {}, _empty_artifact_search_result()
+        payload = _artifact_search_payload(form_state)
+        result = service.query_search_v2(payload, viewer_context=_viewer_context(profile))
+        return form_state, result
+
+    def _rerun_artifact_set_search(
+        form_state: dict[str, Any],
+        *,
+        profile: dict[str, Any],
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        if not form_state:
+            return {}, _empty_artifact_set_search_result()
+        payload = _artifact_set_search_payload(form_state)
+        result = service.query_search_v2(payload, viewer_context=_viewer_context(profile))
+        return form_state, result
 
     @app.middleware("http")
     async def _enforce_origin_allowlist(request: Request, call_next):
@@ -873,6 +1100,588 @@ def create_app(
             },
         )
 
+    @app.get("/artifacts", include_in_schema=False)
+    async def artifacts_page(
+        request: Request, profile: dict[str, Any] = Depends(require_ui_session)
+    ) -> HTMLResponse:
+        return _artifact_page_response(request, profile=profile)
+
+    @app.get("/artifacts/bulk-template.tsv", include_in_schema=False)
+    async def artifacts_bulk_template(
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> Response:
+        _ = profile
+        return Response(
+            content=bulk_template_tsv(),
+            media_type="text/tab-separated-values",
+            headers={"Content-Disposition": 'attachment; filename="dewey_artifacts_bulk_template.tsv"'},
+        )
+
+    @app.post("/artifacts/register", include_in_schema=False)
+    async def artifacts_register(
+        request: Request, profile: dict[str, Any] = Depends(require_ui_session)
+    ) -> HTMLResponse:
+        form = await request.form(max_files=1105)
+        values = _string_form_values(form)
+        artifact_type = str(values.get("artifact_type") or "").strip().lower()
+        if not artifact_type:
+            return _artifact_page_response(
+                request,
+                profile=profile,
+                artifact_form=values,
+                register_report=[{"status": "error", "detail": "artifact_type is required"}],
+                active_section="register",
+            )
+
+        metadata = collect_metadata(
+            values,
+            fields=_artifact_metadata_fields(),
+            prefix="artifact_meta",
+            extra_json_field="artifact_additional_metadata_json",
+        )
+        producer_system = str(values.get("producer_system") or "").strip() or None
+        producer_object_euid = str(values.get("producer_object_euid") or "").strip() or None
+        lock_after_import = str(values.get("lock_after_import") or "").strip().lower() == "yes"
+
+        artifact_set_payload: dict[str, Any] | None = None
+        artifact_set_euid = ""
+        grouping_mode = str(values.get("grouping_mode") or "none").strip().lower() or "none"
+        if grouping_mode == "use_existing":
+            artifact_set_euid = str(values.get("existing_artifact_set_euid") or "").strip()
+            if not artifact_set_euid:
+                return _artifact_page_response(
+                    request,
+                    profile=profile,
+                    artifact_form=values,
+                    register_report=[
+                        {
+                            "status": "error",
+                            "detail": "existing_artifact_set_euid is required when using an existing set",
+                        }
+                    ],
+                    active_section="register",
+                )
+            artifact_set_payload = service.get_artifact_set(artifact_set_euid)
+        elif grouping_mode == "create":
+            artifact_set_metadata = collect_metadata(
+                values,
+                fields=_artifact_set_metadata_fields(),
+                prefix="artifact_set_meta",
+                extra_json_field="artifact_set_additional_metadata_json",
+            )
+            _, artifact_set_payload = service.create_artifact_set(
+                artifact_set_type=str(values.get("artifact_set_type") or "batch").strip().lower()
+                or "batch",
+                label=str(values.get("artifact_set_label") or "").strip() or None,
+                description=str(values.get("artifact_set_description") or "").strip() or None,
+                metadata=artifact_set_metadata,
+                idempotency_key=_new_idempotency_key("ui-artifact-set"),
+            )
+            artifact_set_euid = artifact_set_payload["artifact_set_euid"]
+
+        results: list[dict[str, Any]] = []
+
+        def _remember_result(source: str, payload: dict[str, Any]) -> None:
+            results.append(
+                {
+                    "status": "success",
+                    "source": source,
+                    "artifact_euid": payload["artifact_euid"],
+                    "storage_uri": payload.get("storage_uri"),
+                    "artifact_set_euid": artifact_set_euid or None,
+                    "detail": payload.get("import_mode") or "register",
+                }
+            )
+
+        async def _upload_local_file(source_label: str, upload: UploadFile) -> None:
+            nonlocal artifact_set_payload
+            file_name = Path(str(upload.filename or "").strip() or "upload.bin").name
+            payload_code, payload = service.upload_artifact_bytes(
+                artifact_type=artifact_type,
+                original_filename=file_name,
+                body=await upload.read(),
+                content_type=str(upload.content_type or "").strip() or None,
+                producer_system=producer_system,
+                producer_object_euid=producer_object_euid,
+                metadata=metadata,
+                lock_after_import=lock_after_import,
+                idempotency_key=_new_idempotency_key("ui-upload"),
+            )
+            _ = payload_code
+            if artifact_set_euid:
+                _, artifact_set_payload = service.add_artifact_set_member(
+                    artifact_set_euid=artifact_set_euid,
+                    artifact_euid=payload["artifact_euid"],
+                    idempotency_key=_new_idempotency_key("ui-artifact-set-member"),
+                )
+            _remember_result(source_label, payload)
+
+        try:
+            local_files = [
+                item for item in form.getlist("file_data") if isinstance(item, StarletteUploadFile)
+            ]
+            for item in local_files:
+                if str(item.filename or "").strip():
+                    await _upload_local_file(str(item.filename), item)
+
+            directory_files = [
+                item
+                for item in form.getlist("directory_data")
+                if isinstance(item, StarletteUploadFile)
+            ]
+            directory_files = [
+                item
+                for item in directory_files
+                if not Path(str(item.filename or "")).name.startswith(".")
+            ]
+            if len(directory_files) > 1000:
+                return _artifact_page_response(
+                    request,
+                    profile=profile,
+                    artifact_form=values,
+                    register_report=[
+                        {
+                            "status": "error",
+                            "detail": "Too many directory files. Maximum is 1000.",
+                        }
+                    ],
+                    active_section="register",
+                )
+            for item in directory_files:
+                if str(item.filename or "").strip():
+                    await _upload_local_file(str(item.filename), item)
+
+            for source_uri in split_lines(values.get("url_sources")):
+                _, payload = service.import_artifact_from_uri(
+                    artifact_type=artifact_type,
+                    source_uri=source_uri,
+                    import_mode="copy",
+                    lock_after_import=lock_after_import,
+                    producer_system=producer_system,
+                    producer_object_euid=producer_object_euid,
+                    metadata=metadata,
+                    idempotency_key=_new_idempotency_key("ui-url-import"),
+                )
+                if artifact_set_euid:
+                    _, artifact_set_payload = service.add_artifact_set_member(
+                        artifact_set_euid=artifact_set_euid,
+                        artifact_euid=payload["artifact_euid"],
+                        idempotency_key=_new_idempotency_key("ui-artifact-set-member"),
+                    )
+                _remember_result(source_uri, payload)
+
+            s3_mode = str(values.get("s3_mode") or "reference").strip().lower() or "reference"
+            for source_uri in split_lines(values.get("s3_sources")):
+                expanded_sources = service.expand_s3_sources(source_uri)
+                for expanded_source in expanded_sources:
+                    if s3_mode == "register":
+                        parsed = expanded_source.removeprefix("s3://")
+                        bucket, key = parsed.split("/", 1)
+                        _, payload = service.register_artifact(
+                            artifact_type=artifact_type,
+                            storage_backend="s3",
+                            bucket=bucket,
+                            key=key,
+                            version_id=None,
+                            size=None,
+                            checksums={},
+                            content_type=None,
+                            original_filename=Path(key).name,
+                            producer_system=producer_system,
+                            producer_object_euid=producer_object_euid,
+                            storage_class=None,
+                            availability_status="available",
+                            metadata=metadata,
+                            idempotency_key=_new_idempotency_key("ui-s3-register"),
+                        )
+                    else:
+                        _, payload = service.import_artifact_from_uri(
+                            artifact_type=artifact_type,
+                            source_uri=expanded_source,
+                            import_mode=s3_mode,
+                            lock_after_import=lock_after_import,
+                            producer_system=producer_system,
+                            producer_object_euid=producer_object_euid,
+                            metadata=metadata,
+                            idempotency_key=_new_idempotency_key("ui-s3-import"),
+                        )
+                    if artifact_set_euid:
+                        _, artifact_set_payload = service.add_artifact_set_member(
+                            artifact_set_euid=artifact_set_euid,
+                            artifact_euid=payload["artifact_euid"],
+                            idempotency_key=_new_idempotency_key("ui-artifact-set-member"),
+                        )
+                    _remember_result(expanded_source, payload)
+        except Exception as exc:
+            results.append({"status": "error", "detail": str(exc), "source": "register"})
+
+        return _artifact_page_response(
+            request,
+            profile=profile,
+            artifact_form=values,
+            register_report=results,
+            artifact_set_create_result=artifact_set_payload,
+            active_section="register",
+        )
+
+    @app.post("/artifacts/bulk-upload", include_in_schema=False)
+    async def artifacts_bulk_upload(
+        request: Request, profile: dict[str, Any] = Depends(require_ui_session)
+    ) -> HTMLResponse:
+        form = await request.form(max_files=32)
+        values = _string_form_values(form)
+        file = form.get("bulk_tsv")
+        if not isinstance(file, StarletteUploadFile) or not str(file.filename or "").strip():
+            return _artifact_page_response(
+                request,
+                profile=profile,
+                bulk_report=[{"row_number": 0, "status": "error", "detail": "bulk_tsv is required"}],
+                active_section="register",
+            )
+        text = (await file.read()).decode("utf-8")
+        reader = csv.DictReader(io.StringIO(text), delimiter="\t")
+        results: list[dict[str, Any]] = []
+        artifact_set_cache: dict[tuple[str, str, str, str], str] = {}
+        for index, row in enumerate(reader, start=2):
+            metadata: dict[str, Any] = {}
+            for field in _artifact_metadata_fields():
+                key = field["name"]
+                value = row.get(key)
+                if value:
+                    parsed_value = parse_json_object(value, label=key) if key == "additional_metadata_json" else None
+                    if parsed_value is not None:
+                        metadata.update(parsed_value)
+                    else:
+                        metadata.update(
+                            collect_metadata(
+                                {f"bulk_{key}": value},
+                                fields=[field],
+                                prefix="bulk",
+                                extra_json_field="unused_bulk_json",
+                            )
+                        )
+            try:
+                source_mode = str(row.get("source_mode") or "").strip().lower()
+                artifact_type = str(row.get("artifact_type") or "").strip().lower()
+                source_uri = str(row.get("source_uri") or "").strip()
+                if not artifact_type:
+                    raise ValueError("artifact_type is required")
+                if source_mode == "register":
+                    bucket = str(row.get("bucket") or "").strip()
+                    key = str(row.get("key") or "").strip()
+                    if not bucket or not key:
+                        if source_uri.startswith("s3://"):
+                            trimmed = source_uri.removeprefix("s3://")
+                            bucket, key = trimmed.split("/", 1)
+                        else:
+                            raise ValueError("register rows require bucket/key or s3 source_uri")
+                    _, payload = service.register_artifact(
+                        artifact_type=artifact_type,
+                        storage_backend="s3",
+                        bucket=bucket,
+                        key=key,
+                        version_id=None,
+                        size=None,
+                        checksums={},
+                        content_type=None,
+                        original_filename=str(row.get("original_filename") or "").strip() or Path(key).name,
+                        producer_system=str(row.get("producer_system") or "").strip() or None,
+                        producer_object_euid=str(row.get("producer_object_euid") or "").strip() or None,
+                        storage_class=None,
+                        availability_status="available",
+                        metadata=metadata,
+                        idempotency_key=_new_idempotency_key("ui-bulk-register"),
+                    )
+                elif source_mode in {"reference", "copy"}:
+                    if not source_uri:
+                        raise ValueError("reference/copy rows require source_uri")
+                    _, payload = service.import_artifact_from_uri(
+                        artifact_type=artifact_type,
+                        source_uri=source_uri,
+                        import_mode=source_mode,
+                        lock_after_import=False,
+                        producer_system=str(row.get("producer_system") or "").strip() or None,
+                        producer_object_euid=str(row.get("producer_object_euid") or "").strip() or None,
+                        metadata=metadata,
+                        idempotency_key=_new_idempotency_key("ui-bulk-import"),
+                    )
+                else:
+                    raise ValueError("source_mode must be register, reference, or copy")
+
+                set_label = str(row.get("artifact_set_label") or "").strip()
+                if set_label:
+                    set_type = str(row.get("artifact_set_type") or "batch").strip().lower() or "batch"
+                    set_description = str(row.get("artifact_set_description") or "").strip()
+                    cache_key = (set_type, set_label, set_description, json.dumps({}, sort_keys=True))
+                    artifact_set_euid = artifact_set_cache.get(cache_key)
+                    if not artifact_set_euid:
+                        _, artifact_set = service.create_artifact_set(
+                            artifact_set_type=set_type,
+                            label=set_label,
+                            description=set_description or None,
+                            metadata={},
+                            idempotency_key=_new_idempotency_key("ui-bulk-set"),
+                        )
+                        artifact_set_euid = artifact_set["artifact_set_euid"]
+                        artifact_set_cache[cache_key] = artifact_set_euid
+                    service.add_artifact_set_member(
+                        artifact_set_euid=artifact_set_euid,
+                        artifact_euid=payload["artifact_euid"],
+                        idempotency_key=_new_idempotency_key("ui-bulk-set-member"),
+                    )
+                results.append(
+                    {
+                        "row_number": index,
+                        "status": "success",
+                        "artifact_euid": payload["artifact_euid"],
+                        "storage_uri": payload.get("storage_uri"),
+                    }
+                )
+            except Exception as exc:
+                results.append({"row_number": index, "status": "error", "detail": str(exc)})
+        return _artifact_page_response(
+            request,
+            profile=profile,
+            bulk_report=results,
+            active_section="register",
+        )
+
+    @app.post("/artifacts/search", include_in_schema=False)
+    async def artifacts_search(
+        request: Request, profile: dict[str, Any] = Depends(require_ui_session)
+    ) -> HTMLResponse:
+        form = await request.form()
+        values = _string_form_values(form)
+        result = service.query_search_v2(
+            _artifact_search_payload(values),
+            viewer_context=_viewer_context(profile),
+        )
+        return _artifact_page_response(
+            request,
+            profile=profile,
+            artifact_search_form=values,
+            artifact_search_result=result,
+            active_section="search",
+        )
+
+    @app.post("/artifacts/search/export", include_in_schema=False)
+    async def artifacts_search_export(
+        request: Request, profile: dict[str, Any] = Depends(require_ui_session)
+    ) -> Response:
+        form = await request.form()
+        values = _string_form_values(form)
+        payload = _artifact_search_payload(values)
+        export_format = str(values.get("format") or "tsv").strip().lower() or "tsv"
+        payload["format"] = export_format
+        payload["max_rows"] = int(values.get("max_rows") or 1000)
+        items, timing_ms, truncated = service.collect_search_export_rows(
+            payload,
+            viewer_context=_viewer_context(profile),
+        )
+        if export_format == "json":
+            return JSONResponse(
+                {"items": items, "row_count": len(items), "timing_ms": timing_ms, "truncated": truncated}
+            )
+        return Response(
+            content=_search_payload_to_tsv(items),
+            media_type="text/tab-separated-values",
+            headers={"Content-Disposition": 'attachment; filename="dewey_artifact_search.tsv"'},
+        )
+
+    @app.post("/artifacts/download", include_in_schema=False)
+    async def artifacts_download(
+        request: Request, profile: dict[str, Any] = Depends(require_ui_session)
+    ) -> Response:
+        _ = profile
+        form = await request.form()
+        artifact_euids = [str(item).strip() for item in form.getlist("artifact_euids") if str(item).strip()]
+        archive_name, archive_bytes = service.build_artifact_download_archive(
+            artifact_euids=artifact_euids,
+            naming_mode=str(form.get("download_naming_mode") or "hybrid"),
+            include_metadata=str(form.get("download_include_metadata") or "yes").strip().lower()
+            == "yes",
+        )
+        return Response(
+            content=archive_bytes,
+            media_type="application/zip",
+            headers={"Content-Disposition": f'attachment; filename="{archive_name}"'},
+        )
+
+    @app.post("/artifacts/share", include_in_schema=False)
+    async def artifacts_share(
+        request: Request, profile: dict[str, Any] = Depends(require_ui_session)
+    ) -> HTMLResponse:
+        form = await request.form()
+        artifact_euids = [str(item).strip() for item in form.getlist("artifact_euids") if str(item).strip()]
+        ttl_hours = max(1, int(form.get("share_ttl_hours") or 24))
+        share_rows: list[dict[str, Any]] = []
+        for artifact_euid in artifact_euids:
+            _, payload = service.create_share_reference(
+                target_type="artifact",
+                target_euid=artifact_euid,
+                purpose="download",
+                scope="external",
+                expires_at=None,
+                issued_by=str(profile.get("email") or "").strip() or None,
+                transport="presigned_s3",
+                transport_config={},
+                ttl_seconds=ttl_hours * 3600,
+                idempotency_key=_new_idempotency_key("ui-artifact-share"),
+            )
+            share_rows.append(payload)
+        search_form, search_result = _rerun_artifact_search(
+            _parse_state_json(form.get("artifact_search_form_state")),
+            profile=profile,
+        )
+        return _artifact_page_response(
+            request,
+            profile=profile,
+            artifact_search_form=search_form,
+            artifact_search_result=search_result,
+            artifact_share_results=share_rows,
+            active_section="search",
+        )
+
+    @app.post("/artifacts/sets/create", include_in_schema=False)
+    async def artifacts_set_create(
+        request: Request, profile: dict[str, Any] = Depends(require_ui_session)
+    ) -> HTMLResponse:
+        form = await request.form()
+        values = _string_form_values(form)
+        metadata = collect_metadata(
+            values,
+            fields=_artifact_set_metadata_fields(),
+            prefix="artifact_set_meta",
+            extra_json_field="artifact_set_additional_metadata_json",
+        )
+        _, artifact_set = service.create_artifact_set(
+            artifact_set_type=str(values.get("artifact_set_type") or "collection").strip().lower()
+            or "collection",
+            label=str(values.get("artifact_set_label") or "").strip() or None,
+            description=str(values.get("artifact_set_description") or "").strip() or None,
+            metadata=metadata,
+            idempotency_key=_new_idempotency_key("ui-set-create"),
+        )
+        artifact_set_euid = artifact_set["artifact_set_euid"]
+        for artifact_euid in [
+            str(item).strip() for item in form.getlist("artifact_euids") if str(item).strip()
+        ]:
+            _, artifact_set = service.add_artifact_set_member(
+                artifact_set_euid=artifact_set_euid,
+                artifact_euid=artifact_euid,
+                idempotency_key=_new_idempotency_key("ui-set-member"),
+            )
+        artifact_search_form, artifact_search_result = _rerun_artifact_search(
+            _parse_state_json(form.get("artifact_search_form_state")),
+            profile=profile,
+        )
+        artifact_set_search_form, artifact_set_search_result = _rerun_artifact_set_search(
+            _parse_state_json(form.get("artifact_set_search_form_state")),
+            profile=profile,
+        )
+        return _artifact_page_response(
+            request,
+            profile=profile,
+            artifact_search_form=artifact_search_form,
+            artifact_search_result=artifact_search_result,
+            artifact_set_search_form=artifact_set_search_form,
+            artifact_set_search_result=artifact_set_search_result,
+            artifact_set_create_result=artifact_set,
+            artifact_set_form=values,
+            active_section="artifact_sets",
+        )
+
+    @app.post("/artifacts/sets/search", include_in_schema=False)
+    async def artifacts_set_search(
+        request: Request, profile: dict[str, Any] = Depends(require_ui_session)
+    ) -> HTMLResponse:
+        form = await request.form()
+        values = _string_form_values(form)
+        result = service.query_search_v2(
+            _artifact_set_search_payload(values),
+            viewer_context=_viewer_context(profile),
+        )
+        return _artifact_page_response(
+            request,
+            profile=profile,
+            artifact_set_search_form=values,
+            artifact_set_search_result=result,
+            active_section="artifact_sets",
+        )
+
+    @app.post("/artifacts/sets/export", include_in_schema=False)
+    async def artifacts_set_export(
+        request: Request, profile: dict[str, Any] = Depends(require_ui_session)
+    ) -> Response:
+        form = await request.form()
+        values = _string_form_values(form)
+        payload = _artifact_set_search_payload(values)
+        export_format = str(values.get("format") or "tsv").strip().lower() or "tsv"
+        payload["format"] = export_format
+        payload["max_rows"] = int(values.get("max_rows") or 1000)
+        items, timing_ms, truncated = service.collect_search_export_rows(
+            payload,
+            viewer_context=_viewer_context(profile),
+        )
+        if export_format == "json":
+            return JSONResponse(
+                {"items": items, "row_count": len(items), "timing_ms": timing_ms, "truncated": truncated}
+            )
+        return Response(
+            content=_search_payload_to_tsv(items),
+            media_type="text/tab-separated-values",
+            headers={"Content-Disposition": 'attachment; filename="dewey_artifact_sets.tsv"'},
+        )
+
+    @app.post("/artifacts/sets/share", include_in_schema=False)
+    async def artifacts_set_share(
+        request: Request, profile: dict[str, Any] = Depends(require_ui_session)
+    ) -> HTMLResponse:
+        form = await request.form()
+        artifact_set_euid = str(form.get("selected_artifact_set_euid") or "").strip()
+        if not artifact_set_euid:
+            return _artifact_page_response(
+                request,
+                profile=profile,
+                artifact_set_share_result={"status": "error", "detail": "No artifact set selected"},
+                active_section="artifact_sets",
+            )
+        duration_days = max(1.0, float(form.get("share_duration_days") or 1))
+        expires_at = (
+            datetime.now(timezone.utc) + timedelta(days=duration_days)
+        ).isoformat().replace("+00:00", "Z")
+        transport = str(form.get("share_transport") or "presigned_s3").strip().lower()
+        _, payload = service.create_share_reference(
+            target_type="artifact_set",
+            target_euid=artifact_set_euid,
+            purpose="artifact-set-share",
+            scope="external",
+            expires_at=expires_at,
+            issued_by=str(profile.get("email") or "").strip() or None,
+            transport=transport,
+            transport_config={
+                "bucket": str(form.get("share_bucket") or "").strip() or None,
+                "host": str(form.get("share_host") or "").strip() or None,
+                "port": int(form.get("share_port") or 0) or None,
+                "user": str(form.get("share_user") or "").strip() or None,
+                "passwd": str(form.get("share_password") or "").strip() or None,
+            },
+            ttl_seconds=None,
+            idempotency_key=_new_idempotency_key("ui-set-share"),
+        )
+        artifact_set_search_form, artifact_set_search_result = _rerun_artifact_set_search(
+            _parse_state_json(form.get("artifact_set_search_form_state")),
+            profile=profile,
+        )
+        return _artifact_page_response(
+            request,
+            profile=profile,
+            artifact_set_search_form=artifact_set_search_form,
+            artifact_set_search_result=artifact_set_search_result,
+            artifact_set_share_result=payload,
+            active_section="artifact_sets",
+        )
+
     @app.post("/api/v1/literature/search")
     async def literature_search(
         body: LiteratureSearchRequest,
@@ -1170,6 +1979,7 @@ def create_app(
                 artifact_set_type=body.artifact_set_type,
                 label=body.label,
                 description=body.description,
+                metadata=body.metadata,
                 idempotency_key=_require_idempotency_key(idempotency_key),
             )
             return {"status_code": status_code, **payload}
@@ -1261,6 +2071,7 @@ def create_app(
                 expires_at=body.expires_at,
                 issued_by=body.issued_by,
                 transport=body.transport,
+                transport_config=body.transport_config,
                 ttl_seconds=body.ttl_seconds,
                 idempotency_key=_require_idempotency_key(idempotency_key),
             )

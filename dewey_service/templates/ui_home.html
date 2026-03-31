@@ -19,6 +19,7 @@
           <div class="subtitle">{{ profile.email }}</div>
         </div>
         <div class="navlinks">
+          <a class="navlink" href="/artifacts">Artifacts</a>
           <a class="navlink" href="/literature">Literature Search</a>
           <a class="navlink" href="/search">Unified Search</a>
           <a class="navlink" href="/ui/anomalies">Anomalies</a>
@@ -73,17 +74,19 @@
             <div>
               <h3>Supported Browser Interactions</h3>
               <div class="panel-copy">
-                Use this GUI for browse-and-save workflows. Artifact upload/register-S3 stays in the API/CLI surface.
+                Use this GUI for artifact intake, artifact search/download, literature workflows, and operational review.
               </div>
             </div>
           </div>
           <div class="stack">
+            <span class="pill pill-active">Artifact register/upload/import</span>
+            <span class="pill pill-active">Artifact search and download</span>
+            <span class="pill pill-active">Artifact set create and share</span>
             <span class="pill pill-active">Literature search and save</span>
             <span class="pill pill-active">Unified search and export</span>
             <span class="pill pill-active">Anomaly browsing</span>
             <span class="pill pill-active">Observability views</span>
             <span class="pill pill-active">Admin stub</span>
-            <span class="pill">Register/upload/import via API or CLI only</span>
           </div>
         </section>
 
@@ -96,6 +99,7 @@
               </div>
               <div class="form-actions" style="margin-top: 0;">
                 <a class="button" href="/literature">Open Literature</a>
+                <a class="button" href="/artifacts">Open Artifacts</a>
                 <a class="button" href="/search">Open Search</a>
                 <a class="button" href="/ui/anomalies">Open Anomalies</a>
                 <a class="button" href="/ui/observability">Open Observability</a>
@@ -182,20 +186,20 @@
               <div class="panel-header">
                 <div>
                   <h3>User Notes</h3>
-                  <div class="panel-copy">
-                    File parity is now centered on artifact registration, storage lifecycle,
-                    sharing, and search. File sets stay incidental.
+              <div class="panel-copy">
+                    Artifact browser work now lives in the dedicated Artifacts surface, while
+                    Unified Search stays available for normalized registry queries.
                   </div>
                 </div>
               </div>
               <div class="stack">
                 <span class="pill">External links remain first-class</span>
                 <span class="pill">Write operations stay idempotent</span>
-                <span class="pill">Search/export lives under Unified Search</span>
+                <span class="pill">Artifacts has browser intake and download</span>
               </div>
               <div class="note" style="margin-top: 0.85rem;">
-                Register/upload/import via API or CLI only. The current Dewey GUI supports literature,
-                search, observability, and anomaly review for artifact operations.
+                Use Artifacts for browser intake, download, and artifact-set workflows. Unified Search,
+                Literature, Observability, and Anomalies remain available as specialized surfaces.
               </div>
             </section>
           </section>
