@@ -70,3 +70,4 @@ skips = [
     "B404",  # CLI wrappers intentionally use subprocess for trusted local tools
     "B603",  # subprocess calls execute trusted local commands without shell=True
 ]
+ 
