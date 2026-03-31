@@ -14,6 +14,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from dewey_service.defaults import (
     DEFAULT_APP_PORT,
+    build_default_config_template,
     default_cognito_logout_url,
     default_cognito_redirect_uri,
 )
@@ -38,13 +39,29 @@ def _validate_optional_https_url(value: str, *, field_name: str) -> str:
     return normalized
 
 
+def _normalize_managed_storage_bucket(value: str, *, allow_empty: bool = True) -> str:
+    normalized = str(value or "").strip()
+    if normalized.startswith("s3://"):
+        normalized = normalized[5:]
+    normalized = normalized.strip().strip("/")
+    if not normalized:
+        if allow_empty:
+            return ""
+        raise ValueError("managed_storage_bucket is required")
+    if "/" in normalized:
+        raise ValueError("managed_storage_bucket must be a bucket name, not an s3://bucket/key path")
+    if any(char.isspace() for char in normalized):
+        raise ValueError("managed_storage_bucket must not contain whitespace")
+    return normalized
+
+
 def _default_config_path() -> Path:
     root = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
     return root / _config_dir_name() / _config_filename()
 
 
 def _sanitize_deployment_code(value: str) -> str:
-    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "-", str(value or "").strip()).strip("-")
+    cleaned = re.sub(r"[^A-Za-z0-9-]+", "-", str(value or "").strip()).strip("-")
     return cleaned or "local"
 
 
@@ -209,6 +226,17 @@ class Settings(BaseSettings):
             raise ValueError("api_bearer_token is required")
         return normalized
 
+    @field_validator("managed_storage_bucket")
+    @classmethod
+    def validate_managed_storage_bucket(cls, value: str) -> str:
+        return _normalize_managed_storage_bucket(value, allow_empty=True)
+
+    @field_validator("managed_storage_prefix")
+    @classmethod
+    def validate_managed_storage_prefix(cls, value: str) -> str:
+        normalized = str(value or "").strip().strip("/")
+        return normalized or "artifacts"
+
     @field_validator("cognito_group_role_map", mode="before")
     @classmethod
     def validate_cognito_group_role_map(cls, value: Any) -> dict[str, str]:
@@ -273,6 +301,43 @@ class Settings(BaseSettings):
 
 def get_config_file_path() -> Path:
     return _default_config_path()
+
+
+def _template_config_payload() -> dict[str, Any]:
+    raw = yaml.safe_load(build_default_config_template().decode("utf-8")) or {}
+    if not isinstance(raw, dict):
+        raise ValueError("Default Dewey config template must parse to a mapping")
+    return raw
+
+
+def _load_config_payload(config_path: Path | None = None) -> tuple[Path, dict[str, Any]]:
+    cfg_path = config_path or get_config_file_path()
+    if not cfg_path.exists():
+        return cfg_path, _template_config_payload()
+    raw = yaml.safe_load(cfg_path.read_text(encoding="utf-8")) or {}
+    if not isinstance(raw, dict):
+        raise ValueError("Config root YAML object must be a mapping")
+    return cfg_path, raw
+
+
+def persist_managed_storage_bucket(
+    bucket: str,
+    *,
+    config_path: Path | None = None,
+) -> tuple[Path, str]:
+    cfg_path, raw = _load_config_payload(config_path)
+    normalized = _normalize_managed_storage_bucket(bucket, allow_empty=False)
+    storage = raw.get("storage")
+    if not isinstance(storage, dict):
+        storage = {}
+    storage["managed_bucket"] = normalized
+    storage["managed_prefix"] = str(storage.get("managed_prefix") or "").strip().strip("/") or "artifacts"
+    storage["upload_session_ttl_seconds"] = int(storage.get("upload_session_ttl_seconds") or 900)
+    raw["storage"] = storage
+    cfg_path.parent.mkdir(parents=True, exist_ok=True)
+    cfg_path.write_text(yaml.safe_dump(raw, sort_keys=False), encoding="utf-8")
+    clear_settings_cache()
+    return cfg_path, normalized
 
 
 def load_settings(config_path: Path | None = None) -> Settings:

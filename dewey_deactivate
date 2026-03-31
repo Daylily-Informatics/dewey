@@ -13,9 +13,15 @@ unset DEWEY_PROJECT_ROOT
 unset DEWEY_ROOT
 unset DATABASE_URL
 
-if [[ "$CONDA_DEFAULT_ENV" == "DEWEY" ]]; then
+if [[ -n "${DEWEY_DEPLOYMENT_CODE:-}" ]] && [[ "${CONDA_DEFAULT_ENV:-}" == "DEWEY-${DEWEY_DEPLOYMENT_CODE}" ]]; then
+  conda deactivate 2>/dev/null
+elif [[ "${CONDA_DEFAULT_ENV:-}" == DEWEY-* ]]; then
   conda deactivate 2>/dev/null
 fi
+
+unset DEWEY_DEPLOYMENT_CODE
+unset DEPLOYMENT_CODE
+unset LSMC_DEPLOYMENT_CODE
 
 unset -f dewey 2>/dev/null || true
 unset -f dewey_deactivate 2>/dev/null || true

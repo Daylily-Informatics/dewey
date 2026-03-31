@@ -18,13 +18,19 @@ def default_cognito_logout_url() -> str:
     return f"https://localhost:{DEFAULT_AUTH_PORT}/login"
 
 
-def build_default_config_template() -> bytes:
+def build_default_config_template(
+    *,
+    managed_storage_bucket: str = "",
+    managed_storage_prefix: str = "artifacts",
+) -> bytes:
     deployment = _sanitize_deployment_code(
         os.environ.get("DEWEY_DEPLOYMENT_CODE")
         or os.environ.get("DEPLOYMENT_CODE")
         or os.environ.get("LSMC_DEPLOYMENT_CODE")
         or "local"
     )
+    bucket = str(managed_storage_bucket or "").strip()
+    prefix = str(managed_storage_prefix or "artifacts").strip().strip("/") or "artifacts"
     return f"""# Dewey Configuration
 # ===================
 # Create this file with:
@@ -67,6 +73,11 @@ aws:
   profile: lsmc
   region: us-west-2
 
+storage:
+  managed_bucket: "{bucket}"
+  managed_prefix: {prefix}
+  upload_session_ttl_seconds: 900
+
 deployment:
   name: dev
   color: "#0f766e"
@@ -75,5 +86,5 @@ deployment:
 
 
 def _sanitize_deployment_code(value: str) -> str:
-    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "-", str(value or "").strip()).strip("-")
+    cleaned = re.sub(r"[^A-Za-z0-9-]+", "-", str(value or "").strip()).strip("-")
     return cleaned or "local"

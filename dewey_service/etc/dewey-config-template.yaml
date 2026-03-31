@@ -40,6 +40,11 @@ aws:
   profile: lsmc
   region: us-west-2
 
+storage:
+  managed_bucket: ""
+  managed_prefix: artifacts
+  upload_session_ttl_seconds: 900
+
 deployment:
   name: dev
   color: "#0f766e"

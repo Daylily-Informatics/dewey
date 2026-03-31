@@ -73,6 +73,54 @@
         <section class="panel">
           <div class="panel-header">
             <div>
+              <h3>Managed Artifact Storage</h3>
+              <div class="panel-copy">Update the S3 bucket Dewey uses for managed uploads and copy-import targets.</div>
+            </div>
+          </div>
+          <section class="content-grid" style="grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.2fr);">
+            <div class="stack">
+              <div>
+                <div class="note">Config file</div>
+                <div class="mono">{{ config_path }}</div>
+              </div>
+              <div>
+                <div class="note">Current managed bucket</div>
+                <div class="mono">{{ managed_storage_bucket or "Not configured" }}</div>
+              </div>
+              <div>
+                <div class="note">Managed prefix</div>
+                <div class="mono">{{ managed_storage_prefix }}</div>
+              </div>
+            </div>
+            <form method="post" action="/admin/artifact-storage">
+              <div class="form-grid">
+                <div class="field field-wide">
+                  <label for="managed_storage_bucket">Managed Artifact S3 Bucket</label>
+                  <input
+                    id="managed_storage_bucket"
+                    name="managed_storage_bucket"
+                    type="text"
+                    value="{{ artifact_bucket_form.get('managed_storage_bucket', managed_storage_bucket or '') }}"
+                    placeholder="dewey-artifacts-prod"
+                  />
+                </div>
+              </div>
+              <div class="form-actions">
+                <button type="submit">Save Bucket</button>
+                <span class="note">Use a bucket name only, not an `s3://bucket/prefix` path.</span>
+              </div>
+              {% if artifact_bucket_status %}
+              <div class="{% if artifact_bucket_status.state == 'ok' %}status-ok{% else %}status-error{% endif %}">
+                {{ artifact_bucket_status.detail }}
+              </div>
+              {% endif %}
+            </form>
+          </section>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
               <h3>Recent Anomalies</h3>
               <div class="panel-copy">Sorted by severity and title for quick review.</div>
             </div>

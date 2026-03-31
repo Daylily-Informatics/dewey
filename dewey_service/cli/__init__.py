@@ -150,7 +150,7 @@ spec = CliSpec(
     env=EnvSpec(
         active_env_var="DEWEY_ACTIVE",
         project_root_env_var="DEWEY_PROJECT_ROOT",
-        activate_script_name=str(ACTIVATE_SCRIPT),
+        activate_script_name=f"{ACTIVATE_SCRIPT} <deploy-name>",
         deactivate_script_name=str(DEACTIVATE_SCRIPT),
     ),
     plugins=PluginSpec(

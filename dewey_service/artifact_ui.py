@@ -5,9 +5,14 @@ from __future__ import annotations
 import csv
 import io
 import json
+from pathlib import Path
 from typing import Any, Mapping
+from urllib.parse import unquote, urlparse
+
+NA_ARTIFACT_TYPE = "n/a"
 
 ARTIFACT_TYPES = [
+    NA_ARTIFACT_TYPE,
     "bam",
     "csv",
     "fastq",
@@ -60,6 +65,24 @@ BULK_TEMPLATE_BASE_COLUMNS = [
     "artifact_set_description",
 ]
 
+_ARTIFACT_TYPE_SUFFIXES: tuple[tuple[str, str], ...] = (
+    (".fastq.gz", "fastq"),
+    (".fq.gz", "fastq"),
+    (".vcf.gz", "vcf"),
+    (".fastq", "fastq"),
+    (".fq", "fastq"),
+    (".bam", "bam"),
+    (".csv", "csv"),
+    (".json", "json"),
+    (".pdf", "pdf"),
+    (".tsv", "tsv"),
+    (".vcf", "vcf"),
+    (".html", "report"),
+    (".htm", "report"),
+    (".md", "report"),
+    (".txt", "report"),
+)
+
 
 def metadata_fields(kind: str) -> list[dict[str, str]]:
     if kind == "artifact":
@@ -67,6 +90,30 @@ def metadata_fields(kind: str) -> list[dict[str, str]]:
     if kind == "artifact_set":
         return [dict(item) for item in ARTIFACT_SET_METADATA_FIELDS]
     raise ValueError(f"Unsupported metadata field kind: {kind}")
+
+
+def infer_artifact_type(source: str | None) -> str:
+    raw = str(source or "").strip()
+    if not raw:
+        return NA_ARTIFACT_TYPE
+    parsed = urlparse(raw)
+    candidate = parsed.path if parsed.scheme else raw
+    normalized = Path(unquote(candidate)).name.lower()
+    for suffix, artifact_type in _ARTIFACT_TYPE_SUFFIXES:
+        if normalized.endswith(suffix):
+            return artifact_type
+    return NA_ARTIFACT_TYPE
+
+
+def resolve_artifact_type(requested: str | None, *sources: str | None) -> str:
+    normalized = str(requested or "").strip().lower()
+    if normalized and normalized != NA_ARTIFACT_TYPE:
+        return normalized
+    for source in sources:
+        inferred = infer_artifact_type(source)
+        if inferred != NA_ARTIFACT_TYPE:
+            return inferred
+    return NA_ARTIFACT_TYPE
 
 
 def parse_json_object(raw: str | None, *, label: str) -> dict[str, Any]:

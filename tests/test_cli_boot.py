@@ -114,12 +114,28 @@ def test_config_init_show_validate_and_status(monkeypatch, tmp_path: Path, capsy
     assert init_exit == 0
     assert "Config file created" in init_output
     assert config_path.exists()
+    assert "storage:" in config_path.read_text(encoding="utf-8")
 
     show_exit = _invoke(["config", "show"])
     show_output = capsys.readouterr().out
     assert show_exit == 0
     assert "application:" in show_output
     assert "database:" in show_output
+    assert "storage:" in show_output
+
+
+def test_config_set_artifact_bucket(monkeypatch, tmp_path: Path, capsys) -> None:
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
+    monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "local")
+
+    exit_code = _invoke(["config", "set-artifact-bucket", "dewey-artifacts-test"])
+    captured = capsys.readouterr().out
+    config_path = tmp_path / "dewey-local" / "dewey-config-local.yaml"
+
+    assert exit_code == 0
+    assert "Updated artifact bucket" in captured
+    assert config_path.exists()
+    assert "managed_bucket: dewey-artifacts-test" in config_path.read_text(encoding="utf-8")
 
 
 def test_cli_requires_hyphenated_conda_env(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -183,7 +199,7 @@ def test_env_commands_render(monkeypatch, capsys) -> None:
     activate_exit = _invoke(["env", "activate"])
     activate_output = capsys.readouterr().out
     assert activate_exit == 0
-    assert f"source {cli_module.ACTIVATE_SCRIPT}" in activate_output
+    assert f"source {cli_module.ACTIVATE_SCRIPT} <deploy-name>" in activate_output
 
     deactivate_exit = _invoke(["env", "deactivate"])
     deactivate_output = capsys.readouterr().out
@@ -194,4 +210,4 @@ def test_env_commands_render(monkeypatch, capsys) -> None:
     reset_output = capsys.readouterr().out
     assert reset_exit == 0
     assert f"source {cli_module.DEACTIVATE_SCRIPT}" in reset_output
-    assert f"source {cli_module.ACTIVATE_SCRIPT}" in reset_output
+    assert f"source {cli_module.ACTIVATE_SCRIPT} <deploy-name>" in reset_output

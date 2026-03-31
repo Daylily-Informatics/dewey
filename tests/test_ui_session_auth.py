@@ -27,13 +27,13 @@ def _login_user(monkeypatch, client, groups: list[str] | None = None) -> None:
         follow_redirects=False,
     )
     assert callback.status_code == 303
-    assert callback.headers["location"] == "/artifacts"
+    assert callback.headers["location"] == "/ui"
 
 
-def test_root_redirects_to_artifacts(client) -> None:
+def test_root_redirects_to_ui(client) -> None:
     response = client.get("/", follow_redirects=False)
     assert response.status_code == 307
-    assert response.headers["location"] == "/artifacts"
+    assert response.headers["location"] == "/ui"
 
 
 def test_ui_requires_session_login(client) -> None:
@@ -47,7 +47,63 @@ def test_cognito_callback_sets_session(monkeypatch, client) -> None:
     ui = client.get("/ui")
     assert ui.status_code == 200
     assert "Dewey Console" in ui.text
+    assert "Quick Register" in ui.text
     assert "/admin" not in ui.text
+
+
+def test_dashboard_quick_register_infers_artifact_type_for_local_file(
+    monkeypatch, client, fake_service
+) -> None:
+    _login_user(monkeypatch, client)
+
+    response = client.post(
+        "/ui/register",
+        data={"artifact_type": "n/a"},
+        files=[("file_data", ("sample.vcf.gz", b"##fileformat=VCF", "application/gzip"))],
+    )
+
+    assert response.status_code == 200
+    assert "Registered sample.vcf.gz as vcf." in response.text
+    artifact = next(iter(fake_service.artifacts.values()))
+    assert artifact["artifact_type"] == "vcf"
+
+
+def test_dashboard_quick_register_imports_public_url(monkeypatch, client, fake_service) -> None:
+    _login_user(monkeypatch, client)
+
+    response = client.post(
+        "/ui/register",
+        data={
+            "artifact_type": "n/a",
+            "source_url": "https://example.com/results/report.pdf",
+        },
+    )
+
+    assert response.status_code == 200
+    assert "Imported https://example.com/results/report.pdf as pdf." in response.text
+    artifact = next(iter(fake_service.artifacts.values()))
+    assert artifact["artifact_type"] == "pdf"
+    assert artifact["import_mode"] == "copy"
+    assert artifact["source_uri"] == "https://example.com/results/report.pdf"
+
+
+def test_dashboard_quick_register_references_s3_uri(monkeypatch, client, fake_service) -> None:
+    _login_user(monkeypatch, client)
+
+    response = client.post(
+        "/ui/register",
+        data={
+            "artifact_type": "n/a",
+            "source_s3_uri": "s3://demo-bucket/path/sample.bam",
+        },
+    )
+
+    assert response.status_code == 200
+    assert "Registered s3://demo-bucket/path/sample.bam as bam." in response.text
+    artifact = next(iter(fake_service.artifacts.values()))
+    assert artifact["artifact_type"] == "bam"
+    assert artifact["import_mode"] == "reference"
+    assert artifact["storage_uri"] == "s3://demo-bucket/path/sample.bam"
 
 
 def test_admin_session_exposes_admin_tab_and_page(monkeypatch, client) -> None:
