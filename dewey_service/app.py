@@ -684,6 +684,36 @@ def create_app(
             _template_context(**context),
         )
 
+    def _artifact_detail_response(
+        request: Request,
+        *,
+        profile: dict[str, Any],
+        artifact: dict[str, Any],
+        detail_message: dict[str, Any] | None = None,
+        status_code: int = 200,
+    ) -> HTMLResponse:
+        return templates.TemplateResponse(
+            request,
+            "artifact_detail.html",
+            _template_context(
+                profile=profile,
+                artifact=artifact,
+                artifact_share_references=service.list_share_references(
+                    target_type="artifact",
+                    target_euid=artifact["artifact_euid"],
+                    limit=20,
+                ),
+                artifact_external_relations=service.list_external_object_relations(
+                    target_type="artifact",
+                    target_euid=artifact["artifact_euid"],
+                    limit=20,
+                ),
+                detail_message=detail_message,
+                is_admin=_is_admin(profile),
+            ),
+            status_code=status_code,
+        )
+
     def _string_form_values(form) -> dict[str, Any]:
         values: dict[str, Any] = {}
         for key in form.keys():
@@ -1285,6 +1315,15 @@ def create_app(
             active_section=_normalize_artifact_section(section),
         )
 
+    @app.get("/artifacts/euid/{artifact_euid}", include_in_schema=False)
+    async def artifact_detail_page(
+        request: Request,
+        artifact_euid: str,
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> HTMLResponse:
+        artifact = service.get_artifact(artifact_euid)
+        return _artifact_detail_response(request, profile=profile, artifact=artifact)
+
     @app.get("/artifacts/bulk-template.tsv", include_in_schema=False)
     async def artifacts_bulk_template(
         profile: dict[str, Any] = Depends(require_ui_session),
@@ -1691,6 +1730,50 @@ def create_app(
             media_type="application/zip",
             headers={"Content-Disposition": f'attachment; filename="{archive_name}"'},
         )
+
+    @app.post("/artifacts/euid/{artifact_euid}/download", include_in_schema=False)
+    async def artifact_download_redirect(
+        request: Request,
+        artifact_euid: str,
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> Response:
+        artifact = service.get_artifact(artifact_euid)
+        form = await request.form()
+        ttl_hours = max(1, int(form.get("share_ttl_hours") or 24))
+        try:
+            _, payload = service.create_share_reference(
+                target_type="artifact",
+                target_euid=artifact_euid,
+                purpose="download",
+                scope="external",
+                expires_at=None,
+                issued_by=str(profile.get("email") or "").strip() or None,
+                transport="presigned_s3",
+                transport_config={},
+                ttl_seconds=ttl_hours * 3600,
+                idempotency_key=_new_idempotency_key("ui-artifact-direct-download"),
+            )
+        except Exception as exc:
+            return _artifact_detail_response(
+                request,
+                profile=profile,
+                artifact=artifact,
+                detail_message={"state": "error", "detail": str(exc)},
+                status_code=400,
+            )
+        access_url = str(payload.get("access_url") or "").strip()
+        if not access_url:
+            return _artifact_detail_response(
+                request,
+                profile=profile,
+                artifact=artifact,
+                detail_message={
+                    "state": "error",
+                    "detail": "Could not generate a presigned download URL for this artifact.",
+                },
+                status_code=400,
+            )
+        return RedirectResponse(url=access_url, status_code=status.HTTP_303_SEE_OTHER)
 
     @app.post("/artifacts/share", include_in_schema=False)
     async def artifacts_share(

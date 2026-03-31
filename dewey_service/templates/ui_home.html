@@ -1,4 +1,5 @@
 <!doctype html>
+{% import "_artifact_links.html" as artifact_links %}
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -115,7 +116,7 @@
             <div class="{% if quick_register_result.state == 'ok' %}status-ok{% else %}status-error{% endif %}">
               {{ quick_register_result.detail }}
               {% if quick_register_result.artifact_euid %}
-              <span class="mono">{{ quick_register_result.artifact_euid }}</span>
+              {{ artifact_links.artifact_euid_link(quick_register_result.artifact_euid) }}
               {% endif %}
             </div>
             {% endif %}
@@ -152,12 +153,12 @@
                   {% for item in artifacts %}
                   <tr>
                     <td>
-                      <div class="mono">{{ item.artifact_euid }}</div>
+                      <div>{{ artifact_links.artifact_euid_link(item.artifact_euid) }}</div>
                       <div>{{ item.original_filename or item.key }}</div>
                     </td>
                     <td>{{ item.artifact_type }}</td>
                     <td>{{ item.import_mode or "register" }}</td>
-                    <td class="mono">{{ item.storage_uri }}</td>
+                    <td>{{ artifact_links.artifact_storage_action(item.artifact_euid, item.storage_uri) }}</td>
                     <td>
                       {% if item.storage_status == "verified" %}
                       <span class="pill pill-active">Verified</span>

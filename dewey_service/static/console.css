@@ -310,6 +310,33 @@ td {
   font-size: 0.84rem;
 }
 
+.mono-link {
+  color: var(--ice);
+  text-decoration: none;
+}
+
+.mono-link:hover {
+  text-decoration: underline;
+}
+
+.inline-download-form {
+  display: inline;
+  margin: 0;
+}
+
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ice);
+  cursor: pointer;
+  text-align: left;
+}
+
+.link-button:hover {
+  text-decoration: underline;
+}
+
 .status-ok {
   color: var(--teal);
 }
@@ -326,6 +353,40 @@ td {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+}
+
+.kv-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.kv-table th,
+.kv-table td {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(30, 41, 59, 0.9);
+  vertical-align: top;
+}
+
+.kv-table th {
+  width: 11rem;
+  text-align: left;
+  color: var(--mist);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+}
+
+.json-block {
+  margin: 0;
+  padding: 0.85rem 0.95rem;
+  border-radius: 12px;
+  background: rgba(11, 17, 32, 0.78);
+  color: var(--ice);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .form-grid {
