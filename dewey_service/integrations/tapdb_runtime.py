@@ -139,6 +139,16 @@ def _resolve_runtime_env(
     }
 
 
+def _require_config_path(runtime_env: Mapping[str, str]) -> str:
+    config_path = str(runtime_env.get("config_path") or "").strip()
+    if not config_path:
+        raise TapDBRuntimeError(
+            "TapDB config path is required. Resolve it via Dewey settings and pass it explicitly "
+            "to TapDB with --config."
+        )
+    return config_path
+
+
 def _get_tapdb_db_config_for_env(
     tapdb_env: str,
     *,
@@ -191,14 +201,14 @@ def export_database_url_for_target(
         tapdb_env=tapdb_env,
         config_path=config_path,
     )
+    resolved_config_path = _require_config_path(runtime_env)
     cfg = _get_tapdb_db_config_for_env(
         runtime_env["tapdb_env"],
-        config_path=runtime_env["config_path"],
+        config_path=resolved_config_path,
         client_id=runtime_env["client_id"],
         database_name=runtime_env["database_name"],
     )
     db_url = _build_sqlalchemy_url(cfg)
-    os.environ["DATABASE_URL"] = db_url
     return db_url
 
 
@@ -229,12 +239,9 @@ def run_tapdb_cli(
         sys.executable,
         "-m",
         "daylily_tapdb.cli",
-        "--client-id", runtime_env["client_id"],
-        "--database-name", runtime_env["database_name"],
+        "--config", _require_config_path(runtime_env),
         "--env", runtime_env["tapdb_env"],
     ]
-    if runtime_env["config_path"]:
-        cmd.extend(["--config", runtime_env["config_path"]])
     cmd.extend(args)
     child_env = os.environ.copy()
     child_env["AWS_PROFILE"] = runtime_env["aws_profile"]

@@ -139,7 +139,6 @@ _dewey_install_main_repo() {
 _dewey_prepare_tapdb_config_path() {
   local client_id="$1"
   local namespace="$2"
-  local explicit_path="${DEWEY_TAPDB_CONFIG_PATH:-}"
   local xdg_config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
   local deployment_code="${DEWEY_DEPLOYMENT_CODE:-${DEPLOYMENT_CODE:-${LSMC_DEPLOYMENT_CODE:-local}}}"
   local scoped_namespace=""
@@ -148,11 +147,6 @@ _dewey_prepare_tapdb_config_path() {
   local user_dir="${xdg_config_home}/tapdb/${client_id}/${scoped_namespace}"
   local user_path="${user_dir}/tapdb-config.yaml"
   local repo_template="$DEWEY_ROOT/config/tapdb-config-${namespace}.yaml"
-
-  if [[ -n "$explicit_path" ]]; then
-    printf '%s\n' "$explicit_path"
-    return 0
-  fi
 
   if [[ -f "$user_path" ]]; then
     chmod 600 "$user_path" 2>/dev/null || true
@@ -360,14 +354,14 @@ export AWS_PROFILE="${AWS_PROFILE:-lsmc}"
 export AWS_REGION="${AWS_REGION:-us-west-2}"
 export DATABASE_BACKEND="${DATABASE_BACKEND:-tapdb}"
 export DATABASE_TARGET="${DATABASE_TARGET:-local}"
-_DEWEY_TAPDB_CLIENT_ID="${DEWEY_TAPDB_CLIENT_ID:-dewey}"
-_DEWEY_TAPDB_DATABASE_NAME="${DEWEY_TAPDB_DATABASE_NAME:-dewey}"
-_DEWEY_TAPDB_ENV="${DEWEY_TAPDB_ENV:-dev}"
+_DEWEY_TAPDB_CLIENT_ID="dewey"
+_DEWEY_TAPDB_DATABASE_NAME="dewey"
+_DEWEY_TAPDB_ENV="dev"
 _DEWEY_USER_TAPDB_CONFIG_PATH="$(_dewey_prepare_tapdb_config_path "$_DEWEY_TAPDB_CLIENT_ID" "$_DEWEY_TAPDB_DATABASE_NAME")" || {
   _dewey_fail "Failed to prepare secure TapDB config path."
   return 1
 }
-export DEWEY_TAPDB_CONFIG_PATH="${DEWEY_TAPDB_CONFIG_PATH:-${_DEWEY_USER_TAPDB_CONFIG_PATH}}"
+_DEWEY_RUNTIME_TAPDB_CONFIG_PATH="${_DEWEY_USER_TAPDB_CONFIG_PATH}"
 
 if [[ -z "${DEWEY_API_BEARER_TOKEN:-}" ]]; then
   export DEWEY_API_BEARER_TOKEN="dewey-dev-token"
@@ -375,8 +369,8 @@ fi
 
 export PATH="$DEWEY_ROOT:$PATH"
 
-if [[ ! -f "$DEWEY_TAPDB_CONFIG_PATH" ]]; then
-  echo -e "  ${_YELLOW}⚠${_NC} TapDB scoped config not found at ${DEWEY_TAPDB_CONFIG_PATH}"
+if [[ ! -f "$_DEWEY_RUNTIME_TAPDB_CONFIG_PATH" ]]; then
+  echo -e "  ${_YELLOW}⚠${_NC} TapDB scoped config not found at ${_DEWEY_RUNTIME_TAPDB_CONFIG_PATH}"
 fi
 
 if [[ -f "$DEWEY_ROOT/dewey_deactivate" ]]; then
@@ -390,7 +384,7 @@ echo -e "  ${_GREEN}✓${_NC} AWS_REGION=${AWS_REGION}"
 echo -e "  ${_GREEN}✓${_NC} Dewey TapDB client=${_DEWEY_TAPDB_CLIENT_ID}"
 echo -e "  ${_GREEN}✓${_NC} Dewey TapDB namespace=${_DEWEY_TAPDB_DATABASE_NAME}"
 echo -e "  ${_GREEN}✓${_NC} Dewey TapDB env=${_DEWEY_TAPDB_ENV}"
-echo -e "  ${_GREEN}✓${_NC} Dewey TapDB config path=${DEWEY_TAPDB_CONFIG_PATH}"
+echo -e "  ${_GREEN}✓${_NC} Dewey TapDB config path=${_DEWEY_RUNTIME_TAPDB_CONFIG_PATH}"
 echo -e "  ${_GREEN}✓${_NC} DEWEY_ACTIVE=${DEWEY_ACTIVE}"
 echo -e "  ${_GREEN}✓${_NC} DEWEY_PROJECT_ROOT=${DEWEY_PROJECT_ROOT}"
 echo ""
