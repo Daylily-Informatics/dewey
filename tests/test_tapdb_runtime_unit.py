@@ -45,7 +45,6 @@ def test_resolve_tapdb_config_path_prefers_explicit_argument() -> None:
 
 
 def test_resolve_runtime_env_sets_expected_values(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("TAPDB_CONFIG_PATH", raising=False)
     monkeypatch.setenv("DEPLOYMENT_CODE", "local2")
     home = Path("/tmp/dewey-home")
     user_config = home / ".config" / "tapdb" / "dewey" / "dewey-local2" / "tapdb-config.yaml"
@@ -68,7 +67,9 @@ def test_resolve_runtime_env_sets_expected_values(monkeypatch: pytest.MonkeyPatc
     assert env["config_path"].endswith(".config/tapdb/dewey/dewey-local2/tapdb-config.yaml")
 
 
-def test_export_database_url_for_target_sets_environment(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_export_database_url_for_target_returns_url_without_mutating_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda: "3.0.9")
     monkeypatch.setattr(
         tapdb_runtime,
@@ -82,10 +83,16 @@ def test_export_database_url_for_target_sets_environment(monkeypatch: pytest.Mon
         },
     )
 
+    monkeypatch.setattr(
+        tapdb_runtime,
+        "_resolve_tapdb_config_path",
+        lambda **_kwargs: "/tmp/dewey-tapdb.yaml",
+    )
+
     url = tapdb_runtime.export_database_url_for_target(target="local")
 
     assert url == "postgresql+psycopg2://dewey:secret@localhost:5439/dewey_dev"
-    assert tapdb_runtime.os.environ["DATABASE_URL"] == url
+    assert "DATABASE_URL" not in tapdb_runtime.os.environ
 
 
 def test_run_tapdb_cli_builds_command_and_raises_on_failure(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -99,17 +106,20 @@ def test_run_tapdb_cli_builds_command_and_raises_on_failure(monkeypatch: pytest.
     monkeypatch.setattr(tapdb_runtime.subprocess, "run", fake_run)
 
     with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="tapdb command failed"):
-        tapdb_runtime.run_tapdb_cli(["bootstrap", "local"], target="local", check=True)
+        tapdb_runtime.run_tapdb_cli(
+            ["bootstrap", "local"],
+            target="local",
+            config_path="/tmp/dewey-tapdb.yaml",
+            check=True,
+        )
 
     assert calls
-    assert calls[0][0][:8] == [
+    assert calls[0][0][:6] == [
         tapdb_runtime.sys.executable,
         "-m",
         "daylily_tapdb.cli",
-        "--client-id",
-        "dewey",
-        "--database-name",
-        "dewey",
+        "--config",
+        "/tmp/dewey-tapdb.yaml",
         "--env",
     ]
 
@@ -122,7 +132,12 @@ def test_run_tapdb_cli_returns_process_when_check_disabled(monkeypatch: pytest.M
         lambda *args, **kwargs: SimpleNamespace(returncode=0, stdout="ok", stderr=""),
     )
 
-    result = tapdb_runtime.run_tapdb_cli(["db", "status"], target="local", check=False)
+    result = tapdb_runtime.run_tapdb_cli(
+        ["db", "status"],
+        target="local",
+        config_path="/tmp/dewey-tapdb.yaml",
+        check=False,
+    )
     assert result.returncode == 0
 
 
