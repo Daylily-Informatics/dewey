@@ -339,6 +339,36 @@ def create_app(
         context.update(kwargs)
         return context
 
+    def _auth_template_context(
+        *,
+        cognito_login_url: str = "/auth/login",
+        badge: str = "Authentication Required",
+        eyebrow: str = "Dewey",
+        title: str = "Dewey Access Login",
+        description: str = "Canonical artifact intake, lifecycle, sharing, and search for Dewey users and admins.",
+        card_title: str = "Sign In",
+        card_copy: str = "Continue through Cognito Hosted UI to access the Dewey console.",
+        primary_href: str = "/auth/login",
+        primary_label: str = "Sign In with Cognito",
+        error_message: str = "",
+        status_code: int = 200,
+    ) -> tuple[dict[str, Any], int]:
+        context = _template_context(
+            cognito_login_url=cognito_login_url,
+            title=title,
+            auth_badge=badge,
+            auth_eyebrow=eyebrow,
+            auth_title=title,
+            auth_description=description,
+            auth_card_title=card_title,
+            auth_card_copy=card_copy,
+            auth_primary_href=primary_href,
+            auth_primary_label=primary_label,
+            auth_error=error_message,
+            auth_status_code=status_code,
+        )
+        return context, status_code
+
     def _viewer_context(profile: dict[str, Any]) -> ViewerContext:
         return ViewerContext.from_operator_profile(profile)
 
@@ -857,25 +887,49 @@ def create_app(
         return RedirectResponse(url="/ui", status_code=status.HTTP_303_SEE_OTHER)
 
     @app.get("/login", include_in_schema=False)
-    async def login_page(request: Request) -> HTMLResponse:
-        return templates.TemplateResponse(
-            request,
-            "login.html",
-            _template_context(
-                cognito_login_url="/auth/login",
-                title="Dewey Access Login",
-            ),
-        )
+    async def login_page(request: Request, error: str = "") -> HTMLResponse:
+        context, status_code = _auth_template_context(error_message=str(error or "").strip())
+        return templates.TemplateResponse(request, "login.html", context, status_code=status_code)
 
-    @app.post("/logout", include_in_schema=False)
-    async def logout(request: Request) -> RedirectResponse:
+    @app.get("/auth/error", include_in_schema=False)
+    async def auth_error(request: Request, reason: str = "auth_error") -> HTMLResponse:
+        reasons = {
+            "auth_error": "An authentication error prevented sign-in from completing.",
+            "session_expired": "Your session ended before the requested page loaded.",
+            "not_authorized": "This account is not provisioned for Dewey access.",
+        }
+        message = reasons.get(reason, reasons["auth_error"])
+        context, status_code = _auth_template_context(
+            badge="Access Review",
+            title="This account could not complete sign-in.",
+            description="Dewey access is provisioned per user role and deployment policy.",
+            card_title="Sign-in was blocked",
+            card_copy=message,
+            primary_href="/auth/login",
+            primary_label="Return to Sign In",
+            error_message=message,
+            status_code=403,
+        )
+        return templates.TemplateResponse(request, "login.html", context, status_code=status_code)
+
+    async def _logout_response(request: Request) -> RedirectResponse:
         request.session.clear()
-        # Generate a fresh OAuth state so the callback can validate CSRF
-        # after the user re-authenticates through Cognito managed login.
         state = generate_state()
         request.session["oauth_state"] = state
         logout_url = build_cognito_logout_url(settings=settings, state=state)
         return RedirectResponse(url=logout_url, status_code=status.HTTP_303_SEE_OTHER)
+
+    @app.get("/auth/logout", include_in_schema=False)
+    async def auth_logout_get(request: Request) -> RedirectResponse:
+        return await _logout_response(request)
+
+    @app.post("/auth/logout", include_in_schema=False)
+    async def auth_logout_post(request: Request) -> RedirectResponse:
+        return await _logout_response(request)
+
+    @app.post("/logout", include_in_schema=False)
+    async def logout(request: Request) -> RedirectResponse:
+        return await _logout_response(request)
 
     @app.get("/healthz")
     async def healthz() -> dict[str, str]:

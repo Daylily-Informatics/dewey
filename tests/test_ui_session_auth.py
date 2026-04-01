@@ -138,7 +138,7 @@ def test_admin_session_exposes_admin_tab_and_page(monkeypatch, client) -> None:
 def test_logout_clears_session_and_redirects_to_cognito(monkeypatch, client, test_settings) -> None:
     _login_user(monkeypatch, client)
 
-    logout = client.post("/logout", follow_redirects=False)
+    logout = client.post("/auth/logout", follow_redirects=False)
     assert logout.status_code == 303
 
     parsed = urlparse(logout.headers["location"])
@@ -201,7 +201,7 @@ def test_logout_from_one_browser_does_not_clear_the_other(monkeypatch, client) -
             name="Shared Operator",
         )
 
-        logout = client.post("/logout", follow_redirects=False)
+        logout = client.post("/auth/logout", follow_redirects=False)
         assert logout.status_code == 303
 
         assert client.get("/ui").status_code == 401

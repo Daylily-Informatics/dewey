@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ title }}</title>
+    <title>{{ auth_card_title|default(title) }}</title>
     <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/static/console.css" />
   </head>
@@ -12,17 +12,29 @@
     <div class="deployment-banner" style="background: {{ deployment.color }};">{{ deployment.name|upper }}</div>
     {% endif %}
     <main class="shell">
-      <div class="page" style="max-width: 720px; padding-top: 10vh;">
-        <section class="panel" style="padding: 2rem;">
-          <div class="eyebrow">Dewey Console</div>
-          <h1 class="title" style="font-size: 2.3rem; margin-top: 0.45rem;">Dewey Access Login</h1>
-          <p class="panel-copy" style="font-size: 1rem; max-width: 52ch;">
-            Canonical artifact intake, lifecycle, sharing, and search for Dewey users and admins.
-            Authentication is handled through Cognito Hosted UI.
-          </p>
-          <div class="form-actions" style="margin-top: 1.5rem;">
-            <a class="button button-primary" href="{{ cognito_login_url }}">Sign In with Cognito</a>
-            <span class="pill">Control Room UI</span>
+      <div class="page" style="max-width: 1040px; min-height: calc(100vh - 18px); display: flex; align-items: center;">
+        <section class="panel" style="width: 100%; padding: 2.5rem; display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+          <div>
+            <div class="eyebrow">{{ auth_badge|default("Authentication Required") }}</div>
+            <p class="eyebrow" style="margin-top: 1rem;">{{ auth_eyebrow|default("Dewey") }}</p>
+            <h1 class="title" style="font-size: 2.6rem; margin-top: 0.45rem;">{{ auth_title|default(title) }}</h1>
+            <p class="panel-copy" style="font-size: 1rem; max-width: 52ch;">
+              {{ auth_description|default("Canonical artifact intake, lifecycle, sharing, and search for Dewey users and admins.") }}
+            </p>
+          </div>
+          <div class="panel" style="padding: 2rem; border: 1px solid rgba(148, 163, 184, 0.25); background: rgba(15, 23, 42, 0.7);">
+            <div class="eyebrow">{{ "Status " ~ auth_status_code if auth_error else "Access" }}</div>
+            <h2 class="title" style="font-size: 1.8rem; margin-top: 0.35rem;">{{ auth_card_title|default("Sign In") }}</h2>
+            <p class="panel-copy">{{ auth_card_copy|default("Continue through Cognito Hosted UI to access the Dewey console.") }}</p>
+            {% if auth_error %}
+            <div class="panel" style="margin-top: 1rem; border-color: rgba(248, 113, 113, 0.4); background: rgba(127, 29, 29, 0.18);">
+              <p class="panel-copy" style="margin: 0;">{{ auth_error }}</p>
+            </div>
+            {% endif %}
+            <div class="form-actions" style="margin-top: 1.5rem;">
+              <a class="button button-primary" href="{{ auth_primary_href|default(cognito_login_url) }}">{{ auth_primary_label|default("Sign In with Cognito") }}</a>
+              <span class="pill">Control Room UI</span>
+            </div>
           </div>
         </section>
       </div>
