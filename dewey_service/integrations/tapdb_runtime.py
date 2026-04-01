@@ -15,7 +15,6 @@ from urllib.parse import quote
 
 from dewey_service.defaults import DEFAULT_DB_PORT
 
-TAPDB_REQUIRED_VERSION = "3.0.9"
 DEFAULT_AWS_PROFILE = "lsmc"
 DEFAULT_AWS_REGION = "us-west-2"
 DEFAULT_TAPDB_CLIENT_ID = "dewey"
@@ -58,23 +57,11 @@ def _parse_semver_tuple(version: str) -> tuple[int, int, int] | None:
     return (int(match.group(1)), int(match.group(2)), int(match.group(3)))
 
 
-def ensure_tapdb_version(required_version: str = TAPDB_REQUIRED_VERSION) -> str:
+def ensure_tapdb_version() -> str:
     try:
-        installed_version = importlib.metadata.version("daylily-tapdb")
+        return importlib.metadata.version("daylily-tapdb")
     except importlib.metadata.PackageNotFoundError as exc:
-        raise TapDBRuntimeError(
-            f"daylily-tapdb=={required_version} is required but not installed"
-        ) from exc
-
-    if installed_version != required_version:
-        required_tuple = _parse_semver_tuple(required_version)
-        installed_tuple = _parse_semver_tuple(installed_version)
-        if required_tuple is None or installed_tuple is None or installed_tuple < required_tuple:
-            raise TapDBRuntimeError(
-                "daylily-tapdb version mismatch. "
-                f"Required baseline: {required_version}, installed: {installed_version}."
-            )
-    return installed_version
+        raise TapDBRuntimeError("daylily-tapdb is required but not installed") from exc
 
 
 def tapdb_env_for_target(target: str) -> str:
@@ -84,11 +71,10 @@ def tapdb_env_for_target(target: str) -> str:
     return _TARGET_TO_TAPDB_ENV[normalized]
 
 
-def _resolve_tapdb_config_path(*, namespace: str, client_id: str) -> str | None:
-    explicit = (os.environ.get("TAPDB_CONFIG_PATH") or "").strip()
+def _resolve_tapdb_config_path(*, namespace: str, client_id: str, config_path: str = "") -> str | None:
+    explicit = str(config_path or "").strip()
     if explicit:
         return explicit
-
     normalized_namespace = (
         namespace or DEFAULT_TAPDB_DATABASE_NAME
     ).strip() or DEFAULT_TAPDB_DATABASE_NAME
@@ -133,33 +119,41 @@ def _resolve_runtime_env(
     region: str = DEFAULT_AWS_REGION,
     namespace: str = DEFAULT_TAPDB_DATABASE_NAME,
     tapdb_env: str | None = None,
+    config_path: str = "",
 ) -> dict[str, str]:
     resolved_env = (tapdb_env or tapdb_env_for_target(target)).strip().lower()
-    env = os.environ.copy()
-    env["AWS_PROFILE"] = (profile or DEFAULT_AWS_PROFILE).strip() or DEFAULT_AWS_PROFILE
-    env["AWS_REGION"] = (region or DEFAULT_AWS_REGION).strip() or DEFAULT_AWS_REGION
-    env["TAPDB_CLIENT_ID"] = (
-        client_id or DEFAULT_TAPDB_CLIENT_ID
-    ).strip() or DEFAULT_TAPDB_CLIENT_ID
-    env["TAPDB_DATABASE_NAME"] = (
-        namespace or DEFAULT_TAPDB_DATABASE_NAME
-    ).strip() or DEFAULT_TAPDB_DATABASE_NAME
-    env["TAPDB_ENV"] = resolved_env
-    env["TAPDB_STRICT_NAMESPACE"] = "1"
-
+    resolved_client_id = (client_id or DEFAULT_TAPDB_CLIENT_ID).strip() or DEFAULT_TAPDB_CLIENT_ID
+    resolved_namespace = (namespace or DEFAULT_TAPDB_DATABASE_NAME).strip() or DEFAULT_TAPDB_DATABASE_NAME
     resolved_cfg_path = _resolve_tapdb_config_path(
-        namespace=env["TAPDB_DATABASE_NAME"],
-        client_id=env["TAPDB_CLIENT_ID"],
+        namespace=resolved_namespace,
+        client_id=resolved_client_id,
+        config_path=config_path,
     )
-    if resolved_cfg_path and not (env.get("TAPDB_CONFIG_PATH") or "").strip():
-        env["TAPDB_CONFIG_PATH"] = resolved_cfg_path
-    return env
+    return {
+        "aws_profile": (profile or DEFAULT_AWS_PROFILE).strip() or DEFAULT_AWS_PROFILE,
+        "aws_region": (region or DEFAULT_AWS_REGION).strip() or DEFAULT_AWS_REGION,
+        "client_id": resolved_client_id,
+        "database_name": resolved_namespace,
+        "tapdb_env": resolved_env,
+        "config_path": resolved_cfg_path or "",
+    }
 
 
-def _get_tapdb_db_config_for_env(tapdb_env: str) -> dict[str, str]:
+def _get_tapdb_db_config_for_env(
+    tapdb_env: str,
+    *,
+    config_path: str,
+    client_id: str,
+    database_name: str,
+) -> dict[str, str]:
     from daylily_tapdb.cli.db_config import get_db_config_for_env
 
-    cfg = get_db_config_for_env(tapdb_env)
+    cfg = get_db_config_for_env(
+        tapdb_env,
+        config_path=config_path or None,
+        client_id=client_id,
+        database_name=database_name,
+    )
     if not cfg:
         raise TapDBRuntimeError(f"No TapDB database config resolved for TAPDB_ENV={tapdb_env}.")
     return cfg
@@ -185,6 +179,7 @@ def export_database_url_for_target(
     region: str = DEFAULT_AWS_REGION,
     namespace: str = DEFAULT_TAPDB_DATABASE_NAME,
     tapdb_env: str | None = None,
+    config_path: str = "",
 ) -> str:
     ensure_tapdb_version()
     runtime_env = _resolve_runtime_env(
@@ -194,10 +189,14 @@ def export_database_url_for_target(
         region=region,
         namespace=namespace,
         tapdb_env=tapdb_env,
+        config_path=config_path,
     )
-
-    os.environ.update(runtime_env)
-    cfg = _get_tapdb_db_config_for_env(runtime_env["TAPDB_ENV"])
+    cfg = _get_tapdb_db_config_for_env(
+        runtime_env["tapdb_env"],
+        config_path=runtime_env["config_path"],
+        client_id=runtime_env["client_id"],
+        database_name=runtime_env["database_name"],
+    )
     db_url = _build_sqlalchemy_url(cfg)
     os.environ["DATABASE_URL"] = db_url
     return db_url
@@ -212,6 +211,7 @@ def run_tapdb_cli(
     region: str = DEFAULT_AWS_REGION,
     namespace: str = DEFAULT_TAPDB_DATABASE_NAME,
     tapdb_env: str | None = None,
+    config_path: str = "",
     cwd: Path | None = None,
     check: bool = True,
 ) -> subprocess.CompletedProcess[str]:
@@ -223,22 +223,28 @@ def run_tapdb_cli(
         region=region,
         namespace=namespace,
         tapdb_env=tapdb_env,
+        config_path=config_path,
     )
     cmd = [
         sys.executable,
         "-m",
         "daylily_tapdb.cli",
-        "--client-id",
-        runtime_env["TAPDB_CLIENT_ID"],
-        "--database-name",
-        runtime_env["TAPDB_DATABASE_NAME"],
+        "--client-id", runtime_env["client_id"],
+        "--database-name", runtime_env["database_name"],
+        "--env", runtime_env["tapdb_env"],
     ]
+    if runtime_env["config_path"]:
+        cmd.extend(["--config", runtime_env["config_path"]])
     cmd.extend(args)
+    child_env = os.environ.copy()
+    child_env["AWS_PROFILE"] = runtime_env["aws_profile"]
+    child_env["AWS_REGION"] = runtime_env["aws_region"]
+    child_env["AWS_DEFAULT_REGION"] = runtime_env["aws_region"]
 
     proc = subprocess.run(
         cmd,
         cwd=cwd,
-        env=runtime_env,
+        env=child_env,
         text=True,
         capture_output=True,
     )

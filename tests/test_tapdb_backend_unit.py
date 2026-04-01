@@ -114,28 +114,66 @@ def _backend() -> backend_mod.TapDBBackend:
     backend.templates = SimpleNamespace()
     backend.factory = SimpleNamespace()
     backend.connection = SimpleNamespace()
+    backend.observability = None
     return backend
 
 
 def test_backend_init_requires_env_and_wraps_config_errors(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("TAPDB_ENV", raising=False)
-    with pytest.raises(RuntimeError, match="TAPDB_ENV is required"):
+    monkeypatch.setattr(
+        backend_mod,
+        "get_settings",
+        lambda: SimpleNamespace(
+            tapdb_env="",
+            tapdb_client_id="dewey",
+            tapdb_database_name="dewey",
+            tapdb_config_path="",
+            aws_region="us-west-2",
+        ),
+    )
+    with pytest.raises(RuntimeError, match="tapdb_env is required"):
         backend_mod.TapDBBackend()
 
-    monkeypatch.setenv("TAPDB_ENV", "dev")
-    monkeypatch.setattr(backend_mod, "resolve_context", lambda require_keys=True: (_ for _ in ()).throw(RuntimeError("bad config")))
+    monkeypatch.setattr(
+        backend_mod,
+        "get_settings",
+        lambda: SimpleNamespace(
+            tapdb_env="dev",
+            tapdb_client_id="dewey",
+            tapdb_database_name="dewey",
+            tapdb_config_path="",
+            aws_region="us-west-2",
+        ),
+    )
+    monkeypatch.setattr(
+        backend_mod,
+        "resolve_context",
+        lambda **_kwargs: (_ for _ in ()).throw(RuntimeError("bad config")),
+    )
     with pytest.raises(RuntimeError, match="TapDB is not configured for Dewey"):
         backend_mod.TapDBBackend()
 
 
 def test_backend_init_builds_connection(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("TAPDB_ENV", "dev")
-    monkeypatch.setenv("AWS_REGION", "us-west-2")
-    monkeypatch.setattr(backend_mod, "resolve_context", lambda require_keys=True: None)
+    monkeypatch.setattr(
+        backend_mod,
+        "get_settings",
+        lambda: SimpleNamespace(
+            tapdb_env="dev",
+            tapdb_client_id="dewey",
+            tapdb_database_name="dewey",
+            tapdb_config_path="",
+            aws_region="us-west-2",
+        ),
+    )
+    monkeypatch.setattr(
+        backend_mod,
+        "resolve_context",
+        lambda **_kwargs: SimpleNamespace(client_id="dewey", database_name="dewey"),
+    )
     monkeypatch.setattr(
         backend_mod,
         "get_db_config_for_env",
-        lambda env: {
+        lambda env, **_kwargs: {
             "host": "localhost",
             "port": "5432",
             "user": "dewey",
@@ -174,8 +212,8 @@ def test_backend_init_builds_connection(monkeypatch: pytest.MonkeyPatch) -> None
 def test_backend_helpers_cover_utility_functions() -> None:
     assert backend_mod.utc_now_iso().endswith("Z")
     assert backend_mod.sha256_json({"a": 1}) == hashlib.sha256(str({"a": 1}).encode("utf-8")).hexdigest()
-    assert backend_mod._parse_template_code("dewey/data/artifact/1.0/") == (
-        "dewey",
+    assert backend_mod._parse_template_code("generic/data/artifact/1.0/") == (
+        "generic",
         "data",
         "artifact",
         "1.0",
@@ -216,6 +254,7 @@ def test_template_definitions_are_required_codes() -> None:
         backend_mod.EXTERNAL_OBJECT_TEMPLATE,
         backend_mod.EXTERNAL_OBJECT_RELATION_TEMPLATE,
         backend_mod.LITERATURE_SAVE_TEMPLATE,
+        backend_mod.ANOMALY_TEMPLATE,
         backend_mod.IDEMPOTENCY_TEMPLATE,
     )
 
@@ -277,7 +316,7 @@ def test_update_instance_json_and_query_helpers(monkeypatch: pytest.MonkeyPatch)
     backend.templates = SimpleNamespace(get_template=lambda session, code: template)
     monkeypatch.setattr(backend_mod, "generic_instance", _FakeGenericInstanceModel)
 
-    found = SimpleNamespace(euid="AT-000001", created_dt=datetime.now(timezone.utc))
+    found = SimpleNamespace(euid="DGX-000001", created_dt=datetime.now(timezone.utc))
     q_template = _FakeQuery(first_result=found, all_result=[found])
     session = _FakeSession({_FakeGenericInstanceModel: [q_template, _FakeQuery(first_result=found), _FakeQuery(first_result=found), _FakeQuery(all_result=[found])]})
 
@@ -286,7 +325,7 @@ def test_update_instance_json_and_query_helpers(monkeypatch: pytest.MonkeyPatch)
     assert q_template.with_for_update_called is True
     assert q_template.filters
 
-    assert backend.find_by_euid(session, template_code=backend_mod.ARTIFACT_TEMPLATE, euid="AT-000001") is found
+    assert backend.find_by_euid(session, template_code=backend_mod.ARTIFACT_TEMPLATE, euid="DGX-000001") is found
     assert backend.find_by_json_field(
         session,
         template_code=backend_mod.ARTIFACT_TEMPLATE,
@@ -306,8 +345,8 @@ def test_update_instance_json_and_query_helpers(monkeypatch: pytest.MonkeyPatch)
 
 def test_lineage_helpers_cover_create_delete_and_lists(monkeypatch: pytest.MonkeyPatch) -> None:
     backend = _backend()
-    parent = SimpleNamespace(uid=1, euid="AS-000001", polymorphic_discriminator="data_instance")
-    child = SimpleNamespace(uid=2, euid="AT-000001", polymorphic_discriminator="data_instance")
+    parent = SimpleNamespace(uid=1, euid="DGX-000002", polymorphic_discriminator="data_instance")
+    child = SimpleNamespace(uid=2, euid="DGX-000001", polymorphic_discriminator="data_instance")
     monkeypatch.setattr(backend_mod, "generic_instance", _FakeGenericInstanceModel)
     monkeypatch.setattr(backend_mod, "generic_instance_lineage", _FakeLineageModel)
 
@@ -340,8 +379,8 @@ def test_find_lineage_instance_and_normalize_payload(monkeypatch: pytest.MonkeyP
     monkeypatch.setattr(backend_mod, "generic_instance_lineage", _FakeLineageModel)
     monkeypatch.setattr(backend_mod, "and_", lambda *clauses: clauses)
 
-    candidate_a = SimpleNamespace(uid=3, euid="ER-000001")
-    candidate_b = SimpleNamespace(uid=4, euid="ER-000002")
+    candidate_a = SimpleNamespace(uid=3, euid="DGX-000003")
+    candidate_b = SimpleNamespace(uid=4, euid="DGX-000004")
     session = _FakeSession({_FakeGenericInstanceModel: [_FakeQuery(all_result=[candidate_a, candidate_b])]})
     backend.list_parents = lambda session, child, relationship_type=None: [] if child is candidate_a else [SimpleNamespace(uid=1)]
 
@@ -371,13 +410,13 @@ def test_find_lineage_instance_and_normalize_payload(monkeypatch: pytest.MonkeyP
 
     instance = SimpleNamespace(
         json_addl={"artifact_type": "fastq"},
-        euid="AT-000001",
+        euid="DGX-000001",
         name="artifact",
         created_dt=datetime(2026, 1, 1, tzinfo=timezone.utc),
         modified_dt=None,
     )
     payload = backend_mod.normalize_instance_payload(instance)
-    assert payload["euid"] == "AT-000001"
+    assert payload["euid"] == "DGX-000001"
     assert payload["name"] == "artifact"
     assert payload["created_at"] == "2026-01-01T00:00:00Z"
     assert payload["updated_at"] == "2026-01-01T00:00:00Z"
