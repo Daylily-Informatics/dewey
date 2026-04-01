@@ -22,6 +22,8 @@ from daylily_tapdb.cli.db_config import get_db_config_for_env
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
+from dewey_service.settings import get_settings
+
 
 def utc_now_iso() -> str:
     return dt.datetime.now(dt.timezone.utc).isoformat().replace("+00:00", "Z")
@@ -39,14 +41,14 @@ def _parse_template_code(template_code: str) -> tuple[str, str, str, str]:
     return parts[0], parts[1], parts[2], parts[3]
 
 
-ARTIFACT_TEMPLATE = "dewey/data/artifact/1.0/"
-ARTIFACT_SET_TEMPLATE = "dewey/data/artifact_set/1.0/"
-SHARE_REFERENCE_TEMPLATE = "dewey/data/share_reference/1.0/"
-EXTERNAL_OBJECT_TEMPLATE = "dewey/integration/external_object/1.0/"
-EXTERNAL_OBJECT_RELATION_TEMPLATE = "dewey/integration/external_object_relation/1.0/"
-LITERATURE_SAVE_TEMPLATE = "dewey/access/literature_save/1.0/"
-ANOMALY_TEMPLATE = "dewey/operational/anomaly/1.0/"
-IDEMPOTENCY_TEMPLATE = "dewey/system/idempotency_request/1.0/"
+ARTIFACT_TEMPLATE = "generic/data/artifact/1.0/"
+ARTIFACT_SET_TEMPLATE = "generic/data/artifact_set/1.0/"
+SHARE_REFERENCE_TEMPLATE = "generic/data/share_reference/1.0/"
+EXTERNAL_OBJECT_TEMPLATE = "generic/integration/external_object/1.0/"
+EXTERNAL_OBJECT_RELATION_TEMPLATE = "generic/integration/external_object_relation/1.0/"
+LITERATURE_SAVE_TEMPLATE = "generic/access/literature_save/1.0/"
+ANOMALY_TEMPLATE = "generic/operational/anomaly/1.0/"
+IDEMPOTENCY_TEMPLATE = "generic/system/idempotency_request/1.0/"
 
 
 TEMPLATE_DEFINITIONS: tuple[str, ...] = (
@@ -65,23 +67,34 @@ class TapDBBackend:
     """TapDB-backed repository for Dewey domain entities."""
 
     def __init__(self, app_username: str = "dewey"):
-        os.environ.setdefault("TAPDB_STRICT_NAMESPACE", "1")
-        env = (os.environ.get("TAPDB_ENV") or "").strip()
+        settings = get_settings()
+        env = str(settings.tapdb_env or "").strip().lower()
         if not env:
-            raise RuntimeError("TAPDB_ENV is required (dev|test|prod)")
+            raise RuntimeError("tapdb_env is required in Dewey settings (dev|test|prod)")
 
         try:
-            resolve_context(require_keys=True)
-            cfg = get_db_config_for_env(env)
+            ctx = resolve_context(
+                require_keys=True,
+                client_id=settings.tapdb_client_id,
+                database_name=settings.tapdb_database_name,
+                env_name=env,
+                config_path=settings.tapdb_config_path or None,
+            )
+            cfg = get_db_config_for_env(
+                env,
+                config_path=settings.tapdb_config_path or None,
+                client_id=ctx.client_id,
+                database_name=ctx.database_name,
+            )
         except Exception as exc:
             raise RuntimeError(
                 "TapDB is not configured for Dewey.\n"
-                "Required env: TAPDB_CLIENT_ID, TAPDB_DATABASE_NAME, TAPDB_ENV"
+                "Required settings: tapdb_client_id, tapdb_database_name, tapdb_env"
             ) from exc
 
         db_hostname = f"{cfg['host']}:{cfg['port']}"
         engine_type = (cfg.get("engine_type") or "local").strip().lower()
-        region = (cfg.get("region") or os.environ.get("AWS_REGION") or "us-west-2").strip()
+        region = (cfg.get("region") or settings.aws_region or "us-west-2").strip()
         iam_auth_raw = str(cfg.get("iam_auth") or "").strip().lower()
         iam_auth = iam_auth_raw in {"1", "true", "yes", "on"}
         secret_arn = cfg.get("secret_arn") or cfg.get("master_secret_arn")

@@ -37,7 +37,7 @@ def test_db_seed_main_validates_and_seeds(monkeypatch: pytest.MonkeyPatch) -> No
     monkeypatch.setattr(
         db_seed,
         "validate_template_configs",
-        lambda config_dirs, strict: ([{"template_code": "dewey/data/artifact/1.0/"}], []),
+        lambda config_dirs, strict: ([{"template_code": "generic/data/artifact/1.0/"}], []),
     )
     monkeypatch.setattr(
         db_seed,
@@ -55,7 +55,7 @@ def test_db_seed_main_validates_and_seeds(monkeypatch: pytest.MonkeyPatch) -> No
     assert calls["exited"] is True
     assert str(calls["config_root"]).endswith("config/tapdb_templates")
     assert calls["seed_session"] == "session"
-    assert calls["templates"] == [{"template_code": "dewey/data/artifact/1.0/"}]
+    assert calls["templates"] == [{"template_code": "generic/data/artifact/1.0/"}]
     assert calls["overwrite"] is True
 
 
@@ -111,7 +111,7 @@ def test_db_seed_module_runs_main_when_invoked_as_script(monkeypatch: pytest.Mon
     monkeypatch.setattr("daylily_tapdb.resolve_seed_config_dirs", lambda config_root: [config_root])
     monkeypatch.setattr(
         "daylily_tapdb.validate_template_configs",
-        lambda config_dirs, strict: ([{"template_code": "dewey/data/artifact/1.0/"}], []),
+        lambda config_dirs, strict: ([{"template_code": "generic/data/artifact/1.0/"}], []),
     )
     monkeypatch.setattr(
         "daylily_tapdb.seed_templates",
