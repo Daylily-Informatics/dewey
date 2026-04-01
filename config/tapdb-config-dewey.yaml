@@ -2,6 +2,7 @@ meta:
   config_version: 3
   client_id: dewey
   database_name: dewey
+  euid_client_code: D
 environments:
   dev:
     engine_type: local
