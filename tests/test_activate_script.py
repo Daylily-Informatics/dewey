@@ -121,6 +121,14 @@ def test_activate_requires_conda_on_path(tmp_path: Path) -> None:
 
     env = os.environ.copy()
     env["PATH"] = "/usr/bin:/bin"
+    for key in list(env):
+        if key.startswith("BASH_FUNC_conda"):
+            env.pop(key, None)
+    env.pop("CONDA_EXE", None)
+    env.pop("_CONDA_EXE", None)
+    env.pop("CONDA_SHLVL", None)
+    env.pop("MAMBA_EXE", None)
+    env.pop("MAMBA_ROOT_PREFIX", None)
     env.pop("CONDA_DEFAULT_ENV", None)
     env.pop("CONDA_PREFIX", None)
 
