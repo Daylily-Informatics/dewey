@@ -25,15 +25,20 @@ def assert_authenticated_page(page: Page) -> None:
         assert snippet not in body, f"Unexpected auth failure content detected: {snippet}"
 
 
+def _is_google_identity_host(url: str) -> bool:
+    host = (urlparse(url).hostname or "").lower()
+    return host == "accounts.google.com" or host.endswith(".accounts.google.com")
+
+
 def _complete_identity_provider_login(page: Page, *, email: str, password: str) -> None:
     page.wait_for_load_state("domcontentloaded")
     try:
-        if "accounts.google.com" in (urlparse(page.url).hostname or ""):
+        if _is_google_identity_host(page.url):
             _complete_google_login(page, email=email, password=password)
             return
-        if page.locator("input[type='email']").first.is_visible(
-            timeout=3000
-        ) and "accounts.google.com" in (urlparse(page.url).hostname or ""):
+        if page.locator("input[type='email']").first.is_visible(timeout=3000) and _is_google_identity_host(
+            page.url
+        ):
             _complete_google_login(page, email=email, password=password)
             return
     except Exception:
