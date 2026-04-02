@@ -9,8 +9,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from time import monotonic, time_ns
 from typing import Any
-from uuid import uuid4
 from urllib.parse import urlencode
+from uuid import uuid4
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -21,6 +21,18 @@ from pydantic import BaseModel, ConfigDict, Field
 from starlette.datastructures import UploadFile as StarletteUploadFile
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
+from dewey_service.artifact_ui import (
+    ARTIFACT_SET_TYPES,
+    ARTIFACT_TYPES,
+    NA_ARTIFACT_TYPE,
+    bulk_template_tsv,
+    collect_metadata,
+    collect_metadata_search_filters,
+    metadata_fields,
+    parse_json_object,
+    resolve_artifact_type,
+    split_lines,
+)
 from dewey_service.auth import (
     build_browser_login_href,
     build_cognito_logout_url,
@@ -35,34 +47,12 @@ from dewey_service.auth import (
     require_ui_session,
     start_browser_login,
 )
-from dewey_service.artifact_ui import (
-    ARTIFACT_SET_TYPES,
-    ARTIFACT_TYPES,
-    NA_ARTIFACT_TYPE,
-    bulk_template_tsv,
-    collect_metadata,
-    collect_metadata_search_filters,
-    metadata_fields,
-    parse_json_object,
-    resolve_artifact_type,
-    split_lines,
-)
 from dewey_service.domain_access import (
     build_allowed_origin_regex,
     build_trusted_hosts,
     is_allowed_origin,
 )
 from dewey_service.literature import LiteratureUnavailableError, MetapubAdapter, ViewerContext
-from dewey_service.rbac import Role, profile_has_role
-from dewey_service.service import DeweyConflictError, DeweyNotFoundError, DeweyService
-from dewey_service.settings import (
-    Settings,
-    get_config_file_path,
-    get_settings,
-    persist_managed_storage_bucket,
-)
-from dewey_service.storage import S3StorageClient
-from dewey_service.tapdb_backend import TapDBBackend
 from dewey_service.observability import (
     DeweyObservabilityStore,
     build_api_health_payload,
@@ -76,6 +66,16 @@ from dewey_service.observability import (
     probe_database,
     route_template_from_request,
 )
+from dewey_service.rbac import Role, profile_has_role
+from dewey_service.service import DeweyConflictError, DeweyNotFoundError, DeweyService
+from dewey_service.settings import (
+    Settings,
+    get_config_file_path,
+    get_settings,
+    persist_managed_storage_bucket,
+)
+from dewey_service.storage import S3StorageClient
+from dewey_service.tapdb_backend import TapDBBackend
 
 
 class ArtifactRegisterRequest(BaseModel):
@@ -330,10 +330,12 @@ def create_app(
     configure_session_middleware(app, web_session_config)
 
     templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent / "templates"))
+
     def _static_url(path: str) -> str:
         clean = str(path or "").lstrip("/")
         separator = "&" if "?" in clean else "?"
         return f"/static/{clean}{separator}v={time_ns()}"
+
     templates.env.globals["static_url"] = _static_url
     static_dir = Path(__file__).resolve().parent / "static"
     if static_dir.exists():
@@ -444,7 +446,9 @@ def create_app(
                 sort_keys=True,
                 default=str,
             )
-            row["connection"] = json.dumps(item.get("connection") or {}, sort_keys=True, default=str)
+            row["connection"] = json.dumps(
+                item.get("connection") or {}, sort_keys=True, default=str
+            )
             row["manifest"] = json.dumps(item.get("manifest") or [], sort_keys=True, default=str)
             writer.writerow(row)
         return buffer.getvalue()
@@ -510,7 +514,12 @@ def create_app(
     def _artifact_search_payload(values: dict[str, Any]) -> dict[str, Any]:
         greedy = str(values.get("artifact_match_mode") or "greedy").strip().lower() != "exact"
         property_filters: list[dict[str, Any]] = []
-        for field_name in ["artifact_type", "producer_system", "availability_status", "import_mode"]:
+        for field_name in [
+            "artifact_type",
+            "producer_system",
+            "availability_status",
+            "import_mode",
+        ]:
             value = str(values.get(field_name) or "").strip()
             if value:
                 property_filters.append({"path": field_name, "op": "eq", "value": value})
@@ -587,8 +596,7 @@ def create_app(
             "property_filters": property_filters,
             "created_at_start": str(values.get("artifact_set_created_at_start") or "").strip()
             or None,
-            "created_at_end": str(values.get("artifact_set_created_at_end") or "").strip()
-            or None,
+            "created_at_end": str(values.get("artifact_set_created_at_end") or "").strip() or None,
         }
 
     def _empty_artifact_search_result() -> dict[str, Any]:
@@ -1086,7 +1094,9 @@ def create_app(
             "source_s3_uri": source_s3_uri,
         }
         upload = form.get("file_data")
-        has_file = isinstance(upload, StarletteUploadFile) and bool(str(upload.filename or "").strip())
+        has_file = isinstance(upload, StarletteUploadFile) and bool(
+            str(upload.filename or "").strip()
+        )
         selected_sources = int(has_file) + int(bool(source_url)) + int(bool(source_s3_uri))
         if selected_sources != 1:
             return _ui_home_response(
@@ -1405,7 +1415,9 @@ def create_app(
         return Response(
             content=bulk_template_tsv(),
             media_type="text/tab-separated-values",
-            headers={"Content-Disposition": 'attachment; filename="dewey_artifacts_bulk_template.tsv"'},
+            headers={
+                "Content-Disposition": 'attachment; filename="dewey_artifacts_bulk_template.tsv"'
+            },
         )
 
     @app.post("/artifacts/register", include_in_schema=False)
@@ -1619,13 +1631,14 @@ def create_app(
         request: Request, profile: dict[str, Any] = Depends(require_ui_session)
     ) -> HTMLResponse:
         form = await request.form(max_files=32)
-        values = _string_form_values(form)
         file = form.get("bulk_tsv")
         if not isinstance(file, StarletteUploadFile) or not str(file.filename or "").strip():
             return _artifact_page_response(
                 request,
                 profile=profile,
-                bulk_report=[{"row_number": 0, "status": "error", "detail": "bulk_tsv is required"}],
+                bulk_report=[
+                    {"row_number": 0, "status": "error", "detail": "bulk_tsv is required"}
+                ],
                 active_section="register",
             )
         text = (await file.read()).decode("utf-8")
@@ -1638,7 +1651,11 @@ def create_app(
                 key = field["name"]
                 value = row.get(key)
                 if value:
-                    parsed_value = parse_json_object(value, label=key) if key == "additional_metadata_json" else None
+                    parsed_value = (
+                        parse_json_object(value, label=key)
+                        if key == "additional_metadata_json"
+                        else None
+                    )
                     if parsed_value is not None:
                         metadata.update(parsed_value)
                     else:
@@ -1677,9 +1694,11 @@ def create_app(
                         size=None,
                         checksums={},
                         content_type=None,
-                        original_filename=str(row.get("original_filename") or "").strip() or Path(key).name,
+                        original_filename=str(row.get("original_filename") or "").strip()
+                        or Path(key).name,
                         producer_system=str(row.get("producer_system") or "").strip() or None,
-                        producer_object_euid=str(row.get("producer_object_euid") or "").strip() or None,
+                        producer_object_euid=str(row.get("producer_object_euid") or "").strip()
+                        or None,
                         storage_class=None,
                         availability_status="available",
                         metadata=metadata,
@@ -1698,7 +1717,8 @@ def create_app(
                         import_mode=source_mode,
                         lock_after_import=False,
                         producer_system=str(row.get("producer_system") or "").strip() or None,
-                        producer_object_euid=str(row.get("producer_object_euid") or "").strip() or None,
+                        producer_object_euid=str(row.get("producer_object_euid") or "").strip()
+                        or None,
                         metadata=metadata,
                         idempotency_key=_new_idempotency_key("ui-bulk-import"),
                     )
@@ -1707,9 +1727,16 @@ def create_app(
 
                 set_label = str(row.get("artifact_set_label") or "").strip()
                 if set_label:
-                    set_type = str(row.get("artifact_set_type") or "batch").strip().lower() or "batch"
+                    set_type = (
+                        str(row.get("artifact_set_type") or "batch").strip().lower() or "batch"
+                    )
                     set_description = str(row.get("artifact_set_description") or "").strip()
-                    cache_key = (set_type, set_label, set_description, json.dumps({}, sort_keys=True))
+                    cache_key = (
+                        set_type,
+                        set_label,
+                        set_description,
+                        json.dumps({}, sort_keys=True),
+                    )
                     artifact_set_euid = artifact_set_cache.get(cache_key)
                     if not artifact_set_euid:
                         _, artifact_set = service.create_artifact_set(
@@ -1777,7 +1804,12 @@ def create_app(
         )
         if export_format == "json":
             return JSONResponse(
-                {"items": items, "row_count": len(items), "timing_ms": timing_ms, "truncated": truncated}
+                {
+                    "items": items,
+                    "row_count": len(items),
+                    "timing_ms": timing_ms,
+                    "truncated": truncated,
+                }
             )
         return Response(
             content=_search_payload_to_tsv(items),
@@ -1791,7 +1823,9 @@ def create_app(
     ) -> Response:
         _ = profile
         form = await request.form()
-        artifact_euids = [str(item).strip() for item in form.getlist("artifact_euids") if str(item).strip()]
+        artifact_euids = [
+            str(item).strip() for item in form.getlist("artifact_euids") if str(item).strip()
+        ]
         archive_name, archive_bytes = service.build_artifact_download_archive(
             artifact_euids=artifact_euids,
             naming_mode=str(form.get("download_naming_mode") or "hybrid"),
@@ -1853,7 +1887,9 @@ def create_app(
         request: Request, profile: dict[str, Any] = Depends(require_ui_session)
     ) -> HTMLResponse:
         form = await request.form()
-        artifact_euids = [str(item).strip() for item in form.getlist("artifact_euids") if str(item).strip()]
+        artifact_euids = [
+            str(item).strip() for item in form.getlist("artifact_euids") if str(item).strip()
+        ]
         ttl_hours = max(1, int(form.get("share_ttl_hours") or 24))
         share_rows: list[dict[str, Any]] = []
         for artifact_euid in artifact_euids:
@@ -1966,7 +2002,12 @@ def create_app(
         )
         if export_format == "json":
             return JSONResponse(
-                {"items": items, "row_count": len(items), "timing_ms": timing_ms, "truncated": truncated}
+                {
+                    "items": items,
+                    "row_count": len(items),
+                    "timing_ms": timing_ms,
+                    "truncated": truncated,
+                }
             )
         return Response(
             content=_search_payload_to_tsv(items),
@@ -1989,8 +2030,10 @@ def create_app(
             )
         duration_days = max(1.0, float(form.get("share_duration_days") or 1))
         expires_at = (
-            datetime.now(timezone.utc) + timedelta(days=duration_days)
-        ).isoformat().replace("+00:00", "Z")
+            (datetime.now(timezone.utc) + timedelta(days=duration_days))
+            .isoformat()
+            .replace("+00:00", "Z")
+        )
         transport = str(form.get("share_transport") or "presigned_s3").strip().lower()
         _, payload = service.create_share_reference(
             target_type="artifact_set",

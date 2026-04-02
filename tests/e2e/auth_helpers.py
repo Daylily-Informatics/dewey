@@ -31,7 +31,9 @@ def _complete_identity_provider_login(page: Page, *, email: str, password: str) 
         if "accounts.google.com" in (urlparse(page.url).hostname or ""):
             _complete_google_login(page, email=email, password=password)
             return
-        if page.locator("input[type='email']").first.is_visible(timeout=3000) and "accounts.google.com" in (urlparse(page.url).hostname or ""):
+        if page.locator("input[type='email']").first.is_visible(
+            timeout=3000
+        ) and "accounts.google.com" in (urlparse(page.url).hostname or ""):
             _complete_google_login(page, email=email, password=password)
             return
     except Exception:
@@ -40,9 +42,7 @@ def _complete_identity_provider_login(page: Page, *, email: str, password: str) 
 
 
 def _complete_cognito_login(page: Page, *, email: str, password: str) -> None:
-    user_input = page.locator(
-        "input[name='username']:visible, input[type='email']:visible"
-    ).first
+    user_input = page.locator("input[name='username']:visible, input[type='email']:visible").first
     pass_input = page.locator(
         "input[name='password']:visible, input[type='password']:visible"
     ).first

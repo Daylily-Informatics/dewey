@@ -6,7 +6,9 @@ from functools import lru_cache
 from importlib.metadata import PackageNotFoundError, version
 from typing import Any
 
-from dewey_service.integrations.tapdb_runtime import run_schema_drift_check as run_tapdb_schema_drift_check
+from dewey_service.integrations.tapdb_runtime import (
+    run_schema_drift_check as run_tapdb_schema_drift_check,
+)
 from dewey_service.settings import Settings
 
 

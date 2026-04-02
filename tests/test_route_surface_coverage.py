@@ -12,9 +12,7 @@ def _iter_routes(module_path: str) -> set[tuple[str, str]]:
         if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             continue
         for decorator in node.decorator_list:
-            if not isinstance(decorator, ast.Call) or not isinstance(
-                decorator.func, ast.Attribute
-            ):
+            if not isinstance(decorator, ast.Call) or not isinstance(decorator.func, ast.Attribute):
                 continue
             method = decorator.func.attr.upper()
             if method not in {"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"}:

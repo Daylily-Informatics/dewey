@@ -71,7 +71,9 @@ def tapdb_env_for_target(target: str) -> str:
     return _TARGET_TO_TAPDB_ENV[normalized]
 
 
-def _resolve_tapdb_config_path(*, namespace: str, client_id: str, config_path: str = "") -> str | None:
+def _resolve_tapdb_config_path(
+    *, namespace: str, client_id: str, config_path: str = ""
+) -> str | None:
     explicit = str(config_path or "").strip()
     if explicit:
         return explicit
@@ -123,7 +125,9 @@ def _resolve_runtime_env(
 ) -> dict[str, str]:
     resolved_env = (tapdb_env or tapdb_env_for_target(target)).strip().lower()
     resolved_client_id = (client_id or DEFAULT_TAPDB_CLIENT_ID).strip() or DEFAULT_TAPDB_CLIENT_ID
-    resolved_namespace = (namespace or DEFAULT_TAPDB_DATABASE_NAME).strip() or DEFAULT_TAPDB_DATABASE_NAME
+    resolved_namespace = (
+        namespace or DEFAULT_TAPDB_DATABASE_NAME
+    ).strip() or DEFAULT_TAPDB_DATABASE_NAME
     resolved_cfg_path = _resolve_tapdb_config_path(
         namespace=resolved_namespace,
         client_id=resolved_client_id,
@@ -239,8 +243,10 @@ def run_tapdb_cli(
         sys.executable,
         "-m",
         "daylily_tapdb.cli",
-        "--config", _require_config_path(runtime_env),
-        "--env", runtime_env["tapdb_env"],
+        "--config",
+        _require_config_path(runtime_env),
+        "--env",
+        runtime_env["tapdb_env"],
     ]
     cmd.extend(args)
     child_env = os.environ.copy()

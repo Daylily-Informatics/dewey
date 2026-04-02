@@ -44,4 +44,3 @@ def test_normalize_group_role_map_rejects_bad_values() -> None:
 
     with pytest.raises(ValueError):
         normalize_group_role_map({"": "ADMIN"})
-

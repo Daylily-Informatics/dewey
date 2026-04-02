@@ -6,9 +6,8 @@ import json
 import zipfile
 from typing import Any
 
-import yaml
-
 import pytest
+import yaml
 from fastapi.testclient import TestClient
 
 from dewey_service.app import create_app
@@ -753,8 +752,7 @@ class FakeDeweyService:
     def expand_s3_sources(self, source_uri: str, *, limit: int = 1000):
         if source_uri.endswith("/"):
             return [
-                f"{source_uri.rstrip('/')}/file-{index}.dat"
-                for index in range(1, min(limit, 3))
+                f"{source_uri.rstrip('/')}/file-{index}.dat" for index in range(1, min(limit, 3))
             ]
         return [source_uri]
 

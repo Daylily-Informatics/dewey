@@ -25,9 +25,18 @@ def test_ensure_tapdb_version_requires_install(monkeypatch: pytest.MonkeyPatch) 
 def test_tapdb_env_for_target_and_sqlalchemy_url() -> None:
     assert tapdb_runtime.tapdb_env_for_target("local") == "dev"
     assert tapdb_runtime.tapdb_env_for_target("aurora") == "prod"
-    assert tapdb_runtime._build_sqlalchemy_url(
-        {"user": "alice", "password": "secret", "host": "db", "port": "5432", "database": "dewey"}
-    ) == "postgresql+psycopg2://alice:secret@db:5432/dewey"
+    assert (
+        tapdb_runtime._build_sqlalchemy_url(
+            {
+                "user": "alice",
+                "password": "secret",
+                "host": "db",
+                "port": "5432",
+                "database": "dewey",
+            }
+        )
+        == "postgresql+psycopg2://alice:secret@db:5432/dewey"
+    )
 
     with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="Unsupported database target"):
         tapdb_runtime.tapdb_env_for_target("staging")
@@ -95,7 +104,9 @@ def test_export_database_url_for_target_returns_url_without_mutating_environment
     assert "DATABASE_URL" not in tapdb_runtime.os.environ
 
 
-def test_run_tapdb_cli_builds_command_and_raises_on_failure(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_run_tapdb_cli_builds_command_and_raises_on_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda: "3.0.9")
     calls: list[tuple[list[str], dict[str, str]]] = []
 

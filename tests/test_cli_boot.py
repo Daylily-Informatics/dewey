@@ -185,9 +185,7 @@ def test_cli_requires_hyphenated_conda_env(monkeypatch: pytest.MonkeyPatch) -> N
 
 def test_cli_requires_active_conda_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("CONDA_DEFAULT_ENV", raising=False)
-    with pytest.raises(
-        SystemExit, match="requires an active deployment-scoped conda environment"
-    ):
+    with pytest.raises(SystemExit, match="requires an active deployment-scoped conda environment"):
         cli_module._enforce_conda_env_contract(["server", "status"])
 
 

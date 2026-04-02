@@ -33,7 +33,9 @@ def _status() -> None:
 
 
 def _set_artifact_bucket(
-    bucket: str = typer.Argument(..., help="S3 bucket name for Dewey-managed artifact copies and uploads."),
+    bucket: str = typer.Argument(
+        ..., help="S3 bucket name for Dewey-managed artifact copies and uploads."
+    ),
 ) -> None:
     """Persist the managed artifact bucket in the Dewey config file."""
     try:

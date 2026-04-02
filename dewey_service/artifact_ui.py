@@ -191,7 +191,9 @@ def collect_metadata_search_filters(
             if not values_list:
                 continue
             if greedy:
-                filters.extend({"path": path, "op": "contains", "value": item} for item in values_list)
+                filters.extend(
+                    {"path": path, "op": "contains", "value": item} for item in values_list
+                )
             else:
                 filters.append({"path": path, "op": "in", "value": values_list})
             continue

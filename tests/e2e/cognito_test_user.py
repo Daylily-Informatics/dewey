@@ -8,7 +8,6 @@ from typing import Any
 import boto3
 from botocore.exceptions import ClientError
 
-
 DEFAULT_EMAIL = "johnm+test@lsmc.com"
 DEFAULT_PASSWORD = "CodexPlaywright1!"
 DEFAULT_NAME = "John M Test"

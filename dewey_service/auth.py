@@ -15,11 +15,13 @@ from daylily_cognito import (
     build_authorization_url,
     clear_session_principal,
     complete_cognito_callback,
-    configure_session_middleware,
     exchange_authorization_code,
     load_session_principal,
     start_cognito_login,
     validate_web_auth_contract,
+)
+from daylily_cognito import (
+    configure_session_middleware as _configure_session_middleware,
 )
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
@@ -27,6 +29,8 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from dewey_service.rbac import Role, normalize_session_profile, profile_has_role
 from dewey_service.settings import Settings
+
+configure_session_middleware = _configure_session_middleware
 
 
 class AuthError(RuntimeError):

@@ -83,7 +83,9 @@ def test_db_seed_main_raises_on_validation_errors(monkeypatch: pytest.MonkeyPatc
         lambda config_dirs, strict: ([], [Issue("bad template shape")]),
     )
 
-    with pytest.raises(RuntimeError, match="Dewey template pack validation failed: bad template shape"):
+    with pytest.raises(
+        RuntimeError, match="Dewey template pack validation failed: bad template shape"
+    ):
         db_seed.main()
 
     assert calls["app_username"] == "dewey"
