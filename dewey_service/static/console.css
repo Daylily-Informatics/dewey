@@ -438,6 +438,27 @@ td {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
 }
 
+.file-picker-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.file-picker-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.file-picker-actions .button {
+  padding: 0.56rem 0.78rem;
+}
+
+.file-picker-selection {
+  margin: 0;
+}
+
 .form-actions {
   display: flex;
   gap: 0.65rem;

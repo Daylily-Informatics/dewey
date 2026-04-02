@@ -5,8 +5,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Dewey Artifacts</title>
-    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/static/console.css" />
+    <link rel="icon" href="{{ static_url('favicon.svg') }}" type="image/svg+xml" />
+    <link rel="stylesheet" href="{{ static_url('console.css') }}" />
   </head>
   <body>
     {% if deployment.name and not deployment.is_production %}
@@ -97,11 +97,23 @@
                   </div>
                   <div class="field field-wide">
                     <label for="file_data">Local File</label>
-                    <input id="file_data" name="file_data" type="file" multiple />
+                    <div class="file-picker-stack">
+                      <input id="file_data" name="file_data" type="file" multiple />
+                      <div class="file-picker-actions">
+                        <button class="button" type="button" data-file-dialog-target="file_data">Choose Files</button>
+                        <span class="note mono file-picker-selection" data-file-selection-for="file_data">No file selected</span>
+                      </div>
+                    </div>
                   </div>
                   <div class="field field-wide">
                     <label for="directory_data">Directory Of Files</label>
-                    <input id="directory_data" name="directory_data" type="file" webkitdirectory directory multiple />
+                    <div class="file-picker-stack">
+                      <input id="directory_data" name="directory_data" type="file" webkitdirectory directory multiple />
+                      <div class="file-picker-actions">
+                        <button class="button" type="button" data-file-dialog-target="directory_data">Choose Directory</button>
+                        <span class="note mono file-picker-selection" data-file-selection-for="directory_data">No files selected</span>
+                      </div>
+                    </div>
                   </div>
                   <div class="field field-wide">
                     <label for="url_sources">Public URLs</label>
@@ -207,7 +219,13 @@
                   <div class="form-grid">
                     <div class="field field-wide">
                       <label for="bulk_tsv">TSV File</label>
-                      <input id="bulk_tsv" name="bulk_tsv" type="file" accept=".tsv,text/tab-separated-values" />
+                      <div class="file-picker-stack">
+                        <input id="bulk_tsv" name="bulk_tsv" type="file" accept=".tsv,text/tab-separated-values" />
+                        <div class="file-picker-actions">
+                          <button class="button" type="button" data-file-dialog-target="bulk_tsv">Choose TSV</button>
+                          <span class="note mono file-picker-selection" data-file-selection-for="bulk_tsv">No file selected</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div class="form-actions">
@@ -947,6 +965,43 @@
     </div>
 
     <script>
+      function describeSelectedFiles(input) {
+        const files = Array.from(input.files || []);
+        if (!files.length) {
+          return "No file selected";
+        }
+        if (files.length === 1) {
+          return files[0].name;
+        }
+        return `${files.length} files selected`;
+      }
+
+      function bindFileDialogButtons() {
+        document.querySelectorAll("[data-file-dialog-target]").forEach((button) => {
+          const targetId = button.dataset.fileDialogTarget;
+          const input = targetId ? document.getElementById(targetId) : null;
+          if (!input || input.tagName !== "INPUT" || input.type !== "file") {
+            return;
+          }
+          button.addEventListener("click", () => input.click());
+        });
+      }
+
+      function bindFileSelectionLabels() {
+        document.querySelectorAll("[data-file-selection-for]").forEach((label) => {
+          const targetId = label.dataset.fileSelectionFor;
+          const input = targetId ? document.getElementById(targetId) : null;
+          if (!input || input.tagName !== "INPUT" || input.type !== "file") {
+            return;
+          }
+          const update = () => {
+            label.textContent = describeSelectedFiles(input);
+          };
+          input.addEventListener("change", update);
+          update();
+        });
+      }
+
       function setActiveSection(target) {
         document.querySelectorAll(".section-tab").forEach((button) => {
           button.classList.toggle("section-tab-active", button.dataset.target === target);
@@ -1010,6 +1065,8 @@
         syncGroupingMode();
         syncShareTransport();
         bindToggleAll();
+        bindFileDialogButtons();
+        bindFileSelectionLabels();
       });
     </script>
   </body>

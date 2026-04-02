@@ -7,32 +7,33 @@ import io
 import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from time import monotonic
+from time import monotonic, time_ns
 from typing import Any
 from uuid import uuid4
+from urllib.parse import urlencode
 
-from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, Request, UploadFile, status
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, ConfigDict, Field
 from starlette.datastructures import UploadFile as StarletteUploadFile
-from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from dewey_service.auth import (
-    AuthError,
-    build_session_profile,
-    build_cognito_login_url,
+    build_browser_login_href,
     build_cognito_logout_url,
-    decode_jwt_claims_noverify,
-    exchange_code,
+    build_cognito_web_session_config,
+    clear_ui_session,
+    complete_browser_login,
+    configure_session_middleware,
     generate_state,
     require_api_auth,
     require_observability_access,
     require_ui_admin_session,
     require_ui_session,
+    start_browser_login,
 )
 from dewey_service.artifact_ui import (
     ARTIFACT_SET_TYPES,
@@ -322,9 +323,18 @@ def create_app(
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["*"],
     )
-    app.add_middleware(SessionMiddleware, secret_key=settings.session_secret_key)
+
+    web_session_config = build_cognito_web_session_config(settings=settings)
+    app.state.web_session_config = web_session_config
+    app.state.server_instance_id = web_session_config.server_instance_id
+    configure_session_middleware(app, web_session_config)
 
     templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent / "templates"))
+    def _static_url(path: str) -> str:
+        clean = str(path or "").lstrip("/")
+        separator = "&" if "?" in clean else "?"
+        return f"/static/{clean}{separator}v={time_ns()}"
+    templates.env.globals["static_url"] = _static_url
     static_dir = Path(__file__).resolve().parent / "static"
     if static_dir.exists():
         app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
@@ -368,6 +378,15 @@ def create_app(
             auth_status_code=status_code,
         )
         return context, status_code
+
+    def _request_next_path(request: Request) -> str:
+        next_path = request.url.path
+        if request.url.query:
+            next_path = f"{next_path}?{request.url.query}"
+        return next_path
+
+    def _login_url_for_request(request: Request) -> str:
+        return f"/login?{urlencode({'next': _request_next_path(request)})}"
 
     def _viewer_context(profile: dict[str, Any]) -> ViewerContext:
         return ViewerContext.from_operator_profile(profile)
@@ -834,7 +853,15 @@ def create_app(
         if exc.status_code == 401:
             accept = request.headers.get("accept", "")
             if "text/html" in accept and not request.url.path.startswith("/api/"):
-                return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+                if getattr(request.state, "cognito_auth_reason", None) == "session_expired":
+                    return RedirectResponse(
+                        url="/auth/error?reason=session_expired",
+                        status_code=status.HTTP_302_FOUND,
+                    )
+                return RedirectResponse(
+                    url=_login_url_for_request(request),
+                    status_code=status.HTTP_302_FOUND,
+                )
         if request.url.path.startswith("/api/"):
             return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail or ""})
         return HTMLResponse(status_code=exc.status_code, content=exc.detail or "")
@@ -850,51 +877,42 @@ def create_app(
         )
 
     @app.get("/auth/login", include_in_schema=False)
-    async def auth_login(request: Request) -> RedirectResponse:
-        state = generate_state()
-        request.session["oauth_state"] = state
-        url = build_cognito_login_url(settings=settings, state=state)
-        return RedirectResponse(url=url, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+    async def auth_login(
+        request: Request,
+        next_path: str = Query("/ui", alias="next"),
+    ) -> RedirectResponse:
+        return start_browser_login(request, web_session_config, next_path=next_path)
 
     @app.get("/auth/callback", include_in_schema=False)
     async def auth_callback(request: Request, code: str = "", state: str = "") -> RedirectResponse:
-        expected_state = str(request.session.get("oauth_state") or "").strip()
-        if not code.strip():
-            raise HTTPException(status_code=400, detail="Missing authorization code")
-        if not state.strip() or expected_state != state.strip():
-            raise HTTPException(status_code=400, detail="Invalid oauth state")
-
-        try:
-            token_payload = exchange_code(settings=settings, code=code.strip())
-        except AuthError as exc:
-            raise HTTPException(status_code=401, detail=str(exc)) from exc
-
-        id_token = str(token_payload.get("id_token") or "").strip()
-        claims = decode_jwt_claims_noverify(id_token)
-        email = str(claims.get("email") or claims.get("preferred_username") or "").strip()
-        sub = str(claims.get("sub") or "").strip()
-        groups = claims.get("cognito:groups") or []
-        if not email:
-            raise HTTPException(status_code=401, detail="Cognito response missing email claim")
-
-        request.session["operator_profile"] = build_session_profile(
-            settings=settings,
-            email=email,
-            sub=sub,
-            groups=groups if isinstance(groups, list) else [],
+        return await complete_browser_login(
+            request,
+            web_session_config,
+            code=code,
+            state=state,
         )
-        request.session.pop("oauth_state", None)
-        return RedirectResponse(url="/ui", status_code=status.HTTP_303_SEE_OTHER)
 
     @app.get("/login", include_in_schema=False)
-    async def login_page(request: Request, error: str = "") -> HTMLResponse:
-        context, status_code = _auth_template_context(error_message=str(error or "").strip())
+    async def login_page(
+        request: Request,
+        error: str = "",
+        next_path: str = Query("", alias="next"),
+    ) -> HTMLResponse:
+        cognito_login_url = build_browser_login_href(next_path=next_path)
+        context, status_code = _auth_template_context(
+            cognito_login_url=cognito_login_url,
+            primary_href=cognito_login_url,
+            error_message=str(error or "").strip(),
+        )
         return templates.TemplateResponse(request, "login.html", context, status_code=status_code)
 
     @app.get("/auth/error", include_in_schema=False)
     async def auth_error(request: Request, reason: str = "auth_error") -> HTMLResponse:
         reasons = {
             "auth_error": "An authentication error prevented sign-in from completing.",
+            "invalid_state": "The sign-in flow could not be validated.",
+            "missing_code": "The sign-in flow did not return an authorization code.",
+            "token_exchange_failed": "Dewey could not finish exchanging the authorization code.",
             "session_expired": "Your session ended before the requested page loaded.",
             "not_authorized": "This account is not provisioned for Dewey access.",
         }
@@ -913,6 +931,7 @@ def create_app(
         return templates.TemplateResponse(request, "login.html", context, status_code=status_code)
 
     async def _logout_response(request: Request) -> RedirectResponse:
+        clear_ui_session(request)
         request.session.clear()
         state = generate_state()
         request.session["oauth_state"] = state
