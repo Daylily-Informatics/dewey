@@ -1,16 +1,17 @@
 from __future__ import annotations
 
-import yaml
 from urllib.parse import parse_qs, urlparse
+
+import yaml
 
 
 def _login_operator(monkeypatch, client) -> None:
     monkeypatch.setattr(
-        "dewey_service.app.exchange_code",
-        lambda settings, code: {"id_token": "header.payload.sig"},
+        "daylily_cognito.web_session.exchange_authorization_code",
+        lambda **kwargs: {"id_token": "header.payload.sig"},
     )
     monkeypatch.setattr(
-        "dewey_service.app.decode_jwt_claims_noverify",
+        "dewey_service.auth.decode_jwt_claims_noverify",
         lambda token: {
             "email": "operator@example.com",
             "sub": "sub-1",
@@ -70,11 +71,11 @@ def test_anomaly_api_and_ui_view_round_trip(monkeypatch, client) -> None:
 
 def test_admin_page_links_to_anomaly_view(monkeypatch, client) -> None:
     monkeypatch.setattr(
-        "dewey_service.app.exchange_code",
-        lambda settings, code: {"id_token": "header.payload.sig"},
+        "daylily_cognito.web_session.exchange_authorization_code",
+        lambda **kwargs: {"id_token": "header.payload.sig"},
     )
     monkeypatch.setattr(
-        "dewey_service.app.decode_jwt_claims_noverify",
+        "dewey_service.auth.decode_jwt_claims_noverify",
         lambda token: {
             "email": "admin@example.com",
             "sub": "sub-admin",
@@ -99,11 +100,11 @@ def test_admin_page_links_to_anomaly_view(monkeypatch, client) -> None:
 
 def test_admin_page_updates_managed_artifact_bucket(monkeypatch, client, tmp_path) -> None:
     monkeypatch.setattr(
-        "dewey_service.app.exchange_code",
-        lambda settings, code: {"id_token": "header.payload.sig"},
+        "daylily_cognito.web_session.exchange_authorization_code",
+        lambda **kwargs: {"id_token": "header.payload.sig"},
     )
     monkeypatch.setattr(
-        "dewey_service.app.decode_jwt_claims_noverify",
+        "dewey_service.auth.decode_jwt_claims_noverify",
         lambda token: {
             "email": "admin@example.com",
             "sub": "sub-admin",

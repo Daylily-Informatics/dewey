@@ -1145,5 +1145,5 @@ def fake_service() -> FakeDeweyService:
 @pytest.fixture
 def client(test_settings: Settings, fake_service: FakeDeweyService) -> TestClient:
     app = create_app(settings=test_settings, service=fake_service)
-    with TestClient(app) as tc:
+    with TestClient(app, base_url="https://localhost:8914") as tc:
         yield tc

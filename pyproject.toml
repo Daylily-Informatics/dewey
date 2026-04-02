@@ -4,15 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dewey-service"
-version = "0.7.0"
+version = "0.7.1"
 description = "LSMC Dewey canonical artifact registry service"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "boto3>=1.35.0",
     "cli-core-yo>=0.5.0",
-    "daylily-tapdb==3.2.0",
-    "daylily-cognito==0.3.0",
+    "daylily-tapdb==3.2.1",
+    "daylily-cognito==0.4.0",
     "fastapi>=0.115.0",
     "metapub",
     "uvicorn[standard]>=0.30.0",

@@ -2,7 +2,11 @@ from __future__ import annotations
 
 from urllib.parse import parse_qs, urlparse
 
+import pytest
+from daylily_cognito.web_session import CONFIG_STATE_KEY
 from fastapi.testclient import TestClient
+
+from dewey_service.auth import build_cognito_web_session_config
 
 
 def _login_user(
@@ -15,11 +19,11 @@ def _login_user(
     groups: list[str] | None = None,
 ) -> None:
     monkeypatch.setattr(
-        "dewey_service.app.exchange_code",
-        lambda settings, code: {"id_token": "header.payload.sig"},
+        "daylily_cognito.web_session.exchange_authorization_code",
+        lambda **kwargs: {"id_token": "header.payload.sig"},
     )
     monkeypatch.setattr(
-        "dewey_service.app.decode_jwt_claims_noverify",
+        "dewey_service.auth.decode_jwt_claims_noverify",
         lambda token: {
             "email": email,
             "sub": sub,
@@ -37,8 +41,19 @@ def _login_user(
         params={"code": "code-1", "state": state},
         follow_redirects=False,
     )
-    assert callback.status_code == 303
+    assert callback.status_code == 302
     assert callback.headers["location"] == "/ui"
+
+
+def test_html_login_redirect_preserves_next_path(client) -> None:
+    response = client.get("/ui", headers={"accept": "text/html"}, follow_redirects=False)
+
+    assert response.status_code == 302
+    assert response.headers["location"] == "/login?next=%2Fui"
+
+    login_page = client.get(response.headers["location"])
+    assert login_page.status_code == 200
+    assert 'href="/auth/login?next=%2Fui"' in login_page.text
 
 
 def test_root_redirects_to_ui(client) -> None:
@@ -60,6 +75,36 @@ def test_cognito_callback_sets_session(monkeypatch, client) -> None:
     assert "Dewey Console" in ui.text
     assert "Quick Register" in ui.text
     assert "/admin" not in ui.text
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        {"code": "code-1"},
+        {"code": "code-1", "state": "wrong-state"},
+    ],
+)
+def test_cognito_callback_rejects_missing_or_invalid_state(monkeypatch, client, params) -> None:
+    response = client.get("/auth/callback", params=params, follow_redirects=False)
+
+    assert response.status_code == 303
+    assert response.headers["location"] == "/auth/error?reason=invalid_state"
+
+
+def test_session_expiration_redirects_to_auth_error(monkeypatch, client, test_settings) -> None:
+    _login_user(monkeypatch, client)
+
+    stale_config = build_cognito_web_session_config(
+        settings=test_settings,
+        server_instance_id="restart-2",
+    )
+    client.app.state.web_session_config = stale_config
+    client.app.state.__dict__[CONFIG_STATE_KEY] = stale_config
+
+    response = client.get("/ui", headers={"accept": "text/html"}, follow_redirects=False)
+
+    assert response.status_code == 302
+    assert response.headers["location"] == "/auth/error?reason=session_expired"
 
 
 def test_dashboard_quick_register_infers_artifact_type_for_local_file(
@@ -163,7 +208,7 @@ def test_two_browsers_can_keep_distinct_authenticated_sessions(monkeypatch, clie
         name="Operator A",
     )
 
-    with TestClient(client.app) as other_client:
+    with TestClient(client.app, base_url="https://localhost:8914") as other_client:
         _login_user(
             monkeypatch,
             other_client,
@@ -192,7 +237,7 @@ def test_logout_from_one_browser_does_not_clear_the_other(monkeypatch, client) -
         name="Shared Operator",
     )
 
-    with TestClient(client.app) as other_client:
+    with TestClient(client.app, base_url="https://localhost:8914") as other_client:
         _login_user(
             monkeypatch,
             other_client,

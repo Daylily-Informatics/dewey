@@ -40,11 +40,11 @@ def test_ui_page_renders_banner_after_login(monkeypatch, fake_service) -> None:
     app = create_app(settings=_settings_with_deployment(), service=fake_service)
 
     monkeypatch.setattr(
-        "dewey_service.app.exchange_code",
-        lambda settings, code: {"id_token": "header.payload.sig"},
+        "daylily_cognito.web_session.exchange_authorization_code",
+        lambda **kwargs: {"id_token": "header.payload.sig"},
     )
     monkeypatch.setattr(
-        "dewey_service.app.decode_jwt_claims_noverify",
+        "dewey_service.auth.decode_jwt_claims_noverify",
         lambda token: {
             "email": "operator@example.com",
             "sub": "sub-1",
