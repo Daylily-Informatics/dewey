@@ -8,12 +8,12 @@ if TYPE_CHECKING:
     from cli_core_yo.registry import CommandRegistry
     from cli_core_yo.spec import CliSpec
 
+import json
 import os
 import shutil
 import subprocess
 import sys
 import time
-import json
 from pathlib import Path
 
 import typer
@@ -45,6 +45,7 @@ GENERIC_CERT_ENV = "SSL_CERT_FILE"
 GENERIC_KEY_ENV = "SSL_KEY_FILE"
 LEGACY_CERT_ENV = "DEWEY_SSL_CERT_FILE"
 LEGACY_KEY_ENV = "DEWEY_SSL_KEY_FILE"
+DEFAULT_BIND_HOST = "127.0.0.1"
 
 
 def _state_dir() -> Path:
@@ -368,7 +369,7 @@ def _stop_server() -> None:
 
 @server_app.command("start")
 def start(
-    host: str = typer.Option("0.0.0.0", "--host", help="Host to bind"),
+    host: str = typer.Option(DEFAULT_BIND_HOST, "--host", help="Host to bind"),
     port: int = typer.Option(DEFAULT_APP_PORT, "--port", "-p", help="Port to bind"),
     reload: bool = typer.Option(False, "--reload/--no-reload", help="Enable autoreload"),
     ssl_enabled: bool = typer.Option(True, "--ssl/--no-ssl", help="Serve over HTTPS"),
@@ -458,7 +459,7 @@ def logs(
 
 @server_app.command("restart")
 def restart(
-    host: str = typer.Option("0.0.0.0", "--host", help="Host to bind"),
+    host: str = typer.Option(DEFAULT_BIND_HOST, "--host", help="Host to bind"),
     port: int = typer.Option(DEFAULT_APP_PORT, "--port", "-p", help="Port to bind"),
     ssl_enabled: bool = typer.Option(True, "--ssl/--no-ssl", help="Serve over HTTPS"),
     cert: Path | None = typer.Option(None, "--cert", help="Path to TLS certificate PEM"),

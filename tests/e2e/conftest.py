@@ -14,6 +14,8 @@ def base_url() -> str:
 
 @pytest.fixture(scope="session")
 def e2e_credentials():
+    if not str(os.getenv("E2E_COGNITO_USER_POOL_ID") or "").strip():
+        pytest.skip("Dewey E2E auth tests require E2E_COGNITO_USER_POOL_ID")
     return ensure_test_user()
 
 

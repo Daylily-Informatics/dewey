@@ -73,7 +73,11 @@ def test_obs_services_advertises_canonical_capabilities(client) -> None:
         {"path": "/health", "auth": "operator_or_service_token", "kind": "summary"},
         {"path": "/obs_services", "auth": "operator_or_service_token", "kind": "discovery"},
         {"path": "/api_health", "auth": "operator_or_service_token", "kind": "api_rollup"},
-        {"path": "/endpoint_health", "auth": "operator_or_service_token", "kind": "endpoint_rollup"},
+        {
+            "path": "/endpoint_health",
+            "auth": "operator_or_service_token",
+            "kind": "endpoint_rollup",
+        },
         {"path": "/db_health", "auth": "operator_or_service_token", "kind": "database"},
         {"path": "/my_health", "auth": "authenticated_self", "kind": "self"},
         {"path": "/auth_health", "auth": "operator_or_service_token", "kind": "auth"},

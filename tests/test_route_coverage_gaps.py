@@ -59,7 +59,10 @@ def test_upload_session_complete_route_round_trip(client) -> None:
 
     completed = client.post(
         f"/api/v1/artifacts/upload-sessions/{upload_token}/complete",
-        headers={"Authorization": "Bearer token-123", "Idempotency-Key": "idem-gap-upload-complete"},
+        headers={
+            "Authorization": "Bearer token-123",
+            "Idempotency-Key": "idem-gap-upload-complete",
+        },
         json={"checksums": {"sha256": "abc123"}, "metadata": {"stage": "gap"}},
     )
     assert completed.status_code == 200
@@ -112,7 +115,10 @@ def test_share_reference_lookup_and_external_object_relation_routes(client) -> N
 
     external_object = client.post(
         "/api/v1/external-objects",
-        headers={"Authorization": "Bearer token-123", "Idempotency-Key": "idem-gap-external-object"},
+        headers={
+            "Authorization": "Bearer token-123",
+            "Idempotency-Key": "idem-gap-external-object",
+        },
         json={
             "external_system": "atlas",
             "external_object_type": "document",
@@ -125,7 +131,10 @@ def test_share_reference_lookup_and_external_object_relation_routes(client) -> N
 
     relation = client.post(
         "/api/v1/external-object-relations",
-        headers={"Authorization": "Bearer token-123", "Idempotency-Key": "idem-gap-external-relation"},
+        headers={
+            "Authorization": "Bearer token-123",
+            "Idempotency-Key": "idem-gap-external-relation",
+        },
         json={
             "target_type": "artifact",
             "target_euid": artifact["artifact_euid"],

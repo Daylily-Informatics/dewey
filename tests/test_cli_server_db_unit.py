@@ -44,7 +44,9 @@ def test_server_load_settings_and_uri_validation(monkeypatch: pytest.MonkeyPatch
     assert server_cli._load_settings().cognito_app_client_id == "client-1"
     assert clear_calls == ["clear"]
 
-    monkeypatch.setattr(server_cli, "_load_settings", lambda: (_ for _ in ()).throw(ValueError("bad config")))
+    monkeypatch.setattr(
+        server_cli, "_load_settings", lambda: (_ for _ in ()).throw(ValueError("bad config"))
+    )
     with pytest.raises(typer.Exit) as exc:
         server_cli._validate_cognito_uris_for_port(port=8914, host="localhost")
     assert exc.value.exit_code == 1
@@ -79,7 +81,9 @@ def test_server_port_host_and_status_resolution(monkeypatch: pytest.MonkeyPatch)
     monkeypatch.setattr(server_cli, "_load_settings", _settings)
     assert server_cli._status_bind() == ("localhost", "8914")
 
-    monkeypatch.setattr(server_cli, "_load_settings", lambda: (_ for _ in ()).throw(ValueError("invalid")))
+    monkeypatch.setattr(
+        server_cli, "_load_settings", lambda: (_ for _ in ()).throw(ValueError("invalid"))
+    )
     assert server_cli._status_bind() == ("unknown", "unknown")
 
 
@@ -115,7 +119,9 @@ def test_tls_resolution_precedence(monkeypatch: pytest.MonkeyPatch, tmp_path: Pa
     monkeypatch.setattr(server_cli, "CERT_FILE", repo_cert)
     monkeypatch.setattr(server_cli, "KEY_FILE", repo_key)
     monkeypatch.setattr(server_cli, "_shared_cert_dir", lambda: shared_dir)
-    monkeypatch.setattr(server_cli, "ensure_certs", lambda path: (path / "cert.pem", path / "key.pem"))
+    monkeypatch.setattr(
+        server_cli, "ensure_certs", lambda path: (path / "cert.pem", path / "key.pem")
+    )
 
     assert server_cli._resolve_tls_material(
         ssl_enabled=True,
@@ -210,7 +216,9 @@ def test_tls_resolution_validation_and_generation(
     ) == (generated_cert, generated_key)
     assert calls == [shared_dir]
 
-    monkeypatch.setattr(server_cli, "ensure_certs", lambda path: (_ for _ in ()).throw(SystemExit("mkcert missing")))
+    monkeypatch.setattr(
+        server_cli, "ensure_certs", lambda path: (_ for _ in ()).throw(SystemExit("mkcert missing"))
+    )
     generated_cert.unlink()
     generated_key.unlink()
     with pytest.raises(typer.BadParameter, match="mkcert missing"):
@@ -336,7 +344,9 @@ def test_status_scheme_meta(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> 
     assert server_cli._status_scheme() == "https"
 
 
-def test_stop_server_and_logs_branches(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys) -> None:
+def test_stop_server_and_logs_branches(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys
+) -> None:
     monkeypatch.setattr(server_cli, "_pid_file", lambda: tmp_path / "server.pid")
     monkeypatch.setattr(server_cli, "_runtime_meta_file", lambda: tmp_path / "server-meta.json")
     (tmp_path / "server-meta.json").write_text('{"ssl_enabled": true}', encoding="utf-8")
@@ -345,7 +355,9 @@ def test_stop_server_and_logs_branches(monkeypatch: pytest.MonkeyPatch, tmp_path
     assert "Server stopped" in capsys.readouterr().out
     assert not (tmp_path / "server-meta.json").exists()
 
-    monkeypatch.setattr(server_cli, "stop_pid", lambda path: (False, "Permission denied stopping PID 1"))
+    monkeypatch.setattr(
+        server_cli, "stop_pid", lambda path: (False, "Permission denied stopping PID 1")
+    )
     with pytest.raises(typer.Exit) as exc:
         server_cli._stop_server()
     assert exc.value.exit_code == 1
@@ -372,7 +384,9 @@ def test_stop_server_and_logs_branches(monkeypatch: pytest.MonkeyPatch, tmp_path
 
     monkeypatch.setattr(server_cli, "latest_log", lambda path: log_file)
     followed: list[tuple[Path, int]] = []
-    monkeypatch.setattr(server_cli, "tail_follow", lambda path, lines=50: followed.append((path, lines)))
+    monkeypatch.setattr(
+        server_cli, "tail_follow", lambda path, lines=50: followed.append((path, lines))
+    )
     server_cli.logs(lines=25, all_logs=False)
     assert followed == [(log_file, 25)]
 
@@ -387,7 +401,11 @@ def test_server_command_wrappers(monkeypatch: pytest.MonkeyPatch) -> None:
     start_calls: list[dict[str, object]] = []
     monkeypatch.setenv("DEWEY_HOST", "127.0.0.1")
     monkeypatch.setenv("DEWEY_PORT", "9002")
-    monkeypatch.setattr(server_cli, "_validate_cognito_uris_for_port", lambda **kwargs: start_calls.append({"validated": kwargs}))
+    monkeypatch.setattr(
+        server_cli,
+        "_validate_cognito_uris_for_port",
+        lambda **kwargs: start_calls.append({"validated": kwargs}),
+    )
     monkeypatch.setattr(server_cli, "_start_server", lambda **kwargs: start_calls.append(kwargs))
 
     server_cli.start(reload=True, background=False)
@@ -412,7 +430,9 @@ def test_db_cli_error_branches(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(db_cli, "ensure_tapdb_version", lambda: "3.0.6")
 
     with pytest.raises(typer.Exit) as exc:
-        db_cli.build(target="aurora", cluster="", profile="lsmc", region="us-west-2", namespace="dewey")
+        db_cli.build(
+            target="aurora", cluster="", profile="lsmc", region="us-west-2", namespace="dewey"
+        )
     assert exc.value.exit_code == 1
 
     monkeypatch.setattr(
@@ -431,7 +451,9 @@ def test_db_cli_error_branches(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr(db_cli.subprocess, "run", fail_seed)
     with pytest.raises(typer.Exit) as exc:
-        db_cli.build(target="local", cluster="", profile="lsmc", region="us-west-2", namespace="dewey")
+        db_cli.build(
+            target="local", cluster="", profile="lsmc", region="us-west-2", namespace="dewey"
+        )
     assert exc.value.exit_code == 1
 
     with pytest.raises(typer.Exit) as exc:
@@ -470,7 +492,9 @@ def test_db_cli_reset_success_path(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         db_cli,
         "run_tapdb_cli",
-        lambda args, **kwargs: calls.append(("delete", args)) or _proc(returncode=0, stdout="deleted"),
+        lambda args, **kwargs: (
+            calls.append(("delete", args)) or _proc(returncode=0, stdout="deleted")
+        ),
     )
     monkeypatch.setattr(
         db_cli,
@@ -478,7 +502,14 @@ def test_db_cli_reset_success_path(monkeypatch: pytest.MonkeyPatch) -> None:
         lambda **kwargs: calls.append(("build", kwargs)),
     )
 
-    db_cli.reset(force=True, target="local", cluster="cluster-1", profile="lsmc", region="us-west-2", namespace="dewey")
+    db_cli.reset(
+        force=True,
+        target="local",
+        cluster="cluster-1",
+        profile="lsmc",
+        region="us-west-2",
+        namespace="dewey",
+    )
 
     assert calls == [
         ("delete", ["db", "delete", "dev", "--force"]),
@@ -500,7 +531,9 @@ def test_db_cli_nuke_success_path(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         db_cli,
         "run_tapdb_cli",
-        lambda args, **kwargs: calls.append(("delete", args)) or _proc(returncode=0, stdout="deleted"),
+        lambda args, **kwargs: (
+            calls.append(("delete", args)) or _proc(returncode=0, stdout="deleted")
+        ),
     )
     monkeypatch.setattr(
         db_cli,

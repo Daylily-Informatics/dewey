@@ -118,9 +118,23 @@ def _source_activate(
 def test_activate_requires_conda_on_path(tmp_path: Path) -> None:
     empty_bin = tmp_path / "bin"
     empty_bin.mkdir()
+    for utility in ("dirname", "sed"):
+        source = Path("/usr/bin") / utility
+        if not source.exists():
+            source = Path("/bin") / utility
+        assert source.exists(), f"missing test utility: {utility}"
+        (empty_bin / utility).symlink_to(source)
 
     env = os.environ.copy()
-    env["PATH"] = "/usr/bin:/bin"
+    env["PATH"] = str(empty_bin)
+    for key in list(env):
+        if key.startswith("BASH_FUNC_conda"):
+            env.pop(key, None)
+    env.pop("CONDA_EXE", None)
+    env.pop("_CONDA_EXE", None)
+    env.pop("CONDA_SHLVL", None)
+    env.pop("MAMBA_EXE", None)
+    env.pop("MAMBA_ROOT_PREFIX", None)
     env.pop("CONDA_DEFAULT_ENV", None)
     env.pop("CONDA_PREFIX", None)
 

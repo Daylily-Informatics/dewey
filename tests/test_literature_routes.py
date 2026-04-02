@@ -38,7 +38,11 @@ def test_literature_page_and_search_render_after_login(monkeypatch, client) -> N
     assert response.status_code == 200
     assert "PubMed Search And Save" in response.text
     assert "Gene Therapy For Example Disease" in response.text
-    assert "browser upload/register-S3" in response.text
+    assert (
+        "Search results stay read-mostly until you explicitly save them into Dewey."
+        in response.text
+    )
+    assert "Open Full Text" in response.text
     assert "metapub" in response.text.lower()
 
 

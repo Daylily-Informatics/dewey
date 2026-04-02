@@ -15,11 +15,13 @@ from daylily_cognito import (
     build_authorization_url,
     clear_session_principal,
     complete_cognito_callback,
-    configure_session_middleware,
     exchange_authorization_code,
     load_session_principal,
     start_cognito_login,
     validate_web_auth_contract,
+)
+from daylily_cognito import (
+    configure_session_middleware as _configure_session_middleware,
 )
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
@@ -27,6 +29,8 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from dewey_service.rbac import Role, normalize_session_profile, profile_has_role
 from dewey_service.settings import Settings
+
+configure_session_middleware = _configure_session_middleware
 
 
 class AuthError(RuntimeError):
@@ -142,7 +146,6 @@ def start_browser_login(
     config: CognitoWebSessionConfig,
     next_path: str | None = None,
 ):
-    request.session.pop("operator_profile", None)
     return start_cognito_login(request, config, next_path)
 
 
@@ -168,13 +171,11 @@ async def complete_browser_login(
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
-    request.session.pop("operator_profile", None)
     return response
 
 
 def clear_ui_session(request: Request) -> None:
     clear_session_principal(request)
-    request.session.pop("operator_profile", None)
     config = getattr(getattr(request.app, "state", None), "web_session_config", None)
     if config is not None:
         request.session.pop(config.state_session_key, None)
@@ -252,24 +253,6 @@ def _load_ui_profile(request: Request) -> dict[str, Any] | None:
             email=principal.email,
             sub=principal.user_sub,
             groups=principal.cognito_groups,
-            group_role_map=settings.cognito_group_role_map,
-        )
-
-    legacy_profile = request.session.get("operator_profile")
-    if isinstance(legacy_profile, dict):
-        request.state.auth_mode = "cognito"
-        settings = request.app.state.settings
-        if "roles" in legacy_profile:
-            return normalize_session_profile(
-                email=legacy_profile.get("email"),
-                sub=legacy_profile.get("sub"),
-                groups=legacy_profile.get("groups"),
-                group_role_map=settings.cognito_group_role_map,
-            )
-        return normalize_session_profile(
-            email=legacy_profile.get("email"),
-            sub=legacy_profile.get("sub"),
-            groups=legacy_profile.get("groups"),
             group_role_map=settings.cognito_group_role_map,
         )
 

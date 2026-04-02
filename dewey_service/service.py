@@ -37,8 +37,8 @@ from dewey_service.storage import (
     StoragePermissionError,
 )
 from dewey_service.tapdb_backend import (
-    ARTIFACT_SET_TEMPLATE,
     ANOMALY_TEMPLATE,
+    ARTIFACT_SET_TEMPLATE,
     ARTIFACT_TEMPLATE,
     EXTERNAL_OBJECT_RELATION_TEMPLATE,
     EXTERNAL_OBJECT_TEMPLATE,
@@ -63,6 +63,9 @@ class DeweyConflictError(RuntimeError):
 class IdempotencyReplay:
     status_code: int
     response: dict[str, Any]
+
+
+DEFAULT_SHARE_HOST = "127.0.0.1"
 
 
 class DeweyService:
@@ -320,7 +323,9 @@ class DeweyService:
             raise ValueError("at least one artifact_euid is required")
         seen: set[str] = set()
         buffer = io.BytesIO()
-        archive_name = f"dewey-artifacts-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}.zip"
+        archive_name = (
+            f"dewey-artifacts-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}.zip"
+        )
         with zipfile.ZipFile(buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
             for artifact_euid in selected:
                 artifact = self.get_artifact(artifact_euid)
@@ -394,7 +399,9 @@ class DeweyService:
         share_last_issued_at: str | None = None,
         artifact_identity_key: str | None = None,
     ) -> dict[str, Any]:
-        clean_artifact_type = resolve_artifact_type(artifact_type, original_filename, key, source_uri)
+        clean_artifact_type = resolve_artifact_type(
+            artifact_type, original_filename, key, source_uri
+        )
         backend, bucket_value, key_value, version_value, storage_uri = self._normalize_storage(
             storage_backend=storage_backend,
             bucket=bucket,
@@ -547,7 +554,9 @@ class DeweyService:
             source_value,
             str(meta.get("original_filename") or "").strip() or None,
         )
-        resolved_artifact_type = resolve_artifact_type(artifact_type, original_filename, source_value)
+        resolved_artifact_type = resolve_artifact_type(
+            artifact_type, original_filename, source_value
+        )
         payload = {
             "artifact_type": resolved_artifact_type,
             "source_uri": source_value,
@@ -2879,12 +2888,16 @@ class DeweyService:
                                     or None,
                                 )
                                 entry["status"] = "active"
-                                entry["access_url"] = self._require_storage().generate_presigned_get_url(
-                                    bucket=str(artifact_payload.get("bucket") or ""),
-                                    key=str(artifact_payload.get("key") or ""),
-                                    version_id=str(artifact_payload.get("version_id") or "").strip()
-                                    or None,
-                                    expires_in=ttl_value,
+                                entry["access_url"] = (
+                                    self._require_storage().generate_presigned_get_url(
+                                        bucket=str(artifact_payload.get("bucket") or ""),
+                                        key=str(artifact_payload.get("key") or ""),
+                                        version_id=str(
+                                            artifact_payload.get("version_id") or ""
+                                        ).strip()
+                                        or None,
+                                        expires_in=ttl_value,
+                                    )
                                 )
                             except StorageObjectNotFoundError:
                                 entry["status"] = "error"
@@ -2893,11 +2906,38 @@ class DeweyService:
                         manifest.append(entry)
                     status_value = "error" if errors == member_count and member_count else "active"
                 else:
-                    host = str(clean_transport_config.get("host") or "0.0.0.0").strip() or "0.0.0.0"
-                    port = int(clean_transport_config.get("port") or (8080 if clean_transport == "rclone_http" else 8022))
-                    username = str(clean_transport_config.get("user") or clean_transport_config.get("username") or "user").strip() or "user"
-                    password = str(clean_transport_config.get("passwd") or clean_transport_config.get("password") or "passwd").strip() or "passwd"
-                    bucket = str(clean_transport_config.get("bucket") or self.managed_storage_bucket or "").strip() or None
+                    host = (
+                        str(clean_transport_config.get("host") or DEFAULT_SHARE_HOST).strip()
+                        or DEFAULT_SHARE_HOST
+                    )
+                    port = int(
+                        clean_transport_config.get("port")
+                        or (8080 if clean_transport == "rclone_http" else 8022)
+                    )
+                    username = (
+                        str(
+                            clean_transport_config.get("user")
+                            or clean_transport_config.get("username")
+                            or "user"
+                        ).strip()
+                        or "user"
+                    )
+                    password = (
+                        str(
+                            clean_transport_config.get("passwd")
+                            or clean_transport_config.get("password")
+                            or "passwd"
+                        ).strip()
+                        or "passwd"
+                    )
+                    bucket = (
+                        str(
+                            clean_transport_config.get("bucket")
+                            or self.managed_storage_bucket
+                            or ""
+                        ).strip()
+                        or None
+                    )
                     endpoint = (
                         f"http://{host}:{port}/"
                         if clean_transport == "rclone_http"

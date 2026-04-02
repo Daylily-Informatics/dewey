@@ -30,12 +30,25 @@ _CYAN='\033[0;36m'
 _NC='\033[0m'
 _DEWEY_PYTHON=""
 _DEWEY_CONDA_ENV_BASE="DEWEY"
+_DEWEY_LEGACY_REBIND_VARS=(
+  USE_LOCAL_DAYLILY_TAPDB
+  USE_LOCAL_DAYLILY_COGNITO
+  USE_LOCAL_CLI_CORE_YO
+)
 
-_dewey_truthy() {
-  case "${1:-}" in
-    1|true|TRUE|yes|YES|on|ON) return 0 ;;
-    *) return 1 ;;
-  esac
+_dewey_require_python_import() {
+  local module_name="$1"
+  local package_name="$2"
+  if ! "${_DEWEY_PYTHON:-python}" - "$module_name" <<'PY' >/dev/null 2>&1
+import importlib
+import sys
+
+importlib.import_module(sys.argv[1])
+PY
+  then
+    _dewey_fail "Missing packaged dependency: ${package_name}"
+    return 1
+  fi
 }
 
 _dewey_sanitize_deployment_code() {
@@ -77,27 +90,25 @@ _dewey_fail() {
   return 1
 }
 
-_dewey_resolve_local_repo() {
-  local module_dir="$1"
-  shift
-  local candidate=""
-  local candidate_path=""
-  local fallback=""
-  for candidate in "$@"; do
-    [[ -d "$candidate" ]] || continue
-    candidate_path="$(cd "$candidate" 2>/dev/null && pwd)"
-    [[ -n "$candidate_path" ]] || continue
-    [[ -d "${candidate_path}/${module_dir}" ]] || continue
-    if [[ -d "${candidate_path}/.git" ]]; then
-      printf '%s\n' "$candidate_path"
-      return 0
+_dewey_reject_legacy_local_rebind_env() {
+  local var_name=""
+  local var_value=""
+  for var_name in "${_DEWEY_LEGACY_REBIND_VARS[@]}"; do
+    if [[ -n "${ZSH_VERSION:-}" ]]; then
+      eval 'var_value="${(P)var_name-}"'
+    else
+      eval 'var_value="${!var_name-}"'
     fi
-    if [[ -z "$fallback" ]]; then
-      fallback="$candidate_path"
+    if [[ -n "$var_value" ]]; then
+      _dewey_fail "${var_name} is no longer supported; use packaged dependencies from ${_DEWEY_CONDA_ENV_NAME}"
+      return 1
     fi
   done
-  [[ -n "$fallback" ]] && printf '%s\n' "$fallback"
 }
+
+if ! _dewey_reject_legacy_local_rebind_env; then
+  return 1
+fi
 
 _dewey_module_is_from_repo() {
   local module_name="$1"
@@ -286,44 +297,13 @@ if ! _dewey_install_main_repo; then
   return 1
 fi
 
-_DEWEY_TAPDB_REPO="$(_dewey_resolve_local_repo \
-  daylily_tapdb \
-  "$DEWEY_ROOT/../daylily-tapdb" \
-  "$DEWEY_ROOT/../lims_repos/daylily-tapdb"
-)"
-if _dewey_truthy "${USE_LOCAL_DAYLILY_TAPDB:-0}"; then
-  if ! _dewey_ensure_editable_repo "daylily-tapdb" "daylily_tapdb" "${_DEWEY_TAPDB_REPO:-}" "[cli,admin,aurora,dev]"; then
-    return 1
-  fi
-else
-  echo -e "  ${_GREEN}✓${_NC} Using packaged daylily-tapdb from ${_DEWEY_CONDA_ENV_NAME}"
-fi
+echo -e "  ${_GREEN}✓${_NC} Using packaged daylily-tapdb from ${_DEWEY_CONDA_ENV_NAME}"
+echo -e "  ${_GREEN}✓${_NC} Using packaged daylily-cognito from ${_DEWEY_CONDA_ENV_NAME}"
+echo -e "  ${_GREEN}✓${_NC} Using packaged cli-core-yo from ${_DEWEY_CONDA_ENV_NAME}"
 
-_DEWEY_DAYCOG_REPO="$(_dewey_resolve_local_repo \
-  daylily_cognito \
-  "$DEWEY_ROOT/../daylily-cognito" \
-  "$DEWEY_ROOT/../lims_repos/daylily-cognito"
-)"
-if _dewey_truthy "${USE_LOCAL_DAYLILY_COGNITO:-0}"; then
-  if ! _dewey_ensure_editable_repo "daylily-cognito" "daylily_cognito" "${_DEWEY_DAYCOG_REPO:-}"; then
-    return 1
-  fi
-else
-  echo -e "  ${_GREEN}✓${_NC} Using packaged daylily-cognito from ${_DEWEY_CONDA_ENV_NAME}"
-fi
-
-_DEWEY_CLI_CORE_REPO="$(_dewey_resolve_local_repo \
-  cli_core_yo \
-  "$DEWEY_ROOT/../cli-core-yo" \
-  "$DEWEY_ROOT/../lims_repos/cli-core-yo"
-)"
-if _dewey_truthy "${USE_LOCAL_CLI_CORE_YO:-0}"; then
-  if ! _dewey_ensure_editable_repo "cli-core-yo" "cli_core_yo" "${_DEWEY_CLI_CORE_REPO:-}"; then
-    return 1
-  fi
-else
-  echo -e "  ${_GREEN}✓${_NC} Using packaged cli-core-yo from ${_DEWEY_CONDA_ENV_NAME}"
-fi
+_dewey_require_python_import "daylily_tapdb" "daylily-tapdb" || return 1
+_dewey_require_python_import "daylily_cognito" "daylily-cognito" || return 1
+_dewey_require_python_import "cli_core_yo" "cli-core-yo" || return 1
 
 if command -v rehash >/dev/null 2>&1; then
   rehash

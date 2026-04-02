@@ -69,7 +69,9 @@ storage:
     assert loaded.managed_storage_prefix == "managed"
 
 
-def test_settings_ignore_dewey_cognito_env_overrides(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_settings_allow_dewey_cognito_env_overrides(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "local")
     cfg_dir = tmp_path / "dewey-local"
     cfg_dir.mkdir(parents=True)
@@ -96,8 +98,8 @@ auth:
 
     loaded = load_settings()
 
-    assert loaded.cognito_domain == "https://yaml.example.com"
-    assert loaded.cognito_app_client_id == "yaml-client"
+    assert loaded.cognito_domain == "https://env.example.com"
+    assert loaded.cognito_app_client_id == "env-client"
 
 
 def test_persist_managed_storage_bucket_creates_or_updates_storage_section(

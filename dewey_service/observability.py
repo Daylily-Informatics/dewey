@@ -198,11 +198,19 @@ class DeweyObservabilityStore:
                 {"path": "/health", "auth": "operator_or_service_token", "kind": "summary"},
                 {"path": "/obs_services", "auth": "operator_or_service_token", "kind": "discovery"},
                 {"path": "/api_health", "auth": "operator_or_service_token", "kind": "api_rollup"},
-                {"path": "/endpoint_health", "auth": "operator_or_service_token", "kind": "endpoint_rollup"},
+                {
+                    "path": "/endpoint_health",
+                    "auth": "operator_or_service_token",
+                    "kind": "endpoint_rollup",
+                },
                 {"path": "/db_health", "auth": "operator_or_service_token", "kind": "database"},
                 {"path": "/my_health", "auth": "authenticated_self", "kind": "self"},
                 {"path": "/auth_health", "auth": "operator_or_service_token", "kind": "auth"},
-                {"path": "/api/anomalies", "auth": "operator_or_service_token", "kind": "anomaly_list"},
+                {
+                    "path": "/api/anomalies",
+                    "auth": "operator_or_service_token",
+                    "kind": "anomaly_list",
+                },
                 {
                     "path": "/api/anomalies/{anomaly_id}",
                     "auth": "operator_or_service_token",
@@ -217,7 +225,9 @@ class DeweyObservabilityStore:
             "observed_at": self._started_at,
         }
 
-    def projection(self, *, observed_at: str | None = None, detail: str | None = None) -> ProjectionMetadata:
+    def projection(
+        self, *, observed_at: str | None = None, detail: str | None = None
+    ) -> ProjectionMetadata:
         seen_at = observed_at or self._started_at
         return ProjectionMetadata(
             state="ready",
@@ -327,12 +337,20 @@ class DeweyObservabilityStore:
         observed_at = families[0]["observed_at"] if families else self._started_at
         return self.projection(observed_at=observed_at), families
 
-    def endpoint_health(self, *, offset: int, limit: int) -> tuple[ProjectionMetadata, dict[str, Any]]:
+    def endpoint_health(
+        self, *, offset: int, limit: int
+    ) -> tuple[ProjectionMetadata, dict[str, Any]]:
         items = [rollup.to_dict() for rollup in self._endpoint_rollups.values()]
-        items.sort(key=lambda item: (-int(item["request_count"]), item["route_template"], item["method"]))
+        items.sort(
+            key=lambda item: (-int(item["request_count"]), item["route_template"], item["method"])
+        )
         total = len(items)
         sliced = items[offset : offset + limit]
-        observed_at = sliced[0]["observed_at"] if sliced else (items[0]["observed_at"] if items else self._started_at)
+        observed_at = (
+            sliced[0]["observed_at"]
+            if sliced
+            else (items[0]["observed_at"] if items else self._started_at)
+        )
         return self.projection(observed_at=observed_at), {
             "total": total,
             "offset": offset,
@@ -346,10 +364,14 @@ class DeweyObservabilityStore:
     def db_health(self) -> tuple[ProjectionMetadata, dict[str, Any]]:
         latest = dict(self._db_probes[0]) if self._db_probes else None
         recent = [rollup.to_dict() for rollup in self._db_rollups.values()]
-        recent.sort(key=lambda item: (-float(item["p95_ms"]), -int(item["request_count"]), item["label"]))
+        recent.sort(
+            key=lambda item: (-float(item["p95_ms"]), -int(item["request_count"]), item["label"])
+        )
         hottest = sorted(recent, key=lambda item: (-int(item["request_count"]), item["label"]))[:5]
         slowest = sorted(recent, key=lambda item: (-float(item["p95_ms"]), item["label"]))[:5]
-        observed_at = (latest or {}).get("observed_at") or (recent[0]["observed_at"] if recent else self._started_at)
+        observed_at = (latest or {}).get("observed_at") or (
+            recent[0]["observed_at"] if recent else self._started_at
+        )
         return self.projection(observed_at=observed_at), {
             "status": str((latest or {}).get("status") or "unknown"),
             "latest": latest,
@@ -415,9 +437,7 @@ def classify_family(route_template: str) -> str:
 def route_template_from_request(request: Request) -> str:
     route = request.scope.get("route")
     return str(
-        getattr(route, "path", None)
-        or getattr(route, "path_format", None)
-        or request.url.path
+        getattr(route, "path", None) or getattr(route, "path_format", None) or request.url.path
     )
 
 

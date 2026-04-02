@@ -10,7 +10,11 @@ def _login_user(monkeypatch, client, groups: list[str] | None = None) -> None:
     )
     monkeypatch.setattr(
         "dewey_service.auth.decode_jwt_claims_noverify",
-        lambda token: {"email": "operator@example.com", "sub": "sub-1", "cognito:groups": groups or ["dewey-readwrite"]},
+        lambda token: {
+            "email": "operator@example.com",
+            "sub": "sub-1",
+            "cognito:groups": groups or ["dewey-readwrite"],
+        },
     )
     login = client.get("/auth/login", follow_redirects=False)
     parsed = urlparse(login.headers["location"])
@@ -126,7 +130,10 @@ def test_search_page_renders_after_login(monkeypatch, client) -> None:
 def test_search_export_page_returns_authenticated_json_results(monkeypatch, client) -> None:
     client.post(
         "/api/v1/artifacts",
-        headers={"Authorization": "Bearer token-123", "Idempotency-Key": "idem-search-export-art-1"},
+        headers={
+            "Authorization": "Bearer token-123",
+            "Idempotency-Key": "idem-search-export-art-1",
+        },
         json={
             "artifact_type": "report",
             "storage_backend": "s3",

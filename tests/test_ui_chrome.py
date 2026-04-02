@@ -26,7 +26,7 @@ def _settings_with_deployment() -> Settings:
 def test_login_page_renders_banner_and_favicon(fake_service) -> None:
     app = create_app(settings=_settings_with_deployment(), service=fake_service)
 
-    with TestClient(app) as client:
+    with TestClient(app, base_url="https://localhost:8914") as client:
         response = client.get("/login")
 
     assert response.status_code == 200
@@ -52,7 +52,7 @@ def test_ui_page_renders_banner_after_login(monkeypatch, fake_service) -> None:
         },
     )
 
-    with TestClient(app) as client:
+    with TestClient(app, base_url="https://localhost:8914") as client:
         login = client.get("/auth/login", follow_redirects=False)
         parsed = urlparse(login.headers["location"])
         state = parse_qs(parsed.query)["state"][0]
@@ -61,7 +61,7 @@ def test_ui_page_renders_banner_after_login(monkeypatch, fake_service) -> None:
             params={"code": "code-1", "state": state},
             follow_redirects=False,
         )
-        assert callback.status_code == 303
+        assert callback.status_code == 302
 
         ui = client.get("/ui")
         admin = client.get("/admin")
@@ -88,7 +88,7 @@ def test_ui_page_renders_banner_after_login(monkeypatch, fake_service) -> None:
 def test_favicon_route_redirects_to_svg(fake_service) -> None:
     app = create_app(settings=_settings_with_deployment(), service=fake_service)
 
-    with TestClient(app) as client:
+    with TestClient(app, base_url="https://localhost:8914") as client:
         response = client.get("/favicon.ico", follow_redirects=False)
 
     assert response.status_code == 307

@@ -211,7 +211,10 @@ def test_backend_init_builds_connection(monkeypatch: pytest.MonkeyPatch) -> None
 
 def test_backend_helpers_cover_utility_functions() -> None:
     assert backend_mod.utc_now_iso().endswith("Z")
-    assert backend_mod.sha256_json({"a": 1}) == hashlib.sha256(str({"a": 1}).encode("utf-8")).hexdigest()
+    assert (
+        backend_mod.sha256_json({"a": 1})
+        == hashlib.sha256(str({"a": 1}).encode("utf-8")).hexdigest()
+    )
     assert backend_mod._parse_template_code("generic/data/artifact/1.0/") == (
         "generic",
         "data",
@@ -318,22 +321,45 @@ def test_update_instance_json_and_query_helpers(monkeypatch: pytest.MonkeyPatch)
 
     found = SimpleNamespace(euid="DGX-000001", created_dt=datetime.now(timezone.utc))
     q_template = _FakeQuery(first_result=found, all_result=[found])
-    session = _FakeSession({_FakeGenericInstanceModel: [q_template, _FakeQuery(first_result=found), _FakeQuery(first_result=found), _FakeQuery(all_result=[found])]})
+    session = _FakeSession(
+        {
+            _FakeGenericInstanceModel: [
+                q_template,
+                _FakeQuery(first_result=found),
+                _FakeQuery(first_result=found),
+                _FakeQuery(all_result=[found]),
+            ]
+        }
+    )
 
-    query = backend._template_query(session, template_code=backend_mod.ARTIFACT_TEMPLATE, for_update=True)
+    query = backend._template_query(
+        session, template_code=backend_mod.ARTIFACT_TEMPLATE, for_update=True
+    )
     assert query is q_template
     assert q_template.with_for_update_called is True
     assert q_template.filters
 
-    assert backend.find_by_euid(session, template_code=backend_mod.ARTIFACT_TEMPLATE, euid="DGX-000001") is found
-    assert backend.find_by_json_field(
-        session,
-        template_code=backend_mod.ARTIFACT_TEMPLATE,
-        field="artifact_identity_key",
-        value="identity",
-    ) is found
-    assert backend.list_by_template(session, template_code=backend_mod.ARTIFACT_TEMPLATE, limit=3) == [found]
-    assert backend.find_by_euid(session, template_code=backend_mod.ARTIFACT_TEMPLATE, euid="") is None
+    assert (
+        backend.find_by_euid(
+            session, template_code=backend_mod.ARTIFACT_TEMPLATE, euid="DGX-000001"
+        )
+        is found
+    )
+    assert (
+        backend.find_by_json_field(
+            session,
+            template_code=backend_mod.ARTIFACT_TEMPLATE,
+            field="artifact_identity_key",
+            value="identity",
+        )
+        is found
+    )
+    assert backend.list_by_template(
+        session, template_code=backend_mod.ARTIFACT_TEMPLATE, limit=3
+    ) == [found]
+    assert (
+        backend.find_by_euid(session, template_code=backend_mod.ARTIFACT_TEMPLATE, euid="") is None
+    )
 
     instance = SimpleNamespace(json_addl={"a": 1})
     backend.update_instance_json(session, instance, {"b": 2})
@@ -351,24 +377,67 @@ def test_lineage_helpers_cover_create_delete_and_lists(monkeypatch: pytest.Monke
     monkeypatch.setattr(backend_mod, "generic_instance_lineage", _FakeLineageModel)
 
     existing_lineage = SimpleNamespace()
-    create_session = _FakeSession({_FakeLineageModel: [_FakeQuery(first_result=None), _FakeQuery(first_result=existing_lineage), _FakeQuery(first_result=None), _FakeQuery(first_result=SimpleNamespace(is_deleted=False, bstatus="active")), _FakeQuery(first_result=None)], _FakeGenericInstanceModel: [_FakeQuery(all_result=[child]), _FakeQuery(all_result=[parent])]})
+    create_session = _FakeSession(
+        {
+            _FakeLineageModel: [
+                _FakeQuery(first_result=None),
+                _FakeQuery(first_result=existing_lineage),
+                _FakeQuery(first_result=None),
+                _FakeQuery(first_result=SimpleNamespace(is_deleted=False, bstatus="active")),
+                _FakeQuery(first_result=None),
+            ],
+            _FakeGenericInstanceModel: [
+                _FakeQuery(all_result=[child]),
+                _FakeQuery(all_result=[parent]),
+            ],
+        }
+    )
 
-    lineage = backend.create_lineage(create_session, parent=parent, child=child, relationship_type="artifact_set_member")
+    lineage = backend.create_lineage(
+        create_session, parent=parent, child=child, relationship_type="artifact_set_member"
+    )
     assert lineage in create_session.added
     assert create_session.flush_count >= 1
 
-    assert backend.create_lineage(create_session, parent=parent, child=child, relationship_type="artifact_set_member") is existing_lineage
+    assert (
+        backend.create_lineage(
+            create_session, parent=parent, child=child, relationship_type="artifact_set_member"
+        )
+        is existing_lineage
+    )
 
-    assert backend.delete_lineage(create_session, parent=parent, child=child, relationship_type="artifact_set_member") is False
+    assert (
+        backend.delete_lineage(
+            create_session, parent=parent, child=child, relationship_type="artifact_set_member"
+        )
+        is False
+    )
 
     deletable = SimpleNamespace(is_deleted=False, bstatus="active")
-    delete_session = _FakeSession({_FakeLineageModel: [_FakeQuery(first_result=deletable)], _FakeGenericInstanceModel: [_FakeQuery(all_result=[child]), _FakeQuery(all_result=[parent])]})
-    assert backend.delete_lineage(delete_session, parent=parent, child=child, relationship_type="artifact_set_member") is True
+    delete_session = _FakeSession(
+        {
+            _FakeLineageModel: [_FakeQuery(first_result=deletable)],
+            _FakeGenericInstanceModel: [
+                _FakeQuery(all_result=[child]),
+                _FakeQuery(all_result=[parent]),
+            ],
+        }
+    )
+    assert (
+        backend.delete_lineage(
+            delete_session, parent=parent, child=child, relationship_type="artifact_set_member"
+        )
+        is True
+    )
     assert deletable.is_deleted is True
     assert deletable.bstatus == "deleted"
 
-    assert backend.list_children(delete_session, parent=parent, relationship_type="artifact_set_member") == [child]
-    assert backend.list_parents(delete_session, child=child, relationship_type="artifact_set_member") == [parent]
+    assert backend.list_children(
+        delete_session, parent=parent, relationship_type="artifact_set_member"
+    ) == [child]
+    assert backend.list_parents(
+        delete_session, child=child, relationship_type="artifact_set_member"
+    ) == [parent]
 
 
 def test_find_lineage_instance_and_normalize_payload(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -381,8 +450,12 @@ def test_find_lineage_instance_and_normalize_payload(monkeypatch: pytest.MonkeyP
 
     candidate_a = SimpleNamespace(uid=3, euid="DGX-000003")
     candidate_b = SimpleNamespace(uid=4, euid="DGX-000004")
-    session = _FakeSession({_FakeGenericInstanceModel: [_FakeQuery(all_result=[candidate_a, candidate_b])]})
-    backend.list_parents = lambda session, child, relationship_type=None: [] if child is candidate_a else [SimpleNamespace(uid=1)]
+    session = _FakeSession(
+        {_FakeGenericInstanceModel: [_FakeQuery(all_result=[candidate_a, candidate_b])]}
+    )
+    backend.list_parents = lambda session, child, relationship_type=None: (
+        [] if child is candidate_a else [SimpleNamespace(uid=1)]
+    )
 
     source = SimpleNamespace(uid=1)
     assert (

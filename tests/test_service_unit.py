@@ -270,7 +270,9 @@ class _FakeStorageClient:
 
     def list_objects(self, *, bucket: str, prefix: str, limit: int = 1000) -> list[StorageObject]:
         rows = [
-            obj for (obj_bucket, _), obj in self.objects.items() if obj_bucket == bucket and obj.key.startswith(prefix)
+            obj
+            for (obj_bucket, _), obj in self.objects.items()
+            if obj_bucket == bucket and obj.key.startswith(prefix)
         ]
         rows.sort(key=lambda item: item.key)
         return rows[:limit]
@@ -682,8 +684,12 @@ def test_expand_s3_sources_and_build_download_archive(
     service: DeweyService,
     storage: _FakeStorageClient,
 ) -> None:
-    storage.seed_object(bucket="bucket-6", key="runs/batch/file-1.txt", size=4, content_type="text/plain")
-    storage.seed_object(bucket="bucket-6", key="runs/batch/file-2.txt", size=4, content_type="text/plain")
+    storage.seed_object(
+        bucket="bucket-6", key="runs/batch/file-1.txt", size=4, content_type="text/plain"
+    )
+    storage.seed_object(
+        bucket="bucket-6", key="runs/batch/file-2.txt", size=4, content_type="text/plain"
+    )
 
     expanded = service.expand_s3_sources("s3://bucket-6/runs/batch/")
     assert expanded == [
@@ -744,8 +750,12 @@ def test_artifact_set_search_scope_and_share_transports(
     service: DeweyService,
     storage: _FakeStorageClient,
 ) -> None:
-    storage.seed_object(bucket="bucket-8", key="release/one.txt", size=12, content_type="text/plain")
-    storage.seed_object(bucket="bucket-8", key="release/two.txt", size=12, content_type="text/plain")
+    storage.seed_object(
+        bucket="bucket-8", key="release/one.txt", size=12, content_type="text/plain"
+    )
+    storage.seed_object(
+        bucket="bucket-8", key="release/two.txt", size=12, content_type="text/plain"
+    )
     _, first = service.register_artifact(
         artifact_type="report",
         storage_backend="s3",

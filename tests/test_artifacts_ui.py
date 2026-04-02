@@ -28,7 +28,7 @@ def _login_user(monkeypatch, client, groups: list[str] | None = None) -> None:
         params={"code": "code-1", "state": state},
         follow_redirects=False,
     )
-    assert callback.status_code == 303
+    assert callback.status_code == 302
     assert callback.headers["location"] == "/ui"
 
 
@@ -44,7 +44,7 @@ def test_artifacts_page_requires_login_and_serves_bulk_template(monkeypatch, cli
     assert "Artifact Sets" in page.text
     assert "Recent Artifacts" in page.text
     assert 'href="/artifacts"' in page.text
-    assert 'section=recent_artifacts#section-recent_artifacts' in page.text
+    assert "section=recent_artifacts#section-recent_artifacts" in page.text
 
     template = client.get("/artifacts/bulk-template.tsv")
     assert template.status_code == 200
@@ -158,7 +158,9 @@ def test_artifacts_register_search_download_and_artifact_share(
     assert 'action="/artifacts/euid/AT-000001/download"' in recent.text
 
 
-def test_artifact_detail_page_and_direct_download_redirect(monkeypatch, client, fake_service) -> None:
+def test_artifact_detail_page_and_direct_download_redirect(
+    monkeypatch, client, fake_service
+) -> None:
     _login_user(monkeypatch, client)
 
     register = client.post(
@@ -186,7 +188,9 @@ def test_artifact_detail_page_and_direct_download_redirect(monkeypatch, client, 
     assert len(fake_service.share_references) == 1
 
 
-def test_artifacts_register_infers_artifact_type_from_extension(monkeypatch, client, fake_service) -> None:
+def test_artifacts_register_infers_artifact_type_from_extension(
+    monkeypatch, client, fake_service
+) -> None:
     _login_user(monkeypatch, client)
 
     register = client.post(

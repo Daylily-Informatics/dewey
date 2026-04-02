@@ -5,6 +5,7 @@ import json
 from types import SimpleNamespace
 
 import pytest
+from daylily_cognito import SessionPrincipal
 from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 
@@ -111,47 +112,73 @@ def test_require_api_auth_validates_tokens() -> None:
     assert invalid_exc.value.detail == "Invalid bearer token"
 
 
-def test_require_ui_session_requires_profile() -> None:
+def test_require_ui_session_requires_profile(monkeypatch: pytest.MonkeyPatch) -> None:
     request = SimpleNamespace(
-        session={
-            "operator_profile": {
-                "email": "user@example.com",
-                "sub": "sub-1",
-                "groups": ["dewey-readwrite"],
-            }
-        }
+        session={},
+        app=SimpleNamespace(state=SimpleNamespace(settings=_settings())),
+        state=SimpleNamespace(),
+    )
+    monkeypatch.setattr(
+        auth_mod,
+        "load_session_principal",
+        lambda _request: SessionPrincipal(
+            user_sub="sub-1",
+            email="user@example.com",
+            cognito_groups=["dewey-readwrite"],
+            roles=[Role.READ_WRITE.value],
+        ),
     )
     profile = auth_mod.require_ui_session(request)
     assert profile["email"] == "user@example.com"
     assert profile["roles"] == [Role.READ_WRITE.value]
 
+    monkeypatch.setattr(auth_mod, "load_session_principal", lambda _request: None)
     with pytest.raises(HTTPException) as exc:
-        auth_mod.require_ui_session(SimpleNamespace(session={}))
+        auth_mod.require_ui_session(
+            SimpleNamespace(
+                session={},
+                app=SimpleNamespace(state=SimpleNamespace(settings=_settings())),
+                state=SimpleNamespace(),
+            )
+        )
     assert exc.value.status_code == 401
     assert exc.value.detail == "Login required"
 
 
-def test_require_ui_admin_session_requires_admin_role() -> None:
+def test_require_ui_admin_session_requires_admin_role(monkeypatch: pytest.MonkeyPatch) -> None:
     request = SimpleNamespace(
-        session={
-            "operator_profile": {
-                "email": "user@example.com",
-                "roles": [Role.ADMIN.value],
-            }
-        }
+        session={},
+        app=SimpleNamespace(state=SimpleNamespace(settings=_settings())),
+        state=SimpleNamespace(),
+    )
+    monkeypatch.setattr(
+        auth_mod,
+        "load_session_principal",
+        lambda _request: SessionPrincipal(
+            user_sub="sub-1",
+            email="user@example.com",
+            cognito_groups=["platform-admin"],
+            roles=[Role.ADMIN.value],
+        ),
     )
     assert auth_mod.require_ui_admin_session(request)["email"] == "user@example.com"
 
+    monkeypatch.setattr(
+        auth_mod,
+        "load_session_principal",
+        lambda _request: SessionPrincipal(
+            user_sub="sub-1",
+            email="user@example.com",
+            cognito_groups=["dewey-readwrite"],
+            roles=[Role.READ_WRITE.value],
+        ),
+    )
     with pytest.raises(HTTPException) as exc:
         auth_mod.require_ui_admin_session(
             SimpleNamespace(
-                session={
-                    "operator_profile": {
-                        "email": "user@example.com",
-                        "sub": "sub-1",
-                        "groups": ["dewey-readwrite"],
-                    }
-                }
+                session={},
+                app=SimpleNamespace(state=SimpleNamespace(settings=_settings())),
+                state=SimpleNamespace(),
             )
         )
     assert exc.value.status_code == 403

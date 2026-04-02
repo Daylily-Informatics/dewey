@@ -116,7 +116,9 @@ def build(
         )
         console.print(f"[green]DATABASE_URL[/green] resolved: [dim]{db_url}[/dim]")
 
-        subprocess.run([sys.executable, "-m", "dewey_service.db_seed"], cwd=PROJECT_ROOT, check=True)
+        subprocess.run(
+            [sys.executable, "-m", "dewey_service.db_seed"], cwd=PROJECT_ROOT, check=True
+        )
         console.print("[green]Dewey TapDB overlay complete[/green]")
     except (TapDBRuntimeError, subprocess.CalledProcessError) as exc:
         console.print(f"[red]DB build failed:[/red] {exc}")
@@ -127,7 +129,9 @@ def build(
 def seed() -> None:
     """Apply the Dewey TapDB template overlay only."""
     try:
-        subprocess.run([sys.executable, "-m", "dewey_service.db_seed"], cwd=PROJECT_ROOT, check=True)
+        subprocess.run(
+            [sys.executable, "-m", "dewey_service.db_seed"], cwd=PROJECT_ROOT, check=True
+        )
     except subprocess.CalledProcessError as exc:
         raise typer.Exit(exc.returncode) from exc
 

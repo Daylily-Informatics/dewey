@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import datetime as dt
 import inspect
-import os
 from contextlib import contextmanager
 from hashlib import sha256
 from time import monotonic

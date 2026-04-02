@@ -49,7 +49,9 @@ def _normalize_managed_storage_bucket(value: str, *, allow_empty: bool = True) -
             return ""
         raise ValueError("managed_storage_bucket is required")
     if "/" in normalized:
-        raise ValueError("managed_storage_bucket must be a bucket name, not an s3://bucket/key path")
+        raise ValueError(
+            "managed_storage_bucket must be a bucket name, not an s3://bucket/key path"
+        )
     if any(char.isspace() for char in normalized):
         raise ValueError("managed_storage_bucket must not contain whitespace")
     return normalized
@@ -299,6 +301,7 @@ class Settings(BaseSettings):
             if str(item or "").strip()
         }
 
+
 def get_config_file_path() -> Path:
     return _default_config_path()
 
@@ -331,7 +334,9 @@ def persist_managed_storage_bucket(
     if not isinstance(storage, dict):
         storage = {}
     storage["managed_bucket"] = normalized
-    storage["managed_prefix"] = str(storage.get("managed_prefix") or "").strip().strip("/") or "artifacts"
+    storage["managed_prefix"] = (
+        str(storage.get("managed_prefix") or "").strip().strip("/") or "artifacts"
+    )
     storage["upload_session_ttl_seconds"] = int(storage.get("upload_session_ttl_seconds") or 900)
     raw["storage"] = storage
     cfg_path.parent.mkdir(parents=True, exist_ok=True)

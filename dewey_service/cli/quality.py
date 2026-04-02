@@ -21,7 +21,9 @@ quality_app = typer.Typer(help="Quality commands")
 @quality_app.command("lint")
 def lint() -> None:
     """Run Ruff lint checks."""
-    proc = subprocess.run([sys.executable, "-m", "ruff", "check", "."], cwd=PROJECT_ROOT, check=False)
+    proc = subprocess.run(
+        [sys.executable, "-m", "ruff", "check", "."], cwd=PROJECT_ROOT, check=False
+    )
     raise typer.Exit(proc.returncode)
 
 
