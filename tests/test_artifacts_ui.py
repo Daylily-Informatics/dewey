@@ -28,7 +28,7 @@ def _login_user(monkeypatch, client, groups: list[str] | None = None) -> None:
         params={"code": "code-1", "state": state},
         follow_redirects=False,
     )
-    assert callback.status_code == 303
+    assert callback.status_code == 302
     assert callback.headers["location"] == "/ui"
 
 

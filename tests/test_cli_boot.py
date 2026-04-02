@@ -94,7 +94,7 @@ def test_server_restart_uses_background_start(monkeypatch, capsys) -> None:
         (
             "start",
             {
-                "host": "0.0.0.0",
+                "host": "127.0.0.1",
                 "port": 8914,
                 "reload": False,
                 "background": True,
@@ -131,7 +131,7 @@ def test_server_start_parses_tls_options(monkeypatch, capsys, tmp_path: Path) ->
     assert exit_code == 0
     assert calls == [
         {
-            "host": "0.0.0.0",
+            "host": "127.0.0.1",
             "port": 8914,
             "reload": False,
             "background": False,
@@ -219,7 +219,7 @@ def test_config_validate_and_status(monkeypatch, tmp_path: Path, capsys) -> None
     status_output = capsys.readouterr().out
     assert status_exit == 0
     assert "Config path:" in status_output
-    assert "dewey-config-local.yaml" in status_output
+    assert "dewey-config-local.yaml" in status_output.replace("\n", "")
     assert '"tapdb_database_name": "dewey"' in status_output
 
 

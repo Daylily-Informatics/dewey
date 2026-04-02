@@ -42,8 +42,13 @@ def test_db_seed_main_validates_and_seeds(monkeypatch: pytest.MonkeyPatch) -> No
     monkeypatch.setattr(
         db_seed,
         "seed_templates",
-        lambda session, templates, overwrite: calls.update(
-            {"seed_session": session, "templates": templates, "overwrite": overwrite}
+        lambda session, templates, overwrite, **kwargs: calls.update(
+            {
+                "seed_session": session,
+                "templates": templates,
+                "overwrite": overwrite,
+                "seed_kwargs": kwargs,
+            }
         ),
     )
 
@@ -57,6 +62,7 @@ def test_db_seed_main_validates_and_seeds(monkeypatch: pytest.MonkeyPatch) -> No
     assert calls["seed_session"] == "session"
     assert calls["templates"] == [{"template_code": "generic/data/artifact/1.0/"}]
     assert calls["overwrite"] is True
+    assert calls["seed_kwargs"]["core_instance_prefix"] == "DGX"
 
 
 def test_db_seed_main_raises_on_validation_errors(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -117,8 +123,13 @@ def test_db_seed_module_runs_main_when_invoked_as_script(monkeypatch: pytest.Mon
     )
     monkeypatch.setattr(
         "daylily_tapdb.seed_templates",
-        lambda session, templates, overwrite: calls.update(
-            {"seed_session": session, "templates": templates, "overwrite": overwrite}
+        lambda session, templates, overwrite, **kwargs: calls.update(
+            {
+                "seed_session": session,
+                "templates": templates,
+                "overwrite": overwrite,
+                "seed_kwargs": kwargs,
+            }
         ),
     )
 
@@ -129,3 +140,4 @@ def test_db_seed_module_runs_main_when_invoked_as_script(monkeypatch: pytest.Mon
     assert calls["commit"] is True
     assert calls["seed_session"] == "session"
     assert calls["overwrite"] is True
+    assert calls["seed_kwargs"]["core_instance_prefix"] == "DGX"

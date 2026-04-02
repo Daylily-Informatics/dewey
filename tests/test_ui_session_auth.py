@@ -91,6 +91,13 @@ def test_cognito_callback_rejects_missing_or_invalid_state(monkeypatch, client, 
     assert response.headers["location"] == "/auth/error?reason=invalid_state"
 
 
+def test_auth_error_page_renders(client) -> None:
+    response = client.get("/auth/error", params={"reason": "invalid_state"})
+
+    assert response.status_code == 403
+    assert "Sign-in was blocked" in response.text
+
+
 def test_session_expiration_redirects_to_auth_error(monkeypatch, client, test_settings) -> None:
     _login_user(monkeypatch, client)
 
@@ -197,6 +204,40 @@ def test_logout_clears_session_and_redirects_to_cognito(monkeypatch, client, tes
 
     ui = client.get("/ui")
     assert ui.status_code == 401
+
+
+def test_logout_get_clears_session_and_redirects_to_cognito(
+    monkeypatch, client, test_settings
+) -> None:
+    _login_user(monkeypatch, client)
+
+    logout = client.get("/auth/logout", follow_redirects=False)
+    assert logout.status_code == 303
+
+    parsed = urlparse(logout.headers["location"])
+    params = parse_qs(parsed.query)
+    assert parsed.scheme == "https"
+    assert parsed.netloc == "dewey-auth.example.com"
+    assert parsed.path == "/logout"
+    assert params["client_id"] == [test_settings.cognito_app_client_id]
+    assert params["logout_uri"] == [test_settings.cognito_logout_url.rstrip("/")]
+
+
+def test_plain_logout_post_clears_session_and_redirects_to_cognito(
+    monkeypatch, client, test_settings
+) -> None:
+    _login_user(monkeypatch, client)
+
+    logout = client.post("/logout", follow_redirects=False)
+    assert logout.status_code == 303
+
+    parsed = urlparse(logout.headers["location"])
+    params = parse_qs(parsed.query)
+    assert parsed.scheme == "https"
+    assert parsed.netloc == "dewey-auth.example.com"
+    assert parsed.path == "/logout"
+    assert params["client_id"] == [test_settings.cognito_app_client_id]
+    assert params["logout_uri"] == [test_settings.cognito_logout_url.rstrip("/")]
 
 
 def test_two_browsers_can_keep_distinct_authenticated_sessions(monkeypatch, client) -> None:
