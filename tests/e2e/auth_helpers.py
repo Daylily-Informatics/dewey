@@ -36,9 +36,9 @@ def _complete_identity_provider_login(page: Page, *, email: str, password: str) 
         if _is_google_identity_host(page.url):
             _complete_google_login(page, email=email, password=password)
             return
-        if page.locator("input[type='email']").first.is_visible(timeout=3000) and _is_google_identity_host(
-            page.url
-        ):
+        if page.locator("input[type='email']").first.is_visible(
+            timeout=3000
+        ) and _is_google_identity_host(page.url):
             _complete_google_login(page, email=email, password=password)
             return
     except Exception:
