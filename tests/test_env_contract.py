@@ -14,7 +14,7 @@ def test_metapub_dependency_is_available() -> None:
 
 def test_root_environment_contract_uses_environment_yaml() -> None:
     assert (PROJECT_ROOT / "environment.yaml").is_file()
-    assert not (PROJECT_ROOT / "dewey_env.yaml").exists()
+    assert not (PROJECT_ROOT / "environment").with_suffix(".yml").exists()
 
 
 def test_environment_yaml_does_not_install_local_repo_directly() -> None:
