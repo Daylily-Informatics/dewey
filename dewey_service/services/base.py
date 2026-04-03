@@ -165,8 +165,7 @@ class BaseDeweyService:
                 "status": "monitoring",
                 "title": "Operator session activity is sparse",
                 "summary": (
-                    "No recent browser-session auth events are present in the local anomaly "
-                    "record."
+                    "No recent browser-session auth events are present in the local anomaly record."
                 ),
                 "source": "auth_health",
                 "first_seen_at": now_iso,

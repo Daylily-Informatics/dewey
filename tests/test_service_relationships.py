@@ -57,7 +57,9 @@ def test_artifact_set_member_lifecycle(service: DeweyService) -> None:
 
 
 def test_share_reference_behaviors(service: DeweyService) -> None:
-    service._require_storage().seed_object(bucket="bucket-4", key="alignments/sample.bam", size=1024)
+    service._require_storage().seed_object(
+        bucket="bucket-4", key="alignments/sample.bam", size=1024
+    )
     _, artifact = service.register_artifact(
         artifact_type="bam",
         storage_backend="s3",

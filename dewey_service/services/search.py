@@ -125,7 +125,9 @@ class SearchServiceMixin:
                     }
                 )
                 if viewer_context is not None:
-                    payload.update(self._visible_literature_save_summary(session, row, viewer_context))
+                    payload.update(
+                        self._visible_literature_save_summary(session, row, viewer_context)
+                    )
                 else:
                     payload.update(
                         {
