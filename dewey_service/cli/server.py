@@ -46,6 +46,7 @@ GENERIC_KEY_ENV = "SSL_KEY_FILE"
 LEGACY_CERT_ENV = "DEWEY_SSL_CERT_FILE"
 LEGACY_KEY_ENV = "DEWEY_SSL_KEY_FILE"
 DEFAULT_BIND_HOST = "127.0.0.1"
+NCBI_API_KEY_FILE = Path("~/.config/ncbi/key.txt").expanduser()
 
 
 def _state_dir() -> Path:
@@ -130,6 +131,19 @@ def _normalize_option_default(value, fallback):
     if isinstance(value, OptionInfo):
         return fallback
     return value
+
+
+def _maybe_set_ncbi_api_key() -> None:
+    if os.environ.get("NCBI_API_KEY", "").strip():
+        return
+    try:
+        key = NCBI_API_KEY_FILE.read_text(encoding="utf-8").strip()
+    except FileNotFoundError:
+        return
+    except OSError:
+        return
+    if key:
+        os.environ["NCBI_API_KEY"] = key
 
 
 def _status_bind() -> tuple[str, str]:
@@ -290,6 +304,8 @@ def _start_server(
         console.print(f"[yellow]⚠[/yellow] Server already running (PID {pid})")
         console.print(f"   URL: [cyan]{scheme}://{display_host(host)}:{port}[/cyan]")
         return
+
+    _maybe_set_ncbi_api_key()
 
     if background:
         python = shutil.which("python") or sys.executable

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -85,6 +86,25 @@ def test_server_port_host_and_status_resolution(monkeypatch: pytest.MonkeyPatch)
         server_cli, "_load_settings", lambda: (_ for _ in ()).throw(ValueError("invalid"))
     )
     assert server_cli._status_bind() == ("unknown", "unknown")
+
+
+def test_optional_ncbi_api_key_file(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    key_file = tmp_path / "ncbi-key.txt"
+
+    monkeypatch.setattr(server_cli, "NCBI_API_KEY_FILE", key_file)
+    monkeypatch.delenv("NCBI_API_KEY", raising=False)
+
+    server_cli._maybe_set_ncbi_api_key()
+    assert "NCBI_API_KEY" not in os.environ
+
+    key_file.write_text("file-key\n", encoding="utf-8")
+    server_cli._maybe_set_ncbi_api_key()
+    assert os.environ["NCBI_API_KEY"] == "file-key"
+
+    monkeypatch.setenv("NCBI_API_KEY", "already-set")
+    key_file.write_text("replacement-key\n", encoding="utf-8")
+    server_cli._maybe_set_ncbi_api_key()
+    assert os.environ["NCBI_API_KEY"] == "already-set"
 
 
 def test_tls_resolution_precedence(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
@@ -240,6 +260,8 @@ def test_start_server_branches(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) 
     monkeypatch.setattr(server_cli, "_pid_file", lambda: tmp_path / "server.pid")
     monkeypatch.setattr(server_cli, "_log_dir", lambda: tmp_path)
     monkeypatch.setattr(server_cli, "_runtime_meta_file", lambda: tmp_path / "server-meta.json")
+    monkeypatch.setattr(server_cli, "NCBI_API_KEY_FILE", tmp_path / "ncbi-key.txt")
+    monkeypatch.delenv("NCBI_API_KEY", raising=False)
 
     cert = tmp_path / "cert.pem"
     key = tmp_path / "key.pem"
@@ -299,8 +321,10 @@ def test_start_server_branches(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) 
 
     def fake_popen(cmd, *args, **kwargs):
         commands.append(cmd)
+        assert kwargs["env"]["NCBI_API_KEY"] == "bg-key"
         return RunningProc()
 
+    (tmp_path / "ncbi-key.txt").write_text("bg-key\n", encoding="utf-8")
     monkeypatch.setattr(server_cli.subprocess, "Popen", fake_popen)
     monkeypatch.setattr(server_cli, "write_pid", lambda path, pid: writes.append(pid))
     server_cli._start_server(
@@ -313,6 +337,7 @@ def test_start_server_branches(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) 
         key_path=None,
     )
     assert writes == [555]
+    assert os.environ["NCBI_API_KEY"] == "bg-key"
     assert "--ssl-certfile" in commands[0]
     assert "--ssl-keyfile" in commands[0]
 

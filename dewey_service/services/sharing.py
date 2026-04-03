@@ -209,14 +209,16 @@ class SharingServiceMixin:
                                     or None,
                                 )
                                 entry["status"] = "active"
-                                entry["access_url"] = self._require_storage().generate_presigned_get_url(
-                                    bucket=str(artifact_payload.get("bucket") or ""),
-                                    key=str(artifact_payload.get("key") or ""),
-                                    version_id=str(
-                                        artifact_payload.get("version_id") or ""
-                                    ).strip()
-                                    or None,
-                                    expires_in=ttl_value,
+                                entry["access_url"] = (
+                                    self._require_storage().generate_presigned_get_url(
+                                        bucket=str(artifact_payload.get("bucket") or ""),
+                                        key=str(artifact_payload.get("key") or ""),
+                                        version_id=str(
+                                            artifact_payload.get("version_id") or ""
+                                        ).strip()
+                                        or None,
+                                        expires_in=ttl_value,
+                                    )
                                 )
                             except StorageObjectNotFoundError:
                                 entry["status"] = "error"

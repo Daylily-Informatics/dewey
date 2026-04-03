@@ -1145,4 +1145,6 @@ def client(test_settings: Settings, fake_service: FakeDeweyService) -> TestClien
     app = create_app(settings=test_settings, service=fake_service)
     with TestClient(app, base_url="https://localhost:8914") as tc:
         yield tc
+
+
 pytest_plugins = ("tests.support.service_fakes",)
