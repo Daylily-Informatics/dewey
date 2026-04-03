@@ -38,6 +38,9 @@ if [[ "${{1:-}}" == "-m" && "${{2:-}}" == "pip" && "${{3:-}}" == "show" ]]; then
   exit 0
 fi
 if [[ "${{1:-}}" == "-m" && "${{2:-}}" == "pip" && "${{3:-}}" == "install" ]]; then
+  if [[ -n "${{FAKE_PIP_INSTALL_LOG:-}}" ]]; then
+    printf '%s\\n' "$*" >> "${{FAKE_PIP_INSTALL_LOG}}"
+  fi
   exit 0
 fi
 exit 0
@@ -61,6 +64,9 @@ if [[ "${{1:-}}" == "info" && "${{2:-}}" == "--envs" ]]; then
   exit 0
 fi
 if [[ "${{1:-}}" == "env" && "${{2:-}}" == "create" ]]; then
+  if [[ -n "${{FAKE_CONDA_CALL_LOG:-}}" ]]; then
+    printf '%s\\n' "$*" >> "${{FAKE_CONDA_CALL_LOG}}"
+  fi
   if [[ "${{FAKE_CONDA_ENV_CREATE_FAIL:-0}}" == "1" ]]; then
     exit 1
   fi
@@ -167,18 +173,23 @@ def test_activate_rejects_extra_arguments() -> None:
 
 def test_activate_hardfails_when_conda_env_creation_fails(tmp_path: Path) -> None:
     conda_base = _build_fake_conda(tmp_path)
+    conda_call_log = tmp_path / "conda-calls.log"
 
     env = os.environ.copy()
     env["PATH"] = f"{conda_base / 'bin'}:/usr/bin:/bin"
     env["FAKE_DEWEY_ENV_PRESENT"] = "0"
     env["FAKE_CONDA_ENV_CREATE_FAIL"] = "1"
+    env["FAKE_CONDA_CALL_LOG"] = str(conda_call_log)
     env.pop("CONDA_DEFAULT_ENV", None)
     env.pop("CONDA_PREFIX", None)
 
     result = _source_activate(env)
 
     assert result.returncode == 1
-    assert "Failed to create conda environment from dewey_env.yaml." in result.stderr
+    assert "Failed to create conda environment from environment.yaml." in result.stderr
+    assert f"env create -n DEWEY-{DEPLOY_NAME} -f {PROJECT_ROOT / 'environment.yaml'}" in conda_call_log.read_text(
+        encoding="utf-8"
+    )
     assert "Installing dewey CLI..." not in result.stdout
 
 
@@ -201,12 +212,14 @@ def test_activate_hardfails_when_conda_activation_fails(tmp_path: Path) -> None:
 def test_activate_accepts_preloaded_dewey_conda_env(tmp_path: Path) -> None:
     conda_base = _build_fake_conda(tmp_path)
     call_log = tmp_path / "conda-calls.log"
+    pip_install_log = tmp_path / "pip-install.log"
 
     env = os.environ.copy()
     env["PATH"] = f"{conda_base / 'bin'}:/usr/bin:/bin"
     env["CONDA_DEFAULT_ENV"] = f"DEWEY-{DEPLOY_NAME}"
     env["CONDA_PREFIX"] = str(conda_base / "envs" / f"DEWEY-{DEPLOY_NAME}")
     env["FAKE_CONDA_CALL_LOG"] = str(call_log)
+    env["FAKE_PIP_INSTALL_LOG"] = str(pip_install_log)
 
     result = _source_activate(env)
 
@@ -214,3 +227,7 @@ def test_activate_accepts_preloaded_dewey_conda_env(tmp_path: Path) -> None:
     assert f"Conda environment already active: DEWEY-{DEPLOY_NAME}" in result.stdout
     assert "build, seed, reset, nuke" in result.stdout
     assert not call_log.exists()
+    pip_install_args = pip_install_log.read_text(encoding="utf-8")
+    assert "pip install --no-deps -e " in pip_install_args
+    assert str(PROJECT_ROOT) in pip_install_args
+    assert "[dev]" not in pip_install_args
