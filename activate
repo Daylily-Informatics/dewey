@@ -135,8 +135,8 @@ PY
 }
 
 _dewey_install_main_repo() {
-  echo -e "  ${_CYAN}→${_NC} Installing local Dewey checkout with dependencies..."
-  if ! "${_DEWEY_PYTHON:-python}" -m pip install -e "${DEWEY_ROOT}[dev]" -q; then
+  echo -e "  ${_CYAN}→${_NC} Installing local Dewey checkout..."
+  if ! "${_DEWEY_PYTHON:-python}" -m pip install --no-deps -e "${DEWEY_ROOT}" -q; then
     _dewey_fail "Failed to install local Dewey checkout from ${DEWEY_ROOT}"
     return 1
   fi
@@ -238,10 +238,10 @@ elif conda info --envs | grep -Eq "(^|[[:space:]])${_DEWEY_CONDA_ENV_NAME}([[:sp
   fi
 else
   echo -e "  ${_YELLOW}⚠${_NC} Conda environment '${_DEWEY_CONDA_ENV_NAME}' not found."
-  if [[ -f "$DEWEY_ROOT/dewey_env.yaml" ]]; then
-    echo -e "  ${_CYAN}→${_NC} Installing conda environment from dewey_env.yaml..."
-    if ! conda env create -n "${_DEWEY_CONDA_ENV_NAME}" -f "$DEWEY_ROOT/dewey_env.yaml"; then
-      _dewey_fail "Failed to create conda environment from dewey_env.yaml."
+  if [[ -f "$DEWEY_ROOT/environment.yaml" ]]; then
+    echo -e "  ${_CYAN}→${_NC} Installing conda environment from environment.yaml..."
+    if ! conda env create -n "${_DEWEY_CONDA_ENV_NAME}" -f "$DEWEY_ROOT/environment.yaml"; then
+      _dewey_fail "Failed to create conda environment from environment.yaml."
       unset _DEWEY_CONDA_BASE
       unset -f _dewey_fail
       return 1
@@ -255,7 +255,7 @@ else
       return 1
     fi
   else
-    _dewey_fail "Conda environment '${_DEWEY_CONDA_ENV_NAME}' was not found and dewey_env.yaml is missing."
+    _dewey_fail "Conda environment '${_DEWEY_CONDA_ENV_NAME}' was not found and environment.yaml is missing."
     unset _DEWEY_CONDA_BASE
     unset -f _dewey_fail
     return 1

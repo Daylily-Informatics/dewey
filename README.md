@@ -45,6 +45,8 @@ dewey db build --target local
 dewey server start --port 8914
 ```
 
+`source ./activate <deploy-name>` creates the deployment-scoped conda environment from repo-root `environment.yaml` when it is missing, then activates it and installs only the Dewey repo editable.
+
 HTTPS is the expected local posture. Dewey now resolves TLS material in this order:
 - explicit `--cert` and `--key`
 - generic `SSL_CERT_FILE` and `SSL_KEY_FILE`
