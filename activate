@@ -110,38 +110,41 @@ if ! _dewey_reject_legacy_local_rebind_env; then
   return 1
 fi
 
-_dewey_module_is_from_repo() {
-  local module_name="$1"
-  local repo_root="$2"
-  "${_DEWEY_PYTHON:-python}" - "$module_name" "$repo_root" <<'PY' >/dev/null 2>&1
-import importlib.util
-import pathlib
-import sys
-
-spec = importlib.util.find_spec(sys.argv[1])
-if spec is None:
-    raise SystemExit(1)
-repo_root = pathlib.Path(sys.argv[2]).resolve()
-locations = []
-if spec.origin:
-    locations.append(pathlib.Path(spec.origin).resolve())
-for entry in spec.submodule_search_locations or ():
-    locations.append(pathlib.Path(entry).resolve())
-for path in locations:
-    if path == repo_root or repo_root in path.parents:
-        raise SystemExit(0)
-raise SystemExit(1)
-PY
+_dewey_distribution_is_editable_from_repo() {
+  local repo_root="$1"
+  local editable_project_location=""
+  local pip_show_output=""
+  if [[ -z "$repo_root" ]]; then
+    return 1
+  fi
+  repo_root="$(cd "$repo_root" 2>/dev/null && pwd)"
+  if [[ -z "$repo_root" ]]; then
+    return 1
+  fi
+  if ! pip_show_output="$("${_DEWEY_PYTHON:-python}" -m pip show dewey-service 2>/dev/null)"; then
+    return 1
+  fi
+  editable_project_location="$(printf '%s\n' "$pip_show_output" | awk -F': ' '$1 == "Editable project location" { print $2; exit }')"
+  if [[ -z "$editable_project_location" ]]; then
+    return 1
+  fi
+  editable_project_location="$(cd "$editable_project_location" 2>/dev/null && pwd)"
+  if [[ -z "$editable_project_location" ]]; then
+    return 1
+  fi
+  if [[ "$editable_project_location" != "$repo_root" ]]; then
+    return 1
+  fi
+  return 0
 }
-
 _dewey_install_main_repo() {
   echo -e "  ${_CYAN}→${_NC} Installing local Dewey checkout..."
   if ! "${_DEWEY_PYTHON:-python}" -m pip install --no-deps -e "${DEWEY_ROOT}" -q; then
     _dewey_fail "Failed to install local Dewey checkout from ${DEWEY_ROOT}"
     return 1
   fi
-  if ! _dewey_module_is_from_repo "dewey_service" "$DEWEY_ROOT"; then
-    _dewey_fail "Dewey still resolves outside ${DEWEY_ROOT}"
+  if ! _dewey_distribution_is_editable_from_repo "$DEWEY_ROOT"; then
+    _dewey_fail "Dewey is not installed editable from ${DEWEY_ROOT}"
     return 1
   fi
   echo -e "  ${_GREEN}✓${_NC} Using local Dewey checkout: ${DEWEY_ROOT}"
@@ -186,7 +189,7 @@ _dewey_ensure_editable_repo() {
   if [[ -z "$repo_root" ]]; then
     return 0
   fi
-  if _dewey_module_is_from_repo "$module_name" "$repo_root"; then
+  if _dewey_distribution_is_editable_from_repo "$repo_root"; then
     echo -e "  ${_GREEN}✓${_NC} Using local ${label} checkout: ${repo_root}"
     return 0
   fi
@@ -196,8 +199,8 @@ _dewey_ensure_editable_repo() {
     _dewey_fail "Failed to install local ${label} checkout from ${repo_root}"
     return 1
   fi
-  if ! _dewey_module_is_from_repo "$module_name" "$repo_root"; then
-    _dewey_fail "${label} still resolves outside ${repo_root}"
+  if ! _dewey_distribution_is_editable_from_repo "$repo_root"; then
+    _dewey_fail "${label} is not installed editable from ${repo_root}"
     return 1
   fi
   echo -e "  ${_GREEN}✓${_NC} Using local ${label} checkout: ${repo_root}"
