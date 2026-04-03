@@ -9,7 +9,9 @@ def test_pyproject_declares_cli_core_yo_dependency() -> None:
     pyproject = tomllib.loads((repo_root / "pyproject.toml").read_text(encoding="utf-8"))
     dependencies = pyproject["project"]["dependencies"]
 
-    assert any(dep.startswith("cli-core-yo") for dep in dependencies)
+    assert "cli-core-yo==0.5.2" in dependencies
+    assert "daylily-cognito==0.4.2" in dependencies
+    assert "daylily-tapdb==3.2.3" in dependencies
 
 
 def test_pyproject_declares_python_multipart_for_browser_forms() -> None:

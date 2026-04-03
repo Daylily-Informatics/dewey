@@ -8,9 +8,9 @@ dependencies:
   - setuptools<81
   - pip:
       - boto3>=1.35.0
-      - cli-core-yo>=0.5.1
-      - daylily-tapdb==3.2.2
-      - daylily-cognito==0.4.1
+      - cli-core-yo==0.5.2
+      - daylily-tapdb==3.2.3
+      - daylily-cognito==0.4.2
       - fastapi>=0.115.0
       - metapub
       - uvicorn[standard]>=0.30.0
