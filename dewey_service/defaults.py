@@ -79,8 +79,8 @@ storage:
   upload_session_ttl_seconds: 900
 
 deployment:
-  name: dev
-  color: "#0f766e"
+  name: ""
+  color: ""
   is_production: false
 """.encode("utf-8")
 

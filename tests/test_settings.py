@@ -4,7 +4,14 @@ from pathlib import Path
 
 import pytest
 
-from dewey_service.settings import Settings, load_settings, persist_managed_storage_bucket
+from dewey_service.settings import (
+    DEFAULT_DEPLOYMENT_BANNER_COLOR,
+    Settings,
+    _resolve_deployment_chrome,
+    _stable_deployment_color_hex,
+    load_settings,
+    persist_managed_storage_bucket,
+)
 
 
 def test_settings_requires_https_cognito_domain() -> None:
@@ -67,6 +74,55 @@ storage:
     }
     assert loaded.managed_storage_bucket == "dewey-artifacts-staging"
     assert loaded.managed_storage_prefix == "managed"
+
+
+def test_settings_fall_back_to_deployment_code(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "stage-g")
+
+    loaded = Settings(
+        api_bearer_token="token",
+        session_secret_key="secret",
+        cognito_domain="https://auth.example.com",
+        cognito_app_client_id="client",
+        cognito_redirect_uri="https://localhost:8914/auth/callback",
+        cognito_logout_url="https://localhost:8914/login",
+        deployment_name="",
+        deployment_color="",
+        deployment_is_production=True,
+    )
+
+    assert loaded.deployment == {
+        "name": "stage-g",
+        "color": _stable_deployment_color_hex("stage-g"),
+        "is_production": False,
+    }
+
+
+def test_prod_deployment_name_forces_banner_hidden() -> None:
+    loaded = Settings(
+        api_bearer_token="token",
+        session_secret_key="secret",
+        cognito_domain="https://auth.example.com",
+        cognito_app_client_id="client",
+        cognito_redirect_uri="https://localhost:8914/auth/callback",
+        cognito_logout_url="https://localhost:8914/login",
+        deployment_name="production",
+        deployment_color="",
+    )
+
+    assert loaded.deployment == {
+        "name": "production",
+        "color": _stable_deployment_color_hex("production"),
+        "is_production": True,
+    }
+
+
+def test_light_aqua_is_used_without_any_deployment_name() -> None:
+    assert _resolve_deployment_chrome(name="", color="", fallback_name="") == {
+        "name": "",
+        "color": DEFAULT_DEPLOYMENT_BANNER_COLOR,
+        "is_production": False,
+    }
 
 
 def test_settings_allow_dewey_cognito_env_overrides(
