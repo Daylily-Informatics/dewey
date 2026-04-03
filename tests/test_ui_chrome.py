@@ -93,3 +93,17 @@ def test_favicon_route_redirects_to_svg(fake_service) -> None:
 
     assert response.status_code == 307
     assert response.headers["location"] == "/static/favicon.svg"
+
+
+def test_prod_login_page_omits_deployment_banner(fake_service) -> None:
+    settings = _settings_with_deployment()
+    settings.deployment_name = "prod"
+    settings.deployment_is_production = True
+
+    app = create_app(settings=settings, service=fake_service)
+
+    with TestClient(app, base_url="https://localhost:8914") as client:
+        response = client.get("/login")
+
+    assert response.status_code == 200
+    assert "PROD" not in response.text

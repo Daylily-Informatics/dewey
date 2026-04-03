@@ -30,6 +30,6 @@ aws:
   region: us-west-2
 
 deployment:
-  name: dev
-  color: "#0f766e"
+  name: ""
+  color: ""
   is_production: false

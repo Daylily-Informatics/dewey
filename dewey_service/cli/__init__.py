@@ -37,7 +37,7 @@ _YAML_ONLY_DEFAULTS = {
     "cognito_user_pool_id": "",
     "cognito_region": "us-west-2",
     "deployment_name": "",
-    "deployment_color": "#0f766e",
+    "deployment_color": "",
     "deployment_is_production": False,
 }
 

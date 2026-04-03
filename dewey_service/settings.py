@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import colorsys
+import hashlib
 import os
 import re
 from functools import lru_cache
@@ -19,6 +21,9 @@ from dewey_service.defaults import (
     default_cognito_redirect_uri,
 )
 from dewey_service.rbac import DEFAULT_COGNITO_GROUP_ROLE_MAP, normalize_group_role_map
+
+DEFAULT_DEPLOYMENT_BANNER_COLOR = "#AFEEEE"
+PRODUCTION_DEPLOYMENT_NAMES = {"prod", "production"}
 
 
 def _require_https_url(value: str, *, field_name: str) -> str:
@@ -83,6 +88,38 @@ def _config_dir_name() -> str:
 def _config_filename() -> str:
     deployment = _resolve_deployment_code()
     return f"dewey-config-{deployment}.yaml"
+
+
+def _stable_deployment_color_hex(name: str) -> str:
+    digest = hashlib.sha256(name.encode("utf-8")).digest()
+    hue = int.from_bytes(digest[:8], "big") % 360
+    red, green, blue = colorsys.hls_to_rgb(hue / 360.0, 0.46, 0.72)
+    return "#{:02x}{:02x}{:02x}".format(
+        round(red * 255),
+        round(green * 255),
+        round(blue * 255),
+    )
+
+
+def _resolve_deployment_chrome(
+    *,
+    name: str | None,
+    color: str | None,
+    fallback_name: str | None = None,
+) -> dict[str, Any]:
+    resolved_name = str(name or "").strip() or str(fallback_name or "").strip()
+    resolved_color = str(color or "").strip()
+    if not resolved_color:
+        resolved_color = (
+            _stable_deployment_color_hex(resolved_name)
+            if resolved_name
+            else DEFAULT_DEPLOYMENT_BANNER_COLOR
+        )
+    return {
+        "name": resolved_name,
+        "color": resolved_color,
+        "is_production": resolved_name.lower() in PRODUCTION_DEPLOYMENT_NAMES,
+    }
 
 
 def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
@@ -168,7 +205,7 @@ class Settings(BaseSettings):
     )
 
     deployment_name: str = ""
-    deployment_color: str = "#0f766e"
+    deployment_color: str = ""
     deployment_is_production: bool = False
 
     # TapDB runtime
@@ -271,6 +308,14 @@ class Settings(BaseSettings):
             self.cognito_domain,
             field_name="cognito_domain",
         )
+        deployment = _resolve_deployment_chrome(
+            name=self.deployment_name,
+            color=self.deployment_color,
+            fallback_name=_resolve_deployment_code(),
+        )
+        self.deployment_name = str(deployment["name"])
+        self.deployment_color = str(deployment["color"])
+        self.deployment_is_production = bool(deployment["is_production"])
         return self
 
     def api_tokens(self) -> set[str]:
@@ -363,7 +408,7 @@ def load_settings(config_path: Path | None = None) -> Settings:
         "cognito_region": "us-west-2",
         "cognito_group_role_map": dict(DEFAULT_COGNITO_GROUP_ROLE_MAP),
         "deployment_name": "",
-        "deployment_color": "#0f766e",
+        "deployment_color": "",
         "deployment_is_production": False,
     }
     env_override = {
