@@ -126,7 +126,7 @@ _dewey_distribution_is_editable_from_repo() {
   fi
   editable_project_location="$(printf '%s\n' "$pip_show_output" | awk -F': ' '$1 == "Editable project location" { print $2; exit }')"
   if [[ -z "$editable_project_location" ]]; then
-    return 1
+    return 2
   fi
   editable_project_location="$(cd "$editable_project_location" 2>/dev/null && pwd)"
   if [[ -z "$editable_project_location" ]]; then
@@ -143,7 +143,9 @@ _dewey_install_main_repo() {
     _dewey_fail "Failed to install local Dewey checkout from ${DEWEY_ROOT}"
     return 1
   fi
-  if ! _dewey_distribution_is_editable_from_repo "$DEWEY_ROOT"; then
+  _dewey_distribution_is_editable_from_repo "$DEWEY_ROOT"
+  local editable_status=$?
+  if [[ "$editable_status" -eq 1 ]]; then
     _dewey_fail "Dewey is not installed editable from ${DEWEY_ROOT}"
     return 1
   fi
@@ -199,7 +201,9 @@ _dewey_ensure_editable_repo() {
     _dewey_fail "Failed to install local ${label} checkout from ${repo_root}"
     return 1
   fi
-  if ! _dewey_distribution_is_editable_from_repo "$repo_root"; then
+  _dewey_distribution_is_editable_from_repo "$repo_root"
+  local editable_status=$?
+  if [[ "$editable_status" -eq 1 ]]; then
     _dewey_fail "${label} is not installed editable from ${repo_root}"
     return 1
   fi

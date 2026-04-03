@@ -2,22 +2,48 @@
 
 from __future__ import annotations
 
+import os
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+
+def _metapub_site_packages() -> list[str]:
+    prefix = str(os.environ.get("CONDA_PREFIX") or "").strip()
+    if not prefix:
+        return []
+    root = Path(prefix)
+    if not root.exists():
+        return []
+    return [str(path) for path in sorted(root.glob("lib/python*/site-packages")) if path.is_dir()]
+
+
+def _load_metapub():
+    last_exc: Exception | None = None
+    for _attempt in range(2):
+        try:
+            from metapub import PubMedFetcher as _PubMedFetcher
+            from metapub.findit import FindIt as _FindIt
+
+            return _PubMedFetcher, _FindIt, None
+        except Exception as exc:  # pragma: no cover - runtime dependency guard
+            last_exc = exc
+            added_path = False
+            for candidate in _metapub_site_packages():
+                if candidate not in sys.path:
+                    sys.path.insert(0, candidate)
+                    added_path = True
+            if not added_path:
+                break
+    return None, None, last_exc
+
+
 METAPUB_IMPORT_ERROR: Exception | None = None
 PubMedFetcher = None
 FindIt = None
-try:  # pragma: no cover - runtime dependency guard
-    from metapub import PubMedFetcher as _PubMedFetcher
-    from metapub.findit import FindIt as _FindIt
-
-    PubMedFetcher = _PubMedFetcher
-    FindIt = _FindIt
-except Exception as exc:  # pragma: no cover - runtime dependency guard
-    METAPUB_IMPORT_ERROR = exc
+PubMedFetcher, FindIt, METAPUB_IMPORT_ERROR = _load_metapub()
 
 
 class LiteratureUnavailableError(RuntimeError):

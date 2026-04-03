@@ -39,8 +39,8 @@ def _sanitize_deployment_code(value: str) -> str:
 
 def _resolve_deployment_code() -> str:
     return _sanitize_deployment_code(
-        os.environ.get("DEWEY_DEPLOYMENT_CODE")
-        or os.environ.get("DEPLOYMENT_CODE")
+        os.environ.get("DEPLOYMENT_CODE")
+        or os.environ.get("DEWEY_DEPLOYMENT_CODE")
         or os.environ.get("LSMC_DEPLOYMENT_CODE")
         or "local"
     )

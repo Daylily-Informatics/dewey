@@ -132,6 +132,8 @@ class TapDBBackend:
     def _operation_label(self) -> str:
         for frame_info in inspect.stack(context=0):
             filename = str(frame_info.filename or "")
+            if "/dewey_service/services/" in filename and filename.endswith(".py"):
+                return f"service:{frame_info.function}"
             if filename.endswith("/dewey_service/service.py"):
                 return f"service:{frame_info.function}"
             if filename.endswith("/dewey_service/app.py"):
