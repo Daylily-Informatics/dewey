@@ -187,8 +187,9 @@ def test_activate_hardfails_when_conda_env_creation_fails(tmp_path: Path) -> Non
 
     assert result.returncode == 1
     assert "Failed to create conda environment from environment.yaml." in result.stderr
-    assert f"env create -n DEWEY-{DEPLOY_NAME} -f {PROJECT_ROOT / 'environment.yaml'}" in conda_call_log.read_text(
-        encoding="utf-8"
+    assert (
+        f"env create -n DEWEY-{DEPLOY_NAME} -f {PROJECT_ROOT / 'environment.yaml'}"
+        in conda_call_log.read_text(encoding="utf-8")
     )
     assert "Installing dewey CLI..." not in result.stdout
 
