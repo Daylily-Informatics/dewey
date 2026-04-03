@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=64", "wheel"]
+requires = ["setuptools>=64", "setuptools_scm>=8", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "dewey-service"
-version = "0.7.4"
+dynamic = ["version"]
 description = "LSMC Dewey canonical artifact registry service"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -47,6 +47,11 @@ include = ["dewey_service*"]
 
 [tool.setuptools.package-data]
 dewey_service = ["etc/*.yaml", "templates/*.html", "static/*"]
+
+[tool.setuptools_scm]
+local_scheme = "no-local-version"
+tag_regex = '^(?P<version>\d+\.\d+\.\d+)$'
+version_scheme = "guess-next-dev"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
