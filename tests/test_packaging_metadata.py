@@ -26,3 +26,30 @@ def test_pyproject_packages_dewey_config_template() -> None:
     package_data = pyproject["tool"]["setuptools"]["package-data"]
 
     assert package_data["dewey_service"] == ["etc/*.yaml", "templates/*.html", "static/*"]
+
+
+def test_pyproject_uses_dynamic_version_from_git_tags() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    pyproject = tomllib.loads((repo_root / "pyproject.toml").read_text(encoding="utf-8"))
+    project = pyproject["project"]
+
+    assert "version" not in project
+    assert project["dynamic"] == ["version"]
+
+
+def test_build_system_declares_setuptools_scm() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    pyproject = tomllib.loads((repo_root / "pyproject.toml").read_text(encoding="utf-8"))
+    requires = pyproject["build-system"]["requires"]
+
+    assert any(requirement.startswith("setuptools_scm") for requirement in requires)
+
+
+def test_setuptools_scm_tracks_numeric_release_tags() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    pyproject = tomllib.loads((repo_root / "pyproject.toml").read_text(encoding="utf-8"))
+    scm_config = pyproject["tool"]["setuptools_scm"]
+
+    assert scm_config["version_scheme"] == "guess-next-dev"
+    assert scm_config["local_scheme"] == "no-local-version"
+    assert scm_config["tag_regex"] == r"^(?P<version>\d+\.\d+\.\d+)$"
