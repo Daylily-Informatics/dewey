@@ -33,6 +33,10 @@ class FakeDeweyService:
         self.literature_saves: dict[str, dict[str, Any]] = {}
         self.anomalies: dict[str, dict[str, Any]] = {
             "ANM-000001": {
+                "id": "ANM-000001",
+                "service": "dewey",
+                "environment": "development",
+                "fingerprint": "dewey.readiness.bootstrap_gap",
                 "anomaly_id": "ANM-000001",
                 "anomaly_identity_key": "dewey.readiness.bootstrap_gap",
                 "category": "readiness",
@@ -50,6 +54,10 @@ class FakeDeweyService:
                 "created_at": "2026-03-10T00:00:00Z",
             },
             "ANM-000002": {
+                "id": "ANM-000002",
+                "service": "dewey",
+                "environment": "development",
+                "fingerprint": "dewey.auth.session_activity_low",
                 "anomaly_id": "ANM-000002",
                 "anomaly_identity_key": "dewey.auth.session_activity_low",
                 "category": "auth",

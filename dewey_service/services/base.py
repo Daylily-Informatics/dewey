@@ -12,6 +12,7 @@ from typing import Any
 from itsdangerous import URLSafeTimedSerializer
 
 from dewey_service.literature import LiteratureUnavailableError
+from dewey_service.settings import get_settings
 from dewey_service.storage import S3StorageClient
 from dewey_service.tapdb_backend import (
     ANOMALY_TEMPLATE,
@@ -300,14 +301,26 @@ class BaseDeweyService:
 
     def _anomaly_response(self, instance) -> dict[str, Any]:
         payload = normalize_instance_payload(instance)
+        environment = str(
+            payload.get("environment")
+            or get_settings().deployment_name
+            or get_settings().environment
+            or "unknown"
+        )
+        fingerprint = str(payload.get("fingerprint") or payload.get("anomaly_identity_key") or instance.euid)
+        summary = str(payload.get("summary") or payload.get("title") or "")
         return {
+            "id": instance.euid,
+            "service": str(payload.get("service") or "dewey"),
+            "environment": environment,
+            "fingerprint": fingerprint,
+            "summary": summary,
             "anomaly_id": instance.euid,
             "anomaly_identity_key": payload.get("anomaly_identity_key"),
             "category": payload.get("category"),
             "severity": payload.get("severity"),
             "status": payload.get("status"),
             "title": payload.get("title"),
-            "summary": payload.get("summary"),
             "source": payload.get("source"),
             "first_seen_at": payload.get("first_seen_at"),
             "last_seen_at": payload.get("last_seen_at"),
