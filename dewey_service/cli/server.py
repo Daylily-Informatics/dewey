@@ -43,8 +43,6 @@ CERT_FILE = CERT_DIR / "cert.pem"
 KEY_FILE = CERT_DIR / "key.pem"
 GENERIC_CERT_ENV = "SSL_CERT_FILE"
 GENERIC_KEY_ENV = "SSL_KEY_FILE"
-LEGACY_CERT_ENV = "DEWEY_SSL_CERT_FILE"
-LEGACY_KEY_ENV = "DEWEY_SSL_KEY_FILE"
 DEFAULT_BIND_HOST = "127.0.0.1"
 NCBI_API_KEY_FILE = Path("~/.config/ncbi/key.txt").expanduser()
 
@@ -236,14 +234,6 @@ def _resolve_tls_material(
     )
     if generic is not None:
         return generic
-
-    legacy = _resolve_tls_pair_from_env(
-        cert_env=LEGACY_CERT_ENV,
-        key_env=LEGACY_KEY_ENV,
-        source=f"legacy environment variables {LEGACY_CERT_ENV}/{LEGACY_KEY_ENV}",
-    )
-    if legacy is not None:
-        return legacy
 
     shared_cert = _shared_cert_dir() / "cert.pem"
     shared_key = _shared_cert_dir() / "key.pem"
