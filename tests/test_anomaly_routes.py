@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
+from types import SimpleNamespace
 from urllib.parse import parse_qs, urlparse
 
 import yaml
+
+from dewey_service.services.base import BaseDeweyService
 
 
 def _login_operator(monkeypatch, client) -> None:
@@ -51,6 +55,10 @@ def test_anomaly_api_and_ui_view_round_trip(monkeypatch, client) -> None:
     body = response.json()
     assert body["total"] >= 1
     anomaly = body["items"][0]
+    assert anomaly["id"] == anomaly["anomaly_id"]
+    assert anomaly["service"] == "dewey"
+    assert anomaly["environment"]
+    assert anomaly["fingerprint"] == anomaly["anomaly_identity_key"]
     assert anomaly["anomaly_id"].startswith("ANM-")
     assert anomaly["source_view_url"] == f"/ui/anomalies/{anomaly['anomaly_id']}"
 
@@ -67,6 +75,40 @@ def test_anomaly_api_and_ui_view_round_trip(monkeypatch, client) -> None:
     assert detail_view.status_code == 200
     assert anomaly["title"] in detail_view.text
     assert anomaly["source_view_url"] in detail_view.text
+
+
+def test_base_service_anomaly_response_includes_canonical_and_legacy_fields(monkeypatch) -> None:
+    monkeypatch.setattr("dewey_service.services.base.get_settings", lambda: SimpleNamespace(deployment_name="lsdmc10", environment="development"))
+    service = BaseDeweyService(backend=SimpleNamespace())
+    instance = SimpleNamespace(
+        euid="ANM-123456",
+        name="Readiness probe observed a bootstrap gap",
+        created_dt=datetime.now(UTC),
+        modified_dt=datetime.now(UTC),
+        json_addl={
+            "anomaly_identity_key": "dewey.readiness.bootstrap_gap",
+            "category": "readiness",
+            "severity": "medium",
+            "status": "open",
+            "title": "Readiness probe observed a bootstrap gap",
+            "summary": "Canonical Dewey anomaly summary",
+            "source": "readyz",
+            "first_seen_at": "2026-03-10T00:00:00Z",
+            "last_seen_at": "2026-03-10T00:00:00Z",
+            "occurrence_count": 1,
+            "redacted_context": {"database_status": "unknown"},
+        },
+    )
+
+    payload = service._anomaly_response(instance)
+
+    assert payload["id"] == "ANM-123456"
+    assert payload["service"] == "dewey"
+    assert payload["environment"] == "lsdmc10"
+    assert payload["fingerprint"] == "dewey.readiness.bootstrap_gap"
+    assert payload["summary"] == "Canonical Dewey anomaly summary"
+    assert payload["anomaly_id"] == "ANM-123456"
+    assert payload["anomaly_identity_key"] == "dewey.readiness.bootstrap_gap"
 
 
 def test_admin_page_links_to_anomaly_view(monkeypatch, client) -> None:
