@@ -321,7 +321,6 @@ class BaseDeweyService:
             "severity": payload.get("severity"),
             "status": payload.get("status"),
             "title": payload.get("title"),
-            "summary": summary,
             "source": payload.get("source"),
             "first_seen_at": payload.get("first_seen_at"),
             "last_seen_at": payload.get("last_seen_at"),
