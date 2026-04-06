@@ -1,4 +1,8 @@
 # Deprecated example: use `dewey config init` to create the authoritative template.
+#
+# Explicit env contract for TapDB/Meridian subprocesses:
+# MERIDIAN_DOMAIN_CODE=D
+# TAPDB_APP_CODE=D
 application:
   environment: development
   api_bearer_token: dewey-dev-token
@@ -23,6 +27,9 @@ database:
   client_id: dewey
   namespace: dewey
   env: dev
+  # Explicit env contract for TapDB/Meridian subprocesses:
+  # MERIDIAN_DOMAIN_CODE=D
+  # TAPDB_APP_CODE=D
   config_path: ""
 
 aws:

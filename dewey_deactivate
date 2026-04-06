@@ -12,6 +12,8 @@ unset DEWEY_ACTIVE
 unset DEWEY_PROJECT_ROOT
 unset DEWEY_ROOT
 unset DATABASE_URL
+unset MERIDIAN_DOMAIN_CODE
+unset TAPDB_APP_CODE
 
 if [[ -n "${DEWEY_DEPLOYMENT_CODE:-}" ]] && [[ "${CONDA_DEFAULT_ENV:-}" == "DEWEY-${DEWEY_DEPLOYMENT_CODE}" ]]; then
   conda deactivate 2>/dev/null

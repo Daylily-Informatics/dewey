@@ -58,19 +58,19 @@ def test_domain_allowed_origin_and_host_lists() -> None:
 
 def test_default_schema_drift_payload_and_tool_version(monkeypatch: pytest.MonkeyPatch) -> None:
     with monkeypatch.context() as ctx:
-        ctx.setattr(schema_drift, "_tool_version", lambda: "4.0.7")
+        ctx.setattr(schema_drift, "_tool_version", lambda: "4.1.1")
         assert schema_drift.default_schema_drift_payload("dev") == {
             "status": "not_run",
             "checked_at": None,
             "environment": "dev",
-            "tool_version": "4.0.7",
+            "tool_version": "4.1.1",
             "summary": "Schema drift check has not been run.",
             "report": {},
             "strict": False,
         }
 
-    monkeypatch.setattr(schema_drift, "version", lambda _name: "4.0.7")
-    assert schema_drift._tool_version() == "4.0.7"
+    monkeypatch.setattr(schema_drift, "version", lambda _name: "4.1.1")
+    assert schema_drift._tool_version() == "4.1.1"
 
     def raise_not_found(_name: str) -> str:
         raise schema_drift.PackageNotFoundError
@@ -135,7 +135,7 @@ def test_cached_schema_drift_payload_success_and_failure(monkeypatch: pytest.Mon
             "status": "not_run",
             "checked_at": None,
             "environment": environment,
-            "tool_version": "4.0.7",
+            "tool_version": "4.1.1",
             "summary": "Schema drift check has not been run.",
             "report": {},
             "strict": False,
@@ -160,7 +160,7 @@ def test_cached_schema_drift_payload_success_and_failure(monkeypatch: pytest.Mon
         "status": "check_failed",
         "checked_at": None,
         "environment": "dev",
-        "tool_version": "4.0.7",
+        "tool_version": "4.1.1",
         "summary": "Unable to execute tapdb drift-check: tapdb broke",
         "report": {},
         "strict": False,

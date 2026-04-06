@@ -4,14 +4,14 @@ import tomllib
 from pathlib import Path
 
 
-def test_pyproject_declares_minimum_shared_library_versions() -> None:
+def test_pyproject_declares_shared_library_versions() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     pyproject = tomllib.loads((repo_root / "pyproject.toml").read_text(encoding="utf-8"))
     dependencies = pyproject["project"]["dependencies"]
 
     assert "cli-core-yo>=1.3.1" in dependencies
-    assert "daylily-cognito>=1.1.7" in dependencies
-    assert "daylily-tapdb>=4.0.7" in dependencies
+    assert "daylily-cognito==1.2.0" in dependencies
+    assert "daylily-tapdb==4.1.1" in dependencies
 
 
 def test_pyproject_declares_pytest_cov_in_dev_dependencies() -> None:
