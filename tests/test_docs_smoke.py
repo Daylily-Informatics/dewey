@@ -9,7 +9,6 @@ from cli_core_yo.app import run as run_cli
 
 import dewey_service.cli as cli_module
 
-
 DOC_FILES = [
     Path("README.md"),
     Path("docs/README.md"),
@@ -23,8 +22,8 @@ DOC_FILES = [
 
 def _invoke(argv: list[str]) -> tuple[int, str]:
     output._reset_console()
-    from io import StringIO
     import sys
+    from io import StringIO
 
     captured = StringIO()
     stdout = sys.stdout
