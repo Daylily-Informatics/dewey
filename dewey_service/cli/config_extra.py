@@ -10,6 +10,7 @@ if TYPE_CHECKING:
 
 import typer
 
+from cli_core_yo import ccyo_out
 from dewey_service.cli.common import console
 from dewey_service.settings import (
     clear_settings_cache,
@@ -25,11 +26,11 @@ def _status() -> None:
     try:
         settings = get_settings()
     except Exception as exc:
-        console.print(f"[red]✗[/red] Configuration invalid: {exc}")
+        ccyo_out.error(f"Configuration invalid: {exc}")
         raise typer.Exit(1) from exc
 
-    console.print(f"Config path: [cyan]{get_config_file_path()}[/cyan]")
-    console.print(settings.model_dump_json(indent=2))
+    ccyo_out.print_text(f"Config path: [cyan]{get_config_file_path()}[/cyan]")
+    ccyo_out.print_text(settings.model_dump_json(indent=2))
 
 
 def _set_artifact_bucket(
@@ -42,11 +43,11 @@ def _set_artifact_bucket(
         config_path, normalized = persist_managed_storage_bucket(bucket)
         settings = get_settings()
     except Exception as exc:
-        console.print(f"[red]✗[/red] Could not update artifact bucket: {exc}")
+        ccyo_out.error(f"Could not update artifact bucket: {exc}")
         raise typer.Exit(1) from exc
 
-    console.print(f"[green]✓[/green] Updated artifact bucket in [cyan]{config_path}[/cyan]")
-    console.print(f"managed_storage_bucket={settings.managed_storage_bucket or normalized}")
+    ccyo_out.success(f"Updated artifact bucket in {config_path}")
+    ccyo_out.print_text(f"managed_storage_bucket={settings.managed_storage_bucket or normalized}")
 
 
 def register(registry: CommandRegistry, spec: CliSpec) -> None:

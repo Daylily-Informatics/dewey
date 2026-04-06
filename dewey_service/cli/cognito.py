@@ -15,6 +15,7 @@ import subprocess
 import typer
 
 from dewey_service.cli.common import console
+from cli_core_yo import ccyo_out
 
 cognito_app = typer.Typer(help="Cognito helper commands")
 
@@ -24,7 +25,7 @@ def status() -> None:
     """Show daycog status for the Dewey runtime."""
     daycog_path = shutil.which("daycog")
     if not daycog_path:
-        console.print("[red]daycog not found in PATH[/red]")
+        ccyo_out.error("daycog not found in PATH")
         raise typer.Exit(1)
 
     try:
@@ -36,13 +37,13 @@ def status() -> None:
             env=os.environ.copy(),
         )
     except FileNotFoundError as exc:
-        console.print("[red]daycog not found in PATH[/red]")
+        ccyo_out.error("daycog not found in PATH")
         raise typer.Exit(1) from exc
 
     if proc.stdout:
-        console.print(proc.stdout.rstrip())
+        ccyo_out.print_text(proc.stdout.rstrip())
     if proc.stderr:
-        console.print(proc.stderr.rstrip(), style="yellow")
+        ccyo_out.print_text(proc.stderr.rstrip(), style="yellow")
     raise typer.Exit(proc.returncode)
 
 

@@ -14,6 +14,7 @@ import sys
 import typer
 
 from dewey_service.cli.common import PROJECT_ROOT, console
+from cli_core_yo import ccyo_out
 from dewey_service.integrations.tapdb_runtime import (
     DEFAULT_AWS_PROFILE,
     DEFAULT_AWS_REGION,
@@ -57,7 +58,7 @@ def _delete_db_target(
             cwd=PROJECT_ROOT,
         )
     except TapDBRuntimeError as exc:
-        console.print(f"[red]Delete failed:[/red] {exc}")
+        ccyo_out.error(f"Delete failed: {exc}")
         raise typer.Exit(1) from exc
 
 
@@ -105,7 +106,7 @@ def build(
                 cwd=PROJECT_ROOT,
             )
         if result.stdout:
-            console.print(result.stdout.rstrip())
+            ccyo_out.print_text(result.stdout.rstrip())
 
         db_url = export_database_url_for_target(
             target=target,
@@ -114,14 +115,14 @@ def build(
             region=region,
             namespace=namespace,
         )
-        console.print(f"[green]DATABASE_URL[/green] resolved: [dim]{db_url}[/dim]")
+        ccyo_out.print_text(f"[green]DATABASE_URL[/green] resolved: [dim]{db_url}[/dim]")
 
         subprocess.run(
             [sys.executable, "-m", "dewey_service.db_seed"], cwd=PROJECT_ROOT, check=True
         )
-        console.print("[green]Dewey TapDB overlay complete[/green]")
+        ccyo_out.success("Dewey TapDB overlay complete")
     except (TapDBRuntimeError, subprocess.CalledProcessError) as exc:
-        console.print(f"[red]DB build failed:[/red] {exc}")
+        ccyo_out.error(f"DB build failed: {exc}")
         raise typer.Exit(1) from exc
 
 

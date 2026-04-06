@@ -10,6 +10,7 @@ if TYPE_CHECKING:
 
 import typer
 
+from cli_core_yo import ccyo_out
 from dewey_service.cli.common import PROJECT_ROOT, console
 from dewey_service.integrations.tapdb_runtime import (
     DEFAULT_AWS_PROFILE,
@@ -52,13 +53,13 @@ def run_command(
             check=False,
         )
     except TapDBRuntimeError as exc:
-        console.print(f"[red]TapDB invocation failed:[/red] {exc}")
+        ccyo_out.error(f"TapDB invocation failed: {exc}")
         raise typer.Exit(1) from exc
 
     if result.stdout:
-        console.print(result.stdout.rstrip())
+        ccyo_out.print_text(result.stdout.rstrip())
     if result.stderr:
-        console.print(result.stderr.rstrip(), style="yellow")
+        ccyo_out.print_text(result.stderr.rstrip(), style="yellow")
     raise typer.Exit(result.returncode)
 
 

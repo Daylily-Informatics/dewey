@@ -35,6 +35,7 @@ from typer.models import OptionInfo
 from dewey_service.cli.common import PROJECT_ROOT, console
 from dewey_service.defaults import DEFAULT_APP_PORT
 from dewey_service.settings import clear_settings_cache, get_settings
+from cli_core_yo import ccyo_out
 
 server_app = typer.Typer(help="HTTPS API/UI server commands")
 
@@ -80,7 +81,7 @@ def _validate_cognito_uris_for_port(port: int, host: str) -> None:
     try:
         settings = _load_settings()
     except Exception as exc:
-        console.print(f"[red]✗[/red] Configuration invalid: {exc}")
+        ccyo_out.error(f"Configuration invalid: {exc}")
         raise typer.Exit(1) from exc
 
     oauth_host = runtime_oauth_host(host)
@@ -104,11 +105,11 @@ def _validate_cognito_uris_for_port(port: int, host: str) -> None:
     if not errors:
         return
 
-    console.print("[yellow]⚠[/yellow] Cognito URI port mismatches detected:")
+    ccyo_out.warning("Cognito URI port mismatches detected:")
     for err in errors:
-        console.print(f"   • {err}")
-    console.print(f"   Server is starting on port [cyan]{port}[/cyan]")
-    console.print("   Update Cognito config or use [dim]--no-check-cognito-uris[/dim] to skip\n")
+        ccyo_out.bullet(f"   • {err}")
+    ccyo_out.print_text(f"   Server is starting on port [cyan]{port}[/cyan]")
+    ccyo_out.print_text("   Update Cognito config or use [dim]--no-check-cognito-uris[/dim] to skip\n")
 
 
 def _resolve_port(value: int) -> int:
@@ -291,8 +292,8 @@ def _start_server(
 
     pid = read_pid(_pid_file())
     if pid:
-        console.print(f"[yellow]⚠[/yellow] Server already running (PID {pid})")
-        console.print(f"   URL: [cyan]{scheme}://{display_host(host)}:{port}[/cyan]")
+        ccyo_out.warning(f"Server already running (PID {pid})")
+        ccyo_out.print_text(f"   URL: [cyan]{scheme}://{display_host(host)}:{port}[/cyan]")
         return
 
     _maybe_set_ncbi_api_key()
@@ -337,15 +338,15 @@ def _start_server(
 
         time.sleep(2)
         if proc.poll() is not None:
-            console.print("[red]✗[/red] Server failed to start. Check logs:")
-            console.print(f"   [dim]{log_file}[/dim]")
+            ccyo_out.error("Server failed to start. Check logs:")
+            ccyo_out.print_text(f"   [dim]{log_file}[/dim]")
             raise typer.Exit(1)
 
         write_pid(_pid_file(), proc.pid)
         _write_runtime_meta(ssl_enabled=ssl_enabled)
-        console.print(f"[green]✓[/green] Server started (PID {proc.pid})")
-        console.print(f"   URL: [cyan]{scheme}://{display_host(host)}:{port}[/cyan]")
-        console.print(f"   Logs: [dim]{log_file}[/dim]")
+        ccyo_out.success(f"Server started (PID {proc.pid})")
+        ccyo_out.print_text(f"   URL: [cyan]{scheme}://{display_host(host)}:{port}[/cyan]")
+        ccyo_out.print_text(f"   Logs: [dim]{log_file}[/dim]")
         return
 
     uvicorn_kwargs: dict[str, object] = {
@@ -365,12 +366,12 @@ def _stop_server() -> None:
     stopped, msg = stop_pid(_pid_file())
     if stopped:
         _clear_runtime_meta()
-        console.print(f"[green]✓[/green] {msg}")
+        ccyo_out.success(f"{msg}")
         return
     if "Permission" in msg:
-        console.print(f"[red]✗[/red] {msg}")
+        ccyo_out.error(f"{msg}")
         raise typer.Exit(1)
-    console.print(f"[yellow]⚠[/yellow] {msg}")
+    ccyo_out.warning(f"{msg}")
 
 
 @server_app.command("start")
@@ -422,15 +423,15 @@ def status() -> None:
     """Show Dewey API/UI server status."""
     pid = read_pid(_pid_file())
     if not pid:
-        console.print("[dim]○[/dim] Server is [dim]not running[/dim]")
+        ccyo_out.print_text("Server is [dim]not running[/dim]")
         return
 
     host, port = _status_bind()
     log_file = latest_log(_log_dir())
-    console.print(f"[green]●[/green] Server is [green]running[/green] (PID {pid})")
-    console.print(f"   URL: [cyan]{_status_scheme()}://{host}:{port}[/cyan]")
+    ccyo_out.success(f"Server is running (PID {pid})")
+    ccyo_out.print_text(f"   URL: [cyan]{_status_scheme()}://{host}:{port}[/cyan]")
     if log_file:
-        console.print(f"   Logs: [dim]{log_file}[/dim]")
+        ccyo_out.print_text(f"   Logs: [dim]{log_file}[/dim]")
 
 
 @server_app.command("logs")
@@ -444,23 +445,23 @@ def logs(
     if all_logs:
         entries = list_logs(_log_dir())
         if not entries:
-            console.print("[yellow]⚠[/yellow] No log files found.")
+            ccyo_out.warning("No log files found.")
             return
-        console.print(f"[bold]Server log files ({len(entries)}):[/bold]")
+        ccyo_out.print_text(f"[bold]Server log files ({len(entries)}):[/bold]")
         for entry in entries:
-            console.print(f"  {entry.name}  [dim]({entry.stat().st_size:,} bytes)[/dim]")
+            ccyo_out.print_text(f"  {entry.name}  [dim]({entry.stat().st_size:,} bytes)[/dim]")
         return
 
     log_file = latest_log(_log_dir())
     if not log_file:
-        console.print("[yellow]⚠[/yellow] No log file found. Start the server first.")
+        ccyo_out.warning("No log file found. Start the server first.")
         return
 
-    console.print(f"[dim]Following {log_file.name} (Ctrl+C to stop)[/dim]\n")
+    ccyo_out.print_text(f"[dim]Following {log_file.name} (Ctrl+C to stop)[/dim]\n")
     try:
         tail_follow(log_file, lines=lines)
     except KeyboardInterrupt:
-        console.print()
+        ccyo_out.print_text("")
 
 
 @server_app.command("restart")
