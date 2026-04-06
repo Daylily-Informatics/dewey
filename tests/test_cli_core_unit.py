@@ -181,12 +181,15 @@ def test_command_requires_conda_env_check_handles_flags_and_exemptions(
 def test_main_strips_skip_flag_before_running(monkeypatch: pytest.MonkeyPatch) -> None:
     seen: dict[str, object] = {}
 
-    monkeypatch.setattr(cli_module.sys, "argv", ["dewey", "--skip-conda-env-check", "server", "status"])
+    monkeypatch.setattr(
+        cli_module.sys, "argv", ["dewey", "--skip-conda-env-check", "server", "status"]
+    )
     monkeypatch.setattr(
         cli_module,
         "_enforce_conda_env_contract",
         lambda _args: (_ for _ in ()).throw(AssertionError("should not enforce")),
     )
+
     def fake_run(_spec: object, args: list[str]) -> int:
         seen["args"] = list(args)
         return 7
@@ -211,6 +214,7 @@ def test_main_enforces_conda_env_contract_when_not_skipped(
         "_enforce_conda_env_contract",
         lambda args: seen.setdefault("checked_args", list(args)),
     )
+
     def fake_run(_spec: object, args: list[str]) -> int:
         seen["run_args"] = list(args)
         return 0
@@ -236,7 +240,9 @@ def test_config_status_prints_runtime_settings(monkeypatch: pytest.MonkeyPatch) 
         "get_settings",
         lambda: SimpleNamespace(model_dump_json=lambda indent=2: '{"ok": true}'),
     )
-    monkeypatch.setattr(config_extra.ccyo_out, "print_text", lambda message: printed.append(message))
+    monkeypatch.setattr(
+        config_extra.ccyo_out, "print_text", lambda message: printed.append(message)
+    )
 
     config_extra._status()
 
@@ -280,7 +286,9 @@ def test_set_artifact_bucket_persists_and_prints(monkeypatch: pytest.MonkeyPatch
         lambda: SimpleNamespace(managed_storage_bucket="dewey-artifacts-local"),
     )
     monkeypatch.setattr(config_extra.ccyo_out, "success", lambda message: successes.append(message))
-    monkeypatch.setattr(config_extra.ccyo_out, "print_text", lambda message: printed.append(message))
+    monkeypatch.setattr(
+        config_extra.ccyo_out, "print_text", lambda message: printed.append(message)
+    )
 
     config_extra._set_artifact_bucket("s3://dewey-artifacts-local")
 

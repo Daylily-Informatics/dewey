@@ -216,20 +216,20 @@ def test_resolve_tapdb_config_path_supports_user_repo_and_missing_paths(
     user_scoped.parent.mkdir(parents=True, exist_ok=True)
     user_scoped.write_text("meta: {}\n", encoding="utf-8")
     monkeypatch.setattr(tapdb_runtime.Path, "home", classmethod(lambda cls: home))
-    monkeypatch.setattr(tapdb_runtime, "__file__", str(repo_root / "pkg" / "x" / "tapdb_runtime.py"))
+    monkeypatch.setattr(
+        tapdb_runtime, "__file__", str(repo_root / "pkg" / "x" / "tapdb_runtime.py")
+    )
     monkeypatch.setattr(tapdb_runtime, "_resolve_deployment_code", lambda: "local")
 
-    assert (
-        tapdb_runtime._resolve_tapdb_config_path(namespace="dewey", client_id="dewey")
-        == str(user_scoped)
+    assert tapdb_runtime._resolve_tapdb_config_path(namespace="dewey", client_id="dewey") == str(
+        user_scoped
     )
 
     user_scoped.unlink()
     repo_scoped.parent.mkdir(parents=True, exist_ok=True)
     repo_scoped.write_text("meta: {}\n", encoding="utf-8")
-    assert (
-        tapdb_runtime._resolve_tapdb_config_path(namespace="dewey", client_id="dewey")
-        == str(repo_scoped)
+    assert tapdb_runtime._resolve_tapdb_config_path(namespace="dewey", client_id="dewey") == str(
+        repo_scoped
     )
 
     repo_scoped.unlink()
@@ -237,7 +237,10 @@ def test_resolve_tapdb_config_path_supports_user_repo_and_missing_paths(
 
 
 def test_require_config_path_and_cli_resolution(monkeypatch: pytest.MonkeyPatch) -> None:
-    assert tapdb_runtime._require_config_path({"config_path": " /tmp/tapdb.yaml "}) == "/tmp/tapdb.yaml"
+    assert (
+        tapdb_runtime._require_config_path({"config_path": " /tmp/tapdb.yaml "})
+        == "/tmp/tapdb.yaml"
+    )
 
     with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="TapDB config path is required"):
         tapdb_runtime._require_config_path({"config_path": ""})
@@ -253,16 +256,16 @@ def test_get_tapdb_db_config_for_env_and_sqlalchemy_url(monkeypatch: pytest.Monk
     monkeypatch.setattr(
         db_config_mod,
         "get_db_config_for_env",
-        lambda env, *, config_path, client_id, database_name: seen.append(
-            (env, config_path, client_id, database_name)
-        )
-        or {
-            "user": "postgres",
-            "password": "",
-            "host": "db",
-            "port": "5432",
-            "database": "dewey_dev",
-        },
+        lambda env, *, config_path, client_id, database_name: (
+            seen.append((env, config_path, client_id, database_name))
+            or {
+                "user": "postgres",
+                "password": "",
+                "host": "db",
+                "port": "5432",
+                "database": "dewey_dev",
+            }
+        ),
     )
 
     cfg = tapdb_runtime._get_tapdb_db_config_for_env(
@@ -274,7 +277,10 @@ def test_get_tapdb_db_config_for_env_and_sqlalchemy_url(monkeypatch: pytest.Monk
 
     assert seen == [("dev", "/tmp/tapdb.yaml", "dewey", "dewey")]
     assert cfg["database"] == "dewey_dev"
-    assert tapdb_runtime._build_sqlalchemy_url(cfg) == "postgresql+psycopg2://postgres@db:5432/dewey_dev"
+    assert (
+        tapdb_runtime._build_sqlalchemy_url(cfg)
+        == "postgresql+psycopg2://postgres@db:5432/dewey_dev"
+    )
 
     monkeypatch.setattr(
         db_config_mod,

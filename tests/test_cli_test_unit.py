@@ -80,7 +80,9 @@ def test_run_coverage_builds_pytest_cov_command(monkeypatch: pytest.MonkeyPatch)
         return _proc()
 
     monkeypatch.setattr(test_cli.subprocess, "run", fake_run)
-    monkeypatch.setattr(test_cli.ccyo_out, "success", lambda message: success_messages.append(message))
+    monkeypatch.setattr(
+        test_cli.ccyo_out, "success", lambda message: success_messages.append(message)
+    )
 
     with pytest.raises(typer.Exit) as exc:
         test_cli.run_coverage(

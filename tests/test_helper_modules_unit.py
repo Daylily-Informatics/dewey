@@ -11,9 +11,9 @@ import dewey_service.schema_drift as schema_drift
 
 def test_domain_host_normalization_and_approval() -> None:
     assert domain_access._normalize_host("") == ""
-    assert domain_access._normalize_host("https://USER@example.daylilyinformatics.com:8443/path") == (
-        "example.daylilyinformatics.com"
-    )
+    assert domain_access._normalize_host(
+        "https://USER@example.daylilyinformatics.com:8443/path"
+    ) == ("example.daylilyinformatics.com")
     assert domain_access._normalize_host("localhost:8914") == "localhost"
     assert domain_access._normalize_host("[::1]:8914") == "::1"
     assert domain_access._normalize_host("https://portal.lsmc.bio./") == "portal.lsmc.bio"
@@ -27,8 +27,14 @@ def test_domain_host_normalization_and_approval() -> None:
 
 def test_domain_allowed_origin_and_host_lists() -> None:
     assert domain_access.is_allowed_origin("", allow_local=False) is False
-    assert domain_access.is_allowed_origin("http://portal.daylilyinformatics.com", allow_local=False) is False
-    assert domain_access.is_allowed_origin("https://portal.daylilyinformatics.com", allow_local=False) is True
+    assert (
+        domain_access.is_allowed_origin("http://portal.daylilyinformatics.com", allow_local=False)
+        is False
+    )
+    assert (
+        domain_access.is_allowed_origin("https://portal.daylilyinformatics.com", allow_local=False)
+        is True
+    )
     assert domain_access.is_allowed_origin("https://localhost:8914", allow_local=False) is False
     assert domain_access.is_allowed_origin("https://localhost:8914", allow_local=True) is True
     assert domain_access.is_allowed_origin("https://example.org", allow_local=True) is False

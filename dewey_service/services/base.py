@@ -307,7 +307,9 @@ class BaseDeweyService:
             or get_settings().environment
             or "unknown"
         )
-        fingerprint = str(payload.get("fingerprint") or payload.get("anomaly_identity_key") or instance.euid)
+        fingerprint = str(
+            payload.get("fingerprint") or payload.get("anomaly_identity_key") or instance.euid
+        )
         summary = str(payload.get("summary") or payload.get("title") or "")
         return {
             "id": instance.euid,

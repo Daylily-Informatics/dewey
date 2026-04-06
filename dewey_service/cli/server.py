@@ -109,7 +109,9 @@ def _validate_cognito_uris_for_port(port: int, host: str) -> None:
     for err in errors:
         ccyo_out.bullet(f"   • {err}")
     ccyo_out.print_text(f"   Server is starting on port [cyan]{port}[/cyan]")
-    ccyo_out.print_text("   Update Cognito config or use [dim]--no-check-cognito-uris[/dim] to skip\n")
+    ccyo_out.print_text(
+        "   Update Cognito config or use [dim]--no-check-cognito-uris[/dim] to skip\n"
+    )
 
 
 def _resolve_port(value: int) -> int:

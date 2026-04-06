@@ -290,5 +290,8 @@ def test_activate_syncs_stale_packaged_shared_dependencies(tmp_path: Path) -> No
         and "daylily-tapdb==4.0.6" in line
         for line in pip_install_lines
     )
-    assert any("pip install --no-deps -e " in line and str(PROJECT_ROOT) in line for line in pip_install_lines)
+    assert any(
+        "pip install --no-deps -e " in line and str(PROJECT_ROOT) in line
+        for line in pip_install_lines
+    )
     assert shared_deps_state.read_text(encoding="utf-8").strip() == "current"

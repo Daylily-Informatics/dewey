@@ -142,7 +142,12 @@ def test_s3_storage_client_object_operations_cover_success_paths() -> None:
         [
             {
                 "Contents": [
-                    {"Key": "docs/a.pdf", "Size": 11, "StorageClass": "STANDARD", "ETag": '"etag-a"'},
+                    {
+                        "Key": "docs/a.pdf",
+                        "Size": 11,
+                        "StorageClass": "STANDARD",
+                        "ETag": '"etag-a"',
+                    },
                     {"Key": "docs/b.pdf", "Size": 12, "StorageClass": "GLACIER", "ETag": ""},
                 ]
             }
@@ -235,7 +240,9 @@ def test_s3_storage_client_write_tag_retention_and_presign_paths() -> None:
     )
 
     assert copied == storage_mod.StorageObject(bucket="dest-bucket", key="dest-key", etag="copied")
-    assert uploaded == storage_mod.StorageObject(bucket="dest-bucket", key="dest-key", etag="copied")
+    assert uploaded == storage_mod.StorageObject(
+        bucket="dest-bucket", key="dest-key", etag="copied"
+    )
     assert head_calls == [("dest-bucket", "dest-key"), ("dest-bucket", "dest-key")]
     assert tags == {"zeta": "keep"}
     assert get_url == "https://signed.example.com/object"
@@ -244,21 +251,34 @@ def test_s3_storage_client_write_tag_retention_and_presign_paths() -> None:
         "url": "https://signed.example.com/object",
         "headers": {"Content-Type": "application/pdf"},
     }
-    assert ("copy_object", {"Bucket": "dest-bucket", "Key": "dest-key", "CopySource": {
-        "Bucket": "source-bucket",
-        "Key": "source-key",
-    }}) in backend.calls
-    assert ("put_object", {
-        "Bucket": "dest-bucket",
-        "Key": "dest-key",
-        "Body": b"hello",
-        "ContentType": "text/plain",
-    }) in backend.calls
-    assert ("put_object_retention", {
-        "Bucket": "dest-bucket",
-        "Key": "dest-key",
-        "Retention": {"Mode": "GOVERNANCE", "RetainUntilDate": retain_until},
-    }) in backend.calls
+    assert (
+        "copy_object",
+        {
+            "Bucket": "dest-bucket",
+            "Key": "dest-key",
+            "CopySource": {
+                "Bucket": "source-bucket",
+                "Key": "source-key",
+            },
+        },
+    ) in backend.calls
+    assert (
+        "put_object",
+        {
+            "Bucket": "dest-bucket",
+            "Key": "dest-key",
+            "Body": b"hello",
+            "ContentType": "text/plain",
+        },
+    ) in backend.calls
+    assert (
+        "put_object_retention",
+        {
+            "Bucket": "dest-bucket",
+            "Key": "dest-key",
+            "Retention": {"Mode": "GOVERNANCE", "RetainUntilDate": retain_until},
+        },
+    ) in backend.calls
 
     tag_call = next(kwargs for name, kwargs in backend.calls if name == "put_object_tagging")
     assert tag_call == {
@@ -272,7 +292,9 @@ def test_s3_storage_client_write_tag_retention_and_presign_paths() -> None:
             ]
         },
     }
-    presigned_calls = [payload for name, payload in backend.calls if name == "generate_presigned_url"]
+    presigned_calls = [
+        payload for name, payload in backend.calls if name == "generate_presigned_url"
+    ]
     assert presigned_calls == [
         ("get_object", {"Bucket": "dest-bucket", "Key": "dest-key", "VersionId": "ver-2"}, 60),
         (
