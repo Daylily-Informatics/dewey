@@ -259,9 +259,7 @@ def test_activate_installs_local_checkout_with_packaged_dependencies(tmp_path: P
     assert "Installing conda environment from environment.yaml..." in result.stdout
     pip_install_lines = pip_install_log.read_text(encoding="utf-8").splitlines()
     assert any(
-        "pip install -e " in line
-        and "[dev]" in line
-        and "--no-deps" not in line
+        "pip install -e " in line and "[dev]" in line and "--no-deps" not in line
         for line in pip_install_lines
     )
     assert any(str(PROJECT_ROOT) in line for line in pip_install_lines)
