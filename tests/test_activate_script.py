@@ -36,42 +36,19 @@ if [[ "${{1:-}}" == "-c" ]]; then
 fi
 if [[ "${{1:-}}" == "-" ]]; then
   script="$(cat)"
-  shared_deps_state="${{FAKE_SHARED_DEPS_STATE:-current}}"
-  if [[ -n "${{FAKE_SHARED_DEPS_STATE_FILE:-}}" && -f "${{FAKE_SHARED_DEPS_STATE_FILE}}" ]]; then
-    shared_deps_state="$(cat "${{FAKE_SHARED_DEPS_STATE_FILE}}")"
-  fi
-  if [[ "$script" == *"DEWEY_SHARED_DEPENDENCY_STATE"* ]]; then
-    if [[ "$shared_deps_state" == "stale" ]]; then
-      printf 'INSTALL\\tcli-core-yo\\tcli-core-yo>=1.3.1\\t1.3.0\\n'
-      printf 'INSTALL\\tdaylily-cognito\\tdaylily-cognito>=1.1.7\\t1.1.5\\n'
-      printf 'INSTALL\\tdaylily-tapdb\\tdaylily-tapdb>=4.0.7\\t4.0.6\\n'
-    elif [[ "$shared_deps_state" == "ahead" ]]; then
-      printf 'OK\\tcli-core-yo\\tcli-core-yo>=1.3.1\\t1.3.2\\n'
-      printf 'OK\\tdaylily-cognito\\tdaylily-cognito>=1.1.7\\t1.1.8\\n'
-      printf 'OK\\tdaylily-tapdb\\tdaylily-tapdb>=4.0.7\\t4.1.0\\n'
-    else
-      printf 'OK\\tcli-core-yo\\tcli-core-yo>=1.3.1\\t1.3.1\\n'
-      printf 'OK\\tdaylily-cognito\\tdaylily-cognito>=1.1.7\\t1.1.7\\n'
-      printf 'OK\\tdaylily-tapdb\\tdaylily-tapdb>=4.0.7\\t4.0.7\\n'
-    fi
-    exit 0
-  fi
   if [[ "$script" == *"importlib.import_module"* ]]; then
     exit 0
   fi
   exit 0
 fi
 if [[ "${{1:-}}" == "-m" && "${{2:-}}" == "pip" && "${{3:-}}" == "show" ]]; then
+  printf 'Name: dewey-service\\n'
+  printf 'Editable project location: %s\\n' "{PROJECT_ROOT}"
   exit 0
 fi
 if [[ "${{1:-}}" == "-m" && "${{2:-}}" == "pip" && "${{3:-}}" == "install" ]]; then
   if [[ -n "${{FAKE_PIP_INSTALL_LOG:-}}" ]]; then
     printf '%s\\n' "$*" >> "${{FAKE_PIP_INSTALL_LOG}}"
-  fi
-  if [[ -n "${{FAKE_SHARED_DEPS_STATE_FILE:-}}" ]]; then
-    if [[ "$*" == *"cli-core-yo>=1.3.1"* || "$*" == *"daylily-cognito>=1.1.7"* || "$*" == *"daylily-tapdb>=4.0.7"* ]]; then
-      printf 'current\\n' > "${{FAKE_SHARED_DEPS_STATE_FILE}}"
-    fi
   fi
   exit 0
 fi
@@ -258,68 +235,33 @@ def test_activate_accepts_preloaded_dewey_conda_env(tmp_path: Path) -> None:
 
     assert result.returncode == 0
     assert f"Conda environment already active: DEWEY-{DEPLOY_NAME}" in result.stdout
-    assert "Packaged shared dependencies already satisfy Dewey requirements" in result.stdout
     assert "build, seed, reset, nuke" in result.stdout
     assert not call_log.exists()
-    pip_install_args = pip_install_log.read_text(encoding="utf-8")
-    assert "cli-core-yo>=1.3.1" not in pip_install_args
-    assert "daylily-cognito>=1.1.7" not in pip_install_args
-    assert "daylily-tapdb>=4.0.7" not in pip_install_args
-    assert "pip install --no-deps -e " in pip_install_args
-    assert str(PROJECT_ROOT) in pip_install_args
-    assert "[dev]" not in pip_install_args
+    assert "Using local Dewey checkout" in result.stdout
+    assert not pip_install_log.exists()
 
 
-def test_activate_accepts_newer_packaged_shared_dependencies(tmp_path: Path) -> None:
+def test_activate_installs_local_checkout_with_packaged_dependencies(tmp_path: Path) -> None:
     conda_base = _build_fake_conda(tmp_path)
     pip_install_log = tmp_path / "pip-install.log"
-    shared_deps_state = tmp_path / "shared-deps-state.txt"
-    shared_deps_state.write_text("ahead\n", encoding="utf-8")
 
     env = os.environ.copy()
     env["PATH"] = f"{conda_base / 'bin'}:/usr/bin:/bin"
-    env["CONDA_DEFAULT_ENV"] = f"DEWEY-{DEPLOY_NAME}"
-    env["CONDA_PREFIX"] = str(conda_base / "envs" / f"DEWEY-{DEPLOY_NAME}")
+    env["FAKE_DEWEY_ENV_PRESENT"] = "0"
+    env.pop("CONDA_DEFAULT_ENV", None)
+    env.pop("CONDA_PREFIX", None)
     env["FAKE_PIP_INSTALL_LOG"] = str(pip_install_log)
-    env["FAKE_SHARED_DEPS_STATE_FILE"] = str(shared_deps_state)
 
     result = _source_activate(env)
 
     assert result.returncode == 0
-    assert "Packaged shared dependencies already satisfy Dewey requirements" in result.stdout
-    pip_install_args = pip_install_log.read_text(encoding="utf-8")
-    assert "cli-core-yo>=1.3.1" not in pip_install_args
-    assert "daylily-cognito>=1.1.7" not in pip_install_args
-    assert "daylily-tapdb>=4.0.7" not in pip_install_args
-    assert "pip install --no-deps -e " in pip_install_args
-
-
-def test_activate_syncs_stale_packaged_shared_dependencies(tmp_path: Path) -> None:
-    conda_base = _build_fake_conda(tmp_path)
-    pip_install_log = tmp_path / "pip-install.log"
-    shared_deps_state = tmp_path / "shared-deps-state.txt"
-    shared_deps_state.write_text("stale\n", encoding="utf-8")
-
-    env = os.environ.copy()
-    env["PATH"] = f"{conda_base / 'bin'}:/usr/bin:/bin"
-    env["CONDA_DEFAULT_ENV"] = f"DEWEY-{DEPLOY_NAME}"
-    env["CONDA_PREFIX"] = str(conda_base / "envs" / f"DEWEY-{DEPLOY_NAME}")
-    env["FAKE_PIP_INSTALL_LOG"] = str(pip_install_log)
-    env["FAKE_SHARED_DEPS_STATE_FILE"] = str(shared_deps_state)
-
-    result = _source_activate(env)
-
-    assert result.returncode == 0
-    assert "Syncing packaged shared dependencies to satisfy Dewey requirements..." in result.stdout
+    assert f"Conda environment 'DEWEY-{DEPLOY_NAME}' not found." in result.stdout
+    assert "Installing conda environment from environment.yaml..." in result.stdout
     pip_install_lines = pip_install_log.read_text(encoding="utf-8").splitlines()
     assert any(
-        "cli-core-yo>=1.3.1" in line
-        and "daylily-cognito>=1.1.7" in line
-        and "daylily-tapdb>=4.0.7" in line
+        "pip install -e " in line
+        and "[dev]" in line
+        and "--no-deps" not in line
         for line in pip_install_lines
     )
-    assert any(
-        "pip install --no-deps -e " in line and str(PROJECT_ROOT) in line
-        for line in pip_install_lines
-    )
-    assert shared_deps_state.read_text(encoding="utf-8").strip() == "current"
+    assert any(str(PROJECT_ROOT) in line for line in pip_install_lines)

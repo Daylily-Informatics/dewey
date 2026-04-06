@@ -51,109 +51,6 @@ PY
   fi
 }
 
-_dewey_collect_shared_dependency_state() {
-  "${_DEWEY_PYTHON:-python}" - "$DEWEY_ROOT/pyproject.toml" <<'PY'
-# DEWEY_SHARED_DEPENDENCY_STATE
-import importlib.metadata
-import pathlib
-import sys
-import tomllib
-from packaging.requirements import Requirement
-from packaging.version import InvalidVersion, Version
-
-wanted = ("cli-core-yo", "daylily-cognito", "daylily-tapdb")
-project = tomllib.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
-dependencies = project["project"]["dependencies"]
-
-for package_name in wanted:
-    matches = []
-    for dep in dependencies:
-        dep = dep.strip()
-        if not dep:
-            continue
-        requirement = Requirement(dep)
-        if requirement.name == package_name:
-            matches.append((dep, requirement))
-    if len(matches) != 1:
-        raise SystemExit(f"Expected exactly one shared dependency constraint for {package_name}")
-    spec, requirement = matches[0]
-    if not str(requirement.specifier):
-        raise SystemExit(f"Expected a version constraint for {package_name}")
-    try:
-        installed_version = importlib.metadata.version(package_name)
-    except importlib.metadata.PackageNotFoundError:
-        print(f"INSTALL\t{package_name}\t{spec}\tmissing")
-        continue
-    try:
-        satisfies = requirement.specifier.contains(Version(installed_version), prereleases=True)
-    except InvalidVersion:
-        satisfies = requirement.specifier.contains(installed_version, prereleases=True)
-    if not satisfies:
-        print(f"INSTALL\t{package_name}\t{spec}\t{installed_version}")
-        continue
-    print(f"OK\t{package_name}\t{spec}\t{installed_version}")
-PY
-}
-
-_dewey_reconcile_packaged_dependencies() {
-  local output=""
-  local line=""
-  local action=""
-  local package_name=""
-  local spec=""
-  local detail=""
-  local -a install_specs=()
-
-  if ! output="$(_dewey_collect_shared_dependency_state)"; then
-    _dewey_fail "Failed to resolve packaged dependency requirements from ${DEWEY_ROOT}/pyproject.toml"
-    return 1
-  fi
-
-  while IFS=$'\t' read -r action package_name spec detail; do
-    if [[ -z "$action" ]]; then
-      continue
-    fi
-    if [[ "$action" == "INSTALL" ]]; then
-      install_specs+=("$spec")
-    fi
-  done <<< "$output"
-
-  if (( ${#install_specs[@]} > 0 )); then
-    echo -e "  ${_CYAN}→${_NC} Syncing packaged shared dependencies to satisfy Dewey requirements..."
-    while IFS=$'\t' read -r action package_name spec detail; do
-      if [[ "$action" != "INSTALL" ]]; then
-        continue
-      fi
-      if [[ "$detail" == "missing" ]]; then
-        echo -e "  ${_CYAN}→${_NC} ${package_name} missing; installing ${spec}"
-      else
-        echo -e "  ${_CYAN}→${_NC} ${package_name}=${detail}; installing ${spec}"
-      fi
-    done <<< "$output"
-    if ! "${_DEWEY_PYTHON:-python}" -m pip install --upgrade -q "${install_specs[@]}"; then
-      _dewey_fail "Failed to install packaged shared dependencies: ${install_specs[*]}"
-      return 1
-    fi
-    if ! output="$(_dewey_collect_shared_dependency_state)"; then
-      _dewey_fail "Failed to verify packaged dependency requirements after install"
-      return 1
-    fi
-  else
-    echo -e "  ${_GREEN}✓${_NC} Packaged shared dependencies already satisfy Dewey requirements"
-  fi
-
-  while IFS=$'\t' read -r action package_name spec detail; do
-    if [[ -z "$action" ]]; then
-      continue
-    fi
-    if [[ "$action" != "OK" ]]; then
-      _dewey_fail "Packaged dependency reconciliation did not converge for ${package_name} (${spec})"
-      return 1
-    fi
-    echo -e "  ${_GREEN}✓${_NC} ${spec}"
-  done <<< "$output"
-}
-
 _dewey_sanitize_deployment_code() {
   local raw_value="$1"
   local sanitized=""
@@ -244,7 +141,7 @@ _dewey_distribution_is_editable_from_repo() {
 }
 _dewey_install_main_repo() {
   echo -e "  ${_CYAN}→${_NC} Installing local Dewey checkout..."
-  if ! "${_DEWEY_PYTHON:-python}" -m pip install --no-deps -e "${DEWEY_ROOT}" -q; then
+  if ! "${_DEWEY_PYTHON:-python}" -m pip install -e "${DEWEY_ROOT}[dev]" -q; then
     _dewey_fail "Failed to install local Dewey checkout from ${DEWEY_ROOT}"
     return 1
   fi
@@ -254,7 +151,31 @@ _dewey_install_main_repo() {
     _dewey_fail "Dewey is not installed editable from ${DEWEY_ROOT}"
     return 1
   fi
+  if ! _dewey_dev_runtime_ready; then
+    return 1
+  fi
   echo -e "  ${_GREEN}✓${_NC} Using local Dewey checkout: ${DEWEY_ROOT}"
+}
+
+_dewey_dev_runtime_ready() {
+  _dewey_require_python_import "daylily_tapdb" "daylily-tapdb" || return 1
+  _dewey_require_python_import "daylily_cognito" "daylily-cognito" || return 1
+  _dewey_require_python_import "cli_core_yo" "cli-core-yo" || return 1
+  _dewey_require_python_import "pytest" "pytest" || return 1
+}
+
+_dewey_validate_main_repo_install() {
+  _dewey_distribution_is_editable_from_repo "$DEWEY_ROOT"
+  local editable_status=$?
+  if [[ "$editable_status" -eq 0 ]]; then
+    if ! _dewey_dev_runtime_ready; then
+      return 1
+    fi
+    echo -e "  ${_GREEN}✓${_NC} Using local Dewey checkout: ${DEWEY_ROOT}"
+    return 0
+  fi
+  _dewey_fail "Dewey is not installed editable from ${DEWEY_ROOT}. Recreate ${_DEWEY_CONDA_ENV_NAME} to reinstall it."
+  return 1
 }
 
 _dewey_prepare_tapdb_config_path() {
@@ -302,7 +223,7 @@ _dewey_ensure_editable_repo() {
   fi
   install_target="${repo_root}${extras}"
   echo -e "  ${_CYAN}→${_NC} Installing local ${label} checkout..."
-  if ! "${_DEWEY_PYTHON:-python}" -m pip install --no-deps -e "$install_target" -q; then
+  if ! "${_DEWEY_PYTHON:-python}" -m pip install -e "$install_target" -q; then
     _dewey_fail "Failed to install local ${label} checkout from ${repo_root}"
     return 1
   fi
@@ -338,6 +259,8 @@ source "${_DEWEY_CONDA_BASE}/etc/profile.d/conda.sh" 2>/dev/null || {
   return 1
 }
 
+_DEWEY_CONDA_ENV_CREATED=0
+
 if [[ "${CONDA_DEFAULT_ENV:-}" == "${_DEWEY_CONDA_ENV_NAME}" ]] || [[ "${CONDA_PREFIX:-}" == "${_DEWEY_CONDA_BASE}/envs/${_DEWEY_CONDA_ENV_NAME}" ]]; then
   echo -e "  ${_GREEN}✓${_NC} Conda environment already active: ${_DEWEY_CONDA_ENV_NAME}"
 elif conda info --envs | grep -Eq "(^|[[:space:]])${_DEWEY_CONDA_ENV_NAME}([[:space:]]|$)"; then
@@ -366,6 +289,7 @@ else
       unset -f _dewey_fail
       return 1
     fi
+    _DEWEY_CONDA_ENV_CREATED=1
   else
     _dewey_fail "Conda environment '${_DEWEY_CONDA_ENV_NAME}' was not found and environment.yaml is missing."
     unset _DEWEY_CONDA_BASE
@@ -405,17 +329,20 @@ if [[ -n "${_DEWEY_PYTHON}" ]]; then
   export PATH="${_DEWEY_PYTHON_BIN}:$PATH"
 fi
 
-if ! _dewey_reconcile_packaged_dependencies; then
-  return 1
+if [[ "${_DEWEY_CONDA_ENV_CREATED}" == "1" ]]; then
+  if ! _dewey_install_main_repo; then
+    return 1
+  fi
+else
+  if ! _dewey_validate_main_repo_install; then
+    echo -e "  ${_CYAN}→${_NC} Refreshing Dewey install in ${_DEWEY_CONDA_ENV_NAME}..."
+    if ! _dewey_install_main_repo; then
+      return 1
+    fi
+  fi
 fi
 
-_dewey_require_python_import "daylily_tapdb" "daylily-tapdb" || return 1
-_dewey_require_python_import "daylily_cognito" "daylily-cognito" || return 1
-_dewey_require_python_import "cli_core_yo" "cli-core-yo" || return 1
-
-if ! _dewey_install_main_repo; then
-  return 1
-fi
+_dewey_dev_runtime_ready || return 1
 
 if command -v rehash >/dev/null 2>&1; then
   rehash
@@ -503,5 +430,6 @@ echo -e "  ${_GREEN}dewey_deactivate${_NC}  Deactivate this environment"
 unset _DEWEY_CLI_CORE_REPO
 unset _DEWEY_DAYCOG_REPO
 unset _DEWEY_TAPDB_REPO
+unset _DEWEY_CONDA_ENV_CREATED
 unset _DEWEY_USER_TAPDB_CONFIG_PATH
  
