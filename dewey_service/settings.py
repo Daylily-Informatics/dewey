@@ -308,7 +308,9 @@ class Settings(BaseSettings):
     def validate_cognito_group_role_map(cls, value: Any) -> dict[str, str]:
         return normalize_group_role_map(value)
 
-    @field_validator("cognito_allowed_email_domains", "cognito_auto_provision_allowed_domains", mode="before")
+    @field_validator(
+        "cognito_allowed_email_domains", "cognito_auto_provision_allowed_domains", mode="before"
+    )
     @classmethod
     def validate_cognito_email_domains(cls, value: Any) -> list[str]:
         return _normalize_email_domains(value)
