@@ -9,9 +9,9 @@ if TYPE_CHECKING:
     from cli_core_yo.spec import CliSpec
 
 import typer
-
 from cli_core_yo import ccyo_out
-from dewey_service.cli.common import PROJECT_ROOT, console
+
+from dewey_service.cli.common import PROJECT_ROOT
 from dewey_service.integrations.tapdb_runtime import (
     DEFAULT_AWS_PROFILE,
     DEFAULT_AWS_REGION,
@@ -59,7 +59,7 @@ def run_command(
     if result.stdout:
         ccyo_out.print_text(result.stdout.rstrip())
     if result.stderr:
-        ccyo_out.print_text(result.stderr.rstrip(), style="yellow")
+        ccyo_out.warning(result.stderr.rstrip())
     raise typer.Exit(result.returncode)
 
 

@@ -9,9 +9,9 @@ def test_pyproject_declares_cli_core_yo_dependency() -> None:
     pyproject = tomllib.loads((repo_root / "pyproject.toml").read_text(encoding="utf-8"))
     dependencies = pyproject["project"]["dependencies"]
 
-    assert "cli-core-yo==0.5.2" in dependencies
-    assert "daylily-cognito==0.4.2" in dependencies
-    assert "daylily-tapdb==3.2.3" in dependencies
+    assert "cli-core-yo==1.3.0" in dependencies
+    assert "daylily-cognito==1.1.5" in dependencies
+    assert "daylily-tapdb==4.0.6" in dependencies
 
 
 def test_pyproject_declares_python_multipart_for_browser_forms() -> None:
@@ -55,3 +55,6 @@ def test_setuptools_scm_tracks_numeric_release_tags() -> None:
     assert scm_config["version_scheme"] == "guess-next-dev"
     assert scm_config["local_scheme"] == "no-local-version"
     assert scm_config["tag_regex"] == r"^(?P<version>\d+\.\d+\.\d+)$"
+    assert scm_config["scm"]["git"]["describe_command"] == (
+        "git describe --dirty --tags --long --match '[0-9]*'"
+    )

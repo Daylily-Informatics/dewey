@@ -51,6 +51,95 @@ PY
   fi
 }
 
+_dewey_collect_shared_dependency_state() {
+  "${_DEWEY_PYTHON:-python}" - "$DEWEY_ROOT/pyproject.toml" <<'PY'
+# DEWEY_SHARED_DEPENDENCY_STATE
+import importlib.metadata
+import pathlib
+import sys
+import tomllib
+
+wanted = ("cli-core-yo", "daylily-cognito", "daylily-tapdb")
+project = tomllib.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+dependencies = project["project"]["dependencies"]
+
+for package_name in wanted:
+    matches = [dep.strip() for dep in dependencies if dep.strip().startswith(f"{package_name}==")]
+    if len(matches) != 1:
+        raise SystemExit(f"Expected exactly one pinned dependency for {package_name}")
+    spec = matches[0]
+    wanted_version = spec.split("==", 1)[1]
+    try:
+        installed_version = importlib.metadata.version(package_name)
+    except importlib.metadata.PackageNotFoundError:
+        print(f"INSTALL\t{package_name}\t{spec}\tmissing")
+        continue
+    if installed_version != wanted_version:
+        print(f"INSTALL\t{package_name}\t{spec}\t{installed_version}")
+        continue
+    print(f"OK\t{package_name}\t{spec}\t{installed_version}")
+PY
+}
+
+_dewey_reconcile_packaged_dependencies() {
+  local output=""
+  local line=""
+  local action=""
+  local package_name=""
+  local spec=""
+  local detail=""
+  local -a install_specs=()
+
+  if ! output="$(_dewey_collect_shared_dependency_state)"; then
+    _dewey_fail "Failed to resolve packaged dependency pins from ${DEWEY_ROOT}/pyproject.toml"
+    return 1
+  fi
+
+  while IFS=$'\t' read -r action package_name spec detail; do
+    if [[ -z "$action" ]]; then
+      continue
+    fi
+    if [[ "$action" == "INSTALL" ]]; then
+      install_specs+=("$spec")
+    fi
+  done <<< "$output"
+
+  if (( ${#install_specs[@]} > 0 )); then
+    echo -e "  ${_CYAN}→${_NC} Syncing packaged shared dependencies to Dewey pins..."
+    while IFS=$'\t' read -r action package_name spec detail; do
+      if [[ "$action" != "INSTALL" ]]; then
+        continue
+      fi
+      if [[ "$detail" == "missing" ]]; then
+        echo -e "  ${_CYAN}→${_NC} ${package_name} missing; installing ${spec}"
+      else
+        echo -e "  ${_CYAN}→${_NC} ${package_name}=${detail}; installing ${spec}"
+      fi
+    done <<< "$output"
+    if ! "${_DEWEY_PYTHON:-python}" -m pip install --upgrade -q "${install_specs[@]}"; then
+      _dewey_fail "Failed to install packaged shared dependencies: ${install_specs[*]}"
+      return 1
+    fi
+    if ! output="$(_dewey_collect_shared_dependency_state)"; then
+      _dewey_fail "Failed to verify packaged dependency pins after install"
+      return 1
+    fi
+  else
+    echo -e "  ${_GREEN}✓${_NC} Packaged shared dependencies already match Dewey pins"
+  fi
+
+  while IFS=$'\t' read -r action package_name spec detail; do
+    if [[ -z "$action" ]]; then
+      continue
+    fi
+    if [[ "$action" != "OK" ]]; then
+      _dewey_fail "Packaged dependency reconciliation did not converge for ${package_name} (${spec})"
+      return 1
+    fi
+    echo -e "  ${_GREEN}✓${_NC} ${spec}"
+  done <<< "$output"
+}
+
 _dewey_sanitize_deployment_code() {
   local raw_value="$1"
   local sanitized=""
@@ -300,17 +389,17 @@ if [[ -n "${_DEWEY_PYTHON}" ]]; then
   export PATH="${_DEWEY_PYTHON_BIN}:$PATH"
 fi
 
-if ! _dewey_install_main_repo; then
+if ! _dewey_reconcile_packaged_dependencies; then
   return 1
 fi
-
-echo -e "  ${_GREEN}✓${_NC} Using packaged daylily-tapdb from ${_DEWEY_CONDA_ENV_NAME}"
-echo -e "  ${_GREEN}✓${_NC} Using packaged daylily-cognito from ${_DEWEY_CONDA_ENV_NAME}"
-echo -e "  ${_GREEN}✓${_NC} Using packaged cli-core-yo from ${_DEWEY_CONDA_ENV_NAME}"
 
 _dewey_require_python_import "daylily_tapdb" "daylily-tapdb" || return 1
 _dewey_require_python_import "daylily_cognito" "daylily-cognito" || return 1
 _dewey_require_python_import "cli_core_yo" "cli-core-yo" || return 1
+
+if ! _dewey_install_main_repo; then
+  return 1
+fi
 
 if command -v rehash >/dev/null 2>&1; then
   rehash

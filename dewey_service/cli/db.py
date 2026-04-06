@@ -12,9 +12,9 @@ import subprocess
 import sys
 
 import typer
-
-from dewey_service.cli.common import PROJECT_ROOT, console
 from cli_core_yo import ccyo_out
+
+from dewey_service.cli.common import PROJECT_ROOT
 from dewey_service.integrations.tapdb_runtime import (
     DEFAULT_AWS_PROFILE,
     DEFAULT_AWS_REGION,

@@ -6,8 +6,8 @@ import importlib.metadata
 import json
 import os
 import re
+import shutil
 import subprocess
-import sys
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
@@ -147,10 +147,20 @@ def _require_config_path(runtime_env: Mapping[str, str]) -> str:
     config_path = str(runtime_env.get("config_path") or "").strip()
     if not config_path:
         raise TapDBRuntimeError(
-            "TapDB config path is required. Resolve it via Dewey settings and pass it explicitly "
-            "to TapDB with --config."
+            "TapDB config path is required. Resolve it via Dewey settings and run TapDB as "
+            "'tapdb --config <path> --env <name> ...'."
         )
     return config_path
+
+
+def _resolve_tapdb_cli_executable() -> str:
+    tapdb_executable = shutil.which("tapdb")
+    if tapdb_executable:
+        return tapdb_executable
+    raise TapDBRuntimeError(
+        "tapdb CLI is not available on PATH. Install daylily-tapdb in the active Dewey "
+        "environment so 'tapdb --config <path> --env <name> ...' is available."
+    )
 
 
 def _get_tapdb_db_config_for_env(
@@ -239,10 +249,9 @@ def run_tapdb_cli(
         tapdb_env=tapdb_env,
         config_path=config_path,
     )
+    tapdb_executable = _resolve_tapdb_cli_executable()
     cmd = [
-        sys.executable,
-        "-m",
-        "daylily_tapdb.cli",
+        tapdb_executable,
         "--config",
         _require_config_path(runtime_env),
         "--env",

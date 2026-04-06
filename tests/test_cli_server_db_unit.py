@@ -114,8 +114,6 @@ def test_tls_resolution_precedence(monkeypatch: pytest.MonkeyPatch, tmp_path: Pa
     explicit_key = tmp_path / "explicit-key.pem"
     generic_cert = tmp_path / "generic-cert.pem"
     generic_key = tmp_path / "generic-key.pem"
-    legacy_cert = tmp_path / "legacy-cert.pem"
-    legacy_key = tmp_path / "legacy-key.pem"
     shared_cert = shared_dir / "cert.pem"
     shared_key = shared_dir / "key.pem"
     repo_cert = repo_dir / "cert.pem"
@@ -126,8 +124,6 @@ def test_tls_resolution_precedence(monkeypatch: pytest.MonkeyPatch, tmp_path: Pa
         explicit_key,
         generic_cert,
         generic_key,
-        legacy_cert,
-        legacy_key,
         shared_cert,
         shared_key,
         repo_cert,
@@ -159,16 +155,6 @@ def test_tls_resolution_precedence(monkeypatch: pytest.MonkeyPatch, tmp_path: Pa
 
     monkeypatch.delenv(server_cli.GENERIC_CERT_ENV, raising=False)
     monkeypatch.delenv(server_cli.GENERIC_KEY_ENV, raising=False)
-    monkeypatch.setenv(server_cli.LEGACY_CERT_ENV, str(legacy_cert))
-    monkeypatch.setenv(server_cli.LEGACY_KEY_ENV, str(legacy_key))
-    assert server_cli._resolve_tls_material(
-        ssl_enabled=True,
-        cert_path=None,
-        key_path=None,
-    ) == (legacy_cert, legacy_key)
-
-    monkeypatch.delenv(server_cli.LEGACY_CERT_ENV, raising=False)
-    monkeypatch.delenv(server_cli.LEGACY_KEY_ENV, raising=False)
     assert server_cli._resolve_tls_material(
         ssl_enabled=True,
         cert_path=None,

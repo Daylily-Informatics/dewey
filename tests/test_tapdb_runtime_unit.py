@@ -114,6 +114,7 @@ def test_run_tapdb_cli_builds_command_and_raises_on_failure(
         calls.append((cmd, env))
         return SimpleNamespace(returncode=1, stdout="bad", stderr="worse")
 
+    monkeypatch.setattr(tapdb_runtime.shutil, "which", lambda _name: "tapdb")
     monkeypatch.setattr(tapdb_runtime.subprocess, "run", fake_run)
 
     with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="tapdb command failed"):
@@ -125,18 +126,18 @@ def test_run_tapdb_cli_builds_command_and_raises_on_failure(
         )
 
     assert calls
-    assert calls[0][0][:6] == [
-        tapdb_runtime.sys.executable,
-        "-m",
-        "daylily_tapdb.cli",
+    assert calls[0][0][:5] == [
+        "tapdb",
         "--config",
         "/tmp/dewey-tapdb.yaml",
         "--env",
+        "dev",
     ]
 
 
 def test_run_tapdb_cli_returns_process_when_check_disabled(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda: "3.0.9")
+    monkeypatch.setattr(tapdb_runtime.shutil, "which", lambda _name: "tapdb")
     monkeypatch.setattr(
         tapdb_runtime.subprocess,
         "run",
@@ -173,3 +174,15 @@ def test_run_schema_drift_check_maps_exit_codes(monkeypatch: pytest.MonkeyPatch)
     assert result["status"] == "drift"
     assert result["tool_version"] == "3.0.9"
     assert result["environment"] == "dev"
+
+
+def test_run_tapdb_cli_requires_tapdb_executable(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda: "4.0.6")
+    monkeypatch.setattr(tapdb_runtime.shutil, "which", lambda _name: None)
+
+    with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="tapdb CLI is not available"):
+        tapdb_runtime.run_tapdb_cli(
+            ["info"],
+            target="local",
+            config_path="/tmp/dewey-tapdb.yaml",
+        )

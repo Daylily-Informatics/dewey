@@ -8,6 +8,7 @@ def test_activate_uses_editable_metadata_contract() -> None:
     activate_script = (repo_root / "activate").read_text(encoding="utf-8")
 
     assert "Editable project location" in activate_script
+    assert "_dewey_reconcile_packaged_dependencies" in activate_script
     assert "dewey-service" in activate_script
     assert "is not installed editable from" in activate_script
     assert "_dewey_module_is_from_repo" not in activate_script

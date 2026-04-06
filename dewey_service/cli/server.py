@@ -18,6 +18,7 @@ from pathlib import Path
 
 import typer
 import uvicorn
+from cli_core_yo import ccyo_out
 from cli_core_yo.certs import ensure_certs
 from cli_core_yo.oauth import runtime_oauth_host, validate_uri_list_ports
 from cli_core_yo.server import (
@@ -32,10 +33,9 @@ from cli_core_yo.server import (
 )
 from typer.models import OptionInfo
 
-from dewey_service.cli.common import PROJECT_ROOT, console
+from dewey_service.cli.common import PROJECT_ROOT
 from dewey_service.defaults import DEFAULT_APP_PORT
 from dewey_service.settings import clear_settings_cache, get_settings
-from cli_core_yo import ccyo_out
 
 server_app = typer.Typer(help="HTTPS API/UI server commands")
 

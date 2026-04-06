@@ -13,8 +13,6 @@ import shutil
 import subprocess
 
 import typer
-
-from dewey_service.cli.common import console
 from cli_core_yo import ccyo_out
 
 cognito_app = typer.Typer(help="Cognito helper commands")
@@ -43,7 +41,7 @@ def status() -> None:
     if proc.stdout:
         ccyo_out.print_text(proc.stdout.rstrip())
     if proc.stderr:
-        ccyo_out.print_text(proc.stderr.rstrip(), style="yellow")
+        ccyo_out.warning(proc.stderr.rstrip())
     raise typer.Exit(proc.returncode)
 
 

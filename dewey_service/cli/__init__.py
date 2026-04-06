@@ -143,7 +143,7 @@ spec = CliSpec(
     root_help="Dewey — Development CLI for the canonical artifact registry service.",
     xdg=XdgSpec(app_dir_name=_config_dir_name()),
     config=ConfigSpec(
-        primary_filename=_config_filename(),
+        xdg_relative_path=_config_filename(),
         template_bytes=build_default_config_template(),
         validator=_validate_dewey_config,
     ),

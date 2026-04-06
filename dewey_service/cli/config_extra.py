@@ -9,9 +9,8 @@ if TYPE_CHECKING:
     from cli_core_yo.spec import CliSpec
 
 import typer
-
 from cli_core_yo import ccyo_out
-from dewey_service.cli.common import console
+
 from dewey_service.settings import (
     clear_settings_cache,
     get_config_file_path,
