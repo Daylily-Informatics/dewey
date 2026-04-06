@@ -98,6 +98,30 @@ def test_auth_error_page_renders(client) -> None:
     assert "Sign-in was blocked" in response.text
 
 
+def test_auth_error_page_renders_human_readable_logout_misconfiguration(client) -> None:
+    response = client.get(
+        "/auth/error",
+        params={"reason": "cognito_logout_misconfigured"},
+    )
+
+    assert response.status_code == 403
+    assert "Dewey cleared your local session" in response.text
+
+
+def test_auth_login_redirects_to_local_auth_error_when_cognito_is_misconfigured(
+    monkeypatch, client
+) -> None:
+    monkeypatch.setattr(
+        "dewey_service.app.start_browser_login",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(ValueError("callback mismatch")),
+    )
+
+    response = client.get("/auth/login?next=/ui", follow_redirects=False)
+
+    assert response.status_code == 303
+    assert response.headers["location"] == "/auth/error?reason=cognito_sign_in_misconfigured"
+
+
 def test_session_expiration_redirects_to_auth_error(monkeypatch, client, test_settings) -> None:
     _login_user(monkeypatch, client)
 
@@ -199,7 +223,8 @@ def test_logout_clears_session_and_redirects_to_cognito(monkeypatch, client, tes
     assert parsed.netloc == "dewey-auth.example.com"
     assert parsed.path == "/logout"
     assert params["client_id"] == [test_settings.cognito_app_client_id]
-    assert params["logout_uri"] == [test_settings.cognito_logout_url.rstrip("/")]
+    assert params["redirect_uri"] == [test_settings.cognito_redirect_uri.rstrip("/")]
+    assert params["response_type"] == ["code"]
     assert params["state"][0]
 
     ui = client.get("/ui")
@@ -220,7 +245,8 @@ def test_logout_get_clears_session_and_redirects_to_cognito(
     assert parsed.netloc == "dewey-auth.example.com"
     assert parsed.path == "/logout"
     assert params["client_id"] == [test_settings.cognito_app_client_id]
-    assert params["logout_uri"] == [test_settings.cognito_logout_url.rstrip("/")]
+    assert params["redirect_uri"] == [test_settings.cognito_redirect_uri.rstrip("/")]
+    assert params["response_type"] == ["code"]
 
 
 def test_plain_logout_post_clears_session_and_redirects_to_cognito(
@@ -237,7 +263,23 @@ def test_plain_logout_post_clears_session_and_redirects_to_cognito(
     assert parsed.netloc == "dewey-auth.example.com"
     assert parsed.path == "/logout"
     assert params["client_id"] == [test_settings.cognito_app_client_id]
-    assert params["logout_uri"] == [test_settings.cognito_logout_url.rstrip("/")]
+    assert params["redirect_uri"] == [test_settings.cognito_redirect_uri.rstrip("/")]
+    assert params["response_type"] == ["code"]
+
+
+def test_logout_redirects_to_local_auth_error_when_cognito_is_misconfigured(
+    monkeypatch, client
+) -> None:
+    _login_user(monkeypatch, client)
+    monkeypatch.setattr(
+        "dewey_service.app.build_cognito_logout_url",
+        lambda **_kwargs: (_ for _ in ()).throw(ValueError("logout mismatch")),
+    )
+
+    logout = client.post("/auth/logout", follow_redirects=False)
+
+    assert logout.status_code == 303
+    assert logout.headers["location"] == "/auth/error?reason=cognito_logout_misconfigured"
 
 
 def test_two_browsers_can_keep_distinct_authenticated_sessions(monkeypatch, client) -> None:
