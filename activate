@@ -185,6 +185,8 @@ fi
 export DEWEY_DEPLOYMENT_CODE="${_dewey_deployment_code}"
 export DEPLOYMENT_CODE="${_dewey_deployment_code}"
 export LSMC_DEPLOYMENT_CODE="${_dewey_deployment_code}"
+export MERIDIAN_DOMAIN_CODE="${MERIDIAN_DOMAIN_CODE:-D}"
+export TAPDB_APP_CODE="${TAPDB_APP_CODE:-D}"
 _DEWEY_CONDA_ENV_NAME="${_DEWEY_CONDA_ENV_BASE}-${_dewey_deployment_code}"
 unset _dewey_deployment_code
 
@@ -471,6 +473,8 @@ fi
 
 echo -e "  ${_GREEN}✓${_NC} AWS_PROFILE=${AWS_PROFILE}"
 echo -e "  ${_GREEN}✓${_NC} AWS_REGION=${AWS_REGION}"
+echo -e "  ${_GREEN}✓${_NC} MERIDIAN_DOMAIN_CODE=${MERIDIAN_DOMAIN_CODE}"
+echo -e "  ${_GREEN}✓${_NC} TAPDB_APP_CODE=${TAPDB_APP_CODE}"
 echo -e "  ${_GREEN}✓${_NC} Dewey TapDB client=${_DEWEY_TAPDB_CLIENT_ID}"
 echo -e "  ${_GREEN}✓${_NC} Dewey TapDB namespace=${_DEWEY_TAPDB_DATABASE_NAME}"
 echo -e "  ${_GREEN}✓${_NC} Dewey TapDB env=${_DEWEY_TAPDB_ENV}"

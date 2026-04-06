@@ -154,6 +154,8 @@ def test_config_init_show_validate_and_status(monkeypatch, tmp_path: Path, capsy
     assert "Config file created" in init_output
     assert config_path.exists()
     assert "storage:" in config_path.read_text(encoding="utf-8")
+    assert "MERIDIAN_DOMAIN_CODE=D" in config_path.read_text(encoding="utf-8")
+    assert "TAPDB_APP_CODE=D" in config_path.read_text(encoding="utf-8")
 
     show_exit = _invoke(["config", "show"])
     show_output = capsys.readouterr().out
