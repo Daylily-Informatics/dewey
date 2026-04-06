@@ -178,7 +178,7 @@ def test_run_schema_drift_check_maps_exit_codes(monkeypatch: pytest.MonkeyPatch)
 
 
 def test_run_tapdb_cli_requires_tapdb_executable(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda: "4.0.6")
+    monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda: "4.0.7")
     monkeypatch.setattr(tapdb_runtime.shutil, "which", lambda _name: None)
 
     with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="tapdb CLI is not available"):
@@ -302,7 +302,7 @@ def test_get_tapdb_db_config_for_env_and_sqlalchemy_url(monkeypatch: pytest.Monk
 def test_run_schema_drift_check_covers_clean_invalid_json_and_failed_stderr(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda: "4.0.6")
+    monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda: "4.0.7")
     monkeypatch.setattr(tapdb_runtime, "_utcnow", lambda: "2026-04-05T18:00:00+00:00")
 
     monkeypatch.setattr(
@@ -316,7 +316,7 @@ def test_run_schema_drift_check_covers_clean_invalid_json_and_failed_stderr(
         "status": "clean",
         "checked_at": "2026-04-05T18:00:00+00:00",
         "environment": "dev",
-        "tool_version": "4.0.6",
+        "tool_version": "4.0.7",
         "summary": "no schema drift reported",
         "report": {},
         "strict": False,
@@ -333,7 +333,7 @@ def test_run_schema_drift_check_covers_clean_invalid_json_and_failed_stderr(
         "status": "check_failed",
         "checked_at": "2026-04-05T18:00:00+00:00",
         "environment": "prod",
-        "tool_version": "4.0.6",
+        "tool_version": "4.0.7",
         "summary": "schema drift report unavailable",
         "report": {"raw_stdout": "not-json"},
         "strict": False,

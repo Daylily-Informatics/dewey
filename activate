@@ -58,23 +58,37 @@ import importlib.metadata
 import pathlib
 import sys
 import tomllib
+from packaging.requirements import Requirement
+from packaging.version import InvalidVersion, Version
 
 wanted = ("cli-core-yo", "daylily-cognito", "daylily-tapdb")
 project = tomllib.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
 dependencies = project["project"]["dependencies"]
 
 for package_name in wanted:
-    matches = [dep.strip() for dep in dependencies if dep.strip().startswith(f"{package_name}==")]
+    matches = []
+    for dep in dependencies:
+        dep = dep.strip()
+        if not dep:
+            continue
+        requirement = Requirement(dep)
+        if requirement.name == package_name:
+            matches.append((dep, requirement))
     if len(matches) != 1:
-        raise SystemExit(f"Expected exactly one pinned dependency for {package_name}")
-    spec = matches[0]
-    wanted_version = spec.split("==", 1)[1]
+        raise SystemExit(f"Expected exactly one shared dependency constraint for {package_name}")
+    spec, requirement = matches[0]
+    if not str(requirement.specifier):
+        raise SystemExit(f"Expected a version constraint for {package_name}")
     try:
         installed_version = importlib.metadata.version(package_name)
     except importlib.metadata.PackageNotFoundError:
         print(f"INSTALL\t{package_name}\t{spec}\tmissing")
         continue
-    if installed_version != wanted_version:
+    try:
+        satisfies = requirement.specifier.contains(Version(installed_version), prereleases=True)
+    except InvalidVersion:
+        satisfies = requirement.specifier.contains(installed_version, prereleases=True)
+    if not satisfies:
         print(f"INSTALL\t{package_name}\t{spec}\t{installed_version}")
         continue
     print(f"OK\t{package_name}\t{spec}\t{installed_version}")
@@ -91,7 +105,7 @@ _dewey_reconcile_packaged_dependencies() {
   local -a install_specs=()
 
   if ! output="$(_dewey_collect_shared_dependency_state)"; then
-    _dewey_fail "Failed to resolve packaged dependency pins from ${DEWEY_ROOT}/pyproject.toml"
+    _dewey_fail "Failed to resolve packaged dependency requirements from ${DEWEY_ROOT}/pyproject.toml"
     return 1
   fi
 
@@ -105,7 +119,7 @@ _dewey_reconcile_packaged_dependencies() {
   done <<< "$output"
 
   if (( ${#install_specs[@]} > 0 )); then
-    echo -e "  ${_CYAN}→${_NC} Syncing packaged shared dependencies to Dewey pins..."
+    echo -e "  ${_CYAN}→${_NC} Syncing packaged shared dependencies to satisfy Dewey requirements..."
     while IFS=$'\t' read -r action package_name spec detail; do
       if [[ "$action" != "INSTALL" ]]; then
         continue
@@ -121,11 +135,11 @@ _dewey_reconcile_packaged_dependencies() {
       return 1
     fi
     if ! output="$(_dewey_collect_shared_dependency_state)"; then
-      _dewey_fail "Failed to verify packaged dependency pins after install"
+      _dewey_fail "Failed to verify packaged dependency requirements after install"
       return 1
     fi
   else
-    echo -e "  ${_GREEN}✓${_NC} Packaged shared dependencies already match Dewey pins"
+    echo -e "  ${_GREEN}✓${_NC} Packaged shared dependencies already satisfy Dewey requirements"
   fi
 
   while IFS=$'\t' read -r action package_name spec detail; do
