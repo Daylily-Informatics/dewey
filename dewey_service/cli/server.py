@@ -425,13 +425,21 @@ def status() -> None:
     """Show Dewey API/UI server status."""
     pid = read_pid(_pid_file())
     if not pid:
+        ccyo_out.emit_json({"running": False, "pid": None})
         ccyo_out.print_text("Server is [dim]not running[/dim]")
         return
 
     host, port = _status_bind()
     log_file = latest_log(_log_dir())
+    data = {
+        "running": True,
+        "pid": pid,
+        "url": f"{_status_scheme()}://{host}:{port}",
+        "log_file": str(log_file) if log_file else None,
+    }
+    ccyo_out.emit_json(data)
     ccyo_out.success(f"Server is running (PID {pid})")
-    ccyo_out.print_text(f"   URL: [cyan]{_status_scheme()}://{host}:{port}[/cyan]")
+    ccyo_out.print_text(f"   URL: [cyan]{data['url']}[/cyan]")
     if log_file:
         ccyo_out.print_text(f"   Logs: [dim]{log_file}[/dim]")
 
