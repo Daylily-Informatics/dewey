@@ -108,10 +108,11 @@ def build_cognito_logout_url(*, settings: Settings, state: str | None = None) ->
     import urllib.parse
 
     domain = _strip_scheme(settings.cognito_domain)
-    logout_target = settings.cognito_logout_url
+    logout_target = settings.cognito_redirect_uri
     query: dict[str, str] = {
         "client_id": settings.cognito_app_client_id,
-        "logout_uri": logout_target.rstrip("/"),
+        "redirect_uri": logout_target.rstrip("/"),
+        "response_type": "code",
     }
     if state:
         query["state"] = state

@@ -889,7 +889,13 @@ def create_app(
         request: Request,
         next_path: str = Query("/ui", alias="next"),
     ) -> RedirectResponse:
-        return start_browser_login(request, web_session_config, next_path=next_path)
+        try:
+            return start_browser_login(request, web_session_config, next_path=next_path)
+        except ValueError:
+            return RedirectResponse(
+                url="/auth/error?reason=cognito_sign_in_misconfigured",
+                status_code=status.HTTP_303_SEE_OTHER,
+            )
 
     @app.get("/auth/callback", include_in_schema=False)
     async def auth_callback(request: Request, code: str = "", state: str = "") -> RedirectResponse:
@@ -923,6 +929,14 @@ def create_app(
             "token_exchange_failed": "Dewey could not finish exchanging the authorization code.",
             "session_expired": "Your session ended before the requested page loaded.",
             "not_authorized": "This account is not provisioned for Dewey access.",
+            "cognito_sign_in_misconfigured": (
+                "Dewey Cognito sign-in is misconfigured. The shared app client callback/logout "
+                "URLs or redirect URI do not match this Dewey deployment."
+            ),
+            "cognito_logout_misconfigured": (
+                "Dewey cleared your local session, but the shared Cognito logout contract is "
+                "misconfigured. Update the shared app client redirect URLs for this Dewey deployment."
+            ),
         }
         message = reasons.get(reason, reasons["auth_error"])
         context, status_code = _auth_template_context(
@@ -943,7 +957,13 @@ def create_app(
         request.session.clear()
         state = generate_state()
         request.session["oauth_state"] = state
-        logout_url = build_cognito_logout_url(settings=settings, state=state)
+        try:
+            logout_url = build_cognito_logout_url(settings=settings, state=state)
+        except ValueError:
+            return RedirectResponse(
+                url="/auth/error?reason=cognito_logout_misconfigured",
+                status_code=status.HTTP_303_SEE_OTHER,
+            )
         return RedirectResponse(url=logout_url, status_code=status.HTTP_303_SEE_OTHER)
 
     @app.get("/auth/logout", include_in_schema=False)
