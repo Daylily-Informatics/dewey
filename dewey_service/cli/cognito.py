@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import sys
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -26,9 +28,13 @@ def status() -> None:
         ccyo_out.error("daycog not found in PATH")
         raise typer.Exit(1)
 
+    cmd = [daycog_path, "status"]
+    if "--json" in sys.argv or "-j" in sys.argv:
+        cmd.append("--json")
+
     try:
         proc = subprocess.run(
-            [daycog_path, "status"],
+            cmd,
             capture_output=True,
             text=True,
             check=False,
