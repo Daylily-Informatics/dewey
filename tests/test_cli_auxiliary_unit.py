@@ -116,9 +116,7 @@ def test_cognito_registers_typer_app() -> None:
 
     cognito_cli.register(registry, object())
 
-    assert registry.calls == [
-        (None, cognito_cli.cognito_app, "cognito", "Cognito helper commands")
-    ]
+    assert registry.calls == [(None, cognito_cli.cognito_app, "cognito", "Cognito helper commands")]
 
 
 def test_tapdb_run_requires_passthrough_args() -> None:
@@ -209,9 +207,7 @@ def test_tapdb_registers_typer_app() -> None:
 
     tapdb_cli.register(registry, object())
 
-    assert registry.calls == [
-        (None, tapdb_cli.tapdb_app, "tapdb", "TapDB passthrough wrappers")
-    ]
+    assert registry.calls == [(None, tapdb_cli.tapdb_app, "tapdb", "TapDB passthrough wrappers")]
 
 
 def test_quality_lint_runs_ruff_check(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -227,7 +223,9 @@ def test_quality_lint_runs_ruff_check(monkeypatch: pytest.MonkeyPatch) -> None:
         quality_cli.lint()
 
     assert exc.value.exit_code == 3
-    assert calls == [([sys.executable, "-m", "ruff", "check", "."], quality_cli.PROJECT_ROOT, False)]
+    assert calls == [
+        ([sys.executable, "-m", "ruff", "check", "."], quality_cli.PROJECT_ROOT, False)
+    ]
 
 
 @pytest.mark.parametrize(
@@ -303,6 +301,4 @@ def test_quality_registers_typer_app() -> None:
 
     quality_cli.register(registry, object())
 
-    assert registry.calls == [
-        (None, quality_cli.quality_app, "quality", "Quality commands")
-    ]
+    assert registry.calls == [(None, quality_cli.quality_app, "quality", "Quality commands")]

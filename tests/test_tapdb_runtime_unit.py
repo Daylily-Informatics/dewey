@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from importlib import import_module
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -186,3 +187,155 @@ def test_run_tapdb_cli_requires_tapdb_executable(monkeypatch: pytest.MonkeyPatch
             target="local",
             config_path="/tmp/dewey-tapdb.yaml",
         )
+
+
+def test_sanitize_and_resolve_deployment_code(monkeypatch: pytest.MonkeyPatch) -> None:
+    assert tapdb_runtime._sanitize_deployment_code(" local/dev ") == "local-dev"
+    assert tapdb_runtime._sanitize_deployment_code("###") == "local"
+
+    monkeypatch.setenv("DEPLOYMENT_CODE", "from-deployment")
+    monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "from-dewey")
+    monkeypatch.setenv("LSMC_DEPLOYMENT_CODE", "from-lsmc")
+    assert tapdb_runtime._resolve_deployment_code() == "from-deployment"
+
+    monkeypatch.delenv("DEPLOYMENT_CODE", raising=False)
+    assert tapdb_runtime._resolve_deployment_code() == "from-dewey"
+    monkeypatch.delenv("DEWEY_DEPLOYMENT_CODE", raising=False)
+    assert tapdb_runtime._resolve_deployment_code() == "from-lsmc"
+
+
+def test_resolve_tapdb_config_path_supports_user_repo_and_missing_paths(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    home = tmp_path / "home"
+    repo_root = tmp_path / "repo"
+    user_scoped = home / ".config" / "tapdb" / "dewey" / "dewey" / "tapdb-config.yaml"
+    repo_scoped = repo_root / "config" / "tapdb-config-dewey.yaml"
+
+    user_scoped.parent.mkdir(parents=True, exist_ok=True)
+    user_scoped.write_text("meta: {}\n", encoding="utf-8")
+    monkeypatch.setattr(tapdb_runtime.Path, "home", classmethod(lambda cls: home))
+    monkeypatch.setattr(
+        tapdb_runtime, "__file__", str(repo_root / "pkg" / "x" / "tapdb_runtime.py")
+    )
+    monkeypatch.setattr(tapdb_runtime, "_resolve_deployment_code", lambda: "local")
+
+    assert tapdb_runtime._resolve_tapdb_config_path(namespace="dewey", client_id="dewey") == str(
+        user_scoped
+    )
+
+    user_scoped.unlink()
+    repo_scoped.parent.mkdir(parents=True, exist_ok=True)
+    repo_scoped.write_text("meta: {}\n", encoding="utf-8")
+    assert tapdb_runtime._resolve_tapdb_config_path(namespace="dewey", client_id="dewey") == str(
+        repo_scoped
+    )
+
+    repo_scoped.unlink()
+    assert tapdb_runtime._resolve_tapdb_config_path(namespace="dewey", client_id="dewey") is None
+
+
+def test_require_config_path_and_cli_resolution(monkeypatch: pytest.MonkeyPatch) -> None:
+    assert (
+        tapdb_runtime._require_config_path({"config_path": " /tmp/tapdb.yaml "})
+        == "/tmp/tapdb.yaml"
+    )
+
+    with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="TapDB config path is required"):
+        tapdb_runtime._require_config_path({"config_path": ""})
+
+    monkeypatch.setattr(tapdb_runtime.shutil, "which", lambda _name: "/usr/local/bin/tapdb")
+    assert tapdb_runtime._resolve_tapdb_cli_executable() == "/usr/local/bin/tapdb"
+
+
+def test_get_tapdb_db_config_for_env_and_sqlalchemy_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    db_config_mod = import_module("daylily_tapdb.cli.db_config")
+    seen: list[tuple[object, object, object, object]] = []
+
+    monkeypatch.setattr(
+        db_config_mod,
+        "get_db_config_for_env",
+        lambda env, *, config_path, client_id, database_name: (
+            seen.append((env, config_path, client_id, database_name))
+            or {
+                "user": "postgres",
+                "password": "",
+                "host": "db",
+                "port": "5432",
+                "database": "dewey_dev",
+            }
+        ),
+    )
+
+    cfg = tapdb_runtime._get_tapdb_db_config_for_env(
+        "dev",
+        config_path="/tmp/tapdb.yaml",
+        client_id="dewey",
+        database_name="dewey",
+    )
+
+    assert seen == [("dev", "/tmp/tapdb.yaml", "dewey", "dewey")]
+    assert cfg["database"] == "dewey_dev"
+    assert (
+        tapdb_runtime._build_sqlalchemy_url(cfg)
+        == "postgresql+psycopg2://postgres@db:5432/dewey_dev"
+    )
+
+    monkeypatch.setattr(
+        db_config_mod,
+        "get_db_config_for_env",
+        lambda *args, **kwargs: {},
+    )
+    with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="No TapDB database config resolved"):
+        tapdb_runtime._get_tapdb_db_config_for_env(
+            "dev",
+            config_path="/tmp/tapdb.yaml",
+            client_id="dewey",
+            database_name="dewey",
+        )
+
+    with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="missing database name"):
+        tapdb_runtime._build_sqlalchemy_url({"user": "postgres"})
+
+
+def test_run_schema_drift_check_covers_clean_invalid_json_and_failed_stderr(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda: "4.0.6")
+    monkeypatch.setattr(tapdb_runtime, "_utcnow", lambda: "2026-04-05T18:00:00+00:00")
+
+    monkeypatch.setattr(
+        tapdb_runtime,
+        "run_tapdb_cli",
+        lambda *args, **kwargs: SimpleNamespace(returncode=0, stdout="", stderr=""),
+    )
+    clean = tapdb_runtime.run_schema_drift_check(target="local")
+
+    assert clean == {
+        "status": "clean",
+        "checked_at": "2026-04-05T18:00:00+00:00",
+        "environment": "dev",
+        "tool_version": "4.0.6",
+        "summary": "no schema drift reported",
+        "report": {},
+        "strict": False,
+    }
+
+    monkeypatch.setattr(
+        tapdb_runtime,
+        "run_tapdb_cli",
+        lambda *args, **kwargs: SimpleNamespace(returncode=2, stdout="not-json", stderr="boom"),
+    )
+    failed = tapdb_runtime.run_schema_drift_check(target="local", tapdb_env="prod")
+
+    assert failed == {
+        "status": "check_failed",
+        "checked_at": "2026-04-05T18:00:00+00:00",
+        "environment": "prod",
+        "tool_version": "4.0.6",
+        "summary": "schema drift report unavailable",
+        "report": {"raw_stdout": "not-json"},
+        "strict": False,
+        "stderr": "boom",
+    }

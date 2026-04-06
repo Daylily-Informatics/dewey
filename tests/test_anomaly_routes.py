@@ -78,7 +78,10 @@ def test_anomaly_api_and_ui_view_round_trip(monkeypatch, client) -> None:
 
 
 def test_base_service_anomaly_response_includes_canonical_and_legacy_fields(monkeypatch) -> None:
-    monkeypatch.setattr("dewey_service.services.base.get_settings", lambda: SimpleNamespace(deployment_name="lsdmc10", environment="development"))
+    monkeypatch.setattr(
+        "dewey_service.services.base.get_settings",
+        lambda: SimpleNamespace(deployment_name="lsdmc10", environment="development"),
+    )
     service = BaseDeweyService(backend=SimpleNamespace())
     instance = SimpleNamespace(
         euid="ANM-123456",

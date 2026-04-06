@@ -49,7 +49,9 @@ def test_list_and_snippet_normalizers_cover_edge_cases() -> None:
     assert literature.dedupe_strings([" Alpha ", "", None, "Alpha", "Beta"]) == ["Alpha", "Beta"]
     assert literature.build_abstract_snippet("   ") is None
     assert literature.build_abstract_snippet("short abstract", max_chars=20) == "short abstract"
-    assert literature.build_abstract_snippet("word " * 20, max_chars=25) == "word word word word word…"
+    assert (
+        literature.build_abstract_snippet("word " * 20, max_chars=25) == "word word word word word…"
+    )
 
 
 def test_domain_and_fulltext_helpers_cover_all_statuses(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -59,7 +61,9 @@ def test_domain_and_fulltext_helpers_cover_all_statuses(monkeypatch: pytest.Monk
     }
     assert literature.url_host("https://Sub.Example.com/path") == "sub.example.com"
 
-    monkeypatch.setattr(literature, "urlparse", lambda _value: (_ for _ in ()).throw(ValueError("bad")))
+    monkeypatch.setattr(
+        literature, "urlparse", lambda _value: (_ for _ in ()).throw(ValueError("bad"))
+    )
     assert literature.url_host("https://broken.example.com") == ""
 
     monkeypatch.undo()
@@ -111,9 +115,12 @@ def test_viewer_context_author_name_and_article_normalization() -> None:
         groups=("ops", "reviewers"),
     )
     assert viewer.owner_label == "reader@example.com"
-    assert literature.ViewerContext.from_operator_profile(
-        {"sub": "sub-123", "groups": "ignored"}
-    ).owner_label == "sub-123"
+    assert (
+        literature.ViewerContext.from_operator_profile(
+            {"sub": "sub-123", "groups": "ignored"}
+        ).owner_label
+        == "sub-123"
+    )
     with pytest.raises(ValueError, match="missing subject/email"):
         literature.ViewerContext.from_operator_profile({})
 
