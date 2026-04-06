@@ -4,10 +4,17 @@ from __future__ import annotations
 
 import os
 import re
+import secrets
 
 DEFAULT_APP_PORT = 8914
 DEFAULT_AUTH_PORT = DEFAULT_APP_PORT
 DEFAULT_DB_PORT = 5432
+DEFAULT_COGNITO_ALLOWED_EMAIL_DOMAINS = (
+    "lsmc.com",
+    "lsmc.bio",
+    "lsmc.life",
+    "daylilyinformatics.com",
+)
 
 
 def default_cognito_redirect_uri() -> str:
@@ -45,7 +52,7 @@ def build_default_config_template(
 application:
   environment: development
   api_bearer_token: dewey-dev-token
-  session_secret_key: dewey-session-secret-change-me
+  session_secret_key: {secrets.token_urlsafe(64)}
   host: 127.0.0.1
   port: {DEFAULT_APP_PORT}
   verify_ssl: true
@@ -59,6 +66,14 @@ auth:
     logout_url: {default_cognito_logout_url()}
     user_pool_id: us-west-2_example
     region: us-west-2
+    allowed_email_domains:
+      - lsmc.com
+      - lsmc.bio
+      - lsmc.life
+      - daylilyinformatics.com
+    default_tenant_id: 00000000-0000-0000-0000-000000000000
+    auto_provision_allowed_domains:
+      - lsmc.com
     group_role_map:
       platform-admin: ADMIN
       dewey-admin: ADMIN

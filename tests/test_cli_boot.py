@@ -9,12 +9,13 @@ from cli_core_yo.app import run as run_cli
 
 import dewey_service.cli as cli_module
 import dewey_service.cli.server as server_cli
+from dewey_service.defaults import build_default_config_template
 from dewey_service.settings import Settings
 
 
 def _invoke(argv: list[str]) -> int:
     output._reset_console()
-    return run_cli(cli_module.spec, argv)
+    return run_cli(cli_module._build_spec(), argv)
 
 
 def test_cli_help_renders(capsys) -> None:
@@ -153,9 +154,14 @@ def test_config_init_show_validate_and_status(monkeypatch, tmp_path: Path, capsy
     assert init_exit == 0
     assert "Config file created" in init_output
     assert config_path.exists()
-    assert "storage:" in config_path.read_text(encoding="utf-8")
-    assert "MERIDIAN_DOMAIN_CODE=D" in config_path.read_text(encoding="utf-8")
-    assert "TAPDB_APP_CODE=D" in config_path.read_text(encoding="utf-8")
+    config_text = config_path.read_text(encoding="utf-8")
+    assert "storage:" in config_text
+    assert "MERIDIAN_DOMAIN_CODE=D" in config_text
+    assert "TAPDB_APP_CODE=D" in config_text
+    assert "session_secret_key: dewey-session-secret-change-me" not in config_text
+    assert "allowed_email_domains:" in config_text
+    assert "default_tenant_id: 00000000-0000-0000-0000-000000000000" in config_text
+    assert "auto_provision_allowed_domains:" in config_text
 
     show_exit = _invoke(["config", "show"])
     show_output = capsys.readouterr().out
@@ -163,6 +169,15 @@ def test_config_init_show_validate_and_status(monkeypatch, tmp_path: Path, capsy
     assert "application:" in show_output
     assert "database:" in show_output
     assert "storage:" in show_output
+
+
+def test_config_template_bytes_are_fresh() -> None:
+    first = build_default_config_template()
+    second = build_default_config_template()
+
+    assert first != second
+    assert b"session_secret_key: dewey-session-secret-change-me" not in first
+    assert b"allowed_email_domains:" in first
 
 
 def test_config_set_artifact_bucket(monkeypatch, tmp_path: Path, capsys) -> None:

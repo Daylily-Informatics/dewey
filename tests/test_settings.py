@@ -39,6 +39,14 @@ auth:
     app_client_id: client-1
     redirect_uri: https://localhost:8914/auth/callback
     logout_url: https://localhost:8914/login
+    allowed_email_domains:
+      - lsmc.com
+      - lsmc.bio
+      - lsmc.life
+      - daylilyinformatics.com
+    default_tenant_id: 00000000-0000-0000-0000-000000000000
+    auto_provision_allowed_domains:
+      - lsmc.com
     group_role_map:
       platform-admin: ADMIN
       dewey-admin: ADMIN
@@ -61,6 +69,14 @@ storage:
     assert loaded.cognito_domain == "https://auth.example.com"
     assert loaded.cognito_redirect_uri == "https://localhost:8914/auth/callback"
     assert loaded.cognito_logout_url == "https://localhost:8914/login"
+    assert loaded.cognito_allowed_email_domains == [
+        "lsmc.com",
+        "lsmc.bio",
+        "lsmc.life",
+        "daylilyinformatics.com",
+    ]
+    assert loaded.cognito_default_tenant_id == "00000000-0000-0000-0000-000000000000"
+    assert loaded.cognito_auto_provision_allowed_domains == ["lsmc.com"]
     assert loaded.cognito_group_role_map == {
         "platform-admin": "ADMIN",
         "dewey-admin": "ADMIN",
@@ -74,6 +90,25 @@ storage:
     }
     assert loaded.managed_storage_bucket == "dewey-artifacts-staging"
     assert loaded.managed_storage_prefix == "managed"
+
+
+def test_settings_defaults_include_cognito_domain_policy() -> None:
+    settings = Settings(
+        api_bearer_token="token",
+        cognito_domain="https://auth.example.com",
+        cognito_app_client_id="client",
+        cognito_redirect_uri="https://localhost:8914/auth/callback",
+        cognito_logout_url="https://localhost:8914/login",
+    )
+
+    assert settings.cognito_allowed_email_domains == [
+        "lsmc.com",
+        "lsmc.bio",
+        "lsmc.life",
+        "daylilyinformatics.com",
+    ]
+    assert settings.cognito_default_tenant_id == "00000000-0000-0000-0000-000000000000"
+    assert settings.cognito_auto_provision_allowed_domains == ["lsmc.com"]
 
 
 def test_settings_fall_back_to_deployment_code(monkeypatch: pytest.MonkeyPatch) -> None:

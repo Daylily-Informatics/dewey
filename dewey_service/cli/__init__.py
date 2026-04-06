@@ -42,6 +42,37 @@ _YAML_ONLY_DEFAULTS = {
 }
 
 
+def _build_spec() -> CliSpec:
+    return CliSpec(
+        prog_name="dewey",
+        app_display_name="Dewey",
+        dist_name="dewey-service",
+        root_help="Dewey — Development CLI for the canonical artifact registry service.",
+        xdg=XdgSpec(app_dir_name=_config_dir_name()),
+        config=ConfigSpec(
+            xdg_relative_path=_config_filename(),
+            template_bytes=build_default_config_template(),
+            validator=_validate_dewey_config,
+        ),
+        env=EnvSpec(
+            active_env_var="DEWEY_ACTIVE",
+            project_root_env_var="DEWEY_PROJECT_ROOT",
+            activate_script_name=f"{ACTIVATE_SCRIPT} <deploy-name>",
+            deactivate_script_name=str(DEACTIVATE_SCRIPT),
+        ),
+        plugins=PluginSpec(
+            explicit=[
+                "dewey_service.cli.server.register",
+                "dewey_service.cli.db.register",
+                "dewey_service.cli.test.register",
+                "dewey_service.cli.quality.register",
+                "dewey_service.cli.config_extra.register",
+            ]
+        ),
+        info_hooks=[_dewey_info_hook],
+    )
+
+
 def _validate_dewey_config(content: str) -> list[str]:
     """Validate Dewey configuration YAML."""
     try:
@@ -136,34 +167,7 @@ def _dewey_info_hook() -> list[tuple[str, str]]:
     return rows
 
 
-spec = CliSpec(
-    prog_name="dewey",
-    app_display_name="Dewey",
-    dist_name="dewey-service",
-    root_help="Dewey — Development CLI for the canonical artifact registry service.",
-    xdg=XdgSpec(app_dir_name=_config_dir_name()),
-    config=ConfigSpec(
-        xdg_relative_path=_config_filename(),
-        template_bytes=build_default_config_template(),
-        validator=_validate_dewey_config,
-    ),
-    env=EnvSpec(
-        active_env_var="DEWEY_ACTIVE",
-        project_root_env_var="DEWEY_PROJECT_ROOT",
-        activate_script_name=f"{ACTIVATE_SCRIPT} <deploy-name>",
-        deactivate_script_name=str(DEACTIVATE_SCRIPT),
-    ),
-    plugins=PluginSpec(
-        explicit=[
-            "dewey_service.cli.server.register",
-            "dewey_service.cli.db.register",
-            "dewey_service.cli.test.register",
-            "dewey_service.cli.quality.register",
-            "dewey_service.cli.config_extra.register",
-        ]
-    ),
-    info_hooks=[_dewey_info_hook],
-)
+spec = _build_spec()
 
 app = create_app(spec)
 cli = app
@@ -209,4 +213,4 @@ def main() -> None:
     args, skip_conda_env_check = _strip_skip_conda_env_check_flag(sys.argv[1:])
     if not skip_conda_env_check:
         _enforce_conda_env_contract(args)
-    raise SystemExit(run(spec, args))
+    raise SystemExit(run(_build_spec(), args))

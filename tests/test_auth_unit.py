@@ -182,3 +182,69 @@ def test_require_ui_admin_session_requires_admin_role(monkeypatch: pytest.Monkey
             )
         )
     assert exc.value.status_code == 403
+
+
+def test_resolve_operator_principal_accepts_allowed_email_domain(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    request = SimpleNamespace(
+        app=SimpleNamespace(
+            state=SimpleNamespace(
+                settings=Settings(
+                    cognito_domain="https://auth.example.com",
+                    cognito_app_client_id="client-1",
+                    cognito_app_client_secret="secret-1",
+                    cognito_redirect_uri="https://localhost:8914/auth/callback",
+                    cognito_logout_url="https://localhost:8914/login",
+                )
+            )
+        )
+    )
+    monkeypatch.setattr(
+        auth_mod,
+        "decode_jwt_claims_noverify",
+        lambda _token: {
+            "email": "operator@lsmc.com",
+            "sub": "sub-1",
+            "name": "Operator",
+            "cognito:groups": ["dewey-readonly"],
+        },
+    )
+
+    principal = auth_mod.resolve_operator_principal({"id_token": "token"}, request)
+
+    assert principal.email == "operator@lsmc.com"
+    assert principal.roles == [Role.READ_ONLY.value]
+
+
+def test_resolve_operator_principal_rejects_disallowed_email_domain(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    request = SimpleNamespace(
+        app=SimpleNamespace(
+            state=SimpleNamespace(
+                settings=Settings(
+                    cognito_domain="https://auth.example.com",
+                    cognito_app_client_id="client-1",
+                    cognito_app_client_secret="secret-1",
+                    cognito_redirect_uri="https://localhost:8914/auth/callback",
+                    cognito_logout_url="https://localhost:8914/login",
+                )
+            )
+        )
+    )
+    monkeypatch.setattr(
+        auth_mod,
+        "decode_jwt_claims_noverify",
+        lambda _token: {
+            "email": "operator@gmail.com",
+            "sub": "sub-1",
+            "name": "Operator",
+            "cognito:groups": ["dewey-readonly"],
+        },
+    )
+
+    with pytest.raises(auth_mod.CognitoWebAuthError) as exc:
+        auth_mod.resolve_operator_principal({"id_token": "token"}, request)
+
+    assert exc.value.reason == "not_authorized"

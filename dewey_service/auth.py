@@ -73,6 +73,17 @@ def _origin(value: str) -> str:
     return f"{parsed.scheme}://{parsed.netloc}"
 
 
+def _require_allowed_cognito_email_domain(settings: Settings, email: str) -> None:
+    valid, message = settings.validate_cognito_email_domain(email)
+    if not valid:
+        raise CognitoWebAuthError(
+            "not_authorized",
+            message or "This account is not provisioned for Dewey access.",
+            status_code=status.HTTP_403_FORBIDDEN,
+            redirect_to_error=True,
+        )
+
+
 def build_cognito_web_session_config(
     *,
     settings: Settings,
@@ -203,6 +214,7 @@ def resolve_operator_principal(
         groups = []
 
     settings: Settings = request.app.state.settings
+    _require_allowed_cognito_email_domain(settings, email)
     profile = normalize_session_profile(
         email=email,
         sub=sub,
