@@ -41,10 +41,10 @@ def test_domain_allowed_origin_and_host_lists() -> None:
 
     trusted_no_local = domain_access.build_trusted_hosts(allow_local=False)
     trusted_local = domain_access.build_trusted_hosts(allow_local=True)
+    trusted_local_set = set(trusted_local)
     assert "localhost" not in trusted_no_local
     assert "localhost" in trusted_local
-    assert "*.daylilyinformatics.com" in trusted_local
-    assert "daylilyinformatics.com" in trusted_local
+    assert {"*.daylilyinformatics.com", "daylilyinformatics.com"} <= trusted_local_set
 
     regex_no_local = re.compile(domain_access.build_allowed_origin_regex(allow_local=False))
     regex_local = re.compile(domain_access.build_allowed_origin_regex(allow_local=True))
