@@ -11,7 +11,7 @@ def _login_user(monkeypatch, client, groups: list[str] | None = None) -> None:
     monkeypatch.setattr(
         "dewey_service.auth.decode_jwt_claims_noverify",
         lambda token: {
-            "email": "operator@example.com",
+            "email": "operator@lsmc.bio",
             "sub": "sub-1",
             "cognito:groups": groups or ["dewey-readwrite"],
         },

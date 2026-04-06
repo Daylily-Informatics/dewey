@@ -46,7 +46,7 @@ def test_ui_page_renders_banner_after_login(monkeypatch, fake_service) -> None:
     monkeypatch.setattr(
         "dewey_service.auth.decode_jwt_claims_noverify",
         lambda token: {
-            "email": "operator@example.com",
+            "email": "operator@lsmc.bio",
             "sub": "sub-1",
             "cognito:groups": ["platform-admin"],
         },
