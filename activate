@@ -476,7 +476,7 @@ echo -e "  ${_CYAN}dewey server${_NC}          start, stop, status, logs, restar
 echo -e "  ${_CYAN}dewey db${_NC}              build, seed, reset, nuke"
 echo -e "  ${_CYAN}tapdb${_NC}                 shared DB/runtime lifecycle"
 echo -e "  ${_CYAN}daycog${_NC}                shared Cognito lifecycle"
-echo -e "  ${_CYAN}dewey test${_NC}            run"
+echo -e "  ${_CYAN}dewey test${_NC}            run, cov"
 echo -e "  ${_CYAN}dewey quality${_NC}         lint, format, check"
 echo ""
 echo -e "  ${_GREEN}dewey --help${_NC}        Show all commands"

@@ -14,6 +14,14 @@ def test_pyproject_declares_cli_core_yo_dependency() -> None:
     assert "daylily-tapdb==4.0.6" in dependencies
 
 
+def test_pyproject_declares_pytest_cov_in_dev_dependencies() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    pyproject = tomllib.loads((repo_root / "pyproject.toml").read_text(encoding="utf-8"))
+    dev_dependencies = pyproject["project"]["optional-dependencies"]["dev"]
+
+    assert any(dep.startswith("pytest-cov") for dep in dev_dependencies)
+
+
 def test_pyproject_declares_python_multipart_for_browser_forms() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     pyproject = tomllib.loads((repo_root / "pyproject.toml").read_text(encoding="utf-8"))
@@ -58,3 +66,16 @@ def test_setuptools_scm_tracks_numeric_release_tags() -> None:
     assert scm_config["scm"]["git"]["describe_command"] == (
         "git describe --dirty --tags --long --match '[0-9]*'"
     )
+
+
+def test_pyproject_declares_coverage_assessment_defaults() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    pyproject = tomllib.loads((repo_root / "pyproject.toml").read_text(encoding="utf-8"))
+    coverage_run = pyproject["tool"]["coverage"]["run"]
+    coverage_report = pyproject["tool"]["coverage"]["report"]
+
+    assert coverage_run["source"] == ["dewey_service"]
+    assert coverage_run["branch"] is True
+    assert "*/tests/*" in coverage_run["omit"]
+    assert coverage_report["show_missing"] is True
+    assert "if TYPE_CHECKING:" in coverage_report["exclude_lines"]
