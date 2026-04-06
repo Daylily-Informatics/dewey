@@ -6,7 +6,7 @@
 application:
   environment: development
   api_bearer_token: dewey-dev-token
-  session_secret_key: dewey-session-secret-change-me
+  session_secret_key: generated-on-init
   host: 127.0.0.1
   port: 8914
   verify_ssl: true
@@ -20,6 +20,14 @@ auth:
     logout_url: https://localhost:8914/login
     user_pool_id: us-west-2_example
     region: us-west-2
+    allowed_email_domains:
+      - lsmc.com
+      - lsmc.bio
+      - lsmc.life
+      - daylilyinformatics.com
+    default_tenant_id: 00000000-0000-0000-0000-000000000000
+    auto_provision_allowed_domains:
+      - lsmc.com
 
 database:
   backend: tapdb

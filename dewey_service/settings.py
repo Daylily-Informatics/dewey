@@ -16,11 +16,15 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from dewey_service.defaults import (
     DEFAULT_APP_PORT,
+    DEFAULT_COGNITO_ALLOWED_EMAIL_DOMAINS,
     build_default_config_template,
     default_cognito_logout_url,
     default_cognito_redirect_uri,
 )
 from dewey_service.rbac import DEFAULT_COGNITO_GROUP_ROLE_MAP, normalize_group_role_map
+
+DEFAULT_COGNITO_DEFAULT_TENANT_ID = "00000000-0000-0000-0000-000000000000"
+DEFAULT_COGNITO_AUTO_PROVISION_ALLOWED_DOMAINS = ("lsmc.com",)
 
 DEFAULT_DEPLOYMENT_BANNER_COLOR = "#AFEEEE"
 PRODUCTION_DEPLOYMENT_NAMES = {"prod", "production"}
@@ -42,6 +46,19 @@ def _validate_optional_https_url(value: str, *, field_name: str) -> str:
     if not normalized.startswith("https://"):
         raise ValueError(f"{field_name} must use an absolute https:// URL")
     return normalized
+
+
+def _normalize_email_domains(value: Any, *, default: tuple[str, ...] | None = None) -> list[str]:
+    if value is None:
+        return list(default or [])
+    if isinstance(value, str):
+        raw_items = value.split(",")
+    elif isinstance(value, (list, tuple, set)):
+        raw_items = list(value)
+    else:
+        raise ValueError("email domains must be a string or list of strings")
+    cleaned = [str(item or "").strip().lower() for item in raw_items if str(item or "").strip()]
+    return cleaned if cleaned else list(default or [])
 
 
 def _normalize_managed_storage_bucket(value: str, *, allow_empty: bool = True) -> str:
@@ -166,6 +183,9 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "auth_cognito_logout_url": "cognito_logout_url",
         "auth_cognito_user_pool_id": "cognito_user_pool_id",
         "auth_cognito_region": "cognito_region",
+        "auth_cognito_allowed_email_domains": "cognito_allowed_email_domains",
+        "auth_cognito_default_tenant_id": "cognito_default_tenant_id",
+        "auth_cognito_auto_provision_allowed_domains": "cognito_auto_provision_allowed_domains",
         "auth_cognito_group_role_map": "cognito_group_role_map",
         "deployment_name": "deployment_name",
         "deployment_color": "deployment_color",
@@ -200,6 +220,13 @@ class Settings(BaseSettings):
     cognito_logout_url: str = default_cognito_logout_url()
     cognito_user_pool_id: str = ""
     cognito_region: str = "us-west-2"
+    cognito_allowed_email_domains: list[str] = Field(
+        default_factory=lambda: list(DEFAULT_COGNITO_ALLOWED_EMAIL_DOMAINS)
+    )
+    cognito_default_tenant_id: str = DEFAULT_COGNITO_DEFAULT_TENANT_ID
+    cognito_auto_provision_allowed_domains: list[str] = Field(
+        default_factory=lambda: list(DEFAULT_COGNITO_AUTO_PROVISION_ALLOWED_DOMAINS)
+    )
     cognito_group_role_map: dict[str, str] = Field(
         default_factory=lambda: dict(DEFAULT_COGNITO_GROUP_ROLE_MAP)
     )
@@ -281,6 +308,13 @@ class Settings(BaseSettings):
     def validate_cognito_group_role_map(cls, value: Any) -> dict[str, str]:
         return normalize_group_role_map(value)
 
+    @field_validator(
+        "cognito_allowed_email_domains", "cognito_auto_provision_allowed_domains", mode="before"
+    )
+    @classmethod
+    def validate_cognito_email_domains(cls, value: Any) -> list[str]:
+        return _normalize_email_domains(value)
+
     @field_validator("environment")
     @classmethod
     def validate_environment(cls, value: str) -> str:
@@ -289,6 +323,14 @@ class Settings(BaseSettings):
             raise ValueError(
                 "environment must be one of: development, staging, production, testing"
             )
+        return normalized
+
+    @field_validator("cognito_default_tenant_id")
+    @classmethod
+    def validate_cognito_default_tenant_id(cls, value: str) -> str:
+        normalized = str(value or "").strip()
+        if not normalized:
+            return DEFAULT_COGNITO_DEFAULT_TENANT_ID
         return normalized
 
     @model_validator(mode="after")
@@ -307,6 +349,14 @@ class Settings(BaseSettings):
         self.cognito_domain = _require_https_url(
             self.cognito_domain,
             field_name="cognito_domain",
+        )
+        self.cognito_allowed_email_domains = _normalize_email_domains(
+            self.cognito_allowed_email_domains,
+            default=DEFAULT_COGNITO_ALLOWED_EMAIL_DOMAINS,
+        )
+        self.cognito_auto_provision_allowed_domains = _normalize_email_domains(
+            self.cognito_auto_provision_allowed_domains,
+            default=DEFAULT_COGNITO_AUTO_PROVISION_ALLOWED_DOMAINS,
         )
         deployment = _resolve_deployment_chrome(
             name=self.deployment_name,
@@ -345,6 +395,26 @@ class Settings(BaseSettings):
             for item in str(self.literature_managed_copy_allowed_domains or "").split(",")
             if str(item or "").strip()
         }
+
+    def validate_cognito_email_domain(self, email: str) -> tuple[bool, str]:
+        if not email:
+            return False, "Email address is required"
+        if "@" not in email:
+            return False, "Invalid email address format"
+        domain = email.split("@")[-1].strip().lower()
+        if not domain:
+            return False, "Invalid email address: missing domain"
+        allowed = {
+            str(item or "").strip().lower()
+            for item in self.cognito_allowed_email_domains
+            if str(item or "").strip()
+        }
+        if domain not in allowed:
+            return False, (
+                f"Email domain '{domain}' is not allowed. "
+                f"Registration is restricted to: {', '.join(sorted(allowed))}"
+            )
+        return True, ""
 
 
 def get_config_file_path() -> Path:
@@ -406,6 +476,11 @@ def load_settings(config_path: Path | None = None) -> Settings:
         "cognito_logout_url": default_cognito_logout_url(),
         "cognito_user_pool_id": "",
         "cognito_region": "us-west-2",
+        "cognito_allowed_email_domains": list(DEFAULT_COGNITO_ALLOWED_EMAIL_DOMAINS),
+        "cognito_default_tenant_id": DEFAULT_COGNITO_DEFAULT_TENANT_ID,
+        "cognito_auto_provision_allowed_domains": list(
+            DEFAULT_COGNITO_AUTO_PROVISION_ALLOWED_DOMAINS
+        ),
         "cognito_group_role_map": dict(DEFAULT_COGNITO_GROUP_ROLE_MAP),
         "deployment_name": "",
         "deployment_color": "",

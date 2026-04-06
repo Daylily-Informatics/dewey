@@ -13,7 +13,7 @@ def _login_user(
     monkeypatch,
     client,
     *,
-    email: str = "operator@example.com",
+    email: str = "operator@lsmc.com",
     sub: str = "sub-1",
     name: str = "Operator Example",
     groups: list[str] | None = None,
@@ -75,6 +75,35 @@ def test_cognito_callback_sets_session(monkeypatch, client) -> None:
     assert "Dewey Console" in ui.text
     assert "Quick Register" in ui.text
     assert "/admin" not in ui.text
+
+
+def test_cognito_callback_rejects_disallowed_email_domain(monkeypatch, client) -> None:
+    monkeypatch.setattr(
+        "daylily_cognito.web_session.exchange_authorization_code",
+        lambda **kwargs: {"id_token": "header.payload.sig"},
+    )
+    monkeypatch.setattr(
+        "dewey_service.auth.decode_jwt_claims_noverify",
+        lambda token: {
+            "email": "operator@gmail.com",
+            "sub": "sub-1",
+            "name": "Operator Example",
+            "cognito:groups": ["dewey-readwrite"],
+        },
+    )
+
+    login = client.get("/auth/login", follow_redirects=False)
+    redirect_url = login.headers["location"]
+    parsed = urlparse(redirect_url)
+    state = parse_qs(parsed.query)["state"][0]
+    callback = client.get(
+        "/auth/callback",
+        params={"code": "code-1", "state": state},
+        follow_redirects=False,
+    )
+
+    assert callback.status_code in {302, 303}
+    assert callback.headers["location"] == "/auth/error?reason=not_authorized"
 
 
 @pytest.mark.parametrize(
@@ -286,7 +315,7 @@ def test_two_browsers_can_keep_distinct_authenticated_sessions(monkeypatch, clie
     _login_user(
         monkeypatch,
         client,
-        email="operator-a@example.com",
+        email="operator-a@lsmc.com",
         sub="sub-a",
         name="Operator A",
     )
@@ -295,7 +324,7 @@ def test_two_browsers_can_keep_distinct_authenticated_sessions(monkeypatch, clie
         _login_user(
             monkeypatch,
             other_client,
-            email="operator-b@example.com",
+            email="operator-b@daylilyinformatics.com",
             sub="sub-b",
             name="Operator B",
         )
@@ -305,17 +334,17 @@ def test_two_browsers_can_keep_distinct_authenticated_sessions(monkeypatch, clie
 
         assert ui_a.status_code == 200
         assert ui_b.status_code == 200
-        assert "operator-a@example.com" in ui_a.text
-        assert "operator-b@example.com" not in ui_a.text
-        assert "operator-b@example.com" in ui_b.text
-        assert "operator-a@example.com" not in ui_b.text
+        assert "operator-a@lsmc.com" in ui_a.text
+        assert "operator-b@daylilyinformatics.com" not in ui_a.text
+        assert "operator-b@daylilyinformatics.com" in ui_b.text
+        assert "operator-a@lsmc.com" not in ui_b.text
 
 
 def test_logout_from_one_browser_does_not_clear_the_other(monkeypatch, client) -> None:
     _login_user(
         monkeypatch,
         client,
-        email="shared@example.com",
+        email="shared@lsmc.bio",
         sub="sub-shared",
         name="Shared Operator",
     )
@@ -324,7 +353,7 @@ def test_logout_from_one_browser_does_not_clear_the_other(monkeypatch, client) -
         _login_user(
             monkeypatch,
             other_client,
-            email="shared@example.com",
+            email="shared@lsmc.bio",
             sub="sub-shared",
             name="Shared Operator",
         )
@@ -335,4 +364,4 @@ def test_logout_from_one_browser_does_not_clear_the_other(monkeypatch, client) -
         assert client.get("/ui").status_code == 401
         ui_other = other_client.get("/ui")
         assert ui_other.status_code == 200
-        assert "shared@example.com" in ui_other.text
+        assert "shared@lsmc.bio" in ui_other.text

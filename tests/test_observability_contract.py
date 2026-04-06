@@ -11,7 +11,7 @@ def _login_operator(monkeypatch, client) -> None:
     monkeypatch.setattr(
         "dewey_service.auth.decode_jwt_claims_noverify",
         lambda token: {
-            "email": "operator@example.com",
+            "email": "operator@lsmc.bio",
             "sub": "sub-1",
             "cognito:groups": ["operators"],
         },
@@ -151,7 +151,7 @@ def test_my_health_requires_session_and_rejects_bearer(monkeypatch, client) -> N
     response = client.get("/my_health")
     assert response.status_code == 200
     body = response.json()
-    assert body["principal"]["email"] == "operator@example.com"
+    assert body["principal"]["email"] == "operator@lsmc.bio"
     assert body["principal"]["auth_mode"] == "cognito"
     assert body["principal"]["service_principal"] is False
 

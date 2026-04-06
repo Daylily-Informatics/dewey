@@ -17,7 +17,7 @@ def _login_operator(monkeypatch, client) -> None:
     monkeypatch.setattr(
         "dewey_service.auth.decode_jwt_claims_noverify",
         lambda token: {
-            "email": "operator@example.com",
+            "email": "operator@lsmc.bio",
             "sub": "sub-1",
             "cognito:groups": ["operators"],
         },
@@ -122,7 +122,7 @@ def test_admin_page_links_to_anomaly_view(monkeypatch, client) -> None:
     monkeypatch.setattr(
         "dewey_service.auth.decode_jwt_claims_noverify",
         lambda token: {
-            "email": "admin@example.com",
+            "email": "admin@lsmc.bio",
             "sub": "sub-admin",
             "cognito:groups": ["platform-admin"],
         },
@@ -151,7 +151,7 @@ def test_admin_page_updates_managed_artifact_bucket(monkeypatch, client, tmp_pat
     monkeypatch.setattr(
         "dewey_service.auth.decode_jwt_claims_noverify",
         lambda token: {
-            "email": "admin@example.com",
+            "email": "admin@lsmc.bio",
             "sub": "sub-admin",
             "cognito:groups": ["platform-admin"],
         },
