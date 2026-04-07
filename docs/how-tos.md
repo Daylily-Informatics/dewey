@@ -44,6 +44,24 @@ Then bootstrap local persistence:
 dewey db build --target local
 ```
 
+Current published-package caveat from the April 7, 2026 local walkthrough:
+
+- the first published TapDB build that works with published `cli-core-yo==2.0.0` is currently `daylily-tapdb==5.0.0`
+- on that TapDB line, `dewey db build --target local` initializes PostgreSQL but leaves the `db setup` step incomplete
+- complete the delegated TapDB setup with:
+
+```bash
+tapdb --config ~/.config/tapdb/dewey/dewey-local/tapdb-config.yaml --env dev db setup dev --force
+```
+
+- if you just reset the Dewey config template, set the deployment-scoped TapDB config path explicitly before `dewey db seed` or `dewey server start`:
+
+```bash
+export DEWEY_TAPDB_CONFIG_PATH=~/.config/tapdb/dewey/dewey-local/tapdb-config.yaml
+dewey db seed
+dewey server start --port 8914
+```
+
 If you need a destructive local reset, use Dewey's own CLI rather than bypassing it:
 
 ```bash

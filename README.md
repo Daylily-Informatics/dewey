@@ -240,6 +240,24 @@ dewey db build --target local
 dewey server start --port 8914
 ```
 
+Current published-package caveat from the April 7, 2026 local walkthrough:
+
+- with published `cli-core-yo==2.0.0`, the first compatible published TapDB build is currently `daylily-tapdb==5.0.0`
+- on that published TapDB line, `dewey db build --target local` initializes local PostgreSQL but does not complete `tapdb db setup`
+- finish the local DB bootstrap with:
+
+```bash
+tapdb --config ~/.config/tapdb/dewey/dewey-local/tapdb-config.yaml --env dev db setup dev --force
+```
+
+- after a fresh `dewey config reset`, export the resolved TapDB config path when running Dewey-owned seed or server commands:
+
+```bash
+export DEWEY_TAPDB_CONFIG_PATH=~/.config/tapdb/dewey/dewey-local/tapdb-config.yaml
+dewey db seed
+dewey server start --port 8914
+```
+
 Useful follow-up commands:
 
 ```bash
