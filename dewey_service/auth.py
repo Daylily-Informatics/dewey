@@ -8,18 +8,20 @@ import secrets
 from typing import Any
 from urllib.parse import urlencode, urlsplit
 
-from daylily_auth_cognito.browser.oauth import build_authorization_url
 from daylily_auth_cognito.browser import session as browser_session
+from daylily_auth_cognito.browser.oauth import build_authorization_url
 from daylily_auth_cognito.browser.session import (
     CognitoWebAuthError,
     CognitoWebSessionConfig,
     SessionPrincipal,
     clear_session_principal,
     complete_cognito_callback,
-    configure_session_middleware as _configure_session_middleware,
     load_session_principal,
     start_cognito_login,
     validate_web_auth_contract,
+)
+from daylily_auth_cognito.browser.session import (
+    configure_session_middleware as _configure_session_middleware,
 )
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
