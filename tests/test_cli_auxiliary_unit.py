@@ -6,29 +6,17 @@ from types import SimpleNamespace
 
 import pytest
 import typer
+from cli_core_yo.registry import CommandRegistry
 
 import dewey_service.cli.cognito as cognito_cli
 import dewey_service.cli.quality as quality_cli
 import dewey_service.cli.tapdb as tapdb_cli
+from dewey_service.cli._registry_v2 import REQUIRED, REQUIRED_JSON, REQUIRED_MUTATING
 from dewey_service.integrations.tapdb_runtime import TapDBRuntimeError
 
 
 def _proc(returncode: int = 0, stdout: str = "", stderr: str = "") -> SimpleNamespace:
     return SimpleNamespace(returncode=returncode, stdout=stdout, stderr=stderr)
-
-
-class _Registry:
-    def __init__(self) -> None:
-        self.calls: list[tuple[object, object, str, str]] = []
-
-    def add_typer_app(
-        self,
-        parent: object,
-        app: object,
-        name: str,
-        help_text: str,
-    ) -> None:
-        self.calls.append((parent, app, name, help_text))
 
 
 def test_cognito_status_requires_daycog(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -111,12 +99,48 @@ def test_cognito_status_runs_daycog_and_emits_output(monkeypatch: pytest.MonkeyP
     ]
 
 
-def test_cognito_registers_typer_app() -> None:
-    registry = _Registry()
+def test_cognito_status_forwards_json_output_in_json_mode(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys,
+) -> None:
+    calls: list[list[str]] = []
+
+    monkeypatch.setattr(cognito_cli.shutil, "which", lambda _name: "/usr/bin/daycog")
+    monkeypatch.setattr(cognito_cli, "get_context", lambda: SimpleNamespace(json_mode=True))
+
+    def fake_run(
+        cmd: list[str],
+        *,
+        capture_output: bool,
+        text: bool,
+        check: bool,
+        env: dict[str, str],
+    ) -> SimpleNamespace:
+        calls.append(cmd)
+        return _proc(returncode=0, stdout='{"ok": true}\n')
+
+    monkeypatch.setattr(cognito_cli.subprocess, "run", fake_run)
+
+    with pytest.raises(typer.Exit) as exc:
+        cognito_cli.status()
+
+    captured = capsys.readouterr()
+    assert exc.value.exit_code == 0
+    assert calls == [["/usr/bin/daycog", "status", "--json"]]
+    assert captured.out == '{"ok": true}\n'
+    assert captured.err == ""
+
+
+def test_cognito_registers_v2_command() -> None:
+    registry = CommandRegistry()
 
     cognito_cli.register(registry, object())
 
-    assert registry.calls == [(None, cognito_cli.cognito_app, "cognito", "Cognito helper commands")]
+    cmd = registry.get_command(("cognito", "status"))
+
+    assert cmd is not None
+    assert cmd.callback is cognito_cli.status
+    assert cmd.policy == REQUIRED_JSON
 
 
 def test_tapdb_run_requires_passthrough_args() -> None:
@@ -202,12 +226,16 @@ def test_tapdb_run_handles_runtime_error(monkeypatch: pytest.MonkeyPatch) -> Non
     assert errors == ["TapDB invocation failed: boom"]
 
 
-def test_tapdb_registers_typer_app() -> None:
-    registry = _Registry()
+def test_tapdb_registers_v2_command() -> None:
+    registry = CommandRegistry()
 
     tapdb_cli.register(registry, object())
 
-    assert registry.calls == [(None, tapdb_cli.tapdb_app, "tapdb", "TapDB passthrough wrappers")]
+    cmd = registry.get_command(("tapdb", "run"))
+
+    assert cmd is not None
+    assert cmd.callback is tapdb_cli.run_command
+    assert cmd.policy == REQUIRED_MUTATING
 
 
 def test_quality_lint_runs_ruff_check(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -296,9 +324,23 @@ def test_quality_check_runs_tests_after_clean_lint(monkeypatch: pytest.MonkeyPat
     ]
 
 
-def test_quality_registers_typer_app() -> None:
-    registry = _Registry()
+def test_quality_registers_v2_commands() -> None:
+    registry = CommandRegistry()
 
     quality_cli.register(registry, object())
 
-    assert registry.calls == [(None, quality_cli.quality_app, "quality", "Quality commands")]
+    lint_cmd = registry.get_command(("quality", "lint"))
+    format_cmd = registry.get_command(("quality", "format"))
+    check_cmd = registry.get_command(("quality", "check"))
+
+    assert lint_cmd is not None
+    assert lint_cmd.callback is quality_cli.lint
+    assert lint_cmd.policy == REQUIRED_MUTATING
+
+    assert format_cmd is not None
+    assert format_cmd.callback is quality_cli.format_code
+    assert format_cmd.policy == REQUIRED_MUTATING
+
+    assert check_cmd is not None
+    assert check_cmd.callback is quality_cli.check_all
+    assert check_cmd.policy == REQUIRED

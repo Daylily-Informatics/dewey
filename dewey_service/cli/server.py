@@ -21,6 +21,7 @@ import uvicorn
 from cli_core_yo import ccyo_out
 from cli_core_yo.certs import ensure_certs
 from cli_core_yo.oauth import runtime_oauth_host, validate_uri_list_ports
+from cli_core_yo.runtime import get_context
 from cli_core_yo.server import (
     display_host,
     latest_log,
@@ -33,6 +34,13 @@ from cli_core_yo.server import (
 )
 from typer.models import OptionInfo
 
+from dewey_service.cli._registry_v2 import (
+    REQUIRED_JSON,
+    REQUIRED_LONG_RUNNING,
+    REQUIRED_MUTATING,
+    REQUIRED_MUTATING_LONG_RUNNING,
+    register_group_commands,
+)
 from dewey_service.cli.common import PROJECT_ROOT
 from dewey_service.defaults import DEFAULT_APP_PORT
 from dewey_service.settings import clear_settings_cache, get_settings
@@ -69,6 +77,13 @@ def _runtime_meta_file() -> Path:
 def _ensure_runtime_dirs() -> None:
     _state_dir().mkdir(parents=True, exist_ok=True)
     _log_dir().mkdir(parents=True, exist_ok=True)
+
+
+def _json_mode_enabled() -> bool:
+    try:
+        return bool(get_context().json_mode)
+    except Exception:
+        return False
 
 
 def _load_settings():
@@ -425,7 +440,8 @@ def status() -> None:
     """Show Dewey API/UI server status."""
     pid = read_pid(_pid_file())
     if not pid:
-        ccyo_out.emit_json({"running": False, "pid": None})
+        if _json_mode_enabled():
+            ccyo_out.emit_json({"running": False, "pid": None})
         ccyo_out.print_text("Server is [dim]not running[/dim]")
         return
 
@@ -437,7 +453,8 @@ def status() -> None:
         "url": f"{_status_scheme()}://{host}:{port}",
         "log_file": str(log_file) if log_file else None,
     }
-    ccyo_out.emit_json(data)
+    if _json_mode_enabled():
+        ccyo_out.emit_json(data)
     ccyo_out.success(f"Server is running (PID {pid})")
     ccyo_out.print_text(f"   URL: [cyan]{data['url']}[/cyan]")
     if log_file:
@@ -510,4 +527,16 @@ def restart(
 
 def register(registry: CommandRegistry, spec: CliSpec) -> None:
     """Register the server command group."""
-    registry.add_typer_app(None, server_app, "server", "HTTPS API/UI server commands")
+    _ = spec
+    register_group_commands(
+        registry,
+        "server",
+        "HTTPS API/UI server commands",
+        [
+            ("start", start, REQUIRED_MUTATING_LONG_RUNNING),
+            ("stop", stop, REQUIRED_MUTATING),
+            ("status", status, REQUIRED_JSON),
+            ("logs", logs, REQUIRED_LONG_RUNNING),
+            ("restart", restart, REQUIRED_MUTATING),
+        ],
+    )

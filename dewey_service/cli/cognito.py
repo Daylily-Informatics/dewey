@@ -15,8 +15,18 @@ import subprocess
 
 import typer
 from cli_core_yo import ccyo_out
+from cli_core_yo.runtime import get_context
+
+from dewey_service.cli._registry_v2 import REQUIRED_JSON, register_group_commands
 
 cognito_app = typer.Typer(help="Cognito helper commands")
+
+
+def _json_mode_enabled() -> bool:
+    try:
+        return bool(get_context().json_mode)
+    except Exception:
+        return False
 
 
 @cognito_app.command("status")
@@ -27,8 +37,9 @@ def status() -> None:
         ccyo_out.error("daycog not found in PATH")
         raise typer.Exit(1)
 
+    json_mode = _json_mode_enabled()
     cmd = [daycog_path, "status"]
-    if "--json" in sys.argv or "-j" in sys.argv:
+    if json_mode:
         cmd.append("--json")
 
     try:
@@ -43,6 +54,15 @@ def status() -> None:
         ccyo_out.error("daycog not found in PATH")
         raise typer.Exit(1) from exc
 
+    if json_mode:
+        if proc.stdout:
+            sys.stdout.write(proc.stdout if proc.stdout.endswith("\n") else f"{proc.stdout}\n")
+            sys.stdout.flush()
+        if proc.stderr:
+            sys.stderr.write(proc.stderr if proc.stderr.endswith("\n") else f"{proc.stderr}\n")
+            sys.stderr.flush()
+        raise typer.Exit(proc.returncode)
+
     if proc.stdout:
         ccyo_out.print_text(proc.stdout.rstrip())
     if proc.stderr:
@@ -52,4 +72,12 @@ def status() -> None:
 
 def register(registry: CommandRegistry, spec: CliSpec) -> None:
     """Register the cognito command group."""
-    registry.add_typer_app(None, cognito_app, "cognito", "Cognito helper commands")
+    _ = spec
+    register_group_commands(
+        registry,
+        "cognito",
+        "Cognito helper commands",
+        [
+            ("status", status, REQUIRED_JSON),
+        ],
+    )

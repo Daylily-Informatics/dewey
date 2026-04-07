@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 import typer
 from cli_core_yo import ccyo_out
 
+from dewey_service.cli._registry_v2 import REQUIRED, register_group_commands
 from dewey_service.cli.common import PROJECT_ROOT
 
 test_app = typer.Typer(help="Test commands")
@@ -64,4 +65,13 @@ def run_coverage(
 
 def register(registry: CommandRegistry, spec: CliSpec) -> None:
     """Register the test command group."""
-    registry.add_typer_app(None, test_app, "test", "Test commands")
+    _ = spec
+    register_group_commands(
+        registry,
+        "test",
+        "Test commands",
+        [
+            ("run", run_tests, REQUIRED),
+            ("cov", run_coverage, REQUIRED),
+        ],
+    )

@@ -8,8 +8,21 @@ from pathlib import Path
 
 import yaml
 from cli_core_yo.app import create_app, run
-from cli_core_yo.spec import CliSpec, ConfigSpec, EnvSpec, PluginSpec, XdgSpec
+from cli_core_yo.spec import (
+    BackendDetectSpec,
+    BackendValidationSpec,
+    CliSpec,
+    ConfigSpec,
+    EnvSpec,
+    ExecutionBackendSpec,
+    PluginSpec,
+    PolicySpec,
+    PrereqSpec,
+    RuntimeSpec,
+    XdgSpec,
+)
 
+from dewey_service.cli._registry_v2 import DEWEY_RUNTIME_TAG
 from dewey_service.defaults import (
     build_default_config_template,
     default_cognito_logout_url,
@@ -49,6 +62,7 @@ def _build_spec() -> CliSpec:
         dist_name="dewey-service",
         root_help="Dewey — Development CLI for the canonical artifact registry service.",
         xdg=XdgSpec(app_dir_name=_config_dir_name()),
+        policy=PolicySpec(),
         config=ConfigSpec(
             xdg_relative_path=_config_filename(),
             template_bytes=build_default_config_template(),
@@ -59,6 +73,79 @@ def _build_spec() -> CliSpec:
             project_root_env_var="DEWEY_PROJECT_ROOT",
             activate_script_name=f"{ACTIVATE_SCRIPT} <deploy-name>",
             deactivate_script_name=str(DEACTIVATE_SCRIPT),
+            preferred_backend="dewey-conda",
+        ),
+        runtime=RuntimeSpec(
+            supported_backends=[
+                ExecutionBackendSpec(
+                    name="dewey-conda",
+                    kind="conda",
+                    entry_guidance="source ./activate <deploy-name>",
+                    detect=BackendDetectSpec(env_vars=("CONDA_PREFIX",)),
+                    validation=BackendValidationSpec(env_vars=("CONDA_PREFIX",)),
+                )
+            ],
+            default_backend="dewey-conda",
+            guard_mode="enforced",
+            prereqs=[
+                PrereqSpec(
+                    key="dewey-conda-active-env",
+                    kind="env_var",
+                    value="CONDA_DEFAULT_ENV",
+                    help="Activate Dewey with source ./activate <deploy-name>.",
+                    applies_to_backends={"dewey-conda"},
+                    tags={DEWEY_RUNTIME_TAG},
+                    success_message="Deployment-scoped conda environment is active.",
+                    failure_message=(
+                        "Dewey CLI requires an active deployment-scoped conda environment. "
+                        "Run `source ./activate <deploy-name>`."
+                    ),
+                ),
+                PrereqSpec(
+                    key="dewey-conda-env-name",
+                    kind="command_probe",
+                    value=(
+                        sys.executable,
+                        "-c",
+                        "import os, sys; env = os.environ.get('CONDA_DEFAULT_ENV', '').strip(); "
+                        "sys.exit(0 if env and '-' in env else 1)",
+                    ),
+                    help="Use a deployment-scoped conda environment such as DEWEY-local2.",
+                    applies_to_backends={"dewey-conda"},
+                    tags={DEWEY_RUNTIME_TAG},
+                    success_message="Deployment-scoped conda environment name is valid.",
+                    failure_message=(
+                        "Dewey CLI requires a deployment-scoped conda environment name with '-'. "
+                        "Run `source ./activate <deploy-name>`."
+                    ),
+                ),
+                PrereqSpec(
+                    key="dewey-daylily-tapdb",
+                    kind="python_import",
+                    value="daylily_tapdb",
+                    help="Install daylily-tapdb into the active Dewey environment.",
+                    applies_to_backends={"dewey-conda"},
+                    tags={DEWEY_RUNTIME_TAG},
+                    success_message="Dependency available: daylily-tapdb",
+                    failure_message=(
+                        "Missing dependency: daylily-tapdb. "
+                        "Re-run `source ./activate <deploy-name>`."
+                    ),
+                ),
+                PrereqSpec(
+                    key="dewey-daylily-auth-cognito",
+                    kind="python_import",
+                    value="daylily_auth_cognito",
+                    help="Install daylily-auth-cognito into the active Dewey environment.",
+                    applies_to_backends={"dewey-conda"},
+                    tags={DEWEY_RUNTIME_TAG},
+                    success_message="Dependency available: daylily-auth-cognito",
+                    failure_message=(
+                        "Missing dependency: daylily-auth-cognito. "
+                        "Re-run `source ./activate <deploy-name>`."
+                    ),
+                ),
+            ],
         ),
         plugins=PluginSpec(
             explicit=[
@@ -66,6 +153,8 @@ def _build_spec() -> CliSpec:
                 "dewey_service.cli.db.register",
                 "dewey_service.cli.test.register",
                 "dewey_service.cli.quality.register",
+                "dewey_service.cli.tapdb.register",
+                "dewey_service.cli.cognito.register",
                 "dewey_service.cli.config_extra.register",
             ]
         ),
@@ -172,45 +261,7 @@ spec = _build_spec()
 app = create_app(spec)
 cli = app
 
-_SKIP_CONDA_ENV_CHECK_FLAG = "--skip-conda-env-check"
-_CONDA_ENV_CHECK_EXEMPT_COMMANDS = frozenset({"version", "info", "env", "help"})
-
-
-def _strip_skip_conda_env_check_flag(args: list[str]) -> tuple[list[str], bool]:
-    filtered = [arg for arg in args if arg != _SKIP_CONDA_ENV_CHECK_FLAG]
-    return filtered, len(filtered) != len(args)
-
-
-def _command_requires_conda_env_check(args: list[str]) -> bool:
-    if not args or "--help" in args or "-h" in args:
-        return False
-    for arg in args:
-        if not arg or arg.startswith("-"):
-            continue
-        return arg not in _CONDA_ENV_CHECK_EXEMPT_COMMANDS
-    return False
-
-
-def _enforce_conda_env_contract(args: list[str]) -> None:
-    if not _command_requires_conda_env_check(args):
-        return
-    active_env = os.environ.get("CONDA_DEFAULT_ENV", "").strip()
-    if not active_env:
-        raise SystemExit(
-            "Dewey CLI requires an active deployment-scoped conda environment. "
-            "Activate an env named like 'DEWEY-local2', or pass "
-            "--skip-conda-env-check to override."
-        )
-    if "-" not in active_env:
-        raise SystemExit(
-            f"Dewey CLI requires a deployment-scoped conda environment name with '-'. "
-            f"Current CONDA_DEFAULT_ENV='{active_env}'. Pass --skip-conda-env-check to override."
-        )
-
 
 def main() -> None:
     """Main CLI entry point."""
-    args, skip_conda_env_check = _strip_skip_conda_env_check_flag(sys.argv[1:])
-    if not skip_conda_env_check:
-        _enforce_conda_env_contract(args)
-    raise SystemExit(run(_build_spec(), args))
+    raise SystemExit(run(spec))

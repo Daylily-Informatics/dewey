@@ -6,17 +6,11 @@ from types import SimpleNamespace
 import pytest
 import typer
 import yaml
+from cli_core_yo.registry import CommandRegistry
 
 import dewey_service.cli as cli_module
 import dewey_service.cli.config_extra as config_extra
-
-
-class _ConfigRegistry:
-    def __init__(self) -> None:
-        self.calls: list[tuple[str, str, object, str]] = []
-
-    def add_command(self, group: str, name: str, fn: object, help_text: str) -> None:
-        self.calls.append((group, name, fn, help_text))
+from dewey_service.cli._registry_v2 import REQUIRED, REQUIRED_MUTATING
 
 
 def _minimal_config_yaml(**overrides: object) -> str:
@@ -160,38 +154,11 @@ def test_dewey_info_hook_handles_invalid_config_and_unknown_server(
     assert rows["Dev Server"] == "Unknown"
 
 
-@pytest.mark.parametrize(
-    ("args", "expected"),
-    [
-        ([], False),
-        (["--help"], False),
-        (["-h"], False),
-        (["version"], False),
-        (["--flag", "server", "status"], True),
-        (["--flag"], False),
-    ],
-)
-def test_command_requires_conda_env_check_handles_flags_and_exemptions(
-    args: list[str],
-    expected: bool,
-) -> None:
-    assert cli_module._command_requires_conda_env_check(args) is expected
-
-
-def test_main_strips_skip_flag_before_running(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_main_runs_prebuilt_spec(monkeypatch: pytest.MonkeyPatch) -> None:
     seen: dict[str, object] = {}
 
-    monkeypatch.setattr(
-        cli_module.sys, "argv", ["dewey", "--skip-conda-env-check", "server", "status"]
-    )
-    monkeypatch.setattr(
-        cli_module,
-        "_enforce_conda_env_contract",
-        lambda _args: (_ for _ in ()).throw(AssertionError("should not enforce")),
-    )
-
-    def fake_run(_spec: object, args: list[str]) -> int:
-        seen["args"] = list(args)
+    def fake_run(passed_spec: object) -> int:
+        seen["spec"] = passed_spec
         return 7
 
     monkeypatch.setattr(cli_module, "run", fake_run)
@@ -200,33 +167,7 @@ def test_main_strips_skip_flag_before_running(monkeypatch: pytest.MonkeyPatch) -
         cli_module.main()
 
     assert exc.value.code == 7
-    assert seen["args"] == ["server", "status"]
-
-
-def test_main_enforces_conda_env_contract_when_not_skipped(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    seen: dict[str, object] = {}
-
-    monkeypatch.setattr(cli_module.sys, "argv", ["dewey", "server", "status"])
-    monkeypatch.setattr(
-        cli_module,
-        "_enforce_conda_env_contract",
-        lambda args: seen.setdefault("checked_args", list(args)),
-    )
-
-    def fake_run(_spec: object, args: list[str]) -> int:
-        seen["run_args"] = list(args)
-        return 0
-
-    monkeypatch.setattr(cli_module, "run", fake_run)
-
-    with pytest.raises(SystemExit) as exc:
-        cli_module.main()
-
-    assert exc.value.code == 0
-    assert seen["checked_args"] == ["server", "status"]
-    assert seen["run_args"] == ["server", "status"]
+    assert seen["spec"] is cli_module.spec
 
 
 def test_config_status_prints_runtime_settings(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -314,16 +255,19 @@ def test_set_artifact_bucket_exits_on_failure(monkeypatch: pytest.MonkeyPatch) -
 
 
 def test_config_extra_registers_commands() -> None:
-    registry = _ConfigRegistry()
+    registry = CommandRegistry()
 
     config_extra.register(registry, object())
 
-    assert registry.calls == [
-        ("config", "status", config_extra._status, "Show merged Dewey runtime settings"),
-        (
-            "config",
-            "set-artifact-bucket",
-            config_extra._set_artifact_bucket,
-            "Set the S3 bucket Dewey uses for managed artifact storage.",
-        ),
-    ]
+    status_cmd = registry.get_command(("config", "status"))
+    bucket_cmd = registry.get_command(("config", "set-artifact-bucket"))
+
+    assert status_cmd is not None
+    assert status_cmd.callback is config_extra._status
+    assert status_cmd.help_text == "Show merged Dewey runtime settings"
+    assert status_cmd.policy == REQUIRED
+
+    assert bucket_cmd is not None
+    assert bucket_cmd.callback is config_extra._set_artifact_bucket
+    assert bucket_cmd.help_text == "Set the S3 bucket Dewey uses for managed artifact storage."
+    assert bucket_cmd.policy == REQUIRED_MUTATING
