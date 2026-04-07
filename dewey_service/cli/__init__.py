@@ -71,7 +71,7 @@ def _build_spec() -> CliSpec:
         env=EnvSpec(
             active_env_var="DEWEY_ACTIVE",
             project_root_env_var="DEWEY_PROJECT_ROOT",
-            activate_script_name=f"{ACTIVATE_SCRIPT} <deploy-name>",
+            activate_script_name=f"{ACTIVATE_SCRIPT} [deploy-name] [--debug]",
             deactivate_script_name=str(DEACTIVATE_SCRIPT),
             preferred_backend="dewey-conda",
         ),
@@ -80,7 +80,7 @@ def _build_spec() -> CliSpec:
                 ExecutionBackendSpec(
                     name="dewey-conda",
                     kind="conda",
-                    entry_guidance="source ./activate <deploy-name>",
+                    entry_guidance="source ./activate [deploy-name] [--debug]",
                     detect=BackendDetectSpec(env_vars=("CONDA_PREFIX",)),
                     validation=BackendValidationSpec(env_vars=("CONDA_PREFIX",)),
                 )
@@ -92,13 +92,13 @@ def _build_spec() -> CliSpec:
                     key="dewey-conda-active-env",
                     kind="env_var",
                     value="CONDA_DEFAULT_ENV",
-                    help="Activate Dewey with source ./activate <deploy-name>.",
+                    help="Activate Dewey with source ./activate [deploy-name] [--debug].",
                     applies_to_backends={"dewey-conda"},
                     tags={DEWEY_RUNTIME_TAG},
                     success_message="Deployment-scoped conda environment is active.",
                     failure_message=(
                         "Dewey CLI requires an active deployment-scoped conda environment. "
-                        "Run `source ./activate <deploy-name>`."
+                        "Run `source ./activate [deploy-name] [--debug]`."
                     ),
                 ),
                 PrereqSpec(
@@ -116,7 +116,7 @@ def _build_spec() -> CliSpec:
                     success_message="Deployment-scoped conda environment name is valid.",
                     failure_message=(
                         "Dewey CLI requires a deployment-scoped conda environment name with '-'. "
-                        "Run `source ./activate <deploy-name>`."
+                        "Run `source ./activate [deploy-name] [--debug]`."
                     ),
                 ),
                 PrereqSpec(
@@ -129,7 +129,7 @@ def _build_spec() -> CliSpec:
                     success_message="Dependency available: daylily-tapdb",
                     failure_message=(
                         "Missing dependency: daylily-tapdb. "
-                        "Re-run `source ./activate <deploy-name>`."
+                        "Re-run `source ./activate [deploy-name] [--debug]`."
                     ),
                 ),
                 PrereqSpec(
@@ -142,7 +142,7 @@ def _build_spec() -> CliSpec:
                     success_message="Dependency available: daylily-auth-cognito",
                     failure_message=(
                         "Missing dependency: daylily-auth-cognito. "
-                        "Re-run `source ./activate <deploy-name>`."
+                        "Re-run `source ./activate [deploy-name] [--debug]`."
                     ),
                 ),
             ],

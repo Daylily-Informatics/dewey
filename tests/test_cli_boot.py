@@ -234,7 +234,7 @@ def test_env_commands_render(monkeypatch, capsys) -> None:
     activate_exit = _invoke(["env", "activate"])
     activate_output = capsys.readouterr().out
     assert activate_exit == 0
-    assert f"source {cli_module.ACTIVATE_SCRIPT} <deploy-name>" in activate_output
+    assert f"source {cli_module.ACTIVATE_SCRIPT} [deploy-name] [--debug]" in activate_output
 
     deactivate_exit = _invoke(["env", "deactivate"])
     deactivate_output = capsys.readouterr().out
@@ -245,4 +245,4 @@ def test_env_commands_render(monkeypatch, capsys) -> None:
     reset_output = capsys.readouterr().out
     assert reset_exit == 0
     assert f"source {cli_module.DEACTIVATE_SCRIPT}" in reset_output
-    assert f"source {cli_module.ACTIVATE_SCRIPT} <deploy-name>" in reset_output
+    assert f"source {cli_module.ACTIVATE_SCRIPT} [deploy-name] [--debug]" in reset_output

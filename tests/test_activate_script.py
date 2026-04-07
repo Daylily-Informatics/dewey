@@ -3,6 +3,8 @@ from __future__ import annotations
 import os
 import shlex
 import subprocess
+import sys
+from shutil import copy2
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -23,6 +25,7 @@ def _build_fake_conda(tmp_path: Path) -> Path:
     env_bin = conda_base / "envs" / env_name / "bin"
     scripts_dir = conda_base / "envs" / env_name / "scripts"
     scripts_dir.mkdir(parents=True, exist_ok=True)
+    real_python = str(Path(sys.executable).resolve())
 
     _write_executable(
         env_bin / "python",
@@ -31,15 +34,22 @@ set -euo pipefail
 if [[ "${{1:-}}" == "-c" ]]; then
   if [[ "${{2:-}}" == *'sysconfig.get_path("scripts")'* ]]; then
     printf '%s\\n' "{scripts_dir}"
+    exit 0
   fi
-  exit 0
+  exec "{real_python}" "$@"
 fi
 if [[ "${{1:-}}" == "-" ]]; then
   script="$(cat)"
-  if [[ "$script" == *"importlib.import_module"* ]]; then
+  if [[ "$script" == *"project_version()"* ]] || [[ "$script" == *"setuptools_scm_version()"* ]] || [[ "$script" == *"exact_numeric_git_tag()"* ]]; then
+    exec "{real_python}" "$@" <<<"$script"
+  fi
+  if [[ "$script" == *"importlib.import_module(sys.argv[1])"* ]]; then
     exit 0
   fi
-  exit 0
+  if [[ "$script" == *"importlib.import_module"* ]]; then
+    exec "{real_python}" "$@" <<<"$script"
+  fi
+  exec "{real_python}" "$@" <<<"$script"
 fi
 if [[ "${{1:-}}" == "-m" && "${{2:-}}" == "pip" && "${{3:-}}" == "show" ]]; then
   printf 'Name: dewey-service\\n'
@@ -50,12 +60,14 @@ if [[ "${{1:-}}" == "-m" && "${{2:-}}" == "pip" && "${{3:-}}" == "install" ]]; t
   if [[ -n "${{FAKE_PIP_INSTALL_LOG:-}}" ]]; then
     printf '%s\\n' "$*" >> "${{FAKE_PIP_INSTALL_LOG}}"
   fi
+  if [[ "${{FAKE_PIP_INSTALL_FAIL:-0}}" == "1" ]]; then
+    exit 1
+  fi
   exit 0
 fi
-exit 0
+exec "{real_python}" "$@"
 """,
     )
-
     _write_executable(
         conda_exe,
         f"""#!/usr/bin/env bash
@@ -81,6 +93,15 @@ if [[ "${{1:-}}" == "env" && "${{2:-}}" == "create" ]]; then
   fi
   exit 0
 fi
+if [[ "${{1:-}}" == "env" && "${{2:-}}" == "remove" ]]; then
+  if [[ -n "${{FAKE_CONDA_CALL_LOG:-}}" ]]; then
+    printf '%s\\n' "$*" >> "${{FAKE_CONDA_CALL_LOG}}"
+  fi
+  if [[ "${{FAKE_CONDA_ENV_REMOVE_FAIL:-0}}" == "1" ]]; then
+    exit 1
+  fi
+  exit 0
+fi
 echo "unexpected conda executable call: $*" >&2
 exit 1
 """,
@@ -89,7 +110,7 @@ exit 1
     conda_sh = conda_base / "etc" / "profile.d" / "conda.sh"
     conda_sh.parent.mkdir(parents=True, exist_ok=True)
     conda_sh.write_text(
-        f"""conda() {{
+f"""conda() {{
   if [[ "${{1:-}}" == "activate" && "${{2:-}}" == "{env_name}" ]]; then
     if [[ -n "${{FAKE_CONDA_CALL_LOG:-}}" ]]; then
       printf 'activate\\n' >> "${{FAKE_CONDA_CALL_LOG}}"
@@ -97,8 +118,25 @@ exit 1
     if [[ "${{FAKE_CONDA_ACTIVATE_FAIL:-0}}" == "1" ]]; then
       return 1
     fi
+    export FAKE_CONDA_PREVIOUS_CONDA_DEFAULT_ENV="${{CONDA_DEFAULT_ENV:-}}"
+    export FAKE_CONDA_PREVIOUS_CONDA_PREFIX="${{CONDA_PREFIX:-}}"
     export CONDA_DEFAULT_ENV="{env_name}"
     export CONDA_PREFIX="{conda_base}/envs/{env_name}"
+    return 0
+  fi
+  if [[ "${{1:-}}" == "deactivate" ]]; then
+    if [[ -n "${{FAKE_CONDA_CALL_LOG:-}}" ]]; then
+      printf 'deactivate:%s\\n' "${{CONDA_DEFAULT_ENV:-}}" >> "${{FAKE_CONDA_CALL_LOG}}"
+    fi
+    if [[ -n "${{FAKE_CONDA_PREVIOUS_CONDA_DEFAULT_ENV:-}}" ]]; then
+      export CONDA_DEFAULT_ENV="${{FAKE_CONDA_PREVIOUS_CONDA_DEFAULT_ENV}}"
+      export CONDA_PREFIX="${{FAKE_CONDA_PREVIOUS_CONDA_PREFIX:-}}"
+      unset FAKE_CONDA_PREVIOUS_CONDA_DEFAULT_ENV
+      unset FAKE_CONDA_PREVIOUS_CONDA_PREFIX
+    else
+      unset CONDA_DEFAULT_ENV
+      unset CONDA_PREFIX
+    fi
     return 0
   fi
   command "{conda_exe}" "$@"
@@ -110,13 +148,34 @@ exit 1
     return conda_base
 
 
+def _make_temp_repo(tmp_path: Path, *, pyproject_version: str) -> Path:
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    copy2(ACTIVATE_SCRIPT, repo_root / "activate")
+    copy2(PROJECT_ROOT / "environment.yaml", repo_root / "environment.yaml")
+    (repo_root / "pyproject.toml").write_text(
+        f"""[build-system]
+requires = ["setuptools>=64", "setuptools_scm>=8", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dewey-service"
+version = "{pyproject_version}"
+""",
+        encoding="utf-8",
+    )
+    (repo_root / "activate").chmod(0o755)
+    return repo_root
+
+
 def _source_activate(
     env: dict[str, str],
     *,
+    script_path: Path = ACTIVATE_SCRIPT,
     deploy_name: str | None = DEPLOY_NAME,
     extra_args: tuple[str, ...] = (),
 ) -> subprocess.CompletedProcess[str]:
-    argv = [f"source {shlex.quote(str(ACTIVATE_SCRIPT))}"]
+    argv = [f"source {shlex.quote(str(script_path))}"]
     if deploy_name is not None:
         argv.append(shlex.quote(deploy_name))
     argv.extend(shlex.quote(arg) for arg in extra_args)
@@ -159,13 +218,6 @@ def test_activate_requires_conda_on_path(tmp_path: Path) -> None:
     assert "Conda is required but was not found on PATH." in result.stderr
 
 
-def test_activate_requires_deploy_name_argument() -> None:
-    result = _source_activate(os.environ.copy(), deploy_name=None)
-
-    assert result.returncode == 1
-    assert "Dewey activation requires exactly one positional deploy-name." in result.stdout
-
-
 def test_activate_rejects_invalid_deploy_name_without_conda() -> None:
     result = _source_activate(os.environ.copy(), deploy_name="bad_name")
 
@@ -177,7 +229,78 @@ def test_activate_rejects_extra_arguments() -> None:
     result = _source_activate(os.environ.copy(), extra_args=("extra",))
 
     assert result.returncode == 1
-    assert "Dewey activation requires exactly one positional deploy-name." in result.stdout
+    assert "Usage: source ./activate [deploy-name] [--debug]" in result.stdout
+
+
+def test_activate_uses_static_project_version_when_deploy_name_is_omitted(tmp_path: Path) -> None:
+    repo_root = _make_temp_repo(tmp_path, pyproject_version="v1.2.3.4.5")
+    conda_base = _build_fake_conda(tmp_path)
+
+    env = os.environ.copy()
+    env["PATH"] = f"{conda_base / 'bin'}:/usr/bin:/bin"
+    env["FAKE_DEWEY_ENV_PRESENT"] = "0"
+    env["FAKE_CONDA_ENV_CREATE_FAIL"] = "1"
+    env.pop("CONDA_DEFAULT_ENV", None)
+    env.pop("CONDA_PREFIX", None)
+
+    result = _source_activate(env, script_path=repo_root / "activate", deploy_name=None)
+
+    assert result.returncode == 1
+    assert "Conda environment 'DEWEY-v1-2-3-4' not found." in result.stdout
+    assert "Installing conda environment from environment.yaml..." in result.stdout
+
+
+def test_activate_cleans_up_created_env_and_restores_previous_env_on_failure(tmp_path: Path) -> None:
+    repo_root = _make_temp_repo(tmp_path, pyproject_version="v1.2.3.4.5")
+    conda_base = _build_fake_conda(tmp_path)
+    call_log = tmp_path / "conda-calls.log"
+    pip_install_log = tmp_path / "pip-install.log"
+
+    env = os.environ.copy()
+    env["PATH"] = f"{conda_base / 'bin'}:/usr/bin:/bin"
+    env["FAKE_DEWEY_ENV_PRESENT"] = "0"
+    env["FAKE_CONDA_CALL_LOG"] = str(call_log)
+    env["FAKE_PIP_INSTALL_LOG"] = str(pip_install_log)
+    env["FAKE_PIP_INSTALL_FAIL"] = "1"
+    env["CONDA_DEFAULT_ENV"] = "DEWEY-preexisting"
+    env["CONDA_PREFIX"] = str(conda_base / "envs" / "DEWEY-preexisting")
+
+    result = _source_activate(env, script_path=repo_root / "activate", deploy_name=DEPLOY_NAME)
+
+    assert result.returncode == 1
+    stdout = result.stdout + result.stderr
+    assert "Restoring previously active conda environment: DEWEY-preexisting" in stdout
+    assert f"Removing conda environment created by this attempt: DEWEY-{DEPLOY_NAME}" in stdout
+    call_log_text = call_log.read_text(encoding="utf-8")
+    assert f"deactivate:DEWEY-{DEPLOY_NAME}" in call_log_text
+    assert f"env remove -n DEWEY-{DEPLOY_NAME} -y" in call_log_text
+    assert pip_install_log.read_text(encoding="utf-8")
+
+
+def test_activate_debug_skips_environment_removal_on_failure(tmp_path: Path) -> None:
+    repo_root = _make_temp_repo(tmp_path, pyproject_version="v1.2.3.4.5")
+    conda_base = _build_fake_conda(tmp_path)
+    call_log = tmp_path / "conda-calls.log"
+
+    env = os.environ.copy()
+    env["PATH"] = f"{conda_base / 'bin'}:/usr/bin:/bin"
+    env["FAKE_DEWEY_ENV_PRESENT"] = "0"
+    env["FAKE_CONDA_CALL_LOG"] = str(call_log)
+    env["FAKE_PIP_INSTALL_FAIL"] = "1"
+    env["CONDA_DEFAULT_ENV"] = "DEWEY-preexisting"
+    env["CONDA_PREFIX"] = str(conda_base / "envs" / "DEWEY-preexisting")
+
+    result = _source_activate(
+        env,
+        script_path=repo_root / "activate",
+        deploy_name=DEPLOY_NAME,
+        extra_args=("--debug",),
+    )
+
+    assert result.returncode == 1
+    stdout = result.stdout + result.stderr
+    assert f"--debug set; leaving DEWEY-{DEPLOY_NAME} in place" in stdout
+    assert f"env remove -n DEWEY-{DEPLOY_NAME} -y" not in call_log.read_text(encoding="utf-8")
 
 
 def test_activate_hardfails_when_conda_env_creation_fails(tmp_path: Path) -> None:
