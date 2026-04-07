@@ -9,7 +9,7 @@ def test_pyproject_declares_shared_library_versions() -> None:
     pyproject = tomllib.loads((repo_root / "pyproject.toml").read_text(encoding="utf-8"))
     dependencies = pyproject["project"]["dependencies"]
 
-    assert "cli-core-yo>=1.3.1" in dependencies
+    assert "cli-core-yo>=1.3.1,<2.0.0" in dependencies
     assert "daylily-auth-cognito==2.0.1" in dependencies
     assert "daylily-tapdb>=4.1.4.dev0" in dependencies
 
