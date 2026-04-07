@@ -6,8 +6,15 @@
 {% endif %}
 {%- endmacro %}
 
-{% macro artifact_storage_action(artifact_euid, storage_uri) -%}
-{% if artifact_euid and storage_uri and storage_uri.startswith("s3://") %}
+{% macro artifact_storage_action(artifact_euid, storage_uri, storage_kind="object", storage_console_url=None) -%}
+{% if storage_kind == "prefix" and storage_uri %}
+<span class="inline-link-cluster">
+  <a class="mono mono-link" href="/artifacts/dag?root_uri={{ storage_uri }}{% if artifact_euid %}&artifact_euid={{ artifact_euid }}{% endif %}">{{ storage_uri }}</a>
+  {% if storage_console_url %}
+  <a class="button" href="{{ storage_console_url }}" target="_blank" rel="noreferrer">S3</a>
+  {% endif %}
+</span>
+{% elif artifact_euid and storage_uri and storage_uri.startswith("s3://") %}
 <form class="inline-download-form" method="post" action="/artifacts/euid/{{ artifact_euid }}/download" onsubmit="return confirm('Download {{ artifact_euid }}?');">
   <input type="hidden" name="share_ttl_hours" value="24" />
   <button class="link-button mono" type="submit" title="Generate a presigned download URL and download this artifact.">{{ storage_uri }}</button>

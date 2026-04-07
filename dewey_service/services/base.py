@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from hashlib import sha256
 from typing import Any
+from urllib.parse import quote
 
 from itsdangerous import URLSafeTimedSerializer
 
@@ -261,6 +262,8 @@ class BaseDeweyService:
                 str(payload.get("producer_system") or ""),
                 str(payload.get("producer_object_euid") or ""),
                 str(payload.get("artifact_type") or ""),
+                str(payload.get("storage_kind") or "object"),
+                str(payload.get("node_kind") or "file"),
                 str(payload.get("storage_backend") or ""),
                 str(payload.get("bucket") or ""),
                 str(payload.get("key") or ""),
@@ -269,11 +272,30 @@ class BaseDeweyService:
             ]
         )
 
+    def _artifact_storage_console_url(self, payload: dict[str, Any]) -> str | None:
+        if str(payload.get("storage_backend") or "").strip().lower() != "s3":
+            return None
+        bucket = str(payload.get("bucket") or "").strip()
+        key = str(payload.get("key") or "").strip()
+        if not bucket or not key:
+            return None
+        return (
+            "https://s3.console.aws.amazon.com/s3/buckets/"
+            f"{quote(bucket, safe='')}"
+            f"?prefix={quote(key, safe='/')}&showversions=false"
+        )
+
     def _artifact_response(self, artifact_instance) -> dict[str, Any]:
         payload = normalize_instance_payload(artifact_instance)
+        storage_kind = str(payload.get("storage_kind") or "object").strip().lower() or "object"
+        node_kind = str(payload.get("node_kind") or "file").strip().lower() or "file"
+        is_terminal_raw = payload.get("is_terminal")
+        is_terminal = bool(is_terminal_raw) if storage_kind == "prefix" else True
         return {
             "artifact_euid": artifact_instance.euid,
             "artifact_type": str(payload.get("artifact_type") or ""),
+            "storage_kind": storage_kind,
+            "node_kind": node_kind,
             "storage_backend": str(payload.get("storage_backend") or ""),
             "bucket": str(payload.get("bucket") or ""),
             "key": str(payload.get("key") or ""),
@@ -288,10 +310,12 @@ class BaseDeweyService:
             "availability_status": payload.get("availability_status"),
             "metadata": dict(payload.get("metadata") or {}),
             "storage_uri": str(payload.get("storage_uri") or ""),
+            "storage_console_url": self._artifact_storage_console_url(payload),
             "source_uri": payload.get("source_uri"),
             "import_mode": payload.get("import_mode"),
             "storage_status": payload.get("storage_status"),
             "storage_verified_at": payload.get("storage_verified_at"),
+            "is_terminal": is_terminal,
             "retention_mode": payload.get("retention_mode"),
             "retain_until": payload.get("retain_until"),
             "share_status": payload.get("share_status"),

@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import asyncio
 from urllib.parse import parse_qs, urlparse
 
 
 def _login_user(monkeypatch, client, groups: list[str] | None = None) -> None:
     monkeypatch.setattr(
-        "daylily_cognito.web_session.exchange_authorization_code",
-        lambda **kwargs: {"id_token": "header.payload.sig"},
+        "daylily_auth_cognito.browser.session.exchange_authorization_code_async",
+        lambda **kwargs: asyncio.sleep(0, result={"id_token": "header.payload.sig"}),
     )
     monkeypatch.setattr(
         "dewey_service.auth.decode_jwt_claims_noverify",

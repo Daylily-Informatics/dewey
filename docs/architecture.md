@@ -4,6 +4,8 @@
 
 Dewey is the canonical artifact registry and artifact-resolution service in the Daylily stack. Its job is not to run workflows or own every domain object. Its job is to answer a narrower set of questions well:
 
+Dewey's Cognito integration follows the `daylily-auth-cognito` 2.0 split: browser sessions live in `browser.session`, Hosted UI helpers live in `browser.oauth` and `browser.google`, bearer verification lives in `runtime.verifier` and `runtime.m2m`, and lifecycle changes stay in `daycog` via `admin.*`. Service runtime code should not import `daylily_auth_cognito.cli`.
+
 - what artifact exists
 - what its stable Dewey identity is
 - where the bytes live
@@ -95,7 +97,7 @@ At startup, Dewey wires together:
 - a TapDB backend for persistence
 - an S3 storage client for object inspection, upload sessions, downloads, locking, and presigned URLs
 - a `MetapubAdapter` for PubMed search and record retrieval when available
-- a Cognito web-session config via `daylily-cognito`
+- a Cognito web-session config via `daylily-auth-cognito`
 - an in-memory observability store for request, DB, and auth rollups
 
 ```mermaid
@@ -106,7 +108,7 @@ Dashboard, Artifacts, Literature, Search"] --> FastAPI["FastAPI app"]
 Bloom, Ursa, operators, scripts"] --> FastAPI
 
     FastAPI --> Auth["Auth layer
-daylily-cognito sessions
+daylily-auth-cognito sessions
 and bearer-token checks"]
     FastAPI --> Service["DeweyService
 artifact, set, search, share,
@@ -121,7 +123,7 @@ head/get/list/upload/presign/lock"]
     Service --> Metapub["metapub adapter
 PubMed lookup and full-text discovery"]
     Auth --> Cognito["Cognito Hosted UI
-through daylily-cognito"]
+through daylily-auth-cognito"]
 ```
 
 ## Public Surfaces

@@ -14,8 +14,11 @@ NA_ARTIFACT_TYPE = "n/a"
 ARTIFACT_TYPES = [
     NA_ARTIFACT_TYPE,
     "bam",
+    "crai",
+    "cram",
     "csv",
     "fastq",
+    "folder",
     "json",
     "pdf",
     "report",
@@ -66,6 +69,8 @@ BULK_TEMPLATE_BASE_COLUMNS = [
 ]
 
 _ARTIFACT_TYPE_SUFFIXES: tuple[tuple[str, str], ...] = (
+    (".cram.crai", "crai"),
+    (".cram", "cram"),
     (".fastq.gz", "fastq"),
     (".fq.gz", "fastq"),
     (".vcf.gz", "vcf"),
@@ -134,8 +139,13 @@ def split_lines(raw: str | None) -> list[str]:
 
 
 def split_csv(raw: str | None) -> list[str]:
-    text = str(raw or "").replace("\n", ",")
-    return [item.strip() for item in text.split(",") if item.strip()]
+    text = str(raw or "").strip()
+    if not text:
+        return []
+    if "," in text or "\n" in text:
+        normalized = text.replace("\n", ",")
+        return [item.strip() for item in normalized.split(",") if item.strip()]
+    return [item.strip() for item in text.split() if item.strip()]
 
 
 def coerce_metadata_value(field: Mapping[str, str], raw: Any) -> Any:

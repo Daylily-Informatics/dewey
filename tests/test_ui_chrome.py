@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from urllib.parse import parse_qs, urlparse
 
 from fastapi.testclient import TestClient
@@ -40,8 +41,8 @@ def test_ui_page_renders_banner_after_login(monkeypatch, fake_service) -> None:
     app = create_app(settings=_settings_with_deployment(), service=fake_service)
 
     monkeypatch.setattr(
-        "daylily_cognito.web_session.exchange_authorization_code",
-        lambda **kwargs: {"id_token": "header.payload.sig"},
+        "daylily_auth_cognito.browser.session.exchange_authorization_code_async",
+        lambda **kwargs: asyncio.sleep(0, result={"id_token": "header.payload.sig"}),
     )
     monkeypatch.setattr(
         "dewey_service.auth.decode_jwt_claims_noverify",
@@ -70,6 +71,7 @@ def test_ui_page_renders_banner_after_login(monkeypatch, fake_service) -> None:
     assert "STAGING" in ui.text
     assert "/static/favicon.svg" in ui.text
     assert "/literature" in ui.text
+    assert "/artifacts/dag" in ui.text
     assert "/search" in ui.text
     assert "/ui/anomalies" in ui.text
     assert "/admin" in ui.text

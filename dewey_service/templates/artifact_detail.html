@@ -22,6 +22,7 @@
         <div class="navlinks">
           <a class="navlink" href="/ui">Dashboard</a>
           <a class="navlink" href="/artifacts?section=search#section-search">Artifact Search</a>
+          <a class="navlink" href="/artifacts/dag?artifact_euid={{ artifact.artifact_euid }}">DAG And Browser</a>
           <a class="navlink" href="/artifacts?section=recent_artifacts#section-recent_artifacts">Recent Artifacts</a>
           {% if is_admin %}
           <a class="navlink" href="/admin">Admin</a>
@@ -38,12 +39,17 @@
             <div class="eyebrow">Artifact EUID</div>
             <h2>{{ artifact.artifact_euid }}</h2>
             <p>
+              {% if artifact.storage_kind == "prefix" %}
+              Inspect the registered Dewey hierarchy node, review its metadata, and follow its S3 location.
+              {% else %}
               Inspect the stored record, review metadata, and issue a fresh presigned download for
               this artifact.
+              {% endif %}
             </p>
           </div>
           <div class="results-meta">
             <span class="pill pill-active">{{ artifact.artifact_type or "n/a" }}</span>
+            <span class="pill">{{ artifact.node_kind or "file" }}</span>
             <span class="pill">{{ artifact.import_mode or "register" }}</span>
             <span class="pill">{{ artifact.storage_status or "registered" }}</span>
           </div>
@@ -100,7 +106,34 @@
                   </tr>
                   <tr>
                     <th>Storage URI</th>
-                    <td>{{ artifact_links.artifact_storage_action(artifact.artifact_euid, artifact.storage_uri) }}</td>
+                    <td>{{ artifact_links.artifact_storage_action(artifact.artifact_euid, artifact.storage_uri, artifact.storage_kind, artifact.storage_console_url) }}</td>
+                  </tr>
+                  <tr>
+                    <th>Storage Kind</th>
+                    <td>{{ artifact.storage_kind or "object" }}</td>
+                  </tr>
+                  <tr>
+                    <th>Node Kind</th>
+                    <td>{{ artifact.node_kind or "file" }}</td>
+                  </tr>
+                  <tr>
+                    <th>Terminal</th>
+                    <td>{{ "yes" if artifact.is_terminal else "no" }}</td>
+                  </tr>
+                  <tr>
+                    <th>S3 Console</th>
+                    <td>
+                      {% if artifact.storage_console_url %}
+                      <div class="action-cluster">
+                        <a class="mono mono-link" href="{{ artifact.storage_console_url }}" target="_blank" rel="noreferrer">Open In Console</a>
+                        {% if artifact.storage_backend == "s3" %}
+                        <a class="button" href="/artifacts/dag?artifact_euid={{ artifact.artifact_euid }}">Browse In Explorer</a>
+                        {% endif %}
+                      </div>
+                      {% else %}
+                      n/a
+                      {% endif %}
+                    </td>
                   </tr>
                   <tr>
                     <th>Source URI</th>
@@ -124,6 +157,7 @@
               </table>
             </section>
 
+            {% if artifact.storage_kind == "object" %}
             <section class="panel">
               <div class="panel-header">
                 <div>
@@ -143,9 +177,81 @@
                 </div>
               </form>
             </section>
+            {% endif %}
           </section>
 
           <section class="stack">
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Hierarchy</h3>
+                  <div class="panel-copy">Immediate Dewey parent and child relationships for this artifact node.</div>
+                </div>
+              </div>
+              <div class="stack">
+                <div>
+                  <div class="eyebrow">Parents</div>
+                  {% if artifact_parents %}
+                  <div class="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Artifact</th>
+                          <th>Kind</th>
+                          <th>Storage</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for item in artifact_parents %}
+                        <tr>
+                          <td>
+                            <div>{{ artifact_links.artifact_euid_link(item.artifact_euid) }}</div>
+                            <div>{{ item.original_filename or item.storage_uri }}</div>
+                          </td>
+                          <td>{{ item.node_kind or item.artifact_type or "n/a" }}</td>
+                          <td>{{ artifact_links.artifact_storage_action(item.artifact_euid, item.storage_uri, item.storage_kind, item.storage_console_url) }}</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                  {% else %}
+                  <div class="empty-state">No parent hierarchy nodes.</div>
+                  {% endif %}
+                </div>
+                <div>
+                  <div class="eyebrow">Children</div>
+                  {% if artifact_children %}
+                  <div class="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Artifact</th>
+                          <th>Kind</th>
+                          <th>Storage</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for item in artifact_children %}
+                        <tr>
+                          <td>
+                            <div>{{ artifact_links.artifact_euid_link(item.artifact_euid) }}</div>
+                            <div>{{ item.original_filename or item.storage_uri }}</div>
+                          </td>
+                          <td>{{ item.node_kind or item.artifact_type or "n/a" }}</td>
+                          <td>{{ artifact_links.artifact_storage_action(item.artifact_euid, item.storage_uri, item.storage_kind, item.storage_console_url) }}</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                  {% else %}
+                  <div class="empty-state">No child hierarchy nodes.</div>
+                  {% endif %}
+                </div>
+              </div>
+            </section>
+
             <section class="panel">
               <div class="panel-header">
                 <div>
@@ -172,7 +278,9 @@
                   <div class="panel-copy">Most recent issued download/share records for this artifact.</div>
                 </div>
               </div>
-              {% if artifact_share_references %}
+              {% if artifact.storage_kind != "object" %}
+              <div class="empty-state">Prefix nodes do not issue direct file share references.</div>
+              {% elif artifact_share_references %}
               <div class="table-wrap">
                 <table>
                   <thead>

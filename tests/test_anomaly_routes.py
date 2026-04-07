@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from urllib.parse import parse_qs, urlparse
@@ -11,8 +12,8 @@ from dewey_service.services.base import BaseDeweyService
 
 def _login_operator(monkeypatch, client) -> None:
     monkeypatch.setattr(
-        "daylily_cognito.web_session.exchange_authorization_code",
-        lambda **kwargs: {"id_token": "header.payload.sig"},
+        "daylily_auth_cognito.browser.session.exchange_authorization_code_async",
+        lambda **kwargs: asyncio.sleep(0, result={"id_token": "header.payload.sig"}),
     )
     monkeypatch.setattr(
         "dewey_service.auth.decode_jwt_claims_noverify",
@@ -116,8 +117,8 @@ def test_base_service_anomaly_response_includes_canonical_and_legacy_fields(monk
 
 def test_admin_page_links_to_anomaly_view(monkeypatch, client) -> None:
     monkeypatch.setattr(
-        "daylily_cognito.web_session.exchange_authorization_code",
-        lambda **kwargs: {"id_token": "header.payload.sig"},
+        "daylily_auth_cognito.browser.session.exchange_authorization_code_async",
+        lambda **kwargs: asyncio.sleep(0, result={"id_token": "header.payload.sig"}),
     )
     monkeypatch.setattr(
         "dewey_service.auth.decode_jwt_claims_noverify",
@@ -145,8 +146,8 @@ def test_admin_page_links_to_anomaly_view(monkeypatch, client) -> None:
 
 def test_admin_page_updates_managed_artifact_bucket(monkeypatch, client, tmp_path) -> None:
     monkeypatch.setattr(
-        "daylily_cognito.web_session.exchange_authorization_code",
-        lambda **kwargs: {"id_token": "header.payload.sig"},
+        "daylily_auth_cognito.browser.session.exchange_authorization_code_async",
+        lambda **kwargs: asyncio.sleep(0, result={"id_token": "header.payload.sig"}),
     )
     monkeypatch.setattr(
         "dewey_service.auth.decode_jwt_claims_noverify",

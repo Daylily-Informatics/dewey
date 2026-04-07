@@ -8,20 +8,18 @@ import secrets
 from typing import Any
 from urllib.parse import urlencode, urlsplit
 
-from daylily_cognito import (
+from daylily_auth_cognito.browser.oauth import build_authorization_url
+from daylily_auth_cognito.browser import session as browser_session
+from daylily_auth_cognito.browser.session import (
     CognitoWebAuthError,
     CognitoWebSessionConfig,
     SessionPrincipal,
-    build_authorization_url,
     clear_session_principal,
     complete_cognito_callback,
-    exchange_authorization_code,
+    configure_session_middleware as _configure_session_middleware,
     load_session_principal,
     start_cognito_login,
     validate_web_auth_contract,
-)
-from daylily_cognito import (
-    configure_session_middleware as _configure_session_middleware,
 )
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
@@ -131,10 +129,10 @@ def build_cognito_logout_url(*, settings: Settings, state: str | None = None) ->
     return f"https://{domain}/logout?{params}"
 
 
-def exchange_code(*, settings: Settings, code: str) -> dict[str, Any]:
+async def exchange_code(*, settings: Settings, code: str) -> dict[str, Any]:
     domain = _strip_scheme(settings.cognito_domain)
     try:
-        return exchange_authorization_code(
+        return await browser_session.exchange_authorization_code_async(
             domain=domain,
             client_id=settings.cognito_app_client_id,
             code=code,
@@ -376,3 +374,54 @@ def require_observability_access(settings: Settings):
         )
 
     return _require_observability_access
+
+
+def require_session_or_api_auth(settings: Settings):
+    bearer = HTTPBearer(auto_error=False)
+
+    def _require_session_or_api_auth(
+        request: Request,
+        credentials: HTTPAuthorizationCredentials | None = Depends(bearer),
+    ) -> dict[str, Any]:
+        profile = _load_ui_profile(request)
+        if isinstance(profile, dict):
+            store = getattr(request.app.state, "observability", None)
+            if store is not None:
+                store.record_auth_event(
+                    status="ok",
+                    mode="cognito",
+                    detail="session_or_bearer",
+                    service_principal=False,
+                )
+            request.state.auth_mode = "cognito"
+            return {"auth_mode": "cognito", "service_principal": False, "profile": profile}
+
+        if credentials is not None:
+            token = str(credentials.credentials or "").strip()
+            if token in settings.api_tokens():
+                store = getattr(request.app.state, "observability", None)
+                if store is not None:
+                    store.record_auth_event(
+                        status="ok",
+                        mode="service_token",
+                        detail="session_or_bearer",
+                        service_principal=True,
+                    )
+                request.state.auth_mode = "service_token"
+                return {"auth_mode": "service_token", "service_principal": True}
+
+        store = getattr(request.app.state, "observability", None)
+        if store is not None:
+            store.record_auth_event(
+                status="denied",
+                mode="anonymous",
+                detail="session_or_bearer",
+                service_principal=False,
+            )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Login or bearer token required",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return _require_session_or_api_auth

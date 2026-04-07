@@ -21,10 +21,14 @@
         </div>
         <div class="navlinks">
           <a class="navlink" href="/artifacts">Artifacts</a>
+          <a class="navlink" href="/artifacts/dag">DAG And Browser</a>
           <a class="navlink" href="/literature">Literature Search</a>
           <a class="navlink" href="/search">Unified Search</a>
           <a class="navlink" href="/ui/anomalies">Anomalies</a>
           <a class="navlink" href="/ui/observability">Observability</a>
+          {% if tapdb_embedded %}
+          <a class="navlink" href="/tapdb">TapDB</a>
+          {% endif %}
           {% if is_admin %}
           <a class="navlink" href="/admin">Admin</a>
           {% endif %}
@@ -63,26 +67,16 @@
         <section class="panel">
           <div class="panel-header">
             <div>
-              <h3>Quick Register</h3>
-              <div class="panel-copy">
-                Register one local file, public URL, or S3 URI. Dewey infers the artifact type from the extension unless you override it.
+                <h3>Quick Register</h3>
+                <div class="panel-copy">
+                Register one local file, public URL, or S3 URI. Dewey infers the artifact type, extension, and storage details automatically.
               </div>
             </div>
             <a class="button" href="/artifacts">Comprehensive Artifact Registry</a>
           </div>
           <form method="post" action="/ui/register" enctype="multipart/form-data">
+            <input type="hidden" name="artifact_type" value="n/a" />
             <div class="form-grid">
-              <div class="field">
-                <label for="dashboard_artifact_type">Artifact Type</label>
-                <select id="dashboard_artifact_type" name="artifact_type">
-                  <option value="n/a" {% if quick_register_form.get("artifact_type", "n/a") in ["", "n/a"] %}selected{% endif %}>Auto detect / n/a</option>
-                  {% for item in artifact_types %}
-                  {% if item != "n/a" %}
-                  <option value="{{ item }}" {% if quick_register_form.get("artifact_type") == item %}selected{% endif %}>{{ item }}</option>
-                  {% endif %}
-                  {% endfor %}
-                </select>
-              </div>
               <div class="field">
                 <label for="dashboard_file_data">Local File</label>
                 <div class="file-picker-stack">
@@ -113,10 +107,21 @@
                   value="{{ quick_register_form.get("source_s3_uri", "") }}"
                 />
               </div>
+              <div class="field field-wide">
+                <label for="dashboard_artifact_tags">Tags</label>
+                <input
+                  id="dashboard_artifact_tags"
+                  name="artifact_tags"
+                  type="text"
+                  placeholder="space or comma separated: run504352 ultima priority"
+                  value="{{ quick_register_form.get("artifact_tags", "") }}"
+                />
+                <div class="note">Tags are saved to Dewey metadata and can be queried from Artifact Search.</div>
+              </div>
             </div>
             <div class="form-actions">
               <button type="submit">Register Source</button>
-              <span class="note">Choose exactly one source. Use the full registry for S3 prefixes, bulk TSV, or artifact sets.</span>
+              <span class="note">Choose exactly one source. Use the full registry for S3 prefixes, sequencing runs, bulk TSV, or artifact sets.</span>
             </div>
             {% if quick_register_result %}
             <div class="{% if quick_register_result.state == 'ok' %}status-ok{% else %}status-error{% endif %}">
@@ -139,9 +144,13 @@
               <div class="form-actions" style="margin-top: 0;">
                 <a class="button" href="/literature">Open Literature</a>
                 <a class="button" href="/artifacts">Open Artifacts</a>
+                <a class="button" href="/artifacts/dag">Open DAG And Browser</a>
                 <a class="button" href="/search">Open Search</a>
                 <a class="button" href="/ui/anomalies">Open Anomalies</a>
                 <a class="button" href="/ui/observability">Open Observability</a>
+                {% if tapdb_embedded %}
+                <a class="button" href="/tapdb">Open TapDB</a>
+                {% endif %}
               </div>
             </div>
             <div class="table-wrap">
@@ -164,7 +173,7 @@
                     </td>
                     <td>{{ item.artifact_type }}</td>
                     <td>{{ item.import_mode or "register" }}</td>
-                    <td>{{ artifact_links.artifact_storage_action(item.artifact_euid, item.storage_uri) }}</td>
+                    <td>{{ artifact_links.artifact_storage_action(item.artifact_euid, item.storage_uri, item.storage_kind, item.storage_console_url) }}</td>
                     <td>
                       {% if item.storage_status == "verified" %}
                       <span class="pill pill-active">Verified</span>

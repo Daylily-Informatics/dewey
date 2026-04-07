@@ -261,3 +261,75 @@ def test_service_infers_artifact_type_from_filename_and_allows_na(
     )
     assert complete_code == 201
     assert artifact["artifact_type"] == "vcf"
+
+
+def test_browse_storage_prefix_marks_registered_and_unregistered_entries(
+    service: DeweyService,
+    storage: _FakeStorageClient,
+) -> None:
+    service.bootstrap()
+    run_root = "runs/RUN504352/2026/504352-20260404_1215/"
+    sample = "504352-UGAv3-1527-CAACGATATGTGAT"
+    for key in [
+        f"{run_root}{sample}/{sample}.cram",
+        f"{run_root}{sample}/{sample}.cram.crai",
+        f"{run_root}{sample}/{sample}.json",
+        f"{run_root}{sample}/{sample}.csv",
+        f"{run_root}{sample}/{sample}.metrics.txt",
+    ]:
+        storage.seed_object(bucket="bucket-9", key=key, size=1024)
+
+    _, imported = service.import_run_prefix(
+        root_uri="s3://bucket-9/runs/RUN504352/2026/504352-20260404_1215/",
+        platform="ultima",
+        owner_email="johnm@lsmc.com",
+        finalize=False,
+        idempotency_key="idem-browse-run",
+    )
+    sample_folder = service.list_artifact_children(
+        artifact_euid=imported["run_artifact"]["artifact_euid"]
+    )[0]
+
+    payload = service.browse_storage_prefix(root_uri=sample_folder["storage_uri"])
+
+    assert payload["current_artifact"]["artifact_euid"] == sample_folder["artifact_euid"]
+    assert any(item["registered_artifact"] for item in payload["objects"])
+    assert any(not item["registered_artifact"] for item in payload["objects"])
+    assert payload["objects"][0]["storage_uri"].startswith("s3://bucket-9/")
+
+
+def test_get_artifact_graph_returns_nodes_and_edges_for_hierarchy(
+    service: DeweyService,
+    storage: _FakeStorageClient,
+) -> None:
+    service.bootstrap()
+    storage.seed_object(
+        bucket="bucket-10",
+        key="runs/RUN504352/2026/504352-20260404_1215/504352-UGAv3-1527-CAACGATATGTGAT/504352-UGAv3-1527-CAACGATATGTGAT.cram",
+        size=1024,
+    )
+    storage.seed_object(
+        bucket="bucket-10",
+        key="runs/RUN504352/2026/504352-20260404_1215/504352-UGAv3-1527-CAACGATATGTGAT/504352-UGAv3-1527-CAACGATATGTGAT.cram.crai",
+        size=128,
+    )
+
+    _, imported = service.import_run_prefix(
+        root_uri="s3://bucket-10/runs/RUN504352/2026/504352-20260404_1215/",
+        platform="ultima",
+        owner_email="johnm@lsmc.com",
+        finalize=False,
+        idempotency_key="idem-graph-run",
+    )
+
+    payload = service.get_artifact_graph(
+        artifact_euid=imported["run_artifact"]["artifact_euid"],
+        depth=4,
+    )
+
+    assert payload["root_euid"] == imported["run_artifact"]["artifact_euid"]
+    assert any(node["subtitle"] == "run_folder" for node in payload["nodes"])
+    assert any(node["subtitle"] == "sample_folder" for node in payload["nodes"])
+    assert any(
+        edge["source"] == imported["run_artifact"]["artifact_euid"] for edge in payload["edges"]
+    )

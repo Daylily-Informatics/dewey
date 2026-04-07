@@ -41,6 +41,11 @@ class _FakeS3Backend:
     def __init__(self) -> None:
         self.calls: list[tuple[str, object]] = []
         self.paginator = _Paginator([])
+        self.list_objects_v2_response = {
+            "CommonPrefixes": [],
+            "Contents": [],
+            "IsTruncated": False,
+        }
         self.head_response = {
             "VersionId": "v1",
             "ContentLength": 42,
@@ -72,6 +77,11 @@ class _FakeS3Backend:
         self.calls.append(("get_object", kwargs))
         self._raise("get_object")
         return self.get_response
+
+    def list_objects_v2(self, **kwargs):
+        self.calls.append(("list_objects_v2", kwargs))
+        self._raise("list_objects_v2")
+        return dict(self.list_objects_v2_response)
 
     def copy_object(self, **kwargs):
         self.calls.append(("copy_object", kwargs))
@@ -182,6 +192,65 @@ def test_s3_storage_client_object_operations_cover_success_paths() -> None:
         )
     ]
     assert backend.paginator.calls == [{"Bucket": "bucket-1", "Prefix": "docs/"}]
+
+
+def test_s3_storage_client_browse_prefix_returns_prefixes_objects_and_pagination() -> None:
+    backend = _FakeS3Backend()
+    backend.list_objects_v2_response = {
+        "CommonPrefixes": [{"Prefix": "docs/2026/"}, {"Prefix": "docs/2027/"}],
+        "Contents": [
+            {
+                "Key": "docs/",
+                "Size": 0,
+                "StorageClass": "STANDARD",
+                "ETag": "",
+            },
+            {
+                "Key": "docs/manifest.tsv",
+                "Size": 55,
+                "StorageClass": "STANDARD",
+                "ETag": '"etag-manifest"',
+            },
+        ],
+        "IsTruncated": True,
+        "NextContinuationToken": "token-2",
+    }
+    client = _client(backend)
+
+    payload = client.browse_prefix(
+        bucket="bucket-1",
+        prefix="docs/",
+        limit=25,
+        continuation_token="token-1",
+    )
+
+    assert payload["prefixes"] == [
+        storage_mod.StoragePrefix(bucket="bucket-1", prefix="docs/2026/"),
+        storage_mod.StoragePrefix(bucket="bucket-1", prefix="docs/2027/"),
+    ]
+    assert payload["objects"] == [
+        storage_mod.StorageObject(
+            bucket="bucket-1",
+            key="docs/manifest.tsv",
+            version_id=None,
+            size=55,
+            content_type=None,
+            storage_class="STANDARD",
+            etag="etag-manifest",
+        )
+    ]
+    assert payload["is_truncated"] is True
+    assert payload["next_continuation_token"] == "token-2"
+    assert (
+        "list_objects_v2",
+        {
+            "Bucket": "bucket-1",
+            "Prefix": "docs/",
+            "Delimiter": "/",
+            "MaxKeys": 25,
+            "ContinuationToken": "token-1",
+        },
+    ) in backend.calls
 
 
 def test_s3_storage_client_write_tag_retention_and_presign_paths() -> None:

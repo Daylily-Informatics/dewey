@@ -144,6 +144,8 @@ class SharingServiceMixin:
                 if clean_transport != "presigned_s3":
                     raise ValueError("artifact sharing requires transport presigned_s3")
                 artifact_payload = normalize_instance_payload(target)
+                if str(artifact_payload.get("storage_kind") or "object").lower() != "object":
+                    raise ValueError("artifact sharing requires an object-backed artifact")
                 if str(artifact_payload.get("storage_backend") or "").lower() != "s3":
                     raise ValueError("artifact sharing requires an s3-backed artifact")
                 expires_dt = datetime.fromisoformat(expiry.replace("Z", "+00:00"))

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import io
 import json
 import zipfile
@@ -8,8 +9,8 @@ from urllib.parse import parse_qs, urlparse
 
 def _login_user(monkeypatch, client, groups: list[str] | None = None) -> None:
     monkeypatch.setattr(
-        "daylily_cognito.web_session.exchange_authorization_code",
-        lambda **kwargs: {"id_token": "header.payload.sig"},
+        "daylily_auth_cognito.browser.session.exchange_authorization_code_async",
+        lambda **kwargs: asyncio.sleep(0, result={"id_token": "header.payload.sig"}),
     )
     monkeypatch.setattr(
         "dewey_service.auth.decode_jwt_claims_noverify",
@@ -44,6 +45,7 @@ def test_artifacts_page_requires_login_and_serves_bulk_template(monkeypatch, cli
     assert "Artifact Sets" in page.text
     assert "Recent Artifacts" in page.text
     assert 'href="/artifacts"' in page.text
+    assert 'href="/artifacts/dag"' in page.text
     assert "section=recent_artifacts#section-recent_artifacts" in page.text
 
     template = client.get("/artifacts/bulk-template.tsv")
@@ -68,7 +70,7 @@ def test_artifacts_register_search_download_and_artifact_share(
             "producer_object_euid": "REL-42",
             "artifact_meta_study_id": "STUDY-42",
             "artifact_meta_sample_id": "SAMPLE-42",
-            "artifact_meta_tags": "tumor,rna",
+            "artifact_meta_tags": "tumor rna",
             "artifact_meta_notes": "UI artifact intake",
             "grouping_mode": "create",
             "artifact_set_type": "batch",
@@ -87,6 +89,8 @@ def test_artifacts_register_search_download_and_artifact_share(
     assert "UI Batch 42" in register.text
     assert len(fake_service.artifacts) == 4
     assert len(fake_service.artifact_sets) == 1
+    first_artifact = next(iter(fake_service.artifacts.values()))
+    assert first_artifact["metadata"]["tags"] == ["tumor", "rna"]
     artifact_set = next(iter(fake_service.artifact_sets.values()))
     assert artifact_set["member_count"] == 4
     assert artifact_set["metadata"]["program"] == "oncology"
@@ -94,8 +98,8 @@ def test_artifacts_register_search_download_and_artifact_share(
     search = client.post(
         "/artifacts/search",
         data={
-            "artifact_filter_study_id": "STUDY-42",
-            "artifact_match_mode": "exact",
+            "artifact_filter_tags": "tumor rna",
+            "artifact_match_mode": "greedy",
         },
     )
     assert search.status_code == 200
@@ -156,6 +160,51 @@ def test_artifacts_register_search_download_and_artifact_share(
     assert "local-report.txt" in recent.text
     assert 'href="/artifacts/euid/AT-000001"' in recent.text
     assert 'action="/artifacts/euid/AT-000001/download"' in recent.text
+
+
+def test_artifact_dag_page_and_storage_browser_routes(
+    monkeypatch,
+    client,
+    fake_service,
+) -> None:
+    _login_user(monkeypatch, client)
+
+    imported = client.post(
+        "/artifacts/import-run-prefix",
+        data={
+            "root_uri": "s3://bucket-7/runs/RUN504352/2026/504352-20260404_1215/",
+            "platform": "ultima",
+            "owner_email": "johnm@lsmc.com",
+            "finalize": "no",
+        },
+    )
+    assert imported.status_code == 200
+
+    run_artifact = next(
+        item for item in fake_service.artifacts.values() if item["node_kind"] == "run_folder"
+    )
+
+    page = client.get(f"/artifacts/dag?artifact_euid={run_artifact['artifact_euid']}")
+    assert page.status_code == 200
+    assert "Directory Browser And DAG View" in page.text
+    assert "S3 Directory Browser" in page.text
+    assert run_artifact["artifact_euid"] in page.text
+
+    browse_api = client.get(
+        "/api/v1/storage/browse",
+        params={"root_uri": run_artifact["storage_uri"]},
+    )
+    assert browse_api.status_code == 200
+    browse_payload = browse_api.json()
+    assert browse_payload["root_uri"] == run_artifact["storage_uri"]
+    assert browse_payload["prefixes"]
+
+    graph_api = client.get(f"/api/v1/artifacts/{run_artifact['artifact_euid']}/graph")
+    assert graph_api.status_code == 200
+    graph_payload = graph_api.json()
+    assert graph_payload["root_euid"] == run_artifact["artifact_euid"]
+    assert graph_payload["nodes"]
+    assert graph_payload["edges"]
 
 
 def test_artifact_detail_page_and_direct_download_redirect(

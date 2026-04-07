@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import asyncio
 from urllib.parse import parse_qs, urlparse
 
 
 def _login_operator(monkeypatch, client) -> None:
     monkeypatch.setattr(
-        "daylily_cognito.web_session.exchange_authorization_code",
-        lambda **kwargs: {"id_token": "header.payload.sig"},
+        "daylily_auth_cognito.browser.session.exchange_authorization_code_async",
+        lambda **kwargs: asyncio.sleep(0, result={"id_token": "header.payload.sig"}),
     )
     monkeypatch.setattr(
         "dewey_service.auth.decode_jwt_claims_noverify",
@@ -87,8 +88,28 @@ def test_obs_services_advertises_canonical_capabilities(client) -> None:
             "auth": "operator_or_service_token",
             "kind": "anomaly_detail",
         },
+        {
+            "path": "/api/dag/object/{euid}",
+            "auth": "session_or_bearer",
+            "kind": "dag_exact_lookup",
+        },
+        {"path": "/api/dag/data", "auth": "session_or_bearer", "kind": "dag_native_graph"},
+        {
+            "path": "/api/dag/external",
+            "auth": "session_or_bearer",
+            "kind": "dag_external_graph",
+        },
+        {
+            "path": "/api/dag/external/object",
+            "auth": "session_or_bearer",
+            "kind": "dag_external_object",
+        },
     ]
-    assert body["extensions"] == ["dewey.operator_ui", "dewey.anomalies_v1"]
+    assert body["extensions"] == [
+        "dewey.operator_ui",
+        "dewey.anomalies_v1",
+        "tapdb.dag_v1",
+    ]
     assert body["dependencies"] == {
         "configured_services": [],
         "observed_services": [],

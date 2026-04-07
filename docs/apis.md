@@ -2,6 +2,8 @@
 
 This page documents the current HTTP contract implemented in `dewey_service/app.py`.
 
+Current Cognito authentication uses the `daylily-auth-cognito` 2.0 split: browser session auth lives in `browser.session`, Hosted UI helpers live in `browser.oauth` and `browser.google`, bearer verification lives in `runtime.verifier` and `runtime.m2m`, and lifecycle changes stay in `daycog` via `admin.*`.
+
 ## API Design Notes
 
 Current design rules that matter to integrators:
@@ -77,6 +79,7 @@ Current auth modes used in this document:
 | `GET` | `/ui/anomalies` | `UI session` | Anomaly list page |
 | `GET` | `/ui/anomalies/{anomaly_id}` | `UI session` | Anomaly detail page |
 | `GET` | `/ui/observability` | `UI session` | Observability page |
+| `GET` | `/tapdb` | `UI session` | Mounted TapDB admin landing page |
 | `GET` | `/admin` | `admin session` | Admin page |
 | `POST` | `/admin/artifact-storage` | `admin session` | Update managed artifact bucket |
 
@@ -250,6 +253,19 @@ Current relation fields:
 - `external_object_euid`
 - `relation_type`
 - `metadata`
+
+## TapDB DAG API
+
+These routes are Dewey's contribution surface for cross-service graph
+aggregation. They are backed by `daylily-tapdb`, but authenticated using Dewey's
+existing session-or-bearer contract.
+
+| Method | Path | Auth | Notes |
+| --- | --- | --- | --- |
+| `GET` | `/api/dag/object/{euid}` | `session or bearer token` | Exact ownership lookup |
+| `GET` | `/api/dag/data` | `session or bearer token` | Native DAG for exact root |
+| `GET` | `/api/dag/external` | `session or bearer token` | Expand one external graph ref |
+| `GET` | `/api/dag/external/object` | `session or bearer token` | External object detail |
 
 ## Idempotency Rules
 

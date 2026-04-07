@@ -2,6 +2,8 @@
 
 The current Dewey GUI is a small, operator-focused console layered on top of the Dewey HTTP service.
 
+The login/logout path now uses the `daylily-auth-cognito` 2.0 browser/session boundary. Browser sessions stay token-free, callback exchange is async in the web path, and runtime code should not depend on `daylily_auth_cognito.cli`.
+
 ## Current Role Model
 
 The live role enum is:
@@ -138,6 +140,23 @@ The Observability page shows Dewey-local telemetry only. Current sections includ
 
 This is not a general cross-service operations console. It is Dewey's own local view of its health and activity.
 
+## Embedded TapDB
+
+Path: `/tapdb`
+
+Configured Dewey deployments now mount the reusable TapDB operator UI under
+`/tapdb`. This is Dewey's current reference pattern for sharing the substrate
+GUI from `daylily-tapdb` directly instead of reimplementing EUID detail, search,
+stats, and DAG pages inside Dewey itself.
+
+Current live behavior:
+
+- Dewey browser auth gates the mounted TapDB UI
+- Dewey global console CSS is loaded into the mounted TapDB pages
+- the mounted UI keeps TapDB's native pages such as object detail, query, info,
+  and graph
+- Dewey publishes the canonical root-level DAG API separately at `/api/dag/*`
+
 ## Admin
 
 Path: `/admin`
@@ -159,7 +178,7 @@ Paths:
 - `/auth/callback`
 - `/auth/logout`
 
-Current login/logout behavior is Cognito Hosted UI-backed through `daylily-cognito`. The repo's E2E browser coverage today focuses only on this login/logout path.
+Current login/logout behavior is Cognito Hosted UI-backed through `daylily-auth-cognito`. The repo's E2E browser coverage today focuses only on this login/logout path.
 
 See:
 
