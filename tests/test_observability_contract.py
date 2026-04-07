@@ -87,8 +87,28 @@ def test_obs_services_advertises_canonical_capabilities(client) -> None:
             "auth": "operator_or_service_token",
             "kind": "anomaly_detail",
         },
+        {
+            "path": "/api/dag/object/{euid}",
+            "auth": "session_or_bearer",
+            "kind": "dag_exact_lookup",
+        },
+        {"path": "/api/dag/data", "auth": "session_or_bearer", "kind": "dag_native_graph"},
+        {
+            "path": "/api/dag/external",
+            "auth": "session_or_bearer",
+            "kind": "dag_external_graph",
+        },
+        {
+            "path": "/api/dag/external/object",
+            "auth": "session_or_bearer",
+            "kind": "dag_external_object",
+        },
     ]
-    assert body["extensions"] == ["dewey.operator_ui", "dewey.anomalies_v1"]
+    assert body["extensions"] == [
+        "dewey.operator_ui",
+        "dewey.anomalies_v1",
+        "tapdb.dag_v1",
+    ]
     assert body["dependencies"] == {
         "configured_services": [],
         "observed_services": [],

@@ -25,6 +25,9 @@
           <a class="navlink" href="/search">Unified Search</a>
           <a class="navlink" href="/ui/anomalies">Anomalies</a>
           <a class="navlink" href="/ui/observability">Observability</a>
+          {% if tapdb_embedded %}
+          <a class="navlink" href="/tapdb">TapDB</a>
+          {% endif %}
           {% if is_admin %}
           <a class="navlink" href="/admin">Admin</a>
           {% endif %}
@@ -142,6 +145,9 @@
                 <a class="button" href="/search">Open Search</a>
                 <a class="button" href="/ui/anomalies">Open Anomalies</a>
                 <a class="button" href="/ui/observability">Open Observability</a>
+                {% if tapdb_embedded %}
+                <a class="button" href="/tapdb">Open TapDB</a>
+                {% endif %}
               </div>
             </div>
             <div class="table-wrap">

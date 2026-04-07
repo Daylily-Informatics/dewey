@@ -237,6 +237,37 @@ class DeweyObservabilityStore:
             detail=detail,
         )
 
+    def add_obs_services_fragment(
+        self,
+        *,
+        endpoints: list[dict[str, Any]] | None = None,
+        extensions: list[str] | None = None,
+    ) -> None:
+        """Merge additional discoverable service metadata into `/obs_services`."""
+
+        snapshot = self._obs_services_snapshot
+        known_endpoints = {
+            (str(item.get("path") or ""), str(item.get("kind") or ""))
+            for item in snapshot.get("endpoints") or []
+            if isinstance(item, dict)
+        }
+        for item in endpoints or []:
+            key = (str(item.get("path") or ""), str(item.get("kind") or ""))
+            if key in known_endpoints:
+                continue
+            snapshot.setdefault("endpoints", []).append(dict(item))
+            known_endpoints.add(key)
+
+        known_extensions = {str(item) for item in snapshot.get("extensions") or []}
+        for item in extensions or []:
+            normalized = str(item or "").strip()
+            if not normalized or normalized in known_extensions:
+                continue
+            snapshot.setdefault("extensions", []).append(normalized)
+            known_extensions.add(normalized)
+
+        snapshot["observed_at"] = _utcnow_iso()
+
     def record_http_request(
         self,
         *,
