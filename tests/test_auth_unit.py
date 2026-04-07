@@ -1,18 +1,18 @@
 from __future__ import annotations
 
-import base64
 import asyncio
+import base64
 import json
 from types import SimpleNamespace
 
 import pytest
+from daylily_auth_cognito.browser.session import SessionPrincipal
 from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 
 import dewey_service.auth as auth_mod
 from dewey_service.rbac import Role
 from dewey_service.settings import Settings
-from daylily_auth_cognito.browser.session import SessionPrincipal
 
 
 def _settings() -> Settings:

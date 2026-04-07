@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+
 from fastapi import APIRouter, FastAPI
 from fastapi.responses import HTMLResponse
 from fastapi.testclient import TestClient
@@ -45,7 +46,9 @@ def _configured_client(monkeypatch, test_settings, fake_service) -> TestClient:
     return TestClient(app, base_url="https://localhost:8914")
 
 
-def test_obs_services_advertises_embedded_tapdb_dag(monkeypatch, test_settings, fake_service) -> None:
+def test_obs_services_advertises_embedded_tapdb_dag(
+    monkeypatch, test_settings, fake_service
+) -> None:
     with _configured_client(monkeypatch, test_settings, fake_service) as client:
         response = client.get(
             "/obs_services",
@@ -61,7 +64,9 @@ def test_obs_services_advertises_embedded_tapdb_dag(monkeypatch, test_settings, 
         assert "tapdb.dag_v1" in body["extensions"]
 
 
-def test_dashboard_surfaces_tapdb_link_when_embedded(monkeypatch, test_settings, fake_service) -> None:
+def test_dashboard_surfaces_tapdb_link_when_embedded(
+    monkeypatch, test_settings, fake_service
+) -> None:
     with _configured_client(monkeypatch, test_settings, fake_service) as client:
         monkeypatch.setattr(
             "daylily_auth_cognito.browser.session.exchange_authorization_code_async",

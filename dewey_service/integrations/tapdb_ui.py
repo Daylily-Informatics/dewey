@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import Depends, HTTPException, Request
-
 from daylily_tapdb.web import (
     TapdbHostBridge,
     TapdbHostNavLink,
@@ -13,7 +11,13 @@ from daylily_tapdb.web import (
     create_tapdb_dag_router,
     create_tapdb_web_app,
 )
-from dewey_service.auth import build_browser_login_href, require_session_or_api_auth, require_ui_session
+from fastapi import Depends, HTTPException, Request
+
+from dewey_service.auth import (
+    build_browser_login_href,
+    require_session_or_api_auth,
+    require_ui_session,
+)
 from dewey_service.integrations.tapdb_runtime import _resolve_tapdb_config_path
 from dewey_service.rbac import Role, profile_has_role
 from dewey_service.settings import Settings
