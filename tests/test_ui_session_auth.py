@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import asyncio
 from urllib.parse import parse_qs, urlparse
 
 import pytest
-from daylily_cognito.web_session import CONFIG_STATE_KEY
+from daylily_auth_cognito.browser.session import CONFIG_STATE_KEY
 from fastapi.testclient import TestClient
 
 from dewey_service.auth import build_cognito_web_session_config
@@ -19,8 +20,8 @@ def _login_user(
     groups: list[str] | None = None,
 ) -> None:
     monkeypatch.setattr(
-        "daylily_cognito.web_session.exchange_authorization_code",
-        lambda **kwargs: {"id_token": "header.payload.sig"},
+        "daylily_auth_cognito.browser.session.exchange_authorization_code_async",
+        lambda **kwargs: asyncio.sleep(0, result={"id_token": "header.payload.sig"}),
     )
     monkeypatch.setattr(
         "dewey_service.auth.decode_jwt_claims_noverify",
@@ -79,8 +80,8 @@ def test_cognito_callback_sets_session(monkeypatch, client) -> None:
 
 def test_cognito_callback_rejects_disallowed_email_domain(monkeypatch, client) -> None:
     monkeypatch.setattr(
-        "daylily_cognito.web_session.exchange_authorization_code",
-        lambda **kwargs: {"id_token": "header.payload.sig"},
+        "daylily_auth_cognito.browser.session.exchange_authorization_code_async",
+        lambda **kwargs: asyncio.sleep(0, result={"id_token": "header.payload.sig"}),
     )
     monkeypatch.setattr(
         "dewey_service.auth.decode_jwt_claims_noverify",
@@ -174,7 +175,7 @@ def test_dashboard_quick_register_infers_artifact_type_for_local_file(
 
     response = client.post(
         "/ui/register",
-        data={"artifact_type": "n/a"},
+        data={"artifact_type": "n/a", "artifact_tags": "tumor urgent"},
         files=[("file_data", ("sample.vcf.gz", b"##fileformat=VCF", "application/gzip"))],
     )
 
@@ -182,6 +183,7 @@ def test_dashboard_quick_register_infers_artifact_type_for_local_file(
     assert "Registered sample.vcf.gz as vcf." in response.text
     artifact = next(iter(fake_service.artifacts.values()))
     assert artifact["artifact_type"] == "vcf"
+    assert artifact["metadata"]["tags"] == ["tumor", "urgent"]
 
     ui = client.get("/ui")
     assert ui.status_code == 200

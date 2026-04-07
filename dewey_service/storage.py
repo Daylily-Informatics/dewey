@@ -30,6 +30,12 @@ class StorageObject:
     etag: str | None = None
 
 
+@dataclass(frozen=True)
+class StoragePrefix:
+    bucket: str
+    prefix: str
+
+
 class S3StorageClient:
     """Small S3 adapter kept intentionally narrow for Dewey flows."""
 
@@ -95,6 +101,57 @@ class S3StorageClient:
         except self._client_error as exc:
             raise self._translate_error(exc, bucket=bucket, key=prefix) from exc
         return rows
+
+    def browse_prefix(
+        self,
+        *,
+        bucket: str,
+        prefix: str = "",
+        limit: int = 200,
+        continuation_token: str | None = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {
+            "Bucket": bucket,
+            "Prefix": str(prefix or ""),
+            "Delimiter": "/",
+            "MaxKeys": max(1, min(int(limit), 1000)),
+        }
+        if str(continuation_token or "").strip():
+            params["ContinuationToken"] = str(continuation_token).strip()
+        try:
+            response = self._client.list_objects_v2(**params)
+        except self._client_error as exc:
+            raise self._translate_error(exc, bucket=bucket, key=prefix) from exc
+        prefixes = [
+            StoragePrefix(
+                bucket=bucket,
+                prefix=str(item.get("Prefix") or ""),
+            )
+            for item in response.get("CommonPrefixes", [])
+            if str(item.get("Prefix") or "").strip()
+        ]
+        objects = [
+            StorageObject(
+                bucket=bucket,
+                key=str(item.get("Key") or ""),
+                version_id=None,
+                size=item.get("Size"),
+                content_type=None,
+                storage_class=item.get("StorageClass"),
+                etag=str(item.get("ETag") or "").strip('"') or None,
+            )
+            for item in response.get("Contents", [])
+            if str(item.get("Key") or "").strip()
+            and str(item.get("Key") or "").strip() != str(prefix or "")
+        ]
+        return {
+            "prefixes": prefixes,
+            "objects": objects,
+            "is_truncated": bool(response.get("IsTruncated")),
+            "next_continuation_token": (
+                str(response.get("NextContinuationToken") or "").strip() or None
+            ),
+        }
 
     def get_object_bytes(
         self,

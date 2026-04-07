@@ -8,19 +8,19 @@ import secrets
 from typing import Any
 from urllib.parse import urlencode, urlsplit
 
-from daylily_cognito import (
+from daylily_auth_cognito.browser import session as browser_session
+from daylily_auth_cognito.browser.oauth import build_authorization_url
+from daylily_auth_cognito.browser.session import (
     CognitoWebAuthError,
     CognitoWebSessionConfig,
     SessionPrincipal,
-    build_authorization_url,
     clear_session_principal,
     complete_cognito_callback,
-    exchange_authorization_code,
     load_session_principal,
     start_cognito_login,
     validate_web_auth_contract,
 )
-from daylily_cognito import (
+from daylily_auth_cognito.browser.session import (
     configure_session_middleware as _configure_session_middleware,
 )
 from fastapi import Depends, HTTPException, Request, status
@@ -131,10 +131,10 @@ def build_cognito_logout_url(*, settings: Settings, state: str | None = None) ->
     return f"https://{domain}/logout?{params}"
 
 
-def exchange_code(*, settings: Settings, code: str) -> dict[str, Any]:
+async def exchange_code(*, settings: Settings, code: str) -> dict[str, Any]:
     domain = _strip_scheme(settings.cognito_domain)
     try:
-        return exchange_authorization_code(
+        return await browser_session.exchange_authorization_code_async(
             domain=domain,
             client_id=settings.cognito_app_client_id,
             code=code,

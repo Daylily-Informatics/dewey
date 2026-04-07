@@ -31,6 +31,7 @@ from dewey_service.artifact_ui import (
     metadata_fields,
     parse_json_object,
     resolve_artifact_type,
+    split_csv,
     split_lines,
 )
 from dewey_service.auth import (
@@ -43,6 +44,7 @@ from dewey_service.auth import (
     generate_state,
     require_api_auth,
     require_observability_access,
+    require_session_or_api_auth,
     require_ui_admin_session,
     require_ui_session,
     start_browser_login,
@@ -112,6 +114,16 @@ class ArtifactImportRequest(BaseModel):
     producer_system: str | None = None
     producer_object_euid: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class ArtifactRunPrefixImportRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    root_uri: str
+    platform: str = Field(default="ultima", pattern="^(ultima)$")
+    owner_email: str
+    run_id: str | None = None
+    finalize: bool = False
 
 
 class UploadSessionCreateRequest(BaseModel):
@@ -355,6 +367,7 @@ def create_app(
 
     api_auth_dep = require_api_auth(settings)
     observability_auth_dep = require_observability_access(settings)
+    session_or_api_auth_dep = require_session_or_api_auth(settings)
 
     def _template_context(**kwargs: Any) -> dict[str, Any]:
         context = {
@@ -683,6 +696,14 @@ def create_app(
             "artifact_set_search_form_json": "{}",
             "register_report": [],
             "bulk_report": [],
+            "run_prefix_form": {
+                "root_uri": "",
+                "platform": "ultima",
+                "owner_email": str(profile.get("email") or "").strip().lower(),
+                "run_id": "",
+                "finalize": "no",
+            },
+            "run_prefix_result": None,
             "recent_artifacts": service.list_artifacts(limit=20),
             "artifact_share_results": [],
             "artifact_set_share_result": None,
@@ -724,15 +745,38 @@ def create_app(
                 artifact_types=ARTIFACT_TYPES,
                 quick_register_form=quick_register_form
                 or {
-                    "artifact_type": NA_ARTIFACT_TYPE,
                     "source_url": "",
                     "source_s3_uri": "",
+                    "artifact_tags": "",
                 },
                 quick_register_result=quick_register_result,
                 is_admin=_is_admin(profile),
             ),
             status_code=status_code,
         )
+
+    def _default_browse_root_uri() -> str:
+        bucket = str(settings.managed_storage_bucket or "").strip()
+        prefix = str(settings.managed_storage_prefix or "").strip().strip("/")
+        if not bucket:
+            return ""
+        if prefix:
+            return f"s3://{bucket}/{prefix}/"
+        return f"s3://{bucket}/"
+
+    def _browse_root_for_artifact(artifact: dict[str, Any]) -> str:
+        if str(artifact.get("storage_backend") or "").strip().lower() != "s3":
+            return ""
+        bucket = str(artifact.get("bucket") or "").strip()
+        key = str(artifact.get("key") or "").strip()
+        if not bucket:
+            return ""
+        if str(artifact.get("storage_kind") or "").strip().lower() == "prefix":
+            return str(artifact.get("storage_uri") or "").strip() or f"s3://{bucket}/{key}"
+        parent_parts = [item for item in key.split("/") if item][:-1]
+        if not parent_parts:
+            return f"s3://{bucket}/"
+        return f"s3://{bucket}/{'/'.join(parent_parts)}/"
 
     def _artifact_page_response(
         request: Request,
@@ -752,6 +796,38 @@ def create_app(
             request,
             "artifacts.html",
             _template_context(**context),
+        )
+
+    def _artifact_dag_response(
+        request: Request,
+        *,
+        profile: dict[str, Any],
+        browse_root_uri: str = "",
+        browse_limit: int = 200,
+        browse_result: dict[str, Any] | None = None,
+        graph_result: dict[str, Any] | None = None,
+        selected_artifact: dict[str, Any] | None = None,
+        dag_message: dict[str, Any] | None = None,
+        continuation_token: str | None = None,
+        status_code: int = 200,
+    ) -> HTMLResponse:
+        return templates.TemplateResponse(
+            request,
+            "artifact_dag.html",
+            _template_context(
+                profile=profile,
+                browse_root_uri=browse_root_uri or _default_browse_root_uri(),
+                browse_limit=browse_limit,
+                browse_result=browse_result,
+                browse_result_json=json.dumps(browse_result or {}),
+                graph_result=graph_result,
+                graph_result_json=json.dumps(graph_result or {}),
+                selected_artifact=selected_artifact,
+                continuation_token=continuation_token or "",
+                dag_message=dag_message,
+                is_admin=_is_admin(profile),
+            ),
+            status_code=status_code,
         )
 
     def _artifact_detail_response(
@@ -777,6 +853,14 @@ def create_app(
                     target_type="artifact",
                     target_euid=artifact["artifact_euid"],
                     limit=20,
+                ),
+                artifact_parents=service.list_artifact_parents(
+                    artifact_euid=artifact["artifact_euid"],
+                    limit=50,
+                ),
+                artifact_children=service.list_artifact_children(
+                    artifact_euid=artifact["artifact_euid"],
+                    limit=200,
                 ),
                 detail_message=detail_message,
                 is_admin=_is_admin(profile),
@@ -1118,13 +1202,16 @@ def create_app(
         request: Request, profile: dict[str, Any] = Depends(require_ui_session)
     ) -> HTMLResponse:
         form = await request.form(max_files=8)
-        requested_artifact_type = str(form.get("artifact_type") or "").strip().lower()
+        requested_artifact_type = str(form.get("artifact_type") or NA_ARTIFACT_TYPE).strip().lower()
         source_url = str(form.get("source_url") or "").strip()
         source_s3_uri = str(form.get("source_s3_uri") or "").strip()
+        tag_text = str(form.get("artifact_tags") or "").strip()
+        tag_values = split_csv(tag_text)
+        metadata = {"tags": tag_values} if tag_values else {}
         quick_form = {
-            "artifact_type": requested_artifact_type or NA_ARTIFACT_TYPE,
             "source_url": source_url,
             "source_s3_uri": source_s3_uri,
+            "artifact_tags": tag_text,
         }
         upload = form.get("file_data")
         has_file = isinstance(upload, StarletteUploadFile) and bool(
@@ -1153,15 +1240,15 @@ def create_app(
                     content_type=str(upload.content_type or "").strip() or None,
                     producer_system=None,
                     producer_object_euid=None,
-                    metadata={},
+                    metadata=metadata,
                     lock_after_import=False,
                     idempotency_key=_new_idempotency_key("ui-home-upload"),
                 )
                 result_detail = f"Registered {file_name} as {payload['artifact_type']}."
                 quick_form = {
-                    "artifact_type": payload["artifact_type"],
                     "source_url": "",
                     "source_s3_uri": "",
+                    "artifact_tags": tag_text,
                 }
             elif source_url:
                 artifact_type = resolve_artifact_type(requested_artifact_type, source_url)
@@ -1172,7 +1259,7 @@ def create_app(
                     lock_after_import=False,
                     producer_system=None,
                     producer_object_euid=None,
-                    metadata={},
+                    metadata=metadata,
                     idempotency_key=_new_idempotency_key("ui-home-url"),
                 )
                 result_detail = f"Imported {source_url} as {payload['artifact_type']}."
@@ -1185,7 +1272,7 @@ def create_app(
                     lock_after_import=False,
                     producer_system=None,
                     producer_object_euid=None,
-                    metadata={},
+                    metadata=metadata,
                     idempotency_key=_new_idempotency_key("ui-home-s3"),
                 )
                 result_detail = f"Registered {source_s3_uri} as {payload['artifact_type']}."
@@ -1429,6 +1516,59 @@ def create_app(
             request,
             profile=profile,
             active_section=_normalize_artifact_section(section),
+        )
+
+    @app.get("/artifacts/dag", include_in_schema=False)
+    async def artifact_dag_page(
+        request: Request,
+        artifact_euid: str | None = Query(default=None),
+        root_uri: str | None = Query(default=None),
+        browse_limit: int = Query(default=200, ge=1, le=1000),
+        continuation_token: str | None = Query(default=None),
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> HTMLResponse:
+        browse_root_uri = str(root_uri or "").strip()
+        browse_result: dict[str, Any] | None = None
+        graph_result: dict[str, Any] | None = None
+        selected_artifact: dict[str, Any] | None = None
+        dag_message: dict[str, Any] | None = None
+        response_status = 200
+
+        try:
+            if artifact_euid:
+                selected_artifact = service.get_artifact(artifact_euid)
+                if not browse_root_uri:
+                    browse_root_uri = _browse_root_for_artifact(selected_artifact)
+                graph_result = service.get_artifact_graph(artifact_euid=artifact_euid, depth=4)
+
+            browse_root_uri = browse_root_uri or _default_browse_root_uri()
+            if browse_root_uri:
+                browse_result = service.browse_storage_prefix(
+                    root_uri=browse_root_uri,
+                    limit=browse_limit,
+                    continuation_token=continuation_token,
+                )
+                if graph_result is None and browse_result.get("current_artifact"):
+                    selected_artifact = browse_result["current_artifact"]
+                    graph_result = service.get_artifact_graph(
+                        artifact_euid=selected_artifact["artifact_euid"],
+                        depth=4,
+                    )
+        except Exception as exc:
+            dag_message = {"state": "error", "detail": str(exc)}
+            response_status = 400
+
+        return _artifact_dag_response(
+            request,
+            profile=profile,
+            browse_root_uri=browse_root_uri,
+            browse_limit=browse_limit,
+            browse_result=browse_result,
+            graph_result=graph_result,
+            selected_artifact=selected_artifact,
+            dag_message=dag_message,
+            continuation_token=continuation_token,
+            status_code=response_status,
         )
 
     @app.get("/artifacts/euid/{artifact_euid}", include_in_schema=False)
@@ -1802,6 +1942,48 @@ def create_app(
             bulk_report=results,
             active_section="register",
         )
+
+    @app.post("/artifacts/import-run-prefix", include_in_schema=False)
+    async def artifacts_import_run_prefix(
+        request: Request, profile: dict[str, Any] = Depends(require_ui_session)
+    ) -> HTMLResponse:
+        form = await request.form()
+        values = _string_form_values(form)
+        run_prefix_form = {
+            "root_uri": str(values.get("root_uri") or "").strip(),
+            "platform": str(values.get("platform") or "ultima").strip().lower() or "ultima",
+            "owner_email": str(values.get("owner_email") or "").strip().lower(),
+            "run_id": str(values.get("run_id") or "").strip(),
+            "finalize": (
+                "yes"
+                if str(values.get("finalize") or "").strip().lower() in {"yes", "on", "true", "1"}
+                else "no"
+            ),
+        }
+        try:
+            _, payload = service.import_run_prefix(
+                root_uri=run_prefix_form["root_uri"],
+                platform=run_prefix_form["platform"],
+                owner_email=run_prefix_form["owner_email"],
+                run_id=run_prefix_form["run_id"] or None,
+                finalize=run_prefix_form["finalize"] == "yes",
+                idempotency_key=_new_idempotency_key("ui-run-prefix-import"),
+            )
+            return _artifact_page_response(
+                request,
+                profile=profile,
+                run_prefix_form=run_prefix_form,
+                run_prefix_result=payload,
+                active_section="register",
+            )
+        except Exception as exc:
+            return _artifact_page_response(
+                request,
+                profile=profile,
+                run_prefix_form=run_prefix_form,
+                run_prefix_result={"state": "error", "detail": str(exc)},
+                active_section="register",
+            )
 
     @app.post("/artifacts/search", include_in_schema=False)
     async def artifacts_search(
@@ -2181,6 +2363,72 @@ def create_app(
         except DeweyNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
+    @app.get(
+        "/api/v1/artifacts/{artifact_euid}/children",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def get_artifact_children(
+        artifact_euid: str,
+        limit: int = Query(default=200, ge=1, le=2000),
+    ) -> dict[str, Any]:
+        try:
+            rows = service.list_artifact_children(artifact_euid=artifact_euid, limit=limit)
+            return {"items": rows, "total": len(rows)}
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.get(
+        "/api/v1/artifacts/{artifact_euid}/parents",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def get_artifact_parents(
+        artifact_euid: str,
+        limit: int = Query(default=200, ge=1, le=2000),
+    ) -> dict[str, Any]:
+        try:
+            rows = service.list_artifact_parents(artifact_euid=artifact_euid, limit=limit)
+            return {"items": rows, "total": len(rows)}
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.get("/api/v1/artifacts/{artifact_euid}/graph")
+    async def get_artifact_graph(
+        artifact_euid: str,
+        depth: int = Query(default=3, ge=0, le=6),
+        limit: int = Query(default=200, ge=1, le=500),
+        _auth: dict[str, Any] = Depends(session_or_api_auth_dep),
+    ) -> dict[str, Any]:
+        _ = _auth
+        try:
+            return service.get_artifact_graph(
+                artifact_euid=artifact_euid,
+                depth=depth,
+                limit=limit,
+            )
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.get("/api/v1/storage/browse")
+    async def browse_storage_prefix(
+        root_uri: str = Query(...),
+        limit: int = Query(default=200, ge=1, le=1000),
+        continuation_token: str | None = Query(default=None),
+        _auth: dict[str, Any] = Depends(session_or_api_auth_dep),
+    ) -> dict[str, Any]:
+        _ = _auth
+        try:
+            return service.browse_storage_prefix(
+                root_uri=root_uri,
+                limit=limit,
+                continuation_token=continuation_token,
+            )
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except RuntimeError as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
+
     @app.post(
         "/api/v1/artifacts/{artifact_euid}/storage/verify",
         dependencies=[Depends(api_auth_dep)],
@@ -2299,6 +2547,32 @@ def create_app(
                 idempotency_key=_require_idempotency_key(idempotency_key),
             )
             return {"status_code": status_code, **payload}
+        except DeweyConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except RuntimeError as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    @app.post("/api/v1/artifacts/import-run-prefix")
+    async def import_run_prefix(
+        body: ArtifactRunPrefixImportRequest,
+        _auth: dict[str, Any] = Depends(session_or_api_auth_dep),
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ) -> dict[str, Any]:
+        _ = _auth
+        try:
+            status_code, payload = service.import_run_prefix(
+                root_uri=body.root_uri,
+                platform=body.platform,
+                owner_email=body.owner_email,
+                run_id=body.run_id,
+                finalize=body.finalize,
+                idempotency_key=_require_idempotency_key(idempotency_key),
+            )
+            return {"status_code": status_code, **payload}
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
         except DeweyConflictError as exc:
             raise HTTPException(status_code=409, detail=str(exc)) from exc
         except ValueError as exc:

@@ -10,6 +10,8 @@ For most GUI users, the short version is:
 
 Current live caveat: local-file uploads and copy-style imports depend on a configured managed artifact bucket. S3 `reference` intake can still work without that bucket when Dewey can read the source object.
 
+Dewey's Cognito integration now uses `daylily-auth-cognito` 2.0 as a split boundary: browser session helpers live in `browser.session`, Hosted UI helpers live in `browser.oauth` and `browser.google`, bearer verification lives in `runtime.verifier` and `runtime.m2m`, and lifecycle changes stay in `daycog` via `admin.*`. Service runtime code should not import `daylily_auth_cognito.cli`.
+
 ## What Dewey Does Today
 
 Dewey currently owns:
@@ -78,7 +80,7 @@ deploy, auth wiring, runtime handoff"]
 persistence substrate"]
     S3["S3 and external URLs
 artifact bytes"]
-    Cognito["daylily-cognito + Cognito
+    Cognito["daylily-auth-cognito + Cognito
 browser session auth"]
     Metapub["metapub + PubMed
 literature discovery"]
@@ -114,7 +116,7 @@ Dewey is currently implemented as:
 - Jinja2 templates plus shared CSS for the operator console
 - TapDB-backed persistence through a Dewey service layer composed from mixins
 - S3-backed storage helpers for registration, verification, locking, downloads, upload sessions, and presigned links
-- daylily-cognito for browser-session auth
+- daylily-auth-cognito for browser-session auth
 - metapub for PubMed discovery and literature metadata enrichment
 
 The governing design rules are visible in current code and nearby Dayhoff governance docs:

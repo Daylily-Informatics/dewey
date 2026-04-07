@@ -2,6 +2,8 @@
 
 The current Dewey GUI is a small, operator-focused console layered on top of the Dewey HTTP service.
 
+The login/logout path now uses the `daylily-auth-cognito` 2.0 browser/session boundary. Browser sessions stay token-free, callback exchange is async in the web path, and runtime code should not depend on `daylily_auth_cognito.cli`.
+
 ## Current Role Model
 
 The live role enum is:
@@ -176,7 +178,7 @@ Paths:
 - `/auth/callback`
 - `/auth/logout`
 
-Current login/logout behavior is Cognito Hosted UI-backed through `daylily-cognito`. The repo's E2E browser coverage today focuses only on this login/logout path.
+Current login/logout behavior is Cognito Hosted UI-backed through `daylily-auth-cognito`. The repo's E2E browser coverage today focuses only on this login/logout path.
 
 See:
 

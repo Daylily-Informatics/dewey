@@ -1,0 +1,513 @@
+<!doctype html>
+{% import "_artifact_links.html" as artifact_links %}
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dewey Explorer</title>
+    <link rel="icon" href="{{ static_url('favicon.svg') }}" type="image/svg+xml" />
+    <link rel="stylesheet" href="{{ static_url('console.css') }}" />
+  </head>
+  <body>
+    {% if deployment.name and not deployment.is_production %}
+    <div class="deployment-banner" style="background: {{ deployment.color }};">{{ deployment.name|upper }}</div>
+    {% endif %}
+    <div class="shell">
+      <header class="topbar">
+        <div class="brandline">
+          <div class="eyebrow">Dewey Explorer</div>
+          <h1 class="title">Directory Browser And DAG View</h1>
+          <div class="subtitle">{{ profile.email }}</div>
+        </div>
+        <div class="navlinks">
+          <a class="navlink" href="/ui">Dashboard</a>
+          <a class="navlink" href="/artifacts">Artifacts</a>
+          <a class="navlink" href="/literature">Literature Search</a>
+          <a class="navlink" href="/search">Unified Search</a>
+          <a class="navlink" href="/ui/anomalies">Anomalies</a>
+          <a class="navlink" href="/ui/observability">Observability</a>
+          {% if is_admin %}
+          <a class="navlink" href="/admin">Admin</a>
+          {% endif %}
+          <form class="logout-form" method="post" action="/auth/logout">
+            <button type="submit">Logout</button>
+          </form>
+        </div>
+      </header>
+
+      <main class="page">
+        <section class="hero">
+          <div class="hero-copy">
+            <div class="eyebrow">Browse Before Registering</div>
+            <h2>Walk raw S3 prefixes and inspect Dewey lineage in one place</h2>
+            <p>
+              This explorer can navigate registered and unregistered S3 prefixes, show which entries
+              are already known to Dewey, and render the current artifact hierarchy as a DAG.
+            </p>
+          </div>
+          <div class="results-meta">
+            <span class="pill pill-active">Browse {{ browse_result.prefixes|length if browse_result else 0 }} prefixes</span>
+            <span class="pill">Objects {{ browse_result.objects|length if browse_result else 0 }}</span>
+            <span class="pill">Graph {{ graph_result.nodes|length if graph_result else 0 }} nodes</span>
+          </div>
+        </section>
+
+        {% if dag_message %}
+        <div class="{% if dag_message.state == 'ok' %}status-ok{% else %}status-error{% endif %}" style="margin-bottom: 1rem;">
+          {{ dag_message.detail }}
+        </div>
+        {% endif %}
+
+        <section class="panel" style="margin-bottom: 1rem;">
+          <div class="panel-header">
+            <div>
+              <h3>Open Explorer</h3>
+              <div class="panel-copy">Enter any S3 bucket or prefix. If the selected prefix is already registered in Dewey, its hierarchy graph loads automatically.</div>
+            </div>
+          </div>
+          <form method="get" action="/artifacts/dag">
+            <div class="form-grid">
+              <div class="field field-wide">
+                <label for="root_uri">S3 Root URI</label>
+                <input id="root_uri" name="root_uri" type="text" value="{{ browse_root_uri }}" placeholder="s3://bucket/path/" />
+              </div>
+              <div class="field">
+                <label for="artifact_euid">Focus Artifact EUID</label>
+                <input id="artifact_euid" name="artifact_euid" type="text" value="{{ selected_artifact.artifact_euid if selected_artifact else '' }}" placeholder="AT-000123" />
+              </div>
+              <div class="field">
+                <label for="browse_limit">Entries Per Page</label>
+                <input id="browse_limit" name="browse_limit" type="number" min="1" max="1000" value="{{ browse_limit }}" />
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="button button-primary" type="submit">Open</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="explorer-layout">
+          <section class="stack">
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>S3 Directory Browser</h3>
+                  <div class="panel-copy">Navigate prefixes directly, even when they have not been registered as Dewey artifacts yet.</div>
+                </div>
+              </div>
+
+              {% if browse_result %}
+              <div class="results-meta">
+                <span class="pill pill-active">{{ browse_result.root_uri }}</span>
+                {% if browse_result.current_artifact %}
+                <span class="pill">Registered {{ browse_result.current_artifact.artifact_euid }}</span>
+                {% else %}
+                <span class="pill">Unregistered</span>
+                {% endif %}
+              </div>
+
+              <div class="breadcrumbs">
+                {% for crumb in browse_result.breadcrumbs %}
+                <a class="button breadcrumb" href="/artifacts/dag?root_uri={{ crumb.uri }}">{{ crumb.label }}</a>
+                {% endfor %}
+                {% if browse_result.parent_uri %}
+                <a class="button breadcrumb" href="/artifacts/dag?root_uri={{ browse_result.parent_uri }}">Up</a>
+                {% endif %}
+              </div>
+
+              {% if browse_result.current_artifact %}
+              <div class="panel" style="padding: 0.85rem 0.95rem; margin-bottom: 1rem; background: rgba(11, 17, 32, 0.78);">
+                <div class="eyebrow">Current Prefix Is Registered</div>
+                <div>{{ artifact_links.artifact_euid_link(browse_result.current_artifact.artifact_euid) }}</div>
+                <div class="note">{{ browse_result.current_artifact.original_filename or browse_result.current_artifact.storage_uri }}</div>
+                <div class="form-actions">
+                  <a class="button" href="/artifacts/dag?artifact_euid={{ browse_result.current_artifact.artifact_euid }}&root_uri={{ browse_result.root_uri }}">Focus Graph</a>
+                  <a class="button" href="/artifacts/euid/{{ browse_result.current_artifact.artifact_euid }}">Open Detail</a>
+                </div>
+              </div>
+              {% endif %}
+
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Kind</th>
+                      <th>Name</th>
+                      <th>Dewey</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in browse_result.prefixes %}
+                    <tr>
+                      <td><span class="pill">prefix</span></td>
+                      <td>
+                        <div class="mono">{{ item.label }}</div>
+                        <div class="note">{{ item.storage_uri }}</div>
+                      </td>
+                      <td>
+                        {% if item.registered_artifact %}
+                        {{ artifact_links.artifact_euid_link(item.registered_artifact.artifact_euid) }}
+                        {% else %}
+                        <span class="note">not registered</span>
+                        {% endif %}
+                      </td>
+                      <td>
+                        <div class="action-cluster">
+                          <a class="button" href="/artifacts/dag?root_uri={{ item.storage_uri }}">Browse</a>
+                          {% if item.registered_artifact %}
+                          <a class="button" href="/artifacts/dag?artifact_euid={{ item.registered_artifact.artifact_euid }}&root_uri={{ item.storage_uri }}">Graph</a>
+                          {% endif %}
+                          {% if item.storage_console_url %}
+                          <a class="button" href="{{ item.storage_console_url }}" target="_blank" rel="noreferrer">S3</a>
+                          {% endif %}
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                    {% for item in browse_result.objects %}
+                    <tr>
+                      <td><span class="pill">{{ item.artifact_type or "object" }}</span></td>
+                      <td>
+                        <div class="mono">{{ item.label }}</div>
+                        <div class="note">{{ item.size_human or "size n/a" }}{% if item.storage_class %} · {{ item.storage_class }}{% endif %}</div>
+                      </td>
+                      <td>
+                        {% if item.registered_artifact %}
+                        {{ artifact_links.artifact_euid_link(item.registered_artifact.artifact_euid) }}
+                        {% else %}
+                        <span class="note">not registered</span>
+                        {% endif %}
+                      </td>
+                      <td>
+                        <div class="action-cluster">
+                          {% if item.registered_artifact %}
+                          <a class="button" href="/artifacts/euid/{{ item.registered_artifact.artifact_euid }}">Detail</a>
+                          <a class="button" href="/artifacts/dag?artifact_euid={{ item.registered_artifact.artifact_euid }}&root_uri={{ browse_result.root_uri }}">Graph</a>
+                          {% endif %}
+                          {% if item.storage_console_url %}
+                          <a class="button" href="{{ item.storage_console_url }}" target="_blank" rel="noreferrer">S3</a>
+                          {% endif %}
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not browse_result.prefixes and not browse_result.objects %}
+                    <tr>
+                      <td colspan="4">
+                        <div class="empty-state">No prefixes or objects were found under this S3 location.</div>
+                      </td>
+                    </tr>
+                    {% endif %}
+                  </tbody>
+                </table>
+              </div>
+
+              {% if browse_result.is_truncated and browse_result.next_continuation_token %}
+              <div class="form-actions">
+                <a class="button" href="/artifacts/dag?root_uri={{ browse_result.root_uri }}&browse_limit={{ browse_limit }}&continuation_token={{ browse_result.next_continuation_token }}{% if selected_artifact %}&artifact_euid={{ selected_artifact.artifact_euid }}{% endif %}">Next Page</a>
+              </div>
+              {% endif %}
+              {% else %}
+              <div class="empty-state">Enter an S3 URI above to start browsing.</div>
+              {% endif %}
+            </section>
+          </section>
+
+          <section class="stack">
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Hierarchy DAG</h3>
+                  <div class="panel-copy">Registered artifact lineage renders here. When the current prefix is not registered, the panel falls back to a directory sketch of the current browse scope.</div>
+                </div>
+              </div>
+
+              {% if selected_artifact %}
+              <div class="results-meta">
+                <span class="pill pill-active">{{ selected_artifact.artifact_euid }}</span>
+                <span class="pill">{{ selected_artifact.node_kind or selected_artifact.artifact_type }}</span>
+                <span class="pill">{{ selected_artifact.storage_kind or "object" }}</span>
+              </div>
+              {% endif %}
+
+              <div class="dag-stage">
+                <svg id="dag-canvas" class="dag-canvas" viewBox="0 0 960 520" role="img" aria-label="Artifact DAG"></svg>
+              </div>
+              <div id="dag-empty" class="empty-state" style="display: none;">No graphable nodes are available for the current selection.</div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Selected Node</h3>
+                  <div class="panel-copy">Click a node in the graph to inspect Dewey and storage details.</div>
+                </div>
+              </div>
+              <div id="dag-selection" class="empty-state">Select a graph node to inspect it here.</div>
+            </section>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script id="browse-data" type="application/json">{{ browse_result_json | safe }}</script>
+    <script id="graph-data" type="application/json">{{ graph_result_json | safe }}</script>
+    <script>
+      function parseJsonScript(id) {
+        const node = document.getElementById(id);
+        if (!node) {
+          return {};
+        }
+        try {
+          return JSON.parse(node.textContent || "{}");
+        } catch (_error) {
+          return {};
+        }
+      }
+
+      function buildFallbackGraph(browse) {
+        if (!browse || !browse.root_uri) {
+          return { rootId: null, nodes: [], edges: [] };
+        }
+        const currentId = browse.root_uri;
+        const nodes = [
+          {
+            id: currentId,
+            label: browse.prefix ? browse.prefix.split("/").filter(Boolean).slice(-1)[0] || browse.bucket : browse.bucket,
+            subtitle: browse.current_artifact ? "registered prefix" : "raw prefix",
+            storage_uri: browse.root_uri,
+            detail_href: browse.current_artifact ? `/artifacts/euid/${browse.current_artifact.artifact_euid}` : "",
+            browse_root_uri: browse.root_uri,
+            storage_console_url: browse.current_artifact ? browse.current_artifact.storage_console_url : "",
+          },
+        ];
+        const edges = [];
+
+        (browse.prefixes || []).forEach((item) => {
+          nodes.push({
+            id: item.storage_uri,
+            label: item.label,
+            subtitle: item.registered_artifact ? "registered prefix" : "prefix",
+            storage_uri: item.storage_uri,
+            detail_href: item.registered_artifact ? `/artifacts/euid/${item.registered_artifact.artifact_euid}` : "",
+            browse_root_uri: item.storage_uri,
+            storage_console_url: item.storage_console_url || "",
+          });
+          edges.push({ source: currentId, target: item.storage_uri });
+        });
+
+        (browse.objects || []).forEach((item) => {
+          nodes.push({
+            id: item.storage_uri,
+            label: item.label,
+            subtitle: item.registered_artifact ? item.registered_artifact.artifact_type || "registered object" : item.artifact_type || "object",
+            storage_uri: item.storage_uri,
+            detail_href: item.registered_artifact ? `/artifacts/euid/${item.registered_artifact.artifact_euid}` : "",
+            browse_root_uri: browse.root_uri,
+            storage_console_url: item.storage_console_url || "",
+          });
+          edges.push({ source: currentId, target: item.storage_uri });
+        });
+
+        return { rootId: currentId, nodes, edges };
+      }
+
+      function normalizeGraph(graph, browse) {
+        const nodes = Array.isArray(graph.nodes) ? graph.nodes.slice() : [];
+        const edges = Array.isArray(graph.edges) ? graph.edges.slice() : [];
+        if (nodes.length) {
+          return { rootId: graph.root_euid || nodes[0].id, nodes, edges };
+        }
+        return buildFallbackGraph(browse);
+      }
+
+      function groupByLevel(rootId, nodes, edges) {
+        const parents = new Map();
+        const children = new Map();
+        nodes.forEach((node) => {
+          parents.set(node.id, []);
+          children.set(node.id, []);
+        });
+        edges.forEach((edge) => {
+          if (children.has(edge.source)) {
+            children.get(edge.source).push(edge.target);
+          }
+          if (parents.has(edge.target)) {
+            parents.get(edge.target).push(edge.source);
+          }
+        });
+
+        const levels = new Map();
+        if (rootId && levels.get(rootId) === undefined) {
+          levels.set(rootId, 0);
+        }
+
+        const upwardQueue = rootId ? [{ id: rootId, level: 0 }] : [];
+        while (upwardQueue.length) {
+          const current = upwardQueue.shift();
+          (parents.get(current.id) || []).forEach((parentId) => {
+            const nextLevel = current.level - 1;
+            if (!levels.has(parentId) || nextLevel < levels.get(parentId)) {
+              levels.set(parentId, nextLevel);
+              upwardQueue.push({ id: parentId, level: nextLevel });
+            }
+          });
+        }
+
+        const downwardQueue = rootId ? [{ id: rootId, level: 0 }] : [];
+        while (downwardQueue.length) {
+          const current = downwardQueue.shift();
+          (children.get(current.id) || []).forEach((childId) => {
+            const nextLevel = current.level + 1;
+            if (!levels.has(childId) || nextLevel > levels.get(childId)) {
+              levels.set(childId, nextLevel);
+              downwardQueue.push({ id: childId, level: nextLevel });
+            }
+          });
+        }
+
+        nodes.forEach((node) => {
+          if (!levels.has(node.id)) {
+            levels.set(node.id, 0);
+          }
+        });
+        return levels;
+      }
+
+      function renderSelection(node) {
+        const panel = document.getElementById("dag-selection");
+        if (!panel || !node) {
+          return;
+        }
+        const links = [];
+        if (node.detail_href) {
+          links.push(`<a class="button" href="${node.detail_href}">Open Detail</a>`);
+        }
+        if (node.browse_root_uri) {
+          links.push(`<a class="button" href="/artifacts/dag?root_uri=${encodeURIComponent(node.browse_root_uri)}">Browse</a>`);
+        }
+        if (node.storage_console_url) {
+          links.push(`<a class="button" href="${node.storage_console_url}" target="_blank" rel="noreferrer">S3</a>`);
+        }
+        panel.className = "dag-sidebar";
+        panel.innerHTML = `
+          <div class="eyebrow">Node</div>
+          <h3>${node.label || node.id}</h3>
+          <div class="note">${node.subtitle || ""}</div>
+          <div class="mono" style="margin-top: 0.55rem;">${node.id}</div>
+          ${node.storage_uri ? `<div class="note" style="margin-top: 0.55rem;">${node.storage_uri}</div>` : ""}
+          <div class="action-cluster" style="margin-top: 0.9rem;">${links.join("")}</div>
+        `;
+      }
+
+      function renderDag(graph) {
+        const svg = document.getElementById("dag-canvas");
+        const empty = document.getElementById("dag-empty");
+        if (!svg || !empty) {
+          return;
+        }
+
+        const nodes = Array.isArray(graph.nodes) ? graph.nodes : [];
+        const edges = Array.isArray(graph.edges) ? graph.edges : [];
+        if (!nodes.length) {
+          svg.innerHTML = "";
+          empty.style.display = "";
+          return;
+        }
+        empty.style.display = "none";
+
+        const rootId = graph.rootId || nodes[0].id;
+        const levels = groupByLevel(rootId, nodes, edges);
+        const grouped = new Map();
+        nodes.forEach((node) => {
+          const level = levels.get(node.id) || 0;
+          if (!grouped.has(level)) {
+            grouped.set(level, []);
+          }
+          grouped.get(level).push(node);
+        });
+
+        const orderedLevels = Array.from(grouped.keys()).sort((a, b) => a - b);
+        orderedLevels.forEach((level) => {
+          grouped.get(level).sort((left, right) => String(left.label || left.id).localeCompare(String(right.label || right.id)));
+        });
+
+        const nodeWidth = 190;
+        const nodeHeight = 64;
+        const rowGap = 110;
+        const columnGap = 28;
+        const maxColumns = Math.max(...orderedLevels.map((level) => grouped.get(level).length), 1);
+        const width = Math.max(960, maxColumns * (nodeWidth + columnGap) + 140);
+        const height = Math.max(520, orderedLevels.length * rowGap + 140);
+        svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+
+        const positions = new Map();
+        orderedLevels.forEach((level, rowIndex) => {
+          const row = grouped.get(level);
+          const rowWidth = row.length * nodeWidth + Math.max(0, row.length - 1) * columnGap;
+          const startX = (width - rowWidth) / 2;
+          row.forEach((node, index) => {
+            const x = startX + index * (nodeWidth + columnGap);
+            const y = 50 + rowIndex * rowGap;
+            positions.set(node.id, { x, y });
+          });
+        });
+
+        const parts = [];
+        edges.forEach((edge) => {
+          const source = positions.get(edge.source);
+          const target = positions.get(edge.target);
+          if (!source || !target) {
+            return;
+          }
+          const x1 = source.x + nodeWidth / 2;
+          const y1 = source.y + nodeHeight;
+          const x2 = target.x + nodeWidth / 2;
+          const y2 = target.y;
+          const midY = (y1 + y2) / 2;
+          parts.push(
+            `<path class="dag-edge" d="M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}" />`,
+          );
+        });
+
+        nodes.forEach((node) => {
+          const position = positions.get(node.id);
+          if (!position) {
+            return;
+          }
+          const isRoot = node.id === rootId;
+          const safeLabel = String(node.label || node.id)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;");
+          const safeSubtitle = String(node.subtitle || "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;");
+          parts.push(`
+            <g class="dag-node ${isRoot ? "dag-node-root" : ""}" data-node-id="${node.id}">
+              <rect x="${position.x}" y="${position.y}" rx="16" ry="16" width="${nodeWidth}" height="${nodeHeight}"></rect>
+              <text x="${position.x + 14}" y="${position.y + 26}" class="dag-label">${safeLabel.slice(0, 28)}</text>
+              <text x="${position.x + 14}" y="${position.y + 46}" class="dag-subtitle">${safeSubtitle.slice(0, 30)}</text>
+            </g>
+          `);
+        });
+
+        svg.innerHTML = parts.join("");
+
+        const nodeMap = new Map(nodes.map((node) => [node.id, node]));
+        svg.querySelectorAll("[data-node-id]").forEach((element) => {
+          element.addEventListener("click", () => renderSelection(nodeMap.get(element.dataset.nodeId)));
+        });
+        renderSelection(nodeMap.get(rootId) || nodes[0]);
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const browse = parseJsonScript("browse-data");
+        const graph = parseJsonScript("graph-data");
+        renderDag(normalizeGraph(graph, browse));
+      });
+    </script>
+  </body>
+</html>

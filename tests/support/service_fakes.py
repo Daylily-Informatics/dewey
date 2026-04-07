@@ -9,7 +9,7 @@ from typing import Any
 import pytest
 
 from dewey_service.service import DeweyService
-from dewey_service.storage import StorageObject, StorageObjectNotFoundError
+from dewey_service.storage import StorageObject, StorageObjectNotFoundError, StoragePrefix
 from dewey_service.tapdb_backend import (
     ANOMALY_TEMPLATE,
     ARTIFACT_SET_TEMPLATE,
@@ -300,6 +300,37 @@ class _FakeStorageClient:
         ]
         rows.sort(key=lambda item: item.key)
         return rows[:limit]
+
+    def browse_prefix(
+        self,
+        *,
+        bucket: str,
+        prefix: str = "",
+        limit: int = 200,
+        continuation_token: str | None = None,
+    ) -> dict[str, Any]:
+        _ = continuation_token
+        prefixes: set[str] = set()
+        objects: list[StorageObject] = []
+        for (obj_bucket, _), obj in self.objects.items():
+            if obj_bucket != bucket or not obj.key.startswith(prefix):
+                continue
+            remainder = obj.key[len(prefix) :]
+            if not remainder:
+                continue
+            if "/" in remainder:
+                child = remainder.split("/", 1)[0]
+                prefixes.add(f"{prefix}{child}/")
+            else:
+                objects.append(obj)
+        return {
+            "prefixes": [
+                StoragePrefix(bucket=bucket, prefix=item) for item in sorted(prefixes)[:limit]
+            ],
+            "objects": sorted(objects, key=lambda item: item.key)[:limit],
+            "is_truncated": False,
+            "next_continuation_token": None,
+        }
 
     def get_object_bytes(
         self,

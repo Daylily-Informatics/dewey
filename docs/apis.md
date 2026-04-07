@@ -2,6 +2,8 @@
 
 This page documents the current HTTP contract implemented in `dewey_service/app.py`.
 
+Current Cognito authentication uses the `daylily-auth-cognito` 2.0 split: browser session auth lives in `browser.session`, Hosted UI helpers live in `browser.oauth` and `browser.google`, bearer verification lives in `runtime.verifier` and `runtime.m2m`, and lifecycle changes stay in `daycog` via `admin.*`.
+
 ## API Design Notes
 
 Current design rules that matter to integrators:

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+
 from fastapi import APIRouter, FastAPI
 from fastapi.responses import HTMLResponse
 from fastapi.testclient import TestClient
@@ -67,8 +69,8 @@ def test_dashboard_surfaces_tapdb_link_when_embedded(
 ) -> None:
     with _configured_client(monkeypatch, test_settings, fake_service) as client:
         monkeypatch.setattr(
-            "daylily_cognito.web_session.exchange_authorization_code",
-            lambda **kwargs: {"id_token": "header.payload.sig"},
+            "daylily_auth_cognito.browser.session.exchange_authorization_code_async",
+            lambda **kwargs: asyncio.sleep(0, result={"id_token": "header.payload.sig"}),
         )
         monkeypatch.setattr(
             "dewey_service.auth.decode_jwt_claims_noverify",

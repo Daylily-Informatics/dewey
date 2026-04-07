@@ -159,7 +159,7 @@ _dewey_install_main_repo() {
 
 _dewey_dev_runtime_ready() {
   _dewey_require_python_import "daylily_tapdb" "daylily-tapdb" || return 1
-  _dewey_require_python_import "daylily_cognito" "daylily-cognito" || return 1
+  _dewey_require_python_import "daylily_auth_cognito" "daylily-auth-cognito" || return 1
   _dewey_require_python_import "cli_core_yo" "cli-core-yo" || return 1
   _dewey_require_python_import "pytest" "pytest" || return 1
 }

@@ -2,6 +2,8 @@
 
 This directory is the current, code-grounded documentation set for Dewey.
 
+For Cognito integration, the live 2.0 split is `daylily-auth-cognito.browser.session` for browser sessions, `browser.oauth` and `browser.google` for Hosted UI helpers, `runtime.verifier` and `runtime.m2m` for bearer verification, and `daycog` plus `admin.*` for lifecycle changes. Keep service runtime code out of `daylily_auth_cognito.cli`.
+
 ## Start Here
 
 - [../README.md](../README.md): GUI-first repo overview, ecology framing, current-state caveats, and glossary

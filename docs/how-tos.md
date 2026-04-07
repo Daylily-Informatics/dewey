@@ -2,6 +2,8 @@
 
 These workflows use the current Dewey CLI, browser UI, and API surface exactly as they exist today.
 
+The shared Cognito pieces now come from `daylily-auth-cognito` 2.0. Use browser/session helpers for the Hosted UI flow, runtime verifier helpers for API bearer auth, and `daycog` for Cognito lifecycle; do not route service runtime through `daylily_auth_cognito.cli`.
+
 ## Activate The Repo Environment
 
 Start every Dewey session the repo-supported way:

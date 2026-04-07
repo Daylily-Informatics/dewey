@@ -4,6 +4,7 @@ import hashlib
 import io
 import json
 import zipfile
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -26,6 +27,7 @@ class FakeDeweyService:
         self._anomaly_seq = 1
         self.literature = object()
         self.artifacts: dict[str, dict[str, Any]] = {}
+        self.artifact_lineage: list[tuple[str, str]] = []
         self.artifact_sets: dict[str, dict[str, Any]] = {}
         self.share_references: dict[str, dict[str, Any]] = {}
         self.external_objects: dict[str, dict[str, Any]] = {}
@@ -98,6 +100,14 @@ class FakeDeweyService:
         }
         self.upload_sessions: dict[str, dict[str, Any]] = {}
         self.idempotency: dict[str, tuple[str, int, dict[str, Any]]] = {}
+
+    @staticmethod
+    def _storage_console_url(storage_backend: str, bucket: str, key: str) -> str | None:
+        if storage_backend != "s3" or not bucket or not key:
+            return None
+        return (
+            f"https://s3.console.aws.amazon.com/s3/buckets/{bucket}?prefix={key}&showversions=false"
+        )
 
     @staticmethod
     def _fp(payload: dict[str, Any]) -> str:
@@ -193,6 +203,8 @@ class FakeDeweyService:
         item = {
             "artifact_euid": euid,
             "artifact_type": kwargs["artifact_type"],
+            "storage_kind": kwargs.get("storage_kind", "object"),
+            "node_kind": kwargs.get("node_kind", "file"),
             "storage_backend": kwargs["storage_backend"],
             "bucket": kwargs["bucket"],
             "key": kwargs["key"],
@@ -207,11 +219,20 @@ class FakeDeweyService:
             "availability_status": kwargs.get("availability_status"),
             "metadata": dict(kwargs.get("metadata") or {}),
             "storage_uri": f"{kwargs['storage_backend']}://{kwargs['bucket']}/{kwargs['key']}",
+            "storage_console_url": self._storage_console_url(
+                kwargs["storage_backend"],
+                kwargs["bucket"],
+                kwargs["key"],
+            ),
             "source_uri": kwargs.get("source_uri")
             or f"{kwargs['storage_backend']}://{kwargs['bucket']}/{kwargs['key']}",
             "import_mode": kwargs.get("import_mode", "register"),
             "storage_status": kwargs.get("storage_status", "registered"),
             "storage_verified_at": kwargs.get("storage_verified_at"),
+            "is_terminal": kwargs.get(
+                "is_terminal",
+                kwargs.get("storage_kind", "object") != "prefix",
+            ),
             "retention_mode": kwargs.get("retention_mode"),
             "retain_until": kwargs.get("retain_until"),
             "share_status": kwargs.get("share_status"),
@@ -411,6 +432,8 @@ class FakeDeweyService:
 
     def verify_artifact_storage(self, *, artifact_euid: str, idempotency_key: str):
         item = self.get_artifact(artifact_euid)
+        if item.get("storage_kind") == "prefix":
+            raise ValueError("storage verification requires an object-backed artifact")
         item["storage_status"] = "verified"
         item["storage_verified_at"] = "2026-03-10T00:00:00Z"
         self.artifacts[artifact_euid] = item
@@ -425,6 +448,8 @@ class FakeDeweyService:
         idempotency_key: str,
     ):
         item = self.get_artifact(artifact_euid)
+        if item.get("storage_kind") == "prefix":
+            raise ValueError("storage lock requires an object-backed artifact")
         item["retention_mode"] = mode
         item["retain_until"] = retain_until
         self.artifacts[artifact_euid] = item
@@ -450,6 +475,385 @@ class FakeDeweyService:
         if producer_system:
             rows = [row for row in rows if row.get("producer_system") == producer_system]
         return rows[:limit]
+
+    def _link_artifacts(self, parent_euid: str, child_euid: str) -> None:
+        edge = (parent_euid, child_euid)
+        if edge not in self.artifact_lineage:
+            self.artifact_lineage.append(edge)
+
+    def list_artifact_children(self, *, artifact_euid: str, limit: int = 200):
+        children = [
+            self.artifacts[child_euid]
+            for parent_euid, child_euid in self.artifact_lineage
+            if parent_euid == artifact_euid and child_euid in self.artifacts
+        ]
+        return children[:limit]
+
+    def list_artifact_parents(self, *, artifact_euid: str, limit: int = 200):
+        parents = [
+            self.artifacts[parent_euid]
+            for parent_euid, child_euid in self.artifact_lineage
+            if child_euid == artifact_euid and parent_euid in self.artifacts
+        ]
+        return parents[:limit]
+
+    def _artifact_for_storage_uri(self, storage_uri: str) -> dict[str, Any] | None:
+        for artifact in self.artifacts.values():
+            if artifact.get("storage_uri") == storage_uri:
+                return artifact
+        return None
+
+    def browse_storage_prefix(
+        self,
+        *,
+        root_uri: str,
+        limit: int = 200,
+        continuation_token: str | None = None,
+    ):
+        _ = continuation_token
+        normalized = str(root_uri or "").strip()
+        if not normalized.startswith("s3://"):
+            raise ValueError("root_uri must use s3:// for S3 browse flows")
+        if not normalized.endswith("/"):
+            normalized = f"{normalized.rstrip('/')}/"
+        bucket_and_key = normalized.removeprefix("s3://")
+        bucket, _, prefix = bucket_and_key.partition("/")
+        prefix_entries: dict[str, dict[str, Any]] = {}
+        object_entries: dict[str, dict[str, Any]] = {}
+        current_artifact = self._artifact_for_storage_uri(normalized)
+
+        for artifact in self.artifacts.values():
+            if artifact.get("bucket") != bucket:
+                continue
+            key = str(artifact.get("key") or "")
+            if prefix and not key.startswith(prefix):
+                continue
+            remainder = key[len(prefix) :] if prefix else key
+            if not remainder:
+                continue
+            if "/" in remainder:
+                child = remainder.split("/", 1)[0]
+                child_prefix = f"{prefix}{child}/"
+                storage_uri = f"s3://{bucket}/{child_prefix}"
+                registered = self._artifact_for_storage_uri(storage_uri)
+                prefix_entries[child_prefix] = {
+                    "entry_kind": "prefix",
+                    "label": child,
+                    "bucket": bucket,
+                    "key": child_prefix,
+                    "storage_uri": storage_uri,
+                    "storage_console_url": self._storage_console_url("s3", bucket, child_prefix),
+                    "registered_artifact": dict(registered) if registered else None,
+                    "artifact_euid": registered["artifact_euid"] if registered else None,
+                }
+                continue
+            storage_uri = f"s3://{bucket}/{key}"
+            registered = self._artifact_for_storage_uri(storage_uri)
+            object_entries[key] = {
+                "entry_kind": "object",
+                "label": Path(key).name,
+                "bucket": bucket,
+                "key": key,
+                "size": int(artifact.get("size") or 1024),
+                "size_human": "1.0 KiB"
+                if int(artifact.get("size") or 1024) == 1024
+                else f"{artifact.get('size')} B",
+                "storage_class": artifact.get("storage_class"),
+                "etag": None,
+                "artifact_type": artifact.get("artifact_type") or "report",
+                "storage_uri": storage_uri,
+                "storage_console_url": self._storage_console_url("s3", bucket, key),
+                "registered_artifact": dict(registered) if registered else None,
+                "artifact_euid": registered["artifact_euid"] if registered else None,
+            }
+
+        if not prefix_entries:
+            raw_prefix = f"{prefix}incoming/"
+            prefix_entries[raw_prefix] = {
+                "entry_kind": "prefix",
+                "label": "incoming",
+                "bucket": bucket,
+                "key": raw_prefix,
+                "storage_uri": f"s3://{bucket}/{raw_prefix}",
+                "storage_console_url": self._storage_console_url("s3", bucket, raw_prefix),
+                "registered_artifact": None,
+                "artifact_euid": None,
+            }
+        if not object_entries:
+            raw_key = f"{prefix}README.txt"
+            object_entries[raw_key] = {
+                "entry_kind": "object",
+                "label": "README.txt",
+                "bucket": bucket,
+                "key": raw_key,
+                "size": 256,
+                "size_human": "256 B",
+                "storage_class": "STANDARD",
+                "etag": None,
+                "artifact_type": "report",
+                "storage_uri": f"s3://{bucket}/{raw_key}",
+                "storage_console_url": self._storage_console_url("s3", bucket, raw_key),
+                "registered_artifact": None,
+                "artifact_euid": None,
+            }
+
+        clean_prefix = prefix.rstrip("/")
+        breadcrumbs = [{"label": bucket, "uri": f"s3://{bucket}/"}]
+        built: list[str] = []
+        for segment in [item for item in clean_prefix.split("/") if item]:
+            built.append(segment)
+            breadcrumbs.append(
+                {
+                    "label": segment,
+                    "uri": f"s3://{bucket}/{'/'.join(built)}/",
+                }
+            )
+        parent_uri = None
+        if clean_prefix:
+            parent_parts = clean_prefix.split("/")[:-1]
+            parent_uri = (
+                f"s3://{bucket}/{'/'.join(parent_parts)}/" if parent_parts else f"s3://{bucket}/"
+            )
+        return {
+            "bucket": bucket,
+            "prefix": prefix,
+            "root_uri": normalized,
+            "parent_uri": parent_uri,
+            "breadcrumbs": breadcrumbs,
+            "current_artifact": dict(current_artifact) if current_artifact else None,
+            "prefixes": list(prefix_entries.values())[:limit],
+            "objects": list(object_entries.values())[:limit],
+            "is_truncated": False,
+            "next_continuation_token": None,
+        }
+
+    def get_artifact_graph(self, *, artifact_euid: str, depth: int = 3, limit: int = 200):
+        from dewey_service.service import DeweyNotFoundError
+
+        if artifact_euid not in self.artifacts:
+            raise DeweyNotFoundError(f"Artifact not found: {artifact_euid}")
+
+        max_depth = max(0, min(int(depth), 6))
+        max_nodes = max(1, min(int(limit), 500))
+        queue: list[tuple[str, int]] = [(artifact_euid, 0)]
+        seen: set[str] = set()
+        node_ids: set[str] = {artifact_euid}
+        edges: set[tuple[str, str]] = set()
+
+        while queue and len(node_ids) <= max_nodes:
+            current_euid, current_depth = queue.pop(0)
+            if current_euid in seen:
+                continue
+            seen.add(current_euid)
+            if current_depth >= max_depth:
+                continue
+            for parent_euid, child_euid in self.artifact_lineage:
+                if parent_euid == current_euid:
+                    edges.add((parent_euid, child_euid))
+                    if child_euid not in node_ids and len(node_ids) < max_nodes:
+                        node_ids.add(child_euid)
+                    if child_euid not in seen:
+                        queue.append((child_euid, current_depth + 1))
+                if child_euid == current_euid:
+                    edges.add((parent_euid, child_euid))
+                    if parent_euid not in node_ids and len(node_ids) < max_nodes:
+                        node_ids.add(parent_euid)
+                    if parent_euid not in seen:
+                        queue.append((parent_euid, current_depth + 1))
+
+        def _browse_root_uri(item: dict[str, Any]) -> str:
+            bucket = str(item.get("bucket") or "")
+            key = str(item.get("key") or "")
+            if item.get("storage_kind") == "prefix":
+                return str(item.get("storage_uri") or "")
+            parent_parts = [segment for segment in key.split("/") if segment][:-1]
+            if not parent_parts:
+                return f"s3://{bucket}/"
+            return f"s3://{bucket}/{'/'.join(parent_parts)}/"
+
+        nodes = []
+        for node_euid in sorted(node_ids):
+            artifact = self.artifacts[node_euid]
+            nodes.append(
+                {
+                    "id": node_euid,
+                    "artifact_euid": node_euid,
+                    "label": artifact.get("original_filename")
+                    or artifact.get("storage_uri")
+                    or node_euid,
+                    "subtitle": artifact.get("node_kind")
+                    or artifact.get("artifact_type")
+                    or "artifact",
+                    "artifact_type": artifact.get("artifact_type"),
+                    "node_kind": artifact.get("node_kind"),
+                    "storage_kind": artifact.get("storage_kind"),
+                    "is_terminal": artifact.get("is_terminal"),
+                    "storage_uri": artifact.get("storage_uri"),
+                    "storage_console_url": artifact.get("storage_console_url"),
+                    "detail_href": f"/artifacts/euid/{node_euid}",
+                    "browse_root_uri": _browse_root_uri(artifact),
+                    "metadata": artifact.get("metadata") or {},
+                }
+            )
+        return {
+            "root_euid": artifact_euid,
+            "depth": max_depth,
+            "nodes": nodes,
+            "edges": [
+                {
+                    "source": source,
+                    "target": target,
+                    "relationship_type": "artifact_hierarchy",
+                }
+                for source, target in sorted(edges)
+                if source in node_ids and target in node_ids
+            ],
+        }
+
+    def import_run_prefix(
+        self,
+        *,
+        root_uri: str,
+        platform: str,
+        owner_email: str,
+        run_id: str | None = None,
+        finalize: bool = False,
+        idempotency_key: str,
+    ):
+        payload = {
+            "root_uri": root_uri,
+            "platform": platform,
+            "owner_email": owner_email,
+            "run_id": run_id,
+            "finalize": finalize,
+        }
+        replay = self._idempotent("artifact.import_run_prefix", idempotency_key, payload)
+        if replay:
+            return replay
+
+        normalized_root = str(root_uri).rstrip("/") + "/"
+        run_label = normalized_root.rstrip("/").split("/")[-1]
+        clean_run_id = str(run_id or "RUN504352").strip().upper()
+        _, run_artifact = self.register_artifact(
+            artifact_type="folder",
+            storage_backend="s3",
+            bucket=normalized_root.removeprefix("s3://").split("/", 1)[0],
+            key=normalized_root.removeprefix("s3://").split("/", 1)[1],
+            version_id=None,
+            size=4096,
+            checksums={},
+            content_type=None,
+            original_filename=run_label,
+            producer_system=None,
+            producer_object_euid=None,
+            storage_class=None,
+            availability_status="available",
+            metadata={
+                "owner_email": owner_email,
+                "platform": platform,
+                "run_id": clean_run_id,
+                "run_state": "frozen" if finalize else "live",
+                "tags": ["ultima", "run_folder"],
+            },
+            source_uri=normalized_root,
+            import_mode="register",
+            storage_status="registered",
+            storage_kind="prefix",
+            node_kind="run_folder",
+            is_terminal=False,
+            idempotency_key=f"{idempotency_key}:run",
+        )
+        folder_counts = {"created": 0, "updated": 0}
+        file_counts = {"created": 0, "updated": 0}
+        sample_labels = [
+            "504352-UGAv3-1527-CAACGATATGTGAT",
+            "504352-UGAv3-1528-CGATACGATATGTGAT",
+        ]
+        bucket = run_artifact["bucket"]
+        root_key = run_artifact["key"]
+        for index, sample_label in enumerate(sample_labels, start=1):
+            folder_key = f"{root_key}{sample_label}/"
+            _, folder_artifact = self.register_artifact(
+                artifact_type="folder",
+                storage_backend="s3",
+                bucket=bucket,
+                key=folder_key,
+                version_id=None,
+                size=2048,
+                checksums={},
+                content_type=None,
+                original_filename=sample_label,
+                producer_system=None,
+                producer_object_euid=None,
+                storage_class=None,
+                availability_status="available",
+                metadata={
+                    "owner_email": owner_email,
+                    "platform": platform,
+                    "run_id": clean_run_id,
+                    "folder_label": sample_label,
+                    "seq_index": sample_label.split("-")[-1],
+                    "tags": ["ultima", "sample_folder"],
+                },
+                source_uri=f"s3://{bucket}/{folder_key}",
+                import_mode="register",
+                storage_status="registered",
+                storage_kind="prefix",
+                node_kind="sample_folder",
+                is_terminal=False,
+                idempotency_key=f"{idempotency_key}:folder:{index}",
+            )
+            folder_counts["created"] += 1
+            self._link_artifacts(run_artifact["artifact_euid"], folder_artifact["artifact_euid"])
+            base = f"{folder_key}{sample_label}"
+            for suffix in [".cram", ".cram.crai", ".json", ".csv"]:
+                _, file_artifact = self.register_artifact(
+                    artifact_type="cram"
+                    if suffix == ".cram"
+                    else "crai"
+                    if suffix == ".cram.crai"
+                    else suffix.lstrip("."),
+                    storage_backend="s3",
+                    bucket=bucket,
+                    key=f"{base}{suffix}",
+                    version_id=None,
+                    size=1024,
+                    checksums={},
+                    content_type=None,
+                    original_filename=f"{sample_label}{suffix}",
+                    producer_system=None,
+                    producer_object_euid=None,
+                    storage_class=None,
+                    availability_status="available",
+                    metadata={
+                        "owner_email": owner_email,
+                        "platform": platform,
+                        "run_id": clean_run_id,
+                        "folder_label": sample_label,
+                        "seq_index": sample_label.split("-")[-1],
+                    },
+                    source_uri=f"s3://{bucket}/{base}{suffix}",
+                    import_mode="reference",
+                    storage_status="verified",
+                    storage_verified_at="2026-03-10T00:00:00Z",
+                    storage_kind="object",
+                    node_kind="file",
+                    is_terminal=True,
+                    idempotency_key=f"{idempotency_key}:file:{index}:{suffix}",
+                )
+                file_counts["created"] += 1
+                self._link_artifacts(
+                    folder_artifact["artifact_euid"],
+                    file_artifact["artifact_euid"],
+                )
+        body = {
+            "run_artifact": self.get_artifact(run_artifact["artifact_euid"]),
+            "folder_nodes": folder_counts,
+            "file_artifacts": file_counts,
+            "run_state": "frozen" if finalize else "live",
+        }
+        self._remember("artifact.import_run_prefix", idempotency_key, payload, 201, body)
+        return 201, body
 
     def create_artifact_set(
         self,
@@ -577,7 +981,9 @@ class FakeDeweyService:
         euid = f"SH-{self._share_seq:06d}"
         self._share_seq += 1
         if target_type == "artifact":
-            self.get_artifact(target_euid)
+            artifact = self.get_artifact(target_euid)
+            if artifact.get("storage_kind") == "prefix":
+                raise ValueError("artifact sharing requires an object-backed artifact")
             manifest: list[dict[str, Any]] = []
             connection: dict[str, Any] = {}
             access_url = f"https://downloads.example.com/{euid}"
