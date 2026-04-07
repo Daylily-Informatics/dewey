@@ -223,9 +223,10 @@ Use the repo-owned activation entrypoint:
 ```bash
 source ./activate <deploy-name>
 dewey --help
+dewey runtime check
 ```
 
-That activation flow creates or reuses a deployment-scoped conda environment like `DEWEY-local`, installs the repo editable, and exports deployment-scoped env values such as `DEWEY_DEPLOYMENT_CODE`.
+That activation flow creates or reuses a deployment-scoped conda environment like `DEWEY-local`, installs the repo editable, ensures local `daylily-tapdb` and local `daylily-auth-cognito` are available when needed, installs published `cli-core-yo==2.0.0`, and exports deployment-scoped env values such as `DEWEY_DEPLOYMENT_CODE`.
 
 ### Local Run
 
@@ -233,6 +234,7 @@ The current CLI-first local path is:
 
 ```bash
 source ./activate <deploy-name>
+dewey --json version
 dewey config init
 dewey db build --target local
 dewey server start --port 8914
@@ -243,6 +245,9 @@ Useful follow-up commands:
 ```bash
 dewey server status
 dewey server logs
+dewey runtime status
+dewey tapdb run db status
+dewey cognito status
 dewey test run
 dewey quality lint
 ```
@@ -267,6 +272,8 @@ Current developer checks:
 ```bash
 source ./activate <deploy-name>
 dewey --help
+dewey --json version
+dewey runtime check
 dewey test run
 dewey test cov
 dewey quality check
@@ -274,7 +281,9 @@ pytest --collect-only -q
 pytest --cov=dewey_service --cov-report=term-missing:skip-covered
 ```
 
-There is no documented artifact-specific CLI subcommand tree yet. Artifact operations are currently exposed through the browser UI and HTTP APIs, while the `dewey` CLI owns server, DB, test, quality, config, and env lifecycle.
+`--json` is a root-global flag in the v2 CLI. Commands that do not explicitly support JSON reject it with a contract error instead of silently printing mixed output.
+
+There is no documented artifact-specific CLI subcommand tree yet. Artifact operations are currently exposed through the browser UI and HTTP APIs, while the `dewey` CLI owns server, DB, tapdb passthrough, Cognito status, test, quality, config, env, and runtime lifecycle.
 
 ### Security Model
 

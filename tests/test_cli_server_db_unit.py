@@ -375,13 +375,13 @@ def test_stop_server_and_logs_branches(
 
     monkeypatch.setattr(server_cli, "stop_pid", lambda path: (False, "No server running"))
     server_cli._stop_server()
-    assert "No server running" in capsys.readouterr().out
+    assert "No server running" in capsys.readouterr().err
 
     monkeypatch.setattr(server_cli, "_ensure_runtime_dirs", lambda: None)
     monkeypatch.setattr(server_cli, "_log_dir", lambda: tmp_path)
     monkeypatch.setattr(server_cli, "list_logs", lambda path: [])
     server_cli.logs(all_logs=True)
-    assert "No log files found" in capsys.readouterr().out
+    assert "No log files found" in capsys.readouterr().err
 
     log_file = tmp_path / "server_1.log"
     log_file.write_text("hello", encoding="utf-8")
@@ -391,7 +391,7 @@ def test_stop_server_and_logs_branches(
 
     monkeypatch.setattr(server_cli, "latest_log", lambda path: None)
     server_cli.logs(all_logs=False)
-    assert "No log file found" in capsys.readouterr().out
+    assert "No log file found" in capsys.readouterr().err
 
     monkeypatch.setattr(server_cli, "latest_log", lambda path: log_file)
     followed: list[tuple[Path, int]] = []

@@ -11,15 +11,21 @@ Start every Dewey session the repo-supported way:
 ```bash
 source ./activate <deploy-name>
 dewey --help
+dewey runtime check
 ```
 
 Useful read-only checks:
 
 ```bash
+dewey --json version
 dewey info
+dewey runtime status
 dewey config path
 dewey server status
+dewey cognito status
 ```
+
+The v2 CLI owns root-global `--json`. A command either supports it explicitly or rejects it with a contract error, so use JSON at the root rather than looking for per-command `--json` flags.
 
 ## Initialize Config And Build Local DB
 
@@ -58,6 +64,7 @@ Then inspect status and logs:
 ```bash
 dewey server status
 dewey server logs
+dewey runtime check
 ```
 
 By default the current config template expects HTTPS on `https://localhost:8914`.

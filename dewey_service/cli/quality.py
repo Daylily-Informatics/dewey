@@ -13,6 +13,7 @@ import sys
 
 import typer
 
+from dewey_service.cli._registry_v2 import REQUIRED, REQUIRED_MUTATING, register_group_commands
 from dewey_service.cli.common import PROJECT_ROOT
 
 quality_app = typer.Typer(help="Quality commands")
@@ -58,4 +59,14 @@ def check_all() -> None:
 
 def register(registry: CommandRegistry, spec: CliSpec) -> None:
     """Register the quality command group."""
-    registry.add_typer_app(None, quality_app, "quality", "Quality commands")
+    _ = spec
+    register_group_commands(
+        registry,
+        "quality",
+        "Quality commands",
+        [
+            ("lint", lint, REQUIRED_MUTATING),
+            ("format", format_code, REQUIRED_MUTATING),
+            ("check", check_all, REQUIRED),
+        ],
+    )

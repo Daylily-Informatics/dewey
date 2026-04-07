@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 import typer
 from cli_core_yo import ccyo_out
 
+from dewey_service.cli._registry_v2 import REQUIRED, REQUIRED_MUTATING
 from dewey_service.settings import (
     clear_settings_cache,
     get_config_file_path,
@@ -51,10 +52,18 @@ def _set_artifact_bucket(
 
 def register(registry: CommandRegistry, spec: CliSpec) -> None:
     """Register Dewey-specific config subcommands."""
-    registry.add_command("config", "status", _status, "Show merged Dewey runtime settings")
+    _ = spec
+    registry.add_command(
+        "config",
+        "status",
+        _status,
+        help_text="Show merged Dewey runtime settings",
+        policy=REQUIRED,
+    )
     registry.add_command(
         "config",
         "set-artifact-bucket",
         _set_artifact_bucket,
-        "Set the S3 bucket Dewey uses for managed artifact storage.",
+        help_text="Set the S3 bucket Dewey uses for managed artifact storage.",
+        policy=REQUIRED_MUTATING,
     )

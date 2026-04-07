@@ -18,6 +18,12 @@ def _invoke(argv: list[str]) -> int:
     return run_cli(cli_module._build_spec(), argv)
 
 
+@pytest.fixture(autouse=True)
+def _active_runtime(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("CONDA_PREFIX", "/tmp/dewey-conda")
+    monkeypatch.setenv("CONDA_DEFAULT_ENV", "DEWEY-local2")
+
+
 def test_cli_help_renders(capsys) -> None:
     exit_code = _invoke(["--help"])
     captured = capsys.readouterr()
@@ -192,31 +198,6 @@ def test_config_set_artifact_bucket(monkeypatch, tmp_path: Path, capsys) -> None
     assert "Updated artifact bucket" in captured
     assert config_path.exists()
     assert "managed_bucket: dewey-artifacts-test" in config_path.read_text(encoding="utf-8")
-
-
-def test_cli_requires_hyphenated_conda_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("CONDA_DEFAULT_ENV", "DEWEY")
-    with pytest.raises(SystemExit, match="deployment-scoped conda environment name with '-'"):
-        cli_module._enforce_conda_env_contract(["server", "status"])
-
-
-def test_cli_requires_active_conda_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("CONDA_DEFAULT_ENV", raising=False)
-    with pytest.raises(SystemExit, match="requires an active deployment-scoped conda environment"):
-        cli_module._enforce_conda_env_contract(["server", "status"])
-
-
-def test_cli_accepts_hyphenated_conda_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("CONDA_DEFAULT_ENV", "DEWEY-local2")
-    cli_module._enforce_conda_env_contract(["server", "status"])
-
-
-def test_cli_skip_conda_env_check_flag_is_stripped() -> None:
-    args, skip = cli_module._strip_skip_conda_env_check_flag(
-        ["--skip-conda-env-check", "server", "status"]
-    )
-    assert skip is True
-    assert args == ["server", "status"]
 
 
 def test_config_validate_and_status(monkeypatch, tmp_path: Path, capsys) -> None:

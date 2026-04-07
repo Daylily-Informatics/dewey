@@ -69,6 +69,8 @@ def test_readme_and_how_tos_reference_current_cli_commands() -> None:
 
     expected_commands = [
         "source ./activate <deploy-name>",
+        "dewey --json version",
+        "dewey runtime check",
         "dewey config init",
         "dewey db build --target local",
         "dewey server start --port 8914",
@@ -93,7 +95,17 @@ def test_documented_cli_groups_match_live_help_surface() -> None:
     assert test_code == 0
     assert quality_code == 0
 
-    for snippet in ("config", "env", "server", "db", "test", "quality"):
+    for snippet in (
+        "config",
+        "env",
+        "runtime",
+        "server",
+        "db",
+        "tapdb",
+        "cognito",
+        "test",
+        "quality",
+    ):
         assert snippet in root_help
     for snippet in ("start", "stop", "status", "logs", "restart"):
         assert snippet in server_help

@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 import typer
 from cli_core_yo import ccyo_out
 
+from dewey_service.cli._registry_v2 import REQUIRED_MUTATING, register_group_commands
 from dewey_service.cli.common import PROJECT_ROOT
 from dewey_service.integrations.tapdb_runtime import (
     DEFAULT_AWS_PROFILE,
@@ -65,4 +66,12 @@ def run_command(
 
 def register(registry: CommandRegistry, spec: CliSpec) -> None:
     """Register the tapdb command group."""
-    registry.add_typer_app(None, tapdb_app, "tapdb", "TapDB passthrough wrappers")
+    _ = spec
+    register_group_commands(
+        registry,
+        "tapdb",
+        "TapDB passthrough wrappers",
+        [
+            ("run", run_command, REQUIRED_MUTATING),
+        ],
+    )
