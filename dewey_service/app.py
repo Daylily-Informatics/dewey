@@ -52,6 +52,10 @@ from dewey_service.domain_access import (
     build_trusted_hosts,
     is_allowed_origin,
 )
+from dewey_service.integrations.tapdb_ui import (
+    dewey_tapdb_obs_services_fragment,
+    mount_tapdb_surfaces,
+)
 from dewey_service.literature import LiteratureUnavailableError, MetapubAdapter, ViewerContext
 from dewey_service.observability import (
     DeweyObservabilityStore,
@@ -341,12 +345,21 @@ def create_app(
     if static_dir.exists():
         app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
+    tapdb_embedded = mount_tapdb_surfaces(app, settings=settings)
+    if tapdb_embedded:
+        fragment = dewey_tapdb_obs_services_fragment()
+        app.state.observability.add_obs_services_fragment(
+            endpoints=list(fragment.get("endpoints") or []),
+            extensions=list(fragment.get("extensions") or []),
+        )
+
     api_auth_dep = require_api_auth(settings)
     observability_auth_dep = require_observability_access(settings)
 
     def _template_context(**kwargs: Any) -> dict[str, Any]:
         context = {
             "deployment": settings.deployment,
+            "tapdb_embedded": bool(getattr(app.state, "tapdb_embedded", False)),
         }
         context.update(kwargs)
         return context
