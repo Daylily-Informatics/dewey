@@ -9,7 +9,7 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 ACTIVATE_SCRIPT = PROJECT_ROOT / "activate"
-DEPLOY_NAME = "ab-12cd"
+DEPLOY_NAME = "abc-12345"
 
 
 def _write_executable(path: Path, content: str) -> None:
@@ -219,10 +219,10 @@ def test_activate_requires_conda_on_path(tmp_path: Path) -> None:
 
 
 def test_activate_rejects_invalid_deploy_name_without_conda() -> None:
-    result = _source_activate(os.environ.copy(), deploy_name="bad_name")
+    result = _source_activate(os.environ.copy(), deploy_name="ab")
 
     assert result.returncode == 1
-    assert "deploy-name must match ^[A-Za-z0-9-]{2,8}$" in result.stderr
+    assert "deploy-name must match ^[A-Za-z0-9-]{3,9}$" in result.stderr
 
 
 def test_activate_rejects_extra_arguments() -> None:
@@ -233,7 +233,7 @@ def test_activate_rejects_extra_arguments() -> None:
 
 
 def test_activate_uses_static_project_version_when_deploy_name_is_omitted(tmp_path: Path) -> None:
-    repo_root = _make_temp_repo(tmp_path, pyproject_version="v1.2.3.4.5")
+    repo_root = _make_temp_repo(tmp_path, pyproject_version="v1.2.3.45")
     conda_base = _build_fake_conda(tmp_path)
 
     env = os.environ.copy()
@@ -246,7 +246,7 @@ def test_activate_uses_static_project_version_when_deploy_name_is_omitted(tmp_pa
     result = _source_activate(env, script_path=repo_root / "activate", deploy_name=None)
 
     assert result.returncode == 1
-    assert "Conda environment 'DEWEY-v1-2-3-4' not found." in result.stdout
+    assert "Conda environment 'DEWEY-v1-2-3-45' not found." in result.stdout
     assert "Installing conda environment from environment.yaml..." in result.stdout
 
 

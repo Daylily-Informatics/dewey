@@ -34,6 +34,7 @@ _RED='\033[0;31m'
 _NC='\033[0m'
 _DEWEY_PYTHON=""
 _DEWEY_CONDA_ENV_BASE="DEWEY"
+_DEWEY_DEPLOY_NAME_MAX_LENGTH=9
 _DEWEY_CLI_CORE_YO_VERSION="2.0.0"
 _DEWEY_LEGACY_REBIND_VARS=(
   USE_LOCAL_DAYLILY_TAPDB
@@ -104,8 +105,13 @@ _dewey_read_static_project_version() {
 _dewey_normalize_default_deploy_name() {
   local raw_value="$1"
   local normalized=""
-  normalized="$(printf '%s' "$raw_value" | LC_ALL=C sed -E 's/[^A-Za-z0-9-]+/-/g; s/^-+//; s/-+$//' | cut -c1-8)"
-  if [[ -z "$normalized" ]]; then
+  normalized="$(
+    printf '%s' "$raw_value" |
+      LC_ALL=C sed -E 's/[^A-Za-z0-9-]+/-/g; s/^-+//; s/-+$//' |
+      cut -c1-"${_DEWEY_DEPLOY_NAME_MAX_LENGTH}" |
+      LC_ALL=C sed -E 's/-+$//'
+  )"
+  if [[ "${#normalized}" -lt 3 ]]; then
     normalized="local"
   fi
   printf '%s\n' "$normalized"
@@ -164,8 +170,8 @@ _dewey_default_deploy_name_fallback() {
 
 _dewey_validate_deploy_name() {
   local deploy_name="$1"
-  if [[ ! "$deploy_name" =~ ^[A-Za-z0-9-]{2,8}$ ]]; then
-    echo -e "  ${_YELLOW}⚠${_NC} deploy-name must match ^[A-Za-z0-9-]{2,8}$" >&2
+  if [[ ! "$deploy_name" =~ ^[A-Za-z0-9-]{3,9}$ ]]; then
+    echo -e "  ${_YELLOW}⚠${_NC} deploy-name must match ^[A-Za-z0-9-]{3,9}$" >&2
     return 1
   fi
 }
