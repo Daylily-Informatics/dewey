@@ -11,7 +11,7 @@ def test_pyproject_declares_shared_library_versions() -> None:
 
     assert "cli-core-yo==2.0.0" in dependencies
     assert "daylily-auth-cognito==2.0.2" in dependencies
-    assert "daylily-tapdb==5.0.4" in dependencies
+    assert "daylily-tapdb==5.1.0" in dependencies
 
 
 def test_pyproject_declares_pytest_cov_in_dev_dependencies() -> None:

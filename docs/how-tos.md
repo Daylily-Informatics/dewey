@@ -44,11 +44,10 @@ Then bootstrap local persistence:
 dewey db build --target local
 ```
 
-Current published-package caveat from the April 7, 2026 local walkthrough:
+Current published-package note from the April 9, 2026 TapDB 5.1.0 rollout:
 
-- the first published TapDB build that works with published `cli-core-yo==2.0.0` is currently `daylily-tapdb==5.0.0`
-- on that TapDB line, `dewey db build --target local` initializes PostgreSQL but leaves the `db setup` step incomplete
-- complete the delegated TapDB setup with:
+- this repo now pins `daylily-tapdb==5.1.0`
+- if `dewey db build --target local` initializes PostgreSQL but leaves delegated `tapdb db setup` incomplete, complete that step with:
 
 ```bash
 tapdb --config ~/.config/tapdb/dewey/dewey-local/tapdb-config.yaml --env dev db setup dev --force

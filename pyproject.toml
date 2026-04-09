@@ -11,7 +11,7 @@ requires-python = ">=3.11"
 dependencies = [
     "boto3>=1.35.0",
     "cli-core-yo==2.0.0",
-    "daylily-tapdb==5.0.4",
+    "daylily-tapdb==5.1.0",
     "daylily-auth-cognito==2.0.2",
     "fastapi>=0.115.0",
     "metapub",
