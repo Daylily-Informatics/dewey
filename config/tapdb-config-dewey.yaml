@@ -4,7 +4,7 @@ meta:
   database_name: dewey
   euid_client_code: D
   # Explicit env contract for TapDB/Meridian subprocesses:
-  # MERIDIAN_DOMAIN_CODE=D
+  # MERIDIAN_DOMAIN_CODE=Z
   # TAPDB_APP_CODE=D
 environments:
   dev:

@@ -85,7 +85,7 @@ fi
 export DEWEY_DEPLOYMENT_CODE="${_dewey_deployment_code}"
 export DEPLOYMENT_CODE="${_dewey_deployment_code}"
 export LSMC_DEPLOYMENT_CODE="${_dewey_deployment_code}"
-export MERIDIAN_DOMAIN_CODE="${MERIDIAN_DOMAIN_CODE:-D}"
+export MERIDIAN_DOMAIN_CODE="${MERIDIAN_DOMAIN_CODE:-Z}"
 export TAPDB_APP_CODE="${TAPDB_APP_CODE:-D}"
 _DEWEY_CONDA_ENV_NAME="${_DEWEY_CONDA_ENV_BASE}-${_dewey_deployment_code}"
 unset _dewey_deployment_code

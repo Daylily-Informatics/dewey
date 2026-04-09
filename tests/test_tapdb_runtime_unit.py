@@ -163,7 +163,7 @@ def test_run_tapdb_cli_exports_explicit_identity_env(monkeypatch: pytest.MonkeyP
 
     assert result.returncode == 0
     assert captured["cmd"][:5] == ["tapdb", "--config", "/tmp/dewey-tapdb.yaml", "--env", "dev"]
-    assert captured["env"]["MERIDIAN_DOMAIN_CODE"] == "D"
+    assert captured["env"]["MERIDIAN_DOMAIN_CODE"] == "Z"
     assert captured["env"]["TAPDB_APP_CODE"] == "D"
 
 

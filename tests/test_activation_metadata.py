@@ -21,11 +21,11 @@ def test_activate_uses_editable_metadata_contract() -> None:
     assert "_dewey_module_is_from_repo" in activate_script
     assert 'pip install -e "${DEWEY_ROOT}[dev]" -q' in activate_script
     assert "_dewey_validate_main_repo_install" in activate_script
-    assert 'export MERIDIAN_DOMAIN_CODE="${MERIDIAN_DOMAIN_CODE:-D}"' in activate_script
+    assert 'export MERIDIAN_DOMAIN_CODE="${MERIDIAN_DOMAIN_CODE:-Z}"' in activate_script
     assert 'export TAPDB_APP_CODE="${TAPDB_APP_CODE:-D}"' in activate_script
-    assert "MERIDIAN_DOMAIN_CODE=D" in template_text
+    assert "MERIDIAN_DOMAIN_CODE=Z" in template_text
     assert "TAPDB_APP_CODE=D" in template_text
-    assert "MERIDIAN_DOMAIN_CODE=D" in tapdb_template_text
+    assert "MERIDIAN_DOMAIN_CODE=Z" in tapdb_template_text
     assert "TAPDB_APP_CODE=D" in tapdb_template_text
     assert "unset MERIDIAN_DOMAIN_CODE" in deactivate_script
     assert "unset TAPDB_APP_CODE" in deactivate_script
