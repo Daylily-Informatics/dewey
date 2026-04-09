@@ -152,6 +152,7 @@ def test_server_start_parses_tls_options(monkeypatch, capsys, tmp_path: Path) ->
 def test_config_init_show_validate_and_status(monkeypatch, tmp_path: Path, capsys) -> None:
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
     monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "local")
+    monkeypatch.delenv("AWS_PROFILE", raising=False)
 
     init_exit = _invoke(["config", "init"])
     init_output = capsys.readouterr().out
@@ -168,6 +169,7 @@ def test_config_init_show_validate_and_status(monkeypatch, tmp_path: Path, capsy
     assert "allowed_email_domains:" in config_text
     assert "default_tenant_id: 00000000-0000-0000-0000-000000000000" in config_text
     assert "auto_provision_allowed_domains:" in config_text
+    assert 'profile: ""' in config_text
 
     show_exit = _invoke(["config", "show"])
     show_output = capsys.readouterr().out
@@ -184,6 +186,14 @@ def test_config_template_bytes_are_fresh() -> None:
     assert first != second
     assert b"session_secret_key: dewey-session-secret-change-me" not in first
     assert b"allowed_email_domains:" in first
+
+
+def test_config_template_materializes_shell_aws_profile(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("AWS_PROFILE", "shell-profile")
+
+    template = build_default_config_template().decode("utf-8")
+
+    assert 'profile: "shell-profile"' in template
 
 
 def test_config_set_artifact_bucket(monkeypatch, tmp_path: Path, capsys) -> None:

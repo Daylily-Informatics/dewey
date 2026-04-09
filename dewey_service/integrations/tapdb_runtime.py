@@ -13,9 +13,9 @@ from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import quote
 
-from dewey_service.defaults import DEFAULT_DB_PORT
+from dewey_service.defaults import DEFAULT_DB_PORT, resolve_aws_profile
 
-DEFAULT_AWS_PROFILE = "lsmc"
+DEFAULT_AWS_PROFILE = ""
 DEFAULT_AWS_REGION = "us-west-2"
 DEFAULT_TAPDB_CLIENT_ID = "dewey"
 DEFAULT_TAPDB_DATABASE_NAME = "dewey"
@@ -133,8 +133,9 @@ def _resolve_runtime_env(
         client_id=resolved_client_id,
         config_path=config_path,
     )
+    resolved_profile = resolve_aws_profile(profile)
     return {
-        "aws_profile": (profile or DEFAULT_AWS_PROFILE).strip() or DEFAULT_AWS_PROFILE,
+        "aws_profile": resolved_profile,
         "aws_region": (region or DEFAULT_AWS_REGION).strip() or DEFAULT_AWS_REGION,
         "client_id": resolved_client_id,
         "database_name": resolved_namespace,
@@ -259,7 +260,10 @@ def run_tapdb_cli(
     ]
     cmd.extend(args)
     child_env = os.environ.copy()
-    child_env["AWS_PROFILE"] = runtime_env["aws_profile"]
+    if runtime_env["aws_profile"]:
+        child_env["AWS_PROFILE"] = runtime_env["aws_profile"]
+    else:
+        child_env.pop("AWS_PROFILE", None)
     child_env["AWS_REGION"] = runtime_env["aws_region"]
     child_env["AWS_DEFAULT_REGION"] = runtime_env["aws_region"]
     child_env["MERIDIAN_DOMAIN_CODE"] = os.environ.get("MERIDIAN_DOMAIN_CODE", "D")

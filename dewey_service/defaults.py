@@ -25,6 +25,21 @@ def default_cognito_logout_url() -> str:
     return f"https://localhost:{DEFAULT_AUTH_PORT}/login"
 
 
+def default_aws_profile() -> str:
+    return str(os.environ.get("AWS_PROFILE") or "").strip()
+
+
+def resolve_aws_profile(*candidates: str | None) -> str:
+    for value in candidates:
+        normalized = str(value or "").strip()
+        if normalized:
+            return normalized
+    dewey_env_profile = str(os.environ.get("DEWEY_AWS_PROFILE") or "").strip()
+    if dewey_env_profile:
+        return dewey_env_profile
+    return default_aws_profile()
+
+
 def build_default_config_template(
     *,
     managed_storage_bucket: str = "",
@@ -38,6 +53,7 @@ def build_default_config_template(
     )
     bucket = str(managed_storage_bucket or "").strip()
     prefix = str(managed_storage_prefix or "artifacts").strip().strip("/") or "artifacts"
+    aws_profile = default_aws_profile()
     return f"""# Dewey Configuration
 # ===================
 # Create this file with:
@@ -92,7 +108,7 @@ database:
   config_path: ""
 
 aws:
-  profile: lsmc
+  profile: "{aws_profile}"
   region: us-west-2
 
 storage:

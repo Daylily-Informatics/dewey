@@ -41,7 +41,7 @@ database:
   config_path: ""
 
 aws:
-  profile: lsmc
+  profile: ""
   region: us-west-2
 
 deployment:

@@ -56,6 +56,8 @@ def test_resolve_tapdb_config_path_prefers_explicit_argument() -> None:
 
 def test_resolve_runtime_env_sets_expected_values(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("DEPLOYMENT_CODE", "local2")
+    monkeypatch.setenv("DEWEY_AWS_PROFILE", "dewey-env-profile")
+    monkeypatch.setenv("AWS_PROFILE", "shell-profile")
     home = Path("/tmp/dewey-home")
     user_config = home / ".config" / "tapdb" / "dewey" / "dewey-local2" / "tapdb-config.yaml"
     user_config.parent.mkdir(parents=True, exist_ok=True)
@@ -75,6 +77,25 @@ def test_resolve_runtime_env_sets_expected_values(monkeypatch: pytest.MonkeyPatc
     assert env["database_name"] == "dewey"
     assert env["tapdb_env"] == "dev"
     assert env["config_path"].endswith(".config/tapdb/dewey/dewey-local2/tapdb-config.yaml")
+
+
+def test_resolve_runtime_env_uses_dewey_env_then_shell_env(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("DEWEY_AWS_PROFILE", "dewey-env-profile")
+    monkeypatch.setenv("AWS_PROFILE", "shell-profile")
+    monkeypatch.setattr(
+        tapdb_runtime,
+        "_resolve_tapdb_config_path",
+        lambda **_kwargs: "/tmp/dewey-tapdb.yaml",
+    )
+
+    env = tapdb_runtime._resolve_runtime_env(target="local", profile="")
+    assert env["aws_profile"] == "dewey-env-profile"
+
+    monkeypatch.delenv("DEWEY_AWS_PROFILE", raising=False)
+    env = tapdb_runtime._resolve_runtime_env(target="local", profile="")
+    assert env["aws_profile"] == "shell-profile"
 
 
 def test_export_database_url_for_target_returns_url_without_mutating_environment(
@@ -165,6 +186,38 @@ def test_run_tapdb_cli_exports_explicit_identity_env(monkeypatch: pytest.MonkeyP
     assert captured["cmd"][:5] == ["tapdb", "--config", "/tmp/dewey-tapdb.yaml", "--env", "dev"]
     assert captured["env"]["MERIDIAN_DOMAIN_CODE"] == "D"
     assert captured["env"]["TAPDB_APP_CODE"] == "D"
+    assert "AWS_PROFILE" not in captured["env"]
+
+
+def test_run_tapdb_cli_uses_shell_aws_profile_when_explicit_profile_blank(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    monkeypatch.setenv("AWS_PROFILE", "shell-profile")
+    monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda: "3.0.9")
+    monkeypatch.setattr(tapdb_runtime.shutil, "which", lambda _name: "tapdb")
+    monkeypatch.setattr(
+        tapdb_runtime,
+        "_resolve_tapdb_config_path",
+        lambda **_kwargs: "/tmp/dewey-tapdb.yaml",
+    )
+
+    def fake_run(cmd, cwd=None, env=None, text=None, capture_output=None):
+        captured["env"] = env
+        return SimpleNamespace(returncode=0, stdout="ok", stderr="")
+
+    monkeypatch.setattr(tapdb_runtime.subprocess, "run", fake_run)
+
+    tapdb_runtime.run_tapdb_cli(
+        ["db", "status"],
+        target="local",
+        profile="",
+        config_path="/tmp/dewey-tapdb.yaml",
+        check=False,
+    )
+
+    assert captured["env"]["AWS_PROFILE"] == "shell-profile"
 
 
 def test_run_tapdb_cli_returns_process_when_check_disabled(monkeypatch: pytest.MonkeyPatch) -> None:

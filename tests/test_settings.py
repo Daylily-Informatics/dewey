@@ -92,6 +92,39 @@ storage:
     assert loaded.managed_storage_prefix == "managed"
 
 
+def test_load_settings_aws_profile_prefers_dewey_env_over_config_and_shell_env(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "local")
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
+    monkeypatch.setenv("DEWEY_AWS_PROFILE", "dewey-env-profile")
+    monkeypatch.setenv("AWS_PROFILE", "shell-profile")
+    cfg_dir = tmp_path / "dewey-local"
+    cfg_dir.mkdir(parents=True)
+    cfg = cfg_dir / "dewey-config-local.yaml"
+    cfg.write_text(
+        """
+application:
+  api_bearer_token: yaml-token
+auth:
+  cognito:
+    domain: https://auth.example.com
+    app_client_id: client-1
+    redirect_uri: https://localhost:8914/auth/callback
+    logout_url: https://localhost:8914/login
+database:
+  backend: tapdb
+aws:
+  profile: config-profile
+""",
+        encoding="utf-8",
+    )
+
+    loaded = load_settings()
+
+    assert loaded.aws_profile == "dewey-env-profile"
+
+
 def test_settings_defaults_include_cognito_domain_policy() -> None:
     settings = Settings(
         api_bearer_token="token",
@@ -109,6 +142,65 @@ def test_settings_defaults_include_cognito_domain_policy() -> None:
     ]
     assert settings.cognito_default_tenant_id == "00000000-0000-0000-0000-000000000000"
     assert settings.cognito_auto_provision_allowed_domains == ["lsmc.com"]
+
+
+def test_settings_aws_profile_uses_config_when_present(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("AWS_PROFILE", "env-profile")
+    loaded = Settings(
+        api_bearer_token="token",
+        session_secret_key="secret",
+        cognito_domain="https://auth.example.com",
+        cognito_app_client_id="client",
+        cognito_redirect_uri="https://localhost:8914/auth/callback",
+        cognito_logout_url="https://localhost:8914/login",
+        aws_profile="config-profile",
+    )
+    assert loaded.aws_profile == "config-profile"
+
+
+def test_settings_aws_profile_blank_uses_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("AWS_PROFILE", "env-profile")
+    loaded = Settings(
+        api_bearer_token="token",
+        session_secret_key="secret",
+        cognito_domain="https://auth.example.com",
+        cognito_app_client_id="client",
+        cognito_redirect_uri="https://localhost:8914/auth/callback",
+        cognito_logout_url="https://localhost:8914/login",
+        aws_profile="",
+    )
+    assert loaded.aws_profile == "env-profile"
+
+
+def test_settings_aws_profile_blank_uses_dewey_env_first(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("DEWEY_AWS_PROFILE", "dewey-env-profile")
+    monkeypatch.setenv("AWS_PROFILE", "shell-profile")
+    loaded = Settings(
+        api_bearer_token="token",
+        session_secret_key="secret",
+        cognito_domain="https://auth.example.com",
+        cognito_app_client_id="client",
+        cognito_redirect_uri="https://localhost:8914/auth/callback",
+        cognito_logout_url="https://localhost:8914/login",
+        aws_profile="",
+    )
+    assert loaded.aws_profile == "dewey-env-profile"
+
+
+def test_settings_aws_profile_missing_is_empty_without_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("DEWEY_AWS_PROFILE", raising=False)
+    monkeypatch.delenv("AWS_PROFILE", raising=False)
+    loaded = Settings(
+        api_bearer_token="token",
+        session_secret_key="secret",
+        cognito_domain="https://auth.example.com",
+        cognito_app_client_id="client",
+        cognito_redirect_uri="https://localhost:8914/auth/callback",
+        cognito_logout_url="https://localhost:8914/login",
+    )
+    assert loaded.aws_profile == ""
 
 
 def test_settings_fall_back_to_deployment_code(monkeypatch: pytest.MonkeyPatch) -> None:

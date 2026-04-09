@@ -20,6 +20,7 @@ from dewey_service.defaults import (
     build_default_config_template,
     default_cognito_logout_url,
     default_cognito_redirect_uri,
+    resolve_aws_profile,
 )
 from dewey_service.rbac import DEFAULT_COGNITO_GROUP_ROLE_MAP, normalize_group_role_map
 
@@ -245,7 +246,7 @@ class Settings(BaseSettings):
     tapdb_strict_namespace: int = 1
 
     # AWS defaults for TapDB wrappers
-    aws_profile: str = "lsmc"
+    aws_profile: str = ""
     aws_region: str = "us-west-2"
 
     # Dewey-managed storage
@@ -363,6 +364,7 @@ class Settings(BaseSettings):
             color=self.deployment_color,
             fallback_name=_resolve_deployment_code(),
         )
+        self.aws_profile = resolve_aws_profile(self.aws_profile)
         self.deployment_name = str(deployment["name"])
         self.deployment_color = str(deployment["color"])
         self.deployment_is_production = bool(deployment["is_production"])
