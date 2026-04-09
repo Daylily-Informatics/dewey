@@ -1,8 +1,24 @@
 from __future__ import annotations
 
 import asyncio
+import json
+import os
+from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
+import jsonschema
+
+
+def _schema_root() -> Path:
+    root = os.environ.get("DAYHOFF_PROJECT_ROOT")
+    if not root:
+        raise RuntimeError("DAYHOFF_PROJECT_ROOT must point at the canonical Dayhoff repo root")
+    return Path(root) / "contracts" / "observability"
+
+
+def _validate(name: str, payload: dict) -> None:
+    schema = json.loads((_schema_root() / name).read_text(encoding="utf-8"))
+    jsonschema.validate(payload, schema)
 
 def _login_operator(monkeypatch, client) -> None:
     monkeypatch.setattr(
@@ -36,16 +52,19 @@ def _service_headers() -> dict[str, str]:
 def test_healthz_is_public(client) -> None:
     response = client.get("/healthz")
     assert response.status_code == 200
-    assert response.json()["status"] == "ok"
+    payload = response.json()
+    _validate("healthz.schema.json", payload)
+    assert payload["status"] == "ok"
 
 
 def test_readyz_reports_backend_state(client) -> None:
     response = client.get("/readyz")
     assert response.status_code == 503
     body = response.json()
+    _validate("readyz.schema.json", body)
     assert body["status"] == "degraded"
-    assert body["database"]["status"] == "unknown"
-    assert body["database"]["detail"] == "backend unavailable"
+    assert body["checks"]["database"]["status"] == "unknown"
+    assert body["checks"]["database"]["detail"] == "backend unavailable"
 
 
 def test_privileged_observability_routes_require_auth(client) -> None:

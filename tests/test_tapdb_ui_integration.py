@@ -22,6 +22,18 @@ def _build_dummy_tapdb_app():
 def _build_dummy_dag_router() -> APIRouter:
     router = APIRouter()
 
+    @router.get("/api/dag/data")
+    async def dag_data() -> dict[str, object]:
+        return {"items": [], "total": 0, "system": "dewey"}
+
+    @router.get("/api/dag/external")
+    async def dag_external() -> dict[str, object]:
+        return {"items": [], "total": 0, "system": "dewey"}
+
+    @router.get("/api/dag/external/object")
+    async def dag_external_object() -> dict[str, object]:
+        return {"items": [], "total": 0, "system": "dewey"}
+
     @router.get("/api/dag/object/{euid}")
     async def dag_object(euid: str) -> dict[str, str]:
         return {"euid": euid, "system": "dewey"}
@@ -99,3 +111,15 @@ def test_root_dag_router_uses_existing_dewey_auth(monkeypatch, test_settings, fa
         )
         assert response.status_code == 200
         assert response.json() == {"euid": "GX-123", "system": "dewey"}
+
+
+def test_tapdb_mount_and_dag_routes_execute(monkeypatch, test_settings, fake_service) -> None:
+    with _configured_client(monkeypatch, test_settings, fake_service) as client:
+        tapdb = client.get("/tapdb/")
+        assert tapdb.status_code == 200
+        assert "TapDB Embedded" in tapdb.text
+
+        headers = {"Authorization": "Bearer token-123"}
+        assert client.get("/api/dag/data", headers=headers).json()["system"] == "dewey"
+        assert client.get("/api/dag/external", headers=headers).json()["system"] == "dewey"
+        assert client.get("/api/dag/external/object", headers=headers).json()["system"] == "dewey"

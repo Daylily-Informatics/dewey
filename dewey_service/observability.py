@@ -189,6 +189,10 @@ class DeweyObservabilityStore:
         self._schema_drift = load_schema_drift_payload(settings)
         self._obs_services_snapshot = self._build_obs_services_snapshot()
 
+    @property
+    def started_at(self) -> str:
+        return self._started_at
+
     def _build_obs_services_snapshot(self) -> dict[str, Any]:
         return {
             "status": "ok",
@@ -490,6 +494,62 @@ def base_frame(request: Request, *, status: str) -> dict[str, Any]:
             "sha": _build_sha(),
         },
     }
+
+
+def _probe_projection(observed_at: str) -> ProjectionMetadata:
+    return ProjectionMetadata(
+        state="ready",
+        stale=False,
+        observed_at=observed_at,
+        last_synced_at=observed_at,
+        detail=None,
+    )
+
+
+def build_healthz_payload(
+    request: Request,
+    *,
+    started_at: str,
+) -> dict[str, Any]:
+    payload = base_frame(request, status="ok")
+    observed_at = str(payload.get("observed_at") or _utcnow_iso())
+    payload["checks"] = {
+        "process": {
+            "status": "ok",
+            "started_at": started_at,
+        }
+    }
+    payload["projection"] = _probe_projection(observed_at).model_dump()
+    return payload
+
+
+def build_readyz_payload(
+    request: Request,
+    *,
+    started_at: str,
+    database_check: dict[str, Any],
+    ready: bool,
+    process_details: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    payload = base_frame(request, status="ok" if ready else "degraded")
+    observed_at = str(payload.get("observed_at") or _utcnow_iso())
+    payload["ready"] = ready
+    payload["checks"] = {
+        "process": {
+            "status": "ok",
+            "started_at": started_at,
+            "details": dict(process_details or {}),
+        },
+        "database": {
+            "status": str(database_check.get("status") or "unknown"),
+            "latency_ms": database_check.get("latency_ms"),
+            "detail": database_check.get("detail"),
+            "observed_at": database_check.get("observed_at") or observed_at,
+            "details": dict(database_check.get("details") or {}),
+        },
+    }
+    payload["projection"] = _probe_projection(observed_at).model_dump()
+    return payload
 
 
 def build_health_payload(

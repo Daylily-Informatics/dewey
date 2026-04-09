@@ -66,8 +66,10 @@ from dewey_service.observability import (
     build_db_health_payload,
     build_endpoint_health_payload,
     build_health_payload,
+    build_healthz_payload,
     build_my_health_payload,
     build_obs_services_payload,
+    build_readyz_payload,
     hash_identifier,
     probe_database,
     route_template_from_request,
@@ -1076,8 +1078,11 @@ def create_app(
         return await _logout_response(request)
 
     @app.get("/healthz")
-    async def healthz() -> dict[str, str]:
-        return {"status": "ok", "version": app.version}
+    async def healthz(request: Request) -> dict[str, Any]:
+        return build_healthz_payload(
+            request,
+            started_at=app.state.observability.started_at,
+        )
 
     @app.get("/readyz")
     async def readyz(request: Request) -> JSONResponse:
@@ -1087,12 +1092,14 @@ def create_app(
             latency_ms=float(probe["latency_ms"]),
             detail=str(probe["detail"]),
         )
-        payload = {
-            "status": "ok" if probe["status"] == "ok" else "degraded",
-            "version": app.version,
-            "database": probe,
-        }
-        return JSONResponse(status_code=200 if probe["status"] == "ok" else 503, content=payload)
+        ready = str(probe.get("status") or "") == "ok"
+        payload = build_readyz_payload(
+            request,
+            started_at=app.state.observability.started_at,
+            database_check=probe,
+            ready=ready,
+        )
+        return JSONResponse(status_code=200 if ready else 503, content=payload)
 
     @app.get("/health")
     async def health(
