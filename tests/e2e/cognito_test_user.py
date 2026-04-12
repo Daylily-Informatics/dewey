@@ -92,9 +92,12 @@ def _call_with_retries(func, /, **kwargs):
 def ensure_test_user() -> E2ECredentials:
     region = str(os.getenv("E2E_COGNITO_REGION") or os.getenv("AWS_REGION") or "us-west-2").strip()
     pool_id = str(os.getenv("E2E_COGNITO_USER_POOL_ID") or "").strip()
-    profile = str(os.getenv("E2E_AWS_PROFILE") or os.getenv("AWS_PROFILE") or "lsmc").strip()
-    if not region or not pool_id:
-        raise RuntimeError("Dewey E2E tests require Cognito region and user pool ID.")
+    profile = str(os.getenv("E2E_AWS_PROFILE") or os.getenv("AWS_PROFILE") or "").strip()
+    if not region or not pool_id or not profile:
+        raise RuntimeError(
+            "Dewey E2E tests require Cognito region, user pool ID, and "
+            "E2E_AWS_PROFILE or AWS_PROFILE."
+        )
 
     email = os.getenv("E2E_USER_EMAIL", DEFAULT_EMAIL).strip().lower()
     password = os.getenv("E2E_USER_PASSWORD", DEFAULT_PASSWORD).strip() or DEFAULT_PASSWORD

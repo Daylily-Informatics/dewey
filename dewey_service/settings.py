@@ -20,7 +20,6 @@ from dewey_service.defaults import (
     build_default_config_template,
     default_cognito_logout_url,
     default_cognito_redirect_uri,
-    resolve_aws_profile,
 )
 from dewey_service.rbac import DEFAULT_COGNITO_GROUP_ROLE_MAP, normalize_group_role_map
 
@@ -364,7 +363,6 @@ class Settings(BaseSettings):
             color=self.deployment_color,
             fallback_name=_resolve_deployment_code(),
         )
-        self.aws_profile = resolve_aws_profile(self.aws_profile)
         self.deployment_name = str(deployment["name"])
         self.deployment_color = str(deployment["color"])
         self.deployment_is_production = bool(deployment["is_production"])
@@ -438,6 +436,14 @@ def _load_config_payload(config_path: Path | None = None) -> tuple[Path, dict[st
     if not isinstance(raw, dict):
         raise ValueError("Config root YAML object must be a mapping")
     return cfg_path, raw
+
+
+def load_config_aws_profile(config_path: Path | None = None) -> str:
+    _cfg_path, raw = _load_config_payload(config_path)
+    aws_config = raw.get("aws")
+    if not isinstance(aws_config, dict):
+        return ""
+    return str(aws_config.get("profile") or "").strip()
 
 
 def persist_managed_storage_bucket(

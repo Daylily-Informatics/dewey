@@ -158,7 +158,9 @@ def test_settings_aws_profile_uses_config_when_present(monkeypatch: pytest.Monke
     assert loaded.aws_profile == "config-profile"
 
 
-def test_settings_aws_profile_blank_uses_env(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_settings_aws_profile_blank_does_not_use_shell_env(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setenv("AWS_PROFILE", "env-profile")
     loaded = Settings(
         api_bearer_token="token",
@@ -169,10 +171,10 @@ def test_settings_aws_profile_blank_uses_env(monkeypatch: pytest.MonkeyPatch) ->
         cognito_logout_url="https://localhost:8914/login",
         aws_profile="",
     )
-    assert loaded.aws_profile == "env-profile"
+    assert loaded.aws_profile == ""
 
 
-def test_settings_aws_profile_blank_uses_dewey_env_first(
+def test_settings_aws_profile_blank_does_not_use_dewey_env(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setenv("DEWEY_AWS_PROFILE", "dewey-env-profile")
@@ -186,7 +188,7 @@ def test_settings_aws_profile_blank_uses_dewey_env_first(
         cognito_logout_url="https://localhost:8914/login",
         aws_profile="",
     )
-    assert loaded.aws_profile == "dewey-env-profile"
+    assert loaded.aws_profile == ""
 
 
 def test_settings_aws_profile_missing_is_empty_without_env(monkeypatch: pytest.MonkeyPatch) -> None:

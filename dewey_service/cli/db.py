@@ -20,6 +20,7 @@ from dewey_service.cli._registry_v2 import (
     register_group_commands,
 )
 from dewey_service.cli.common import PROJECT_ROOT
+from dewey_service.defaults import AWS_PROFILE_REQUIRED_MESSAGE, resolve_aws_profile
 from dewey_service.integrations.tapdb_runtime import (
     DEFAULT_AWS_PROFILE,
     DEFAULT_AWS_REGION,
@@ -31,8 +32,19 @@ from dewey_service.integrations.tapdb_runtime import (
     run_tapdb_cli,
     tapdb_env_for_target,
 )
+from dewey_service.settings import load_config_aws_profile
 
 db_app = typer.Typer(help="TapDB lifecycle and Dewey overlay commands")
+
+
+def _resolve_cli_aws_profile(profile: str) -> str:
+    resolved_profile = resolve_aws_profile(
+        cli_profile=profile,
+        config_profile=load_config_aws_profile(),
+    )
+    if resolved_profile:
+        return resolved_profile
+    raise TapDBRuntimeError(AWS_PROFILE_REQUIRED_MESSAGE)
 
 
 def _confirm_db_delete(force: bool) -> bool:
@@ -80,12 +92,13 @@ def build(
     """Bootstrap TapDB runtime and apply the Dewey overlay."""
     ensure_tapdb_version()
     try:
+        resolved_profile = _resolve_cli_aws_profile(profile)
         if target == "local":
             result = run_tapdb_cli(
                 ["bootstrap", "local", "--no-gui"],
                 target=target,
                 client_id=DEFAULT_TAPDB_CLIENT_ID,
-                profile=profile,
+                profile=resolved_profile,
                 region=region,
                 namespace=namespace,
                 cwd=PROJECT_ROOT,
@@ -105,7 +118,7 @@ def build(
                 ],
                 target=target,
                 client_id=DEFAULT_TAPDB_CLIENT_ID,
-                profile=profile,
+                profile=resolved_profile,
                 region=region,
                 namespace=namespace,
                 cwd=PROJECT_ROOT,
@@ -116,7 +129,7 @@ def build(
         db_url = export_database_url_for_target(
             target=target,
             client_id=DEFAULT_TAPDB_CLIENT_ID,
-            profile=profile,
+            profile=resolved_profile,
             region=region,
             namespace=namespace,
         )
@@ -154,15 +167,22 @@ def reset(
     ),
 ) -> None:
     """Delete and rebuild the TapDB target, then apply the Dewey overlay."""
+    resolved_profile = _resolve_cli_aws_profile(profile)
     _delete_db_target(
         force=force,
         target=target,
-        profile=profile,
+        profile=resolved_profile,
         region=region,
         namespace=namespace,
     )
 
-    build(target=target, cluster=cluster, profile=profile, region=region, namespace=namespace)
+    build(
+        target=target,
+        cluster=cluster,
+        profile=resolved_profile,
+        region=region,
+        namespace=namespace,
+    )
 
 
 @db_app.command("nuke")
@@ -176,10 +196,11 @@ def nuke(
     ),
 ) -> None:
     """Delete the TapDB target without rebuilding."""
+    resolved_profile = _resolve_cli_aws_profile(profile)
     _delete_db_target(
         force=force,
         target=target,
-        profile=profile,
+        profile=resolved_profile,
         region=region,
         namespace=namespace,
     )

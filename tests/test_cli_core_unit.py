@@ -138,6 +138,7 @@ def test_dewey_info_hook_reports_settings_and_running_server(
 def test_dewey_info_hook_handles_invalid_config_and_unknown_server(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setenv("AWS_PROFILE", "shell-profile")
     monkeypatch.setattr(cli_module, "clear_settings_cache", lambda: None)
     monkeypatch.setattr(
         cli_module,
@@ -152,7 +153,7 @@ def test_dewey_info_hook_handles_invalid_config_and_unknown_server(
     rows = dict(cli_module._dewey_info_hook())
 
     assert rows["Config Status"] == "invalid (bad cfg)"
-    assert rows["AWS Profile"] == ""
+    assert rows["AWS Profile"] == "shell-profile"
     assert rows["Dev Server"] == "Unknown"
 
 

@@ -49,6 +49,7 @@ from dewey_service.auth import (
     require_ui_session,
     start_browser_login,
 )
+from dewey_service.defaults import AWS_PROFILE_REQUIRED_MESSAGE, resolve_aws_profile
 from dewey_service.domain_access import (
     build_allowed_origin_regex,
     build_trusted_hosts,
@@ -289,9 +290,12 @@ def create_app(
     allow_local_domain_access = not settings.is_production
 
     if service is None:
+        aws_profile = resolve_aws_profile(config_profile=settings.aws_profile)
+        if not aws_profile:
+            raise RuntimeError(AWS_PROFILE_REQUIRED_MESSAGE)
         backend = TapDBBackend(app_username="dewey")
         storage_client = S3StorageClient(
-            profile=settings.aws_profile,
+            profile=aws_profile,
             region=settings.aws_region,
         )
         literature_adapter = None

@@ -188,12 +188,14 @@ def test_config_template_bytes_are_fresh() -> None:
     assert b"allowed_email_domains:" in first
 
 
-def test_config_template_materializes_shell_aws_profile(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_config_template_does_not_materialize_shell_aws_profile(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setenv("AWS_PROFILE", "shell-profile")
 
     template = build_default_config_template().decode("utf-8")
 
-    assert 'profile: "shell-profile"' in template
+    assert 'profile: ""' in template
 
 
 def test_config_set_artifact_bucket(monkeypatch, tmp_path: Path, capsys) -> None:

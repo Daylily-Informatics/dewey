@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 from urllib.parse import parse_qs, urlparse
 
+import pytest
 from fastapi.testclient import TestClient
 
 from dewey_service.app import create_app
@@ -35,6 +36,46 @@ def test_login_page_renders_banner_and_favicon(fake_service) -> None:
     assert "#124e78" in response.text
     assert "/static/favicon.svg" in response.text
     assert "Dewey Access Login" in response.text
+
+
+def test_create_app_requires_explicit_aws_profile_for_runtime_startup(monkeypatch) -> None:
+    settings = _settings_with_deployment()
+    settings.aws_profile = ""
+    monkeypatch.delenv("DEWEY_AWS_PROFILE", raising=False)
+    monkeypatch.delenv("AWS_PROFILE", raising=False)
+
+    with pytest.raises(RuntimeError, match="AWS profile is required"):
+        create_app(settings=settings)
+
+
+def test_create_app_accepts_shell_aws_profile_when_config_blank(monkeypatch) -> None:
+    settings = _settings_with_deployment()
+    settings.aws_profile = ""
+    captured: dict[str, str] = {}
+
+    class FakeService:
+        def __init__(self, backend, **kwargs):
+            self.backend = backend
+            self.storage_client = kwargs["storage_client"]
+
+        def bootstrap(self) -> None:
+            return
+
+    class FakeStorageClient:
+        def __init__(self, *, profile: str | None = None, region: str | None = None) -> None:
+            captured["profile"] = str(profile or "")
+            captured["region"] = str(region or "")
+
+    monkeypatch.setenv("AWS_PROFILE", "shell-profile")
+    monkeypatch.setattr("dewey_service.app.TapDBBackend", lambda app_username="dewey": object())
+    monkeypatch.setattr("dewey_service.app.S3StorageClient", FakeStorageClient)
+    monkeypatch.setattr("dewey_service.app.DeweyService", FakeService)
+    monkeypatch.setattr("dewey_service.app.MetapubAdapter", lambda **kwargs: None)
+
+    app = create_app(settings=settings)
+
+    assert app.state.service.storage_client is not None
+    assert captured == {"profile": "shell-profile", "region": "us-west-2"}
 
 
 def test_ui_page_renders_banner_after_login(monkeypatch, fake_service) -> None:

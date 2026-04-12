@@ -13,7 +13,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import quote
 
-from dewey_service.defaults import DEFAULT_DB_PORT, resolve_aws_profile
+from dewey_service.defaults import AWS_PROFILE_REQUIRED_MESSAGE, DEFAULT_DB_PORT, resolve_aws_profile
+from dewey_service.settings import load_config_aws_profile
 
 DEFAULT_AWS_PROFILE = ""
 DEFAULT_AWS_REGION = "us-west-2"
@@ -133,7 +134,11 @@ def _resolve_runtime_env(
         client_id=resolved_client_id,
         config_path=config_path,
     )
-    resolved_profile = resolve_aws_profile(profile)
+    resolved_profile = (profile or "").strip()
+    if not resolved_profile:
+        resolved_profile = resolve_aws_profile(config_profile=load_config_aws_profile())
+    if not resolved_profile:
+        raise TapDBRuntimeError(AWS_PROFILE_REQUIRED_MESSAGE)
     return {
         "aws_profile": resolved_profile,
         "aws_region": (region or DEFAULT_AWS_REGION).strip() or DEFAULT_AWS_REGION,

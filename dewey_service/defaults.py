@@ -9,6 +9,9 @@ import secrets
 DEFAULT_APP_PORT = 8914
 DEFAULT_AUTH_PORT = DEFAULT_APP_PORT
 DEFAULT_DB_PORT = 5432
+AWS_PROFILE_REQUIRED_MESSAGE = (
+    "AWS profile is required; set --profile, DEWEY_AWS_PROFILE, aws.profile, or AWS_PROFILE."
+)
 DEFAULT_COGNITO_ALLOWED_EMAIL_DOMAINS = (
     "lsmc.com",
     "lsmc.bio",
@@ -29,14 +32,18 @@ def default_aws_profile() -> str:
     return str(os.environ.get("AWS_PROFILE") or "").strip()
 
 
-def resolve_aws_profile(*candidates: str | None) -> str:
-    for value in candidates:
-        normalized = str(value or "").strip()
-        if normalized:
-            return normalized
+def resolve_aws_profile(
+    *, cli_profile: str | None = None, config_profile: str | None = None
+) -> str:
+    normalized_cli_profile = str(cli_profile or "").strip()
+    if normalized_cli_profile:
+        return normalized_cli_profile
     dewey_env_profile = str(os.environ.get("DEWEY_AWS_PROFILE") or "").strip()
     if dewey_env_profile:
         return dewey_env_profile
+    normalized_config_profile = str(config_profile or "").strip()
+    if normalized_config_profile:
+        return normalized_config_profile
     return default_aws_profile()
 
 
@@ -53,7 +60,6 @@ def build_default_config_template(
     )
     bucket = str(managed_storage_bucket or "").strip()
     prefix = str(managed_storage_prefix or "artifacts").strip().strip("/") or "artifacts"
-    aws_profile = default_aws_profile()
     return f"""# Dewey Configuration
 # ===================
 # Create this file with:
@@ -108,7 +114,7 @@ database:
   config_path: ""
 
 aws:
-  profile: "{aws_profile}"
+  profile: ""
   region: us-west-2
 
 storage:

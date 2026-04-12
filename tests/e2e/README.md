@@ -3,7 +3,7 @@
 Run:
 
 ```bash
-E2E_USER_PASSWORD=... pytest tests/e2e/test_auth_e2e.py -m e2e
+AWS_PROFILE=your-profile E2E_USER_PASSWORD=... pytest tests/e2e/test_auth_e2e.py -m e2e
 ```
 
 Defaults:

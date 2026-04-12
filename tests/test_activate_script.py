@@ -235,10 +235,26 @@ def test_activate_accepts_preloaded_dewey_conda_env(tmp_path: Path) -> None:
 
     assert result.returncode == 0
     assert f"Conda environment already active: DEWEY-{DEPLOY_NAME}" in result.stdout
+    assert "AWS_PROFILE=<unset>" in result.stdout
     assert "build, seed, reset, nuke" in result.stdout
     assert not call_log.exists()
     assert "Using local Dewey checkout" in result.stdout
     assert not pip_install_log.exists()
+
+
+def test_activate_preserves_existing_aws_profile(tmp_path: Path) -> None:
+    conda_base = _build_fake_conda(tmp_path)
+
+    env = os.environ.copy()
+    env["PATH"] = f"{conda_base / 'bin'}:/usr/bin:/bin"
+    env["AWS_PROFILE"] = "shell-profile"
+    env.pop("CONDA_DEFAULT_ENV", None)
+    env.pop("CONDA_PREFIX", None)
+
+    result = _source_activate(env)
+
+    assert result.returncode == 0
+    assert "AWS_PROFILE=shell-profile" in result.stdout
 
 
 def test_activate_installs_local_checkout_with_packaged_dependencies(tmp_path: Path) -> None:

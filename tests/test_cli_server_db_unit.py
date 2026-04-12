@@ -442,7 +442,7 @@ def test_db_cli_error_branches(monkeypatch: pytest.MonkeyPatch) -> None:
 
     with pytest.raises(typer.Exit) as exc:
         db_cli.build(
-            target="aurora", cluster="", profile="lsmc", region="us-west-2", namespace="dewey"
+            target="aurora", cluster="", profile="team-profile", region="us-west-2", namespace="dewey"
         )
     assert exc.value.exit_code == 1
 
@@ -463,7 +463,7 @@ def test_db_cli_error_branches(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(db_cli.subprocess, "run", fail_seed)
     with pytest.raises(typer.Exit) as exc:
         db_cli.build(
-            target="local", cluster="", profile="lsmc", region="us-west-2", namespace="dewey"
+            target="local", cluster="", profile="team-profile", region="us-west-2", namespace="dewey"
         )
     assert exc.value.exit_code == 1
 
@@ -491,11 +491,76 @@ def test_db_cli_error_branches(monkeypatch: pytest.MonkeyPatch) -> None:
             force=True,
             target="local",
             cluster="",
-            profile="lsmc",
+            profile="team-profile",
             region="us-west-2",
             namespace="dewey",
         )
     assert exc.value.exit_code == 1
+
+
+def test_db_cli_resolves_profile_from_config_when_flag_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[tuple[str, dict[str, object]]] = []
+
+    monkeypatch.setenv("AWS_PROFILE", "shell-profile")
+    monkeypatch.setattr(db_cli, "ensure_tapdb_version", lambda: "3.0.6")
+    monkeypatch.setattr(db_cli, "load_config_aws_profile", lambda: "config-profile")
+    monkeypatch.setattr(
+        db_cli,
+        "run_tapdb_cli",
+        lambda args, **kwargs: (calls.append(("run", kwargs)) or _proc(returncode=0, stdout="ok")),
+    )
+    monkeypatch.setattr(
+        db_cli,
+        "export_database_url_for_target",
+        lambda **kwargs: (calls.append(("export", kwargs)) or "postgresql+psycopg2://dewey@localhost:5432/dewey"),
+    )
+    monkeypatch.setattr(db_cli.subprocess, "run", lambda *args, **kwargs: None)
+
+    db_cli.build(target="local", cluster="", profile="", region="us-west-2", namespace="dewey")
+
+    assert calls == [
+        (
+            "run",
+            {
+                "target": "local",
+                "client_id": db_cli.DEFAULT_TAPDB_CLIENT_ID,
+                "profile": "config-profile",
+                "region": "us-west-2",
+                "namespace": "dewey",
+                "cwd": db_cli.PROJECT_ROOT,
+            },
+        ),
+        (
+            "export",
+            {
+                "target": "local",
+                "client_id": db_cli.DEFAULT_TAPDB_CLIENT_ID,
+                "profile": "config-profile",
+                "region": "us-west-2",
+                "namespace": "dewey",
+            },
+        ),
+    ]
+
+
+def test_db_cli_requires_profile_source(monkeypatch: pytest.MonkeyPatch) -> None:
+    errors: list[str] = []
+
+    monkeypatch.delenv("DEWEY_AWS_PROFILE", raising=False)
+    monkeypatch.delenv("AWS_PROFILE", raising=False)
+    monkeypatch.setattr(db_cli, "ensure_tapdb_version", lambda: "3.0.6")
+    monkeypatch.setattr(db_cli, "load_config_aws_profile", lambda: "")
+    monkeypatch.setattr(db_cli.ccyo_out, "error", lambda message: errors.append(message))
+
+    with pytest.raises(typer.Exit) as exc:
+        db_cli.build(target="local", cluster="", profile="", region="us-west-2", namespace="dewey")
+
+    assert exc.value.exit_code == 1
+    assert errors == [
+        "DB build failed: AWS profile is required; set --profile, DEWEY_AWS_PROFILE, aws.profile, or AWS_PROFILE."
+    ]
 
 
 def test_db_cli_reset_success_path(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -517,7 +582,7 @@ def test_db_cli_reset_success_path(monkeypatch: pytest.MonkeyPatch) -> None:
         force=True,
         target="local",
         cluster="cluster-1",
-        profile="lsmc",
+        profile="team-profile",
         region="us-west-2",
         namespace="dewey",
     )
@@ -529,7 +594,7 @@ def test_db_cli_reset_success_path(monkeypatch: pytest.MonkeyPatch) -> None:
             {
                 "target": "local",
                 "cluster": "cluster-1",
-                "profile": "lsmc",
+                "profile": "team-profile",
                 "region": "us-west-2",
                 "namespace": "dewey",
             },
@@ -552,6 +617,12 @@ def test_db_cli_nuke_success_path(monkeypatch: pytest.MonkeyPatch) -> None:
         lambda **kwargs: calls.append(("build", kwargs)),
     )
 
-    db_cli.nuke(force=True, target="aurora", profile="lsmc", region="us-west-2", namespace="dewey")
+    db_cli.nuke(
+        force=True,
+        target="aurora",
+        profile="team-profile",
+        region="us-west-2",
+        namespace="dewey",
+    )
 
     assert calls == [("delete", ["db", "delete", "prod", "--force"])]

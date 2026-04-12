@@ -440,7 +440,6 @@ unset -f _dewey_fail
 export DEWEY_ROOT
 export DEWEY_ACTIVE=1
 export DEWEY_PROJECT_ROOT="$DEWEY_ROOT"
-export AWS_PROFILE="${AWS_PROFILE:-lsmc}"
 export AWS_REGION="${AWS_REGION:-us-west-2}"
 export DATABASE_BACKEND="${DATABASE_BACKEND:-tapdb}"
 export DATABASE_TARGET="${DATABASE_TARGET:-local}"
@@ -469,7 +468,7 @@ if [[ -f "$DEWEY_ROOT/dewey_deactivate" ]]; then
   }
 fi
 
-echo -e "  ${_GREEN}✓${_NC} AWS_PROFILE=${AWS_PROFILE}"
+echo -e "  ${_GREEN}✓${_NC} AWS_PROFILE=${AWS_PROFILE:-<unset>}"
 echo -e "  ${_GREEN}✓${_NC} AWS_REGION=${AWS_REGION}"
 echo -e "  ${_GREEN}✓${_NC} MERIDIAN_DOMAIN_CODE=${MERIDIAN_DOMAIN_CODE}"
 echo -e "  ${_GREEN}✓${_NC} TAPDB_APP_CODE=${TAPDB_APP_CODE}"

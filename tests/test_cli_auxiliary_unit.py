@@ -209,6 +209,42 @@ def test_tapdb_run_invokes_runtime_and_emits_output(monkeypatch: pytest.MonkeyPa
     ]
 
 
+def test_tapdb_run_resolves_profile_from_config_when_flag_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[dict[str, object]] = []
+
+    monkeypatch.setenv("AWS_PROFILE", "shell-profile")
+    monkeypatch.setattr(tapdb_cli, "load_config_aws_profile", lambda: "config-profile")
+    monkeypatch.setattr(
+        tapdb_cli,
+        "run_tapdb_cli",
+        lambda args, **kwargs: (calls.append(kwargs) or _proc(returncode=0, stdout="", stderr="")),
+    )
+
+    with pytest.raises(typer.Exit) as exc:
+        tapdb_cli.run_command(
+            SimpleNamespace(args=["db", "status"]),
+            target="local",
+            profile="",
+            region="us-west-2",
+            namespace="dewey",
+        )
+
+    assert exc.value.exit_code == 0
+    assert calls == [
+        {
+            "target": "local",
+            "client_id": tapdb_cli.DEFAULT_TAPDB_CLIENT_ID,
+            "profile": "config-profile",
+            "region": "us-west-2",
+            "namespace": "dewey",
+            "cwd": tapdb_cli.PROJECT_ROOT,
+            "check": False,
+        }
+    ]
+
+
 def test_tapdb_run_handles_runtime_error(monkeypatch: pytest.MonkeyPatch) -> None:
     errors: list[str] = []
 
@@ -224,6 +260,29 @@ def test_tapdb_run_handles_runtime_error(monkeypatch: pytest.MonkeyPatch) -> Non
 
     assert exc.value.exit_code == 1
     assert errors == ["TapDB invocation failed: boom"]
+
+
+def test_tapdb_run_requires_profile_source(monkeypatch: pytest.MonkeyPatch) -> None:
+    errors: list[str] = []
+
+    monkeypatch.delenv("DEWEY_AWS_PROFILE", raising=False)
+    monkeypatch.delenv("AWS_PROFILE", raising=False)
+    monkeypatch.setattr(tapdb_cli, "load_config_aws_profile", lambda: "")
+    monkeypatch.setattr(tapdb_cli.ccyo_out, "error", lambda message: errors.append(message))
+
+    with pytest.raises(typer.Exit) as exc:
+        tapdb_cli.run_command(
+            SimpleNamespace(args=["db", "status"]),
+            target="local",
+            profile="",
+            region="us-west-2",
+            namespace="dewey",
+        )
+
+    assert exc.value.exit_code == 1
+    assert errors == [
+        "TapDB invocation failed: AWS profile is required; set --profile, DEWEY_AWS_PROFILE, aws.profile, or AWS_PROFILE."
+    ]
 
 
 def test_tapdb_registers_v2_command() -> None:

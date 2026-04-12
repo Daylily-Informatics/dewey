@@ -6,6 +6,7 @@ from functools import lru_cache
 from importlib.metadata import PackageNotFoundError, version
 from typing import Any
 
+from dewey_service.defaults import resolve_aws_profile
 from dewey_service.integrations.tapdb_runtime import (
     run_schema_drift_check as run_tapdb_schema_drift_check,
 )
@@ -29,7 +30,7 @@ def load_schema_drift_payload(settings: Settings) -> dict[str, Any]:
         _cached_schema_drift_payload(
             settings.database_target,
             settings.tapdb_client_id,
-            settings.aws_profile,
+            resolve_aws_profile(config_profile=settings.aws_profile),
             settings.aws_region,
             settings.tapdb_database_name,
             settings.tapdb_env or "",

@@ -27,6 +27,7 @@ from dewey_service.defaults import (
     build_default_config_template,
     default_cognito_logout_url,
     default_cognito_redirect_uri,
+    resolve_aws_profile,
 )
 from dewey_service.settings import (
     Settings,
@@ -213,7 +214,7 @@ def _validate_dewey_config(content: str) -> list[str]:
 def _dewey_info_hook() -> list[tuple[str, str]]:
     """Return Dewey-specific rows for the built-in info command."""
     rows: list[tuple[str, str]] = [("Project Root", str(PROJECT_ROOT))]
-    aws_profile = ""
+    aws_profile = resolve_aws_profile()
 
     try:
         clear_settings_cache()
@@ -222,7 +223,7 @@ def _dewey_info_hook() -> list[tuple[str, str]]:
         rows.append(("Config Status", f"invalid ({exc})"))
         settings = None
     else:
-        aws_profile = settings.aws_profile
+        aws_profile = resolve_aws_profile(config_profile=settings.aws_profile)
         rows.extend(
             [
                 ("Database Backend", settings.database_backend),
