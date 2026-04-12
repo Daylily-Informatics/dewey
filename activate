@@ -451,6 +451,7 @@ _DEWEY_USER_TAPDB_CONFIG_PATH="$(_dewey_prepare_tapdb_config_path "$_DEWEY_TAPDB
   return 1
 }
 _DEWEY_RUNTIME_TAPDB_CONFIG_PATH="${_DEWEY_USER_TAPDB_CONFIG_PATH}"
+export TAPDB_CONFIG_PATH="${_DEWEY_RUNTIME_TAPDB_CONFIG_PATH}"
 
 if [[ -z "${DEWEY_API_BEARER_TOKEN:-}" ]]; then
   export DEWEY_API_BEARER_TOKEN="dewey-dev-token"
