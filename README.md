@@ -380,3 +380,4 @@ Current code wins when historical docs disagree.
 - `share reference`: A Dewey record describing a time-bounded sharing action for an artifact or artifact set.
 - `TapDB`: The shared persistence substrate Dewey uses for templates, instances, lineage, and related storage primitives.
 - `Unified Search`: Dewey's normalized search surface for artifacts, share references, and, through the API, artifact sets.
+ 
