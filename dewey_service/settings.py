@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import colorsys
+import json
 import hashlib
 import os
 import re
@@ -28,6 +29,23 @@ DEFAULT_COGNITO_AUTO_PROVISION_ALLOWED_DOMAINS = ("lsmc.com",)
 
 DEFAULT_DEPLOYMENT_BANNER_COLOR = "#AFEEEE"
 PRODUCTION_DEPLOYMENT_NAMES = {"prod", "production"}
+SENSITIVE_CONFIG_KEY_PARTS = {
+    "secret",
+    "token",
+    "password",
+    "passwd",
+    "key",
+    "credential",
+    "private",
+    "signing",
+    "session",
+    "cookie",
+    "authorization",
+    "client_secret",
+    "api_key",
+    "access_key",
+    "secret_key",
+}
 
 
 def _require_https_url(value: str, *, field_name: str) -> str:
@@ -118,6 +136,17 @@ def _stable_deployment_color_hex(name: str) -> str:
     )
 
 
+def _stable_region_color_hex(name: str) -> str:
+    digest = hashlib.sha256(name.encode("utf-8")).digest()
+    hue = (int.from_bytes(digest[:8], "big") % 360 + 180) % 360
+    red, green, blue = colorsys.hls_to_rgb(hue / 360.0, 0.62, 0.45)
+    return "#{:02x}{:02x}{:02x}".format(
+        round(red * 255),
+        round(green * 255),
+        round(blue * 255),
+    )
+
+
 def _resolve_deployment_chrome(
     *,
     name: str | None,
@@ -125,17 +154,23 @@ def _resolve_deployment_chrome(
     fallback_name: str | None = None,
 ) -> dict[str, Any]:
     resolved_name = str(name or "").strip() or str(fallback_name or "").strip()
-    resolved_color = str(color or "").strip()
-    if not resolved_color:
-        resolved_color = (
-            _stable_deployment_color_hex(resolved_name)
-            if resolved_name
-            else DEFAULT_DEPLOYMENT_BANNER_COLOR
-        )
+    resolved_color = (
+        _stable_deployment_color_hex(resolved_name)
+        if resolved_name
+        else DEFAULT_DEPLOYMENT_BANNER_COLOR
+    )
     return {
         "name": resolved_name,
         "color": resolved_color,
         "is_production": resolved_name.lower() in PRODUCTION_DEPLOYMENT_NAMES,
+    }
+
+
+def _resolve_region_chrome(name: str | None) -> dict[str, Any]:
+    resolved_name = str(name or "").strip() or "us-west-2"
+    return {
+        "name": resolved_name,
+        "color": _stable_region_color_hex(resolved_name),
     }
 
 
@@ -190,11 +225,119 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "deployment_name": "deployment_name",
         "deployment_color": "deployment_color",
         "deployment_is_production": "deployment_is_production",
+        "ui_show_environment_chrome": "show_environment_chrome",
+        "show_environment_chrome": "show_environment_chrome",
     }
     normalized: dict[str, Any] = {}
     for key, value in out.items():
         normalized[remap.get(key, key)] = value
     return normalized
+
+
+def _is_sensitive_config_path(path: str) -> bool:
+    lowered = str(path or "").lower()
+    return any(part in lowered for part in SENSITIVE_CONFIG_KEY_PARTS)
+
+
+def _display_config_value(value: Any) -> str:
+    if value is None:
+        return "<unset>"
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (int, float)):
+        return str(value)
+    if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, (list, tuple, set)):
+        items = [str(item).strip() for item in value if str(item).strip()]
+        return ", ".join(items) if items else "<unset>"
+    if isinstance(value, dict):
+        return json.dumps(value, sort_keys=True, default=str)
+    text = str(value).strip()
+    return text or "<unset>"
+
+
+def _display_config_path(path: str) -> str:
+    mapping = {
+        "show_environment_chrome": "ui.show_environment_chrome",
+        "deployment_name": "deployment.name",
+        "deployment_color": "deployment.color",
+        "deployment_is_production": "deployment.is_production",
+        "environment": "application.environment",
+        "api_bearer_token": "application.api_bearer_token",
+        "api_bearer_tokens": "application.api_bearer_tokens",
+        "session_secret_key": "application.session_secret_key",
+        "host": "application.host",
+        "port": "application.port",
+        "verify_ssl": "application.verify_ssl",
+        "cognito_domain": "auth.cognito.domain",
+        "cognito_app_client_id": "auth.cognito.app_client_id",
+        "cognito_app_client_secret": "auth.cognito.app_client_secret",
+        "cognito_redirect_uri": "auth.cognito.redirect_uri",
+        "cognito_logout_url": "auth.cognito.logout_url",
+        "cognito_user_pool_id": "auth.cognito.user_pool_id",
+        "cognito_region": "auth.cognito.region",
+        "cognito_allowed_email_domains": "auth.cognito.allowed_email_domains",
+        "cognito_default_tenant_id": "auth.cognito.default_tenant_id",
+        "cognito_auto_provision_allowed_domains": "auth.cognito.auto_provision_allowed_domains",
+        "cognito_group_role_map": "auth.cognito.group_role_map",
+        "database_backend": "database.backend",
+        "database_target": "database.target",
+        "tapdb_client_id": "database.client_id",
+        "tapdb_database_name": "database.namespace",
+        "tapdb_env": "database.env",
+        "tapdb_config_path": "database.config_path",
+        "tapdb_strict_namespace": "database.strict_namespace",
+        "aws_profile": "aws.profile",
+        "aws_region": "aws.region",
+        "managed_storage_bucket": "storage.managed_bucket",
+        "managed_storage_prefix": "storage.managed_prefix",
+        "upload_session_ttl_seconds": "storage.upload_session_ttl_seconds",
+        "literature_managed_copy_allowed_domains": "literature.managed_copy_allowed_domains",
+        "literature_metapub_cache_dir": "literature.metapub_cache_dir",
+        "literature_request_timeout_seconds": "literature.request_timeout_seconds",
+        "literature_max_redirects": "literature.max_redirects",
+        "default_share_reference_ttl_seconds": "share_reference.default_ttl_seconds",
+        "search_export_max_rows": "search.export_max_rows",
+        "config_path": "config.file_path",
+    }
+    if path in mapping:
+        return mapping[path]
+    prefix_mapping = {
+        "cognito_group_role_map.": "auth.cognito.group_role_map.",
+    }
+    for prefix, replacement in prefix_mapping.items():
+        if path.startswith(prefix):
+            return replacement + path[len(prefix) :]
+    return path.replace("_", ".")
+
+
+def build_effective_config_rows(settings: "Settings", *, config_path: Path) -> list[dict[str, str]]:
+    payload = settings.model_dump(mode="python")
+    payload["show_environment_chrome"] = settings.show_environment_chrome
+    payload["config_path"] = str(config_path)
+
+    rows: list[dict[str, str]] = []
+
+    def _visit(path: str, value: Any) -> None:
+        if isinstance(value, dict):
+            for key in sorted(value):
+                next_path = f"{path}.{key}" if path else str(key)
+                _visit(next_path, value[key])
+            return
+        display_path = _display_config_path(path)
+        rows.append(
+            {
+                "path": display_path,
+                "value": "<redacted>" if _is_sensitive_config_path(display_path) else _display_config_value(value),
+            }
+        )
+
+    for key in sorted(payload):
+        _visit(str(key), payload[key])
+
+    rows.sort(key=lambda item: item["path"])
+    return rows
 
 
 class Settings(BaseSettings):
@@ -234,6 +377,7 @@ class Settings(BaseSettings):
     deployment_name: str = ""
     deployment_color: str = ""
     deployment_is_production: bool = False
+    show_environment_chrome: bool = True
 
     # TapDB runtime
     database_backend: str = "tapdb"
@@ -493,6 +637,7 @@ def load_settings(config_path: Path | None = None) -> Settings:
         "deployment_name": "",
         "deployment_color": "",
         "deployment_is_production": False,
+        "show_environment_chrome": True,
     }
     env_override = {
         key[len("DEWEY_") :].lower(): value

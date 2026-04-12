@@ -1,0 +1,21 @@
+{% macro environment_chrome(deployment, region, show_environment_chrome) -%}
+  {% if show_environment_chrome %}
+  <div class="environment-chrome" aria-hidden="true">
+    <div class="deployment-banner" style="background: {{ deployment.color }};">
+      {{ deployment.name|upper }}
+    </div>
+    <div class="region-banner" style="background: {{ region.color }};"></div>
+  </div>
+  {% endif %}
+{%- endmacro %}
+
+{% macro page_footer(git_meta, build_version) -%}
+  <footer class="page-footer">
+    <div class="footer-grid">
+      <span><span class="footer-label">Version</span> {{ build_version }}</span>
+      <span><span class="footer-label">Branch</span> {{ git_meta.branch }}</span>
+      <span><span class="footer-label">Tag</span> {{ git_meta.tag }}</span>
+      <span><span class="footer-label">Commit</span> {{ git_meta.commit }}</span>
+    </div>
+  </footer>
+{%- endmacro %}

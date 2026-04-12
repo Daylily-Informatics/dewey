@@ -77,11 +77,14 @@ from dewey_service.observability import (
 )
 from dewey_service.rbac import Role, profile_has_role
 from dewey_service.service import DeweyConflictError, DeweyNotFoundError, DeweyService
+from dewey_service.ui_metadata import resolve_git_metadata, resolve_package_version
 from dewey_service.settings import (
     Settings,
+    build_effective_config_rows,
     get_config_file_path,
     get_settings,
     persist_managed_storage_bucket,
+    _resolve_region_chrome,
 )
 from dewey_service.storage import S3StorageClient
 from dewey_service.tapdb_backend import TapDBBackend
@@ -324,12 +327,13 @@ def create_app(
 
     app = FastAPI(
         title="Dewey Artifact Service",
-        version="1.0.0",
+        version=resolve_package_version(),
         description="Canonical artifact registry and resolver for LSMC",
     )
     app.state.settings = settings
     app.state.service = service
     app.state.observability = DeweyObservabilityStore(settings, version=app.version)
+    app.state.git_metadata = resolve_git_metadata(Path(__file__).resolve().parents[1])
     backend = getattr(service, "backend", None)
     if backend is not None and hasattr(backend, "observability"):
         backend.observability = app.state.observability
@@ -378,6 +382,10 @@ def create_app(
     def _template_context(**kwargs: Any) -> dict[str, Any]:
         context = {
             "deployment": settings.deployment,
+            "region": _resolve_region_chrome(settings.aws_region or settings.cognito_region),
+            "show_environment_chrome": bool(settings.show_environment_chrome),
+            "git_meta": dict(getattr(app.state, "git_metadata", {})),
+            "build_version": app.version,
             "tapdb_embedded": bool(getattr(app.state, "tapdb_embedded", False)),
         }
         context.update(kwargs)
@@ -677,6 +685,10 @@ def create_app(
                 managed_storage_bucket=str(settings.managed_storage_bucket or "").strip(),
                 managed_storage_prefix=str(settings.managed_storage_prefix or "").strip(),
                 config_path=str(get_config_file_path()),
+                config_rows=build_effective_config_rows(
+                    settings,
+                    config_path=get_config_file_path(),
+                ),
                 artifact_bucket_form=artifact_bucket_form
                 or {"managed_storage_bucket": str(settings.managed_storage_bucket or "").strip()},
                 artifact_bucket_status=artifact_bucket_status,

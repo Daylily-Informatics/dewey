@@ -490,7 +490,7 @@ def base_frame(request: Request, *, status: str) -> dict[str, Any]:
         "request_id": getattr(request.state, "request_id", ""),
         "correlation_id": getattr(request.state, "correlation_id", ""),
         "build": {
-            "version": request.app.version,
+            "version": store.version,
             "sha": _build_sha(),
         },
     }

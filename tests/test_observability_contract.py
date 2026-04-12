@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib.metadata
 import asyncio
 import json
 import os
@@ -225,3 +226,11 @@ def test_observability_page_renders_for_logged_in_operator(monkeypatch, client) 
     assert "/api/v1/artifacts" in response.text
     assert "Schema drift:" in response.text
     assert "Sessions supported:" in response.text
+
+
+def test_observability_payload_reports_package_version(client) -> None:
+    response = client.get("/health", headers=_service_headers())
+    assert response.status_code == 200
+    body = response.json()
+    assert body["build"]["version"] == importlib.metadata.version("dewey-service")
+    assert client.app.version == importlib.metadata.version("dewey-service")

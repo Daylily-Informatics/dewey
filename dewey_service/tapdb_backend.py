@@ -22,6 +22,9 @@ from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from dewey_service.settings import get_settings
+from dewey_service.ui_metadata import resolve_package_version
+
+SERVICE_VERSION = resolve_package_version()
 
 
 def utc_now_iso() -> str:
@@ -276,7 +279,7 @@ class TapDBBackend:
             category="generic",
             type="lineage",
             subtype="instance_lineage",
-            version="1.0.0",
+            version=SERVICE_VERSION,
             bstatus="active",
             json_addl={},
             is_singleton=False,

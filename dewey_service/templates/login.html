@@ -1,4 +1,5 @@
 <!doctype html>
+{% from "_chrome.html" import environment_chrome, page_footer %}
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -8,11 +9,9 @@
     <link rel="stylesheet" href="{{ static_url('console.css') }}" />
   </head>
   <body>
-    {% if deployment.name and not deployment.is_production %}
-    <div class="deployment-banner" style="background: {{ deployment.color }};">{{ deployment.name|upper }}</div>
-    {% endif %}
+    {{ environment_chrome(deployment, region, show_environment_chrome|default(true)) }}
     <main class="shell">
-      <div class="page" style="max-width: 1040px; min-height: calc(100vh - 18px); display: flex; align-items: center;">
+      <div class="page" style="max-width: 1040px; min-height: calc(100vh - 22px); display: flex; align-items: center;">
         <section class="panel" style="width: 100%; padding: 2.5rem; display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
           <div>
             <div class="eyebrow">{{ auth_badge|default("Authentication Required") }}</div>
@@ -38,6 +37,7 @@
           </div>
         </section>
       </div>
+      {{ page_footer(git_meta, build_version) }}
     </main>
   </body>
 </html>

@@ -7,7 +7,11 @@ import pytest
 from fastapi.testclient import TestClient
 
 from dewey_service.app import create_app
-from dewey_service.settings import Settings
+from dewey_service.settings import (
+    Settings,
+    _stable_deployment_color_hex,
+    _stable_region_color_hex,
+)
 
 
 def _settings_with_deployment() -> Settings:
@@ -19,23 +23,45 @@ def _settings_with_deployment() -> Settings:
         cognito_app_client_secret="secret-123",
         cognito_redirect_uri="https://localhost:8914/auth/callback",
         cognito_logout_url="https://localhost:8914/login",
-        deployment_name="staging",
+        deployment_name="510x2",
         deployment_color="#124e78",
         deployment_is_production=False,
+        aws_region="us-east-1",
     )
 
 
-def test_login_page_renders_banner_and_favicon(fake_service) -> None:
+def test_login_page_renders_chrome_and_footer(monkeypatch, fake_service) -> None:
+    monkeypatch.setattr(
+        "dewey_service.app.resolve_package_version",
+        lambda: "9.9.9",
+    )
+    monkeypatch.setattr(
+        "dewey_service.app.resolve_git_metadata",
+        lambda _repo_root=None: {
+            "branch": "codex/dewey-gui-chrome-scm",
+            "tag": "1.2.0",
+            "commit": "abc1234",
+        },
+    )
     app = create_app(settings=_settings_with_deployment(), service=fake_service)
 
     with TestClient(app, base_url="https://localhost:8914") as client:
         response = client.get("/login")
 
     assert response.status_code == 200
-    assert "staging".upper() in response.text
-    assert "#124e78" in response.text
+    assert "510X2" in response.text
+    assert _stable_deployment_color_hex("510x2") in response.text
+    assert _stable_region_color_hex("us-east-1") in response.text
     assert "/static/favicon.svg" in response.text
     assert "Dewey Access Login" in response.text
+    assert "Version" in response.text
+    assert "9.9.9" in response.text
+    assert "Branch" in response.text
+    assert "codex/dewey-gui-chrome-scm" in response.text
+    assert "Tag" in response.text
+    assert "1.2.0" in response.text
+    assert "Commit" in response.text
+    assert "abc1234" in response.text
 
 
 def test_create_app_requires_explicit_aws_profile_for_runtime_startup(monkeypatch) -> None:
@@ -75,10 +101,22 @@ def test_create_app_accepts_shell_aws_profile_when_config_blank(monkeypatch) -> 
     app = create_app(settings=settings)
 
     assert app.state.service.storage_client is not None
-    assert captured == {"profile": "shell-profile", "region": "us-west-2"}
+    assert captured == {"profile": "shell-profile", "region": "us-east-1"}
 
 
-def test_ui_page_renders_banner_after_login(monkeypatch, fake_service) -> None:
+def test_ui_page_renders_chrome_after_login(monkeypatch, fake_service) -> None:
+    monkeypatch.setattr(
+        "dewey_service.app.resolve_package_version",
+        lambda: "9.9.9",
+    )
+    monkeypatch.setattr(
+        "dewey_service.app.resolve_git_metadata",
+        lambda _repo_root=None: {
+            "branch": "codex/dewey-gui-chrome-scm",
+            "tag": "1.2.0",
+            "commit": "abc1234",
+        },
+    )
     app = create_app(settings=_settings_with_deployment(), service=fake_service)
 
     monkeypatch.setattr(
@@ -109,7 +147,9 @@ def test_ui_page_renders_banner_after_login(monkeypatch, fake_service) -> None:
         admin = client.get("/admin")
 
     assert ui.status_code == 200
-    assert "STAGING" in ui.text
+    assert "510X2" in ui.text
+    assert _stable_deployment_color_hex("510x2") in ui.text
+    assert _stable_region_color_hex("us-east-1") in ui.text
     assert "/static/favicon.svg" in ui.text
     assert "/literature" in ui.text
     assert "/artifacts/dag" in ui.text
@@ -126,6 +166,36 @@ def test_ui_page_renders_banner_after_login(monkeypatch, fake_service) -> None:
     assert "Operator Anomalies" in admin.text
     assert "Open anomaly view" in admin.text
     assert "Managed Artifact Storage" in admin.text
+    assert "Runtime Config" in admin.text
+    assert "ui.show_environment_chrome" in admin.text
+    assert "Version" in admin.text
+    assert "9.9.9" in admin.text
+
+
+def test_environment_chrome_can_be_disabled(monkeypatch, fake_service) -> None:
+    settings = _settings_with_deployment()
+    settings.show_environment_chrome = False
+    monkeypatch.setattr(
+        "dewey_service.app.resolve_package_version",
+        lambda: "9.9.9",
+    )
+    monkeypatch.setattr(
+        "dewey_service.app.resolve_git_metadata",
+        lambda _repo_root=None: {
+            "branch": "codex/dewey-gui-chrome-scm",
+            "tag": "1.2.0",
+            "commit": "abc1234",
+        },
+    )
+    app = create_app(settings=settings, service=fake_service)
+
+    with TestClient(app, base_url="https://localhost:8914") as client:
+        response = client.get("/login")
+
+    assert response.status_code == 200
+    assert "510X2" not in response.text
+    assert _stable_region_color_hex("us-east-1") not in response.text
+    assert "abc1234" in response.text
 
 
 def test_favicon_route_redirects_to_svg(fake_service) -> None:
@@ -138,10 +208,24 @@ def test_favicon_route_redirects_to_svg(fake_service) -> None:
     assert response.headers["location"] == "/static/favicon.svg"
 
 
-def test_prod_login_page_omits_deployment_banner(fake_service) -> None:
+def test_prod_login_page_renders_deployment_banner_when_enabled(
+    monkeypatch, fake_service
+) -> None:
     settings = _settings_with_deployment()
     settings.deployment_name = "prod"
     settings.deployment_is_production = True
+    monkeypatch.setattr(
+        "dewey_service.app.resolve_package_version",
+        lambda: "9.9.9",
+    )
+    monkeypatch.setattr(
+        "dewey_service.app.resolve_git_metadata",
+        lambda _repo_root=None: {
+            "branch": "codex/dewey-gui-chrome-scm",
+            "tag": "unreleased",
+            "commit": "abc1234",
+        },
+    )
 
     app = create_app(settings=settings, service=fake_service)
 
@@ -149,4 +233,6 @@ def test_prod_login_page_omits_deployment_banner(fake_service) -> None:
         response = client.get("/login")
 
     assert response.status_code == 200
-    assert "PROD" not in response.text
+    assert "PROD" in response.text
+    assert _stable_region_color_hex("us-east-1") in response.text
+    assert "abc1234" in response.text

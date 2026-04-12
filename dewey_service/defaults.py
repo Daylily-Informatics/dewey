@@ -126,6 +126,9 @@ deployment:
   name: ""
   color: ""
   is_production: false
+
+ui:
+  show_environment_chrome: true
 """.encode("utf-8")
 
 

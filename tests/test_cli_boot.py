@@ -169,6 +169,8 @@ def test_config_init_show_validate_and_status(monkeypatch, tmp_path: Path, capsy
     assert "allowed_email_domains:" in config_text
     assert "default_tenant_id: 00000000-0000-0000-0000-000000000000" in config_text
     assert "auto_provision_allowed_domains:" in config_text
+    assert "ui:" in config_text
+    assert "show_environment_chrome: true" in config_text
     assert 'profile: ""' in config_text
 
     show_exit = _invoke(["config", "show"])
@@ -177,6 +179,7 @@ def test_config_init_show_validate_and_status(monkeypatch, tmp_path: Path, capsy
     assert "application:" in show_output
     assert "database:" in show_output
     assert "storage:" in show_output
+    assert "show_environment_chrome" in show_output
 
 
 def test_config_template_bytes_are_fresh() -> None:

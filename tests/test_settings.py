@@ -7,8 +7,11 @@ import pytest
 from dewey_service.settings import (
     DEFAULT_DEPLOYMENT_BANNER_COLOR,
     Settings,
+    _resolve_region_chrome,
     _resolve_deployment_chrome,
+    _stable_region_color_hex,
     _stable_deployment_color_hex,
+    build_effective_config_rows,
     load_settings,
     persist_managed_storage_bucket,
 )
@@ -85,11 +88,12 @@ storage:
     }
     assert loaded.deployment == {
         "name": "staging",
-        "color": "#124e78",
+        "color": _stable_deployment_color_hex("staging"),
         "is_production": False,
     }
     assert loaded.managed_storage_bucket == "dewey-artifacts-staging"
     assert loaded.managed_storage_prefix == "managed"
+    assert loaded.show_environment_chrome is True
 
 
 def test_load_settings_aws_profile_prefers_dewey_env_over_config_and_shell_env(
@@ -216,7 +220,7 @@ def test_settings_fall_back_to_deployment_code(monkeypatch: pytest.MonkeyPatch) 
         cognito_redirect_uri="https://localhost:8914/auth/callback",
         cognito_logout_url="https://localhost:8914/login",
         deployment_name="",
-        deployment_color="",
+        deployment_color="#124e78",
         deployment_is_production=True,
     )
 
@@ -227,7 +231,7 @@ def test_settings_fall_back_to_deployment_code(monkeypatch: pytest.MonkeyPatch) 
     }
 
 
-def test_prod_deployment_name_forces_banner_hidden() -> None:
+def test_prod_deployment_name_uses_derived_color() -> None:
     loaded = Settings(
         api_bearer_token="token",
         session_secret_key="secret",
@@ -236,7 +240,7 @@ def test_prod_deployment_name_forces_banner_hidden() -> None:
         cognito_redirect_uri="https://localhost:8914/auth/callback",
         cognito_logout_url="https://localhost:8914/login",
         deployment_name="production",
-        deployment_color="",
+        deployment_color="#124e78",
     )
 
     assert loaded.deployment == {
@@ -252,6 +256,52 @@ def test_light_aqua_is_used_without_any_deployment_name() -> None:
         "color": DEFAULT_DEPLOYMENT_BANNER_COLOR,
         "is_production": False,
     }
+
+
+def test_deployment_color_is_derived_from_name_even_when_configured() -> None:
+    assert _resolve_deployment_chrome(
+        name="510x2",
+        color="#124e78",
+        fallback_name="local",
+    ) == {
+        "name": "510x2",
+        "color": "#4321ca",
+        "is_production": False,
+    }
+
+
+def test_region_color_is_derived_from_region_name() -> None:
+    assert _stable_region_color_hex("us-east-1") == "#8aca72"
+    assert _stable_region_color_hex("us-west-2") == "#a5ca72"
+    assert _resolve_region_chrome("us-east-1") == {
+        "name": "us-east-1",
+        "color": "#8aca72",
+    }
+
+
+def test_effective_config_rows_redact_secret_values(tmp_path: Path) -> None:
+    settings = Settings(
+        api_bearer_token="token",
+        session_secret_key="secret",
+        cognito_domain="https://auth.example.com",
+        cognito_app_client_id="client",
+        cognito_app_client_secret="secret-client",
+        cognito_redirect_uri="https://localhost:8914/auth/callback",
+        cognito_logout_url="https://localhost:8914/login",
+        show_environment_chrome=False,
+        aws_region="us-east-1",
+    )
+
+    rows = build_effective_config_rows(settings, config_path=tmp_path / "dewey.yaml")
+    row_map = {row["path"]: row["value"] for row in rows}
+
+    assert row_map["ui.show_environment_chrome"] == "false"
+    assert row_map["auth.cognito.app_client_secret"] == "<redacted>"
+    assert row_map["application.session_secret_key"] == "<redacted>"
+    assert row_map["application.api_bearer_token"] == "<redacted>"
+    assert row_map["aws.region"] == "us-east-1"
+    assert row_map["auth.cognito.group_role_map.platform-admin"] == "ADMIN"
+    assert row_map["config.file_path"] == str(tmp_path / "dewey.yaml")
 
 
 def test_settings_allow_dewey_cognito_env_overrides(
