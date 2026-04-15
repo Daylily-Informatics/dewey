@@ -127,6 +127,9 @@ deployment:
   color: ""
   is_production: false
 
+network:
+  allowed_hosts: []
+
 ui:
   show_environment_chrome: true
 """.encode("utf-8")

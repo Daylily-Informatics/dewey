@@ -64,3 +64,6 @@ deployment:
   name: ""
   color: ""
   is_production: false
+
+network:
+  allowed_hosts: []

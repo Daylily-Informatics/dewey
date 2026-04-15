@@ -377,6 +377,7 @@ class Settings(BaseSettings):
     deployment_name: str = ""
     deployment_color: str = ""
     deployment_is_production: bool = False
+    network_allowed_hosts: list[str] = Field(default_factory=list)
     show_environment_chrome: bool = True
 
     # TapDB runtime

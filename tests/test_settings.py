@@ -59,6 +59,10 @@ deployment:
   name: staging
   color: "#124e78"
   is_production: false
+network:
+  allowed_hosts:
+    - dewey.dev2.lsmc.life
+    - 54.218.100.68
 storage:
   managed_bucket: dewey-artifacts-staging
   managed_prefix: managed
@@ -91,6 +95,7 @@ storage:
         "color": _stable_deployment_color_hex("staging"),
         "is_production": False,
     }
+    assert loaded.network_allowed_hosts == ["dewey.dev2.lsmc.life", "54.218.100.68"]
     assert loaded.managed_storage_bucket == "dewey-artifacts-staging"
     assert loaded.managed_storage_prefix == "managed"
     assert loaded.show_environment_chrome is True

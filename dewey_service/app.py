@@ -291,6 +291,7 @@ def create_app(
 ) -> FastAPI:
     settings = settings or get_settings()
     allow_local_domain_access = not settings.is_production
+    configured_allowed_hosts = settings.network_allowed_hosts
 
     if service is None:
         aws_profile = resolve_aws_profile(config_profile=settings.aws_profile)
@@ -339,12 +340,18 @@ def create_app(
         backend.observability = app.state.observability
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=build_trusted_hosts(allow_local=allow_local_domain_access),
+        allowed_hosts=build_trusted_hosts(
+            allow_local=allow_local_domain_access,
+            additional_hosts=configured_allowed_hosts,
+        ),
     )
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[],
-        allow_origin_regex=build_allowed_origin_regex(allow_local=allow_local_domain_access),
+        allow_origin_regex=build_allowed_origin_regex(
+            allow_local=allow_local_domain_access,
+            additional_hosts=configured_allowed_hosts,
+        ),
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["*"],
@@ -920,7 +927,11 @@ def create_app(
     @app.middleware("http")
     async def _enforce_origin_allowlist(request: Request, call_next):
         origin = request.headers.get("origin")
-        if origin and not is_allowed_origin(origin, allow_local=allow_local_domain_access):
+        if origin and not is_allowed_origin(
+            origin,
+            allow_local=allow_local_domain_access,
+            additional_hosts=configured_allowed_hosts,
+        ):
             return HTMLResponse(status_code=403, content="Origin not allowed")
         return await call_next(request)
 
