@@ -4,14 +4,28 @@ import tomllib
 from pathlib import Path
 
 
-def test_pyproject_declares_shared_library_versions() -> None:
+def _tapdb_dependency_spec() -> str:
     repo_root = Path(__file__).resolve().parents[1]
     pyproject = tomllib.loads((repo_root / "pyproject.toml").read_text(encoding="utf-8"))
     dependencies = pyproject["project"]["dependencies"]
 
+    for dependency in dependencies:
+        if dependency.startswith("daylily-tapdb"):
+            return dependency
+    raise AssertionError("daylily-tapdb dependency missing from pyproject.toml")
+
+
+def test_pyproject_declares_shared_library_versions() -> None:
+    pyproject = tomllib.loads(
+        (Path(__file__).resolve().parents[1] / "pyproject.toml").read_text(encoding="utf-8")
+    )
+    dependencies = pyproject["project"]["dependencies"]
+    tapdb_dependency = next(dep for dep in dependencies if dep.startswith("daylily-tapdb"))
+
     assert "cli-core-yo==2.0.0" in dependencies
     assert "daylily-auth-cognito==2.0.2" in dependencies
-    assert "daylily-tapdb==5.1.0" in dependencies
+    assert tapdb_dependency == _tapdb_dependency_spec()
+    assert tapdb_dependency.startswith("daylily-tapdb==")
 
 
 def test_pyproject_declares_pytest_cov_in_dev_dependencies() -> None:

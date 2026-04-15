@@ -228,8 +228,9 @@ def _dewey_info_hook() -> list[tuple[str, str]]:
             [
                 ("Database Backend", settings.database_backend),
                 ("Database Target", settings.database_target),
-                ("TapDB Client", settings.tapdb_client_id),
                 ("TapDB Namespace", settings.tapdb_database_name),
+                ("TapDB Owner Repo", settings.tapdb_owner_repo_name),
+                ("TapDB Domain", settings.tapdb_domain_code),
                 ("TapDB Env", settings.tapdb_env),
                 ("Host", settings.host),
                 ("Port", str(settings.port)),

@@ -33,7 +33,7 @@ class TapDBRuntimeError(RuntimeError):
 
 
 def _sanitize_deployment_code(value: str) -> str:
-    cleaned = re.sub(r"[^A-Za-z0-9-]+", "-", (value or "").strip())
+    cleaned = "".join(ch if ch.isalnum() or ch == "-" else "-" for ch in (value or "").strip())
     cleaned = cleaned.strip("-")
     return cleaned or "local"
 
@@ -82,36 +82,14 @@ def _resolve_tapdb_config_path(
         namespace or DEFAULT_TAPDB_DATABASE_NAME
     ).strip() or DEFAULT_TAPDB_DATABASE_NAME
     normalized_client_id = (client_id or DEFAULT_TAPDB_CLIENT_ID).strip() or DEFAULT_TAPDB_CLIENT_ID
-    deployment_code = _resolve_deployment_code()
+    from daylily_tapdb.cli.context import resolve_context
 
-    deployment_scoped = (
-        Path.home()
-        / ".config"
-        / "tapdb"
-        / normalized_client_id
-        / f"{normalized_namespace}-{deployment_code}"
-        / "tapdb-config.yaml"
+    ctx = resolve_context(
+        require_keys=True,
+        client_id=normalized_client_id,
+        database_name=normalized_namespace,
     )
-    if deployment_scoped.exists():
-        return str(deployment_scoped)
-
-    user_scoped = (
-        Path.home()
-        / ".config"
-        / "tapdb"
-        / normalized_client_id
-        / normalized_namespace
-        / "tapdb-config.yaml"
-    )
-    if user_scoped.exists():
-        return str(user_scoped)
-
-    repo_root = Path(__file__).resolve().parents[2]
-    repo_scoped = repo_root / "config" / f"tapdb-config-{normalized_namespace}.yaml"
-    if repo_scoped.exists():
-        return str(repo_scoped)
-
-    return None
+    return str(ctx.config_path()) if ctx else None
 
 
 def _resolve_runtime_env(
@@ -271,8 +249,14 @@ def run_tapdb_cli(
         child_env.pop("AWS_PROFILE", None)
     child_env["AWS_REGION"] = runtime_env["aws_region"]
     child_env["AWS_DEFAULT_REGION"] = runtime_env["aws_region"]
-    child_env["MERIDIAN_DOMAIN_CODE"] = os.environ.get("MERIDIAN_DOMAIN_CODE", "D")
-    child_env["TAPDB_APP_CODE"] = os.environ.get("TAPDB_APP_CODE", "D")
+    domain_code = str(os.environ.get("MERIDIAN_DOMAIN_CODE") or "").strip()
+    owner_repo_name = str(os.environ.get("TAPDB_OWNER_REPO") or "").strip()
+    if not domain_code:
+        raise TapDBRuntimeError("MERIDIAN_DOMAIN_CODE is required for TapDB runtime commands")
+    if not owner_repo_name:
+        raise TapDBRuntimeError("TAPDB_OWNER_REPO is required for TapDB runtime commands")
+    child_env["MERIDIAN_DOMAIN_CODE"] = domain_code
+    child_env["TAPDB_OWNER_REPO"] = owner_repo_name
 
     proc = subprocess.run(
         cmd,

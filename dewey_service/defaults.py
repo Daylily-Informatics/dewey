@@ -5,10 +5,16 @@ from __future__ import annotations
 import os
 import re
 import secrets
+from pathlib import Path
 
 DEFAULT_APP_PORT = 8914
 DEFAULT_AUTH_PORT = DEFAULT_APP_PORT
 DEFAULT_DB_PORT = 5432
+DEFAULT_TAPDB_CONFIG_DIR = Path.home() / ".config" / "tapdb"
+DEFAULT_TAPDB_DOMAIN_REGISTRY_PATH = DEFAULT_TAPDB_CONFIG_DIR / "domain_code_registry.json"
+DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH = (
+    DEFAULT_TAPDB_CONFIG_DIR / "prefix_ownership_registry.json"
+)
 AWS_PROFILE_REQUIRED_MESSAGE = (
     "AWS profile is required; set --profile, DEWEY_AWS_PROFILE, aws.profile, or AWS_PROFILE."
 )
@@ -69,7 +75,7 @@ def build_default_config_template(
 #
 # Explicit env contract for TapDB/Meridian subprocesses:
 # MERIDIAN_DOMAIN_CODE=D
-# TAPDB_APP_CODE=D
+# TAPDB_OWNER_REPO=dewey
 
 application:
   environment: development
@@ -107,11 +113,15 @@ database:
   target: local
   client_id: dewey
   namespace: dewey
+  owner_repo_name: dewey
+  domain_code: D
+  domain_registry_path: ~/.config/tapdb/domain_code_registry.json
+  prefix_ownership_registry_path: ~/.config/tapdb/prefix_ownership_registry.json
   env: dev
   # Explicit env contract for TapDB/Meridian subprocesses:
   # MERIDIAN_DOMAIN_CODE=D
-  # TAPDB_APP_CODE=D
-  config_path: ""
+  # TAPDB_OWNER_REPO=dewey
+  config_path: ~/.config/tapdb/dewey/dewey/tapdb-config.yaml
 
 aws:
   profile: ""

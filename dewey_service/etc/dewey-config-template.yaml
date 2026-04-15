@@ -7,7 +7,7 @@
 #
 # Explicit env contract for TapDB/Meridian subprocesses:
 # MERIDIAN_DOMAIN_CODE=D
-# TAPDB_APP_CODE=D
+# TAPDB_OWNER_REPO=dewey
 
 application:
   environment: development
@@ -45,11 +45,15 @@ database:
   target: local
   client_id: dewey
   namespace: dewey
+  owner_repo_name: dewey
+  domain_code: D
+  domain_registry_path: ~/.config/tapdb/domain_code_registry.json
+  prefix_ownership_registry_path: ~/.config/tapdb/prefix_ownership_registry.json
   env: dev
   # Explicit env contract for TapDB/Meridian subprocesses:
   # MERIDIAN_DOMAIN_CODE=D
-  # TAPDB_APP_CODE=D
-  config_path: ""
+  # TAPDB_OWNER_REPO=dewey
+  config_path: ~/.config/tapdb/dewey/dewey/tapdb-config.yaml
 
 aws:
   profile: ""

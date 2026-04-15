@@ -91,7 +91,9 @@ class TapDBBackend:
         except Exception as exc:
             raise RuntimeError(
                 "TapDB is not configured for Dewey.\n"
-                "Required settings: tapdb_client_id, tapdb_database_name, tapdb_env"
+                "Required settings: tapdb_client_id, tapdb_database_name, tapdb_env, "
+                "tapdb_owner_repo_name, tapdb_domain_code, tapdb_domain_registry_path, "
+                "tapdb_prefix_ownership_registry_path"
             ) from exc
 
         db_hostname = f"{cfg['host']}:{cfg['port']}"

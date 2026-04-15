@@ -10,14 +10,14 @@ from daylily_tapdb import (
     seed_templates,
     validate_template_configs,
 )
-from daylily_tapdb.euid import resolve_client_scoped_core_prefix
 
 from dewey_service.tapdb_backend import TapDBBackend
+from dewey_service.settings import get_settings
 
 
 def main() -> None:
     backend = TapDBBackend(app_username="dewey")
-    core_prefix = resolve_client_scoped_core_prefix("D")
+    settings = get_settings()
     config_root = Path(__file__).resolve().parents[1] / "config" / "tapdb_templates"
     config_dirs = resolve_seed_config_dirs(config_root)
     templates, issues = validate_template_configs(config_dirs, strict=True)
@@ -31,7 +31,10 @@ def main() -> None:
             templates,
             overwrite=True,
             core_config_dir=find_tapdb_core_config_dir(),
-            core_instance_prefix=core_prefix,
+            domain_code=settings.tapdb_domain_code,
+            owner_repo_name=settings.tapdb_owner_repo_name,
+            domain_registry_path=Path(settings.tapdb_domain_registry_path),
+            prefix_registry_path=Path(settings.tapdb_prefix_ownership_registry_path),
         )
 
 

@@ -57,10 +57,11 @@ def test_resolve_tapdb_config_path_prefers_explicit_argument() -> None:
 def test_resolve_runtime_env_sets_expected_values(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("DEPLOYMENT_CODE", "local2")
     home = Path("/tmp/dewey-home")
-    user_config = home / ".config" / "tapdb" / "dewey" / "dewey-local2" / "tapdb-config.yaml"
+    user_config = home / ".config" / "tapdb" / "dewey" / "dewey" / "tapdb-config.yaml"
     user_config.parent.mkdir(parents=True, exist_ok=True)
     user_config.write_text("meta: {}\n", encoding="utf-8")
-    monkeypatch.setattr(tapdb_runtime.Path, "home", classmethod(lambda cls: home))
+    context_mod = import_module("daylily_tapdb.cli.context")
+    monkeypatch.setattr(context_mod.Path, "home", classmethod(lambda cls: home))
     env = tapdb_runtime._resolve_runtime_env(
         target="local",
         client_id="dewey",
@@ -74,7 +75,7 @@ def test_resolve_runtime_env_sets_expected_values(monkeypatch: pytest.MonkeyPatc
     assert env["client_id"] == "dewey"
     assert env["database_name"] == "dewey"
     assert env["tapdb_env"] == "dev"
-    assert env["config_path"].endswith(".config/tapdb/dewey/dewey-local2/tapdb-config.yaml")
+    assert env["config_path"].endswith(".config/tapdb/dewey/dewey/tapdb-config.yaml")
 
 
 def test_resolve_runtime_env_uses_dewey_env_then_shell_env(
@@ -135,6 +136,8 @@ def test_run_tapdb_cli_builds_command_and_raises_on_failure(
 ) -> None:
     monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda: "3.0.9")
     calls: list[tuple[list[str], dict[str, str]]] = []
+    monkeypatch.setenv("MERIDIAN_DOMAIN_CODE", "D")
+    monkeypatch.setenv("TAPDB_OWNER_REPO", "dewey")
 
     def fake_run(cmd, cwd=None, env=None, text=None, capture_output=None):
         calls.append((cmd, env))
@@ -169,6 +172,8 @@ def test_run_tapdb_cli_exports_resolved_profile_and_identity_env(
 
     monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda: "3.0.9")
     monkeypatch.setattr(tapdb_runtime.shutil, "which", lambda _name: "tapdb")
+    monkeypatch.setenv("MERIDIAN_DOMAIN_CODE", "D")
+    monkeypatch.setenv("TAPDB_OWNER_REPO", "dewey")
     monkeypatch.setattr(
         tapdb_runtime,
         "_resolve_tapdb_config_path",
@@ -194,7 +199,7 @@ def test_run_tapdb_cli_exports_resolved_profile_and_identity_env(
     assert captured["cmd"][:5] == ["tapdb", "--config", "/tmp/dewey-tapdb.yaml", "--env", "dev"]
     assert captured["env"]["AWS_PROFILE"] == "config-profile"
     assert captured["env"]["MERIDIAN_DOMAIN_CODE"] == "D"
-    assert captured["env"]["TAPDB_APP_CODE"] == "D"
+    assert captured["env"]["TAPDB_OWNER_REPO"] == "dewey"
 
 
 def test_run_tapdb_cli_uses_shell_aws_profile_when_explicit_profile_blank(
@@ -203,6 +208,8 @@ def test_run_tapdb_cli_uses_shell_aws_profile_when_explicit_profile_blank(
     captured: dict[str, object] = {}
 
     monkeypatch.setenv("AWS_PROFILE", "shell-profile")
+    monkeypatch.setenv("MERIDIAN_DOMAIN_CODE", "D")
+    monkeypatch.setenv("TAPDB_OWNER_REPO", "dewey")
     monkeypatch.setattr(tapdb_runtime, "load_config_aws_profile", lambda: "")
     monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda: "3.0.9")
     monkeypatch.setattr(tapdb_runtime.shutil, "which", lambda _name: "tapdb")
@@ -241,6 +248,8 @@ def test_resolve_runtime_env_requires_explicit_profile(monkeypatch: pytest.Monke
 def test_run_tapdb_cli_returns_process_when_check_disabled(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda: "3.0.9")
     monkeypatch.setattr(tapdb_runtime.shutil, "which", lambda _name: "tapdb")
+    monkeypatch.setenv("MERIDIAN_DOMAIN_CODE", "D")
+    monkeypatch.setenv("TAPDB_OWNER_REPO", "dewey")
     monkeypatch.setattr(
         tapdb_runtime.subprocess,
         "run",
@@ -283,6 +292,8 @@ def test_run_schema_drift_check_maps_exit_codes(monkeypatch: pytest.MonkeyPatch)
 def test_run_tapdb_cli_requires_tapdb_executable(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda: "4.1.1")
     monkeypatch.setattr(tapdb_runtime.shutil, "which", lambda _name: None)
+    monkeypatch.setenv("MERIDIAN_DOMAIN_CODE", "D")
+    monkeypatch.setenv("TAPDB_OWNER_REPO", "dewey")
 
     with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="tapdb CLI is not available"):
         tapdb_runtime.run_tapdb_cli(
@@ -312,31 +323,20 @@ def test_resolve_tapdb_config_path_supports_user_repo_and_missing_paths(
     tmp_path: Path,
 ) -> None:
     home = tmp_path / "home"
-    repo_root = tmp_path / "repo"
-    user_scoped = home / ".config" / "tapdb" / "dewey" / "dewey" / "tapdb-config.yaml"
-    repo_scoped = repo_root / "config" / "tapdb-config-dewey.yaml"
-
-    user_scoped.parent.mkdir(parents=True, exist_ok=True)
-    user_scoped.write_text("meta: {}\n", encoding="utf-8")
-    monkeypatch.setattr(tapdb_runtime.Path, "home", classmethod(lambda cls: home))
-    monkeypatch.setattr(
-        tapdb_runtime, "__file__", str(repo_root / "pkg" / "x" / "tapdb_runtime.py")
-    )
-    monkeypatch.setattr(tapdb_runtime, "_resolve_deployment_code", lambda: "local")
+    shared_config = home / ".config" / "tapdb" / "dewey" / "dewey" / "tapdb-config.yaml"
+    shared_config.parent.mkdir(parents=True, exist_ok=True)
+    shared_config.write_text("meta: {}\n", encoding="utf-8")
+    context_mod = import_module("daylily_tapdb.cli.context")
+    monkeypatch.setattr(context_mod.Path, "home", classmethod(lambda cls: home))
 
     assert tapdb_runtime._resolve_tapdb_config_path(namespace="dewey", client_id="dewey") == str(
-        user_scoped
+        shared_config
     )
 
-    user_scoped.unlink()
-    repo_scoped.parent.mkdir(parents=True, exist_ok=True)
-    repo_scoped.write_text("meta: {}\n", encoding="utf-8")
+    shared_config.unlink()
     assert tapdb_runtime._resolve_tapdb_config_path(namespace="dewey", client_id="dewey") == str(
-        repo_scoped
+        shared_config
     )
-
-    repo_scoped.unlink()
-    assert tapdb_runtime._resolve_tapdb_config_path(namespace="dewey", client_id="dewey") is None
 
 
 def test_require_config_path_and_cli_resolution(monkeypatch: pytest.MonkeyPatch) -> None:

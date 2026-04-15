@@ -18,6 +18,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from dewey_service.defaults import (
     DEFAULT_APP_PORT,
     DEFAULT_COGNITO_ALLOWED_EMAIL_DOMAINS,
+    DEFAULT_TAPDB_CONFIG_DIR,
+    DEFAULT_TAPDB_DOMAIN_REGISTRY_PATH,
+    DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH,
     build_default_config_template,
     default_cognito_logout_url,
     default_cognito_redirect_uri,
@@ -204,6 +207,10 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "database_target": "database_target",
         "database_namespace": "tapdb_database_name",
         "database_client_id": "tapdb_client_id",
+        "database_owner_repo_name": "tapdb_owner_repo_name",
+        "database_domain_code": "tapdb_domain_code",
+        "database_domain_registry_path": "tapdb_domain_registry_path",
+        "database_prefix_ownership_registry_path": "tapdb_prefix_ownership_registry_path",
         "database_env": "tapdb_env",
         "database_config_path": "tapdb_config_path",
         "aws_profile": "aws_profile",
@@ -285,6 +292,10 @@ def _display_config_path(path: str) -> str:
         "database_target": "database.target",
         "tapdb_client_id": "database.client_id",
         "tapdb_database_name": "database.namespace",
+        "tapdb_owner_repo_name": "database.owner_repo_name",
+        "tapdb_domain_code": "database.domain_code",
+        "tapdb_domain_registry_path": "database.domain_registry_path",
+        "tapdb_prefix_ownership_registry_path": "database.prefix_ownership_registry_path",
         "tapdb_env": "database.env",
         "tapdb_config_path": "database.config_path",
         "tapdb_strict_namespace": "database.strict_namespace",
@@ -385,8 +396,16 @@ class Settings(BaseSettings):
     database_target: str = "local"
     tapdb_client_id: str = "dewey"
     tapdb_database_name: str = "dewey"
+    tapdb_owner_repo_name: str = "dewey"
+    tapdb_domain_code: str = "D"
+    tapdb_domain_registry_path: str = str(DEFAULT_TAPDB_DOMAIN_REGISTRY_PATH)
+    tapdb_prefix_ownership_registry_path: str = str(
+        DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH
+    )
     tapdb_env: str = "dev"
-    tapdb_config_path: str = ""
+    tapdb_config_path: str = str(
+        DEFAULT_TAPDB_CONFIG_DIR / "dewey" / "dewey" / "tapdb-config.yaml"
+    )
     tapdb_strict_namespace: int = 1
 
     # AWS defaults for TapDB wrappers
@@ -427,6 +446,30 @@ class Settings(BaseSettings):
         normalized = str(value or "").strip().lower()
         if normalized not in {"local", "aurora"}:
             raise ValueError("database_target must be one of: local, aurora")
+        return normalized
+
+    @field_validator("tapdb_owner_repo_name")
+    @classmethod
+    def validate_tapdb_owner_repo_name(cls, value: str) -> str:
+        normalized = str(value or "").strip()
+        if not normalized:
+            raise ValueError("tapdb_owner_repo_name is required")
+        return normalized
+
+    @field_validator("tapdb_domain_code")
+    @classmethod
+    def validate_tapdb_domain_code(cls, value: str) -> str:
+        normalized = str(value or "").strip().upper()
+        if not normalized:
+            raise ValueError("tapdb_domain_code is required")
+        return normalized
+
+    @field_validator("tapdb_domain_registry_path", "tapdb_prefix_ownership_registry_path")
+    @classmethod
+    def validate_tapdb_registry_path(cls, value: str) -> str:
+        normalized = str(value or "").strip()
+        if not normalized:
+            raise ValueError("TapDB registry paths are required")
         return normalized
 
     @field_validator("api_bearer_token")

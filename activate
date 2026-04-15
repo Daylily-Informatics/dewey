@@ -21,7 +21,6 @@ _dewey_script_path() {
 _DEWEY_SCRIPT_PATH="$(_dewey_script_path)"
 DEWEY_ROOT="$(cd "$(dirname "${_DEWEY_SCRIPT_PATH}")" && pwd)"
 _DEWEY_WORKSPACE_ROOT="$(cd "${DEWEY_ROOT}/../.." && pwd)"
-_DEWEY_DAYLILY_TAPDB_ROOT="${_DEWEY_WORKSPACE_ROOT}/daylily/daylily-tapdb"
 _DEWEY_DAYLILY_AUTH_COGNITO_ROOT="${_DEWEY_WORKSPACE_ROOT}/daylily-auth-cognito"
 unset -f _dewey_script_path
 unset _DEWEY_SCRIPT_PATH
@@ -85,8 +84,8 @@ fi
 export DEWEY_DEPLOYMENT_CODE="${_dewey_deployment_code}"
 export DEPLOYMENT_CODE="${_dewey_deployment_code}"
 export LSMC_DEPLOYMENT_CODE="${_dewey_deployment_code}"
-export MERIDIAN_DOMAIN_CODE="${MERIDIAN_DOMAIN_CODE:-D}"
-export TAPDB_APP_CODE="${TAPDB_APP_CODE:-D}"
+export MERIDIAN_DOMAIN_CODE="D"
+export TAPDB_OWNER_REPO="dewey"
 _DEWEY_CONDA_ENV_NAME="${_DEWEY_CONDA_ENV_BASE}-${_dewey_deployment_code}"
 unset _dewey_deployment_code
 
@@ -201,13 +200,8 @@ _dewey_prepare_tapdb_config_path() {
   local client_id="$1"
   local namespace="$2"
   local xdg_config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
-  local deployment_code="${DEWEY_DEPLOYMENT_CODE:-${DEPLOYMENT_CODE:-${LSMC_DEPLOYMENT_CODE:-local}}}"
-  local scoped_namespace=""
-  deployment_code="$(_dewey_sanitize_deployment_code "${deployment_code}")"
-  scoped_namespace="${namespace}-${deployment_code}"
-  local user_dir="${xdg_config_home}/tapdb/${client_id}/${scoped_namespace}"
+  local user_dir="${xdg_config_home}/tapdb/${client_id}/${namespace}"
   local user_path="${user_dir}/tapdb-config.yaml"
-  local repo_template="$DEWEY_ROOT/config/tapdb-config-${namespace}.yaml"
 
   if [[ -f "$user_path" ]]; then
     chmod 600 "$user_path" 2>/dev/null || true
@@ -215,16 +209,8 @@ _dewey_prepare_tapdb_config_path() {
     return 0
   fi
 
-  if [[ ! -f "$repo_template" ]]; then
-    printf '%s\n' "$user_path"
-    return 0
-  fi
-
-  mkdir -p "$user_dir" || return 1
-  cp "$repo_template" "$user_path" || return 1
-  chmod 600 "$user_path" || return 1
-  echo -e "  ${_CYAN}→${_NC} Created secure TapDB config copy: ${user_path}" >&2
   printf '%s\n' "$user_path"
+  return 1
 }
 
 _dewey_ensure_editable_repo() {
@@ -380,18 +366,6 @@ else
   fi
 fi
 
-if ! _dewey_require_python_import "daylily_tapdb" "daylily-tapdb"; then
-  if ! _dewey_ensure_editable_repo \
-    "daylily-tapdb" \
-    "daylily_tapdb" \
-    "${_DEWEY_DAYLILY_TAPDB_ROOT}" \
-    "" \
-    "daylily-tapdb" \
-    "with-deps"; then
-    return 1
-  fi
-fi
-
 if ! _dewey_require_python_import "daylily_auth_cognito" "daylily-auth-cognito"; then
   if ! _dewey_ensure_editable_repo \
     "daylily-auth-cognito" \
@@ -445,6 +419,8 @@ export DATABASE_BACKEND="${DATABASE_BACKEND:-tapdb}"
 export DATABASE_TARGET="${DATABASE_TARGET:-local}"
 _DEWEY_TAPDB_CLIENT_ID="dewey"
 _DEWEY_TAPDB_DATABASE_NAME="dewey"
+_DEWEY_TAPDB_DOMAIN_CODE="D"
+_DEWEY_TAPDB_OWNER_REPO="dewey"
 _DEWEY_TAPDB_ENV="dev"
 _DEWEY_USER_TAPDB_CONFIG_PATH="$(_dewey_prepare_tapdb_config_path "$_DEWEY_TAPDB_CLIENT_ID" "$_DEWEY_TAPDB_DATABASE_NAME")" || {
   _dewey_fail "Failed to prepare secure TapDB config path."
@@ -452,6 +428,10 @@ _DEWEY_USER_TAPDB_CONFIG_PATH="$(_dewey_prepare_tapdb_config_path "$_DEWEY_TAPDB
 }
 _DEWEY_RUNTIME_TAPDB_CONFIG_PATH="${_DEWEY_USER_TAPDB_CONFIG_PATH}"
 export TAPDB_CONFIG_PATH="${_DEWEY_RUNTIME_TAPDB_CONFIG_PATH}"
+export TAPDB_OWNER_REPO="${_DEWEY_TAPDB_OWNER_REPO}"
+export TAPDB_DOMAIN_CODE="${_DEWEY_TAPDB_DOMAIN_CODE}"
+export TAPDB_DOMAIN_REGISTRY_PATH="${XDG_CONFIG_HOME:-$HOME/.config}/tapdb/domain_code_registry.json"
+export TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH="${XDG_CONFIG_HOME:-$HOME/.config}/tapdb/prefix_ownership_registry.json"
 
 if [[ -z "${DEWEY_API_BEARER_TOKEN:-}" ]]; then
   export DEWEY_API_BEARER_TOKEN="dewey-dev-token"
@@ -460,7 +440,8 @@ fi
 export PATH="$DEWEY_ROOT:$PATH"
 
 if [[ ! -f "$_DEWEY_RUNTIME_TAPDB_CONFIG_PATH" ]]; then
-  echo -e "  ${_YELLOW}⚠${_NC} TapDB scoped config not found at ${_DEWEY_RUNTIME_TAPDB_CONFIG_PATH}"
+  _dewey_fail "TapDB scoped config not found at ${_DEWEY_RUNTIME_TAPDB_CONFIG_PATH}"
+  return 1
 fi
 
 if [[ -f "$DEWEY_ROOT/dewey_deactivate" ]]; then
@@ -472,7 +453,10 @@ fi
 echo -e "  ${_GREEN}✓${_NC} AWS_PROFILE=${AWS_PROFILE:-<unset>}"
 echo -e "  ${_GREEN}✓${_NC} AWS_REGION=${AWS_REGION}"
 echo -e "  ${_GREEN}✓${_NC} MERIDIAN_DOMAIN_CODE=${MERIDIAN_DOMAIN_CODE}"
-echo -e "  ${_GREEN}✓${_NC} TAPDB_APP_CODE=${TAPDB_APP_CODE}"
+echo -e "  ${_GREEN}✓${_NC} TAPDB_OWNER_REPO=${TAPDB_OWNER_REPO}"
+echo -e "  ${_GREEN}✓${_NC} TAPDB_DOMAIN_CODE=${TAPDB_DOMAIN_CODE}"
+echo -e "  ${_GREEN}✓${_NC} TAPDB_DOMAIN_REGISTRY_PATH=${TAPDB_DOMAIN_REGISTRY_PATH}"
+echo -e "  ${_GREEN}✓${_NC} TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH=${TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH}"
 echo -e "  ${_GREEN}✓${_NC} Dewey TapDB client=${_DEWEY_TAPDB_CLIENT_ID}"
 echo -e "  ${_GREEN}✓${_NC} Dewey TapDB namespace=${_DEWEY_TAPDB_DATABASE_NAME}"
 echo -e "  ${_GREEN}✓${_NC} Dewey TapDB env=${_DEWEY_TAPDB_ENV}"
@@ -499,7 +483,6 @@ echo -e "  ${_GREEN}dewey --help${_NC}        Show all commands"
 echo -e "  ${_GREEN}dewey_deactivate${_NC}  Deactivate this environment"
 
 unset _DEWEY_WORKSPACE_ROOT
-unset _DEWEY_DAYLILY_TAPDB_ROOT
 unset _DEWEY_DAYLILY_AUTH_COGNITO_ROOT
 unset _DEWEY_CLI_CORE_YO_VERSION
 unset _DEWEY_CONDA_ENV_CREATED

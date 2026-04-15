@@ -63,7 +63,9 @@ def test_cli_info_renders(monkeypatch, capsys) -> None:
     assert exit_code == 0
     assert "Dewey Info" in captured.out
     assert "Database Backend" in captured.out
-    assert "TapDB Client" in captured.out
+    assert "TapDB Namespace" in captured.out
+    assert "TapDB Owner Repo" in captured.out
+    assert "TapDB Domain" in captured.out
 
 
 def test_server_status_reports_not_running(monkeypatch, capsys) -> None:
@@ -164,7 +166,11 @@ def test_config_init_show_validate_and_status(monkeypatch, tmp_path: Path, capsy
     config_text = config_path.read_text(encoding="utf-8")
     assert "storage:" in config_text
     assert "MERIDIAN_DOMAIN_CODE=D" in config_text
-    assert "TAPDB_APP_CODE=D" in config_text
+    assert "TAPDB_OWNER_REPO=dewey" in config_text
+    assert "owner_repo_name: dewey" in config_text
+    assert "domain_code: D" in config_text
+    assert "domain_registry_path: ~/.config/tapdb/domain_code_registry.json" in config_text
+    assert "prefix_ownership_registry_path: ~/.config/tapdb/prefix_ownership_registry.json" in config_text
     assert "session_secret_key: dewey-session-secret-change-me" not in config_text
     assert "allowed_email_domains:" in config_text
     assert "default_tenant_id: 00000000-0000-0000-0000-000000000000" in config_text

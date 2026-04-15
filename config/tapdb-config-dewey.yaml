@@ -2,10 +2,13 @@ meta:
   config_version: 3
   client_id: dewey
   database_name: dewey
-  euid_client_code: D
+  owner_repo_name: dewey
+  domain_code: D
+  domain_registry_path: ~/.config/tapdb/domain_code_registry.json
+  prefix_ownership_registry_path: ~/.config/tapdb/prefix_ownership_registry.json
   # Explicit env contract for TapDB/Meridian subprocesses:
   # MERIDIAN_DOMAIN_CODE=D
-  # TAPDB_APP_CODE=D
+  # TAPDB_OWNER_REPO=dewey
 environments:
   dev:
     engine_type: local
