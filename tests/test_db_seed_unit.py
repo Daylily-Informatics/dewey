@@ -62,7 +62,14 @@ def test_db_seed_main_validates_and_seeds(monkeypatch: pytest.MonkeyPatch) -> No
     assert calls["seed_session"] == "session"
     assert calls["templates"] == [{"template_code": "generic/data/artifact/1.0/"}]
     assert calls["overwrite"] is True
-    assert calls["seed_kwargs"]["core_instance_prefix"] == "DGX"
+    assert calls["seed_kwargs"]["domain_code"] == "D"
+    assert calls["seed_kwargs"]["owner_repo_name"] == "dewey"
+    assert str(calls["seed_kwargs"]["domain_registry_path"]).endswith(
+        "domain_code_registry.json"
+    )
+    assert str(calls["seed_kwargs"]["prefix_registry_path"]).endswith(
+        "prefix_ownership_registry.json"
+    )
 
 
 def test_db_seed_main_raises_on_validation_errors(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -140,4 +147,11 @@ def test_db_seed_module_runs_main_when_invoked_as_script(monkeypatch: pytest.Mon
     assert calls["commit"] is True
     assert calls["seed_session"] == "session"
     assert calls["overwrite"] is True
-    assert calls["seed_kwargs"]["core_instance_prefix"] == "DGX"
+    assert calls["seed_kwargs"]["domain_code"] == "D"
+    assert calls["seed_kwargs"]["owner_repo_name"] == "dewey"
+    assert str(calls["seed_kwargs"]["domain_registry_path"]).endswith(
+        "domain_code_registry.json"
+    )
+    assert str(calls["seed_kwargs"]["prefix_registry_path"]).endswith(
+        "prefix_ownership_registry.json"
+    )

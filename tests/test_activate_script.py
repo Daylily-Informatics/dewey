@@ -42,8 +42,17 @@ if [[ "${{1:-}}" == "-" ]]; then
   exit 0
 fi
 if [[ "${{1:-}}" == "-m" && "${{2:-}}" == "pip" && "${{3:-}}" == "show" ]]; then
-  printf 'Name: dewey-service\\n'
-  printf 'Editable project location: %s\\n' "{PROJECT_ROOT}"
+  package_name="${{4:-}}"
+  if [[ "$package_name" == "dewey-service" ]]; then
+    printf 'Name: dewey-service\\n'
+    printf 'Editable project location: %s\\n' "{PROJECT_ROOT}"
+  elif [[ "$package_name" == "daylily-auth-cognito" ]]; then
+    printf 'Name: daylily-auth-cognito\\nVersion: %s\\n' "${{FAKE_DAYLILY_AUTH_COGNITO_VERSION:-2.0.3}}"
+  elif [[ "$package_name" == "daylily-tapdb" ]]; then
+    printf 'Name: daylily-tapdb\\nVersion: %s\\n' "${{FAKE_DAYLILY_TAPDB_VERSION:-6.0.2}}"
+  elif [[ "$package_name" == "cli-core-yo" ]]; then
+    printf 'Name: cli-core-yo\\nVersion: %s\\n' "${{FAKE_CLI_CORE_YO_VERSION:-2.0.0}}"
+  fi
   exit 0
 fi
 if [[ "${{1:-}}" == "-m" && "${{2:-}}" == "pip" && "${{3:-}}" == "install" ]]; then
@@ -230,6 +239,9 @@ def test_activate_accepts_preloaded_dewey_conda_env(tmp_path: Path) -> None:
     env["CONDA_PREFIX"] = str(conda_base / "envs" / f"DEWEY-{DEPLOY_NAME}")
     env["FAKE_CONDA_CALL_LOG"] = str(call_log)
     env["FAKE_PIP_INSTALL_LOG"] = str(pip_install_log)
+    env["FAKE_DAYLILY_AUTH_COGNITO_VERSION"] = "2.1.1"
+    env["FAKE_DAYLILY_TAPDB_VERSION"] = "6.0.3"
+    env["FAKE_CLI_CORE_YO_VERSION"] = "2.1.0"
 
     result = _source_activate(env)
 
@@ -279,3 +291,6 @@ def test_activate_installs_local_checkout_with_packaged_dependencies(tmp_path: P
         for line in pip_install_lines
     )
     assert any(str(PROJECT_ROOT) in line for line in pip_install_lines)
+    assert any("daylily-tapdb==6.0.3" in line for line in pip_install_lines)
+    assert any("daylily-auth-cognito==2.1.1" in line for line in pip_install_lines)
+    assert any("cli-core-yo==2.1.0" in line for line in pip_install_lines)

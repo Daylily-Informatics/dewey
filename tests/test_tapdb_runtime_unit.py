@@ -292,6 +292,7 @@ def test_run_schema_drift_check_maps_exit_codes(monkeypatch: pytest.MonkeyPatch)
 def test_run_tapdb_cli_requires_tapdb_executable(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda: "4.1.1")
     monkeypatch.setattr(tapdb_runtime.shutil, "which", lambda _name: None)
+    monkeypatch.setattr(tapdb_runtime, "load_config_aws_profile", lambda: "config-profile")
     monkeypatch.setenv("MERIDIAN_DOMAIN_CODE", "D")
     monkeypatch.setenv("TAPDB_OWNER_REPO", "dewey")
 
@@ -327,7 +328,16 @@ def test_resolve_tapdb_config_path_supports_user_repo_and_missing_paths(
     shared_config.parent.mkdir(parents=True, exist_ok=True)
     shared_config.write_text("meta: {}\n", encoding="utf-8")
     context_mod = import_module("daylily_tapdb.cli.context")
-    monkeypatch.setattr(context_mod.Path, "home", classmethod(lambda cls: home))
+
+    class _Context:
+        def config_path(self) -> Path:
+            return shared_config
+
+    monkeypatch.setattr(
+        context_mod,
+        "resolve_context",
+        lambda **kwargs: _Context(),
+    )
 
     assert tapdb_runtime._resolve_tapdb_config_path(namespace="dewey", client_id="dewey") == str(
         shared_config

@@ -20,8 +20,11 @@ def test_activate_uses_editable_metadata_contract() -> None:
     assert "_dewey_validate_main_repo_install" in activate_script
     assert 'export AWS_PROFILE="${AWS_PROFILE:-lsmc}"' not in activate_script
     assert 'AWS_PROFILE=${AWS_PROFILE:-<unset>}' in activate_script
-    assert "_DEWEY_DAYLILY_TAPDB_ROOT" not in activate_script
+    assert '_DEWEY_CLI_CORE_YO_VERSION="2.1.0"' in activate_script
+    assert '_DEWEY_DAYLILY_AUTH_COGNITO_VERSION="2.1.1"' in activate_script
+    assert '_DEWEY_DAYLILY_TAPDB_VERSION="6.0.3"' in activate_script
     assert "Installing local daylily-tapdb checkout" not in activate_script
+    assert "Installing local daylily-auth-cognito checkout" not in activate_script
     assert "TAPDB_APP_CODE" not in activate_script
     assert 'config/tapdb-config-${client_id}.yaml' in activate_script
     assert 'export MERIDIAN_DOMAIN_CODE="D"' in activate_script

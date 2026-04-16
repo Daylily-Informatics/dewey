@@ -17,6 +17,7 @@ def _invoke(argv: list[str]) -> int:
 def _activate_runtime(monkeypatch) -> None:
     monkeypatch.setenv("CONDA_PREFIX", "/tmp/dewey-conda")
     monkeypatch.setenv("CONDA_DEFAULT_ENV", "DEWEY-local2")
+    monkeypatch.setenv("AWS_PROFILE", "config-profile")
 
 
 def test_db_build_invokes_overlay(monkeypatch, capsys) -> None:

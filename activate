@@ -21,7 +21,6 @@ _dewey_script_path() {
 _DEWEY_SCRIPT_PATH="$(_dewey_script_path)"
 DEWEY_ROOT="$(cd "$(dirname "${_DEWEY_SCRIPT_PATH}")" && pwd)"
 _DEWEY_WORKSPACE_ROOT="$(cd "${DEWEY_ROOT}/../.." && pwd)"
-_DEWEY_DAYLILY_AUTH_COGNITO_ROOT="${_DEWEY_WORKSPACE_ROOT}/daylily-auth-cognito"
 unset -f _dewey_script_path
 unset _DEWEY_SCRIPT_PATH
 
@@ -32,11 +31,10 @@ _CYAN='\033[0;36m'
 _NC='\033[0m'
 _DEWEY_PYTHON=""
 _DEWEY_CONDA_ENV_BASE="DEWEY"
-_DEWEY_CLI_CORE_YO_VERSION="2.0.0"
-_DEWEY_LEGACY_REBIND_VARS=(
-  USE_LOCAL_DAYLILY_TAPDB
-  USE_LOCAL_CLI_CORE_YO
-)
+_DEWEY_CLI_CORE_YO_VERSION="2.1.0"
+_DEWEY_DAYLILY_AUTH_COGNITO_VERSION="2.1.1"
+_DEWEY_DAYLILY_TAPDB_VERSION="6.0.3"
+_DEWEY_LEGACY_REBIND_VARS=(USE_LOCAL_DAYLILY_TAPDB USE_LOCAL_CLI_CORE_YO)
 
 _dewey_require_python_import() {
   local module_name="$1"
@@ -49,6 +47,37 @@ importlib.import_module(sys.argv[1])
 PY
   then
     _dewey_fail "Missing packaged dependency: ${package_name}"
+    return 1
+  fi
+}
+
+_dewey_published_dependency_version() {
+  local package_name="$1"
+  local pip_show_output=""
+  if ! pip_show_output="$("${_DEWEY_PYTHON:-python}" -m pip show "$package_name" 2>/dev/null)"; then
+    return 1
+  fi
+  printf '%s\n' "$pip_show_output" | awk -F': ' '$1 == "Version" { print $2; exit }'
+}
+
+_dewey_ensure_published_dependency() {
+  local module_name="$1"
+  local package_name="$2"
+  local expected_version="$3"
+  local current_version=""
+
+  current_version="$(_dewey_published_dependency_version "$package_name")"
+  if [[ "$current_version" == "$expected_version" ]] && _dewey_require_python_import "$module_name" "$package_name"; then
+    return 0
+  fi
+
+  echo -e "  ${_CYAN}→${_NC} Installing published ${package_name} ${expected_version}..."
+  if ! "${_DEWEY_PYTHON:-python}" -m pip install "${package_name}==${expected_version}" -q; then
+    _dewey_fail "Failed to install published ${package_name} ${expected_version}"
+    return 1
+  fi
+  if ! _dewey_require_python_import "$module_name" "$package_name"; then
+    _dewey_fail "Installed ${package_name} ${expected_version} but it is still unavailable"
     return 1
   fi
 }
@@ -377,24 +406,16 @@ else
   fi
 fi
 
-if ! _dewey_require_python_import "daylily_auth_cognito" "daylily-auth-cognito"; then
-  if ! _dewey_ensure_editable_repo \
-    "daylily-auth-cognito" \
-    "daylily_auth_cognito" \
-    "${_DEWEY_DAYLILY_AUTH_COGNITO_ROOT}" \
-    "" \
-    "daylily-auth-cognito" \
-    "with-deps"; then
-    return 1
-  fi
+if ! _dewey_ensure_published_dependency "daylily_tapdb" "daylily-tapdb" "${_DEWEY_DAYLILY_TAPDB_VERSION}"; then
+  return 1
 fi
 
-if ! _dewey_require_python_import "cli_core_yo" "cli-core-yo"; then
-  echo -e "  ${_CYAN}→${_NC} Installing published cli-core-yo ${_DEWEY_CLI_CORE_YO_VERSION}..."
-  if ! "${_DEWEY_PYTHON:-python}" -m pip install "cli-core-yo==${_DEWEY_CLI_CORE_YO_VERSION}" -q; then
-    _dewey_fail "Failed to install published cli-core-yo ${_DEWEY_CLI_CORE_YO_VERSION}"
-    return 1
-  fi
+if ! _dewey_ensure_published_dependency "daylily_auth_cognito" "daylily-auth-cognito" "${_DEWEY_DAYLILY_AUTH_COGNITO_VERSION}"; then
+  return 1
+fi
+
+if ! _dewey_ensure_published_dependency "cli_core_yo" "cli-core-yo" "${_DEWEY_CLI_CORE_YO_VERSION}"; then
+  return 1
 fi
 
 _dewey_dev_runtime_ready || return 1
@@ -492,8 +513,9 @@ echo -e "  ${_GREEN}dewey --help${_NC}        Show all commands"
 echo -e "  ${_GREEN}dewey_deactivate${_NC}  Deactivate this environment"
 
 unset _DEWEY_WORKSPACE_ROOT
-unset _DEWEY_DAYLILY_AUTH_COGNITO_ROOT
 unset _DEWEY_CLI_CORE_YO_VERSION
+unset _DEWEY_DAYLILY_AUTH_COGNITO_VERSION
+unset _DEWEY_DAYLILY_TAPDB_VERSION
 unset _DEWEY_CONDA_ENV_CREATED
 unset _DEWEY_USER_TAPDB_CONFIG_PATH
 unset -f _dewey_fail
