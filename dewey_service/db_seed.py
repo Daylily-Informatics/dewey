@@ -5,6 +5,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from sqlalchemy import text
+
+from daylily_tapdb.euid import AUDIT_LOG_PREFIX, GENERIC_INSTANCE_LINEAGE_PREFIX
 from daylily_tapdb.templates.loader import (
     find_tapdb_core_config_dir,
     resolve_seed_config_dirs,
@@ -51,6 +54,14 @@ def _client_template_prefixes(
             seen.add(prefix)
             prefixes.append(prefix)
     return prefixes
+
+
+def _filter_client_templates(templates: list[dict[str, object]]) -> list[dict[str, object]]:
+    return [
+        template
+        for template in templates
+        if str(template.get("instance_prefix") or "").strip().upper() not in _TAPDB_CORE_PREFIXES
+    ]
 
 
 def _load_or_init_prefix_registry(path: Path) -> dict[str, object]:
@@ -131,21 +142,88 @@ def _claim_client_template_prefix_ownership(
     return prefixes
 
 
+def _ensure_identity_prefix_config(
+    session,
+    *,
+    entity: str,
+    domain_code: str,
+    owner_repo_name: str,
+    prefix: str,
+) -> None:
+    normalized_entity = str(entity or "").strip()
+    normalized_domain = str(domain_code or "").strip().upper()
+    normalized_owner = normalize_owner_repo_name(owner_repo_name)
+    normalized_prefix = str(prefix or "").strip().upper()
+    if not normalized_entity:
+        raise ValueError("Dewey TapDB identity entity is required")
+    if not normalized_prefix:
+        raise ValueError(f"Dewey TapDB identity prefix is required for {normalized_entity!r}")
+
+    params = {
+        "entity": normalized_entity,
+        "domain_code": normalized_domain,
+        "owner_repo_name": normalized_owner,
+        "prefix": normalized_prefix,
+    }
+    existing = session.execute(
+        text(
+            """
+            SELECT prefix
+            FROM tapdb_identity_prefix_config
+            WHERE entity = :entity
+              AND domain_code = :domain_code
+              AND issuer_app_code = :owner_repo_name
+            """
+        ),
+        params,
+    ).scalar_one_or_none()
+    if existing is not None:
+        existing_prefix = str(existing or "").strip().upper()
+        if existing_prefix != normalized_prefix:
+            raise RuntimeError(
+                f"Dewey identity prefix config for entity {normalized_entity!r} in domain "
+                f"{normalized_domain!r} is already seeded with prefix {existing_prefix!r}, "
+                f"not {normalized_prefix!r}"
+            )
+        return
+
+    session.execute(
+        text(
+            """
+            INSERT INTO tapdb_identity_prefix_config(
+              entity, domain_code, issuer_app_code, prefix
+            )
+            VALUES (:entity, :domain_code, :owner_repo_name, :prefix)
+            """
+        ),
+        params,
+    )
+
+
 def main() -> None:
     backend = TapDBBackend(app_username="dewey")
     settings = get_settings()
     config_root = Path(__file__).resolve().parents[1] / "config" / "tapdb_templates"
-    config_dirs = resolve_seed_config_dirs(config_root)
-    templates, issues = validate_template_configs(config_dirs, strict=True)
-    errors = [issue for issue in issues if issue.level == "error"]
+    core_config_dir = find_tapdb_core_config_dir()
+    core_templates, core_issues = validate_template_configs([core_config_dir], strict=True)
+    raw_client_templates, client_issues = validate_template_configs(
+        resolve_seed_config_dirs(config_root),
+        strict=True,
+    )
+    client_templates = _filter_client_templates(raw_client_templates)
+    errors = [
+        issue
+        for issue in [*core_issues, *client_issues]
+        if issue.level == "error"
+    ]
     if errors:
         joined = "; ".join(issue.message for issue in errors)
         raise RuntimeError(f"Dewey template pack validation failed: {joined}")
-    core_config_dir = find_tapdb_core_config_dir()
+
     domain_registry_path = Path(settings.tapdb_domain_registry_path)
     prefix_registry_path = Path(settings.tapdb_prefix_ownership_registry_path)
     _claim_client_template_prefix_ownership(
-        templates,
+        client_templates,
         domain_code=settings.tapdb_domain_code,
         owner_repo_name=settings.tapdb_owner_repo_name,
         domain_registry_path=domain_registry_path,
@@ -155,7 +233,38 @@ def main() -> None:
     with backend.session_scope(commit=True) as session:
         seed_templates(
             session,
-            templates,
+            core_templates,
+            overwrite=True,
+            core_config_dir=core_config_dir,
+            domain_code=settings.tapdb_domain_code,
+            owner_repo_name="daylily-tapdb",
+            domain_registry_path=domain_registry_path,
+            prefix_registry_path=prefix_registry_path,
+        )
+        _ensure_identity_prefix_config(
+            session,
+            entity="generic_template",
+            domain_code=settings.tapdb_domain_code,
+            owner_repo_name=settings.tapdb_owner_repo_name,
+            prefix="DGX",
+        )
+        _ensure_identity_prefix_config(
+            session,
+            entity="generic_instance_lineage",
+            domain_code=settings.tapdb_domain_code,
+            owner_repo_name=settings.tapdb_owner_repo_name,
+            prefix=GENERIC_INSTANCE_LINEAGE_PREFIX,
+        )
+        _ensure_identity_prefix_config(
+            session,
+            entity="audit_log",
+            domain_code=settings.tapdb_domain_code,
+            owner_repo_name=settings.tapdb_owner_repo_name,
+            prefix=AUDIT_LOG_PREFIX,
+        )
+        seed_templates(
+            session,
+            client_templates,
             overwrite=True,
             core_config_dir=core_config_dir,
             domain_code=settings.tapdb_domain_code,

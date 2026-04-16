@@ -26,10 +26,16 @@ def test_db_seed_main_claims_prefixes_before_seeding(
     class _Scope:
         def __enter__(self):
             calls["entered"] = True
-            return "session"
+            return FakeSession()
 
         def __exit__(self, exc_type, exc, tb):
             calls["exited"] = True
+
+    class FakeSession:
+        def execute(self, statement, params=None):  # noqa: ANN001 - test double
+            rows = calls.setdefault("identity_rows", [])
+            rows.append(dict(params or {}))
+            return SimpleNamespace(scalar_one_or_none=lambda: None)
 
     class FakeBackend:
         def __init__(self, app_username: str) -> None:
@@ -90,7 +96,7 @@ def test_db_seed_main_claims_prefixes_before_seeding(
     monkeypatch.setattr(
         db_seed,
         "seed_templates",
-        lambda session, templates, overwrite, **kwargs: calls.update(
+        lambda session, templates, overwrite, **kwargs: calls.setdefault("seed_calls", []).append(
             {
                 "seed_session": session,
                 "templates": templates,
@@ -111,18 +117,61 @@ def test_db_seed_main_claims_prefixes_before_seeding(
     assert calls["entered"] is True
     assert calls["exited"] is True
     assert str(calls["config_root"]).endswith("config/tapdb_templates")
-    assert calls["seed_session"] == "session"
-    assert len(calls["templates"]) == 2
-    assert calls["overwrite"] is True
-    assert calls["seed_kwargs"]["domain_code"] == "Z"
-    assert calls["seed_kwargs"]["owner_repo_name"] == "dewey"
-    assert str(calls["seed_kwargs"]["domain_registry_path"]).endswith(
+    assert len(calls["seed_calls"]) == 2
+    assert all(call["seed_session"].__class__.__name__ == "FakeSession" for call in calls["seed_calls"])
+    assert calls["seed_calls"][0]["overwrite"] is True
+    assert len(calls["seed_calls"][0]["templates"]) == 2
+    assert calls["seed_calls"][0]["seed_kwargs"]["domain_code"] == "Z"
+    assert calls["seed_calls"][0]["seed_kwargs"]["owner_repo_name"] == "daylily-tapdb"
+    assert calls["seed_calls"][1]["overwrite"] is True
+    assert len(calls["seed_calls"][1]["templates"]) == 1
+    assert calls["seed_calls"][1]["seed_kwargs"]["domain_code"] == "Z"
+    assert calls["seed_calls"][1]["seed_kwargs"]["owner_repo_name"] == "dewey"
+    assert str(calls["seed_calls"][1]["seed_kwargs"]["domain_registry_path"]).endswith(
         "domain_code_registry.json"
     )
-    assert str(calls["seed_kwargs"]["prefix_registry_path"]).endswith(
+    assert str(calls["seed_calls"][1]["seed_kwargs"]["prefix_registry_path"]).endswith(
         "prefix_ownership_registry.json"
     )
-    assert calls["claim_exists"] is True
+    assert all(call["claim_exists"] is True for call in calls["seed_calls"])
+    assert calls["identity_rows"] == [
+        {
+            "entity": "generic_template",
+            "domain_code": "Z",
+            "owner_repo_name": "dewey",
+            "prefix": "DGX",
+        },
+        {
+            "entity": "generic_template",
+            "domain_code": "Z",
+            "owner_repo_name": "dewey",
+            "prefix": "DGX",
+        },
+        {
+            "entity": "generic_instance_lineage",
+            "domain_code": "Z",
+            "owner_repo_name": "dewey",
+            "prefix": "EDG",
+        },
+        {
+            "entity": "generic_instance_lineage",
+            "domain_code": "Z",
+            "owner_repo_name": "dewey",
+            "prefix": "EDG",
+        },
+        {
+            "entity": "audit_log",
+            "domain_code": "Z",
+            "owner_repo_name": "dewey",
+            "prefix": "ADT",
+        },
+        {
+            "entity": "audit_log",
+            "domain_code": "Z",
+            "owner_repo_name": "dewey",
+            "prefix": "ADT",
+        },
+    ]
     registry = json.loads(prefix_registry.read_text(encoding="utf-8"))
     assert registry["ownership"]["Z"]["DGX"]["issuer_app_code"] == "dewey"
     assert "SYS" not in registry["ownership"]["Z"]
@@ -264,10 +313,16 @@ def test_db_seed_module_runs_main_when_invoked_as_script(monkeypatch: pytest.Mon
 
     class _Scope:
         def __enter__(self):
-            return "session"
+            return FakeSession()
 
         def __exit__(self, exc_type, exc, tb):
             return False
+
+    class FakeSession:
+        def execute(self, statement, params=None):  # noqa: ANN001 - tiny test double
+            rows = calls.setdefault("identity_rows", [])
+            rows.append(dict(params or {}))
+            return SimpleNamespace(scalar_one_or_none=lambda: None)
 
     class FakeBackend:
         def __init__(self, app_username: str) -> None:
@@ -311,7 +366,7 @@ def test_db_seed_module_runs_main_when_invoked_as_script(monkeypatch: pytest.Mon
     )
     monkeypatch.setattr(
         "daylily_tapdb.templates.loader.seed_templates",
-        lambda session, templates, overwrite, **kwargs: calls.update(
+        lambda session, templates, overwrite, **kwargs: calls.setdefault("seed_calls", []).append(
             {
                 "seed_session": session,
                 "templates": templates,
@@ -326,13 +381,94 @@ def test_db_seed_module_runs_main_when_invoked_as_script(monkeypatch: pytest.Mon
 
     assert calls["app_username"] == "dewey"
     assert calls["commit"] is True
-    assert calls["seed_session"] == "session"
-    assert calls["overwrite"] is True
-    assert calls["seed_kwargs"]["domain_code"] == "Z"
-    assert calls["seed_kwargs"]["owner_repo_name"] == "dewey"
-    assert str(calls["seed_kwargs"]["domain_registry_path"]).endswith(
+    assert len(calls["seed_calls"]) == 2
+    assert all(call["seed_session"].__class__.__name__ == "FakeSession" for call in calls["seed_calls"])
+    assert calls["seed_calls"][0]["overwrite"] is True
+    assert calls["seed_calls"][0]["seed_kwargs"]["domain_code"] == "Z"
+    assert calls["seed_calls"][0]["seed_kwargs"]["owner_repo_name"] == "daylily-tapdb"
+    assert calls["seed_calls"][1]["overwrite"] is True
+    assert calls["seed_calls"][1]["seed_kwargs"]["domain_code"] == "Z"
+    assert calls["seed_calls"][1]["seed_kwargs"]["owner_repo_name"] == "dewey"
+    assert str(calls["seed_calls"][1]["seed_kwargs"]["domain_registry_path"]).endswith(
         "domain_code_registry.json"
     )
-    assert str(calls["seed_kwargs"]["prefix_registry_path"]).endswith(
+    assert str(calls["seed_calls"][1]["seed_kwargs"]["prefix_registry_path"]).endswith(
         "prefix_ownership_registry.json"
     )
+    assert calls["identity_rows"] == [
+        {
+            "entity": "generic_template",
+            "domain_code": "Z",
+            "owner_repo_name": "dewey",
+            "prefix": "DGX",
+        },
+        {
+            "entity": "generic_template",
+            "domain_code": "Z",
+            "owner_repo_name": "dewey",
+            "prefix": "DGX",
+        },
+        {
+            "entity": "generic_instance_lineage",
+            "domain_code": "Z",
+            "owner_repo_name": "dewey",
+            "prefix": "EDG",
+        },
+        {
+            "entity": "generic_instance_lineage",
+            "domain_code": "Z",
+            "owner_repo_name": "dewey",
+            "prefix": "EDG",
+        },
+        {
+            "entity": "audit_log",
+            "domain_code": "Z",
+            "owner_repo_name": "dewey",
+            "prefix": "ADT",
+        },
+        {
+            "entity": "audit_log",
+            "domain_code": "Z",
+            "owner_repo_name": "dewey",
+            "prefix": "ADT",
+        },
+    ]
+
+
+def test_db_seed_identity_prefix_helper_registers_lineage_prefix() -> None:
+    db_seed = importlib.import_module("dewey_service.db_seed")
+    calls: list[dict[str, object]] = []
+
+    class FakeSession:
+        def execute(self, statement, params=None):  # noqa: ANN001 - tiny test double
+            calls.append(
+                {
+                    "sql": getattr(statement, "text", str(statement)),
+                    "params": dict(params or {}),
+                }
+            )
+            return SimpleNamespace(scalar_one_or_none=lambda: None)
+
+    db_seed._ensure_identity_prefix_config(
+        FakeSession(),
+        entity="generic_instance_lineage",
+        domain_code="Z",
+        owner_repo_name="dewey",
+        prefix="EDG",
+    )
+
+    assert len(calls) == 2
+    assert "SELECT prefix" in calls[0]["sql"]
+    assert calls[0]["params"] == {
+        "entity": "generic_instance_lineage",
+        "domain_code": "Z",
+        "owner_repo_name": "dewey",
+        "prefix": "EDG",
+    }
+    assert "INSERT INTO tapdb_identity_prefix_config" in calls[1]["sql"]
+    assert calls[1]["params"] == {
+        "entity": "generic_instance_lineage",
+        "domain_code": "Z",
+        "owner_repo_name": "dewey",
+        "prefix": "EDG",
+    }
