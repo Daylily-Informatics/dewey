@@ -50,7 +50,7 @@ def test_cli_info_renders(monkeypatch, capsys) -> None:
         cli_module,
         "get_settings",
         lambda: Settings(
-            cognito_domain="https://auth.example.com",
+            cognito_domain="auth.example.com",
             cognito_app_client_id="client-1",
             cognito_redirect_uri="https://localhost:8914/auth/callback",
             cognito_logout_url="https://localhost:8914/login",

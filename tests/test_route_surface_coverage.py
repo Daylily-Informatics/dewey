@@ -38,7 +38,7 @@ def _build_settings() -> Settings:
     return Settings(
         api_bearer_token="token-123",
         session_secret_key="session-secret",
-        cognito_domain="https://dewey-auth.example.com",
+        cognito_domain="dewey-auth.example.com",
         cognito_app_client_id="client-123",
         cognito_app_client_secret="secret-123",
         cognito_redirect_uri="https://localhost:8914/auth/callback",

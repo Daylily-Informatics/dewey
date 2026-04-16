@@ -10,6 +10,7 @@ import re
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 import yaml
 from pydantic import Field, field_validator, model_validator
@@ -66,6 +67,16 @@ def _validate_optional_https_url(value: str, *, field_name: str) -> str:
         return ""
     if not normalized.startswith("https://"):
         raise ValueError(f"{field_name} must use an absolute https:// URL")
+    return normalized
+
+
+def _require_bare_host(value: str, *, field_name: str) -> str:
+    normalized = str(value or "").strip().rstrip("/")
+    if not normalized:
+        raise ValueError(f"{field_name} is required")
+    parsed = urlsplit(normalized)
+    if parsed.scheme or parsed.netloc or any(char in normalized for char in "/?#"):
+        raise ValueError(f"{field_name} must be a bare host, not a URL")
     return normalized
 
 
@@ -523,21 +534,21 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_cognito_contract(self) -> "Settings":
-        missing: list[str] = []
-        if not str(self.cognito_domain or "").strip():
-            missing.append("cognito_domain")
-        if not str(self.cognito_app_client_id or "").strip():
-            missing.append("cognito_app_client_id")
-        if not str(self.cognito_redirect_uri or "").strip():
-            missing.append("cognito_redirect_uri")
-        if not str(self.cognito_logout_url or "").strip():
-            missing.append("cognito_logout_url")
-        if missing:
-            raise ValueError("Cognito UI auth is required; missing settings: " + ", ".join(missing))
-        self.cognito_domain = _require_https_url(
-            self.cognito_domain,
-            field_name="cognito_domain",
-        )
+        if str(self.cognito_domain or "").strip():
+            self.cognito_domain = _require_bare_host(
+                self.cognito_domain,
+                field_name="cognito_domain",
+            )
+        if str(self.cognito_redirect_uri or "").strip():
+            self.cognito_redirect_uri = _require_https_url(
+                self.cognito_redirect_uri,
+                field_name="cognito_redirect_uri",
+            )
+        if str(self.cognito_logout_url or "").strip():
+            self.cognito_logout_url = _require_https_url(
+                self.cognito_logout_url,
+                field_name="cognito_logout_url",
+            )
         self.cognito_allowed_email_domains = _normalize_email_domains(
             self.cognito_allowed_email_domains,
             default=DEFAULT_COGNITO_ALLOWED_EMAIL_DOMAINS,

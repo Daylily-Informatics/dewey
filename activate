@@ -202,8 +202,19 @@ _dewey_prepare_tapdb_config_path() {
   local xdg_config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
   local user_dir="${xdg_config_home}/tapdb/${client_id}/${namespace}"
   local user_path="${user_dir}/tapdb-config.yaml"
+  local repo_template="${DEWEY_ROOT}/config/tapdb-config-${client_id}.yaml"
 
   if [[ -f "$user_path" ]]; then
+    chmod 600 "$user_path" 2>/dev/null || true
+    printf '%s\n' "$user_path"
+    return 0
+  fi
+
+  mkdir -p "$user_dir" || return 1
+  chmod 700 "$user_dir" 2>/dev/null || true
+
+  if [[ -f "$repo_template" ]]; then
+    cp "$repo_template" "$user_path" || return 1
     chmod 600 "$user_path" 2>/dev/null || true
     printf '%s\n' "$user_path"
     return 0
@@ -409,8 +420,6 @@ if [[ "$-" == *i* ]]; then
   fi
 fi
 
-unset -f _dewey_fail
-
 export DEWEY_ROOT
 export DEWEY_ACTIVE=1
 export DEWEY_PROJECT_ROOT="$DEWEY_ROOT"
@@ -487,4 +496,5 @@ unset _DEWEY_DAYLILY_AUTH_COGNITO_ROOT
 unset _DEWEY_CLI_CORE_YO_VERSION
 unset _DEWEY_CONDA_ENV_CREATED
 unset _DEWEY_USER_TAPDB_CONFIG_PATH
+unset -f _dewey_fail
  

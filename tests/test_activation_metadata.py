@@ -23,6 +23,7 @@ def test_activate_uses_editable_metadata_contract() -> None:
     assert "_DEWEY_DAYLILY_TAPDB_ROOT" not in activate_script
     assert "Installing local daylily-tapdb checkout" not in activate_script
     assert "TAPDB_APP_CODE" not in activate_script
+    assert 'config/tapdb-config-${client_id}.yaml' in activate_script
     assert 'export MERIDIAN_DOMAIN_CODE="D"' in activate_script
     assert 'export TAPDB_OWNER_REPO="dewey"' in activate_script
     assert "MERIDIAN_DOMAIN_CODE=D" in template_text

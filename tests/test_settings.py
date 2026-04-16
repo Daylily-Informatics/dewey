@@ -17,14 +17,25 @@ from dewey_service.settings import (
 )
 
 
-def test_settings_requires_https_cognito_domain() -> None:
+def test_settings_rejects_schemeful_cognito_domain() -> None:
     with pytest.raises(ValueError):
         Settings(
-            cognito_domain="http://bad.example.com",
+            cognito_domain="https://bad.example.com",
             cognito_app_client_id="x",
             cognito_redirect_uri="https://localhost:8914/auth/callback",
             cognito_logout_url="https://localhost:8914/login",
         )
+
+
+def test_settings_accepts_bare_host_cognito_domain() -> None:
+    settings = Settings(
+        cognito_domain="auth.example.com",
+        cognito_app_client_id="x",
+        cognito_redirect_uri="https://localhost:8914/auth/callback",
+        cognito_logout_url="https://localhost:8914/login",
+    )
+
+    assert settings.cognito_domain == "auth.example.com"
 
 
 def test_settings_loads_yaml(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -38,7 +49,7 @@ application:
   api_bearer_token: yaml-token
 auth:
   cognito:
-    domain: https://auth.example.com
+    domain: auth.example.com
     app_client_id: client-1
     redirect_uri: https://localhost:8914/auth/callback
     logout_url: https://localhost:8914/login
@@ -73,7 +84,7 @@ storage:
     monkeypatch.delenv("DEWEY_API_BEARER_TOKEN", raising=False)
     loaded = load_settings()
     assert loaded.api_bearer_token == "yaml-token"
-    assert loaded.cognito_domain == "https://auth.example.com"
+    assert loaded.cognito_domain == "auth.example.com"
     assert loaded.cognito_redirect_uri == "https://localhost:8914/auth/callback"
     assert loaded.cognito_logout_url == "https://localhost:8914/login"
     assert loaded.cognito_allowed_email_domains == [
@@ -117,7 +128,7 @@ application:
   api_bearer_token: yaml-token
 auth:
   cognito:
-    domain: https://auth.example.com
+    domain: auth.example.com
     app_client_id: client-1
     redirect_uri: https://localhost:8914/auth/callback
     logout_url: https://localhost:8914/login
@@ -137,7 +148,7 @@ aws:
 def test_settings_defaults_include_cognito_domain_policy() -> None:
     settings = Settings(
         api_bearer_token="token",
-        cognito_domain="https://auth.example.com",
+        cognito_domain="auth.example.com",
         cognito_app_client_id="client",
         cognito_redirect_uri="https://localhost:8914/auth/callback",
         cognito_logout_url="https://localhost:8914/login",
@@ -158,7 +169,7 @@ def test_settings_aws_profile_uses_config_when_present(monkeypatch: pytest.Monke
     loaded = Settings(
         api_bearer_token="token",
         session_secret_key="secret",
-        cognito_domain="https://auth.example.com",
+        cognito_domain="auth.example.com",
         cognito_app_client_id="client",
         cognito_redirect_uri="https://localhost:8914/auth/callback",
         cognito_logout_url="https://localhost:8914/login",
@@ -174,7 +185,7 @@ def test_settings_aws_profile_blank_does_not_use_shell_env(
     loaded = Settings(
         api_bearer_token="token",
         session_secret_key="secret",
-        cognito_domain="https://auth.example.com",
+        cognito_domain="auth.example.com",
         cognito_app_client_id="client",
         cognito_redirect_uri="https://localhost:8914/auth/callback",
         cognito_logout_url="https://localhost:8914/login",
@@ -191,7 +202,7 @@ def test_settings_aws_profile_blank_does_not_use_dewey_env(
     loaded = Settings(
         api_bearer_token="token",
         session_secret_key="secret",
-        cognito_domain="https://auth.example.com",
+        cognito_domain="auth.example.com",
         cognito_app_client_id="client",
         cognito_redirect_uri="https://localhost:8914/auth/callback",
         cognito_logout_url="https://localhost:8914/login",
@@ -206,7 +217,7 @@ def test_settings_aws_profile_missing_is_empty_without_env(monkeypatch: pytest.M
     loaded = Settings(
         api_bearer_token="token",
         session_secret_key="secret",
-        cognito_domain="https://auth.example.com",
+        cognito_domain="auth.example.com",
         cognito_app_client_id="client",
         cognito_redirect_uri="https://localhost:8914/auth/callback",
         cognito_logout_url="https://localhost:8914/login",
@@ -220,7 +231,7 @@ def test_settings_fall_back_to_deployment_code(monkeypatch: pytest.MonkeyPatch) 
     loaded = Settings(
         api_bearer_token="token",
         session_secret_key="secret",
-        cognito_domain="https://auth.example.com",
+        cognito_domain="auth.example.com",
         cognito_app_client_id="client",
         cognito_redirect_uri="https://localhost:8914/auth/callback",
         cognito_logout_url="https://localhost:8914/login",
@@ -240,7 +251,7 @@ def test_prod_deployment_name_uses_derived_color() -> None:
     loaded = Settings(
         api_bearer_token="token",
         session_secret_key="secret",
-        cognito_domain="https://auth.example.com",
+        cognito_domain="auth.example.com",
         cognito_app_client_id="client",
         cognito_redirect_uri="https://localhost:8914/auth/callback",
         cognito_logout_url="https://localhost:8914/login",
@@ -288,7 +299,7 @@ def test_effective_config_rows_redact_secret_values(tmp_path: Path) -> None:
     settings = Settings(
         api_bearer_token="token",
         session_secret_key="secret",
-        cognito_domain="https://auth.example.com",
+        cognito_domain="auth.example.com",
         cognito_app_client_id="client",
         cognito_app_client_secret="secret-client",
         cognito_redirect_uri="https://localhost:8914/auth/callback",
@@ -322,7 +333,7 @@ application:
   api_bearer_token: yaml-token
 auth:
   cognito:
-    domain: https://yaml.example.com
+    domain: yaml.example.com
     app_client_id: yaml-client
     redirect_uri: https://localhost:8914/auth/callback
     logout_url: https://localhost:8914/login
@@ -333,12 +344,12 @@ auth:
         encoding="utf-8",
     )
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
-    monkeypatch.setenv("DEWEY_COGNITO_DOMAIN", "https://env.example.com")
+    monkeypatch.setenv("DEWEY_COGNITO_DOMAIN", "env.example.com")
     monkeypatch.setenv("DEWEY_COGNITO_APP_CLIENT_ID", "env-client")
 
     loaded = load_settings()
 
-    assert loaded.cognito_domain == "https://env.example.com"
+    assert loaded.cognito_domain == "env.example.com"
     assert loaded.cognito_app_client_id == "env-client"
 
 

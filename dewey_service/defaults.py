@@ -87,7 +87,7 @@ application:
 
 auth:
   cognito:
-    domain: https://dewey-auth.example.com
+    domain: dewey-auth.example.com
     app_client_id: dewey-client-id
     app_client_secret: ""
     redirect_uri: {default_cognito_redirect_uri()}

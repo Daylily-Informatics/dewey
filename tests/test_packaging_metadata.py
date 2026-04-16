@@ -23,7 +23,7 @@ def test_pyproject_declares_shared_library_versions() -> None:
     tapdb_dependency = next(dep for dep in dependencies if dep.startswith("daylily-tapdb"))
 
     assert "cli-core-yo==2.0.0" in dependencies
-    assert "daylily-auth-cognito==2.0.2" in dependencies
+    assert "daylily-auth-cognito==2.0.3" in dependencies
     assert tapdb_dependency == _tapdb_dependency_spec()
     assert tapdb_dependency.startswith("daylily-tapdb==")
 

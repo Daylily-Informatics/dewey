@@ -17,7 +17,7 @@ from dewey_service.settings import Settings
 
 def _settings() -> Settings:
     return Settings(
-        cognito_domain="https://auth.example.com",
+        cognito_domain="auth.example.com",
         cognito_app_client_id="client-1",
         cognito_app_client_secret="secret-1",
         cognito_redirect_uri="https://localhost:8914/auth/callback",
@@ -48,7 +48,7 @@ def test_generate_state_returns_unique_nonce() -> None:
     assert first != second
 
 
-def test_build_cognito_login_url_strips_scheme(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_build_cognito_login_url_accepts_bare_host(monkeypatch: pytest.MonkeyPatch) -> None:
     seen: dict[str, str] = {}
 
     def fake_build_authorization_url(**kwargs: str) -> str:
@@ -195,7 +195,7 @@ def test_resolve_operator_principal_accepts_allowed_email_domain(
         app=SimpleNamespace(
             state=SimpleNamespace(
                 settings=Settings(
-                    cognito_domain="https://auth.example.com",
+                    cognito_domain="auth.example.com",
                     cognito_app_client_id="client-1",
                     cognito_app_client_secret="secret-1",
                     cognito_redirect_uri="https://localhost:8914/auth/callback",
@@ -228,7 +228,7 @@ def test_resolve_operator_principal_rejects_disallowed_email_domain(
         app=SimpleNamespace(
             state=SimpleNamespace(
                 settings=Settings(
-                    cognito_domain="https://auth.example.com",
+                    cognito_domain="auth.example.com",
                     cognito_app_client_id="client-1",
                     cognito_app_client_secret="secret-1",
                     cognito_redirect_uri="https://localhost:8914/auth/callback",
