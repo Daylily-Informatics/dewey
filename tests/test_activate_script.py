@@ -240,7 +240,7 @@ def test_activate_accepts_preloaded_dewey_conda_env(tmp_path: Path) -> None:
     env["FAKE_CONDA_CALL_LOG"] = str(call_log)
     env["FAKE_PIP_INSTALL_LOG"] = str(pip_install_log)
     env["FAKE_DAYLILY_AUTH_COGNITO_VERSION"] = "2.1.1"
-    env["FAKE_DAYLILY_TAPDB_VERSION"] = "6.0.3"
+    env["FAKE_DAYLILY_TAPDB_VERSION"] = "6.0.4"
     env["FAKE_CLI_CORE_YO_VERSION"] = "2.1.0"
 
     result = _source_activate(env)
@@ -291,6 +291,6 @@ def test_activate_installs_local_checkout_with_packaged_dependencies(tmp_path: P
         for line in pip_install_lines
     )
     assert any(str(PROJECT_ROOT) in line for line in pip_install_lines)
-    assert any("daylily-tapdb==6.0.3" in line for line in pip_install_lines)
+    assert any("daylily-tapdb==6.0.4" in line for line in pip_install_lines)
     assert any("daylily-auth-cognito==2.1.1" in line for line in pip_install_lines)
     assert any("cli-core-yo==2.1.0" in line for line in pip_install_lines)

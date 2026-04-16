@@ -1,0 +1,10 @@
+{
+  "ownership": {
+    "Z": {
+      "DGX": {
+        "issuer_app_code": "dewey"
+      }
+    }
+  },
+  "version": "0.4.0"
+}

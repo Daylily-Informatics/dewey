@@ -33,7 +33,7 @@ _DEWEY_PYTHON=""
 _DEWEY_CONDA_ENV_BASE="DEWEY"
 _DEWEY_CLI_CORE_YO_VERSION="2.1.0"
 _DEWEY_DAYLILY_AUTH_COGNITO_VERSION="2.1.1"
-_DEWEY_DAYLILY_TAPDB_VERSION="6.0.3"
+_DEWEY_DAYLILY_TAPDB_VERSION="6.0.4"
 _DEWEY_LEGACY_REBIND_VARS=(USE_LOCAL_DAYLILY_TAPDB USE_LOCAL_CLI_CORE_YO)
 
 _dewey_require_python_import() {
@@ -113,7 +113,7 @@ fi
 export DEWEY_DEPLOYMENT_CODE="${_dewey_deployment_code}"
 export DEPLOYMENT_CODE="${_dewey_deployment_code}"
 export LSMC_DEPLOYMENT_CODE="${_dewey_deployment_code}"
-export MERIDIAN_DOMAIN_CODE="D"
+export MERIDIAN_DOMAIN_CODE="Z"
 export TAPDB_OWNER_REPO="dewey"
 _DEWEY_CONDA_ENV_NAME="${_DEWEY_CONDA_ENV_BASE}-${_dewey_deployment_code}"
 unset _dewey_deployment_code

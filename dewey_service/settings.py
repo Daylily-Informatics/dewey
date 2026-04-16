@@ -408,7 +408,7 @@ class Settings(BaseSettings):
     tapdb_client_id: str = "dewey"
     tapdb_database_name: str = "dewey"
     tapdb_owner_repo_name: str = "dewey"
-    tapdb_domain_code: str = "D"
+    tapdb_domain_code: str = "Z"
     tapdb_domain_registry_path: str = str(DEFAULT_TAPDB_DOMAIN_REGISTRY_PATH)
     tapdb_prefix_ownership_registry_path: str = str(
         DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH

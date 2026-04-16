@@ -22,23 +22,23 @@ def test_activate_uses_editable_metadata_contract() -> None:
     assert 'AWS_PROFILE=${AWS_PROFILE:-<unset>}' in activate_script
     assert '_DEWEY_CLI_CORE_YO_VERSION="2.1.0"' in activate_script
     assert '_DEWEY_DAYLILY_AUTH_COGNITO_VERSION="2.1.1"' in activate_script
-    assert '_DEWEY_DAYLILY_TAPDB_VERSION="6.0.3"' in activate_script
+    assert '_DEWEY_DAYLILY_TAPDB_VERSION="6.0.4"' in activate_script
     assert "Installing local daylily-tapdb checkout" not in activate_script
     assert "Installing local daylily-auth-cognito checkout" not in activate_script
     assert "TAPDB_APP_CODE" not in activate_script
     assert 'config/tapdb-config-${client_id}.yaml' in activate_script
-    assert 'export MERIDIAN_DOMAIN_CODE="D"' in activate_script
+    assert 'export MERIDIAN_DOMAIN_CODE="Z"' in activate_script
     assert 'export TAPDB_OWNER_REPO="dewey"' in activate_script
-    assert "MERIDIAN_DOMAIN_CODE=D" in template_text
+    assert "MERIDIAN_DOMAIN_CODE=Z" in template_text
     assert "TAPDB_OWNER_REPO=dewey" in template_text
     assert "owner_repo_name: dewey" in template_text
-    assert "domain_code: D" in template_text
+    assert "domain_code: Z" in template_text
     assert "domain_registry_path: ~/.config/tapdb/domain_code_registry.json" in template_text
     assert "prefix_ownership_registry_path: ~/.config/tapdb/prefix_ownership_registry.json" in template_text
-    assert "MERIDIAN_DOMAIN_CODE=D" in tapdb_template_text
+    assert "MERIDIAN_DOMAIN_CODE=Z" in tapdb_template_text
     assert "TAPDB_OWNER_REPO=dewey" in tapdb_template_text
     assert "owner_repo_name: dewey" in tapdb_template_text
-    assert "domain_code: D" in tapdb_template_text
+    assert "domain_code: Z" in tapdb_template_text
     assert "euid_client_code" not in tapdb_template_text
     assert "unset MERIDIAN_DOMAIN_CODE" in deactivate_script
     assert "unset TAPDB_OWNER_REPO" in deactivate_script

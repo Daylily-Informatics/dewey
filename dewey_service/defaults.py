@@ -74,7 +74,7 @@ def build_default_config_template(
 # Stored by default at ~/.config/dewey-{deployment}/dewey-config-{deployment}.yaml unless XDG_CONFIG_HOME is set.
 #
 # Explicit env contract for TapDB/Meridian subprocesses:
-# MERIDIAN_DOMAIN_CODE=D
+# MERIDIAN_DOMAIN_CODE=Z
 # TAPDB_OWNER_REPO=dewey
 
 application:
@@ -114,12 +114,12 @@ database:
   client_id: dewey
   namespace: dewey
   owner_repo_name: dewey
-  domain_code: D
+  domain_code: Z
   domain_registry_path: ~/.config/tapdb/domain_code_registry.json
   prefix_ownership_registry_path: ~/.config/tapdb/prefix_ownership_registry.json
   env: dev
   # Explicit env contract for TapDB/Meridian subprocesses:
-  # MERIDIAN_DOMAIN_CODE=D
+  # MERIDIAN_DOMAIN_CODE=Z
   # TAPDB_OWNER_REPO=dewey
   config_path: ~/.config/tapdb/dewey/dewey/tapdb-config.yaml
 

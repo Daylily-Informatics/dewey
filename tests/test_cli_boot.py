@@ -165,10 +165,10 @@ def test_config_init_show_validate_and_status(monkeypatch, tmp_path: Path, capsy
     assert config_path.exists()
     config_text = config_path.read_text(encoding="utf-8")
     assert "storage:" in config_text
-    assert "MERIDIAN_DOMAIN_CODE=D" in config_text
+    assert "MERIDIAN_DOMAIN_CODE=Z" in config_text
     assert "TAPDB_OWNER_REPO=dewey" in config_text
     assert "owner_repo_name: dewey" in config_text
-    assert "domain_code: D" in config_text
+    assert "domain_code: Z" in config_text
     assert "domain_registry_path: ~/.config/tapdb/domain_code_registry.json" in config_text
     assert "prefix_ownership_registry_path: ~/.config/tapdb/prefix_ownership_registry.json" in config_text
     assert "session_secret_key: dewey-session-secret-change-me" not in config_text

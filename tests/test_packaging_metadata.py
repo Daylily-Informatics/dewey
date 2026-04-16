@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import tomllib
 from pathlib import Path
 
@@ -24,7 +25,7 @@ def test_pyproject_declares_shared_library_versions() -> None:
 
     assert "cli-core-yo==2.1.0" in dependencies
     assert "daylily-auth-cognito==2.1.1" in dependencies
-    assert "daylily-tapdb==6.0.3" in dependencies
+    assert "daylily-tapdb==6.0.4" in dependencies
     assert tapdb_dependency == _tapdb_dependency_spec()
     assert tapdb_dependency.startswith("daylily-tapdb==")
 
@@ -50,7 +51,40 @@ def test_pyproject_packages_dewey_config_template() -> None:
     pyproject = tomllib.loads((repo_root / "pyproject.toml").read_text(encoding="utf-8"))
     package_data = pyproject["tool"]["setuptools"]["package-data"]
 
-    assert package_data["dewey_service"] == ["etc/*.yaml", "templates/*.html", "static/*"]
+    assert package_data["dewey_service"] == [
+        "etc/*.yaml",
+        "etc/*.json",
+        "templates/*.html",
+        "static/*",
+    ]
+
+
+def test_packaged_tapdb_registry_fixtures_match_owned_prefixes() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    templates = json.loads(
+        (repo_root / "config" / "tapdb_templates" / "dewey" / "templates.json").read_text(
+            encoding="utf-8"
+        )
+    )["templates"]
+    domain_registry = json.loads(
+        (repo_root / "dewey_service" / "etc" / "domain_code_registry.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    prefix_registry = json.loads(
+        (repo_root / "dewey_service" / "etc" / "prefix_ownership_registry.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    assert domain_registry["domains"] == {"Z": {"name": "dewey"}}
+    assert set(prefix_registry["ownership"]) == {"Z"}
+    assert set(prefix_registry["ownership"]["Z"]) == {
+        template["instance_prefix"] for template in templates
+    }
+    assert {
+        claim["issuer_app_code"] for claim in prefix_registry["ownership"]["Z"].values()
+    } == {"dewey"}
 
 
 def test_pyproject_uses_dynamic_version_from_git_tags() -> None:

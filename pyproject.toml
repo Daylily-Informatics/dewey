@@ -11,7 +11,7 @@ requires-python = ">=3.11"
 dependencies = [
     "boto3>=1.35.0",
     "cli-core-yo==2.1.0",
-    "daylily-tapdb==6.0.3",
+    "daylily-tapdb==6.0.4",
     "daylily-auth-cognito==2.1.1",
     "fastapi>=0.115.0",
     "metapub",
@@ -47,7 +47,7 @@ dewey = "dewey_service.cli:main"
 include = ["dewey_service*"]
 
 [tool.setuptools.package-data]
-dewey_service = ["etc/*.yaml", "templates/*.html", "static/*"]
+dewey_service = ["etc/*.yaml", "etc/*.json", "templates/*.html", "static/*"]
 
 [tool.setuptools_scm]
 local_scheme = "no-local-version"
