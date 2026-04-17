@@ -32,7 +32,7 @@ from dewey_service.integrations.tapdb_runtime import (
     run_tapdb_cli,
     tapdb_env_for_target,
 )
-from dewey_service.settings import load_config_aws_profile
+from dewey_service.settings import get_settings, load_config_aws_profile
 
 db_app = typer.Typer(help="TapDB lifecycle and Dewey overlay commands")
 
