@@ -75,24 +75,24 @@ def tapdb_env_for_target(target: str) -> str:
 def _resolve_tapdb_config_path(
     *, namespace: str, client_id: str, config_path: str = ""
 ) -> str | None:
+    del namespace, client_id
     explicit = str(config_path or "").strip()
     if explicit:
-        return explicit
+        resolved = Path(explicit)
+        if not resolved.is_absolute():
+            raise TapDBRuntimeError(
+                f"TapDB config path must be an absolute file path, got: {explicit}"
+            )
+        return str(resolved.resolve())
     env_override = str(os.environ.get("TAPDB_CONFIG_PATH") or "").strip()
     if env_override:
-        return env_override
-    normalized_namespace = (
-        namespace or DEFAULT_TAPDB_DATABASE_NAME
-    ).strip() or DEFAULT_TAPDB_DATABASE_NAME
-    normalized_client_id = (client_id or DEFAULT_TAPDB_CLIENT_ID).strip() or DEFAULT_TAPDB_CLIENT_ID
-    from daylily_tapdb.cli.context import resolve_context
-
-    ctx = resolve_context(
-        require_keys=True,
-        client_id=normalized_client_id,
-        database_name=normalized_namespace,
-    )
-    return str(ctx.config_path()) if ctx else None
+        resolved = Path(env_override)
+        if not resolved.is_absolute():
+            raise TapDBRuntimeError(
+                f"TAPDB_CONFIG_PATH must be an absolute file path, got: {env_override}"
+            )
+        return str(resolved.resolve())
+    return None
 
 
 def _resolve_runtime_env(
@@ -134,7 +134,8 @@ def _require_config_path(runtime_env: Mapping[str, str]) -> str:
     config_path = str(runtime_env.get("config_path") or "").strip()
     if not config_path:
         raise TapDBRuntimeError(
-            "TapDB config path is required. Resolve it via Dewey settings and run TapDB as "
+            "TapDB config path is required. Pass an explicit absolute path via Dewey settings, "
+            "--config, or TAPDB_CONFIG_PATH, then run TapDB as "
             "'tapdb --config <path> --env <name> ...'."
         )
     return config_path

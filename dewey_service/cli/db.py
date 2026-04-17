@@ -60,6 +60,7 @@ def _delete_db_target(
     profile: str,
     region: str,
     namespace: str,
+    config_path: str,
 ) -> None:
     if not _confirm_db_delete(force):
         raise typer.Exit(0)
@@ -72,6 +73,7 @@ def _delete_db_target(
             profile=profile,
             region=region,
             namespace=namespace,
+            config_path=config_path,
             cwd=PROJECT_ROOT,
         )
     except TapDBRuntimeError as exc:
@@ -92,6 +94,8 @@ def build(
     """Bootstrap TapDB runtime and apply the Dewey overlay."""
     ensure_tapdb_version()
     try:
+        settings = get_settings()
+        resolved_config_path = str(settings.tapdb_config_path or "").strip()
         resolved_profile = _resolve_cli_aws_profile(profile)
         if target == "local":
             result = run_tapdb_cli(
@@ -101,6 +105,7 @@ def build(
                 profile=resolved_profile,
                 region=region,
                 namespace=namespace,
+                config_path=resolved_config_path,
                 cwd=PROJECT_ROOT,
             )
         else:
@@ -121,6 +126,7 @@ def build(
                 profile=resolved_profile,
                 region=region,
                 namespace=namespace,
+                config_path=resolved_config_path,
                 cwd=PROJECT_ROOT,
             )
         if result.stdout:
@@ -132,6 +138,7 @@ def build(
             profile=resolved_profile,
             region=region,
             namespace=namespace,
+            config_path=resolved_config_path,
         )
         ccyo_out.print_text(f"[green]DATABASE_URL[/green] resolved: [dim]{db_url}[/dim]")
 
@@ -174,6 +181,7 @@ def reset(
         profile=resolved_profile,
         region=region,
         namespace=namespace,
+        config_path=str(get_settings().tapdb_config_path or "").strip(),
     )
 
     build(
@@ -203,6 +211,7 @@ def nuke(
         profile=resolved_profile,
         region=region,
         namespace=namespace,
+        config_path=str(get_settings().tapdb_config_path or "").strip(),
     )
 
 

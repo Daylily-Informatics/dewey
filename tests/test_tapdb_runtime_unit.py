@@ -50,7 +50,7 @@ def test_resolve_tapdb_config_path_prefers_explicit_argument() -> None:
             client_id="ignored",
             config_path="/tmp/custom-tapdb.yaml",
         )
-        == "/tmp/custom-tapdb.yaml"
+        == str(Path("/tmp/custom-tapdb.yaml").resolve())
     )
 
 
@@ -65,18 +65,12 @@ def test_resolve_tapdb_config_path_prefers_env_override(
             client_id="ignored",
             config_path="",
         )
-        == "/tmp/from-env-tapdb.yaml"
+        == str(Path("/tmp/from-env-tapdb.yaml").resolve())
     )
 
 
 def test_resolve_runtime_env_sets_expected_values(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("DEPLOYMENT_CODE", "local2")
-    home = Path("/tmp/dewey-home")
-    user_config = home / ".config" / "tapdb" / "dewey" / "dewey" / "tapdb-config.yaml"
-    user_config.parent.mkdir(parents=True, exist_ok=True)
-    user_config.write_text("meta: {}\n", encoding="utf-8")
-    context_mod = import_module("daylily_tapdb.cli.context")
-    monkeypatch.setattr(context_mod.Path, "home", classmethod(lambda cls: home))
+    monkeypatch.setenv("TAPDB_CONFIG_PATH", "/tmp/dewey-home/.config/tapdb/dewey/dewey/tapdb-config.yaml")
     env = tapdb_runtime._resolve_runtime_env(
         target="local",
         client_id="dewey",
@@ -90,7 +84,9 @@ def test_resolve_runtime_env_sets_expected_values(monkeypatch: pytest.MonkeyPatc
     assert env["client_id"] == "dewey"
     assert env["database_name"] == "dewey"
     assert env["tapdb_env"] == "dev"
-    assert env["config_path"].endswith(".config/tapdb/dewey/dewey/tapdb-config.yaml")
+    assert env["config_path"] == str(
+        Path("/tmp/dewey-home/.config/tapdb/dewey/dewey/tapdb-config.yaml").resolve()
+    )
 
 
 def test_resolve_runtime_env_uses_dewey_env_then_shell_env(
@@ -174,7 +170,7 @@ def test_run_tapdb_cli_builds_command_and_raises_on_failure(
     assert calls[0][0][:5] == [
         "tapdb",
         "--config",
-        "/tmp/dewey-tapdb.yaml",
+        str(Path("/tmp/dewey-tapdb.yaml").resolve()),
         "--env",
         "dev",
     ]
@@ -334,35 +330,26 @@ def test_sanitize_and_resolve_deployment_code(monkeypatch: pytest.MonkeyPatch) -
     assert tapdb_runtime._resolve_deployment_code() == "from-lsmc"
 
 
-def test_resolve_tapdb_config_path_supports_user_repo_and_missing_paths(
+def test_resolve_tapdb_config_path_returns_none_without_explicit_path(
     monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
 ) -> None:
     monkeypatch.delenv("TAPDB_CONFIG_PATH", raising=False)
-    home = tmp_path / "home"
-    shared_config = home / ".config" / "tapdb" / "dewey" / "dewey" / "tapdb-config.yaml"
-    shared_config.parent.mkdir(parents=True, exist_ok=True)
-    shared_config.write_text("meta: {}\n", encoding="utf-8")
-    context_mod = import_module("daylily_tapdb.cli.context")
+    assert tapdb_runtime._resolve_tapdb_config_path(namespace="dewey", client_id="dewey") is None
 
-    class _Context:
-        def config_path(self) -> Path:
-            return shared_config
 
-    monkeypatch.setattr(
-        context_mod,
-        "resolve_context",
-        lambda **kwargs: _Context(),
-    )
+def test_resolve_tapdb_config_path_rejects_relative_paths(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="absolute file path"):
+        tapdb_runtime._resolve_tapdb_config_path(
+            namespace="dewey",
+            client_id="dewey",
+            config_path="relative/tapdb.yaml",
+        )
 
-    assert tapdb_runtime._resolve_tapdb_config_path(namespace="dewey", client_id="dewey") == str(
-        shared_config
-    )
-
-    shared_config.unlink()
-    assert tapdb_runtime._resolve_tapdb_config_path(namespace="dewey", client_id="dewey") == str(
-        shared_config
-    )
+    monkeypatch.setenv("TAPDB_CONFIG_PATH", "relative/tapdb.yaml")
+    with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="absolute file path"):
+        tapdb_runtime._resolve_tapdb_config_path(namespace="dewey", client_id="dewey")
 
 
 def test_require_config_path_and_cli_resolution(monkeypatch: pytest.MonkeyPatch) -> None:

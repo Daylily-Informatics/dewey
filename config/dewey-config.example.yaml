@@ -36,13 +36,13 @@ database:
   namespace: dewey
   owner_repo_name: dewey
   domain_code: Z
-  domain_registry_path: ~/.config/tapdb/domain_code_registry.json
-  prefix_ownership_registry_path: ~/.config/tapdb/prefix_ownership_registry.json
+  domain_registry_path: /absolute/path/to/domain_code_registry.json
+  prefix_ownership_registry_path: /absolute/path/to/prefix_ownership_registry.json
   env: dev
   # Explicit env contract for TapDB/Meridian subprocesses:
   # MERIDIAN_DOMAIN_CODE=Z
   # TAPDB_OWNER_REPO=dewey
-  config_path: ~/.config/tapdb/dewey/dewey/tapdb-config.yaml
+  config_path: /absolute/path/to/tapdb-config.yaml
 
 aws:
   profile: ""

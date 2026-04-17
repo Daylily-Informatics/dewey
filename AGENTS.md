@@ -27,6 +27,9 @@ source ./activate <deploy-name>
 - All Python deps needed by the repo live in `project.dependencies`.
 - If a CLI is missing from `PATH` after activation, fix packaging or entrypoints, not `activate`.
 - Repo-solo config ownership stays in `dewey config init`; deployment-scoped runtime wiring stays out of `activate`.
+- Every service/TapDB config file path must be passed explicitly as a full absolute file path.
+- Do not guess TapDB config paths from `~/.config`, repo defaults, deployment code, or TapDB context loaders at runtime.
+- If a Dewey path is missing, fail hard with an explicit error instead of discovering or synthesizing an alternate path.
 
 ## No Circumvention Policy
 
