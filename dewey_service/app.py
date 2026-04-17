@@ -49,6 +49,7 @@ from dewey_service.auth import (
     require_ui_session,
     start_browser_login,
 )
+from dewey_service.defaults import AWS_PROFILE_REQUIRED_MESSAGE, resolve_aws_profile
 from dewey_service.domain_access import (
     build_allowed_origin_regex,
     build_trusted_hosts,
@@ -66,8 +67,10 @@ from dewey_service.observability import (
     build_db_health_payload,
     build_endpoint_health_payload,
     build_health_payload,
+    build_healthz_payload,
     build_my_health_payload,
     build_obs_services_payload,
+    build_readyz_payload,
     hash_identifier,
     probe_database,
     route_template_from_request,
@@ -76,12 +79,15 @@ from dewey_service.rbac import Role, profile_has_role
 from dewey_service.service import DeweyConflictError, DeweyNotFoundError, DeweyService
 from dewey_service.settings import (
     Settings,
+    _resolve_region_chrome,
+    build_effective_config_rows,
     get_config_file_path,
     get_settings,
     persist_managed_storage_bucket,
 )
 from dewey_service.storage import S3StorageClient
 from dewey_service.tapdb_backend import TapDBBackend
+from dewey_service.ui_metadata import resolve_git_metadata, resolve_package_version
 
 
 class ArtifactRegisterRequest(BaseModel):
@@ -285,11 +291,15 @@ def create_app(
 ) -> FastAPI:
     settings = settings or get_settings()
     allow_local_domain_access = not settings.is_production
+    configured_allowed_hosts = settings.network_allowed_hosts
 
     if service is None:
+        aws_profile = resolve_aws_profile(config_profile=settings.aws_profile)
+        if not aws_profile:
+            raise RuntimeError(AWS_PROFILE_REQUIRED_MESSAGE)
         backend = TapDBBackend(app_username="dewey")
         storage_client = S3StorageClient(
-            profile=settings.aws_profile,
+            profile=aws_profile,
             region=settings.aws_region,
         )
         literature_adapter = None
@@ -318,23 +328,30 @@ def create_app(
 
     app = FastAPI(
         title="Dewey Artifact Service",
-        version="1.0.0",
+        version=resolve_package_version(),
         description="Canonical artifact registry and resolver for LSMC",
     )
     app.state.settings = settings
     app.state.service = service
     app.state.observability = DeweyObservabilityStore(settings, version=app.version)
+    app.state.git_metadata = resolve_git_metadata(Path(__file__).resolve().parents[1])
     backend = getattr(service, "backend", None)
     if backend is not None and hasattr(backend, "observability"):
         backend.observability = app.state.observability
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=build_trusted_hosts(allow_local=allow_local_domain_access),
+        allowed_hosts=build_trusted_hosts(
+            allow_local=allow_local_domain_access,
+            additional_hosts=configured_allowed_hosts,
+        ),
     )
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[],
-        allow_origin_regex=build_allowed_origin_regex(allow_local=allow_local_domain_access),
+        allow_origin_regex=build_allowed_origin_regex(
+            allow_local=allow_local_domain_access,
+            additional_hosts=configured_allowed_hosts,
+        ),
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["*"],
@@ -372,6 +389,10 @@ def create_app(
     def _template_context(**kwargs: Any) -> dict[str, Any]:
         context = {
             "deployment": settings.deployment,
+            "region": _resolve_region_chrome(settings.aws_region or settings.cognito_region),
+            "show_environment_chrome": bool(settings.show_environment_chrome),
+            "git_meta": dict(getattr(app.state, "git_metadata", {})),
+            "build_version": app.version,
             "tapdb_embedded": bool(getattr(app.state, "tapdb_embedded", False)),
         }
         context.update(kwargs)
@@ -671,6 +692,10 @@ def create_app(
                 managed_storage_bucket=str(settings.managed_storage_bucket or "").strip(),
                 managed_storage_prefix=str(settings.managed_storage_prefix or "").strip(),
                 config_path=str(get_config_file_path()),
+                config_rows=build_effective_config_rows(
+                    settings,
+                    config_path=get_config_file_path(),
+                ),
                 artifact_bucket_form=artifact_bucket_form
                 or {"managed_storage_bucket": str(settings.managed_storage_bucket or "").strip()},
                 artifact_bucket_status=artifact_bucket_status,
@@ -902,7 +927,11 @@ def create_app(
     @app.middleware("http")
     async def _enforce_origin_allowlist(request: Request, call_next):
         origin = request.headers.get("origin")
-        if origin and not is_allowed_origin(origin, allow_local=allow_local_domain_access):
+        if origin and not is_allowed_origin(
+            origin,
+            allow_local=allow_local_domain_access,
+            additional_hosts=configured_allowed_hosts,
+        ):
             return HTMLResponse(status_code=403, content="Origin not allowed")
         return await call_next(request)
 
@@ -1076,8 +1105,11 @@ def create_app(
         return await _logout_response(request)
 
     @app.get("/healthz")
-    async def healthz() -> dict[str, str]:
-        return {"status": "ok", "version": app.version}
+    async def healthz(request: Request) -> dict[str, Any]:
+        return build_healthz_payload(
+            request,
+            started_at=app.state.observability.started_at,
+        )
 
     @app.get("/readyz")
     async def readyz(request: Request) -> JSONResponse:
@@ -1087,12 +1119,14 @@ def create_app(
             latency_ms=float(probe["latency_ms"]),
             detail=str(probe["detail"]),
         )
-        payload = {
-            "status": "ok" if probe["status"] == "ok" else "degraded",
-            "version": app.version,
-            "database": probe,
-        }
-        return JSONResponse(status_code=200 if probe["status"] == "ok" else 503, content=payload)
+        ready = str(probe.get("status") or "") == "ok"
+        payload = build_readyz_payload(
+            request,
+            started_at=app.state.observability.started_at,
+            database_check=probe,
+            ready=ready,
+        )
+        return JSONResponse(status_code=200 if ready else 503, content=payload)
 
     @app.get("/health")
     async def health(

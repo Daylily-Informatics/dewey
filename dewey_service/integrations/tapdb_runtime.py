@@ -13,9 +13,14 @@ from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import quote
 
-from dewey_service.defaults import DEFAULT_DB_PORT
+from dewey_service.defaults import (
+    AWS_PROFILE_REQUIRED_MESSAGE,
+    DEFAULT_DB_PORT,
+    resolve_aws_profile,
+)
+from dewey_service.settings import load_config_aws_profile
 
-DEFAULT_AWS_PROFILE = "lsmc"
+DEFAULT_AWS_PROFILE = ""
 DEFAULT_AWS_REGION = "us-west-2"
 DEFAULT_TAPDB_CLIENT_ID = "dewey"
 DEFAULT_TAPDB_DATABASE_NAME = "dewey"
@@ -32,7 +37,7 @@ class TapDBRuntimeError(RuntimeError):
 
 
 def _sanitize_deployment_code(value: str) -> str:
-    cleaned = re.sub(r"[^A-Za-z0-9-]+", "-", (value or "").strip())
+    cleaned = "".join(ch if ch.isalnum() or ch == "-" else "-" for ch in (value or "").strip())
     cleaned = cleaned.strip("-")
     return cleaned or "local"
 
@@ -74,42 +79,23 @@ def tapdb_env_for_target(target: str) -> str:
 def _resolve_tapdb_config_path(
     *, namespace: str, client_id: str, config_path: str = ""
 ) -> str | None:
+    del namespace, client_id
     explicit = str(config_path or "").strip()
     if explicit:
-        return explicit
-    normalized_namespace = (
-        namespace or DEFAULT_TAPDB_DATABASE_NAME
-    ).strip() or DEFAULT_TAPDB_DATABASE_NAME
-    normalized_client_id = (client_id or DEFAULT_TAPDB_CLIENT_ID).strip() or DEFAULT_TAPDB_CLIENT_ID
-    deployment_code = _resolve_deployment_code()
-
-    deployment_scoped = (
-        Path.home()
-        / ".config"
-        / "tapdb"
-        / normalized_client_id
-        / f"{normalized_namespace}-{deployment_code}"
-        / "tapdb-config.yaml"
-    )
-    if deployment_scoped.exists():
-        return str(deployment_scoped)
-
-    user_scoped = (
-        Path.home()
-        / ".config"
-        / "tapdb"
-        / normalized_client_id
-        / normalized_namespace
-        / "tapdb-config.yaml"
-    )
-    if user_scoped.exists():
-        return str(user_scoped)
-
-    repo_root = Path(__file__).resolve().parents[2]
-    repo_scoped = repo_root / "config" / f"tapdb-config-{normalized_namespace}.yaml"
-    if repo_scoped.exists():
-        return str(repo_scoped)
-
+        resolved = Path(explicit)
+        if not resolved.is_absolute():
+            raise TapDBRuntimeError(
+                f"TapDB config path must be an absolute file path, got: {explicit}"
+            )
+        return str(resolved.resolve())
+    env_override = str(os.environ.get("TAPDB_CONFIG_PATH") or "").strip()
+    if env_override:
+        resolved = Path(env_override)
+        if not resolved.is_absolute():
+            raise TapDBRuntimeError(
+                f"TAPDB_CONFIG_PATH must be an absolute file path, got: {env_override}"
+            )
+        return str(resolved.resolve())
     return None
 
 
@@ -133,8 +119,13 @@ def _resolve_runtime_env(
         client_id=resolved_client_id,
         config_path=config_path,
     )
+    resolved_profile = (profile or "").strip()
+    if not resolved_profile:
+        resolved_profile = resolve_aws_profile(config_profile=load_config_aws_profile())
+    if not resolved_profile:
+        raise TapDBRuntimeError(AWS_PROFILE_REQUIRED_MESSAGE)
     return {
-        "aws_profile": (profile or DEFAULT_AWS_PROFILE).strip() or DEFAULT_AWS_PROFILE,
+        "aws_profile": resolved_profile,
         "aws_region": (region or DEFAULT_AWS_REGION).strip() or DEFAULT_AWS_REGION,
         "client_id": resolved_client_id,
         "database_name": resolved_namespace,
@@ -147,7 +138,8 @@ def _require_config_path(runtime_env: Mapping[str, str]) -> str:
     config_path = str(runtime_env.get("config_path") or "").strip()
     if not config_path:
         raise TapDBRuntimeError(
-            "TapDB config path is required. Resolve it via Dewey settings and run TapDB as "
+            "TapDB config path is required. Pass an explicit absolute path via Dewey settings, "
+            "--config, or TAPDB_CONFIG_PATH, then run TapDB as "
             "'tapdb --config <path> --env <name> ...'."
         )
     return config_path
@@ -259,11 +251,20 @@ def run_tapdb_cli(
     ]
     cmd.extend(args)
     child_env = os.environ.copy()
-    child_env["AWS_PROFILE"] = runtime_env["aws_profile"]
+    if runtime_env["aws_profile"]:
+        child_env["AWS_PROFILE"] = runtime_env["aws_profile"]
+    else:
+        child_env.pop("AWS_PROFILE", None)
     child_env["AWS_REGION"] = runtime_env["aws_region"]
     child_env["AWS_DEFAULT_REGION"] = runtime_env["aws_region"]
-    child_env["MERIDIAN_DOMAIN_CODE"] = os.environ.get("MERIDIAN_DOMAIN_CODE", "D")
-    child_env["TAPDB_APP_CODE"] = os.environ.get("TAPDB_APP_CODE", "D")
+    domain_code = str(os.environ.get("MERIDIAN_DOMAIN_CODE") or "").strip()
+    owner_repo_name = str(os.environ.get("TAPDB_OWNER_REPO") or "").strip()
+    if not domain_code:
+        raise TapDBRuntimeError("MERIDIAN_DOMAIN_CODE is required for TapDB runtime commands")
+    if not owner_repo_name:
+        raise TapDBRuntimeError("TAPDB_OWNER_REPO is required for TapDB runtime commands")
+    child_env["MERIDIAN_DOMAIN_CODE"] = domain_code
+    child_env["TAPDB_OWNER_REPO"] = owner_repo_name
 
     proc = subprocess.run(
         cmd,

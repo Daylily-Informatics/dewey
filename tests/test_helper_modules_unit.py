@@ -86,7 +86,7 @@ def test_load_schema_drift_payload_returns_copy(monkeypatch: pytest.MonkeyPatch)
     settings = SimpleNamespace(
         database_target="local",
         tapdb_client_id="dewey",
-        aws_profile="lsmc",
+        aws_profile="team-profile",
         aws_region="us-west-2",
         tapdb_database_name="dewey",
         tapdb_env="dev",
@@ -109,7 +109,7 @@ def test_cached_schema_drift_payload_success_and_failure(monkeypatch: pytest.Mon
     success = schema_drift._cached_schema_drift_payload(
         "local",
         "dewey",
-        "lsmc",
+        "team-profile",
         "us-west-2",
         "dewey",
         "dev",
@@ -120,7 +120,7 @@ def test_cached_schema_drift_payload_success_and_failure(monkeypatch: pytest.Mon
         {
             "target": "local",
             "client_id": "dewey",
-            "profile": "lsmc",
+            "profile": "team-profile",
             "region": "us-west-2",
             "namespace": "dewey",
             "tapdb_env": "dev",
@@ -150,7 +150,7 @@ def test_cached_schema_drift_payload_success_and_failure(monkeypatch: pytest.Mon
     failure = schema_drift._cached_schema_drift_payload(
         "local",
         "dewey",
-        "lsmc",
+        "team-profile",
         "us-west-2",
         "dewey",
         "dev",

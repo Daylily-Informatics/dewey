@@ -44,20 +44,21 @@ Then bootstrap local persistence:
 dewey db build --target local
 ```
 
-Current published-package caveat from the April 7, 2026 local walkthrough:
+Current published-package note from the April 15, 2026 TapDB hard cut:
 
-- the first published TapDB build that works with published `cli-core-yo==2.0.0` is currently `daylily-tapdb==5.0.0`
-- on that TapDB line, `dewey db build --target local` initializes PostgreSQL but leaves the `db setup` step incomplete
-- complete the delegated TapDB setup with:
+- this repo now pins the `daylily-tapdb` version declared in `pyproject.toml`
+- All Python dependencies needed by the repo live in `project.dependencies`
+- the shared TapDB config must be passed as an explicit full path such as `/absolute/path/to/tapdb-config.yaml`
+- if you invoke `tapdb` manually, use that shared config path directly:
 
 ```bash
-tapdb --config ~/.config/tapdb/dewey/dewey-local/tapdb-config.yaml --env dev db setup dev --force
+tapdb --config /absolute/path/to/tapdb-config.yaml --env dev db setup dev --force
 ```
 
-- if you just reset the Dewey config template, set the deployment-scoped TapDB config path explicitly before `dewey db seed` or `dewey server start`:
+- if you just reset the Dewey config template, set the TapDB config path explicitly before `dewey db seed` or `dewey server start`:
 
 ```bash
-export DEWEY_TAPDB_CONFIG_PATH=~/.config/tapdb/dewey/dewey-local/tapdb-config.yaml
+export TAPDB_CONFIG_PATH=/absolute/path/to/tapdb-config.yaml
 dewey db seed
 dewey server start --port 8914
 ```

@@ -30,7 +30,7 @@ def _require_pytest_cov() -> None:
     """Fail with a clear message when coverage support is not installed."""
     if importlib.util.find_spec("pytest_cov") is not None:
         return
-    ccyo_out.error("pytest-cov is not installed; run `python -m pip install -e '.[dev]'`")
+    ccyo_out.error("pytest-cov is not installed; run `python -m pip install -e .`")
     raise typer.Exit(1)
 
 

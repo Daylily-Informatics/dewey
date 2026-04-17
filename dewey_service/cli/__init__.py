@@ -27,6 +27,7 @@ from dewey_service.defaults import (
     build_default_config_template,
     default_cognito_logout_url,
     default_cognito_redirect_uri,
+    resolve_aws_profile,
 )
 from dewey_service.settings import (
     Settings,
@@ -213,6 +214,7 @@ def _validate_dewey_config(content: str) -> list[str]:
 def _dewey_info_hook() -> list[tuple[str, str]]:
     """Return Dewey-specific rows for the built-in info command."""
     rows: list[tuple[str, str]] = [("Project Root", str(PROJECT_ROOT))]
+    aws_profile = resolve_aws_profile()
 
     try:
         clear_settings_cache()
@@ -221,12 +223,14 @@ def _dewey_info_hook() -> list[tuple[str, str]]:
         rows.append(("Config Status", f"invalid ({exc})"))
         settings = None
     else:
+        aws_profile = resolve_aws_profile(config_profile=settings.aws_profile)
         rows.extend(
             [
                 ("Database Backend", settings.database_backend),
                 ("Database Target", settings.database_target),
-                ("TapDB Client", settings.tapdb_client_id),
                 ("TapDB Namespace", settings.tapdb_database_name),
+                ("TapDB Owner Repo", settings.tapdb_owner_repo_name),
+                ("TapDB Domain", settings.tapdb_domain_code),
                 ("TapDB Env", settings.tapdb_env),
                 ("Host", settings.host),
                 ("Port", str(settings.port)),
@@ -235,7 +239,7 @@ def _dewey_info_hook() -> list[tuple[str, str]]:
 
     rows.extend(
         [
-            ("AWS Profile", os.environ.get("AWS_PROFILE", "")),
+            ("AWS Profile", aws_profile),
             ("AWS Region", os.environ.get("AWS_REGION", "")),
         ]
     )

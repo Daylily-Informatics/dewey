@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import colorsys
 import hashlib
+import json
 import os
 import re
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 import yaml
 from pydantic import Field, field_validator, model_validator
@@ -17,6 +19,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from dewey_service.defaults import (
     DEFAULT_APP_PORT,
     DEFAULT_COGNITO_ALLOWED_EMAIL_DOMAINS,
+    DEFAULT_TAPDB_CONFIG_DIR,
+    DEFAULT_TAPDB_DOMAIN_REGISTRY_PATH,
+    DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH,
     build_default_config_template,
     default_cognito_logout_url,
     default_cognito_redirect_uri,
@@ -28,6 +33,23 @@ DEFAULT_COGNITO_AUTO_PROVISION_ALLOWED_DOMAINS = ("lsmc.com",)
 
 DEFAULT_DEPLOYMENT_BANNER_COLOR = "#AFEEEE"
 PRODUCTION_DEPLOYMENT_NAMES = {"prod", "production"}
+SENSITIVE_CONFIG_KEY_PARTS = {
+    "secret",
+    "token",
+    "password",
+    "passwd",
+    "key",
+    "credential",
+    "private",
+    "signing",
+    "session",
+    "cookie",
+    "authorization",
+    "client_secret",
+    "api_key",
+    "access_key",
+    "secret_key",
+}
 
 
 def _require_https_url(value: str, *, field_name: str) -> str:
@@ -45,6 +67,16 @@ def _validate_optional_https_url(value: str, *, field_name: str) -> str:
         return ""
     if not normalized.startswith("https://"):
         raise ValueError(f"{field_name} must use an absolute https:// URL")
+    return normalized
+
+
+def _require_bare_host(value: str, *, field_name: str) -> str:
+    normalized = str(value or "").strip().rstrip("/")
+    if not normalized:
+        raise ValueError(f"{field_name} is required")
+    parsed = urlsplit(normalized)
+    if parsed.scheme or parsed.netloc or any(char in normalized for char in "/?#"):
+        raise ValueError(f"{field_name} must be a bare host, not a URL")
     return normalized
 
 
@@ -118,6 +150,17 @@ def _stable_deployment_color_hex(name: str) -> str:
     )
 
 
+def _stable_region_color_hex(name: str) -> str:
+    digest = hashlib.sha256(name.encode("utf-8")).digest()
+    hue = (int.from_bytes(digest[:8], "big") % 360 + 180) % 360
+    red, green, blue = colorsys.hls_to_rgb(hue / 360.0, 0.62, 0.45)
+    return "#{:02x}{:02x}{:02x}".format(
+        round(red * 255),
+        round(green * 255),
+        round(blue * 255),
+    )
+
+
 def _resolve_deployment_chrome(
     *,
     name: str | None,
@@ -125,17 +168,23 @@ def _resolve_deployment_chrome(
     fallback_name: str | None = None,
 ) -> dict[str, Any]:
     resolved_name = str(name or "").strip() or str(fallback_name or "").strip()
-    resolved_color = str(color or "").strip()
-    if not resolved_color:
-        resolved_color = (
-            _stable_deployment_color_hex(resolved_name)
-            if resolved_name
-            else DEFAULT_DEPLOYMENT_BANNER_COLOR
-        )
+    resolved_color = (
+        _stable_deployment_color_hex(resolved_name)
+        if resolved_name
+        else DEFAULT_DEPLOYMENT_BANNER_COLOR
+    )
     return {
         "name": resolved_name,
         "color": resolved_color,
         "is_production": resolved_name.lower() in PRODUCTION_DEPLOYMENT_NAMES,
+    }
+
+
+def _resolve_region_chrome(name: str | None) -> dict[str, Any]:
+    resolved_name = str(name or "").strip() or "us-west-2"
+    return {
+        "name": resolved_name,
+        "color": _stable_region_color_hex(resolved_name),
     }
 
 
@@ -169,6 +218,10 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "database_target": "database_target",
         "database_namespace": "tapdb_database_name",
         "database_client_id": "tapdb_client_id",
+        "database_owner_repo_name": "tapdb_owner_repo_name",
+        "database_domain_code": "tapdb_domain_code",
+        "database_domain_registry_path": "tapdb_domain_registry_path",
+        "database_prefix_ownership_registry_path": "tapdb_prefix_ownership_registry_path",
         "database_env": "tapdb_env",
         "database_config_path": "tapdb_config_path",
         "aws_profile": "aws_profile",
@@ -190,11 +243,135 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "deployment_name": "deployment_name",
         "deployment_color": "deployment_color",
         "deployment_is_production": "deployment_is_production",
+        "ui_show_environment_chrome": "show_environment_chrome",
+        "show_environment_chrome": "show_environment_chrome",
     }
     normalized: dict[str, Any] = {}
     for key, value in out.items():
         normalized[remap.get(key, key)] = value
     return normalized
+
+
+def _is_sensitive_config_path(path: str) -> bool:
+    lowered = str(path or "").lower()
+    return any(part in lowered for part in SENSITIVE_CONFIG_KEY_PARTS)
+
+
+def _display_config_value(value: Any) -> str:
+    if value is None:
+        return "<unset>"
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (int, float)):
+        return str(value)
+    if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, (list, tuple, set)):
+        items = [str(item).strip() for item in value if str(item).strip()]
+        return ", ".join(items) if items else "<unset>"
+    if isinstance(value, dict):
+        return json.dumps(value, sort_keys=True, default=str)
+    text = str(value).strip()
+    return text or "<unset>"
+
+
+def _require_absolute_path(value: str, *, field_name: str) -> str:
+    normalized = str(value or "").strip()
+    if not normalized:
+        raise ValueError(f"{field_name} is required")
+    resolved = Path(normalized)
+    if not resolved.is_absolute():
+        raise ValueError(f"{field_name} must be an absolute file path")
+    return str(resolved.resolve())
+
+
+def _display_config_path(path: str) -> str:
+    mapping = {
+        "show_environment_chrome": "ui.show_environment_chrome",
+        "deployment_name": "deployment.name",
+        "deployment_color": "deployment.color",
+        "deployment_is_production": "deployment.is_production",
+        "environment": "application.environment",
+        "api_bearer_token": "application.api_bearer_token",
+        "api_bearer_tokens": "application.api_bearer_tokens",
+        "session_secret_key": "application.session_secret_key",
+        "host": "application.host",
+        "port": "application.port",
+        "verify_ssl": "application.verify_ssl",
+        "cognito_domain": "auth.cognito.domain",
+        "cognito_app_client_id": "auth.cognito.app_client_id",
+        "cognito_app_client_secret": "auth.cognito.app_client_secret",
+        "cognito_redirect_uri": "auth.cognito.redirect_uri",
+        "cognito_logout_url": "auth.cognito.logout_url",
+        "cognito_user_pool_id": "auth.cognito.user_pool_id",
+        "cognito_region": "auth.cognito.region",
+        "cognito_allowed_email_domains": "auth.cognito.allowed_email_domains",
+        "cognito_default_tenant_id": "auth.cognito.default_tenant_id",
+        "cognito_auto_provision_allowed_domains": "auth.cognito.auto_provision_allowed_domains",
+        "cognito_group_role_map": "auth.cognito.group_role_map",
+        "database_backend": "database.backend",
+        "database_target": "database.target",
+        "tapdb_client_id": "database.client_id",
+        "tapdb_database_name": "database.namespace",
+        "tapdb_owner_repo_name": "database.owner_repo_name",
+        "tapdb_domain_code": "database.domain_code",
+        "tapdb_domain_registry_path": "database.domain_registry_path",
+        "tapdb_prefix_ownership_registry_path": "database.prefix_ownership_registry_path",
+        "tapdb_env": "database.env",
+        "tapdb_config_path": "database.config_path",
+        "tapdb_strict_namespace": "database.strict_namespace",
+        "aws_profile": "aws.profile",
+        "aws_region": "aws.region",
+        "managed_storage_bucket": "storage.managed_bucket",
+        "managed_storage_prefix": "storage.managed_prefix",
+        "upload_session_ttl_seconds": "storage.upload_session_ttl_seconds",
+        "literature_managed_copy_allowed_domains": "literature.managed_copy_allowed_domains",
+        "literature_metapub_cache_dir": "literature.metapub_cache_dir",
+        "literature_request_timeout_seconds": "literature.request_timeout_seconds",
+        "literature_max_redirects": "literature.max_redirects",
+        "default_share_reference_ttl_seconds": "share_reference.default_ttl_seconds",
+        "search_export_max_rows": "search.export_max_rows",
+        "config_path": "config.file_path",
+    }
+    if path in mapping:
+        return mapping[path]
+    prefix_mapping = {
+        "cognito_group_role_map.": "auth.cognito.group_role_map.",
+    }
+    for prefix, replacement in prefix_mapping.items():
+        if path.startswith(prefix):
+            return replacement + path[len(prefix) :]
+    return path.replace("_", ".")
+
+
+def build_effective_config_rows(settings: "Settings", *, config_path: Path) -> list[dict[str, str]]:
+    payload = settings.model_dump(mode="python")
+    payload["show_environment_chrome"] = settings.show_environment_chrome
+    payload["config_path"] = str(config_path)
+
+    rows: list[dict[str, str]] = []
+
+    def _visit(path: str, value: Any) -> None:
+        if isinstance(value, dict):
+            for key in sorted(value):
+                next_path = f"{path}.{key}" if path else str(key)
+                _visit(next_path, value[key])
+            return
+        display_path = _display_config_path(path)
+        rows.append(
+            {
+                "path": display_path,
+                "value": "<redacted>"
+                if _is_sensitive_config_path(display_path)
+                else _display_config_value(value),
+            }
+        )
+
+    for key in sorted(payload):
+        _visit(str(key), payload[key])
+
+    rows.sort(key=lambda item: item["path"])
+    return rows
 
 
 class Settings(BaseSettings):
@@ -234,18 +411,24 @@ class Settings(BaseSettings):
     deployment_name: str = ""
     deployment_color: str = ""
     deployment_is_production: bool = False
+    network_allowed_hosts: list[str] = Field(default_factory=list)
+    show_environment_chrome: bool = True
 
     # TapDB runtime
     database_backend: str = "tapdb"
     database_target: str = "local"
     tapdb_client_id: str = "dewey"
     tapdb_database_name: str = "dewey"
+    tapdb_owner_repo_name: str = "dewey"
+    tapdb_domain_code: str = "Z"
+    tapdb_domain_registry_path: str = str(DEFAULT_TAPDB_DOMAIN_REGISTRY_PATH)
+    tapdb_prefix_ownership_registry_path: str = str(DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH)
     tapdb_env: str = "dev"
-    tapdb_config_path: str = ""
+    tapdb_config_path: str = str(DEFAULT_TAPDB_CONFIG_DIR / "dewey" / "dewey" / "tapdb-config.yaml")
     tapdb_strict_namespace: int = 1
 
     # AWS defaults for TapDB wrappers
-    aws_profile: str = "lsmc"
+    aws_profile: str = ""
     aws_region: str = "us-west-2"
 
     # Dewey-managed storage
@@ -283,6 +466,27 @@ class Settings(BaseSettings):
         if normalized not in {"local", "aurora"}:
             raise ValueError("database_target must be one of: local, aurora")
         return normalized
+
+    @field_validator("tapdb_owner_repo_name")
+    @classmethod
+    def validate_tapdb_owner_repo_name(cls, value: str) -> str:
+        normalized = str(value or "").strip()
+        if not normalized:
+            raise ValueError("tapdb_owner_repo_name is required")
+        return normalized
+
+    @field_validator("tapdb_domain_code")
+    @classmethod
+    def validate_tapdb_domain_code(cls, value: str) -> str:
+        normalized = str(value or "").strip().upper()
+        if not normalized:
+            raise ValueError("tapdb_domain_code is required")
+        return normalized
+
+    @field_validator("tapdb_domain_registry_path", "tapdb_prefix_ownership_registry_path")
+    @classmethod
+    def validate_tapdb_registry_path(cls, value: str) -> str:
+        return _require_absolute_path(value, field_name="TapDB registry path")
 
     @field_validator("api_bearer_token")
     @classmethod
@@ -335,21 +539,21 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_cognito_contract(self) -> "Settings":
-        missing: list[str] = []
-        if not str(self.cognito_domain or "").strip():
-            missing.append("cognito_domain")
-        if not str(self.cognito_app_client_id or "").strip():
-            missing.append("cognito_app_client_id")
-        if not str(self.cognito_redirect_uri or "").strip():
-            missing.append("cognito_redirect_uri")
-        if not str(self.cognito_logout_url or "").strip():
-            missing.append("cognito_logout_url")
-        if missing:
-            raise ValueError("Cognito UI auth is required; missing settings: " + ", ".join(missing))
-        self.cognito_domain = _require_https_url(
-            self.cognito_domain,
-            field_name="cognito_domain",
-        )
+        if str(self.cognito_domain or "").strip():
+            self.cognito_domain = _require_bare_host(
+                self.cognito_domain,
+                field_name="cognito_domain",
+            )
+        if str(self.cognito_redirect_uri or "").strip():
+            self.cognito_redirect_uri = _require_https_url(
+                self.cognito_redirect_uri,
+                field_name="cognito_redirect_uri",
+            )
+        if str(self.cognito_logout_url or "").strip():
+            self.cognito_logout_url = _require_https_url(
+                self.cognito_logout_url,
+                field_name="cognito_logout_url",
+            )
         self.cognito_allowed_email_domains = _normalize_email_domains(
             self.cognito_allowed_email_domains,
             default=DEFAULT_COGNITO_ALLOWED_EMAIL_DOMAINS,
@@ -366,6 +570,15 @@ class Settings(BaseSettings):
         self.deployment_name = str(deployment["name"])
         self.deployment_color = str(deployment["color"])
         self.deployment_is_production = bool(deployment["is_production"])
+        tapdb_config_path = str(os.environ.get("TAPDB_CONFIG_PATH") or "").strip()
+        if tapdb_config_path:
+            self.tapdb_config_path = tapdb_config_path
+        else:
+            self.tapdb_config_path = str(self.tapdb_config_path or "").strip()
+        self.tapdb_config_path = _require_absolute_path(
+            self.tapdb_config_path,
+            field_name="tapdb_config_path",
+        )
         return self
 
     def api_tokens(self) -> set[str]:
@@ -438,6 +651,14 @@ def _load_config_payload(config_path: Path | None = None) -> tuple[Path, dict[st
     return cfg_path, raw
 
 
+def load_config_aws_profile(config_path: Path | None = None) -> str:
+    _cfg_path, raw = _load_config_payload(config_path)
+    aws_config = raw.get("aws")
+    if not isinstance(aws_config, dict):
+        return ""
+    return str(aws_config.get("profile") or "").strip()
+
+
 def persist_managed_storage_bucket(
     bucket: str,
     *,
@@ -485,6 +706,7 @@ def load_settings(config_path: Path | None = None) -> Settings:
         "deployment_name": "",
         "deployment_color": "",
         "deployment_is_production": False,
+        "show_environment_chrome": True,
     }
     env_override = {
         key[len("DEWEY_") :].lower(): value

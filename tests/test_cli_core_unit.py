@@ -108,9 +108,12 @@ def test_dewey_info_hook_reports_settings_and_running_server(
             database_target="local",
             tapdb_client_id="dewey",
             tapdb_database_name="dewey",
+            tapdb_owner_repo_name="dewey",
+            tapdb_domain_code="Z",
             tapdb_env="dev",
             host="127.0.0.1",
             port=8914,
+            aws_profile="config-profile",
         ),
     )
     monkeypatch.setattr(
@@ -118,7 +121,7 @@ def test_dewey_info_hook_reports_settings_and_running_server(
         lambda: SimpleNamespace(xdg_paths=SimpleNamespace(state=tmp_path)),
     )
     monkeypatch.setattr(cli_module.os, "kill", lambda pid, sig: None)
-    monkeypatch.setenv("AWS_PROFILE", "lsmc")
+    monkeypatch.setenv("AWS_PROFILE", "shell-profile")
     monkeypatch.setenv("AWS_REGION", "us-west-2")
 
     rows = dict(cli_module._dewey_info_hook())
@@ -126,10 +129,12 @@ def test_dewey_info_hook_reports_settings_and_running_server(
     assert clear_calls == ["clear"]
     assert rows["Project Root"] == str(cli_module.PROJECT_ROOT)
     assert rows["Database Backend"] == "tapdb"
-    assert rows["TapDB Client"] == "dewey"
+    assert rows["TapDB Namespace"] == "dewey"
+    assert rows["TapDB Owner Repo"] == "dewey"
+    assert rows["TapDB Domain"] == "Z"
     assert rows["Host"] == "127.0.0.1"
     assert rows["Port"] == "8914"
-    assert rows["AWS Profile"] == "lsmc"
+    assert rows["AWS Profile"] == "config-profile"
     assert rows["AWS Region"] == "us-west-2"
     assert rows["Dev Server"] == "Running (PID 4321)"
 
@@ -137,6 +142,7 @@ def test_dewey_info_hook_reports_settings_and_running_server(
 def test_dewey_info_hook_handles_invalid_config_and_unknown_server(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setenv("AWS_PROFILE", "shell-profile")
     monkeypatch.setattr(cli_module, "clear_settings_cache", lambda: None)
     monkeypatch.setattr(
         cli_module,
@@ -151,6 +157,7 @@ def test_dewey_info_hook_handles_invalid_config_and_unknown_server(
     rows = dict(cli_module._dewey_info_hook())
 
     assert rows["Config Status"] == "invalid (bad cfg)"
+    assert rows["AWS Profile"] == "shell-profile"
     assert rows["Dev Server"] == "Unknown"
 
 

@@ -9,7 +9,12 @@ from cli_core_yo.app import run as run_cli
 
 import dewey_service.cli as cli_module
 import dewey_service.cli.server as server_cli
-from dewey_service.defaults import build_default_config_template
+from dewey_service.defaults import (
+    DEFAULT_TAPDB_CONFIG_DIR,
+    DEFAULT_TAPDB_DOMAIN_REGISTRY_PATH,
+    DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH,
+    build_default_config_template,
+)
 from dewey_service.settings import Settings
 
 
@@ -50,7 +55,7 @@ def test_cli_info_renders(monkeypatch, capsys) -> None:
         cli_module,
         "get_settings",
         lambda: Settings(
-            cognito_domain="https://auth.example.com",
+            cognito_domain="auth.example.com",
             cognito_app_client_id="client-1",
             cognito_redirect_uri="https://localhost:8914/auth/callback",
             cognito_logout_url="https://localhost:8914/login",
@@ -63,7 +68,9 @@ def test_cli_info_renders(monkeypatch, capsys) -> None:
     assert exit_code == 0
     assert "Dewey Info" in captured.out
     assert "Database Backend" in captured.out
-    assert "TapDB Client" in captured.out
+    assert "TapDB Namespace" in captured.out
+    assert "TapDB Owner Repo" in captured.out
+    assert "TapDB Domain" in captured.out
 
 
 def test_server_status_reports_not_running(monkeypatch, capsys) -> None:
@@ -152,6 +159,7 @@ def test_server_start_parses_tls_options(monkeypatch, capsys, tmp_path: Path) ->
 def test_config_init_show_validate_and_status(monkeypatch, tmp_path: Path, capsys) -> None:
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
     monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "local")
+    monkeypatch.delenv("AWS_PROFILE", raising=False)
 
     init_exit = _invoke(["config", "init"])
     init_output = capsys.readouterr().out
@@ -162,12 +170,26 @@ def test_config_init_show_validate_and_status(monkeypatch, tmp_path: Path, capsy
     assert config_path.exists()
     config_text = config_path.read_text(encoding="utf-8")
     assert "storage:" in config_text
-    assert "MERIDIAN_DOMAIN_CODE=D" in config_text
-    assert "TAPDB_APP_CODE=D" in config_text
+    assert "MERIDIAN_DOMAIN_CODE=Z" in config_text
+    assert "TAPDB_OWNER_REPO=dewey" in config_text
+    assert "owner_repo_name: dewey" in config_text
+    assert "domain_code: Z" in config_text
+    assert f"domain_registry_path: {DEFAULT_TAPDB_DOMAIN_REGISTRY_PATH}" in config_text
+    assert (
+        f"prefix_ownership_registry_path: {DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH}"
+        in config_text
+    )
+    assert (
+        f"config_path: {DEFAULT_TAPDB_CONFIG_DIR / 'dewey' / 'dewey' / 'tapdb-config.yaml'}"
+        in config_text
+    )
     assert "session_secret_key: dewey-session-secret-change-me" not in config_text
     assert "allowed_email_domains:" in config_text
     assert "default_tenant_id: 00000000-0000-0000-0000-000000000000" in config_text
     assert "auto_provision_allowed_domains:" in config_text
+    assert "ui:" in config_text
+    assert "show_environment_chrome: true" in config_text
+    assert 'profile: ""' in config_text
 
     show_exit = _invoke(["config", "show"])
     show_output = capsys.readouterr().out
@@ -175,6 +197,7 @@ def test_config_init_show_validate_and_status(monkeypatch, tmp_path: Path, capsy
     assert "application:" in show_output
     assert "database:" in show_output
     assert "storage:" in show_output
+    assert "show_environment_chrome" in show_output
 
 
 def test_config_template_bytes_are_fresh() -> None:
@@ -184,6 +207,16 @@ def test_config_template_bytes_are_fresh() -> None:
     assert first != second
     assert b"session_secret_key: dewey-session-secret-change-me" not in first
     assert b"allowed_email_domains:" in first
+
+
+def test_config_template_does_not_materialize_shell_aws_profile(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AWS_PROFILE", "shell-profile")
+
+    template = build_default_config_template().decode("utf-8")
+
+    assert 'profile: ""' in template
 
 
 def test_config_set_artifact_bucket(monkeypatch, tmp_path: Path, capsys) -> None:

@@ -64,7 +64,7 @@ def test_run_coverage_requires_pytest_cov(monkeypatch: pytest.MonkeyPatch) -> No
         test_cli.run_coverage(SimpleNamespace(args=[]), html=False)
 
     assert exc.value.exit_code == 1
-    assert errors == ["pytest-cov is not installed; run `python -m pip install -e '.[dev]'`"]
+    assert errors == ["pytest-cov is not installed; run `python -m pip install -e .`"]
 
 
 def test_run_coverage_builds_pytest_cov_command(monkeypatch: pytest.MonkeyPatch) -> None:

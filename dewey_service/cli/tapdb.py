@@ -13,6 +13,7 @@ from cli_core_yo import ccyo_out
 
 from dewey_service.cli._registry_v2 import REQUIRED_MUTATING, register_group_commands
 from dewey_service.cli.common import PROJECT_ROOT
+from dewey_service.defaults import AWS_PROFILE_REQUIRED_MESSAGE, resolve_aws_profile
 from dewey_service.integrations.tapdb_runtime import (
     DEFAULT_AWS_PROFILE,
     DEFAULT_AWS_REGION,
@@ -21,8 +22,19 @@ from dewey_service.integrations.tapdb_runtime import (
     TapDBRuntimeError,
     run_tapdb_cli,
 )
+from dewey_service.settings import load_config_aws_profile
 
 tapdb_app = typer.Typer(help="TapDB passthrough wrappers")
+
+
+def _resolve_cli_aws_profile(profile: str) -> str:
+    resolved_profile = resolve_aws_profile(
+        cli_profile=profile,
+        config_profile=load_config_aws_profile(),
+    )
+    if resolved_profile:
+        return resolved_profile
+    raise TapDBRuntimeError(AWS_PROFILE_REQUIRED_MESSAGE)
 
 
 @tapdb_app.command(
@@ -43,11 +55,12 @@ def run_command(
         raise typer.BadParameter("Missing tapdb arguments")
 
     try:
+        resolved_profile = _resolve_cli_aws_profile(profile)
         result = run_tapdb_cli(
             list(ctx.args),
             target=target,
             client_id=DEFAULT_TAPDB_CLIENT_ID,
-            profile=profile,
+            profile=resolved_profile,
             region=region,
             namespace=namespace,
             cwd=PROJECT_ROOT,

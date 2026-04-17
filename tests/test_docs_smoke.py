@@ -82,6 +82,20 @@ def test_readme_and_how_tos_reference_current_cli_commands() -> None:
         assert command in readme or command in how_tos
 
 
+def test_shipped_docs_and_templates_do_not_teach_guessed_tapdb_paths() -> None:
+    files = {
+        Path("config/dewey-config.example.yaml"): "/absolute/path/to/tapdb-config.yaml",
+        Path("config/tapdb-config-dewey.yaml"): "/absolute/path/to/domain_code_registry.json",
+        Path("dewey_service/etc/dewey-config-template.yaml"): "/absolute/path/to/tapdb-config.yaml",
+        Path("docs/how-tos.md"): "/absolute/path/to/tapdb-config.yaml",
+    }
+
+    for path, expected_snippet in files.items():
+        content = path.read_text(encoding="utf-8")
+        assert "~/.config/tapdb" not in content
+        assert expected_snippet in content
+
+
 def test_documented_cli_groups_match_live_help_surface() -> None:
     root_code, root_help = _invoke(["--help"])
     server_code, server_help = _invoke(["server", "--help"])

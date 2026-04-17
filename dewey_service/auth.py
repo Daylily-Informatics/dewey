@@ -57,12 +57,13 @@ def generate_state() -> str:
     return secrets.token_urlsafe(24)
 
 
-def _strip_scheme(value: str) -> str:
+def _bare_host(value: str) -> str:
     cleaned = str(value or "").strip().rstrip("/")
-    if cleaned.startswith("https://"):
-        return cleaned[len("https://") :]
-    if cleaned.startswith("http://"):
-        return cleaned[len("http://") :]
+    if not cleaned:
+        raise ValueError("cognito_domain must be a bare host, not a URL")
+    parsed = urlsplit(cleaned)
+    if parsed.scheme or parsed.netloc or any(char in cleaned for char in "/?#"):
+        raise ValueError("cognito_domain must be a bare host, not a URL")
     return cleaned
 
 
@@ -90,7 +91,7 @@ def build_cognito_web_session_config(
     server_instance_id: str | None = None,
 ) -> CognitoWebSessionConfig:
     config = CognitoWebSessionConfig(
-        domain=_strip_scheme(settings.cognito_domain),
+        domain=_bare_host(settings.cognito_domain),
         client_id=settings.cognito_app_client_id,
         redirect_uri=settings.cognito_redirect_uri,
         logout_uri=settings.cognito_logout_url,
@@ -106,7 +107,7 @@ def build_cognito_web_session_config(
 
 
 def build_cognito_login_url(*, settings: Settings, state: str) -> str:
-    domain = _strip_scheme(settings.cognito_domain)
+    domain = _bare_host(settings.cognito_domain)
     return build_authorization_url(
         domain=domain,
         client_id=settings.cognito_app_client_id,
@@ -118,7 +119,7 @@ def build_cognito_login_url(*, settings: Settings, state: str) -> str:
 def build_cognito_logout_url(*, settings: Settings, state: str | None = None) -> str:
     import urllib.parse
 
-    domain = _strip_scheme(settings.cognito_domain)
+    domain = _bare_host(settings.cognito_domain)
     logout_target = settings.cognito_redirect_uri
     query: dict[str, str] = {
         "client_id": settings.cognito_app_client_id,
@@ -132,7 +133,7 @@ def build_cognito_logout_url(*, settings: Settings, state: str | None = None) ->
 
 
 async def exchange_code(*, settings: Settings, code: str) -> dict[str, Any]:
-    domain = _strip_scheme(settings.cognito_domain)
+    domain = _bare_host(settings.cognito_domain)
     try:
         return await browser_session.exchange_authorization_code_async(
             domain=domain,

@@ -226,7 +226,7 @@ dewey --help
 dewey runtime check
 ```
 
-That activation flow creates or reuses a deployment-scoped conda environment like `DEWEY-local`, installs the repo editable, ensures local `daylily-tapdb` and local `daylily-auth-cognito` are available when needed, installs published `cli-core-yo==2.0.0`, and exports deployment-scoped env values such as `DEWEY_DEPLOYMENT_CODE`.
+That activation flow creates or reuses a deployment-scoped conda environment like `DEWEY-local`, activates it, and installs only the Dewey repo editable on first create. All Python dependencies needed by the repo live in `project.dependencies`, and repo-solo config still starts with `dewey config init`.
 
 ### Local Run
 
@@ -240,20 +240,21 @@ dewey db build --target local
 dewey server start --port 8914
 ```
 
-Current published-package caveat from the April 7, 2026 local walkthrough:
+Current published-package note from the April 15, 2026 TapDB hard cut:
 
-- with published `cli-core-yo==2.0.0`, the first compatible published TapDB build is currently `daylily-tapdb==5.0.0`
-- on that published TapDB line, `dewey db build --target local` initializes local PostgreSQL but does not complete `tapdb db setup`
-- finish the local DB bootstrap with:
+- this repo now pins the `daylily-tapdb` version declared in `pyproject.toml`
+- Python runtime dependencies are owned by `pyproject.toml`, not `environment.yaml`
+- the shared TapDB config lives at `~/.config/tapdb/dewey/dewey/tapdb-config.yaml`
+- if you invoke `tapdb` manually, use that shared config path directly:
 
 ```bash
-tapdb --config ~/.config/tapdb/dewey/dewey-local/tapdb-config.yaml --env dev db setup dev --force
+tapdb --config ~/.config/tapdb/dewey/dewey/tapdb-config.yaml --env dev db setup dev --force
 ```
 
-- after a fresh `dewey config reset`, export the resolved TapDB config path when running Dewey-owned seed or server commands:
+- after a fresh `dewey config reset`, export the explicit TapDB config path when running Dewey-owned seed or server commands:
 
 ```bash
-export DEWEY_TAPDB_CONFIG_PATH=~/.config/tapdb/dewey/dewey-local/tapdb-config.yaml
+export TAPDB_CONFIG_PATH=~/.config/tapdb/dewey/dewey/tapdb-config.yaml
 dewey db seed
 dewey server start --port 8914
 ```
@@ -381,3 +382,4 @@ Current code wins when historical docs disagree.
 - `share reference`: A Dewey record describing a time-bounded sharing action for an artifact or artifact set.
 - `TapDB`: The shared persistence substrate Dewey uses for templates, instances, lineage, and related storage primitives.
 - `Unified Search`: Dewey's normalized search surface for artifacts, share references, and, through the API, artifact sets.
+ 
