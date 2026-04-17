@@ -47,6 +47,7 @@ dewey db build --target local
 Current published-package note from the April 15, 2026 TapDB hard cut:
 
 - this repo now pins the `daylily-tapdb` version declared in `pyproject.toml`
+- All Python dependencies needed by the repo live in `project.dependencies`
 - the shared TapDB config lives at `~/.config/tapdb/dewey/dewey/tapdb-config.yaml`
 - if you invoke `tapdb` manually, use that shared config path directly:
 

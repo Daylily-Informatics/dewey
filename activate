@@ -20,76 +20,17 @@ _dewey_script_path() {
 
 _DEWEY_SCRIPT_PATH="$(_dewey_script_path)"
 DEWEY_ROOT="$(cd "$(dirname "${_DEWEY_SCRIPT_PATH}")" && pwd)"
-_DEWEY_WORKSPACE_ROOT="$(cd "${DEWEY_ROOT}/../.." && pwd)"
 unset -f _dewey_script_path
 unset _DEWEY_SCRIPT_PATH
 
 _GREEN='\033[0;32m'
 _YELLOW='\033[1;33m'
-_BLUE='\033[0;34m'
 _CYAN='\033[0;36m'
 _NC='\033[0m'
-_DEWEY_PYTHON=""
-_DEWEY_CONDA_ENV_BASE="DEWEY"
-_DEWEY_CLI_CORE_YO_VERSION="2.1.0"
-_DEWEY_DAYLILY_AUTH_COGNITO_VERSION="2.1.1"
-_DEWEY_DAYLILY_TAPDB_VERSION="6.0.4"
-_DEWEY_LEGACY_REBIND_VARS=(USE_LOCAL_DAYLILY_TAPDB USE_LOCAL_CLI_CORE_YO)
 
-_dewey_require_python_import() {
-  local module_name="$1"
-  local package_name="$2"
-  if ! "${_DEWEY_PYTHON:-python}" - "$module_name" <<'PY' >/dev/null 2>&1
-import importlib
-import sys
-
-importlib.import_module(sys.argv[1])
-PY
-  then
-    _dewey_fail "Missing packaged dependency: ${package_name}"
-    return 1
-  fi
-}
-
-_dewey_published_dependency_version() {
-  local package_name="$1"
-  local pip_show_output=""
-  if ! pip_show_output="$("${_DEWEY_PYTHON:-python}" -m pip show "$package_name" 2>/dev/null)"; then
-    return 1
-  fi
-  printf '%s\n' "$pip_show_output" | awk -F': ' '$1 == "Version" { print $2; exit }'
-}
-
-_dewey_ensure_published_dependency() {
-  local module_name="$1"
-  local package_name="$2"
-  local expected_version="$3"
-  local current_version=""
-
-  current_version="$(_dewey_published_dependency_version "$package_name")"
-  if [[ "$current_version" == "$expected_version" ]] && _dewey_require_python_import "$module_name" "$package_name"; then
-    return 0
-  fi
-
-  echo -e "  ${_CYAN}→${_NC} Installing published ${package_name} ${expected_version}..."
-  if ! "${_DEWEY_PYTHON:-python}" -m pip install "${package_name}==${expected_version}" -q; then
-    _dewey_fail "Failed to install published ${package_name} ${expected_version}"
-    return 1
-  fi
-  if ! _dewey_require_python_import "$module_name" "$package_name"; then
-    _dewey_fail "Installed ${package_name} ${expected_version} but it is still unavailable"
-    return 1
-  fi
-}
-
-_dewey_sanitize_deployment_code() {
-  local raw_value="$1"
-  local sanitized=""
-  sanitized="$(printf '%s' "$raw_value" | LC_ALL=C sed -E 's/[^A-Za-z0-9-]+/-/g; s/^-+//; s/-+$//')"
-  if [[ -z "$sanitized" ]]; then
-    sanitized="local"
-  fi
-  printf '%s\n' "$sanitized"
+_dewey_fail() {
+  echo -e "  ${_YELLOW}⚠${_NC} $1" >&2
+  return 1
 }
 
 _dewey_validate_deploy_name() {
@@ -110,197 +51,19 @@ _dewey_deployment_code="$1"
 if ! _dewey_validate_deploy_name "${_dewey_deployment_code}"; then
   return 1
 fi
-export DEWEY_DEPLOYMENT_CODE="${_dewey_deployment_code}"
-export DEPLOYMENT_CODE="${_dewey_deployment_code}"
-export LSMC_DEPLOYMENT_CODE="${_dewey_deployment_code}"
-export MERIDIAN_DOMAIN_CODE="Z"
-export TAPDB_OWNER_REPO="dewey"
+
+_DEWEY_CONDA_ENV_BASE="DEWEY"
 _DEWEY_CONDA_ENV_NAME="${_DEWEY_CONDA_ENV_BASE}-${_dewey_deployment_code}"
 unset _dewey_deployment_code
 
-_dewey_fail() {
-  echo -e "  ${_YELLOW}⚠${_NC} $1" >&2
-  return 1
-}
+export DEWEY_ROOT
+export DEWEY_DEPLOYMENT_CODE="${_DEWEY_CONDA_ENV_NAME#DEWEY-}"
+export DEPLOYMENT_CODE="${DEWEY_DEPLOYMENT_CODE}"
+export LSMC_DEPLOYMENT_CODE="${DEWEY_DEPLOYMENT_CODE}"
+export DEWEY_ACTIVE=1
+export DEWEY_PROJECT_ROOT="$DEWEY_ROOT"
 
-_dewey_reject_legacy_local_rebind_env() {
-  local var_name=""
-  local var_value=""
-  for var_name in "${_DEWEY_LEGACY_REBIND_VARS[@]}"; do
-    if [[ -n "${ZSH_VERSION:-}" ]]; then
-      eval 'var_value="${(P)var_name-}"'
-    else
-      eval 'var_value="${!var_name-}"'
-    fi
-    if [[ -n "$var_value" ]]; then
-      _dewey_fail "${var_name} is no longer supported; use packaged dependencies from ${_DEWEY_CONDA_ENV_NAME}"
-      return 1
-    fi
-  done
-}
-
-if ! _dewey_reject_legacy_local_rebind_env; then
-  return 1
-fi
-
-_dewey_module_is_from_repo() {
-  local module_name="$1"
-  local repo_root="$2"
-  "${_DEWEY_PYTHON:-python}" - "$module_name" "$repo_root" <<'PY' >/dev/null 2>&1
-import importlib
-import pathlib
-import sys
-
-module = importlib.import_module(sys.argv[1])
-repo_root = pathlib.Path(sys.argv[2]).resolve()
-module_file = getattr(module, "__file__", "")
-if not module_file:
-    raise SystemExit(1)
-module_path = pathlib.Path(module_file).resolve()
-raise SystemExit(0 if module_path == repo_root or repo_root in module_path.parents else 1)
-PY
-}
-
-_dewey_distribution_is_editable_from_repo() {
-  local dist_name="$1"
-  local repo_root="$2"
-  local editable_project_location=""
-  local pip_show_output=""
-  if [[ -z "$repo_root" ]]; then
-    return 1
-  fi
-  repo_root="$(cd "$repo_root" 2>/dev/null && pwd)"
-  if [[ -z "$repo_root" ]]; then
-    return 1
-  fi
-  if ! pip_show_output="$("${_DEWEY_PYTHON:-python}" -m pip show "$dist_name" 2>/dev/null)"; then
-    return 1
-  fi
-  editable_project_location="$(printf '%s\n' "$pip_show_output" | awk -F': ' '$1 == "Editable project location" { print $2; exit }')"
-  if [[ -z "$editable_project_location" ]]; then
-    return 2
-  fi
-  editable_project_location="$(cd "$editable_project_location" 2>/dev/null && pwd)"
-  if [[ -z "$editable_project_location" ]]; then
-    return 1
-  fi
-  if [[ "$editable_project_location" != "$repo_root" ]]; then
-    return 1
-  fi
-  return 0
-}
-_dewey_install_main_repo() {
-  echo -e "  ${_CYAN}→${_NC} Installing local Dewey checkout..."
-  if ! "${_DEWEY_PYTHON:-python}" -m pip install -e "${DEWEY_ROOT}[dev]" -q; then
-    _dewey_fail "Failed to install local Dewey checkout from ${DEWEY_ROOT}"
-    return 1
-  fi
-  _dewey_distribution_is_editable_from_repo "dewey-service" "$DEWEY_ROOT"
-  local editable_status=$?
-  if [[ "$editable_status" -eq 1 ]]; then
-    _dewey_fail "Dewey is not installed editable from ${DEWEY_ROOT}"
-    return 1
-  fi
-  echo -e "  ${_GREEN}✓${_NC} Using local Dewey checkout: ${DEWEY_ROOT}"
-}
-
-_dewey_dev_runtime_ready() {
-  _dewey_require_python_import "daylily_tapdb" "daylily-tapdb" || return 1
-  _dewey_require_python_import "daylily_auth_cognito" "daylily-auth-cognito" || return 1
-  _dewey_require_python_import "cli_core_yo" "cli-core-yo" || return 1
-  _dewey_require_python_import "pytest" "pytest" || return 1
-}
-
-_dewey_validate_main_repo_install() {
-  _dewey_distribution_is_editable_from_repo "dewey-service" "$DEWEY_ROOT"
-  local editable_status=$?
-  if [[ "$editable_status" -eq 0 ]]; then
-    if ! _dewey_dev_runtime_ready; then
-      return 1
-    fi
-    echo -e "  ${_GREEN}✓${_NC} Using local Dewey checkout: ${DEWEY_ROOT}"
-    return 0
-  fi
-  _dewey_fail "Dewey is not installed editable from ${DEWEY_ROOT}. Recreate ${_DEWEY_CONDA_ENV_NAME} to reinstall it."
-  return 1
-}
-
-_dewey_prepare_tapdb_config_path() {
-  local client_id="$1"
-  local namespace="$2"
-  local xdg_config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
-  local user_dir="${xdg_config_home}/tapdb/${client_id}/${namespace}"
-  local user_path="${user_dir}/tapdb-config.yaml"
-  local repo_template="${DEWEY_ROOT}/config/tapdb-config-${client_id}.yaml"
-
-  if [[ -f "$user_path" ]]; then
-    chmod 600 "$user_path" 2>/dev/null || true
-    printf '%s\n' "$user_path"
-    return 0
-  fi
-
-  mkdir -p "$user_dir" || return 1
-  chmod 700 "$user_dir" 2>/dev/null || true
-
-  if [[ -f "$repo_template" ]]; then
-    cp "$repo_template" "$user_path" || return 1
-    chmod 600 "$user_path" 2>/dev/null || true
-    printf '%s\n' "$user_path"
-    return 0
-  fi
-
-  printf '%s\n' "$user_path"
-  return 1
-}
-
-_dewey_ensure_editable_repo() {
-  local label="$1"
-  local module_name="$2"
-  local repo_root="$3"
-  local extras="${4:-}"
-  local dist_name="${5:-}"
-  local install_mode="${6:-no-deps}"
-  local install_target=""
-  if [[ -z "$repo_root" ]]; then
-    return 0
-  fi
-  if [[ -n "$dist_name" ]]; then
-    if _dewey_distribution_is_editable_from_repo "$dist_name" "$repo_root"; then
-      if [[ "$install_mode" != "with-deps" ]]; then
-        echo -e "  ${_GREEN}✓${_NC} Using local ${label} checkout: ${repo_root}"
-        return 0
-      fi
-    fi
-  elif _dewey_module_is_from_repo "$module_name" "$repo_root"; then
-    if [[ "$install_mode" != "with-deps" ]]; then
-      echo -e "  ${_GREEN}✓${_NC} Using local ${label} checkout: ${repo_root}"
-      return 0
-    fi
-  fi
-  install_target="${repo_root}${extras}"
-  echo -e "  ${_CYAN}→${_NC} Installing local ${label} checkout..."
-  if [[ "$install_mode" == "with-deps" ]]; then
-    if ! "${_DEWEY_PYTHON:-python}" -m pip install -e "$install_target" -q; then
-      _dewey_fail "Failed to install local ${label} checkout from ${repo_root}"
-      return 1
-    fi
-  elif ! "${_DEWEY_PYTHON:-python}" -m pip install --no-deps -e "$install_target" -q; then
-    _dewey_fail "Failed to install local ${label} checkout from ${repo_root}"
-    return 1
-  fi
-  if [[ -n "$dist_name" ]]; then
-    if ! _dewey_distribution_is_editable_from_repo "$dist_name" "$repo_root"; then
-      _dewey_fail "${label} is not installed editable from ${repo_root}"
-      return 1
-    fi
-  elif ! _dewey_module_is_from_repo "$module_name" "$repo_root"; then
-    _dewey_fail "${label} still resolves outside ${repo_root}"
-    return 1
-  fi
-  echo -e "  ${_GREEN}✓${_NC} Using local ${label} checkout: ${repo_root}"
-}
-
-echo -e "${_BLUE}Activating Dewey environment...${_NC}"
+echo -e "${_CYAN}Activating Dewey environment...${_NC}"
 
 if ! command -v conda &> /dev/null; then
   _dewey_fail "Conda is required but was not found on PATH."
@@ -325,7 +88,8 @@ source "${_DEWEY_CONDA_BASE}/etc/profile.d/conda.sh" 2>/dev/null || {
 
 _DEWEY_CONDA_ENV_CREATED=0
 
-if [[ "${CONDA_DEFAULT_ENV:-}" == "${_DEWEY_CONDA_ENV_NAME}" ]] || [[ "${CONDA_PREFIX:-}" == "${_DEWEY_CONDA_BASE}/envs/${_DEWEY_CONDA_ENV_NAME}" ]]; then
+if [[ "${CONDA_DEFAULT_ENV:-}" == "${_DEWEY_CONDA_ENV_NAME}" ]] || \
+  [[ "${CONDA_PREFIX:-}" == "${_DEWEY_CONDA_BASE}/envs/${_DEWEY_CONDA_ENV_NAME}" ]]; then
   echo -e "  ${_GREEN}✓${_NC} Conda environment already active: ${_DEWEY_CONDA_ENV_NAME}"
 elif conda info --envs | grep -Eq "(^|[[:space:]])${_DEWEY_CONDA_ENV_NAME}([[:space:]]|$)"; then
   echo -e "  ${_GREEN}✓${_NC} Activating conda environment: ${_DEWEY_CONDA_ENV_NAME}"
@@ -337,29 +101,27 @@ elif conda info --envs | grep -Eq "(^|[[:space:]])${_DEWEY_CONDA_ENV_NAME}([[:sp
   fi
 else
   echo -e "  ${_YELLOW}⚠${_NC} Conda environment '${_DEWEY_CONDA_ENV_NAME}' not found."
-  if [[ -f "$DEWEY_ROOT/environment.yaml" ]]; then
-    echo -e "  ${_CYAN}→${_NC} Installing conda environment from environment.yaml..."
-    if ! conda env create -n "${_DEWEY_CONDA_ENV_NAME}" -f "$DEWEY_ROOT/environment.yaml"; then
-      _dewey_fail "Failed to create conda environment from environment.yaml."
-      unset _DEWEY_CONDA_BASE
-      unset -f _dewey_fail
-      return 1
-    fi
-
-    echo -e "  ${_GREEN}✓${_NC} Activating conda environment: ${_DEWEY_CONDA_ENV_NAME}"
-    if ! conda activate "${_DEWEY_CONDA_ENV_NAME}"; then
-      _dewey_fail "Failed to activate conda environment: ${_DEWEY_CONDA_ENV_NAME}"
-      unset _DEWEY_CONDA_BASE
-      unset -f _dewey_fail
-      return 1
-    fi
-    _DEWEY_CONDA_ENV_CREATED=1
-  else
+  if [[ ! -f "$DEWEY_ROOT/environment.yaml" ]]; then
     _dewey_fail "Conda environment '${_DEWEY_CONDA_ENV_NAME}' was not found and environment.yaml is missing."
     unset _DEWEY_CONDA_BASE
     unset -f _dewey_fail
     return 1
   fi
+  echo -e "  ${_CYAN}→${_NC} Installing conda environment from environment.yaml..."
+  if ! conda env create -n "${_DEWEY_CONDA_ENV_NAME}" -f "$DEWEY_ROOT/environment.yaml"; then
+    _dewey_fail "Failed to create conda environment from environment.yaml."
+    unset _DEWEY_CONDA_BASE
+    unset -f _dewey_fail
+    return 1
+  fi
+  echo -e "  ${_GREEN}✓${_NC} Activating conda environment: ${_DEWEY_CONDA_ENV_NAME}"
+  if ! conda activate "${_DEWEY_CONDA_ENV_NAME}"; then
+    _dewey_fail "Failed to activate conda environment: ${_DEWEY_CONDA_ENV_NAME}"
+    unset _DEWEY_CONDA_BASE
+    unset -f _dewey_fail
+    return 1
+  fi
+  _DEWEY_CONDA_ENV_CREATED=1
 fi
 
 if [[ -z "${CONDA_PREFIX:-}" ]] || [[ ! -d "${CONDA_PREFIX}/bin" ]]; then
@@ -369,57 +131,15 @@ if [[ -z "${CONDA_PREFIX:-}" ]] || [[ ! -d "${CONDA_PREFIX}/bin" ]]; then
   return 1
 fi
 
-export PATH="${CONDA_PREFIX}/bin:$PATH"
-
-if [[ -n "${_DEWEY_CONDA_BASE:-}" ]] && [[ -d "${_DEWEY_CONDA_BASE}/bin" ]]; then
-  export PATH="${_DEWEY_CONDA_BASE}/bin:$PATH"
-fi
-unset _DEWEY_CONDA_BASE
-
-if [[ -n "${CONDA_PREFIX:-}" ]] && [[ -x "${CONDA_PREFIX}/bin/python" ]]; then
-  _DEWEY_PYTHON="${CONDA_PREFIX}/bin/python"
-elif command -v python3 &> /dev/null; then
-  _DEWEY_PYTHON="$(command -v python3)"
-elif command -v python &> /dev/null; then
-  _DEWEY_PYTHON="$(command -v python)"
-fi
-
-if [[ -n "${_DEWEY_PYTHON}" ]]; then
-  _DEWEY_PYTHON_BIN="$(dirname "${_DEWEY_PYTHON}")"
-  _DEWEY_SCRIPTS_DIR="$("${_DEWEY_PYTHON}" -c 'import sysconfig; print(sysconfig.get_path("scripts") or "")' 2>/dev/null || true)"
-  if [[ -n "${_DEWEY_SCRIPTS_DIR}" ]] && [[ -d "${_DEWEY_SCRIPTS_DIR}" ]]; then
-    export PATH="${_DEWEY_SCRIPTS_DIR}:$PATH"
-  fi
-  export PATH="${_DEWEY_PYTHON_BIN}:$PATH"
-fi
-
 if [[ "${_DEWEY_CONDA_ENV_CREATED}" == "1" ]]; then
-  if ! _dewey_install_main_repo; then
+  echo -e "  ${_CYAN}→${_NC} Installing editable Dewey checkout..."
+  if ! "${CONDA_PREFIX}/bin/python" -m pip install -e "$DEWEY_ROOT" -q; then
+    _dewey_fail "Failed to install editable Dewey checkout from ${DEWEY_ROOT}"
+    unset _DEWEY_CONDA_BASE
+    unset -f _dewey_fail
     return 1
   fi
-else
-  if ! _dewey_validate_main_repo_install; then
-    echo -e "  ${_CYAN}→${_NC} Refreshing Dewey install in ${_DEWEY_CONDA_ENV_NAME}..."
-    if ! _dewey_install_main_repo; then
-      return 1
-    fi
-  fi
 fi
-
-if ! _dewey_ensure_published_dependency "daylily_tapdb" "daylily-tapdb" "${_DEWEY_DAYLILY_TAPDB_VERSION}"; then
-  return 1
-fi
-
-if ! _dewey_ensure_published_dependency "daylily_auth_cognito" "daylily-auth-cognito" "${_DEWEY_DAYLILY_AUTH_COGNITO_VERSION}"; then
-  return 1
-fi
-
-if ! _dewey_ensure_published_dependency "cli_core_yo" "cli-core-yo" "${_DEWEY_CLI_CORE_YO_VERSION}"; then
-  return 1
-fi
-
-_dewey_dev_runtime_ready || return 1
-echo -e "  ${_GREEN}✓${_NC} Dewey dependency sources validated in ${_DEWEY_CONDA_ENV_NAME}"
 
 if command -v rehash >/dev/null 2>&1; then
   rehash
@@ -427,99 +147,10 @@ elif command -v hash >/dev/null 2>&1; then
   hash -r 2>/dev/null || true
 fi
 
-if [[ "$-" == *i* ]]; then
-  if [[ -n "${ZSH_VERSION:-}" ]]; then
-    if _DEWEY_COMPLETION="$(dewey --show-completion zsh 2>/dev/null)" && eval "${_DEWEY_COMPLETION}" 2>/dev/null; then
-      echo -e "  ${_GREEN}✓${_NC} Enabled tab completion for 'dewey' (zsh)"
-    fi
-    unset _DEWEY_COMPLETION
-  elif [[ -n "${BASH_VERSION:-}" ]]; then
-    if _DEWEY_COMPLETION="$(dewey --show-completion bash 2>/dev/null)" && eval "${_DEWEY_COMPLETION}" 2>/dev/null; then
-      echo -e "  ${_GREEN}✓${_NC} Enabled tab completion for 'dewey' (bash)"
-    fi
-    unset _DEWEY_COMPLETION
-  fi
-fi
+echo -e "  ${_GREEN}✓${_NC} Dewey environment activated!"
 
-export DEWEY_ROOT
-export DEWEY_ACTIVE=1
-export DEWEY_PROJECT_ROOT="$DEWEY_ROOT"
-export AWS_REGION="${AWS_REGION:-us-west-2}"
-export DATABASE_BACKEND="${DATABASE_BACKEND:-tapdb}"
-export DATABASE_TARGET="${DATABASE_TARGET:-local}"
-_DEWEY_TAPDB_CLIENT_ID="dewey"
-_DEWEY_TAPDB_DATABASE_NAME="dewey"
-_DEWEY_TAPDB_DOMAIN_CODE="Z"
-_DEWEY_TAPDB_OWNER_REPO="dewey"
-_DEWEY_TAPDB_ENV="dev"
-_DEWEY_RUNTIME_TAPDB_CONFIG_PATH="${TAPDB_CONFIG_PATH:-}"
-if [[ -z "$_DEWEY_RUNTIME_TAPDB_CONFIG_PATH" ]]; then
-  _DEWEY_USER_TAPDB_CONFIG_PATH="$(_dewey_prepare_tapdb_config_path "$_DEWEY_TAPDB_CLIENT_ID" "$_DEWEY_TAPDB_DATABASE_NAME")" || {
-    _dewey_fail "Failed to prepare secure TapDB config path."
-    return 1
-  }
-  _DEWEY_RUNTIME_TAPDB_CONFIG_PATH="${_DEWEY_USER_TAPDB_CONFIG_PATH}"
-fi
-export TAPDB_CONFIG_PATH="${_DEWEY_RUNTIME_TAPDB_CONFIG_PATH}"
-export TAPDB_OWNER_REPO="${_DEWEY_TAPDB_OWNER_REPO}"
-export TAPDB_DOMAIN_CODE="${_DEWEY_TAPDB_DOMAIN_CODE}"
-export TAPDB_DOMAIN_REGISTRY_PATH="${XDG_CONFIG_HOME:-$HOME/.config}/tapdb/domain_code_registry.json"
-export TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH="${XDG_CONFIG_HOME:-$HOME/.config}/tapdb/prefix_ownership_registry.json"
-
-if [[ -z "${DEWEY_API_BEARER_TOKEN:-}" ]]; then
-  export DEWEY_API_BEARER_TOKEN="dewey-dev-token"
-fi
-
-export PATH="$DEWEY_ROOT:$PATH"
-
-if [[ ! -f "$_DEWEY_RUNTIME_TAPDB_CONFIG_PATH" ]]; then
-  _dewey_fail "TapDB scoped config not found at ${_DEWEY_RUNTIME_TAPDB_CONFIG_PATH}"
-  return 1
-fi
-
-if [[ -f "$DEWEY_ROOT/dewey_deactivate" ]]; then
-  dewey_deactivate() {
-    source "$DEWEY_ROOT/dewey_deactivate"
-  }
-fi
-
-echo -e "  ${_GREEN}✓${_NC} AWS_PROFILE=${AWS_PROFILE:-<unset>}"
-echo -e "  ${_GREEN}✓${_NC} AWS_REGION=${AWS_REGION}"
-echo -e "  ${_GREEN}✓${_NC} MERIDIAN_DOMAIN_CODE=${MERIDIAN_DOMAIN_CODE}"
-echo -e "  ${_GREEN}✓${_NC} TAPDB_OWNER_REPO=${TAPDB_OWNER_REPO}"
-echo -e "  ${_GREEN}✓${_NC} TAPDB_DOMAIN_CODE=${TAPDB_DOMAIN_CODE}"
-echo -e "  ${_GREEN}✓${_NC} TAPDB_DOMAIN_REGISTRY_PATH=${TAPDB_DOMAIN_REGISTRY_PATH}"
-echo -e "  ${_GREEN}✓${_NC} TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH=${TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH}"
-echo -e "  ${_GREEN}✓${_NC} Dewey TapDB client=${_DEWEY_TAPDB_CLIENT_ID}"
-echo -e "  ${_GREEN}✓${_NC} Dewey TapDB namespace=${_DEWEY_TAPDB_DATABASE_NAME}"
-echo -e "  ${_GREEN}✓${_NC} Dewey TapDB env=${_DEWEY_TAPDB_ENV}"
-echo -e "  ${_GREEN}✓${_NC} Dewey TapDB config path=${_DEWEY_RUNTIME_TAPDB_CONFIG_PATH}"
-echo -e "  ${_GREEN}✓${_NC} DEWEY_ACTIVE=${DEWEY_ACTIVE}"
-echo -e "  ${_GREEN}✓${_NC} DEWEY_PROJECT_ROOT=${DEWEY_PROJECT_ROOT}"
-echo ""
-echo -e "${_CYAN}Dewey environment activated!${_NC}"
-echo ""
-
-echo "Commands:"
-echo -e "  ${_CYAN}dewey version${_NC}         Show version"
-echo -e "  ${_CYAN}dewey info${_NC}            Show runtime info"
-echo -e "  ${_CYAN}dewey config${_NC}          path, init, show, validate, edit, reset, status"
-echo -e "  ${_CYAN}dewey env${_NC}             status, activate, deactivate, reset"
-echo -e "  ${_CYAN}dewey server${_NC}          start, stop, status, logs, restart"
-echo -e "  ${_CYAN}dewey db${_NC}              build, seed, reset, nuke"
-echo -e "  ${_CYAN}tapdb${_NC}                 shared DB/runtime lifecycle"
-echo -e "  ${_CYAN}daycog${_NC}                shared Cognito lifecycle"
-echo -e "  ${_CYAN}dewey test${_NC}            run, cov"
-echo -e "  ${_CYAN}dewey quality${_NC}         lint, format, check"
-echo ""
-echo -e "  ${_GREEN}dewey --help${_NC}        Show all commands"
-echo -e "  ${_GREEN}dewey_deactivate${_NC}  Deactivate this environment"
-
-unset _DEWEY_WORKSPACE_ROOT
-unset _DEWEY_CLI_CORE_YO_VERSION
-unset _DEWEY_DAYLILY_AUTH_COGNITO_VERSION
-unset _DEWEY_DAYLILY_TAPDB_VERSION
+unset _DEWEY_CONDA_BASE
 unset _DEWEY_CONDA_ENV_CREATED
-unset _DEWEY_USER_TAPDB_CONFIG_PATH
+unset _DEWEY_CONDA_ENV_NAME
+unset _DEWEY_CONDA_ENV_BASE
 unset -f _dewey_fail
- 
