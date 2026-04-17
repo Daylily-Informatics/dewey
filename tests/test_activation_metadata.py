@@ -22,7 +22,7 @@ def test_activate_uses_editable_metadata_contract() -> None:
     assert 'AWS_PROFILE=${AWS_PROFILE:-<unset>}' in activate_script
     assert '_DEWEY_CLI_CORE_YO_VERSION="2.1.0"' in activate_script
     assert '_DEWEY_DAYLILY_AUTH_COGNITO_VERSION="2.1.1"' in activate_script
-    assert '_DEWEY_DAYLILY_TAPDB_VERSION="6.0.4"' in activate_script
+    assert '_DEWEY_DAYLILY_TAPDB_VERSION="6.0.5"' in activate_script
     assert "Installing local daylily-tapdb checkout" not in activate_script
     assert "Installing local daylily-auth-cognito checkout" not in activate_script
     assert "TAPDB_APP_CODE" not in activate_script
