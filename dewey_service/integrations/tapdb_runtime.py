@@ -13,7 +13,11 @@ from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import quote
 
-from dewey_service.defaults import AWS_PROFILE_REQUIRED_MESSAGE, DEFAULT_DB_PORT, resolve_aws_profile
+from dewey_service.defaults import (
+    AWS_PROFILE_REQUIRED_MESSAGE,
+    DEFAULT_DB_PORT,
+    resolve_aws_profile,
+)
 from dewey_service.settings import load_config_aws_profile
 
 DEFAULT_AWS_PROFILE = ""

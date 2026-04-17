@@ -93,9 +93,9 @@ def test_packaged_tapdb_registry_fixtures_match_owned_prefixes() -> None:
     assert set(prefix_registry["ownership"]["Z"]) == {
         template["instance_prefix"] for template in templates
     }
-    assert {
-        claim["issuer_app_code"] for claim in prefix_registry["ownership"]["Z"].values()
-    } == {"dewey"}
+    assert {claim["issuer_app_code"] for claim in prefix_registry["ownership"]["Z"].values()} == {
+        "dewey"
+    }
 
 
 def test_pyproject_uses_dynamic_version_from_git_tags() -> None:

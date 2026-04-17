@@ -44,14 +44,11 @@ def test_tapdb_env_for_target_and_sqlalchemy_url() -> None:
 
 
 def test_resolve_tapdb_config_path_prefers_explicit_argument() -> None:
-    assert (
-        tapdb_runtime._resolve_tapdb_config_path(
-            namespace="ignored",
-            client_id="ignored",
-            config_path="/tmp/custom-tapdb.yaml",
-        )
-        == str(Path("/tmp/custom-tapdb.yaml").resolve())
-    )
+    assert tapdb_runtime._resolve_tapdb_config_path(
+        namespace="ignored",
+        client_id="ignored",
+        config_path="/tmp/custom-tapdb.yaml",
+    ) == str(Path("/tmp/custom-tapdb.yaml").resolve())
 
 
 def test_resolve_tapdb_config_path_prefers_env_override(
@@ -59,18 +56,17 @@ def test_resolve_tapdb_config_path_prefers_env_override(
 ) -> None:
     monkeypatch.setenv("TAPDB_CONFIG_PATH", "/tmp/from-env-tapdb.yaml")
 
-    assert (
-        tapdb_runtime._resolve_tapdb_config_path(
-            namespace="ignored",
-            client_id="ignored",
-            config_path="",
-        )
-        == str(Path("/tmp/from-env-tapdb.yaml").resolve())
-    )
+    assert tapdb_runtime._resolve_tapdb_config_path(
+        namespace="ignored",
+        client_id="ignored",
+        config_path="",
+    ) == str(Path("/tmp/from-env-tapdb.yaml").resolve())
 
 
 def test_resolve_runtime_env_sets_expected_values(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("TAPDB_CONFIG_PATH", "/tmp/dewey-home/.config/tapdb/dewey/dewey/tapdb-config.yaml")
+    monkeypatch.setenv(
+        "TAPDB_CONFIG_PATH", "/tmp/dewey-home/.config/tapdb/dewey/dewey/tapdb-config.yaml"
+    )
     env = tapdb_runtime._resolve_runtime_env(
         target="local",
         client_id="dewey",

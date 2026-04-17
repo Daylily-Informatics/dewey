@@ -6,13 +6,11 @@ import pytest
 
 from dewey_service.settings import (
     DEFAULT_DEPLOYMENT_BANNER_COLOR,
-    DEFAULT_TAPDB_DOMAIN_REGISTRY_PATH,
-    DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH,
     Settings,
-    _resolve_region_chrome,
     _resolve_deployment_chrome,
-    _stable_region_color_hex,
+    _resolve_region_chrome,
     _stable_deployment_color_hex,
+    _stable_region_color_hex,
     build_effective_config_rows,
     load_settings,
     persist_managed_storage_bucket,

@@ -216,7 +216,9 @@ def test_activate_accepts_preloaded_dewey_conda_env(tmp_path: Path) -> None:
     pip_install_log = tmp_path / "pip-install.log"
 
     env = os.environ.copy()
-    env["PATH"] = f"{conda_base / 'envs' / f'DEWEY-{DEPLOY_NAME}' / 'bin'}:{conda_base / 'bin'}:/usr/bin:/bin"
+    env["PATH"] = (
+        f"{conda_base / 'envs' / f'DEWEY-{DEPLOY_NAME}' / 'bin'}:{conda_base / 'bin'}:/usr/bin:/bin"
+    )
     env["CONDA_DEFAULT_ENV"] = f"DEWEY-{DEPLOY_NAME}"
     env["CONDA_PREFIX"] = str(conda_base / "envs" / f"DEWEY-{DEPLOY_NAME}")
     env["FAKE_DEWEY_ENV_PRESENT"] = "1"

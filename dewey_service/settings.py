@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import colorsys
-import json
 import hashlib
+import json
 import os
 import re
 from functools import lru_cache
@@ -361,7 +361,9 @@ def build_effective_config_rows(settings: "Settings", *, config_path: Path) -> l
         rows.append(
             {
                 "path": display_path,
-                "value": "<redacted>" if _is_sensitive_config_path(display_path) else _display_config_value(value),
+                "value": "<redacted>"
+                if _is_sensitive_config_path(display_path)
+                else _display_config_value(value),
             }
         )
 
@@ -420,13 +422,9 @@ class Settings(BaseSettings):
     tapdb_owner_repo_name: str = "dewey"
     tapdb_domain_code: str = "Z"
     tapdb_domain_registry_path: str = str(DEFAULT_TAPDB_DOMAIN_REGISTRY_PATH)
-    tapdb_prefix_ownership_registry_path: str = str(
-        DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH
-    )
+    tapdb_prefix_ownership_registry_path: str = str(DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH)
     tapdb_env: str = "dev"
-    tapdb_config_path: str = str(
-        DEFAULT_TAPDB_CONFIG_DIR / "dewey" / "dewey" / "tapdb-config.yaml"
-    )
+    tapdb_config_path: str = str(DEFAULT_TAPDB_CONFIG_DIR / "dewey" / "dewey" / "tapdb-config.yaml")
     tapdb_strict_namespace: int = 1
 
     # AWS defaults for TapDB wrappers

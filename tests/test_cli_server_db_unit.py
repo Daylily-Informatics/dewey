@@ -448,7 +448,11 @@ def test_db_cli_error_branches(monkeypatch: pytest.MonkeyPatch) -> None:
 
     with pytest.raises(typer.Exit) as exc:
         db_cli.build(
-            target="aurora", cluster="", profile="team-profile", region="us-west-2", namespace="dewey"
+            target="aurora",
+            cluster="",
+            profile="team-profile",
+            region="us-west-2",
+            namespace="dewey",
         )
     assert exc.value.exit_code == 1
 
@@ -469,7 +473,11 @@ def test_db_cli_error_branches(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(db_cli.subprocess, "run", fail_seed)
     with pytest.raises(typer.Exit) as exc:
         db_cli.build(
-            target="local", cluster="", profile="team-profile", region="us-west-2", namespace="dewey"
+            target="local",
+            cluster="",
+            profile="team-profile",
+            region="us-west-2",
+            namespace="dewey",
         )
     assert exc.value.exit_code == 1
 
@@ -516,12 +524,14 @@ def test_db_cli_resolves_profile_from_config_when_flag_missing(
     monkeypatch.setattr(
         db_cli,
         "run_tapdb_cli",
-        lambda args, **kwargs: (calls.append(("run", kwargs)) or _proc(returncode=0, stdout="ok")),
+        lambda args, **kwargs: calls.append(("run", kwargs)) or _proc(returncode=0, stdout="ok"),
     )
     monkeypatch.setattr(
         db_cli,
         "export_database_url_for_target",
-        lambda **kwargs: (calls.append(("export", kwargs)) or "postgresql+psycopg2://dewey@localhost:5432/dewey"),
+        lambda **kwargs: (
+            calls.append(("export", kwargs)) or "postgresql+psycopg2://dewey@localhost:5432/dewey"
+        ),
     )
     monkeypatch.setattr(db_cli.subprocess, "run", lambda *args, **kwargs: None)
 
@@ -580,7 +590,8 @@ def test_db_cli_reset_success_path(monkeypatch: pytest.MonkeyPatch) -> None:
         db_cli,
         "run_tapdb_cli",
         lambda args, **kwargs: (
-            calls.append(("delete", {"args": args, **kwargs})) or _proc(returncode=0, stdout="deleted")
+            calls.append(("delete", {"args": args, **kwargs}))
+            or _proc(returncode=0, stdout="deleted")
         ),
     )
     monkeypatch.setattr(
@@ -632,7 +643,8 @@ def test_db_cli_nuke_success_path(monkeypatch: pytest.MonkeyPatch) -> None:
         db_cli,
         "run_tapdb_cli",
         lambda args, **kwargs: (
-            calls.append(("delete", {"args": args, **kwargs})) or _proc(returncode=0, stdout="deleted")
+            calls.append(("delete", {"args": args, **kwargs}))
+            or _proc(returncode=0, stdout="deleted")
         ),
     )
     monkeypatch.setattr(

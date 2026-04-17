@@ -208,9 +208,7 @@ def test_favicon_route_redirects_to_svg(fake_service) -> None:
     assert response.headers["location"] == "/static/favicon.svg"
 
 
-def test_prod_login_page_renders_deployment_banner_when_enabled(
-    monkeypatch, fake_service
-) -> None:
+def test_prod_login_page_renders_deployment_banner_when_enabled(monkeypatch, fake_service) -> None:
     settings = _settings_with_deployment()
     settings.deployment_name = "prod"
     settings.deployment_is_production = True

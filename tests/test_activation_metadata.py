@@ -11,7 +11,7 @@ def test_activate_uses_bare_environment_contract() -> None:
     assert ' "${CONDA_PREFIX}/bin/python" -m pip install -e "$DEWEY_ROOT" -q' in activate_script
     assert "_dewey_ensure_published_dependency" not in activate_script
     assert "_dewey_prepare_tapdb_config_path" not in activate_script
-    assert "export PATH=\"${CONDA_PREFIX}/bin:$PATH\"" not in activate_script
+    assert 'export PATH="${CONDA_PREFIX}/bin:$PATH"' not in activate_script
     assert "export TAPDB_CONFIG_PATH=" not in activate_script
     assert "export TAPDB_OWNER_REPO=" not in activate_script
     assert "export MERIDIAN_DOMAIN_CODE=" not in activate_script

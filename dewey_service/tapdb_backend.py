@@ -155,9 +155,7 @@ class TapDBBackend:
         missing = [
             template_code
             for template_code in TEMPLATE_DEFINITIONS
-            if self.templates.get_template(
-                session, template_code, domain_code=self.domain_code
-            )
+            if self.templates.get_template(session, template_code, domain_code=self.domain_code)
             is None
         ]
         if missing:
@@ -176,9 +174,7 @@ class TapDBBackend:
         json_addl: dict[str, Any],
         status: str = "active",
     ) -> generic_instance:
-        template = self.templates.get_template(
-            session, template_code, domain_code=self.domain_code
-        )
+        template = self.templates.get_template(session, template_code, domain_code=self.domain_code)
         if template is None:
             raise RuntimeError(f"Missing template: {template_code}")
 
@@ -210,9 +206,7 @@ class TapDBBackend:
         template_code: str,
         for_update: bool = False,
     ):
-        template = self.templates.get_template(
-            session, template_code, domain_code=self.domain_code
-        )
+        template = self.templates.get_template(session, template_code, domain_code=self.domain_code)
         if template is None:
             return None
         query = session.query(generic_instance).filter(

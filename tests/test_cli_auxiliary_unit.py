@@ -219,7 +219,7 @@ def test_tapdb_run_resolves_profile_from_config_when_flag_missing(
     monkeypatch.setattr(
         tapdb_cli,
         "run_tapdb_cli",
-        lambda args, **kwargs: (calls.append(kwargs) or _proc(returncode=0, stdout="", stderr="")),
+        lambda args, **kwargs: calls.append(kwargs) or _proc(returncode=0, stdout="", stderr=""),
     )
 
     with pytest.raises(typer.Exit) as exc:

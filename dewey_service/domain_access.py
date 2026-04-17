@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
 import re
+from collections.abc import Iterable
 from urllib.parse import urlsplit
 
 APPROVED_WEB_DOMAIN_SUFFIXES: tuple[str, ...] = (

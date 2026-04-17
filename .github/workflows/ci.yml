@@ -51,6 +51,8 @@ jobs:
     name: Tests and Build
     runs-on: ubuntu-latest
     needs: [lint, security]
+    env:
+      DAYHOFF_PROJECT_ROOT: ${{ github.workspace }}
     steps:
       - uses: actions/checkout@v4
 

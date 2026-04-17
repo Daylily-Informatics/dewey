@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import importlib.metadata
 import asyncio
+import importlib.metadata
 import json
 import os
 from pathlib import Path
@@ -20,6 +20,7 @@ def _schema_root() -> Path:
 def _validate(name: str, payload: dict) -> None:
     schema = json.loads((_schema_root() / name).read_text(encoding="utf-8"))
     jsonschema.validate(payload, schema)
+
 
 def _login_operator(monkeypatch, client) -> None:
     monkeypatch.setattr(

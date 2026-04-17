@@ -77,17 +77,17 @@ from dewey_service.observability import (
 )
 from dewey_service.rbac import Role, profile_has_role
 from dewey_service.service import DeweyConflictError, DeweyNotFoundError, DeweyService
-from dewey_service.ui_metadata import resolve_git_metadata, resolve_package_version
 from dewey_service.settings import (
     Settings,
+    _resolve_region_chrome,
     build_effective_config_rows,
     get_config_file_path,
     get_settings,
     persist_managed_storage_bucket,
-    _resolve_region_chrome,
 )
 from dewey_service.storage import S3StorageClient
 from dewey_service.tapdb_backend import TapDBBackend
+from dewey_service.ui_metadata import resolve_git_metadata, resolve_package_version
 
 
 class ArtifactRegisterRequest(BaseModel):

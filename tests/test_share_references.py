@@ -89,4 +89,7 @@ def test_atlas_result_lookup_share_reference_contract(client) -> None:
     assert related.status_code == 200
     related_payload = related.json()
     assert related_payload["total"] == 1
-    assert related_payload["items"][0]["share_reference_euid"] == share_reference["share_reference_euid"]
+    assert (
+        related_payload["items"][0]["share_reference_euid"]
+        == share_reference["share_reference_euid"]
+    )

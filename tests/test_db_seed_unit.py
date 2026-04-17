@@ -78,9 +78,7 @@ def test_db_seed_main_claims_prefixes_before_seeding(
                     "instance_prefix": "DGX",
                 },
                 {
-                    "_source_file": str(
-                        core_config_dir / "system" / "system.json"
-                    ),
+                    "_source_file": str(core_config_dir / "system" / "system.json"),
                     "name": "TapDB System User",
                     "polymorphic_discriminator": "actor_template",
                     "category": "SYS",
@@ -118,7 +116,9 @@ def test_db_seed_main_claims_prefixes_before_seeding(
     assert calls["exited"] is True
     assert str(calls["config_root"]).endswith("config/tapdb_templates")
     assert len(calls["seed_calls"]) == 2
-    assert all(call["seed_session"].__class__.__name__ == "FakeSession" for call in calls["seed_calls"])
+    assert all(
+        call["seed_session"].__class__.__name__ == "FakeSession" for call in calls["seed_calls"]
+    )
     assert calls["seed_calls"][0]["overwrite"] is True
     assert len(calls["seed_calls"][0]["templates"]) == 2
     assert calls["seed_calls"][0]["seed_kwargs"]["domain_code"] == "Z"
@@ -201,7 +201,9 @@ def test_db_seed_claim_helper_rejects_collisions(tmp_path: Path) -> None:
 
     templates = [
         {
-            "_source_file": str(tmp_path / "config" / "tapdb_templates" / "dewey" / "templates.json"),
+            "_source_file": str(
+                tmp_path / "config" / "tapdb_templates" / "dewey" / "templates.json"
+            ),
             "name": "Dewey Artifact",
             "polymorphic_discriminator": "data_template",
             "category": "DGX",
@@ -351,7 +353,9 @@ def test_db_seed_module_runs_main_when_invoked_as_script(monkeypatch: pytest.Mon
         lambda config_dirs, strict: (
             [
                 {
-                    "_source_file": str(tmp_root / "config" / "tapdb_templates" / "dewey" / "templates.json"),
+                    "_source_file": str(
+                        tmp_root / "config" / "tapdb_templates" / "dewey" / "templates.json"
+                    ),
                     "name": "Dewey Artifact",
                     "polymorphic_discriminator": "data_template",
                     "category": "DGX",
@@ -382,7 +386,9 @@ def test_db_seed_module_runs_main_when_invoked_as_script(monkeypatch: pytest.Mon
     assert calls["app_username"] == "dewey"
     assert calls["commit"] is True
     assert len(calls["seed_calls"]) == 2
-    assert all(call["seed_session"].__class__.__name__ == "FakeSession" for call in calls["seed_calls"])
+    assert all(
+        call["seed_session"].__class__.__name__ == "FakeSession" for call in calls["seed_calls"]
+    )
     assert calls["seed_calls"][0]["overwrite"] is True
     assert calls["seed_calls"][0]["seed_kwargs"]["domain_code"] == "Z"
     assert calls["seed_calls"][0]["seed_kwargs"]["owner_repo_name"] == "daylily-tapdb"

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "service",
+    "environment",
+    "instance_id",
+    "observed_at",
+    "status",
+    "request_id",
+    "correlation_id",
+    "build",
+    "projection",
+    "auth"
+  ],
+  "properties": {
+    "contract_version": { "type": "string" },
+    "service": { "type": "string" },
+    "environment": { "type": "string" },
+    "instance_id": { "type": "string" },
+    "observed_at": { "type": "string" },
+    "status": { "type": "string" },
+    "request_id": { "type": "string" },
+    "correlation_id": { "type": "string" },
+    "build": { "type": "object" },
+    "projection": {
+      "type": "object",
+      "required": ["state", "stale", "observed_at", "last_synced_at"],
+      "properties": {
+        "state": { "type": "string" },
+        "stale": { "type": "boolean" },
+        "observed_at": { "type": ["string", "null"] },
+        "last_synced_at": { "type": ["string", "null"] },
+        "detail": { "type": ["string", "null"] }
+      },
+      "additionalProperties": true
+    },
+    "auth": {
+      "type": "object",
+      "required": [
+        "mode",
+        "cognito_configured",
+        "cognito_domain",
+        "user_pool_id",
+        "app_client_id_present",
+        "recent",
+        "status_counts"
+      ],
+      "properties": {
+        "mode": { "type": "string" },
+        "cognito_configured": { "type": "boolean" },
+        "cognito_domain": { "type": "string" },
+        "user_pool_id": { "type": "string" },
+        "app_client_id_present": { "type": "boolean" },
+        "recent": { "type": "array" },
+        "status_counts": { "type": "object" },
+        "sessions": {
+          "type": "object",
+          "properties": {
+            "supported": { "type": "boolean" },
+            "active_session_count": { "type": ["integer", "null"] },
+            "recent_user_count": { "type": ["integer", "null"] },
+            "observed_at": { "type": ["string", "null"] }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
