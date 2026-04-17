@@ -28,6 +28,7 @@ def test_activate_uses_editable_metadata_contract() -> None:
     assert "TAPDB_APP_CODE" not in activate_script
     assert 'config/tapdb-config-${client_id}.yaml' in activate_script
     assert 'export MERIDIAN_DOMAIN_CODE="Z"' in activate_script
+    assert '_DEWEY_TAPDB_DOMAIN_CODE="Z"' in activate_script
     assert 'export TAPDB_OWNER_REPO="dewey"' in activate_script
     assert "MERIDIAN_DOMAIN_CODE=Z" in template_text
     assert "TAPDB_OWNER_REPO=dewey" in template_text
@@ -39,6 +40,8 @@ def test_activate_uses_editable_metadata_contract() -> None:
     assert "TAPDB_OWNER_REPO=dewey" in tapdb_template_text
     assert "owner_repo_name: dewey" in tapdb_template_text
     assert "domain_code: Z" in tapdb_template_text
+    assert "dev:\n    domain_code: Z" in tapdb_template_text
+    assert "prod:\n    domain_code: Z" in tapdb_template_text
     assert "euid_client_code" not in tapdb_template_text
     assert "unset MERIDIAN_DOMAIN_CODE" in deactivate_script
     assert "unset TAPDB_OWNER_REPO" in deactivate_script

@@ -78,6 +78,9 @@ def _resolve_tapdb_config_path(
     explicit = str(config_path or "").strip()
     if explicit:
         return explicit
+    env_override = str(os.environ.get("TAPDB_CONFIG_PATH") or "").strip()
+    if env_override:
+        return env_override
     normalized_namespace = (
         namespace or DEFAULT_TAPDB_DATABASE_NAME
     ).strip() or DEFAULT_TAPDB_DATABASE_NAME

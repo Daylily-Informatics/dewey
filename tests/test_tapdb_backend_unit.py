@@ -111,6 +111,7 @@ class _FakeSession:
 
 def _backend() -> backend_mod.TapDBBackend:
     backend = object.__new__(backend_mod.TapDBBackend)
+    backend.domain_code = "Z"
     backend.templates = SimpleNamespace()
     backend.factory = SimpleNamespace()
     backend.connection = SimpleNamespace()
@@ -140,6 +141,7 @@ def test_backend_init_requires_env_and_wraps_config_errors(monkeypatch: pytest.M
             tapdb_env="dev",
             tapdb_client_id="dewey",
             tapdb_database_name="dewey",
+            tapdb_domain_code="Z",
             tapdb_config_path="",
             aws_region="us-west-2",
         ),
@@ -161,6 +163,7 @@ def test_backend_init_builds_connection(monkeypatch: pytest.MonkeyPatch) -> None
             tapdb_env="dev",
             tapdb_client_id="dewey",
             tapdb_database_name="dewey",
+            tapdb_domain_code="Z",
             tapdb_config_path="",
             aws_region="us-west-2",
         ),
@@ -194,7 +197,11 @@ def test_backend_init_builds_connection(monkeypatch: pytest.MonkeyPatch) -> None
 
     monkeypatch.setattr(backend_mod, "TAPDBConnection", FakeConnection)
     monkeypatch.setattr(backend_mod, "TemplateManager", lambda: "templates")
-    monkeypatch.setattr(backend_mod, "InstanceFactory", lambda templates: ("factory", templates))
+    monkeypatch.setattr(
+        backend_mod,
+        "InstanceFactory",
+        lambda templates, *, domain_code=None: ("factory", templates, domain_code),
+    )
 
     backend = backend_mod.TapDBBackend(app_username="svc")
 
@@ -205,8 +212,9 @@ def test_backend_init_builds_connection(monkeypatch: pytest.MonkeyPatch) -> None
     assert seen["app_username"] == "svc"
     assert seen["engine_type"] is None
     assert seen["iam_auth"] is True
+    assert backend.domain_code == "Z"
     assert backend.templates == "templates"
-    assert backend.factory == ("factory", "templates")
+    assert backend.factory == ("factory", "templates", "Z")
 
 
 def test_backend_helpers_cover_utility_functions() -> None:
@@ -215,8 +223,8 @@ def test_backend_helpers_cover_utility_functions() -> None:
         backend_mod.sha256_json({"a": 1})
         == hashlib.sha256(str({"a": 1}).encode("utf-8")).hexdigest()
     )
-    assert backend_mod._parse_template_code("generic/data/artifact/1.0/") == (
-        "generic",
+    assert backend_mod._parse_template_code(backend_mod.ARTIFACT_TEMPLATE) == (
+        backend_mod.DEWEY_TEMPLATE_CATEGORY,
         "data",
         "artifact",
         "1.0",
@@ -265,18 +273,34 @@ def test_template_definitions_are_required_codes() -> None:
 def test_ensure_templates_raises_on_missing() -> None:
     backend = _backend()
     session = _FakeSession()
-    backend.templates = SimpleNamespace(get_template=lambda session, code: None)
+    calls: list[tuple[str, str]] = []
+    backend.templates = SimpleNamespace(
+        get_template=lambda session, code, *, domain_code=None: (
+            calls.append((code, domain_code)),
+            None,
+        )[1]
+    )
 
     with pytest.raises(RuntimeError, match="Missing Dewey templates"):
         backend.ensure_templates(session)
+    assert calls
+    assert all(domain_code == "Z" for _, domain_code in calls)
 
 
 def test_ensure_templates_passes_when_seeded() -> None:
     backend = _backend()
     session = _FakeSession()
-    backend.templates = SimpleNamespace(get_template=lambda session, code: SimpleNamespace(uid=1))
+    calls: list[tuple[str, str]] = []
+    backend.templates = SimpleNamespace(
+        get_template=lambda session, code, *, domain_code=None: (
+            calls.append((code, domain_code)),
+            SimpleNamespace(uid=1),
+        )[1]
+    )
 
     backend.ensure_templates(session)
+    assert calls
+    assert all(domain_code == "Z" for _, domain_code in calls)
 
 
 def test_create_instance_covers_success_and_missing_template() -> None:
@@ -285,7 +309,9 @@ def test_create_instance_covers_success_and_missing_template() -> None:
     created = SimpleNamespace(json_addl={}, bstatus="", is_singleton=True)
     template = SimpleNamespace(instance_prefix=" AT ", uid=11)
 
-    backend.templates = SimpleNamespace(get_template=lambda session, code: template)
+    backend.templates = SimpleNamespace(
+        get_template=lambda session, code, *, domain_code=None: template
+    )
     backend.factory = SimpleNamespace(create_instance=lambda **kwargs: created)
 
     instance = backend.create_instance(
@@ -302,7 +328,9 @@ def test_create_instance_covers_success_and_missing_template() -> None:
     assert session.flush_count == 1
 
     backend_missing = _backend()
-    backend_missing.templates = SimpleNamespace(get_template=lambda session, code: None)
+    backend_missing.templates = SimpleNamespace(
+        get_template=lambda session, code, *, domain_code=None: None
+    )
     backend_missing.factory = SimpleNamespace()
     with pytest.raises(RuntimeError, match="Missing template"):
         backend_missing.create_instance(
@@ -316,7 +344,13 @@ def test_create_instance_covers_success_and_missing_template() -> None:
 def test_update_instance_json_and_query_helpers(monkeypatch: pytest.MonkeyPatch) -> None:
     backend = _backend()
     template = SimpleNamespace(uid=7)
-    backend.templates = SimpleNamespace(get_template=lambda session, code: template)
+    seen_domain_codes: list[str | None] = []
+    backend.templates = SimpleNamespace(
+        get_template=lambda session, code, *, domain_code=None: (
+            seen_domain_codes.append(domain_code),
+            template,
+        )[1]
+    )
     monkeypatch.setattr(backend_mod, "generic_instance", _FakeGenericInstanceModel)
 
     found = SimpleNamespace(euid="DGX-000001", created_dt=datetime.now(timezone.utc))
@@ -365,8 +399,12 @@ def test_update_instance_json_and_query_helpers(monkeypatch: pytest.MonkeyPatch)
     backend.update_instance_json(session, instance, {"b": 2})
     assert instance.json_addl == {"a": 1, "b": 2}
 
-    backend.templates = SimpleNamespace(get_template=lambda session, code: None)
+    backend.templates = SimpleNamespace(
+        get_template=lambda session, code, *, domain_code=None: None
+    )
     assert backend._template_query(session, template_code=backend_mod.ARTIFACT_TEMPLATE) is None
+    assert seen_domain_codes
+    assert all(domain_code == "Z" for domain_code in seen_domain_codes)
 
 
 def test_lineage_helpers_cover_create_delete_and_lists(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -443,7 +481,13 @@ def test_lineage_helpers_cover_create_delete_and_lists(monkeypatch: pytest.Monke
 def test_find_lineage_instance_and_normalize_payload(monkeypatch: pytest.MonkeyPatch) -> None:
     backend = _backend()
     relation_template = SimpleNamespace(uid=10)
-    backend.templates = SimpleNamespace(get_template=lambda session, code: relation_template)
+    seen_domain_codes: list[str | None] = []
+    backend.templates = SimpleNamespace(
+        get_template=lambda session, code, *, domain_code=None: (
+            seen_domain_codes.append(domain_code),
+            relation_template,
+        )[1]
+    )
     monkeypatch.setattr(backend_mod, "generic_instance", _FakeGenericInstanceModel)
     monkeypatch.setattr(backend_mod, "generic_instance_lineage", _FakeLineageModel)
     monkeypatch.setattr(backend_mod, "and_", lambda *clauses: clauses)
@@ -469,7 +513,9 @@ def test_find_lineage_instance_and_normalize_payload(monkeypatch: pytest.MonkeyP
         is candidate_b
     )
 
-    backend.templates = SimpleNamespace(get_template=lambda session, code: None)
+    backend.templates = SimpleNamespace(
+        get_template=lambda session, code, *, domain_code=None: None
+    )
     assert (
         backend.find_lineage_instance(
             session,
@@ -480,6 +526,8 @@ def test_find_lineage_instance_and_normalize_payload(monkeypatch: pytest.MonkeyP
         )
         is None
     )
+    assert seen_domain_codes
+    assert all(domain_code == "Z" for domain_code in seen_domain_codes)
 
     instance = SimpleNamespace(
         json_addl={"artifact_type": "fastq"},

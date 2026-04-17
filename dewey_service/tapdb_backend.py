@@ -43,14 +43,17 @@ def _parse_template_code(template_code: str) -> tuple[str, str, str, str]:
     return parts[0], parts[1], parts[2], parts[3]
 
 
-ARTIFACT_TEMPLATE = "generic/data/artifact/1.0/"
-ARTIFACT_SET_TEMPLATE = "generic/data/artifact_set/1.0/"
-SHARE_REFERENCE_TEMPLATE = "generic/data/share_reference/1.0/"
-EXTERNAL_OBJECT_TEMPLATE = "generic/integration/external_object/1.0/"
-EXTERNAL_OBJECT_RELATION_TEMPLATE = "generic/integration/external_object_relation/1.0/"
-LITERATURE_SAVE_TEMPLATE = "generic/access/literature_save/1.0/"
-ANOMALY_TEMPLATE = "generic/operational/anomaly/1.0/"
-IDEMPOTENCY_TEMPLATE = "generic/system/idempotency_request/1.0/"
+DEWEY_TEMPLATE_CATEGORY = "DGX"
+ARTIFACT_TEMPLATE = f"{DEWEY_TEMPLATE_CATEGORY}/data/artifact/1.0/"
+ARTIFACT_SET_TEMPLATE = f"{DEWEY_TEMPLATE_CATEGORY}/data/artifact_set/1.0/"
+SHARE_REFERENCE_TEMPLATE = f"{DEWEY_TEMPLATE_CATEGORY}/data/share_reference/1.0/"
+EXTERNAL_OBJECT_TEMPLATE = f"{DEWEY_TEMPLATE_CATEGORY}/integration/external_object/1.0/"
+EXTERNAL_OBJECT_RELATION_TEMPLATE = (
+    f"{DEWEY_TEMPLATE_CATEGORY}/integration/external_object_relation/1.0/"
+)
+LITERATURE_SAVE_TEMPLATE = f"{DEWEY_TEMPLATE_CATEGORY}/access/literature_save/1.0/"
+ANOMALY_TEMPLATE = f"{DEWEY_TEMPLATE_CATEGORY}/operational/anomaly/1.0/"
+IDEMPOTENCY_TEMPLATE = f"{DEWEY_TEMPLATE_CATEGORY}/system/idempotency_request/1.0/"
 
 
 TEMPLATE_DEFINITIONS: tuple[str, ...] = (
@@ -114,8 +117,11 @@ class TapDBBackend:
             iam_auth=iam_auth,
             secret_arn=secret_arn,
         )
+        self.domain_code = str(cfg.get("domain_code") or settings.tapdb_domain_code or "").strip()
+        if not self.domain_code:
+            raise RuntimeError("tapdb_domain_code is required in Dewey settings")
         self.templates = TemplateManager()
-        self.factory = InstanceFactory(self.templates)
+        self.factory = InstanceFactory(self.templates, domain_code=self.domain_code)
         self.observability = None
 
     @contextmanager
@@ -149,7 +155,10 @@ class TapDBBackend:
         missing = [
             template_code
             for template_code in TEMPLATE_DEFINITIONS
-            if self.templates.get_template(session, template_code) is None
+            if self.templates.get_template(
+                session, template_code, domain_code=self.domain_code
+            )
+            is None
         ]
         if missing:
             joined = ", ".join(missing)
@@ -167,7 +176,9 @@ class TapDBBackend:
         json_addl: dict[str, Any],
         status: str = "active",
     ) -> generic_instance:
-        template = self.templates.get_template(session, template_code)
+        template = self.templates.get_template(
+            session, template_code, domain_code=self.domain_code
+        )
         if template is None:
             raise RuntimeError(f"Missing template: {template_code}")
 
@@ -199,7 +210,9 @@ class TapDBBackend:
         template_code: str,
         for_update: bool = False,
     ):
-        template = self.templates.get_template(session, template_code)
+        template = self.templates.get_template(
+            session, template_code, domain_code=self.domain_code
+        )
         if template is None:
             return None
         query = session.query(generic_instance).filter(
@@ -376,7 +389,9 @@ class TapDBBackend:
         child_relationship_type: str,
     ) -> Optional[generic_instance]:
         # Resolve relation instances by traversing lineages through the relation object.
-        relation_template = self.templates.get_template(session, relation_template_code)
+        relation_template = self.templates.get_template(
+            session, relation_template_code, domain_code=self.domain_code
+        )
         if relation_template is None:
             return None
 

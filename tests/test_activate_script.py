@@ -294,3 +294,21 @@ def test_activate_installs_local_checkout_with_packaged_dependencies(tmp_path: P
     assert any("daylily-tapdb==6.0.4" in line for line in pip_install_lines)
     assert any("daylily-auth-cognito==2.1.1" in line for line in pip_install_lines)
     assert any("cli-core-yo==2.1.0" in line for line in pip_install_lines)
+
+
+def test_activate_honors_preseeded_tapdb_config_path(tmp_path: Path) -> None:
+    conda_base = _build_fake_conda(tmp_path)
+    tapdb_config_path = tmp_path / "deployment" / "tapdb-config.yaml"
+    tapdb_config_path.parent.mkdir(parents=True, exist_ok=True)
+    tapdb_config_path.write_text("meta: {}\n", encoding="utf-8")
+
+    env = os.environ.copy()
+    env["PATH"] = f"{conda_base / 'bin'}:/usr/bin:/bin"
+    env["TAPDB_CONFIG_PATH"] = str(tapdb_config_path)
+    env.pop("CONDA_DEFAULT_ENV", None)
+    env.pop("CONDA_PREFIX", None)
+
+    result = _source_activate(env)
+
+    assert result.returncode == 0
+    assert str(tapdb_config_path) in result.stdout

@@ -54,6 +54,21 @@ def test_resolve_tapdb_config_path_prefers_explicit_argument() -> None:
     )
 
 
+def test_resolve_tapdb_config_path_prefers_env_override(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("TAPDB_CONFIG_PATH", "/tmp/from-env-tapdb.yaml")
+
+    assert (
+        tapdb_runtime._resolve_tapdb_config_path(
+            namespace="ignored",
+            client_id="ignored",
+            config_path="",
+        )
+        == "/tmp/from-env-tapdb.yaml"
+    )
+
+
 def test_resolve_runtime_env_sets_expected_values(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("DEPLOYMENT_CODE", "local2")
     home = Path("/tmp/dewey-home")
@@ -323,6 +338,7 @@ def test_resolve_tapdb_config_path_supports_user_repo_and_missing_paths(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
+    monkeypatch.delenv("TAPDB_CONFIG_PATH", raising=False)
     home = tmp_path / "home"
     shared_config = home / ".config" / "tapdb" / "dewey" / "dewey" / "tapdb-config.yaml"
     shared_config.parent.mkdir(parents=True, exist_ok=True)

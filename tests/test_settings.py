@@ -225,6 +225,23 @@ def test_settings_aws_profile_missing_is_empty_without_env(monkeypatch: pytest.M
     assert loaded.aws_profile == ""
 
 
+def test_settings_honors_tapdb_config_path_env_override(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("TAPDB_CONFIG_PATH", "/tmp/from-env-tapdb.yaml")
+
+    loaded = Settings(
+        api_bearer_token="token",
+        session_secret_key="secret",
+        cognito_domain="auth.example.com",
+        cognito_app_client_id="client",
+        cognito_redirect_uri="https://localhost:8914/auth/callback",
+        cognito_logout_url="https://localhost:8914/login",
+    )
+
+    assert loaded.tapdb_config_path == "/tmp/from-env-tapdb.yaml"
+
+
 def test_settings_fall_back_to_deployment_code(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "stage-g")
 

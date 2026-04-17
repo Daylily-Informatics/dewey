@@ -4,7 +4,7 @@
     {
       "name": "Dewey Artifact",
       "polymorphic_discriminator": "data_template",
-      "category": "generic",
+      "category": "DGX",
       "type": "data",
       "subtype": "artifact",
       "version": "1.0",
@@ -17,7 +17,7 @@
     {
       "name": "Dewey Artifact Set",
       "polymorphic_discriminator": "data_template",
-      "category": "generic",
+      "category": "DGX",
       "type": "data",
       "subtype": "artifact_set",
       "version": "1.0",
@@ -30,7 +30,7 @@
     {
       "name": "Dewey Share Reference",
       "polymorphic_discriminator": "data_template",
-      "category": "generic",
+      "category": "DGX",
       "type": "data",
       "subtype": "share_reference",
       "version": "1.0",
@@ -43,7 +43,7 @@
     {
       "name": "Dewey External Object",
       "polymorphic_discriminator": "data_template",
-      "category": "generic",
+      "category": "DGX",
       "type": "integration",
       "subtype": "external_object",
       "version": "1.0",
@@ -56,7 +56,7 @@
     {
       "name": "Dewey External Object Relation",
       "polymorphic_discriminator": "data_template",
-      "category": "generic",
+      "category": "DGX",
       "type": "integration",
       "subtype": "external_object_relation",
       "version": "1.0",
@@ -69,7 +69,7 @@
     {
       "name": "Dewey Literature Save",
       "polymorphic_discriminator": "data_template",
-      "category": "generic",
+      "category": "DGX",
       "type": "access",
       "subtype": "literature_save",
       "version": "1.0",
@@ -82,7 +82,7 @@
     {
       "name": "Dewey Anomaly",
       "polymorphic_discriminator": "data_template",
-      "category": "generic",
+      "category": "DGX",
       "type": "operational",
       "subtype": "anomaly",
       "version": "1.0",
@@ -95,7 +95,7 @@
     {
       "name": "Dewey Idempotency",
       "polymorphic_discriminator": "data_template",
-      "category": "generic",
+      "category": "DGX",
       "type": "system",
       "subtype": "idempotency_request",
       "version": "1.0",

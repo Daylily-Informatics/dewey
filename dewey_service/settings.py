@@ -565,6 +565,11 @@ class Settings(BaseSettings):
         self.deployment_name = str(deployment["name"])
         self.deployment_color = str(deployment["color"])
         self.deployment_is_production = bool(deployment["is_production"])
+        tapdb_config_path = str(os.environ.get("TAPDB_CONFIG_PATH") or "").strip()
+        if tapdb_config_path:
+            self.tapdb_config_path = tapdb_config_path
+        else:
+            self.tapdb_config_path = str(self.tapdb_config_path or "").strip()
         return self
 
     def api_tokens(self) -> set[str]:
