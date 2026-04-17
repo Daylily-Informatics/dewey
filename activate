@@ -131,6 +131,8 @@ if [[ -z "${CONDA_PREFIX:-}" ]] || [[ ! -d "${CONDA_PREFIX}/bin" ]]; then
   return 1
 fi
 
+export PATH="${CONDA_PREFIX}/bin:${PATH}"
+
 if [[ "${_DEWEY_CONDA_ENV_CREATED}" == "1" ]]; then
   echo -e "  ${_CYAN}→${_NC} Installing editable Dewey checkout..."
   if ! "${CONDA_PREFIX}/bin/python" -m pip install -e "$DEWEY_ROOT" -q; then
