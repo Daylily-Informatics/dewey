@@ -116,6 +116,11 @@ def test_obs_services_advertises_canonical_capabilities(client) -> None:
         },
         {"path": "/api/dag/data", "auth": "session_or_bearer", "kind": "dag_native_graph"},
         {
+            "path": "/api/dag/search",
+            "auth": "session_or_bearer",
+            "kind": "dag_object_search",
+        },
+        {
             "path": "/api/dag/external",
             "auth": "session_or_bearer",
             "kind": "dag_external_graph",

@@ -63,6 +63,10 @@ def _build_dummy_dag_router() -> APIRouter:
     async def dag_graph_data() -> dict[str, str]:
         return {"kind": "native"}
 
+    @router.get("/api/dag/search")
+    async def dag_object_search() -> dict[str, str]:
+        return {"kind": "search"}
+
     @router.get("/api/dag/external")
     async def dag_external_graph() -> dict[str, str]:
         return {"kind": "external"}

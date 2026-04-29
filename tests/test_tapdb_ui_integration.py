@@ -26,6 +26,10 @@ def _build_dummy_dag_router() -> APIRouter:
     async def dag_data() -> dict[str, object]:
         return {"items": [], "total": 0, "system": "dewey"}
 
+    @router.get("/api/dag/search")
+    async def dag_search() -> dict[str, object]:
+        return {"items": [], "total": 0, "system": "dewey"}
+
     @router.get("/api/dag/external")
     async def dag_external() -> dict[str, object]:
         return {"items": [], "total": 0, "system": "dewey"}
@@ -71,9 +75,13 @@ def test_obs_services_advertises_embedded_tapdb_dag(
         paths = {item["path"] for item in body["endpoints"]}
         assert "/api/dag/object/{euid}" in paths
         assert "/api/dag/data" in paths
+        assert "/api/dag/search" in paths
         assert "/api/dag/external" in paths
         assert "/api/dag/external/object" in paths
         assert "tapdb.dag_v1" in body["extensions"]
+        assert "object_search" in body["capabilities"]
+        assert "typed_external_identifier" in body["external_ref_models"]
+        assert body["tapdb_dag_contract_version"] == "dag:v1"
 
 
 def test_dashboard_surfaces_tapdb_link_when_embedded(
@@ -121,5 +129,34 @@ def test_tapdb_mount_and_dag_routes_execute(monkeypatch, test_settings, fake_ser
 
         headers = {"Authorization": "Bearer token-123"}
         assert client.get("/api/dag/data", headers=headers).json()["system"] == "dewey"
+        assert client.get("/api/dag/search", headers=headers).json()["system"] == "dewey"
         assert client.get("/api/dag/external", headers=headers).json()["system"] == "dewey"
         assert client.get("/api/dag/external/object", headers=headers).json()["system"] == "dewey"
+
+
+def test_tapdb_graph_page_renders_for_logged_in_user(
+    monkeypatch, test_settings, fake_service
+) -> None:
+    with _configured_client(monkeypatch, test_settings, fake_service) as client:
+        monkeypatch.setattr(
+            "daylily_auth_cognito.browser.session.exchange_authorization_code_async",
+            lambda **kwargs: asyncio.sleep(0, result={"id_token": "header.payload.sig"}),
+        )
+        monkeypatch.setattr(
+            "dewey_service.auth.decode_jwt_claims_noverify",
+            lambda _token: {
+                "email": "operator@lsmc.bio",
+                "sub": "sub-1",
+                "cognito:groups": ["operators"],
+            },
+        )
+
+        login = client.get("/auth/login", follow_redirects=False)
+        state = login.headers["location"].split("state=")[1].split("&")[0]
+        client.get("/auth/callback", params={"code": "code-1", "state": state})
+
+        response = client.get("/graph")
+
+    assert response.status_code == 200
+    assert "Dewey TapDB Object Graph" in response.text
+    assert "/api/dag/search" in response.text
