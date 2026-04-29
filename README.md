@@ -226,7 +226,7 @@ dewey --help
 dewey runtime check
 ```
 
-That activation flow creates or reuses a deployment-scoped conda environment like `DEWEY-local`, installs the repo editable, ensures the shared published package versions declared in `pyproject.toml` are present, and exports deployment-scoped env values such as `DEWEY_DEPLOYMENT_CODE`.
+That activation flow creates or reuses a deployment-scoped conda environment like `DEWEY-local`, activates it, and installs only the Dewey repo editable on first create. All Python dependencies needed by the repo live in `project.dependencies`, and repo-solo config still starts with `dewey config init`.
 
 ### Local Run
 
@@ -243,6 +243,7 @@ dewey server start --port 8914
 Current published-package note from the April 15, 2026 TapDB hard cut:
 
 - this repo now pins the `daylily-tapdb` version declared in `pyproject.toml`
+- Python runtime dependencies are owned by `pyproject.toml`, not `environment.yaml`
 - the shared TapDB config lives at `~/.config/tapdb/dewey/dewey/tapdb-config.yaml`
 - if you invoke `tapdb` manually, use that shared config path directly:
 

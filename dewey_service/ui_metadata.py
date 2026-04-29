@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import subprocess
-from importlib.metadata import PackageNotFoundError, version as package_version
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as package_version
 from pathlib import Path
+from shutil import which
 
 
 def resolve_package_version() -> str:
@@ -18,8 +20,11 @@ def resolve_package_version() -> str:
 
 
 def _git_output(repo_root: Path, *args: str) -> str:
+    git_executable = which("git")
+    if git_executable is None:
+        raise RuntimeError("git executable is required to resolve repository metadata")
     completed = subprocess.run(
-        ["git", "-C", str(repo_root), *args],
+        [git_executable, "-C", str(repo_root), *args],
         check=True,
         capture_output=True,
         text=True,

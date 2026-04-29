@@ -7,10 +7,10 @@ import pytest
 from dewey_service.settings import (
     DEFAULT_DEPLOYMENT_BANNER_COLOR,
     Settings,
-    _resolve_region_chrome,
     _resolve_deployment_chrome,
-    _stable_region_color_hex,
+    _resolve_region_chrome,
     _stable_deployment_color_hex,
+    _stable_region_color_hex,
     build_effective_config_rows,
     load_settings,
     persist_managed_storage_bucket,
@@ -239,7 +239,42 @@ def test_settings_honors_tapdb_config_path_env_override(
         cognito_logout_url="https://localhost:8914/login",
     )
 
-    assert loaded.tapdb_config_path == "/tmp/from-env-tapdb.yaml"
+    assert loaded.tapdb_config_path == str(Path("/tmp/from-env-tapdb.yaml").resolve())
+
+
+def test_settings_require_absolute_tapdb_paths() -> None:
+    with pytest.raises(ValueError, match="absolute file path"):
+        Settings(
+            api_bearer_token="token",
+            session_secret_key="secret",
+            cognito_domain="auth.example.com",
+            cognito_app_client_id="client",
+            cognito_redirect_uri="https://localhost:8914/auth/callback",
+            cognito_logout_url="https://localhost:8914/login",
+            tapdb_config_path="relative/tapdb-config.yaml",
+        )
+
+    with pytest.raises(ValueError, match="absolute file path"):
+        Settings(
+            api_bearer_token="token",
+            session_secret_key="secret",
+            cognito_domain="auth.example.com",
+            cognito_app_client_id="client",
+            cognito_redirect_uri="https://localhost:8914/auth/callback",
+            cognito_logout_url="https://localhost:8914/login",
+            tapdb_domain_registry_path="relative/domain.json",
+        )
+
+    with pytest.raises(ValueError, match="absolute file path"):
+        Settings(
+            api_bearer_token="token",
+            session_secret_key="secret",
+            cognito_domain="auth.example.com",
+            cognito_app_client_id="client",
+            cognito_redirect_uri="https://localhost:8914/auth/callback",
+            cognito_logout_url="https://localhost:8914/login",
+            tapdb_prefix_ownership_registry_path="relative/prefix.json",
+        )
 
 
 def test_settings_fall_back_to_deployment_code(monkeypatch: pytest.MonkeyPatch) -> None:

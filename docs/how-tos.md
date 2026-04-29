@@ -47,17 +47,18 @@ dewey db build --target local
 Current published-package note from the April 15, 2026 TapDB hard cut:
 
 - this repo now pins the `daylily-tapdb` version declared in `pyproject.toml`
-- the shared TapDB config lives at `~/.config/tapdb/dewey/dewey/tapdb-config.yaml`
+- All Python dependencies needed by the repo live in `project.dependencies`
+- the shared TapDB config must be passed as an explicit full path such as `/absolute/path/to/tapdb-config.yaml`
 - if you invoke `tapdb` manually, use that shared config path directly:
 
 ```bash
-tapdb --config ~/.config/tapdb/dewey/dewey/tapdb-config.yaml --env dev db setup dev --force
+tapdb --config /absolute/path/to/tapdb-config.yaml --env dev db setup dev --force
 ```
 
 - if you just reset the Dewey config template, set the TapDB config path explicitly before `dewey db seed` or `dewey server start`:
 
 ```bash
-export TAPDB_CONFIG_PATH=~/.config/tapdb/dewey/dewey/tapdb-config.yaml
+export TAPDB_CONFIG_PATH=/absolute/path/to/tapdb-config.yaml
 dewey db seed
 dewey server start --port 8914
 ```

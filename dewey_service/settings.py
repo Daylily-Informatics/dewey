@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import colorsys
-import json
 import hashlib
+import json
 import os
 import re
 from functools import lru_cache
@@ -275,6 +275,16 @@ def _display_config_value(value: Any) -> str:
     return text or "<unset>"
 
 
+def _require_absolute_path(value: str, *, field_name: str) -> str:
+    normalized = str(value or "").strip()
+    if not normalized:
+        raise ValueError(f"{field_name} is required")
+    resolved = Path(normalized)
+    if not resolved.is_absolute():
+        raise ValueError(f"{field_name} must be an absolute file path")
+    return str(resolved.resolve())
+
+
 def _display_config_path(path: str) -> str:
     mapping = {
         "show_environment_chrome": "ui.show_environment_chrome",
@@ -351,7 +361,9 @@ def build_effective_config_rows(settings: "Settings", *, config_path: Path) -> l
         rows.append(
             {
                 "path": display_path,
-                "value": "<redacted>" if _is_sensitive_config_path(display_path) else _display_config_value(value),
+                "value": "<redacted>"
+                if _is_sensitive_config_path(display_path)
+                else _display_config_value(value),
             }
         )
 
@@ -410,13 +422,9 @@ class Settings(BaseSettings):
     tapdb_owner_repo_name: str = "dewey"
     tapdb_domain_code: str = "Z"
     tapdb_domain_registry_path: str = str(DEFAULT_TAPDB_DOMAIN_REGISTRY_PATH)
-    tapdb_prefix_ownership_registry_path: str = str(
-        DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH
-    )
+    tapdb_prefix_ownership_registry_path: str = str(DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH)
     tapdb_env: str = "dev"
-    tapdb_config_path: str = str(
-        DEFAULT_TAPDB_CONFIG_DIR / "dewey" / "dewey" / "tapdb-config.yaml"
-    )
+    tapdb_config_path: str = str(DEFAULT_TAPDB_CONFIG_DIR / "dewey" / "dewey" / "tapdb-config.yaml")
     tapdb_strict_namespace: int = 1
 
     # AWS defaults for TapDB wrappers
@@ -478,10 +486,7 @@ class Settings(BaseSettings):
     @field_validator("tapdb_domain_registry_path", "tapdb_prefix_ownership_registry_path")
     @classmethod
     def validate_tapdb_registry_path(cls, value: str) -> str:
-        normalized = str(value or "").strip()
-        if not normalized:
-            raise ValueError("TapDB registry paths are required")
-        return normalized
+        return _require_absolute_path(value, field_name="TapDB registry path")
 
     @field_validator("api_bearer_token")
     @classmethod
@@ -570,6 +575,10 @@ class Settings(BaseSettings):
             self.tapdb_config_path = tapdb_config_path
         else:
             self.tapdb_config_path = str(self.tapdb_config_path or "").strip()
+        self.tapdb_config_path = _require_absolute_path(
+            self.tapdb_config_path,
+            field_name="tapdb_config_path",
+        )
         return self
 
     def api_tokens(self) -> set[str]:

@@ -5,20 +5,18 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from sqlalchemy import text
-
 from daylily_tapdb.euid import AUDIT_LOG_PREFIX, GENERIC_INSTANCE_LINEAGE_PREFIX
+from daylily_tapdb.governance import assert_registered_domain, normalize_owner_repo_name
 from daylily_tapdb.templates.loader import (
     find_tapdb_core_config_dir,
     resolve_seed_config_dirs,
     seed_templates,
     validate_template_configs,
 )
-from daylily_tapdb.governance import assert_registered_domain, normalize_owner_repo_name
+from sqlalchemy import text
 
-from dewey_service.tapdb_backend import TapDBBackend
 from dewey_service.settings import get_settings
-
+from dewey_service.tapdb_backend import TapDBBackend
 
 _PREFIX_OWNERSHIP_REGISTRY_VERSION = "0.4.0"
 _TAPDB_CORE_PREFIXES = {"SYS", "MSG"}
@@ -45,9 +43,7 @@ def _client_template_prefixes(
             continue
         prefix = str(template.get("instance_prefix") or "").strip().upper()
         if not prefix:
-            raise ValueError(
-                f"Template {template.get('name')!r} is missing an instance_prefix"
-            )
+            raise ValueError(f"Template {template.get('name')!r} is missing an instance_prefix")
         if prefix in _TAPDB_CORE_PREFIXES:
             continue
         if prefix not in seen:
@@ -99,12 +95,11 @@ def _claim_client_template_prefix_ownership(
 
     payload = _load_or_init_prefix_registry(prefix_registry_path)
     ownership = payload["ownership"]
-    assert isinstance(ownership, dict)
+    if not isinstance(ownership, dict):
+        raise ValueError("Prefix registry ownership table must be an object")
     domain_claims = ownership.setdefault(domain_code, {})
     if not isinstance(domain_claims, dict):
-        raise ValueError(
-            f"Prefix registry claims for domain {domain_code!r} must be an object"
-        )
+        raise ValueError(f"Prefix registry claims for domain {domain_code!r} must be an object")
 
     changed = False
     for prefix in prefixes:
@@ -114,9 +109,7 @@ def _claim_client_template_prefix_ownership(
             changed = True
             continue
         if not isinstance(claim, dict):
-            raise ValueError(
-                f"Prefix {prefix!r} in domain {domain_code!r} must be an object"
-            )
+            raise ValueError(f"Prefix {prefix!r} in domain {domain_code!r} must be an object")
         registered_owner = str(
             claim.get("issuer_app_code")
             or claim.get("owner_repo_name")
@@ -124,9 +117,7 @@ def _claim_client_template_prefix_ownership(
             or ""
         ).strip()
         if not registered_owner:
-            raise ValueError(
-                f"Prefix {prefix!r} in domain {domain_code!r} is missing an owner"
-            )
+            raise ValueError(f"Prefix {prefix!r} in domain {domain_code!r} is missing an owner")
         if registered_owner != normalized_owner_repo_name:
             raise ValueError(
                 f"Prefix {prefix!r} in domain {domain_code!r} is owned by "
@@ -211,11 +202,7 @@ def main() -> None:
         strict=True,
     )
     client_templates = _filter_client_templates(raw_client_templates)
-    errors = [
-        issue
-        for issue in [*core_issues, *client_issues]
-        if issue.level == "error"
-    ]
+    errors = [issue for issue in [*core_issues, *client_issues] if issue.level == "error"]
     if errors:
         joined = "; ".join(issue.message for issue in errors)
         raise RuntimeError(f"Dewey template pack validation failed: {joined}")

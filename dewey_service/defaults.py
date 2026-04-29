@@ -64,6 +64,7 @@ def build_default_config_template(
         or os.environ.get("LSMC_DEPLOYMENT_CODE")
         or "local"
     )
+    tapdb_config_path = DEFAULT_TAPDB_CONFIG_DIR / "dewey" / "dewey" / "tapdb-config.yaml"
     bucket = str(managed_storage_bucket or "").strip()
     prefix = str(managed_storage_prefix or "artifacts").strip().strip("/") or "artifacts"
     return f"""# Dewey Configuration
@@ -115,13 +116,13 @@ database:
   namespace: dewey
   owner_repo_name: dewey
   domain_code: Z
-  domain_registry_path: ~/.config/tapdb/domain_code_registry.json
-  prefix_ownership_registry_path: ~/.config/tapdb/prefix_ownership_registry.json
+  domain_registry_path: {DEFAULT_TAPDB_DOMAIN_REGISTRY_PATH}
+  prefix_ownership_registry_path: {DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH}
   env: dev
   # Explicit env contract for TapDB/Meridian subprocesses:
   # MERIDIAN_DOMAIN_CODE=Z
   # TAPDB_OWNER_REPO=dewey
-  config_path: ~/.config/tapdb/dewey/dewey/tapdb-config.yaml
+  config_path: {tapdb_config_path}
 
 aws:
   profile: ""

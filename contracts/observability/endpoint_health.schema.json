@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "service",
+    "environment",
+    "instance_id",
+    "observed_at",
+    "status",
+    "request_id",
+    "correlation_id",
+    "build",
+    "projection",
+    "page",
+    "items"
+  ],
+  "properties": {
+    "contract_version": { "type": "string" },
+    "service": { "type": "string" },
+    "environment": { "type": "string" },
+    "instance_id": { "type": "string" },
+    "observed_at": { "type": "string" },
+    "status": { "type": "string" },
+    "request_id": { "type": "string" },
+    "correlation_id": { "type": "string" },
+    "build": { "type": "object" },
+    "projection": {
+      "type": "object",
+      "required": ["state", "stale", "observed_at", "last_synced_at"],
+      "properties": {
+        "state": { "type": "string" },
+        "stale": { "type": "boolean" },
+        "observed_at": { "type": ["string", "null"] },
+        "last_synced_at": { "type": ["string", "null"] },
+        "detail": { "type": ["string", "null"] }
+      },
+      "additionalProperties": true
+    },
+    "page": {
+      "type": "object",
+      "required": ["total", "offset", "limit"],
+      "properties": {
+        "total": { "type": "integer" },
+        "offset": { "type": "integer" },
+        "limit": { "type": "integer" }
+      },
+      "additionalProperties": true
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "method",
+          "route_template",
+          "request_count",
+          "status_class_counts",
+          "p50_ms",
+          "p95_ms",
+          "p99_ms",
+          "fingerprint_count",
+          "observed_at"
+        ],
+        "properties": {
+          "method": { "type": "string" },
+          "route_template": { "type": "string" },
+          "request_count": { "type": "integer" },
+          "status_class_counts": { "type": "object" },
+          "p50_ms": { "type": "number" },
+          "p95_ms": { "type": "number" },
+          "p99_ms": { "type": "number" },
+          "fingerprint_count": { "type": "integer" },
+          "observed_at": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

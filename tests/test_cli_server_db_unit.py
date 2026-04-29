@@ -12,12 +12,17 @@ import dewey_service.cli.server as server_cli
 from dewey_service.settings import Settings
 
 
+def _tapdb_config_path() -> str:
+    return str(Path("/tmp/dewey-tapdb-config.yaml").resolve())
+
+
 def _settings() -> Settings:
     return Settings(
         cognito_domain="auth.example.com",
         cognito_app_client_id="client-1",
         cognito_redirect_uri="https://localhost:8914/auth/callback",
         cognito_logout_url="https://localhost:8914/login",
+        tapdb_config_path=_tapdb_config_path(),
     )
 
 
@@ -439,10 +444,15 @@ def test_server_command_wrappers(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_db_cli_error_branches(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(db_cli, "ensure_tapdb_version", lambda: "3.0.6")
+    monkeypatch.setattr(db_cli, "get_settings", _settings)
 
     with pytest.raises(typer.Exit) as exc:
         db_cli.build(
-            target="aurora", cluster="", profile="team-profile", region="us-west-2", namespace="dewey"
+            target="aurora",
+            cluster="",
+            profile="team-profile",
+            region="us-west-2",
+            namespace="dewey",
         )
     assert exc.value.exit_code == 1
 
@@ -463,7 +473,11 @@ def test_db_cli_error_branches(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(db_cli.subprocess, "run", fail_seed)
     with pytest.raises(typer.Exit) as exc:
         db_cli.build(
-            target="local", cluster="", profile="team-profile", region="us-west-2", namespace="dewey"
+            target="local",
+            cluster="",
+            profile="team-profile",
+            region="us-west-2",
+            namespace="dewey",
         )
     assert exc.value.exit_code == 1
 
@@ -505,16 +519,19 @@ def test_db_cli_resolves_profile_from_config_when_flag_missing(
 
     monkeypatch.setenv("AWS_PROFILE", "shell-profile")
     monkeypatch.setattr(db_cli, "ensure_tapdb_version", lambda: "3.0.6")
+    monkeypatch.setattr(db_cli, "get_settings", _settings)
     monkeypatch.setattr(db_cli, "load_config_aws_profile", lambda: "config-profile")
     monkeypatch.setattr(
         db_cli,
         "run_tapdb_cli",
-        lambda args, **kwargs: (calls.append(("run", kwargs)) or _proc(returncode=0, stdout="ok")),
+        lambda args, **kwargs: calls.append(("run", kwargs)) or _proc(returncode=0, stdout="ok"),
     )
     monkeypatch.setattr(
         db_cli,
         "export_database_url_for_target",
-        lambda **kwargs: (calls.append(("export", kwargs)) or "postgresql+psycopg2://dewey@localhost:5432/dewey"),
+        lambda **kwargs: (
+            calls.append(("export", kwargs)) or "postgresql+psycopg2://dewey@localhost:5432/dewey"
+        ),
     )
     monkeypatch.setattr(db_cli.subprocess, "run", lambda *args, **kwargs: None)
 
@@ -529,6 +546,7 @@ def test_db_cli_resolves_profile_from_config_when_flag_missing(
                 "profile": "config-profile",
                 "region": "us-west-2",
                 "namespace": "dewey",
+                "config_path": _tapdb_config_path(),
                 "cwd": db_cli.PROJECT_ROOT,
             },
         ),
@@ -540,6 +558,7 @@ def test_db_cli_resolves_profile_from_config_when_flag_missing(
                 "profile": "config-profile",
                 "region": "us-west-2",
                 "namespace": "dewey",
+                "config_path": _tapdb_config_path(),
             },
         ),
     ]
@@ -551,6 +570,7 @@ def test_db_cli_requires_profile_source(monkeypatch: pytest.MonkeyPatch) -> None
     monkeypatch.delenv("DEWEY_AWS_PROFILE", raising=False)
     monkeypatch.delenv("AWS_PROFILE", raising=False)
     monkeypatch.setattr(db_cli, "ensure_tapdb_version", lambda: "3.0.6")
+    monkeypatch.setattr(db_cli, "get_settings", _settings)
     monkeypatch.setattr(db_cli, "load_config_aws_profile", lambda: "")
     monkeypatch.setattr(db_cli.ccyo_out, "error", lambda message: errors.append(message))
 
@@ -565,11 +585,13 @@ def test_db_cli_requires_profile_source(monkeypatch: pytest.MonkeyPatch) -> None
 
 def test_db_cli_reset_success_path(monkeypatch: pytest.MonkeyPatch) -> None:
     calls: list[tuple[str, object]] = []
+    monkeypatch.setattr(db_cli, "get_settings", _settings)
     monkeypatch.setattr(
         db_cli,
         "run_tapdb_cli",
         lambda args, **kwargs: (
-            calls.append(("delete", args)) or _proc(returncode=0, stdout="deleted")
+            calls.append(("delete", {"args": args, **kwargs}))
+            or _proc(returncode=0, stdout="deleted")
         ),
     )
     monkeypatch.setattr(
@@ -588,7 +610,19 @@ def test_db_cli_reset_success_path(monkeypatch: pytest.MonkeyPatch) -> None:
     )
 
     assert calls == [
-        ("delete", ["db", "delete", "dev", "--force"]),
+        (
+            "delete",
+            {
+                "args": ["db", "delete", "dev", "--force"],
+                "target": "local",
+                "client_id": db_cli.DEFAULT_TAPDB_CLIENT_ID,
+                "profile": "team-profile",
+                "region": "us-west-2",
+                "namespace": "dewey",
+                "config_path": _tapdb_config_path(),
+                "cwd": db_cli.PROJECT_ROOT,
+            },
+        ),
         (
             "build",
             {
@@ -604,11 +638,13 @@ def test_db_cli_reset_success_path(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_db_cli_nuke_success_path(monkeypatch: pytest.MonkeyPatch) -> None:
     calls: list[tuple[str, object]] = []
+    monkeypatch.setattr(db_cli, "get_settings", _settings)
     monkeypatch.setattr(
         db_cli,
         "run_tapdb_cli",
         lambda args, **kwargs: (
-            calls.append(("delete", args)) or _proc(returncode=0, stdout="deleted")
+            calls.append(("delete", {"args": args, **kwargs}))
+            or _proc(returncode=0, stdout="deleted")
         ),
     )
     monkeypatch.setattr(
@@ -625,4 +661,18 @@ def test_db_cli_nuke_success_path(monkeypatch: pytest.MonkeyPatch) -> None:
         namespace="dewey",
     )
 
-    assert calls == [("delete", ["db", "delete", "prod", "--force"])]
+    assert calls == [
+        (
+            "delete",
+            {
+                "args": ["db", "delete", "prod", "--force"],
+                "target": "aurora",
+                "client_id": db_cli.DEFAULT_TAPDB_CLIENT_ID,
+                "profile": "team-profile",
+                "region": "us-west-2",
+                "namespace": "dewey",
+                "config_path": _tapdb_config_path(),
+                "cwd": db_cli.PROJECT_ROOT,
+            },
+        )
+    ]

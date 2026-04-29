@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import re
 
-from dewey_service.domain_access import build_allowed_origin_regex, build_trusted_hosts, is_allowed_origin
+from dewey_service.domain_access import (
+    build_allowed_origin_regex,
+    build_trusted_hosts,
+    is_allowed_origin,
+)
 
 
 def test_dewey_allows_approved_origin_preflight(client) -> None:

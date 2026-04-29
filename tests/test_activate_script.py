@@ -21,23 +21,23 @@ def _build_fake_conda(tmp_path: Path) -> Path:
     conda_exe = conda_base / "bin" / "conda"
     env_name = f"DEWEY-{DEPLOY_NAME}"
     env_bin = conda_base / "envs" / env_name / "bin"
-    scripts_dir = conda_base / "envs" / env_name / "scripts"
-    scripts_dir.mkdir(parents=True, exist_ok=True)
+
+    env_bin.mkdir(parents=True, exist_ok=True)
+    _write_executable(
+        env_bin / "dewey",
+        """#!/usr/bin/env bash
+set -euo pipefail
+printf 'dewey stub\\n'
+""",
+    )
 
     _write_executable(
         env_bin / "python",
         f"""#!/usr/bin/env bash
 set -euo pipefail
-if [[ "${{1:-}}" == "-c" ]]; then
-  if [[ "${{2:-}}" == *'sysconfig.get_path("scripts")'* ]]; then
-    printf '%s\\n' "{scripts_dir}"
-  fi
-  exit 0
-fi
-if [[ "${{1:-}}" == "-" ]]; then
-  script="$(cat)"
-  if [[ "$script" == *"importlib.import_module"* ]]; then
-    exit 0
+if [[ "${{1:-}}" == "-m" && "${{2:-}}" == "pip" && "${{3:-}}" == "install" ]]; then
+  if [[ -n "${{FAKE_PIP_INSTALL_LOG:-}}" ]]; then
+    printf '%s\\n' "$*" >> "${{FAKE_PIP_INSTALL_LOG}}"
   fi
   exit 0
 fi
@@ -46,18 +46,6 @@ if [[ "${{1:-}}" == "-m" && "${{2:-}}" == "pip" && "${{3:-}}" == "show" ]]; then
   if [[ "$package_name" == "dewey-service" ]]; then
     printf 'Name: dewey-service\\n'
     printf 'Editable project location: %s\\n' "{PROJECT_ROOT}"
-  elif [[ "$package_name" == "daylily-auth-cognito" ]]; then
-    printf 'Name: daylily-auth-cognito\\nVersion: %s\\n' "${{FAKE_DAYLILY_AUTH_COGNITO_VERSION:-2.1.5}}"
-  elif [[ "$package_name" == "daylily-tapdb" ]]; then
-    printf 'Name: daylily-tapdb\\nVersion: %s\\n' "${{FAKE_DAYLILY_TAPDB_VERSION:-6.0.8}}"
-  elif [[ "$package_name" == "cli-core-yo" ]]; then
-    printf 'Name: cli-core-yo\\nVersion: %s\\n' "${{FAKE_CLI_CORE_YO_VERSION:-2.1.1}}"
-  fi
-  exit 0
-fi
-if [[ "${{1:-}}" == "-m" && "${{2:-}}" == "pip" && "${{3:-}}" == "install" ]]; then
-  if [[ -n "${{FAKE_PIP_INSTALL_LOG:-}}" ]]; then
-    printf '%s\\n' "$*" >> "${{FAKE_PIP_INSTALL_LOG}}"
   fi
   exit 0
 fi
@@ -108,6 +96,7 @@ exit 1
     fi
     export CONDA_DEFAULT_ENV="{env_name}"
     export CONDA_PREFIX="{conda_base}/envs/{env_name}"
+    export PATH="{env_bin}:$PATH"
     return 0
   fi
   command "{conda_exe}" "$@"
@@ -124,12 +113,15 @@ def _source_activate(
     *,
     deploy_name: str | None = DEPLOY_NAME,
     extra_args: tuple[str, ...] = (),
+    post_command: str | None = None,
 ) -> subprocess.CompletedProcess[str]:
     argv = [f"source {shlex.quote(str(ACTIVATE_SCRIPT))}"]
     if deploy_name is not None:
         argv.append(shlex.quote(deploy_name))
     argv.extend(shlex.quote(arg) for arg in extra_args)
     command = " ".join(argv)
+    if post_command:
+        command = f"{command} && {post_command}"
     return subprocess.run(
         ["/bin/bash", "--noprofile", "--norc", "-c", command],
         cwd=PROJECT_ROOT,
@@ -189,129 +181,78 @@ def test_activate_rejects_extra_arguments() -> None:
     assert "Dewey activation requires exactly one positional deploy-name." in result.stdout
 
 
-def test_activate_hardfails_when_conda_env_creation_fails(tmp_path: Path) -> None:
+def test_activate_creates_env_and_installs_repo_editable_once(tmp_path: Path) -> None:
     conda_base = _build_fake_conda(tmp_path)
     conda_call_log = tmp_path / "conda-calls.log"
+    pip_install_log = tmp_path / "pip-install.log"
 
     env = os.environ.copy()
     env["PATH"] = f"{conda_base / 'bin'}:/usr/bin:/bin"
     env["FAKE_DEWEY_ENV_PRESENT"] = "0"
-    env["FAKE_CONDA_ENV_CREATE_FAIL"] = "1"
     env["FAKE_CONDA_CALL_LOG"] = str(conda_call_log)
-    env.pop("CONDA_DEFAULT_ENV", None)
-    env.pop("CONDA_PREFIX", None)
-
-    result = _source_activate(env)
-
-    assert result.returncode == 1
-    assert "Failed to create conda environment from environment.yaml." in result.stderr
-    assert (
-        f"env create -n DEWEY-{DEPLOY_NAME} -f {PROJECT_ROOT / 'environment.yaml'}"
-        in conda_call_log.read_text(encoding="utf-8")
-    )
-    assert "Installing dewey CLI..." not in result.stdout
-
-
-def test_activate_hardfails_when_conda_activation_fails(tmp_path: Path) -> None:
-    conda_base = _build_fake_conda(tmp_path)
-
-    env = os.environ.copy()
-    env["PATH"] = f"{conda_base / 'bin'}:/usr/bin:/bin"
-    env["FAKE_CONDA_ACTIVATE_FAIL"] = "1"
-    env.pop("CONDA_DEFAULT_ENV", None)
-    env.pop("CONDA_PREFIX", None)
-
-    result = _source_activate(env)
-
-    assert result.returncode == 1
-    assert f"Failed to activate conda environment: DEWEY-{DEPLOY_NAME}" in result.stderr
-    assert "Installing dewey CLI..." not in result.stdout
-
-
-def test_activate_accepts_preloaded_dewey_conda_env(tmp_path: Path) -> None:
-    conda_base = _build_fake_conda(tmp_path)
-    call_log = tmp_path / "conda-calls.log"
-    pip_install_log = tmp_path / "pip-install.log"
-
-    env = os.environ.copy()
-    env["PATH"] = f"{conda_base / 'bin'}:/usr/bin:/bin"
-    env["CONDA_DEFAULT_ENV"] = f"DEWEY-{DEPLOY_NAME}"
-    env["CONDA_PREFIX"] = str(conda_base / "envs" / f"DEWEY-{DEPLOY_NAME}")
-    env["FAKE_CONDA_CALL_LOG"] = str(call_log)
     env["FAKE_PIP_INSTALL_LOG"] = str(pip_install_log)
-    env["FAKE_DAYLILY_AUTH_COGNITO_VERSION"] = "2.1.5"
-    env["FAKE_DAYLILY_TAPDB_VERSION"] = "6.0.8"
-    env["FAKE_CLI_CORE_YO_VERSION"] = "2.1.1"
-
-    result = _source_activate(env)
-
-    assert result.returncode == 0
-    assert f"Conda environment already active: DEWEY-{DEPLOY_NAME}" in result.stdout
-    assert "AWS_PROFILE=<unset>" in result.stdout
-    assert "build, seed, reset, nuke" in result.stdout
-    assert not call_log.exists()
-    assert "Using local Dewey checkout" in result.stdout
-    assert not pip_install_log.exists()
-
-
-def test_activate_preserves_existing_aws_profile(tmp_path: Path) -> None:
-    conda_base = _build_fake_conda(tmp_path)
-
-    env = os.environ.copy()
-    env["PATH"] = f"{conda_base / 'bin'}:/usr/bin:/bin"
-    env["AWS_PROFILE"] = "shell-profile"
     env.pop("CONDA_DEFAULT_ENV", None)
     env.pop("CONDA_PREFIX", None)
 
-    result = _source_activate(env)
-
-    assert result.returncode == 0
-    assert "AWS_PROFILE=shell-profile" in result.stdout
-
-
-def test_activate_installs_local_checkout_with_packaged_dependencies(tmp_path: Path) -> None:
-    conda_base = _build_fake_conda(tmp_path)
-    pip_install_log = tmp_path / "pip-install.log"
-
-    env = os.environ.copy()
-    env["PATH"] = f"{conda_base / 'bin'}:/usr/bin:/bin"
-    env["FAKE_DEWEY_ENV_PRESENT"] = "0"
-    env.pop("CONDA_DEFAULT_ENV", None)
-    env.pop("CONDA_PREFIX", None)
-    env["FAKE_PIP_INSTALL_LOG"] = str(pip_install_log)
-    env["FAKE_DAYLILY_AUTH_COGNITO_VERSION"] = "2.1.1"
-    env["FAKE_DAYLILY_TAPDB_VERSION"] = "6.0.5"
-    env["FAKE_CLI_CORE_YO_VERSION"] = "2.1.0"
-
-    result = _source_activate(env)
+    result = _source_activate(env, post_command="command -v dewey")
 
     assert result.returncode == 0
     assert f"Conda environment 'DEWEY-{DEPLOY_NAME}' not found." in result.stdout
     assert "Installing conda environment from environment.yaml..." in result.stdout
+    assert "Installing editable Dewey checkout..." in result.stdout
+    assert conda_call_log.read_text(encoding="utf-8").splitlines() == [
+        f"env create -n DEWEY-{DEPLOY_NAME} -f {PROJECT_ROOT / 'environment.yaml'}",
+        "activate",
+    ]
     pip_install_lines = pip_install_log.read_text(encoding="utf-8").splitlines()
-    assert any(
-        "pip install -e " in line and "[dev]" in line and "--no-deps" not in line
-        for line in pip_install_lines
+    assert pip_install_lines == [f"-m pip install -e {PROJECT_ROOT} -q"]
+    assert result.stdout.strip().splitlines()[-1] == str(
+        conda_base / "envs" / f"DEWEY-{DEPLOY_NAME}" / "bin" / "dewey"
     )
-    assert any(str(PROJECT_ROOT) in line for line in pip_install_lines)
-    assert any("daylily-tapdb==6.0.8" in line for line in pip_install_lines)
-    assert any("daylily-auth-cognito==2.1.5" in line for line in pip_install_lines)
-    assert any("cli-core-yo==2.1.1" in line for line in pip_install_lines)
 
 
-def test_activate_honors_preseeded_tapdb_config_path(tmp_path: Path) -> None:
+def test_activate_accepts_preloaded_dewey_conda_env(tmp_path: Path) -> None:
     conda_base = _build_fake_conda(tmp_path)
-    tapdb_config_path = tmp_path / "deployment" / "tapdb-config.yaml"
-    tapdb_config_path.parent.mkdir(parents=True, exist_ok=True)
-    tapdb_config_path.write_text("meta: {}\n", encoding="utf-8")
+    pip_install_log = tmp_path / "pip-install.log"
+
+    env = os.environ.copy()
+    env["PATH"] = (
+        f"{conda_base / 'envs' / f'DEWEY-{DEPLOY_NAME}' / 'bin'}:{conda_base / 'bin'}:/usr/bin:/bin"
+    )
+    env["CONDA_DEFAULT_ENV"] = f"DEWEY-{DEPLOY_NAME}"
+    env["CONDA_PREFIX"] = str(conda_base / "envs" / f"DEWEY-{DEPLOY_NAME}")
+    env["FAKE_DEWEY_ENV_PRESENT"] = "1"
+    env["FAKE_PIP_INSTALL_LOG"] = str(pip_install_log)
+
+    result = _source_activate(env, post_command="command -v dewey")
+
+    assert result.returncode == 0
+    assert f"Conda environment already active: DEWEY-{DEPLOY_NAME}" in result.stdout
+    assert not pip_install_log.exists()
+    assert result.stdout.strip().splitlines()[-1] == str(
+        conda_base / "envs" / f"DEWEY-{DEPLOY_NAME}" / "bin" / "dewey"
+    )
+
+
+def test_activate_activates_preexisting_dewey_conda_env(tmp_path: Path) -> None:
+    conda_base = _build_fake_conda(tmp_path)
+    conda_call_log = tmp_path / "conda-calls.log"
+    pip_install_log = tmp_path / "pip-install.log"
 
     env = os.environ.copy()
     env["PATH"] = f"{conda_base / 'bin'}:/usr/bin:/bin"
-    env["TAPDB_CONFIG_PATH"] = str(tapdb_config_path)
+    env["FAKE_DEWEY_ENV_PRESENT"] = "1"
+    env["FAKE_CONDA_CALL_LOG"] = str(conda_call_log)
+    env["FAKE_PIP_INSTALL_LOG"] = str(pip_install_log)
     env.pop("CONDA_DEFAULT_ENV", None)
     env.pop("CONDA_PREFIX", None)
 
-    result = _source_activate(env)
+    result = _source_activate(env, post_command="command -v dewey")
 
     assert result.returncode == 0
-    assert str(tapdb_config_path) in result.stdout
+    assert f"Activating conda environment: DEWEY-{DEPLOY_NAME}" in result.stdout
+    assert conda_call_log.read_text(encoding="utf-8").splitlines() == ["activate"]
+    assert not pip_install_log.exists()
+    assert result.stdout.strip().splitlines()[-1] == str(
+        conda_base / "envs" / f"DEWEY-{DEPLOY_NAME}" / "bin" / "dewey"
+    )

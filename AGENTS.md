@@ -14,6 +14,23 @@ source ./activate <deploy-name>
 - Use `tapdb ...` only when Dewey explicitly delegates low-level DB/runtime lifecycle to TapDB.
 - Use `daycog ...` only when Dewey explicitly delegates shared Cognito lifecycle to Daycog.
 
+## Activate Contract
+
+- Keep `source ./activate <deploy-name>` environment-only:
+  - create the conda env if missing,
+  - activate the env,
+  - run exactly one `python -m pip install -e .` on first create,
+  - do nothing else.
+- Do not add a separate dev extra, extra `pip install` calls, `conda install`, config copying, PATH rebinding, runtime env exports, or bootstrap work to `activate`.
+- Do not add any secondary install set such as `.[dev]`, `.[test]`, `requirements-dev.txt`, or `[project.optional-dependencies]`.
+- `environment.yaml` is only for Python, pip/setuptools bootstrap, and non-Python system packages.
+- All Python deps needed by the repo live in `project.dependencies`.
+- If a CLI is missing from `PATH` after activation, fix packaging or entrypoints, not `activate`.
+- Repo-solo config ownership stays in `dewey config init`; deployment-scoped runtime wiring stays out of `activate`.
+- Every service/TapDB config file path must be passed explicitly as a full absolute file path.
+- Do not guess TapDB config paths from `~/.config`, repo defaults, deployment code, or TapDB context loaders at runtime.
+- If a Dewey path is missing, fail hard with an explicit error instead of discovering or synthesizing an alternate path.
+
 ## No Circumvention Policy
 
 - Do not bypass `dewey`, `tapdb`, or `daycog` with raw tools just because something is missing or broken.

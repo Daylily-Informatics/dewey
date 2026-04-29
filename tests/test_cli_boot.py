@@ -9,7 +9,12 @@ from cli_core_yo.app import run as run_cli
 
 import dewey_service.cli as cli_module
 import dewey_service.cli.server as server_cli
-from dewey_service.defaults import build_default_config_template
+from dewey_service.defaults import (
+    DEFAULT_TAPDB_CONFIG_DIR,
+    DEFAULT_TAPDB_DOMAIN_REGISTRY_PATH,
+    DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH,
+    build_default_config_template,
+)
 from dewey_service.settings import Settings
 
 
@@ -169,8 +174,15 @@ def test_config_init_show_validate_and_status(monkeypatch, tmp_path: Path, capsy
     assert "TAPDB_OWNER_REPO=dewey" in config_text
     assert "owner_repo_name: dewey" in config_text
     assert "domain_code: Z" in config_text
-    assert "domain_registry_path: ~/.config/tapdb/domain_code_registry.json" in config_text
-    assert "prefix_ownership_registry_path: ~/.config/tapdb/prefix_ownership_registry.json" in config_text
+    assert f"domain_registry_path: {DEFAULT_TAPDB_DOMAIN_REGISTRY_PATH}" in config_text
+    assert (
+        f"prefix_ownership_registry_path: {DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH}"
+        in config_text
+    )
+    assert (
+        f"config_path: {DEFAULT_TAPDB_CONFIG_DIR / 'dewey' / 'dewey' / 'tapdb-config.yaml'}"
+        in config_text
+    )
     assert "session_secret_key: dewey-session-secret-change-me" not in config_text
     assert "allowed_email_domains:" in config_text
     assert "default_tenant_id: 00000000-0000-0000-0000-000000000000" in config_text
