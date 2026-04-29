@@ -222,6 +222,8 @@ class DeweyObservabilityStore:
                 },
             ],
             "extensions": ["dewey.operator_ui", "dewey.anomalies_v1"],
+            "capabilities": [],
+            "external_ref_models": [],
             "dependencies": {
                 "configured_services": list(self._configured_dependencies),
                 "observed_services": sorted(self._observed_dependencies),
@@ -246,6 +248,9 @@ class DeweyObservabilityStore:
         *,
         endpoints: list[dict[str, Any]] | None = None,
         extensions: list[str] | None = None,
+        capabilities: list[str] | None = None,
+        external_ref_models: list[str] | None = None,
+        contract_version: str = "",
     ) -> None:
         """Merge additional discoverable service metadata into `/obs_services`."""
 
@@ -269,6 +274,28 @@ class DeweyObservabilityStore:
                 continue
             snapshot.setdefault("extensions", []).append(normalized)
             known_extensions.add(normalized)
+
+        known_capabilities = {str(item) for item in snapshot.get("capabilities") or []}
+        for item in capabilities or []:
+            normalized = str(item or "").strip()
+            if not normalized or normalized in known_capabilities:
+                continue
+            snapshot.setdefault("capabilities", []).append(normalized)
+            known_capabilities.add(normalized)
+
+        known_external_ref_models = {
+            str(item) for item in snapshot.get("external_ref_models") or []
+        }
+        for item in external_ref_models or []:
+            normalized = str(item or "").strip()
+            if not normalized or normalized in known_external_ref_models:
+                continue
+            snapshot.setdefault("external_ref_models", []).append(normalized)
+            known_external_ref_models.add(normalized)
+
+        normalized_contract_version = str(contract_version or "").strip()
+        if normalized_contract_version:
+            snapshot["tapdb_dag_contract_version"] = normalized_contract_version
 
         snapshot["observed_at"] = _utcnow_iso()
 
@@ -580,6 +607,14 @@ def build_obs_services_payload(
     payload["endpoints"] = list(snapshot.get("endpoints") or [])
     payload["extensions"] = list(snapshot.get("extensions") or [])
     payload["dependencies"] = dict(snapshot.get("dependencies") or {})
+    if snapshot.get("capabilities"):
+        payload["capabilities"] = list(snapshot.get("capabilities") or [])
+    if snapshot.get("external_ref_models"):
+        payload["external_ref_models"] = list(snapshot.get("external_ref_models") or [])
+    if snapshot.get("tapdb_dag_contract_version"):
+        payload["tapdb_dag_contract_version"] = str(
+            snapshot.get("tapdb_dag_contract_version") or ""
+        )
     payload["projection"] = projection.model_dump()
     return payload
 

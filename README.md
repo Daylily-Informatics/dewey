@@ -226,7 +226,7 @@ dewey --help
 dewey runtime check
 ```
 
-That activation flow creates or reuses a deployment-scoped conda environment like `DEWEY-local`, installs the repo editable, ensures local `daylily-tapdb` and local `daylily-auth-cognito` are available when needed, installs published `cli-core-yo==2.0.0`, and exports deployment-scoped env values such as `DEWEY_DEPLOYMENT_CODE`.
+That activation flow creates or reuses a deployment-scoped conda environment like `DEWEY-local`, installs the repo editable, ensures the shared published package versions declared in `pyproject.toml` are present, and exports deployment-scoped env values such as `DEWEY_DEPLOYMENT_CODE`.
 
 ### Local Run
 

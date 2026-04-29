@@ -77,17 +77,17 @@ from dewey_service.observability import (
 )
 from dewey_service.rbac import Role, profile_has_role
 from dewey_service.service import DeweyConflictError, DeweyNotFoundError, DeweyService
-from dewey_service.ui_metadata import resolve_git_metadata, resolve_package_version
 from dewey_service.settings import (
     Settings,
+    _resolve_region_chrome,
     build_effective_config_rows,
     get_config_file_path,
     get_settings,
     persist_managed_storage_bucket,
-    _resolve_region_chrome,
 )
 from dewey_service.storage import S3StorageClient
 from dewey_service.tapdb_backend import TapDBBackend
+from dewey_service.ui_metadata import resolve_git_metadata, resolve_package_version
 
 
 class ArtifactRegisterRequest(BaseModel):
@@ -380,6 +380,9 @@ def create_app(
         app.state.observability.add_obs_services_fragment(
             endpoints=list(fragment.get("endpoints") or []),
             extensions=list(fragment.get("extensions") or []),
+            capabilities=list(fragment.get("capabilities") or []),
+            external_ref_models=list(fragment.get("external_ref_models") or []),
+            contract_version=str(fragment.get("contract_version") or ""),
         )
 
     api_auth_dep = require_api_auth(settings)
@@ -1604,6 +1607,18 @@ def create_app(
             continuation_token=continuation_token,
             status_code=response_status,
         )
+
+    @app.get("/graph", include_in_schema=False)
+    async def tapdb_graph_page(
+        request: Request,
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> HTMLResponse:
+        context = _template_context(
+            profile=profile,
+            is_admin=profile_has_role(profile, Role.ADMIN),
+            tapdb_dag_configured=bool(getattr(app.state, "tapdb_configured", False)),
+        )
+        return templates.TemplateResponse(request, "tapdb_graph.html", context)
 
     @app.get("/artifacts/euid/{artifact_euid}", include_in_schema=False)
     async def artifact_detail_page(

@@ -47,11 +47,11 @@ if [[ "${{1:-}}" == "-m" && "${{2:-}}" == "pip" && "${{3:-}}" == "show" ]]; then
     printf 'Name: dewey-service\\n'
     printf 'Editable project location: %s\\n' "{PROJECT_ROOT}"
   elif [[ "$package_name" == "daylily-auth-cognito" ]]; then
-    printf 'Name: daylily-auth-cognito\\nVersion: %s\\n' "${{FAKE_DAYLILY_AUTH_COGNITO_VERSION:-2.0.3}}"
+    printf 'Name: daylily-auth-cognito\\nVersion: %s\\n' "${{FAKE_DAYLILY_AUTH_COGNITO_VERSION:-2.1.5}}"
   elif [[ "$package_name" == "daylily-tapdb" ]]; then
-    printf 'Name: daylily-tapdb\\nVersion: %s\\n' "${{FAKE_DAYLILY_TAPDB_VERSION:-6.0.2}}"
+    printf 'Name: daylily-tapdb\\nVersion: %s\\n' "${{FAKE_DAYLILY_TAPDB_VERSION:-6.0.8}}"
   elif [[ "$package_name" == "cli-core-yo" ]]; then
-    printf 'Name: cli-core-yo\\nVersion: %s\\n' "${{FAKE_CLI_CORE_YO_VERSION:-2.0.0}}"
+    printf 'Name: cli-core-yo\\nVersion: %s\\n' "${{FAKE_CLI_CORE_YO_VERSION:-2.1.1}}"
   fi
   exit 0
 fi
@@ -239,9 +239,9 @@ def test_activate_accepts_preloaded_dewey_conda_env(tmp_path: Path) -> None:
     env["CONDA_PREFIX"] = str(conda_base / "envs" / f"DEWEY-{DEPLOY_NAME}")
     env["FAKE_CONDA_CALL_LOG"] = str(call_log)
     env["FAKE_PIP_INSTALL_LOG"] = str(pip_install_log)
-    env["FAKE_DAYLILY_AUTH_COGNITO_VERSION"] = "2.1.1"
-    env["FAKE_DAYLILY_TAPDB_VERSION"] = "6.0.5"
-    env["FAKE_CLI_CORE_YO_VERSION"] = "2.1.0"
+    env["FAKE_DAYLILY_AUTH_COGNITO_VERSION"] = "2.1.5"
+    env["FAKE_DAYLILY_TAPDB_VERSION"] = "6.0.8"
+    env["FAKE_CLI_CORE_YO_VERSION"] = "2.1.1"
 
     result = _source_activate(env)
 
@@ -279,6 +279,9 @@ def test_activate_installs_local_checkout_with_packaged_dependencies(tmp_path: P
     env.pop("CONDA_DEFAULT_ENV", None)
     env.pop("CONDA_PREFIX", None)
     env["FAKE_PIP_INSTALL_LOG"] = str(pip_install_log)
+    env["FAKE_DAYLILY_AUTH_COGNITO_VERSION"] = "2.1.1"
+    env["FAKE_DAYLILY_TAPDB_VERSION"] = "6.0.5"
+    env["FAKE_CLI_CORE_YO_VERSION"] = "2.1.0"
 
     result = _source_activate(env)
 
@@ -291,9 +294,9 @@ def test_activate_installs_local_checkout_with_packaged_dependencies(tmp_path: P
         for line in pip_install_lines
     )
     assert any(str(PROJECT_ROOT) in line for line in pip_install_lines)
-    assert any("daylily-tapdb==6.0.5" in line for line in pip_install_lines)
-    assert any("daylily-auth-cognito==2.1.1" in line for line in pip_install_lines)
-    assert any("cli-core-yo==2.1.0" in line for line in pip_install_lines)
+    assert any("daylily-tapdb==6.0.8" in line for line in pip_install_lines)
+    assert any("daylily-auth-cognito==2.1.5" in line for line in pip_install_lines)
+    assert any("cli-core-yo==2.1.1" in line for line in pip_install_lines)
 
 
 def test_activate_honors_preseeded_tapdb_config_path(tmp_path: Path) -> None:

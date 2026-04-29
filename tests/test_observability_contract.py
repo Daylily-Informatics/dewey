@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import importlib.metadata
 import asyncio
+import importlib.metadata
 import json
 import os
 from pathlib import Path
@@ -20,6 +20,7 @@ def _schema_root() -> Path:
 def _validate(name: str, payload: dict) -> None:
     schema = json.loads((_schema_root() / name).read_text(encoding="utf-8"))
     jsonschema.validate(payload, schema)
+
 
 def _login_operator(monkeypatch, client) -> None:
     monkeypatch.setattr(
@@ -114,6 +115,11 @@ def test_obs_services_advertises_canonical_capabilities(client) -> None:
             "kind": "dag_exact_lookup",
         },
         {"path": "/api/dag/data", "auth": "session_or_bearer", "kind": "dag_native_graph"},
+        {
+            "path": "/api/dag/search",
+            "auth": "session_or_bearer",
+            "kind": "dag_object_search",
+        },
         {
             "path": "/api/dag/external",
             "auth": "session_or_bearer",
