@@ -7,13 +7,13 @@ name = "dewey-service"
 dynamic = ["version"]
 description = "LSMC Dewey canonical artifact registry service"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "boto3>=1.35.0",
     "bandit[toml]>=1.8.0",
     "cli-core-yo==2.1.1",
     "build>=1.2.0",
-    "daylily-tapdb==6.0.8",
+    "daylily-tapdb @ git+https://github.com/Daylily-Informatics/daylily-tapdb.git@6.0.10",
     "daylily-auth-cognito==2.1.5",
     "djlint",
     "fastapi>=0.115.0",

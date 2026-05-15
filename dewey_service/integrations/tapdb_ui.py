@@ -134,7 +134,10 @@ def _dag_row_matches_filters(
         return False
     if tenant_id and _dag_search_lower(getattr(row, "tenant_id", None)) != tenant_id:
         return False
-    if relationship_type and _dag_search_lower(getattr(row, "relationship_type", None)) != relationship_type:
+    if (
+        relationship_type
+        and _dag_search_lower(getattr(row, "relationship_type", None)) != relationship_type
+    ):
         return False
     return True
 
