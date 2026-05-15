@@ -7,7 +7,7 @@ name = "dewey-service"
 dynamic = ["version"]
 description = "LSMC Dewey canonical artifact registry service"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "boto3>=1.35.0",
     "bandit[toml]>=1.8.0",
