@@ -17,6 +17,7 @@ environments:
     port: '5439'
     ui_port: '8914'
     database: dewey_dev
+    schema_name: tapdb_dewey_dev
     audit_log_euid_prefix: DGX
     support_email: support@lsmc.bio
     cognito_user_pool_id: ''
@@ -29,6 +30,7 @@ environments:
     user: tapdb_admin
     password: ''
     database: dewey_prod
+    schema_name: tapdb_dewey_prod
     audit_log_euid_prefix: DGX
     support_email: support@lsmc.bio
     cognito_user_pool_id: ''
