@@ -182,6 +182,7 @@ def test_backend_init_builds_connection(monkeypatch: pytest.MonkeyPatch) -> None
             "user": "dewey",
             "password": "secret",
             "database": "dewey_dev",
+            "schema_name": "tapdb_dewey_dev",
             "engine_type": "local",
             "region": "us-west-2",
             "iam_auth": "true",
@@ -209,6 +210,7 @@ def test_backend_init_builds_connection(monkeypatch: pytest.MonkeyPatch) -> None
     assert seen["db_user"] == "dewey"
     assert seen["db_pass"] == "secret"
     assert seen["db_name"] == "dewey_dev"
+    assert seen["schema_name"] == "tapdb_dewey_dev"
     assert seen["app_username"] == "svc"
     assert seen["engine_type"] is None
     assert seen["iam_auth"] is True

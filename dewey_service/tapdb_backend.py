@@ -111,6 +111,7 @@ class TapDBBackend:
             db_user=cfg["user"],
             db_pass=cfg["password"],
             db_name=cfg["database"],
+            schema_name=cfg["schema_name"],
             app_username=app_username,
             engine_type=engine_type if engine_type != "local" else None,
             region=region,
