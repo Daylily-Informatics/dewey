@@ -42,6 +42,7 @@ class S3StorageClient:
     def __init__(self, *, profile: str | None = None, region: str | None = None) -> None:
         try:
             import boto3
+            from botocore.config import Config
             from botocore.exceptions import ClientError
         except ImportError as exc:  # pragma: no cover - runtime guard
             raise RuntimeError("boto3 is required for Dewey storage operations") from exc
@@ -53,7 +54,10 @@ class S3StorageClient:
             session_kwargs["region_name"] = str(region).strip()
 
         session = boto3.session.Session(**session_kwargs)
-        self._client = session.client("s3")
+        self._client = session.client(
+            "s3",
+            config=Config(s3={"use_accelerate_endpoint": False}),
+        )
         self._client_error = ClientError
 
     def head_object(

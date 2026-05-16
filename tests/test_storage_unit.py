@@ -126,23 +126,32 @@ def test_s3_storage_client_init_builds_session_from_profile_and_region(
         def __init__(self, **kwargs) -> None:
             seen["kwargs"] = kwargs
 
-        def client(self, service_name: str) -> str:
+        def client(self, service_name: str, **kwargs) -> str:
             seen["service_name"] = service_name
+            seen["client_kwargs"] = kwargs
             return "fake-s3-client"
 
+    class FakeConfig:
+        def __init__(self, **kwargs) -> None:
+            self.kwargs = kwargs
+
     fake_boto3 = types.SimpleNamespace(session=types.SimpleNamespace(Session=FakeSession))
+    fake_config = types.SimpleNamespace(Config=FakeConfig)
     fake_exceptions = types.SimpleNamespace(ClientError=FakeClientError)
 
     monkeypatch.setitem(sys.modules, "boto3", fake_boto3)
+    monkeypatch.setitem(sys.modules, "botocore.config", fake_config)
     monkeypatch.setitem(sys.modules, "botocore.exceptions", fake_exceptions)
 
     client = storage_mod.S3StorageClient(profile="  team ", region=" us-west-2 ")
 
     assert client._client == "fake-s3-client"
     assert client._client_error is FakeClientError
-    assert seen == {
-        "kwargs": {"profile_name": "team", "region_name": "us-west-2"},
-        "service_name": "s3",
+    assert seen["kwargs"] == {"profile_name": "team", "region_name": "us-west-2"}
+    assert seen["service_name"] == "s3"
+    assert set(seen["client_kwargs"]) == {"config"}
+    assert seen["client_kwargs"]["config"].kwargs == {
+        "s3": {"use_accelerate_endpoint": False}
     }
 
 
