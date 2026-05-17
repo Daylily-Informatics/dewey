@@ -62,7 +62,6 @@ def build_default_config_template(
         os.environ.get("DEWEY_DEPLOYMENT_CODE")
         or os.environ.get("DEPLOYMENT_CODE")
         or os.environ.get("LSMC_DEPLOYMENT_CODE")
-        or "local"
     )
     tapdb_config_path = DEFAULT_TAPDB_CONFIG_DIR / "dewey" / "dewey" / "tapdb-config.yaml"
     bucket = str(managed_storage_bucket or "").strip()
@@ -161,4 +160,9 @@ ui:
 
 def _sanitize_deployment_code(value: str) -> str:
     cleaned = re.sub(r"[^A-Za-z0-9-]+", "-", str(value or "").strip()).strip("-")
-    return cleaned or "local"
+    if not cleaned:
+        raise RuntimeError(
+            "Dewey deployment code is required. Set DEWEY_DEPLOYMENT_CODE, "
+            "DEPLOYMENT_CODE, or LSMC_DEPLOYMENT_CODE before generating config."
+        )
+    return cleaned

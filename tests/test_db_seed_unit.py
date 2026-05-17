@@ -287,6 +287,16 @@ def test_db_seed_main_raises_on_validation_errors(monkeypatch: pytest.MonkeyPatc
             self.level = level
 
     monkeypatch.setattr(db_seed, "TapDBBackend", FakeBackend)
+    monkeypatch.setattr(
+        db_seed,
+        "get_settings",
+        lambda: SimpleNamespace(
+            tapdb_domain_code="Z",
+            tapdb_owner_repo_name="dewey",
+            tapdb_domain_registry_path="/tmp/domain_code_registry.json",
+            tapdb_prefix_ownership_registry_path="/tmp/prefix_ownership_registry.json",
+        ),
+    )
     monkeypatch.setattr(db_seed, "resolve_seed_config_dirs", lambda config_root: [config_root])
     monkeypatch.setattr(
         db_seed,

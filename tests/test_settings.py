@@ -5,16 +5,23 @@ from pathlib import Path
 import pytest
 
 from dewey_service.settings import (
-    DEFAULT_DEPLOYMENT_BANNER_COLOR,
     Settings,
     _resolve_deployment_chrome,
     _resolve_region_chrome,
-    _stable_deployment_color_hex,
     _stable_region_color_hex,
+    build_default_config_template,
     build_effective_config_rows,
     load_settings,
     persist_managed_storage_bucket,
 )
+
+
+def _write_explicit_config(root: Path, deployment: str = "local") -> Path:
+    cfg_dir = root / f"dewey-{deployment}"
+    cfg_dir.mkdir(parents=True, exist_ok=True)
+    cfg_path = cfg_dir / f"dewey-config-{deployment}.yaml"
+    cfg_path.write_bytes(build_default_config_template())
+    return cfg_path
 
 
 def test_settings_rejects_schemeful_cognito_domain() -> None:
@@ -103,7 +110,7 @@ storage:
     }
     assert loaded.deployment == {
         "name": "staging",
-        "color": _stable_deployment_color_hex("staging"),
+        "color": "#124e78",
         "is_production": False,
     }
     assert loaded.network_allowed_hosts == ["dewey.dev2.lsmc.life", "54.218.100.68"]
@@ -167,7 +174,9 @@ def test_settings_defaults_include_cognito_domain_policy() -> None:
     assert settings.cognito_group_role_map["lsmc:dewey:admin"] == "ADMIN"
 
 
-def test_settings_loads_external_broker_yaml(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_settings_loads_external_broker_yaml(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "local")
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
     cfg_dir = tmp_path / "dewey-local"
@@ -214,7 +223,12 @@ def test_settings_external_broker_mode_requires_explicit_urls() -> None:
         Settings(auth_mode="external_broker")
 
 
-def test_settings_reads_shared_external_broker_env(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_settings_reads_shared_external_broker_env(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "local")
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
+    _write_explicit_config(tmp_path)
     monkeypatch.setenv("LSMC_AUTH_MODE", "external_broker")
     monkeypatch.setenv("LSMC_AUTH_BROKER_SERVICE_ID", "dewey")
     monkeypatch.setenv("LSMC_AUTH_BROKER_LOGIN_URL", "https://dev.login.lsmc.com/login")
@@ -355,7 +369,9 @@ def test_settings_require_absolute_tapdb_paths() -> None:
         )
 
 
-def test_settings_fall_back_to_deployment_code(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_settings_uses_explicit_deployment_code_when_name_is_empty(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "stage-g")
 
     loaded = Settings(
@@ -372,7 +388,7 @@ def test_settings_fall_back_to_deployment_code(monkeypatch: pytest.MonkeyPatch) 
 
     assert loaded.deployment == {
         "name": "stage-g",
-        "color": _stable_deployment_color_hex("stage-g"),
+        "color": "#124e78",
         "is_production": False,
     }
 
@@ -391,27 +407,24 @@ def test_prod_deployment_name_uses_derived_color() -> None:
 
     assert loaded.deployment == {
         "name": "production",
-        "color": _stable_deployment_color_hex("production"),
+        "color": "#124e78",
         "is_production": True,
     }
 
 
-def test_light_aqua_is_used_without_any_deployment_name() -> None:
-    assert _resolve_deployment_chrome(name="", color="", fallback_name="") == {
-        "name": "",
-        "color": DEFAULT_DEPLOYMENT_BANNER_COLOR,
-        "is_production": False,
-    }
+def test_deployment_chrome_requires_deployment_name_or_code() -> None:
+    with pytest.raises(ValueError, match="deployment.name is required"):
+        _resolve_deployment_chrome(name="", color="", deployment_code="")
 
 
-def test_deployment_color_is_derived_from_name_even_when_configured() -> None:
+def test_deployment_chrome_uses_configured_color_when_present() -> None:
     assert _resolve_deployment_chrome(
         name="510x2",
         color="#124e78",
-        fallback_name="local",
+        deployment_code="local",
     ) == {
         "name": "510x2",
-        "color": "#4321ca",
+        "color": "#124e78",
         "is_production": False,
     }
 
@@ -488,6 +501,7 @@ def test_persist_managed_storage_bucket_creates_or_updates_storage_section(
 ) -> None:
     monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "local")
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
+    _write_explicit_config(tmp_path)
 
     config_path, normalized = persist_managed_storage_bucket("s3://dewey-artifacts-local")
     raw = config_path.read_text(encoding="utf-8")

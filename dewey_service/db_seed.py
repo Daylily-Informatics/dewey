@@ -64,11 +64,14 @@ def _load_or_init_prefix_registry(path: Path) -> dict[str, object]:
     if path.exists():
         payload = json.loads(path.read_text(encoding="utf-8"))
     else:
-        payload = {}
+        payload = {"version": _PREFIX_OWNERSHIP_REGISTRY_VERSION, "ownership": {}}
     if not isinstance(payload, dict):
         raise ValueError(f"Prefix registry must contain a JSON object: {path}")
-    payload.setdefault("version", _PREFIX_OWNERSHIP_REGISTRY_VERSION)
-    ownership = payload.setdefault("ownership", {})
+    if payload.get("version") != _PREFIX_OWNERSHIP_REGISTRY_VERSION:
+        raise ValueError(
+            f"Prefix registry version must be {_PREFIX_OWNERSHIP_REGISTRY_VERSION!r}: {path}"
+        )
+    ownership = payload.get("ownership")
     if not isinstance(ownership, dict):
         raise ValueError(f"Prefix registry must define an object 'ownership': {path}")
     return payload
@@ -97,7 +100,10 @@ def _claim_client_template_prefix_ownership(
     ownership = payload["ownership"]
     if not isinstance(ownership, dict):
         raise ValueError("Prefix registry ownership table must be an object")
-    domain_claims = ownership.setdefault(domain_code, {})
+    domain_claims = ownership.get(domain_code)
+    if domain_claims is None:
+        domain_claims = {}
+        ownership[domain_code] = domain_claims
     if not isinstance(domain_claims, dict):
         raise ValueError(f"Prefix registry claims for domain {domain_code!r} must be an object")
 

@@ -140,12 +140,15 @@ def _resolve_port(value: int) -> int:
 
 
 def _resolve_host(value: str) -> str:
-    return os.environ.get("DEWEY_HOST", "").strip() or value
+    resolved = os.environ.get("DEWEY_HOST", "").strip() or str(value or "").strip()
+    if not resolved:
+        raise typer.BadParameter("Dewey host must be explicit")
+    return resolved
 
 
-def _normalize_option_default(value, fallback):
+def _normalize_option_default(value):
     if isinstance(value, OptionInfo):
-        return fallback
+        raise typer.BadParameter("OptionInfo defaults must be resolved by Typer")
     return value
 
 
@@ -181,19 +184,27 @@ def _status_bind() -> tuple[str, str]:
 
 
 def _resolve_deployment_code() -> str:
-    return (
+    value = (
         os.environ.get("DEWEY_DEPLOYMENT_CODE", "").strip()
         or os.environ.get("DEPLOYMENT_CODE", "").strip()
         or os.environ.get("LSMC_DEPLOYMENT_CODE", "").strip()
-        or "local"
     )
+    if not value:
+        raise typer.BadParameter(
+            "Dewey deployment code is required; set DEWEY_DEPLOYMENT_CODE, "
+            "DEPLOYMENT_CODE, or LSMC_DEPLOYMENT_CODE"
+        )
+    return value
 
 
 def _state_home() -> Path:
     raw = os.environ.get("XDG_STATE_HOME", "").strip()
-    if raw:
-        return Path(raw).expanduser()
-    return Path.home() / ".local" / "state"
+    if not raw:
+        raise typer.BadParameter("XDG_STATE_HOME is required for Dewey server state")
+    path = Path(raw).expanduser()
+    if not path.is_absolute():
+        raise typer.BadParameter(f"XDG_STATE_HOME must be an absolute path: {raw}")
+    return path
 
 
 def _shared_cert_dir() -> Path:
@@ -411,9 +422,9 @@ def start(
     ),
 ) -> None:
     """Start the Dewey API/UI server."""
-    ssl_enabled = _normalize_option_default(ssl_enabled, True)
-    cert = _normalize_option_default(cert, None)
-    key = _normalize_option_default(key, None)
+    ssl_enabled = _normalize_option_default(ssl_enabled)
+    cert = _normalize_option_default(cert)
+    key = _normalize_option_default(key)
     resolved_host = _resolve_host(host)
     resolved_port = _resolve_port(port)
     if check_cognito_uris:
@@ -505,9 +516,9 @@ def restart(
     ),
 ) -> None:
     """Restart the Dewey API/UI server in background mode."""
-    ssl_enabled = _normalize_option_default(ssl_enabled, True)
-    cert = _normalize_option_default(cert, None)
-    key = _normalize_option_default(key, None)
+    ssl_enabled = _normalize_option_default(ssl_enabled)
+    cert = _normalize_option_default(cert)
+    key = _normalize_option_default(key)
     resolved_host = _resolve_host(host)
     resolved_port = _resolve_port(port)
     _stop_server()

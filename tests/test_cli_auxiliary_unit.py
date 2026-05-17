@@ -19,6 +19,14 @@ def _proc(returncode: int = 0, stdout: str = "", stderr: str = "") -> SimpleName
     return SimpleNamespace(returncode=returncode, stdout=stdout, stderr=stderr)
 
 
+def _settings() -> SimpleNamespace:
+    return SimpleNamespace(
+        aws_region="us-west-2",
+        tapdb_client_id="dewey",
+        tapdb_database_name="dewey",
+    )
+
+
 def test_cognito_status_requires_daycog(monkeypatch: pytest.MonkeyPatch) -> None:
     errors: list[str] = []
 
@@ -155,6 +163,7 @@ def test_tapdb_run_invokes_runtime_and_emits_output(monkeypatch: pytest.MonkeyPa
 
     monkeypatch.setattr(tapdb_cli.ccyo_out, "print_text", lambda message: prints.append(message))
     monkeypatch.setattr(tapdb_cli.ccyo_out, "warning", lambda message: warnings.append(message))
+    monkeypatch.setattr(tapdb_cli, "get_settings", _settings)
 
     def fake_run_tapdb_cli(
         args: list[str],
@@ -199,7 +208,7 @@ def test_tapdb_run_invokes_runtime_and_emits_output(monkeypatch: pytest.MonkeyPa
         {
             "args": ["db", "status"],
             "target": "aurora",
-            "client_id": tapdb_cli.DEFAULT_TAPDB_CLIENT_ID,
+            "client_id": "dewey",
             "profile": "profile-1",
             "region": "us-west-1",
             "namespace": "ns1",
@@ -215,6 +224,7 @@ def test_tapdb_run_resolves_profile_from_config_when_flag_missing(
     calls: list[dict[str, object]] = []
 
     monkeypatch.setenv("AWS_PROFILE", "shell-profile")
+    monkeypatch.setattr(tapdb_cli, "get_settings", _settings)
     monkeypatch.setattr(tapdb_cli, "load_config_aws_profile", lambda: "config-profile")
     monkeypatch.setattr(
         tapdb_cli,
@@ -235,7 +245,7 @@ def test_tapdb_run_resolves_profile_from_config_when_flag_missing(
     assert calls == [
         {
             "target": "local",
-            "client_id": tapdb_cli.DEFAULT_TAPDB_CLIENT_ID,
+            "client_id": "dewey",
             "profile": "config-profile",
             "region": "us-west-2",
             "namespace": "dewey",
@@ -253,6 +263,8 @@ def test_tapdb_run_handles_runtime_error(monkeypatch: pytest.MonkeyPatch) -> Non
         "run_tapdb_cli",
         lambda *args, **kwargs: (_ for _ in ()).throw(TapDBRuntimeError("boom")),
     )
+    monkeypatch.setattr(tapdb_cli, "get_settings", _settings)
+    monkeypatch.setattr(tapdb_cli, "load_config_aws_profile", lambda: "config-profile")
     monkeypatch.setattr(tapdb_cli.ccyo_out, "error", lambda message: errors.append(message))
 
     with pytest.raises(typer.Exit) as exc:
@@ -267,6 +279,7 @@ def test_tapdb_run_requires_profile_source(monkeypatch: pytest.MonkeyPatch) -> N
 
     monkeypatch.delenv("DEWEY_AWS_PROFILE", raising=False)
     monkeypatch.delenv("AWS_PROFILE", raising=False)
+    monkeypatch.setattr(tapdb_cli, "get_settings", _settings)
     monkeypatch.setattr(tapdb_cli, "load_config_aws_profile", lambda: "")
     monkeypatch.setattr(tapdb_cli.ccyo_out, "error", lambda message: errors.append(message))
 
