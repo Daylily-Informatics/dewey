@@ -252,7 +252,9 @@ async def complete_browser_login(
 
 async def exchange_external_broker_handoff(*, settings: Settings, code: str) -> dict[str, Any]:
     async with httpx.AsyncClient(timeout=10.0) as client:
-        response = await client.post(settings.external_broker_handoff_exchange_url, json={"code": code})
+        response = await client.post(
+            settings.external_broker_handoff_exchange_url, json={"code": code}
+        )
     if response.status_code >= 400:
         raise CognitoWebAuthError(
             "auth_error",
@@ -309,9 +311,7 @@ def resolve_external_broker_principal(user: dict[str, Any], request: Request) ->
         )
     _require_allowed_cognito_email_domain(settings, email)
     groups = [str(item).strip() for item in user.get("groups") or [] if str(item).strip()]
-    groups.extend(
-        _service_entitlement_roles(user, service_id=settings.external_broker_service_id)
-    )
+    groups.extend(_service_entitlement_roles(user, service_id=settings.external_broker_service_id))
     profile = normalize_session_profile(
         email=email,
         sub=subject,
@@ -377,7 +377,9 @@ async def complete_external_broker_login(
         )
 
     request.session.pop(_EXTERNAL_BROKER_STATE_KEY, None)
-    redirect_to = _safe_next_path(str(request.session.pop(_EXTERNAL_BROKER_NEXT_KEY, "/ui") or "/ui"))
+    redirect_to = _safe_next_path(
+        str(request.session.pop(_EXTERNAL_BROKER_NEXT_KEY, "/ui") or "/ui")
+    )
     return RedirectResponse(url=redirect_to, status_code=status.HTTP_303_SEE_OTHER)
 
 

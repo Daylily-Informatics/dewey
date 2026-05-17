@@ -12,6 +12,11 @@ from dewey_service.auth import build_cognito_web_session_config
 from dewey_service.settings import Settings
 
 
+def _set_explicit_config_path(monkeypatch, tmp_path) -> None:
+    config_path = tmp_path / "dewey-config-test.yaml"
+    monkeypatch.setenv("DEWEY_CONFIG", str(config_path))
+
+
 def _login_user(
     monkeypatch,
     client,
@@ -231,7 +236,8 @@ def test_dashboard_quick_register_references_s3_uri(monkeypatch, client, fake_se
     assert artifact["storage_uri"] == "s3://demo-bucket/path/sample.bam"
 
 
-def test_admin_session_exposes_admin_tab_and_page(monkeypatch, client) -> None:
+def test_admin_session_exposes_admin_tab_and_page(monkeypatch, tmp_path, client) -> None:
+    _set_explicit_config_path(monkeypatch, tmp_path)
     _login_user(monkeypatch, client, groups=["platform-admin"])
 
     ui = client.get("/ui")
@@ -371,7 +377,8 @@ def test_logout_from_one_browser_does_not_clear_the_other(monkeypatch, client) -
         assert "shared@lsmc.bio" in ui_other.text
 
 
-def test_external_broker_login_sets_admin_session(monkeypatch, fake_service) -> None:
+def test_external_broker_login_sets_admin_session(monkeypatch, tmp_path, fake_service) -> None:
+    _set_explicit_config_path(monkeypatch, tmp_path)
     settings = Settings(
         api_bearer_token="token-123",
         session_secret_key="session-secret",

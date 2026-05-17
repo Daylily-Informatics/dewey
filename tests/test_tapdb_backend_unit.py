@@ -126,6 +126,7 @@ def test_backend_init_wraps_config_errors(monkeypatch: pytest.MonkeyPatch) -> No
         lambda: SimpleNamespace(
             tapdb_client_id="dewey",
             tapdb_database_name="dewey",
+            tapdb_owner_repo_name="dewey",
             tapdb_domain_code="Z",
             tapdb_config_path="",
             aws_region="us-west-2",
@@ -147,6 +148,7 @@ def test_backend_init_builds_connection(monkeypatch: pytest.MonkeyPatch) -> None
         lambda: SimpleNamespace(
             tapdb_client_id="dewey",
             tapdb_database_name="dewey",
+            tapdb_owner_repo_name="dewey",
             tapdb_domain_code="Z",
             tapdb_config_path="",
             aws_region="us-west-2",
@@ -196,7 +198,7 @@ def test_backend_init_builds_connection(monkeypatch: pytest.MonkeyPatch) -> None
     assert seen["db_name"] == "dewey_dev"
     assert seen["schema_name"] == "tapdb_dewey_dev"
     assert seen["app_username"] == "svc"
-    assert seen["engine_type"] is None
+    assert seen["engine_type"] == "local"
     assert seen["iam_auth"] is True
     assert backend.domain_code == "Z"
     assert backend.templates == "templates"

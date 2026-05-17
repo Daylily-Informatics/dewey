@@ -15,15 +15,8 @@ from urllib.parse import quote
 
 from dewey_service.defaults import (
     AWS_PROFILE_REQUIRED_MESSAGE,
-    DEFAULT_DB_PORT,
-    resolve_aws_profile,
 )
-from dewey_service.settings import load_config_aws_profile
 
-DEFAULT_AWS_PROFILE = ""
-DEFAULT_AWS_REGION = "us-west-2"
-DEFAULT_TAPDB_CLIENT_ID = "dewey"
-DEFAULT_TAPDB_DATABASE_NAME = "dewey"
 
 class TapDBRuntimeError(RuntimeError):
     """Raised for TapDB runtime configuration/invocation errors."""
@@ -32,7 +25,9 @@ class TapDBRuntimeError(RuntimeError):
 def _sanitize_deployment_code(value: str) -> str:
     cleaned = "".join(ch if ch.isalnum() or ch == "-" else "-" for ch in (value or "").strip())
     cleaned = cleaned.strip("-")
-    return cleaned or "local"
+    if not cleaned:
+        raise TapDBRuntimeError("Dewey deployment code is required")
+    return cleaned
 
 
 def _resolve_deployment_code() -> str:
@@ -40,7 +35,6 @@ def _resolve_deployment_code() -> str:
         os.environ.get("DEPLOYMENT_CODE")
         or os.environ.get("DEWEY_DEPLOYMENT_CODE")
         or os.environ.get("LSMC_DEPLOYMENT_CODE")
-        or "local"
     )
 
 
@@ -95,17 +89,19 @@ def _resolve_tapdb_config_path(
 def _resolve_runtime_env(
     *,
     target: str,
-    client_id: str = DEFAULT_TAPDB_CLIENT_ID,
-    profile: str = DEFAULT_AWS_PROFILE,
-    region: str = DEFAULT_AWS_REGION,
-    namespace: str = DEFAULT_TAPDB_DATABASE_NAME,
+    client_id: str,
+    profile: str,
+    region: str,
+    namespace: str,
     config_path: str = "",
 ) -> dict[str, str]:
     validate_database_target(target)
-    resolved_client_id = (client_id or DEFAULT_TAPDB_CLIENT_ID).strip() or DEFAULT_TAPDB_CLIENT_ID
-    resolved_namespace = (
-        namespace or DEFAULT_TAPDB_DATABASE_NAME
-    ).strip() or DEFAULT_TAPDB_DATABASE_NAME
+    resolved_client_id = (client_id or "").strip()
+    if not resolved_client_id:
+        raise TapDBRuntimeError("Dewey TapDB client_id is required")
+    resolved_namespace = (namespace or "").strip()
+    if not resolved_namespace:
+        raise TapDBRuntimeError("Dewey TapDB database_name/namespace is required")
     resolved_cfg_path = _resolve_tapdb_config_path(
         namespace=resolved_namespace,
         client_id=resolved_client_id,
@@ -113,12 +109,13 @@ def _resolve_runtime_env(
     )
     resolved_profile = (profile or "").strip()
     if not resolved_profile:
-        resolved_profile = resolve_aws_profile(config_profile=load_config_aws_profile())
-    if not resolved_profile:
         raise TapDBRuntimeError(AWS_PROFILE_REQUIRED_MESSAGE)
+    resolved_region = (region or "").strip()
+    if not resolved_region:
+        raise TapDBRuntimeError("Dewey AWS region is required")
     return {
         "aws_profile": resolved_profile,
-        "aws_region": (region or DEFAULT_AWS_REGION).strip() or DEFAULT_AWS_REGION,
+        "aws_region": resolved_region,
         "client_id": resolved_client_id,
         "database_name": resolved_namespace,
         "config_path": resolved_cfg_path or "",
@@ -165,24 +162,36 @@ def _get_tapdb_db_config(
 
 
 def _build_sqlalchemy_url(cfg: Mapping[str, str]) -> str:
-    user = quote((cfg.get("user") or "").strip(), safe="") or "postgres"
+    user = quote((cfg.get("user") or "").strip(), safe="")
+    if not user:
+        raise TapDBRuntimeError("TapDB DB config is missing user")
     password = quote((cfg.get("password") or "").strip(), safe="")
-    host = (cfg.get("host") or "localhost").strip()
-    port = (cfg.get("port") or str(DEFAULT_DB_PORT)).strip()
+    host = (cfg.get("host") or "").strip()
+    if not host:
+        raise TapDBRuntimeError("TapDB DB config is missing host")
+    port = (cfg.get("port") or "").strip()
+    if not port:
+        raise TapDBRuntimeError("TapDB DB config is missing port")
     database = (cfg.get("database") or "").strip()
     if not database:
         raise TapDBRuntimeError("TapDB DB config is missing database name")
+    schema_name = (cfg.get("schema_name") or "").strip()
+    if not schema_name:
+        raise TapDBRuntimeError("TapDB DB config is missing schema_name")
     auth = f"{user}:{password}@" if password else f"{user}@"
-    return f"postgresql+psycopg2://{auth}{host}:{port}/{database}"
+    return (
+        f"postgresql+psycopg2://{auth}{host}:{port}/{database}"
+        f"?options={quote(f'-csearch_path={schema_name}', safe='')}"
+    )
 
 
 def export_database_url_for_target(
     *,
     target: str,
-    client_id: str = DEFAULT_TAPDB_CLIENT_ID,
-    profile: str = DEFAULT_AWS_PROFILE,
-    region: str = DEFAULT_AWS_REGION,
-    namespace: str = DEFAULT_TAPDB_DATABASE_NAME,
+    client_id: str,
+    profile: str,
+    region: str,
+    namespace: str,
     config_path: str = "",
 ) -> str:
     ensure_tapdb_version()
@@ -208,10 +217,10 @@ def run_tapdb_cli(
     args: Sequence[str],
     *,
     target: str,
-    client_id: str = DEFAULT_TAPDB_CLIENT_ID,
-    profile: str = DEFAULT_AWS_PROFILE,
-    region: str = DEFAULT_AWS_REGION,
-    namespace: str = DEFAULT_TAPDB_DATABASE_NAME,
+    client_id: str,
+    profile: str,
+    region: str,
+    namespace: str,
     config_path: str = "",
     cwd: Path | None = None,
     check: bool = True,
@@ -267,10 +276,10 @@ def run_tapdb_cli(
 def run_schema_drift_check(
     *,
     target: str,
-    client_id: str = DEFAULT_TAPDB_CLIENT_ID,
-    profile: str = DEFAULT_AWS_PROFILE,
-    region: str = DEFAULT_AWS_REGION,
-    namespace: str = DEFAULT_TAPDB_DATABASE_NAME,
+    client_id: str,
+    profile: str,
+    region: str,
+    namespace: str,
     cwd: Path | None = None,
 ) -> dict[str, object]:
     target_label = validate_database_target(target)

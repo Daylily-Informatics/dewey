@@ -211,7 +211,6 @@ Current live search behavior includes:
 - property filters over fields and nested metadata
 - created-at range filters
 - JSON and TSV export
-- deprecated `/api/v1/search/v2/*` aliases that forward users toward `/api/search/v2/*`
 
 ## Observability
 

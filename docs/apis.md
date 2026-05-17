@@ -11,7 +11,7 @@ Current design rules that matter to integrators:
 - the main registry API is bearer-token protected
 - GUI pages use Cognito-backed browser sessions
 - most write endpoints require `Idempotency-Key`
-- search has canonical `/api/search/v2/*` endpoints plus deprecated `/api/v1/search/v2/*` aliases
+- search has canonical `/api/search/v2/*` endpoints
 - the current repo does not expose a separate public messaging or event-stream API
 
 ## Auth Modes
@@ -197,17 +197,6 @@ Current transport behavior:
 | `POST` | `/api/search/v2/query` | `bearer token` | no |
 | `POST` | `/api/search/v2/export` | `bearer token` | no |
 
-### Deprecated aliases
-
-| Method | Path | Auth | Notes |
-| --- | --- | --- | --- |
-| `POST` | `/api/v1/search/v2/query` | `bearer token` | Deprecated alias for `/api/search/v2/query` |
-| `POST` | `/api/v1/search/v2/export` | `bearer token` | Deprecated alias for `/api/search/v2/export` |
-
-Current alias response headers:
-
-- `Deprecation: true`
-- `Sunset: Wed, 30 Sep 2026 00:00:00 GMT`
 - `Link: </api/search/v2/query>; rel="successor-version"` or `</api/search/v2/export>; rel="successor-version"`
 
 Current search request fields:

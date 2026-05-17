@@ -189,8 +189,6 @@ POST /api/search/v2/query
 POST /api/search/v2/export
 ```
 
-The `/api/v1/search/v2/*` aliases are still live but currently marked deprecated.
-
 ## Create And Share An Artifact Set
 
 There are two current browser paths:

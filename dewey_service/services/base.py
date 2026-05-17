@@ -117,10 +117,14 @@ class BaseDeweyService:
         return self.literature
 
     @staticmethod
-    def _safe_filename(value: str | None, fallback: str = "artifact.bin") -> str:
-        candidate = str(value or "").strip() or fallback
+    def _safe_filename(value: str | None) -> str:
+        candidate = str(value or "").strip()
+        if not candidate:
+            raise ValueError("artifact filename is required")
         cleaned = re.sub(r"[^A-Za-z0-9._-]+", "-", candidate).strip("-.")
-        return cleaned or fallback
+        if not cleaned:
+            raise ValueError(f"artifact filename {value!r} has no safe characters")
+        return cleaned
 
     def _seed_default_anomalies(self, session) -> None:
         for payload in self._default_anomaly_payloads():

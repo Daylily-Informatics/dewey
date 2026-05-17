@@ -89,17 +89,15 @@ def test_search_api_query_and_export(client) -> None:
     assert query.json()["total"] >= 1
     assert query.json()["items"][0]["record_type"] == "artifact"
 
-    alias_query = client.post(
+    removed_query = client.post(
         "/api/v1/search/v2/query",
         headers={"Authorization": "Bearer token-123"},
         json={"q": "case-report", "scopes": ["artifact"], "page": 1, "page_size": 25},
     )
-    assert alias_query.status_code == 200
-    assert alias_query.headers["Deprecation"] == "true"
-    assert alias_query.headers["Link"] == '</api/search/v2/query>; rel="successor-version"'
+    assert removed_query.status_code == 404
 
     export = client.post(
-        "/api/v1/search/v2/export",
+        "/api/search/v2/export",
         headers={"Authorization": "Bearer token-123"},
         json={"format": "tsv", "scopes": ["artifact", "share_reference"], "max_rows": 25},
     )
@@ -107,17 +105,24 @@ def test_search_api_query_and_export(client) -> None:
     assert export.headers["content-type"].startswith("text/tab-separated-values")
     assert "case-report.pdf" in export.text
 
-    canonical_export = client.post(
+    json_export = client.post(
         "/api/search/v2/export",
         headers={"Authorization": "Bearer token-123"},
         json={"format": "json", "scopes": ["artifact", "share_reference"], "max_rows": 25},
     )
-    assert canonical_export.status_code == 200
-    assert canonical_export.json()["row_count"] == 2
-    assert {item["record_type"] for item in canonical_export.json()["items"]} == {
+    assert json_export.status_code == 200
+    assert json_export.json()["row_count"] == 2
+    assert {item["record_type"] for item in json_export.json()["items"]} == {
         "artifact",
         "share_reference",
     }
+
+    removed_export = client.post(
+        "/api/v1/search/v2/export",
+        headers={"Authorization": "Bearer token-123"},
+        json={"format": "json", "scopes": ["artifact", "share_reference"], "max_rows": 25},
+    )
+    assert removed_export.status_code == 404
 
 
 def test_search_page_renders_after_login(monkeypatch, client) -> None:

@@ -101,7 +101,6 @@ class ArtifactServiceMixin:
         clean_mode = str(naming_mode or "hybrid").strip().lower() or "hybrid"
         original_name = self._safe_filename(
             artifact.get("original_filename"),
-            fallback=f"{artifact['artifact_euid']}.bin",
         )
         suffix = self._filename_suffix(original_name)
         if clean_mode == "dewey":
@@ -795,7 +794,11 @@ class ArtifactServiceMixin:
             if not relative_key or "/" not in relative_key:
                 continue
             folder_label = relative_key.split("/", 1)[0]
-            folders.setdefault(folder_label, []).append(obj)
+            folder_objects = folders.get(folder_label)
+            if folder_objects is None:
+                folder_objects = []
+                folders[folder_label] = folder_objects
+            folder_objects.append(obj)
 
         with self.backend.session_scope(commit=True) as session:
             replay = self._idempotency_replay(
@@ -1271,7 +1274,7 @@ class ArtifactServiceMixin:
         if not self.managed_storage_bucket:
             raise ValueError("managed_storage_bucket is required for upload sessions")
         clean_type = resolve_artifact_type(artifact_type, original_filename)
-        clean_filename = self._safe_filename(original_filename, fallback="upload.bin")
+        clean_filename = self._safe_filename(original_filename)
         payload = {
             "artifact_type": clean_type,
             "original_filename": clean_filename,

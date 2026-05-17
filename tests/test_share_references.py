@@ -126,7 +126,10 @@ def test_create_share_reference_prepares_external_recipient(
 def test_create_share_reference_requires_broker_url_for_external_recipient(client) -> None:
     artifact = client.post(
         "/api/v1/artifacts",
-        headers={"Authorization": "Bearer token-123", "Idempotency-Key": "idem-share-art-no-broker"},
+        headers={
+            "Authorization": "Bearer token-123",
+            "Idempotency-Key": "idem-share-art-no-broker",
+        },
         json={
             "artifact_type": "pdf",
             "storage_backend": "s3",

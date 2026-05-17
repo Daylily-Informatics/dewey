@@ -221,11 +221,15 @@ def test_config_template_does_not_materialize_shell_aws_profile(
 
 def test_config_set_artifact_bucket(monkeypatch, tmp_path: Path, capsys) -> None:
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
-    monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "local")
+    monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "ci")
+
+    init_exit = _invoke(["config", "init"])
+    capsys.readouterr()
+    assert init_exit == 0
 
     exit_code = _invoke(["config", "set-artifact-bucket", "dewey-artifacts-test"])
     captured = capsys.readouterr().out
-    config_path = tmp_path / "dewey-local" / "dewey-config-local.yaml"
+    config_path = tmp_path / "dewey-ci" / "dewey-config-ci.yaml"
 
     assert exit_code == 0
     assert "Updated artifact bucket" in captured

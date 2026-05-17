@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 from cli_core_yo import output
 from cli_core_yo.app import run as run_cli
 from cli_core_yo.runtime import _reset
+from daylily_tapdb.cli import db_config as tapdb_db_config
 
 import dewey_service.cli as cli_module
 import dewey_service.cli.db as db_cli
@@ -17,7 +20,21 @@ def _invoke(argv: list[str]) -> int:
 def _activate_runtime(monkeypatch) -> None:
     monkeypatch.setenv("CONDA_PREFIX", "/tmp/dewey-conda")
     monkeypatch.setenv("CONDA_DEFAULT_ENV", "DEWEY-local2")
+    monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "local2")
+    monkeypatch.setenv("DEPLOYMENT_CODE", "local2")
+    monkeypatch.setenv("LSMC_DEPLOYMENT_CODE", "local2")
     monkeypatch.setenv("AWS_PROFILE", "config-profile")
+    monkeypatch.setattr(
+        db_cli,
+        "get_settings",
+        lambda: SimpleNamespace(
+            tapdb_config_path="/tmp/dewey-tapdb.yaml",
+            tapdb_client_id="dewey",
+            tapdb_database_name="dewey",
+            aws_region="us-west-2",
+        ),
+    )
+    monkeypatch.setattr(db_cli, "load_config_aws_profile", lambda: "config-profile")
 
 
 def test_db_build_invokes_overlay(monkeypatch, capsys) -> None:
@@ -74,6 +91,11 @@ def test_db_nuke_invokes_delete_only(monkeypatch, capsys) -> None:
     monkeypatch.setattr(db_cli, "ensure_tapdb_version", lambda: "3.0.6")
     monkeypatch.setattr(db_cli, "run_tapdb_cli", _fake_tapdb)
     monkeypatch.setattr(db_cli, "build", _fail_build)
+    monkeypatch.setattr(
+        tapdb_db_config,
+        "get_db_config",
+        lambda **_kwargs: {"schema_name": "tapdb_dewey_dev", "database": "tapdb_shared"},
+    )
 
     exit_code = _invoke(["db", "nuke", "--target", "local", "--force"])
     capsys.readouterr()

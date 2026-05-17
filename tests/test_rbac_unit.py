@@ -18,6 +18,11 @@ def test_default_group_role_map_and_role_normalization() -> None:
         "dewey-admin": "ADMIN",
         "dewey-readwrite": "READ_WRITE",
         "dewey-readonly": "READ_ONLY",
+        "lsmc:global-admin": "ADMIN",
+        "lsmc:internal-user": "READ_WRITE",
+        "lsmc:dewey:admin": "ADMIN",
+        "lsmc:dewey:readwrite": "READ_WRITE",
+        "lsmc:dewey:readonly": "READ_ONLY",
     }
 
     assert roles_from_groups(

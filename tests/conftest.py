@@ -12,6 +12,7 @@ import yaml
 from fastapi.testclient import TestClient
 
 from dewey_service.app import create_app
+from dewey_service.defaults import build_default_config_template
 from dewey_service.settings import Settings
 
 
@@ -1537,7 +1538,16 @@ class FakeDeweyService:
 
 
 @pytest.fixture
-def test_settings() -> Settings:
+def explicit_config_file(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
+    config_path = tmp_path / "dewey-config-test.yaml"
+    config_path.write_bytes(build_default_config_template(session_secret_key="test-session-secret"))
+    monkeypatch.setenv("DEWEY_CONFIG", str(config_path))
+    return config_path
+
+
+@pytest.fixture
+def test_settings(explicit_config_file: Path) -> Settings:
+    _ = explicit_config_file
     return Settings(
         api_bearer_token="token-123",
         session_secret_key="session-secret",

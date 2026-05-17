@@ -95,8 +95,12 @@ class TapDBBackend:
             ) from exc
 
         db_hostname = f"{cfg['host']}:{cfg['port']}"
-        engine_type = (cfg.get("engine_type") or "local").strip().lower()
-        region = (cfg.get("region") or settings.aws_region or "us-west-2").strip()
+        engine_type = (cfg.get("engine_type") or "").strip().lower()
+        if not engine_type:
+            raise RuntimeError("TapDB DB config is missing engine_type")
+        region = (cfg.get("region") or settings.aws_region or "").strip()
+        if not region:
+            raise RuntimeError("Dewey AWS region is required")
         iam_auth_raw = str(cfg.get("iam_auth") or "").strip().lower()
         iam_auth = iam_auth_raw in {"1", "true", "yes", "on"}
         secret_arn = cfg.get("secret_arn") or cfg.get("master_secret_arn")
@@ -108,10 +112,13 @@ class TapDBBackend:
             db_name=cfg["database"],
             schema_name=cfg["schema_name"],
             app_username=app_username,
-            engine_type=engine_type if engine_type != "local" else None,
+            echo_sql=False,
+            engine_type=engine_type,
             region=region,
             iam_auth=iam_auth,
             secret_arn=secret_arn,
+            domain_code=settings.tapdb_domain_code,
+            owner_repo_name=settings.tapdb_owner_repo_name,
         )
         self.domain_code = str(cfg.get("domain_code") or settings.tapdb_domain_code or "").strip()
         if not self.domain_code:
@@ -415,18 +422,20 @@ class TapDBBackend:
 
 def normalize_instance_payload(instance: generic_instance) -> dict[str, Any]:
     payload = dict(instance.json_addl or {})
-    payload.setdefault("euid", instance.euid)
-    payload.setdefault("name", instance.name)
-    payload.setdefault(
-        "created_at",
-        instance.created_dt.isoformat().replace("+00:00", "Z")
-        if instance.created_dt
-        else utc_now_iso(),
-    )
-    payload.setdefault(
-        "updated_at",
-        instance.modified_dt.isoformat().replace("+00:00", "Z")
-        if instance.modified_dt
-        else payload["created_at"],
-    )
+    if not payload.get("euid"):
+        payload["euid"] = instance.euid
+    if not payload.get("name"):
+        payload["name"] = instance.name
+    if not payload.get("created_at"):
+        payload["created_at"] = (
+            instance.created_dt.isoformat().replace("+00:00", "Z")
+            if instance.created_dt
+            else utc_now_iso()
+        )
+    if not payload.get("updated_at"):
+        payload["updated_at"] = (
+            instance.modified_dt.isoformat().replace("+00:00", "Z")
+            if instance.modified_dt
+            else payload["created_at"]
+        )
     return payload

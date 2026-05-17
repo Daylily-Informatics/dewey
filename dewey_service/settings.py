@@ -120,22 +120,35 @@ def _normalize_managed_storage_bucket(value: str, *, allow_empty: bool = True) -
 
 
 def _default_config_path() -> Path:
-    root = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
+    raw_config = str(os.environ.get("DEWEY_CONFIG") or "").strip()
+    if raw_config:
+        config_path = Path(raw_config).expanduser()
+        if not config_path.is_absolute():
+            raise RuntimeError(f"DEWEY_CONFIG must be an absolute path: {raw_config}")
+        return config_path
+    raw_root = str(os.environ.get("XDG_CONFIG_HOME") or "").strip()
+    if not raw_root:
+        raise RuntimeError("Dewey requires explicit XDG_CONFIG_HOME or DEWEY_CONFIG")
+    root = Path(raw_root)
+    if not root.is_absolute():
+        raise RuntimeError(f"XDG_CONFIG_HOME must be an absolute path: {raw_root}")
     return root / _config_dir_name() / _config_filename()
 
 
 def _sanitize_deployment_code(value: str) -> str:
     cleaned = re.sub(r"[^A-Za-z0-9-]+", "-", str(value or "").strip()).strip("-")
-    return cleaned or "local"
+    if not cleaned:
+        raise RuntimeError("Dewey deployment code is required")
+    return cleaned
 
 
 def _resolve_deployment_code() -> str:
-    return _sanitize_deployment_code(
+    raw = (
         os.environ.get("DEWEY_DEPLOYMENT_CODE")
         or os.environ.get("DEPLOYMENT_CODE")
         or os.environ.get("LSMC_DEPLOYMENT_CODE")
-        or "local"
     )
+    return _sanitize_deployment_code(raw)
 
 
 def _config_dir_name() -> str:
@@ -173,14 +186,12 @@ def _resolve_deployment_chrome(
     *,
     name: str | None,
     color: str | None,
-    fallback_name: str | None = None,
+    deployment_code: str | None = None,
 ) -> dict[str, Any]:
-    resolved_name = str(name or "").strip() or str(fallback_name or "").strip()
-    resolved_color = (
-        _stable_deployment_color_hex(resolved_name)
-        if resolved_name
-        else DEFAULT_DEPLOYMENT_BANNER_COLOR
-    )
+    resolved_name = str(name or "").strip() or str(deployment_code or "").strip()
+    if not resolved_name:
+        raise ValueError("deployment.name is required")
+    resolved_color = str(color or "").strip() or _stable_deployment_color_hex(resolved_name)
     return {
         "name": resolved_name,
         "color": resolved_color,
@@ -189,7 +200,9 @@ def _resolve_deployment_chrome(
 
 
 def _resolve_region_chrome(name: str | None) -> dict[str, Any]:
-    resolved_name = str(name or "").strip() or "us-west-2"
+    resolved_name = str(name or "").strip()
+    if not resolved_name:
+        raise ValueError("aws.region is required")
     return {
         "name": resolved_name,
         "color": _stable_region_color_hex(resolved_name),
@@ -599,8 +612,7 @@ class Settings(BaseSettings):
             ]
             if missing:
                 raise ValueError(
-                    "external_broker auth requires explicit settings: "
-                    + ", ".join(sorted(missing))
+                    "external_broker auth requires explicit settings: " + ", ".join(sorted(missing))
                 )
             self.external_broker_service_id = str(self.external_broker_service_id).strip()
             self.external_broker_login_url = _require_https_url(
@@ -649,7 +661,7 @@ class Settings(BaseSettings):
         deployment = _resolve_deployment_chrome(
             name=self.deployment_name,
             color=self.deployment_color,
-            fallback_name=_resolve_deployment_code(),
+            deployment_code=_resolve_deployment_code(),
         )
         self.deployment_name = str(deployment["name"])
         self.deployment_color = str(deployment["color"])
@@ -719,7 +731,7 @@ def get_config_file_path() -> Path:
 
 
 def _template_config_payload() -> dict[str, Any]:
-    raw = yaml.safe_load(build_default_config_template().decode("utf-8")) or {}
+    raw = yaml.safe_load(build_default_config_template().decode("utf-8"))
     if not isinstance(raw, dict):
         raise ValueError("Default Dewey config template must parse to a mapping")
     return raw
@@ -728,8 +740,8 @@ def _template_config_payload() -> dict[str, Any]:
 def _load_config_payload(config_path: Path | None = None) -> tuple[Path, dict[str, Any]]:
     cfg_path = config_path or get_config_file_path()
     if not cfg_path.exists():
-        return cfg_path, _template_config_payload()
-    raw = yaml.safe_load(cfg_path.read_text(encoding="utf-8")) or {}
+        raise ValueError(f"Dewey config file is required: {cfg_path}")
+    raw = yaml.safe_load(cfg_path.read_text(encoding="utf-8"))
     if not isinstance(raw, dict):
         raise ValueError("Config root YAML object must be a mapping")
     return cfg_path, raw
@@ -767,11 +779,12 @@ def persist_managed_storage_bucket(
 
 def load_settings(config_path: Path | None = None) -> Settings:
     cfg_path = config_path or get_config_file_path()
-    seed: dict[str, Any] = {}
-    if cfg_path.exists():
-        raw = yaml.safe_load(cfg_path.read_text(encoding="utf-8")) or {}
-        if isinstance(raw, dict):
-            seed = _flatten_config(raw)
+    if not cfg_path.exists():
+        raise ValueError(f"Dewey config file is required: {cfg_path}")
+    raw = yaml.safe_load(cfg_path.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        raise ValueError("Config root YAML object must be a mapping")
+    seed: dict[str, Any] = _flatten_config(raw)
 
     yaml_only_defaults = {
         "cognito_domain": "",

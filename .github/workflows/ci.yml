@@ -53,6 +53,9 @@ jobs:
     needs: [lint, security]
     env:
       DAYHOFF_PROJECT_ROOT: ${{ github.workspace }}
+      DEWEY_DEPLOYMENT_CODE: ci
+      DEPLOYMENT_CODE: ci
+      LSMC_DEPLOYMENT_CODE: ci
     steps:
       - uses: actions/checkout@v4
 

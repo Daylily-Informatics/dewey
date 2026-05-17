@@ -218,7 +218,7 @@
               <div class="panel-header">
                 <div>
                   <h3>Hierarchy DAG</h3>
-                  <div class="panel-copy">Registered artifact lineage renders here. When the current prefix is not registered, the panel falls back to a directory sketch of the current browse scope.</div>
+                  <div class="panel-copy">Registered artifact lineage renders here. Unregistered prefixes show no lineage graph until artifact metadata is registered.</div>
                 </div>
               </div>
 
@@ -257,69 +257,26 @@
       function parseJsonScript(id) {
         const node = document.getElementById(id);
         if (!node) {
-          return {};
+          throw new Error(`Missing JSON script element: ${id}`);
         }
         try {
-          return JSON.parse(node.textContent || "{}");
-        } catch (_error) {
-          return {};
+          const parsed = JSON.parse(node.textContent || "null");
+          if (!parsed || typeof parsed !== "object") {
+            throw new Error(`JSON script ${id} must contain an object`);
+          }
+          return parsed;
+        } catch (error) {
+          throw new Error(`Could not parse JSON script ${id}: ${error.message}`);
         }
       }
 
-      function buildFallbackGraph(browse) {
-        if (!browse || !browse.root_uri) {
-          return { rootId: null, nodes: [], edges: [] };
-        }
-        const currentId = browse.root_uri;
-        const nodes = [
-          {
-            id: currentId,
-            label: browse.prefix ? browse.prefix.split("/").filter(Boolean).slice(-1)[0] || browse.bucket : browse.bucket,
-            subtitle: browse.current_artifact ? "registered prefix" : "raw prefix",
-            storage_uri: browse.root_uri,
-            detail_href: browse.current_artifact ? `/artifacts/euid/${browse.current_artifact.artifact_euid}` : "",
-            browse_root_uri: browse.root_uri,
-            storage_console_url: browse.current_artifact ? browse.current_artifact.storage_console_url : "",
-          },
-        ];
-        const edges = [];
-
-        (browse.prefixes || []).forEach((item) => {
-          nodes.push({
-            id: item.storage_uri,
-            label: item.label,
-            subtitle: item.registered_artifact ? "registered prefix" : "prefix",
-            storage_uri: item.storage_uri,
-            detail_href: item.registered_artifact ? `/artifacts/euid/${item.registered_artifact.artifact_euid}` : "",
-            browse_root_uri: item.storage_uri,
-            storage_console_url: item.storage_console_url || "",
-          });
-          edges.push({ source: currentId, target: item.storage_uri });
-        });
-
-        (browse.objects || []).forEach((item) => {
-          nodes.push({
-            id: item.storage_uri,
-            label: item.label,
-            subtitle: item.registered_artifact ? item.registered_artifact.artifact_type || "registered object" : item.artifact_type || "object",
-            storage_uri: item.storage_uri,
-            detail_href: item.registered_artifact ? `/artifacts/euid/${item.registered_artifact.artifact_euid}` : "",
-            browse_root_uri: browse.root_uri,
-            storage_console_url: item.storage_console_url || "",
-          });
-          edges.push({ source: currentId, target: item.storage_uri });
-        });
-
-        return { rootId: currentId, nodes, edges };
-      }
-
-      function normalizeGraph(graph, browse) {
+      function normalizeGraph(graph) {
         const nodes = Array.isArray(graph.nodes) ? graph.nodes.slice() : [];
         const edges = Array.isArray(graph.edges) ? graph.edges.slice() : [];
         if (nodes.length) {
           return { rootId: graph.root_euid || nodes[0].id, nodes, edges };
         }
-        return buildFallbackGraph(browse);
+        return { rootId: null, nodes: [], edges };
       }
 
       function groupByLevel(rootId, nodes, edges) {
@@ -504,9 +461,8 @@
       }
 
       document.addEventListener("DOMContentLoaded", () => {
-        const browse = parseJsonScript("browse-data");
         const graph = parseJsonScript("graph-data");
-        renderDag(normalizeGraph(graph, browse));
+        renderDag(normalizeGraph(graph));
       });
     </script>
   </body>

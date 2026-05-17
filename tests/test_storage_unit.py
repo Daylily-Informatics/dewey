@@ -150,9 +150,7 @@ def test_s3_storage_client_init_builds_session_from_profile_and_region(
     assert seen["kwargs"] == {"profile_name": "team", "region_name": "us-west-2"}
     assert seen["service_name"] == "s3"
     assert set(seen["client_kwargs"]) == {"config"}
-    assert seen["client_kwargs"]["config"].kwargs == {
-        "s3": {"use_accelerate_endpoint": False}
-    }
+    assert seen["client_kwargs"]["config"].kwargs == {"s3": {"use_accelerate_endpoint": False}}
 
 
 def test_s3_storage_client_object_operations_cover_success_paths() -> None:

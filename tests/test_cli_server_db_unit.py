@@ -424,7 +424,14 @@ def test_server_command_wrappers(monkeypatch: pytest.MonkeyPatch) -> None:
     )
     monkeypatch.setattr(server_cli, "_start_server", lambda **kwargs: start_calls.append(kwargs))
 
-    server_cli.start(reload=True, background=False)
+    server_cli.start(
+        reload=True,
+        background=False,
+        ssl_enabled=True,
+        cert=None,
+        key=None,
+        check_cognito_uris=True,
+    )
     assert start_calls[0]["validated"] == {"port": 9002, "host": "127.0.0.1"}
     assert start_calls[1] == {
         "host": "127.0.0.1",
@@ -497,6 +504,11 @@ def test_db_cli_error_branches(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(db_cli.typer, "confirm", lambda message: True)
     monkeypatch.setattr(
         db_cli,
+        "_confirm_target_label",
+        lambda *, namespace: "dewey/dewey/tapdb_dewey_dev@dewey_dev",
+    )
+    monkeypatch.setattr(
+        db_cli,
         "run_tapdb_cli",
         lambda *args, **kwargs: (_ for _ in ()).throw(db_cli.TapDBRuntimeError("delete failed")),
     )
@@ -542,7 +554,7 @@ def test_db_cli_resolves_profile_from_config_when_flag_missing(
             "run",
             {
                 "target": "local",
-                "client_id": db_cli.DEFAULT_TAPDB_CLIENT_ID,
+                "client_id": "dewey",
                 "profile": "config-profile",
                 "region": "us-west-2",
                 "namespace": "dewey",
@@ -554,7 +566,7 @@ def test_db_cli_resolves_profile_from_config_when_flag_missing(
             "export",
             {
                 "target": "local",
-                "client_id": db_cli.DEFAULT_TAPDB_CLIENT_ID,
+                "client_id": "dewey",
                 "profile": "config-profile",
                 "region": "us-west-2",
                 "namespace": "dewey",
@@ -599,6 +611,11 @@ def test_db_cli_reset_success_path(monkeypatch: pytest.MonkeyPatch) -> None:
         "build",
         lambda **kwargs: calls.append(("build", kwargs)),
     )
+    monkeypatch.setattr(
+        db_cli,
+        "_confirm_target_label",
+        lambda *, namespace: "dewey/dewey/tapdb_dewey_dev@dewey_dev",
+    )
 
     db_cli.reset(
         force=True,
@@ -613,9 +630,14 @@ def test_db_cli_reset_success_path(monkeypatch: pytest.MonkeyPatch) -> None:
         (
             "delete",
             {
-                "args": ["db", "delete", "dev", "--force"],
+                "args": [
+                    "db",
+                    "delete",
+                    "--confirm-target",
+                    "dewey/dewey/tapdb_dewey_dev@dewey_dev",
+                ],
                 "target": "local",
-                "client_id": db_cli.DEFAULT_TAPDB_CLIENT_ID,
+                "client_id": "dewey",
                 "profile": "team-profile",
                 "region": "us-west-2",
                 "namespace": "dewey",
@@ -652,6 +674,11 @@ def test_db_cli_nuke_success_path(monkeypatch: pytest.MonkeyPatch) -> None:
         "build",
         lambda **kwargs: calls.append(("build", kwargs)),
     )
+    monkeypatch.setattr(
+        db_cli,
+        "_confirm_target_label",
+        lambda *, namespace: "dewey/dewey/tapdb_dewey_dev@dewey_dev",
+    )
 
     db_cli.nuke(
         force=True,
@@ -665,9 +692,14 @@ def test_db_cli_nuke_success_path(monkeypatch: pytest.MonkeyPatch) -> None:
         (
             "delete",
             {
-                "args": ["db", "delete", "prod", "--force"],
+                "args": [
+                    "db",
+                    "delete",
+                    "--confirm-target",
+                    "dewey/dewey/tapdb_dewey_dev@dewey_dev",
+                ],
                 "target": "aurora",
-                "client_id": db_cli.DEFAULT_TAPDB_CLIENT_ID,
+                "client_id": "dewey",
                 "profile": "team-profile",
                 "region": "us-west-2",
                 "namespace": "dewey",

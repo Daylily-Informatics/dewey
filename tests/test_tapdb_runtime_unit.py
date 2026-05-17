@@ -9,6 +9,25 @@ import pytest
 from dewey_service.integrations import tapdb_runtime
 
 
+def _runtime_kwargs(**overrides: str) -> dict[str, str]:
+    values = {
+        "target": "local",
+        "client_id": "dewey",
+        "profile": "config-profile",
+        "region": "us-west-2",
+        "namespace": "dewey",
+        "config_path": "/tmp/dewey-tapdb.yaml",
+    }
+    values.update(overrides)
+    return values
+
+
+def _drift_kwargs(**overrides: str) -> dict[str, str]:
+    values = _runtime_kwargs(**overrides)
+    values.pop("config_path", None)
+    return values
+
+
 def test_ensure_tapdb_version_accepts_exact(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(tapdb_runtime.importlib.metadata, "version", lambda _name: "3.0.9")
     assert tapdb_runtime.ensure_tapdb_version() == "3.0.9"
@@ -34,9 +53,11 @@ def test_validate_database_target_and_sqlalchemy_url() -> None:
                 "host": "db",
                 "port": "5432",
                 "database": "dewey",
+                "schema_name": "tapdb_dewey_dev",
             }
         )
         == "postgresql+psycopg2://alice:secret@db:5432/dewey"
+        "?options=-csearch_path%3Dtapdb_dewey_dev"
     )
 
     with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="Unsupported database target"):
@@ -84,28 +105,26 @@ def test_resolve_runtime_env_sets_expected_values(monkeypatch: pytest.MonkeyPatc
     )
 
 
-def test_resolve_runtime_env_uses_dewey_env_then_shell_env(
+def test_resolve_runtime_env_requires_explicit_inputs(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("DEWEY_AWS_PROFILE", "dewey-env-profile")
-    monkeypatch.setenv("AWS_PROFILE", "shell-profile")
-    monkeypatch.setattr(tapdb_runtime, "load_config_aws_profile", lambda: "config-profile")
     monkeypatch.setattr(
         tapdb_runtime,
         "_resolve_tapdb_config_path",
         lambda **_kwargs: "/tmp/dewey-tapdb.yaml",
     )
 
-    env = tapdb_runtime._resolve_runtime_env(target="local", profile="")
-    assert env["aws_profile"] == "dewey-env-profile"
-
-    monkeypatch.delenv("DEWEY_AWS_PROFILE", raising=False)
-    env = tapdb_runtime._resolve_runtime_env(target="local", profile="")
+    env = tapdb_runtime._resolve_runtime_env(**_runtime_kwargs(config_path=""))
     assert env["aws_profile"] == "config-profile"
 
-    monkeypatch.setattr(tapdb_runtime, "load_config_aws_profile", lambda: "")
-    env = tapdb_runtime._resolve_runtime_env(target="local", profile="")
-    assert env["aws_profile"] == "shell-profile"
+    with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="client_id is required"):
+        tapdb_runtime._resolve_runtime_env(**_runtime_kwargs(client_id="", config_path=""))
+    with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="database_name/namespace"):
+        tapdb_runtime._resolve_runtime_env(**_runtime_kwargs(namespace="", config_path=""))
+    with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="AWS profile"):
+        tapdb_runtime._resolve_runtime_env(**_runtime_kwargs(profile="", config_path=""))
+    with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="AWS region"):
+        tapdb_runtime._resolve_runtime_env(**_runtime_kwargs(region="", config_path=""))
 
 
 def test_export_database_url_for_target_returns_url_without_mutating_environment(
@@ -121,6 +140,7 @@ def test_export_database_url_for_target_returns_url_without_mutating_environment
             "host": "localhost",
             "port": "5439",
             "database": "dewey_dev",
+            "schema_name": "tapdb_dewey_dev",
         },
     )
 
@@ -129,11 +149,12 @@ def test_export_database_url_for_target_returns_url_without_mutating_environment
         "_resolve_tapdb_config_path",
         lambda **_kwargs: "/tmp/dewey-tapdb.yaml",
     )
-    monkeypatch.setattr(tapdb_runtime, "load_config_aws_profile", lambda: "config-profile")
+    url = tapdb_runtime.export_database_url_for_target(**_runtime_kwargs())
 
-    url = tapdb_runtime.export_database_url_for_target(target="local")
-
-    assert url == "postgresql+psycopg2://dewey:secret@localhost:5439/dewey_dev"
+    assert url == (
+        "postgresql+psycopg2://dewey:secret@localhost:5439/dewey_dev"
+        "?options=-csearch_path%3Dtapdb_dewey_dev"
+    )
     assert "DATABASE_URL" not in tapdb_runtime.os.environ
 
 
@@ -155,9 +176,7 @@ def test_run_tapdb_cli_builds_command_and_raises_on_failure(
     with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="tapdb command failed"):
         tapdb_runtime.run_tapdb_cli(
             ["bootstrap", "local"],
-            target="local",
-            profile="team-profile",
-            config_path="/tmp/dewey-tapdb.yaml",
+            **_runtime_kwargs(profile="team-profile"),
             check=True,
         )
 
@@ -193,9 +212,7 @@ def test_run_tapdb_cli_exports_resolved_profile_and_identity_env(
 
     result = tapdb_runtime.run_tapdb_cli(
         ["db", "status"],
-        target="local",
-        profile="config-profile",
-        config_path="/tmp/dewey-tapdb.yaml",
+        **_runtime_kwargs(),
         check=False,
     )
 
@@ -206,15 +223,11 @@ def test_run_tapdb_cli_exports_resolved_profile_and_identity_env(
     assert captured["env"]["TAPDB_OWNER_REPO"] == "dewey"
 
 
-def test_run_tapdb_cli_uses_shell_aws_profile_when_explicit_profile_blank(
+def test_run_tapdb_cli_rejects_blank_profile(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    captured: dict[str, object] = {}
-
-    monkeypatch.setenv("AWS_PROFILE", "shell-profile")
     monkeypatch.setenv("MERIDIAN_DOMAIN_CODE", "D")
     monkeypatch.setenv("TAPDB_OWNER_REPO", "dewey")
-    monkeypatch.setattr(tapdb_runtime, "load_config_aws_profile", lambda: "")
     monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda: "3.0.9")
     monkeypatch.setattr(tapdb_runtime.shutil, "which", lambda _name: "tapdb")
     monkeypatch.setattr(
@@ -223,30 +236,20 @@ def test_run_tapdb_cli_uses_shell_aws_profile_when_explicit_profile_blank(
         lambda **_kwargs: "/tmp/dewey-tapdb.yaml",
     )
 
-    def fake_run(cmd, cwd=None, env=None, text=None, capture_output=None):
-        captured["env"] = env
-        return SimpleNamespace(returncode=0, stdout="ok", stderr="")
-
-    monkeypatch.setattr(tapdb_runtime.subprocess, "run", fake_run)
-
-    tapdb_runtime.run_tapdb_cli(
-        ["db", "status"],
-        target="local",
-        profile="",
-        config_path="/tmp/dewey-tapdb.yaml",
-        check=False,
-    )
-
-    assert captured["env"]["AWS_PROFILE"] == "shell-profile"
+    with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="AWS profile"):
+        tapdb_runtime.run_tapdb_cli(
+            ["db", "status"],
+            **_runtime_kwargs(profile=""),
+            check=False,
+        )
 
 
 def test_resolve_runtime_env_requires_explicit_profile(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("DEWEY_AWS_PROFILE", raising=False)
     monkeypatch.delenv("AWS_PROFILE", raising=False)
-    monkeypatch.setattr(tapdb_runtime, "load_config_aws_profile", lambda: "")
 
     with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="AWS profile is required"):
-        tapdb_runtime._resolve_runtime_env(target="local", profile="")
+        tapdb_runtime._resolve_runtime_env(**_runtime_kwargs(profile=""))
 
 
 def test_run_tapdb_cli_returns_process_when_check_disabled(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -262,9 +265,7 @@ def test_run_tapdb_cli_returns_process_when_check_disabled(monkeypatch: pytest.M
 
     result = tapdb_runtime.run_tapdb_cli(
         ["db", "status"],
-        target="local",
-        profile="config-profile",
-        config_path="/tmp/dewey-tapdb.yaml",
+        **_runtime_kwargs(),
         check=False,
     )
     assert result.returncode == 0
@@ -286,7 +287,7 @@ def test_run_schema_drift_check_maps_exit_codes(monkeypatch: pytest.MonkeyPatch)
         ),
     )
 
-    result = tapdb_runtime.run_schema_drift_check(target="local")
+    result = tapdb_runtime.run_schema_drift_check(**_drift_kwargs())
 
     assert result["status"] == "drift"
     assert result["tool_version"] == "3.0.9"
@@ -296,21 +297,20 @@ def test_run_schema_drift_check_maps_exit_codes(monkeypatch: pytest.MonkeyPatch)
 def test_run_tapdb_cli_requires_tapdb_executable(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda: "4.1.1")
     monkeypatch.setattr(tapdb_runtime.shutil, "which", lambda _name: None)
-    monkeypatch.setattr(tapdb_runtime, "load_config_aws_profile", lambda: "config-profile")
     monkeypatch.setenv("MERIDIAN_DOMAIN_CODE", "D")
     monkeypatch.setenv("TAPDB_OWNER_REPO", "dewey")
 
     with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="tapdb CLI is not available"):
         tapdb_runtime.run_tapdb_cli(
             ["info"],
-            target="local",
-            config_path="/tmp/dewey-tapdb.yaml",
+            **_runtime_kwargs(),
         )
 
 
 def test_sanitize_and_resolve_deployment_code(monkeypatch: pytest.MonkeyPatch) -> None:
     assert tapdb_runtime._sanitize_deployment_code(" local/dev ") == "local-dev"
-    assert tapdb_runtime._sanitize_deployment_code("###") == "local"
+    with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="deployment code is required"):
+        tapdb_runtime._sanitize_deployment_code("###")
 
     monkeypatch.setenv("DEPLOYMENT_CODE", "from-deployment")
     monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "from-dewey")
@@ -373,6 +373,7 @@ def test_get_tapdb_db_config_and_sqlalchemy_url(monkeypatch: pytest.MonkeyPatch)
                 "host": "db",
                 "port": "5432",
                 "database": "dewey_dev",
+                "schema_name": "tapdb_dewey_dev",
             }
         ),
     )
@@ -388,6 +389,7 @@ def test_get_tapdb_db_config_and_sqlalchemy_url(monkeypatch: pytest.MonkeyPatch)
     assert (
         tapdb_runtime._build_sqlalchemy_url(cfg)
         == "postgresql+psycopg2://postgres@db:5432/dewey_dev"
+        "?options=-csearch_path%3Dtapdb_dewey_dev"
     )
 
     monkeypatch.setattr(
@@ -402,7 +404,7 @@ def test_get_tapdb_db_config_and_sqlalchemy_url(monkeypatch: pytest.MonkeyPatch)
             database_name="dewey",
         )
 
-    with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="missing database name"):
+    with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="missing host"):
         tapdb_runtime._build_sqlalchemy_url({"user": "postgres"})
 
 
@@ -417,7 +419,7 @@ def test_run_schema_drift_check_covers_clean_invalid_json_and_failed_stderr(
         "run_tapdb_cli",
         lambda *args, **kwargs: SimpleNamespace(returncode=0, stdout="", stderr=""),
     )
-    clean = tapdb_runtime.run_schema_drift_check(target="local")
+    clean = tapdb_runtime.run_schema_drift_check(**_drift_kwargs())
 
     assert clean == {
         "status": "clean",
@@ -434,7 +436,7 @@ def test_run_schema_drift_check_covers_clean_invalid_json_and_failed_stderr(
         "run_tapdb_cli",
         lambda *args, **kwargs: SimpleNamespace(returncode=2, stdout="not-json", stderr="boom"),
     )
-    failed = tapdb_runtime.run_schema_drift_check(target="local")
+    failed = tapdb_runtime.run_schema_drift_check(**_drift_kwargs())
 
     assert failed == {
         "status": "check_failed",

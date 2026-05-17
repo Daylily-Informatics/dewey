@@ -57,16 +57,17 @@ def build_default_config_template(
     *,
     managed_storage_bucket: str = "",
     managed_storage_prefix: str = "artifacts",
+    session_secret_key: str | None = None,
 ) -> bytes:
     deployment = _sanitize_deployment_code(
         os.environ.get("DEWEY_DEPLOYMENT_CODE")
         or os.environ.get("DEPLOYMENT_CODE")
         or os.environ.get("LSMC_DEPLOYMENT_CODE")
-        or "local"
     )
     tapdb_config_path = DEFAULT_TAPDB_CONFIG_DIR / "dewey" / "dewey" / "tapdb-config.yaml"
     bucket = str(managed_storage_bucket or "").strip()
     prefix = str(managed_storage_prefix or "artifacts").strip().strip("/") or "artifacts"
+    resolved_session_secret_key = session_secret_key or secrets.token_urlsafe(64)
     return f"""# Dewey Configuration
 # ===================
 # Create this file with:
@@ -81,7 +82,7 @@ def build_default_config_template(
 application:
   environment: development
   api_bearer_token: dewey-dev-token
-  session_secret_key: {secrets.token_urlsafe(64)}
+  session_secret_key: {resolved_session_secret_key}
   host: 127.0.0.1
   port: {DEFAULT_APP_PORT}
   verify_ssl: true
@@ -161,4 +162,9 @@ ui:
 
 def _sanitize_deployment_code(value: str) -> str:
     cleaned = re.sub(r"[^A-Za-z0-9-]+", "-", str(value or "").strip()).strip("-")
-    return cleaned or "local"
+    if not cleaned:
+        raise RuntimeError(
+            "Dewey deployment code is required. Set DEWEY_DEPLOYMENT_CODE, "
+            "DEPLOYMENT_CODE, or LSMC_DEPLOYMENT_CODE before generating config."
+        )
+    return cleaned

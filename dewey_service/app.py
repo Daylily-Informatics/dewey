@@ -484,11 +484,6 @@ def create_app(
     def _is_admin(profile: dict[str, Any]) -> bool:
         return profile_has_role(profile, Role.ADMIN)
 
-    def _with_search_alias_headers(response: Response, successor: str) -> None:
-        response.headers["Deprecation"] = "true"
-        response.headers["Sunset"] = "Wed, 30 Sep 2026 00:00:00 GMT"
-        response.headers["Link"] = f'<{successor}>; rel="successor-version"'
-
     def _search_payload_to_tsv(items: list[dict[str, Any]]) -> str:
         fields = [
             "record_type",
@@ -2942,18 +2937,6 @@ def create_app(
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     @app.post(
-        "/api/v1/search/v2/query",
-        dependencies=[Depends(api_auth_dep)],
-    )
-    async def search_v2_query_alias(body: SearchQueryRequest) -> Response:
-        try:
-            response = JSONResponse(content=service.query_search_v2(body.model_dump()))
-        except ValueError as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
-        _with_search_alias_headers(response, "/api/search/v2/query")
-        return response
-
-    @app.post(
         "/api/search/v2/export",
         dependencies=[Depends(api_auth_dep)],
     )
@@ -2981,15 +2964,6 @@ def create_app(
                 "X-Timing-Ms": str(timing_ms),
             },
         )
-
-    @app.post(
-        "/api/v1/search/v2/export",
-        dependencies=[Depends(api_auth_dep)],
-    )
-    async def search_v2_export_alias(body: SearchExportRequest) -> Response:
-        response = await search_v2_export(body)
-        _with_search_alias_headers(response, "/api/search/v2/export")
-        return response
 
     @app.post(
         "/api/v1/external-objects",
