@@ -59,10 +59,10 @@ def test_domain_allowed_origin_and_host_lists() -> None:
 def test_default_schema_drift_payload_and_tool_version(monkeypatch: pytest.MonkeyPatch) -> None:
     with monkeypatch.context() as ctx:
         ctx.setattr(schema_drift, "_tool_version", lambda: "4.1.1")
-        assert schema_drift.default_schema_drift_payload("dev") == {
+        assert schema_drift.default_schema_drift_payload("local") == {
             "status": "not_run",
             "checked_at": None,
-            "environment": "dev",
+            "target": "local",
             "tool_version": "4.1.1",
             "summary": "Schema drift check has not been run.",
             "report": {},
@@ -89,7 +89,6 @@ def test_load_schema_drift_payload_returns_copy(monkeypatch: pytest.MonkeyPatch)
         aws_profile="team-profile",
         aws_region="us-west-2",
         tapdb_database_name="dewey",
-        tapdb_env="dev",
     )
     loaded = schema_drift.load_schema_drift_payload(settings)
     loaded["status"] = "changed"
@@ -112,7 +111,6 @@ def test_cached_schema_drift_payload_success_and_failure(monkeypatch: pytest.Mon
         "team-profile",
         "us-west-2",
         "dewey",
-        "dev",
     )
 
     assert success == {"status": "clean", "summary": "ok"}
@@ -123,7 +121,6 @@ def test_cached_schema_drift_payload_success_and_failure(monkeypatch: pytest.Mon
             "profile": "team-profile",
             "region": "us-west-2",
             "namespace": "dewey",
-            "tapdb_env": "dev",
         }
     ]
 
@@ -131,10 +128,10 @@ def test_cached_schema_drift_payload_success_and_failure(monkeypatch: pytest.Mon
     monkeypatch.setattr(
         schema_drift,
         "default_schema_drift_payload",
-        lambda environment="": {
+        lambda target="": {
             "status": "not_run",
             "checked_at": None,
-            "environment": environment,
+            "target": target,
             "tool_version": "4.1.1",
             "summary": "Schema drift check has not been run.",
             "report": {},
@@ -153,13 +150,12 @@ def test_cached_schema_drift_payload_success_and_failure(monkeypatch: pytest.Mon
         "team-profile",
         "us-west-2",
         "dewey",
-        "dev",
     )
 
     assert failure == {
         "status": "check_failed",
         "checked_at": None,
-        "environment": "dev",
+        "target": "local",
         "tool_version": "4.1.1",
         "summary": "Unable to execute tapdb drift-check: tapdb broke",
         "report": {},

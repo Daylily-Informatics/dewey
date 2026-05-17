@@ -17,6 +17,11 @@ DEFAULT_COGNITO_GROUP_ROLE_MAP: dict[str, str] = {
     "dewey-admin": Role.ADMIN.value,
     "dewey-readwrite": Role.READ_WRITE.value,
     "dewey-readonly": Role.READ_ONLY.value,
+    "lsmc:global-admin": Role.ADMIN.value,
+    "lsmc:internal-user": Role.READ_WRITE.value,
+    "lsmc:dewey:admin": Role.ADMIN.value,
+    "lsmc:dewey:readwrite": Role.READ_WRITE.value,
+    "lsmc:dewey:readonly": Role.READ_ONLY.value,
 }
 
 

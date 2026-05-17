@@ -25,13 +25,6 @@ DEFAULT_AWS_REGION = "us-west-2"
 DEFAULT_TAPDB_CLIENT_ID = "dewey"
 DEFAULT_TAPDB_DATABASE_NAME = "dewey"
 
-_TARGET_TO_TAPDB_ENV = {
-    "local": "dev",
-    "aurora": "prod",
-    "prod": "prod",
-}
-
-
 class TapDBRuntimeError(RuntimeError):
     """Raised for TapDB runtime configuration/invocation errors."""
 
@@ -69,11 +62,11 @@ def ensure_tapdb_version() -> str:
         raise TapDBRuntimeError("daylily-tapdb is required but not installed") from exc
 
 
-def tapdb_env_for_target(target: str) -> str:
+def validate_database_target(target: str) -> str:
     normalized = (target or "").strip().lower()
-    if normalized not in _TARGET_TO_TAPDB_ENV:
+    if normalized not in {"local", "aurora"}:
         raise TapDBRuntimeError(f"Unsupported database target '{target}'. Use local or aurora.")
-    return _TARGET_TO_TAPDB_ENV[normalized]
+    return normalized
 
 
 def _resolve_tapdb_config_path(
@@ -106,10 +99,9 @@ def _resolve_runtime_env(
     profile: str = DEFAULT_AWS_PROFILE,
     region: str = DEFAULT_AWS_REGION,
     namespace: str = DEFAULT_TAPDB_DATABASE_NAME,
-    tapdb_env: str | None = None,
     config_path: str = "",
 ) -> dict[str, str]:
-    resolved_env = (tapdb_env or tapdb_env_for_target(target)).strip().lower()
+    validate_database_target(target)
     resolved_client_id = (client_id or DEFAULT_TAPDB_CLIENT_ID).strip() or DEFAULT_TAPDB_CLIENT_ID
     resolved_namespace = (
         namespace or DEFAULT_TAPDB_DATABASE_NAME
@@ -129,7 +121,6 @@ def _resolve_runtime_env(
         "aws_region": (region or DEFAULT_AWS_REGION).strip() or DEFAULT_AWS_REGION,
         "client_id": resolved_client_id,
         "database_name": resolved_namespace,
-        "tapdb_env": resolved_env,
         "config_path": resolved_cfg_path or "",
     }
 
@@ -140,7 +131,7 @@ def _require_config_path(runtime_env: Mapping[str, str]) -> str:
         raise TapDBRuntimeError(
             "TapDB config path is required. Pass an explicit absolute path via Dewey settings, "
             "--config, or TAPDB_CONFIG_PATH, then run TapDB as "
-            "'tapdb --config <path> --env <name> ...'."
+            "'tapdb --config <path> ...'."
         )
     return config_path
 
@@ -151,27 +142,25 @@ def _resolve_tapdb_cli_executable() -> str:
         return tapdb_executable
     raise TapDBRuntimeError(
         "tapdb CLI is not available on PATH. Install daylily-tapdb in the active Dewey "
-        "environment so 'tapdb --config <path> --env <name> ...' is available."
+        "environment so 'tapdb --config <path> ...' is available."
     )
 
 
-def _get_tapdb_db_config_for_env(
-    tapdb_env: str,
+def _get_tapdb_db_config(
     *,
     config_path: str,
     client_id: str,
     database_name: str,
 ) -> dict[str, str]:
-    from daylily_tapdb.cli.db_config import get_db_config_for_env
+    from daylily_tapdb.cli.db_config import get_db_config
 
-    cfg = get_db_config_for_env(
-        tapdb_env,
+    cfg = get_db_config(
         config_path=config_path or None,
         client_id=client_id,
         database_name=database_name,
     )
     if not cfg:
-        raise TapDBRuntimeError(f"No TapDB database config resolved for TAPDB_ENV={tapdb_env}.")
+        raise TapDBRuntimeError("No TapDB database config resolved for the explicit target.")
     return cfg
 
 
@@ -194,7 +183,6 @@ def export_database_url_for_target(
     profile: str = DEFAULT_AWS_PROFILE,
     region: str = DEFAULT_AWS_REGION,
     namespace: str = DEFAULT_TAPDB_DATABASE_NAME,
-    tapdb_env: str | None = None,
     config_path: str = "",
 ) -> str:
     ensure_tapdb_version()
@@ -204,12 +192,10 @@ def export_database_url_for_target(
         profile=profile,
         region=region,
         namespace=namespace,
-        tapdb_env=tapdb_env,
         config_path=config_path,
     )
     resolved_config_path = _require_config_path(runtime_env)
-    cfg = _get_tapdb_db_config_for_env(
-        runtime_env["tapdb_env"],
+    cfg = _get_tapdb_db_config(
         config_path=resolved_config_path,
         client_id=runtime_env["client_id"],
         database_name=runtime_env["database_name"],
@@ -226,7 +212,6 @@ def run_tapdb_cli(
     profile: str = DEFAULT_AWS_PROFILE,
     region: str = DEFAULT_AWS_REGION,
     namespace: str = DEFAULT_TAPDB_DATABASE_NAME,
-    tapdb_env: str | None = None,
     config_path: str = "",
     cwd: Path | None = None,
     check: bool = True,
@@ -238,7 +223,6 @@ def run_tapdb_cli(
         profile=profile,
         region=region,
         namespace=namespace,
-        tapdb_env=tapdb_env,
         config_path=config_path,
     )
     tapdb_executable = _resolve_tapdb_cli_executable()
@@ -246,8 +230,6 @@ def run_tapdb_cli(
         tapdb_executable,
         "--config",
         _require_config_path(runtime_env),
-        "--env",
-        runtime_env["tapdb_env"],
     ]
     cmd.extend(args)
     child_env = os.environ.copy()
@@ -289,19 +271,17 @@ def run_schema_drift_check(
     profile: str = DEFAULT_AWS_PROFILE,
     region: str = DEFAULT_AWS_REGION,
     namespace: str = DEFAULT_TAPDB_DATABASE_NAME,
-    tapdb_env: str | None = None,
     cwd: Path | None = None,
 ) -> dict[str, object]:
-    env_name = (tapdb_env or tapdb_env_for_target(target)).strip().lower()
+    target_label = validate_database_target(target)
     tool_version = ensure_tapdb_version()
     result = run_tapdb_cli(
-        ["db", "schema", "drift-check", env_name, "--json", "--no-strict"],
+        ["db", "schema", "drift-check", "--json", "--no-strict"],
         target=target,
         client_id=client_id,
         profile=profile,
         region=region,
         namespace=namespace,
-        tapdb_env=env_name,
         cwd=cwd,
         check=False,
     )
@@ -336,7 +316,7 @@ def run_schema_drift_check(
     normalized: dict[str, object] = {
         "status": status,
         "checked_at": _utcnow(),
-        "environment": env_name,
+        "target": target_label,
         "tool_version": tool_version,
         "summary": summary,
         "report": payload,

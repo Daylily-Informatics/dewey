@@ -87,6 +87,14 @@ application:
   verify_ssl: true
 
 auth:
+  mode: cognito
+  external_broker:
+    service_id: dewey
+    login_url: ""
+    handoff_exchange_url: ""
+    callback_url: ""
+    logout_url: ""
+    share_recipient_prepare_url: ""
   cognito:
     domain: dewey-auth.example.com
     app_client_id: dewey-client-id
@@ -108,6 +116,11 @@ auth:
       dewey-admin: ADMIN
       dewey-readwrite: READ_WRITE
       dewey-readonly: READ_ONLY
+      lsmc:global-admin: ADMIN
+      lsmc:internal-user: READ_WRITE
+      lsmc:dewey:admin: ADMIN
+      lsmc:dewey:readwrite: READ_WRITE
+      lsmc:dewey:readonly: READ_ONLY
 
 database:
   backend: tapdb

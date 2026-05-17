@@ -70,6 +70,14 @@ def _validate_optional_https_url(value: str, *, field_name: str) -> str:
     return normalized
 
 
+def _read_first_env(*names: str) -> str:
+    for name in names:
+        value = str(os.environ.get(name) or "").strip()
+        if value:
+            return value
+    return ""
+
+
 def _require_bare_host(value: str, *, field_name: str) -> str:
     normalized = str(value or "").strip().rstrip("/")
     if not normalized:
@@ -222,7 +230,6 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "database_domain_code": "tapdb_domain_code",
         "database_domain_registry_path": "tapdb_domain_registry_path",
         "database_prefix_ownership_registry_path": "tapdb_prefix_ownership_registry_path",
-        "database_env": "tapdb_env",
         "database_config_path": "tapdb_config_path",
         "aws_profile": "aws_profile",
         "aws_region": "aws_region",
@@ -240,6 +247,13 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "auth_cognito_default_tenant_id": "cognito_default_tenant_id",
         "auth_cognito_auto_provision_allowed_domains": "cognito_auto_provision_allowed_domains",
         "auth_cognito_group_role_map": "cognito_group_role_map",
+        "auth_mode": "auth_mode",
+        "auth_external_broker_service_id": "external_broker_service_id",
+        "auth_external_broker_login_url": "external_broker_login_url",
+        "auth_external_broker_handoff_exchange_url": "external_broker_handoff_exchange_url",
+        "auth_external_broker_callback_url": "external_broker_callback_url",
+        "auth_external_broker_logout_url": "external_broker_logout_url",
+        "auth_external_broker_share_recipient_prepare_url": "external_broker_share_recipient_prepare_url",
         "deployment_name": "deployment_name",
         "deployment_color": "deployment_color",
         "deployment_is_production": "deployment_is_production",
@@ -309,6 +323,13 @@ def _display_config_path(path: str) -> str:
         "cognito_default_tenant_id": "auth.cognito.default_tenant_id",
         "cognito_auto_provision_allowed_domains": "auth.cognito.auto_provision_allowed_domains",
         "cognito_group_role_map": "auth.cognito.group_role_map",
+        "auth_mode": "auth.mode",
+        "external_broker_service_id": "auth.external_broker.service_id",
+        "external_broker_login_url": "auth.external_broker.login_url",
+        "external_broker_handoff_exchange_url": "auth.external_broker.handoff_exchange_url",
+        "external_broker_callback_url": "auth.external_broker.callback_url",
+        "external_broker_logout_url": "auth.external_broker.logout_url",
+        "external_broker_share_recipient_prepare_url": "auth.external_broker.share_recipient_prepare_url",
         "database_backend": "database.backend",
         "database_target": "database.target",
         "tapdb_client_id": "database.client_id",
@@ -317,7 +338,6 @@ def _display_config_path(path: str) -> str:
         "tapdb_domain_code": "database.domain_code",
         "tapdb_domain_registry_path": "database.domain_registry_path",
         "tapdb_prefix_ownership_registry_path": "database.prefix_ownership_registry_path",
-        "tapdb_env": "database.env",
         "tapdb_config_path": "database.config_path",
         "tapdb_strict_namespace": "database.strict_namespace",
         "aws_profile": "aws.profile",
@@ -389,6 +409,8 @@ class Settings(BaseSettings):
     port: int = DEFAULT_APP_PORT
     verify_ssl: bool = True
 
+    auth_mode: str = "cognito"
+
     # Cognito-backed browser UI auth
     cognito_domain: str = ""
     cognito_app_client_id: str = ""
@@ -407,6 +429,12 @@ class Settings(BaseSettings):
     cognito_group_role_map: dict[str, str] = Field(
         default_factory=lambda: dict(DEFAULT_COGNITO_GROUP_ROLE_MAP)
     )
+    external_broker_service_id: str = "dewey"
+    external_broker_login_url: str = ""
+    external_broker_handoff_exchange_url: str = ""
+    external_broker_callback_url: str = ""
+    external_broker_logout_url: str = ""
+    external_broker_share_recipient_prepare_url: str = ""
 
     deployment_name: str = ""
     deployment_color: str = ""
@@ -423,7 +451,6 @@ class Settings(BaseSettings):
     tapdb_domain_code: str = "Z"
     tapdb_domain_registry_path: str = str(DEFAULT_TAPDB_DOMAIN_REGISTRY_PATH)
     tapdb_prefix_ownership_registry_path: str = str(DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH)
-    tapdb_env: str = "dev"
     tapdb_config_path: str = str(DEFAULT_TAPDB_CONFIG_DIR / "dewey" / "dewey" / "tapdb-config.yaml")
     tapdb_strict_namespace: int = 1
 
@@ -450,6 +477,25 @@ class Settings(BaseSettings):
     @classmethod
     def validate_cognito_urls(cls, value: str, info):
         return _validate_optional_https_url(value, field_name=str(info.field_name))
+
+    @field_validator(
+        "external_broker_login_url",
+        "external_broker_handoff_exchange_url",
+        "external_broker_callback_url",
+        "external_broker_logout_url",
+        "external_broker_share_recipient_prepare_url",
+    )
+    @classmethod
+    def validate_external_broker_urls(cls, value: str, info):
+        return _validate_optional_https_url(value, field_name=str(info.field_name))
+
+    @field_validator("auth_mode")
+    @classmethod
+    def validate_auth_mode(cls, value: str) -> str:
+        normalized = str(value or "").strip().lower()
+        if normalized not in {"cognito", "external_broker"}:
+            raise ValueError("auth_mode must be one of: cognito, external_broker")
+        return normalized
 
     @field_validator("database_backend")
     @classmethod
@@ -539,6 +585,44 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_cognito_contract(self) -> "Settings":
+        if self.auth_mode == "external_broker":
+            missing = [
+                field_name
+                for field_name in (
+                    "external_broker_service_id",
+                    "external_broker_login_url",
+                    "external_broker_handoff_exchange_url",
+                    "external_broker_callback_url",
+                    "external_broker_logout_url",
+                )
+                if not str(getattr(self, field_name) or "").strip()
+            ]
+            if missing:
+                raise ValueError(
+                    "external_broker auth requires explicit settings: "
+                    + ", ".join(sorted(missing))
+                )
+            self.external_broker_service_id = str(self.external_broker_service_id).strip()
+            self.external_broker_login_url = _require_https_url(
+                self.external_broker_login_url,
+                field_name="external_broker_login_url",
+            )
+            self.external_broker_handoff_exchange_url = _require_https_url(
+                self.external_broker_handoff_exchange_url,
+                field_name="external_broker_handoff_exchange_url",
+            )
+            self.external_broker_callback_url = _require_https_url(
+                self.external_broker_callback_url,
+                field_name="external_broker_callback_url",
+            )
+            self.external_broker_logout_url = _require_https_url(
+                self.external_broker_logout_url,
+                field_name="external_broker_logout_url",
+            )
+            self.external_broker_share_recipient_prepare_url = _validate_optional_https_url(
+                self.external_broker_share_recipient_prepare_url,
+                field_name="external_broker_share_recipient_prepare_url",
+            )
         if str(self.cognito_domain or "").strip():
             self.cognito_domain = _require_bare_host(
                 self.cognito_domain,
@@ -703,6 +787,13 @@ def load_settings(config_path: Path | None = None) -> Settings:
             DEFAULT_COGNITO_AUTO_PROVISION_ALLOWED_DOMAINS
         ),
         "cognito_group_role_map": dict(DEFAULT_COGNITO_GROUP_ROLE_MAP),
+        "auth_mode": "cognito",
+        "external_broker_service_id": "dewey",
+        "external_broker_login_url": "",
+        "external_broker_handoff_exchange_url": "",
+        "external_broker_callback_url": "",
+        "external_broker_logout_url": "",
+        "external_broker_share_recipient_prepare_url": "",
         "deployment_name": "",
         "deployment_color": "",
         "deployment_is_production": False,
@@ -713,10 +804,28 @@ def load_settings(config_path: Path | None = None) -> Settings:
         for key, value in os.environ.items()
         if key.startswith("DEWEY_")
     }
+    shared_auth_env = {
+        "auth_mode": _read_first_env("LSMC_AUTH_MODE"),
+        "external_broker_service_id": _read_first_env(
+            "LSMC_AUTH_BROKER_SERVICE_ID",
+            "LSMC_AUTH_SERVICE_ID",
+        ),
+        "external_broker_login_url": _read_first_env("LSMC_AUTH_BROKER_LOGIN_URL"),
+        "external_broker_handoff_exchange_url": _read_first_env(
+            "LSMC_AUTH_BROKER_HANDOFF_EXCHANGE_URL"
+        ),
+        "external_broker_callback_url": _read_first_env("LSMC_AUTH_BROKER_CALLBACK_URL"),
+        "external_broker_logout_url": _read_first_env("LSMC_AUTH_BROKER_LOGOUT_URL"),
+        "external_broker_share_recipient_prepare_url": _read_first_env(
+            "LSMC_AUTH_BROKER_SHARE_RECIPIENT_PREPARE_URL",
+            "DEWEY_EXTERNAL_SHARE_RECIPIENT_PREPARE_URL",
+        ),
+    }
     merged = {**seed}
     for key, default in yaml_only_defaults.items():
         merged[key] = seed.get(key, default)
     merged.update(env_override)
+    merged.update({key: value for key, value in shared_auth_env.items() if value})
     return Settings(**merged)
 
 

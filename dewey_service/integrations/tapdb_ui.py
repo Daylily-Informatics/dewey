@@ -240,10 +240,9 @@ def _dewey_dag_contract_version() -> str:
     return str(build_dag_capability_advertisement().get("contract_version") or "dag:v1")
 
 
-def _build_dewey_dag_router(*, config_path: str, env_name: str) -> Any:
+def _build_dewey_dag_router(*, config_path: str) -> Any:
     router = create_tapdb_dag_router(
         config_path=config_path,
-        env_name=env_name,
         service_name="dewey",
     )
 
@@ -259,7 +258,7 @@ def _build_dewey_dag_router(*, config_path: str, env_name: str) -> Any:
         relationship_type: str = "",
         limit: int = Query(25, ge=1, le=100),
     ) -> dict[str, Any]:
-        with tapdb_dag_runtime.get_db(config_path, env_name) as conn:
+        with tapdb_dag_runtime.get_db(config_path) as conn:
             with conn.session_scope() as session:
                 payload = _search_tapdb_objects(
                     session,
@@ -325,14 +324,12 @@ def mount_tapdb_surfaces(app, *, settings: Settings) -> bool:
         "/tapdb",
         create_tapdb_web_app(
             config_path=config_path,
-            env_name=settings.tapdb_env,
             host_bridge=bridge,
         ),
     )
     app.include_router(
         _build_dewey_dag_router(
             config_path=config_path,
-            env_name=settings.tapdb_env,
         ),
         dependencies=[Depends(require_session_or_api_auth(settings))],
     )

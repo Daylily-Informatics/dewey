@@ -119,26 +119,11 @@ def _backend() -> backend_mod.TapDBBackend:
     return backend
 
 
-def test_backend_init_requires_env_and_wraps_config_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_backend_init_wraps_config_errors(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         backend_mod,
         "get_settings",
         lambda: SimpleNamespace(
-            tapdb_env="",
-            tapdb_client_id="dewey",
-            tapdb_database_name="dewey",
-            tapdb_config_path="",
-            aws_region="us-west-2",
-        ),
-    )
-    with pytest.raises(RuntimeError, match="tapdb_env is required"):
-        backend_mod.TapDBBackend()
-
-    monkeypatch.setattr(
-        backend_mod,
-        "get_settings",
-        lambda: SimpleNamespace(
-            tapdb_env="dev",
             tapdb_client_id="dewey",
             tapdb_database_name="dewey",
             tapdb_domain_code="Z",
@@ -160,7 +145,6 @@ def test_backend_init_builds_connection(monkeypatch: pytest.MonkeyPatch) -> None
         backend_mod,
         "get_settings",
         lambda: SimpleNamespace(
-            tapdb_env="dev",
             tapdb_client_id="dewey",
             tapdb_database_name="dewey",
             tapdb_domain_code="Z",
@@ -175,8 +159,8 @@ def test_backend_init_builds_connection(monkeypatch: pytest.MonkeyPatch) -> None
     )
     monkeypatch.setattr(
         backend_mod,
-        "get_db_config_for_env",
-        lambda env, **_kwargs: {
+        "get_db_config",
+        lambda **_kwargs: {
             "host": "localhost",
             "port": "5432",
             "user": "dewey",

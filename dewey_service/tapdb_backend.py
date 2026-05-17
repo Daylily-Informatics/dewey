@@ -17,7 +17,7 @@ from daylily_tapdb import (
     generic_instance_lineage,
 )
 from daylily_tapdb.cli.context import resolve_context
-from daylily_tapdb.cli.db_config import get_db_config_for_env
+from daylily_tapdb.cli.db_config import get_db_config
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
@@ -73,20 +73,15 @@ class TapDBBackend:
 
     def __init__(self, app_username: str = "dewey"):
         settings = get_settings()
-        env = str(settings.tapdb_env or "").strip().lower()
-        if not env:
-            raise RuntimeError("tapdb_env is required in Dewey settings (dev|test|prod)")
 
         try:
             ctx = resolve_context(
                 require_keys=True,
                 client_id=settings.tapdb_client_id,
                 database_name=settings.tapdb_database_name,
-                env_name=env,
                 config_path=settings.tapdb_config_path or None,
             )
-            cfg = get_db_config_for_env(
-                env,
+            cfg = get_db_config(
                 config_path=settings.tapdb_config_path or None,
                 client_id=ctx.client_id,
                 database_name=ctx.database_name,
@@ -94,7 +89,7 @@ class TapDBBackend:
         except Exception as exc:
             raise RuntimeError(
                 "TapDB is not configured for Dewey.\n"
-                "Required settings: tapdb_client_id, tapdb_database_name, tapdb_env, "
+                "Required settings: tapdb_client_id, tapdb_database_name, "
                 "tapdb_owner_repo_name, tapdb_domain_code, tapdb_domain_registry_path, "
                 "tapdb_prefix_ownership_registry_path"
             ) from exc

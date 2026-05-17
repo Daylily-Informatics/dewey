@@ -8,6 +8,7 @@ import secrets
 from typing import Any
 from urllib.parse import urlencode, urlsplit
 
+import httpx
 from daylily_auth_cognito.browser import session as browser_session
 from daylily_auth_cognito.browser.oauth import build_authorization_url
 from daylily_auth_cognito.browser.session import (
@@ -18,6 +19,7 @@ from daylily_auth_cognito.browser.session import (
     complete_cognito_callback,
     load_session_principal,
     start_cognito_login,
+    store_session_principal,
     validate_web_auth_contract,
 )
 from daylily_auth_cognito.browser.session import (
@@ -31,6 +33,9 @@ from dewey_service.rbac import Role, normalize_session_profile, profile_has_role
 from dewey_service.settings import Settings
 
 configure_session_middleware = _configure_session_middleware
+
+_EXTERNAL_BROKER_STATE_KEY = "dewey_external_broker_state"
+_EXTERNAL_BROKER_NEXT_KEY = "dewey_external_broker_next"
 
 
 class AuthError(RuntimeError):
@@ -106,6 +111,32 @@ def build_cognito_web_session_config(
     return config
 
 
+def build_web_session_config(
+    *,
+    settings: Settings,
+    server_instance_id: str | None = None,
+) -> CognitoWebSessionConfig:
+    if settings.auth_mode != "external_broker":
+        return build_cognito_web_session_config(
+            settings=settings,
+            server_instance_id=server_instance_id,
+        )
+
+    public_base_url = _origin(settings.external_broker_callback_url)
+    return CognitoWebSessionConfig(
+        domain=urlsplit(settings.external_broker_login_url).netloc,
+        client_id=settings.external_broker_service_id,
+        redirect_uri=settings.external_broker_callback_url,
+        logout_uri=public_base_url,
+        session_secret_key=settings.session_secret_key,
+        session_cookie_name="dewey_session",
+        public_base_url=public_base_url,
+        allow_insecure_http=public_base_url.startswith("http://"),
+        server_instance_id=server_instance_id or secrets.token_urlsafe(16),
+        auth_mode="external_broker",
+    )
+
+
 def build_cognito_login_url(*, settings: Settings, state: str) -> str:
     domain = _bare_host(settings.cognito_domain)
     return build_authorization_url(
@@ -159,7 +190,39 @@ def start_browser_login(
     config: CognitoWebSessionConfig,
     next_path: str | None = None,
 ):
+    settings: Settings = request.app.state.settings
+    if settings.auth_mode == "external_broker":
+        return start_external_broker_login(request, settings=settings, next_path=next_path)
     return start_cognito_login(request, config, next_path)
+
+
+def _safe_next_path(value: str | None) -> str:
+    cleaned = str(value or "").strip()
+    return cleaned if cleaned.startswith("/") else "/ui"
+
+
+def start_external_broker_login(
+    request: Request,
+    *,
+    settings: Settings,
+    next_path: str | None = None,
+) -> RedirectResponse:
+    state = secrets.token_urlsafe(32)
+    target = _safe_next_path(next_path or "/ui")
+    request.session[_EXTERNAL_BROKER_STATE_KEY] = state
+    request.session[_EXTERNAL_BROKER_NEXT_KEY] = target
+    query = urlencode(
+        {
+            "service": settings.external_broker_service_id,
+            "next": target,
+            "callback_url": settings.external_broker_callback_url,
+            "state": state,
+        }
+    )
+    return RedirectResponse(
+        url=f"{settings.external_broker_login_url.rstrip('/')}?{query}",
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
 
 
 async def complete_browser_login(
@@ -187,12 +250,145 @@ async def complete_browser_login(
     return response
 
 
+async def exchange_external_broker_handoff(*, settings: Settings, code: str) -> dict[str, Any]:
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        response = await client.post(settings.external_broker_handoff_exchange_url, json={"code": code})
+    if response.status_code >= 400:
+        raise CognitoWebAuthError(
+            "auth_error",
+            f"External broker handoff exchange failed with status {response.status_code}",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            redirect_to_error=True,
+        )
+    payload = response.json()
+    if not isinstance(payload, dict):
+        raise CognitoWebAuthError(
+            "auth_error",
+            "External broker handoff response must be an object",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            redirect_to_error=True,
+        )
+    return payload
+
+
+def _service_entitlement_roles(user: dict[str, Any], *, service_id: str) -> list[str]:
+    entitlements = user.get("service_entitlements") or []
+    out: list[str] = []
+    if isinstance(entitlements, dict):
+        entitlement = entitlements.get(service_id)
+        entitlements = [entitlement] if isinstance(entitlement, dict) else []
+    for entitlement in entitlements:
+        if not isinstance(entitlement, dict):
+            continue
+        if str(entitlement.get("service") or service_id).strip() != service_id:
+            continue
+        for role in entitlement.get("roles") or []:
+            normalized = str(role or "").strip().lower().replace("-", "_")
+            if normalized in {"admin", "administrator"}:
+                out.append("dewey-admin")
+            elif normalized in {"read_write", "readwrite", "write", "operator", "internal_user"}:
+                out.append("dewey-readwrite")
+            elif normalized in {"read_only", "readonly", "read", "viewer", "auditor"}:
+                out.append("dewey-readonly")
+    return out
+
+
+def resolve_external_broker_principal(user: dict[str, Any], request: Request) -> SessionPrincipal:
+    settings: Settings = request.app.state.settings
+    email = str(user.get("email") or "").strip().lower()
+    subject = str(
+        user.get("canonical_user_id") or user.get("sub") or user.get("user_id") or email
+    ).strip()
+    name = str(user.get("display_name") or user.get("name") or "").strip() or None
+    if not email or not subject:
+        raise CognitoWebAuthError(
+            "auth_error",
+            "External broker handoff missing required user identity",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            redirect_to_error=True,
+        )
+    _require_allowed_cognito_email_domain(settings, email)
+    groups = [str(item).strip() for item in user.get("groups") or [] if str(item).strip()]
+    groups.extend(
+        _service_entitlement_roles(user, service_id=settings.external_broker_service_id)
+    )
+    profile = normalize_session_profile(
+        email=email,
+        sub=subject,
+        groups=list(dict.fromkeys(groups)),
+        group_role_map=settings.cognito_group_role_map,
+    )
+    if not profile["roles"]:
+        raise CognitoWebAuthError(
+            "not_authorized",
+            "External broker user has no Dewey roles",
+            status_code=status.HTTP_403_FORBIDDEN,
+            redirect_to_error=True,
+        )
+    return SessionPrincipal(
+        user_sub=profile["sub"],
+        email=profile["email"],
+        name=name,
+        roles=list(profile["roles"]),
+        cognito_groups=list(profile["groups"]),
+        auth_mode="external_broker",
+        app_context={"canonical_user": dict(user)},
+    )
+
+
+async def complete_external_broker_login(
+    request: Request,
+    config: CognitoWebSessionConfig,
+    *,
+    code: str | None,
+    state: str | None,
+) -> RedirectResponse:
+    if not code:
+        return RedirectResponse(
+            url="/auth/error?reason=missing_code",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+    expected_state = str(request.session.get(_EXTERNAL_BROKER_STATE_KEY) or "")
+    if not expected_state or state != expected_state:
+        clear_ui_session(request)
+        return RedirectResponse(
+            url="/auth/error?reason=invalid_state",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    settings: Settings = request.app.state.settings
+    try:
+        payload = await exchange_external_broker_handoff(settings=settings, code=code)
+        user = payload.get("user")
+        if not isinstance(user, dict):
+            raise CognitoWebAuthError(
+                "auth_error",
+                "External broker handoff response omitted user",
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                redirect_to_error=True,
+            )
+        principal = resolve_external_broker_principal(user, request)
+        store_session_principal(request, config, principal)
+    except CognitoWebAuthError as exc:
+        clear_ui_session(request)
+        return RedirectResponse(
+            url=f"/auth/error?reason={exc.reason}",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    request.session.pop(_EXTERNAL_BROKER_STATE_KEY, None)
+    redirect_to = _safe_next_path(str(request.session.pop(_EXTERNAL_BROKER_NEXT_KEY, "/ui") or "/ui"))
+    return RedirectResponse(url=redirect_to, status_code=status.HTTP_303_SEE_OTHER)
+
+
 def clear_ui_session(request: Request) -> None:
     clear_session_principal(request)
     config = getattr(getattr(request.app, "state", None), "web_session_config", None)
     if config is not None:
         request.session.pop(config.state_session_key, None)
         request.session.pop(config.next_path_session_key, None)
+    request.session.pop(_EXTERNAL_BROKER_STATE_KEY, None)
+    request.session.pop(_EXTERNAL_BROKER_NEXT_KEY, None)
 
 
 def resolve_operator_principal(
@@ -295,11 +491,10 @@ def require_ui_session(request: Request) -> dict[str, Any]:
     if store is not None:
         store.record_auth_event(
             status="ok",
-            mode="cognito",
+            mode=str(getattr(request.state, "auth_mode", "cognito") or "cognito"),
             detail="ui_session",
             service_principal=False,
         )
-    request.state.auth_mode = "cognito"
     return profile
 
 
@@ -337,16 +532,16 @@ def require_observability_access(settings: Settings):
     ) -> dict[str, Any]:
         profile = _load_ui_profile(request)
         if isinstance(profile, dict):
+            auth_mode = str(getattr(request.state, "auth_mode", "cognito") or "cognito")
             store = getattr(request.app.state, "observability", None)
             if store is not None:
                 store.record_auth_event(
                     status="ok",
-                    mode="cognito",
+                    mode=auth_mode,
                     detail="session",
                     service_principal=False,
                 )
-            request.state.auth_mode = "cognito"
-            return {"auth_mode": "cognito", "service_principal": False, "profile": profile}
+            return {"auth_mode": auth_mode, "service_principal": False, "profile": profile}
 
         if credentials is not None:
             token = str(credentials.credentials or "").strip()
@@ -388,16 +583,16 @@ def require_session_or_api_auth(settings: Settings):
     ) -> dict[str, Any]:
         profile = _load_ui_profile(request)
         if isinstance(profile, dict):
+            auth_mode = str(getattr(request.state, "auth_mode", "cognito") or "cognito")
             store = getattr(request.app.state, "observability", None)
             if store is not None:
                 store.record_auth_event(
                     status="ok",
-                    mode="cognito",
+                    mode=auth_mode,
                     detail="session_or_bearer",
                     service_principal=False,
                 )
-            request.state.auth_mode = "cognito"
-            return {"auth_mode": "cognito", "service_principal": False, "profile": profile}
+            return {"auth_mode": auth_mode, "service_principal": False, "profile": profile}
 
         if credentials is not None:
             token = str(credentials.credentials or "").strip()

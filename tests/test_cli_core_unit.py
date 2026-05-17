@@ -110,7 +110,6 @@ def test_dewey_info_hook_reports_settings_and_running_server(
             tapdb_database_name="dewey",
             tapdb_owner_repo_name="dewey",
             tapdb_domain_code="Z",
-            tapdb_env="dev",
             host="127.0.0.1",
             port=8914,
             aws_profile="config-profile",

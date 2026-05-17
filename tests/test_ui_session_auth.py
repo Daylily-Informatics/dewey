@@ -7,7 +7,9 @@ import pytest
 from daylily_auth_cognito.browser.session import CONFIG_STATE_KEY
 from fastapi.testclient import TestClient
 
+from dewey_service.app import create_app
 from dewey_service.auth import build_cognito_web_session_config
+from dewey_service.settings import Settings
 
 
 def _login_user(
@@ -367,3 +369,92 @@ def test_logout_from_one_browser_does_not_clear_the_other(monkeypatch, client) -
         ui_other = other_client.get("/ui")
         assert ui_other.status_code == 200
         assert "shared@lsmc.bio" in ui_other.text
+
+
+def test_external_broker_login_sets_admin_session(monkeypatch, fake_service) -> None:
+    settings = Settings(
+        api_bearer_token="token-123",
+        session_secret_key="session-secret",
+        auth_mode="external_broker",
+        external_broker_service_id="dewey",
+        external_broker_login_url="https://dev.login.lsmc.com/login",
+        external_broker_handoff_exchange_url="https://dev.login.lsmc.com/api/handoff/exchange",
+        external_broker_callback_url="https://localhost:8914/auth/lsmc/callback",
+        external_broker_logout_url="https://dev.login.lsmc.com/logout",
+    )
+
+    async def _exchange(*_args, **_kwargs):
+        return {
+            "user": {
+                "email": "johnm@lsmc.com",
+                "canonical_user_id": "user-johnm",
+                "display_name": "John M",
+                "groups": ["lsmc:global-admin"],
+                "service_entitlements": [
+                    {"service": "dewey", "roles": ["admin"]},
+                ],
+            }
+        }
+
+    monkeypatch.setattr("dewey_service.auth.exchange_external_broker_handoff", _exchange)
+    app = create_app(settings=settings, service=fake_service)
+    with TestClient(app, base_url="https://localhost:8914") as broker_client:
+        login = broker_client.get("/auth/login?next=/admin", follow_redirects=False)
+        assert login.status_code == 303
+        parsed = urlparse(login.headers["location"])
+        params = parse_qs(parsed.query)
+        assert parsed.netloc == "dev.login.lsmc.com"
+        assert params["service"] == ["dewey"]
+        assert params["callback_url"] == ["https://localhost:8914/auth/lsmc/callback"]
+
+        callback = broker_client.get(
+            "/auth/lsmc/callback",
+            params={"code": "handoff-1", "state": params["state"][0]},
+            follow_redirects=False,
+        )
+        assert callback.status_code == 303
+        assert callback.headers["location"] == "/admin"
+
+        admin = broker_client.get("/admin")
+        assert admin.status_code == 200
+        assert "Dewey Admin" in admin.text
+
+        logout = broker_client.post("/auth/logout", follow_redirects=False)
+        assert logout.status_code == 303
+        assert logout.headers["location"] == "https://dev.login.lsmc.com/logout"
+
+
+def test_external_broker_callback_rejects_missing_roles(monkeypatch, fake_service) -> None:
+    settings = Settings(
+        api_bearer_token="token-123",
+        session_secret_key="session-secret",
+        auth_mode="external_broker",
+        external_broker_service_id="dewey",
+        external_broker_login_url="https://dev.login.lsmc.com/login",
+        external_broker_handoff_exchange_url="https://dev.login.lsmc.com/api/handoff/exchange",
+        external_broker_callback_url="https://localhost:8914/auth/lsmc/callback",
+        external_broker_logout_url="https://dev.login.lsmc.com/logout",
+    )
+
+    async def _exchange(*_args, **_kwargs):
+        return {
+            "user": {
+                "email": "viewer@lsmc.com",
+                "canonical_user_id": "user-viewer",
+                "groups": [],
+            }
+        }
+
+    monkeypatch.setattr("dewey_service.auth.exchange_external_broker_handoff", _exchange)
+    app = create_app(settings=settings, service=fake_service)
+    with TestClient(app, base_url="https://localhost:8914") as broker_client:
+        login = broker_client.get("/auth/login", follow_redirects=False)
+        state = parse_qs(urlparse(login.headers["location"]).query)["state"][0]
+        callback = broker_client.get(
+            "/auth/lsmc/callback",
+            params={"code": "handoff-1", "state": state},
+            follow_redirects=False,
+        )
+
+    assert callback.status_code == 303
+    assert callback.headers["location"] == "/auth/error?reason=not_authorized"

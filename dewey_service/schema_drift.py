@@ -13,11 +13,11 @@ from dewey_service.integrations.tapdb_runtime import (
 from dewey_service.settings import Settings
 
 
-def default_schema_drift_payload(environment: str = "") -> dict[str, Any]:
+def default_schema_drift_payload(target: str = "") -> dict[str, Any]:
     return {
         "status": "not_run",
         "checked_at": None,
-        "environment": environment,
+        "target": target,
         "tool_version": _tool_version(),
         "summary": "Schema drift check has not been run.",
         "report": {},
@@ -33,7 +33,6 @@ def load_schema_drift_payload(settings: Settings) -> dict[str, Any]:
             resolve_aws_profile(config_profile=settings.aws_profile),
             settings.aws_region,
             settings.tapdb_database_name,
-            settings.tapdb_env or "",
         )
     )
 
@@ -45,7 +44,6 @@ def _cached_schema_drift_payload(
     profile: str,
     region: str,
     namespace: str,
-    tapdb_env: str,
 ) -> dict[str, Any]:
     try:
         return run_tapdb_schema_drift_check(
@@ -54,11 +52,10 @@ def _cached_schema_drift_payload(
             profile=profile,
             region=region,
             namespace=namespace,
-            tapdb_env=tapdb_env or None,
         )
     except Exception as exc:
         return {
-            **default_schema_drift_payload(tapdb_env),
+            **default_schema_drift_payload(target),
             "status": "check_failed",
             "summary": f"Unable to execute tapdb drift-check: {exc}",
         }

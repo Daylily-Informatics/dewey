@@ -30,7 +30,6 @@ from dewey_service.integrations.tapdb_runtime import (
     ensure_tapdb_version,
     export_database_url_for_target,
     run_tapdb_cli,
-    tapdb_env_for_target,
 )
 from dewey_service.settings import get_settings, load_config_aws_profile
 
@@ -53,6 +52,22 @@ def _confirm_db_delete(force: bool) -> bool:
     return typer.confirm("This will delete the current TapDB DB target. Continue?")
 
 
+def _confirm_target_label(*, namespace: str) -> str:
+    settings = get_settings()
+    from daylily_tapdb.cli.db_config import get_db_config
+
+    cfg = get_db_config(
+        config_path=settings.tapdb_config_path,
+        client_id=DEFAULT_TAPDB_CLIENT_ID,
+        database_name=namespace,
+    )
+    schema_name = str(cfg.get("schema_name") or "").strip()
+    physical_database = str(cfg.get("database") or namespace).strip()
+    if not schema_name:
+        raise TapDBRuntimeError("TapDB config is missing schema_name for destructive confirmation")
+    return f"{DEFAULT_TAPDB_CLIENT_ID}/{namespace}/{schema_name}@{physical_database}"
+
+
 def _delete_db_target(
     *,
     force: bool,
@@ -67,7 +82,7 @@ def _delete_db_target(
 
     try:
         run_tapdb_cli(
-            ["db", "delete", tapdb_env_for_target(target), "--force"],
+            ["db", "delete", "--confirm-target", _confirm_target_label(namespace=namespace)],
             target=target,
             client_id=DEFAULT_TAPDB_CLIENT_ID,
             profile=profile,

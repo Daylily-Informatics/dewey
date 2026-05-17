@@ -12,6 +12,7 @@ from typing import Any
 from urllib.parse import urlencode
 from uuid import uuid4
 
+import httpx
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
@@ -37,9 +38,10 @@ from dewey_service.artifact_ui import (
 from dewey_service.auth import (
     build_browser_login_href,
     build_cognito_logout_url,
-    build_cognito_web_session_config,
+    build_web_session_config,
     clear_ui_session,
     complete_browser_login,
+    complete_external_broker_login,
     configure_session_middleware,
     generate_state,
     require_api_auth,
@@ -194,6 +196,7 @@ class ShareReferenceCreateRequest(BaseModel):
     )
     transport_config: dict[str, Any] = Field(default_factory=dict)
     ttl_seconds: int | None = None
+    recipient_email: str | None = None
 
 
 class ArtifactStorageLockRequest(BaseModel):
@@ -201,6 +204,41 @@ class ArtifactStorageLockRequest(BaseModel):
 
     mode: str = "GOVERNANCE"
     retain_until: str
+
+
+async def _prepare_external_share_recipient(
+    *,
+    settings: Settings,
+    recipient_email: str,
+    share_reference: dict[str, Any],
+    request: Request,
+) -> dict[str, Any]:
+    prepare_url = str(settings.external_broker_share_recipient_prepare_url or "").strip()
+    if not prepare_url:
+        raise RuntimeError(
+            "Dewey external share recipient preparation requires "
+            "external_broker_share_recipient_prepare_url"
+        )
+    share_ref_euid = str(share_reference.get("share_reference_euid") or "").strip()
+    if not share_ref_euid:
+        raise RuntimeError("Dewey share reference response is missing share_reference_euid")
+    share_url = f"{str(request.base_url).rstrip('/')}/share-references/{share_ref_euid}"
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        response = await client.post(
+            prepare_url,
+            json={
+                "recipient_email": recipient_email,
+                "share_ref_euid": share_ref_euid,
+                "share_url": share_url,
+                "expires_at": share_reference.get("expires_at"),
+            },
+        )
+    if response.status_code >= 400:
+        raise RuntimeError(f"Broker recipient preparation failed: {response.status_code}")
+    payload = response.json()
+    if not isinstance(payload, dict):
+        raise RuntimeError("Broker recipient preparation returned a non-object payload")
+    return payload
 
 
 class ExternalObjectCreateRequest(BaseModel):
@@ -357,7 +395,7 @@ def create_app(
         allow_headers=["*"],
     )
 
-    web_session_config = build_cognito_web_session_config(settings=settings)
+    web_session_config = build_web_session_config(settings=settings)
     app.state.web_session_config = web_session_config
     app.state.server_instance_id = web_session_config.server_instance_id
     configure_session_middleware(app, web_session_config)
@@ -1021,14 +1059,30 @@ def create_app(
         try:
             return start_browser_login(request, web_session_config, next_path=next_path)
         except ValueError:
+            reason = (
+                "external_broker_misconfigured"
+                if settings.auth_mode == "external_broker"
+                else "cognito_sign_in_misconfigured"
+            )
             return RedirectResponse(
-                url="/auth/error?reason=cognito_sign_in_misconfigured",
+                url=f"/auth/error?reason={reason}",
                 status_code=status.HTTP_303_SEE_OTHER,
             )
 
     @app.get("/auth/callback", include_in_schema=False)
     async def auth_callback(request: Request, code: str = "", state: str = "") -> RedirectResponse:
         return await complete_browser_login(
+            request,
+            web_session_config,
+            code=code,
+            state=state,
+        )
+
+    @app.get("/auth/lsmc/callback", include_in_schema=False)
+    async def external_broker_callback(
+        request: Request, code: str = "", state: str = ""
+    ) -> RedirectResponse:
+        return await complete_external_broker_login(
             request,
             web_session_config,
             code=code,
@@ -1066,6 +1120,10 @@ def create_app(
                 "Dewey cleared your local session, but the shared Cognito logout contract is "
                 "misconfigured. Update the shared app client redirect URLs for this Dewey deployment."
             ),
+            "external_broker_misconfigured": (
+                "Dewey external broker sign-in is misconfigured. Update the broker login, "
+                "callback, handoff exchange, and logout URLs for this deployment."
+            ),
         }
         message = reasons.get(reason, reasons["auth_error"])
         context, status_code = _auth_template_context(
@@ -1084,6 +1142,16 @@ def create_app(
     async def _logout_response(request: Request) -> RedirectResponse:
         clear_ui_session(request)
         request.session.clear()
+        if settings.auth_mode == "external_broker":
+            if not settings.external_broker_logout_url:
+                return RedirectResponse(
+                    url="/auth/error?reason=external_broker_misconfigured",
+                    status_code=status.HTTP_303_SEE_OTHER,
+                )
+            return RedirectResponse(
+                url=settings.external_broker_logout_url,
+                status_code=status.HTTP_303_SEE_OTHER,
+            )
         state = generate_state()
         request.session["oauth_state"] = state
         try:
@@ -2799,6 +2867,7 @@ def create_app(
         dependencies=[Depends(api_auth_dep)],
     )
     async def create_share_reference(
+        request: Request,
         body: ShareReferenceCreateRequest,
         idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
     ) -> dict[str, Any]:
@@ -2815,6 +2884,13 @@ def create_app(
                 ttl_seconds=body.ttl_seconds,
                 idempotency_key=_require_idempotency_key(idempotency_key),
             )
+            if body.recipient_email:
+                payload["broker_recipient"] = await _prepare_external_share_recipient(
+                    settings=settings,
+                    recipient_email=body.recipient_email,
+                    share_reference=payload,
+                    request=request,
+                )
             return {"status_code": status_code, **payload}
         except DeweyNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc

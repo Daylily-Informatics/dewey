@@ -162,6 +162,84 @@ def test_settings_defaults_include_cognito_domain_policy() -> None:
     ]
     assert settings.cognito_default_tenant_id == "00000000-0000-0000-0000-000000000000"
     assert settings.cognito_auto_provision_allowed_domains == ["lsmc.com"]
+    assert settings.cognito_group_role_map["lsmc:global-admin"] == "ADMIN"
+    assert settings.cognito_group_role_map["lsmc:internal-user"] == "READ_WRITE"
+    assert settings.cognito_group_role_map["lsmc:dewey:admin"] == "ADMIN"
+
+
+def test_settings_loads_external_broker_yaml(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "local")
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
+    cfg_dir = tmp_path / "dewey-local"
+    cfg_dir.mkdir(parents=True)
+    cfg = cfg_dir / "dewey-config-local.yaml"
+    cfg.write_text(
+        """
+application:
+  api_bearer_token: yaml-token
+auth:
+  mode: external_broker
+  external_broker:
+    service_id: dewey
+    login_url: https://dev.login.lsmc.com/login
+    handoff_exchange_url: https://dev.login.lsmc.com/api/handoff/exchange
+    callback_url: https://localhost:8914/auth/lsmc/callback
+    logout_url: https://dev.login.lsmc.com/logout
+    share_recipient_prepare_url: https://dev.login.lsmc.com/api/v1/dewey/share-recipient/prepare
+database:
+  backend: tapdb
+""",
+        encoding="utf-8",
+    )
+
+    loaded = load_settings()
+
+    assert loaded.auth_mode == "external_broker"
+    assert loaded.external_broker_service_id == "dewey"
+    assert loaded.external_broker_login_url == "https://dev.login.lsmc.com/login"
+    assert (
+        loaded.external_broker_handoff_exchange_url
+        == "https://dev.login.lsmc.com/api/handoff/exchange"
+    )
+    assert loaded.external_broker_callback_url == "https://localhost:8914/auth/lsmc/callback"
+    assert loaded.external_broker_logout_url == "https://dev.login.lsmc.com/logout"
+    assert (
+        loaded.external_broker_share_recipient_prepare_url
+        == "https://dev.login.lsmc.com/api/v1/dewey/share-recipient/prepare"
+    )
+
+
+def test_settings_external_broker_mode_requires_explicit_urls() -> None:
+    with pytest.raises(ValueError, match="external_broker auth requires explicit settings"):
+        Settings(auth_mode="external_broker")
+
+
+def test_settings_reads_shared_external_broker_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("LSMC_AUTH_MODE", "external_broker")
+    monkeypatch.setenv("LSMC_AUTH_BROKER_SERVICE_ID", "dewey")
+    monkeypatch.setenv("LSMC_AUTH_BROKER_LOGIN_URL", "https://dev.login.lsmc.com/login")
+    monkeypatch.setenv(
+        "LSMC_AUTH_BROKER_HANDOFF_EXCHANGE_URL",
+        "https://dev.login.lsmc.com/api/handoff/exchange",
+    )
+    monkeypatch.setenv(
+        "LSMC_AUTH_BROKER_CALLBACK_URL",
+        "https://localhost:8914/auth/lsmc/callback",
+    )
+    monkeypatch.setenv("LSMC_AUTH_BROKER_LOGOUT_URL", "https://dev.login.lsmc.com/logout")
+    monkeypatch.setenv(
+        "LSMC_AUTH_BROKER_SHARE_RECIPIENT_PREPARE_URL",
+        "https://dev.login.lsmc.com/api/v1/dewey/share-recipient/prepare",
+    )
+
+    loaded = load_settings()
+
+    assert loaded.auth_mode == "external_broker"
+    assert loaded.external_broker_service_id == "dewey"
+    assert (
+        loaded.external_broker_share_recipient_prepare_url
+        == "https://dev.login.lsmc.com/api/v1/dewey/share-recipient/prepare"
+    )
 
 
 def test_settings_aws_profile_uses_config_when_present(monkeypatch: pytest.MonkeyPatch) -> None:

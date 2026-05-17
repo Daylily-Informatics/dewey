@@ -248,7 +248,7 @@ Current published-package note from the April 15, 2026 TapDB hard cut:
 - if you invoke `tapdb` manually, use that shared config path directly:
 
 ```bash
-tapdb --config ~/.config/tapdb/dewey/dewey/tapdb-config.yaml --env dev db setup dev --force
+tapdb --config ~/.config/tapdb/dewey/dewey/tapdb-config.yaml db setup --recreate
 ```
 
 - after a fresh `dewey config reset`, export the explicit TapDB config path when running Dewey-owned seed or server commands:

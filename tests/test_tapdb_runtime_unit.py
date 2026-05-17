@@ -23,9 +23,9 @@ def test_ensure_tapdb_version_requires_install(monkeypatch: pytest.MonkeyPatch) 
         tapdb_runtime.ensure_tapdb_version()
 
 
-def test_tapdb_env_for_target_and_sqlalchemy_url() -> None:
-    assert tapdb_runtime.tapdb_env_for_target("local") == "dev"
-    assert tapdb_runtime.tapdb_env_for_target("aurora") == "prod"
+def test_validate_database_target_and_sqlalchemy_url() -> None:
+    assert tapdb_runtime.validate_database_target("local") == "local"
+    assert tapdb_runtime.validate_database_target("aurora") == "aurora"
     assert (
         tapdb_runtime._build_sqlalchemy_url(
             {
@@ -40,7 +40,7 @@ def test_tapdb_env_for_target_and_sqlalchemy_url() -> None:
     )
 
     with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="Unsupported database target"):
-        tapdb_runtime.tapdb_env_for_target("staging")
+        tapdb_runtime.validate_database_target("staging")
 
 
 def test_resolve_tapdb_config_path_prefers_explicit_argument() -> None:
@@ -79,7 +79,6 @@ def test_resolve_runtime_env_sets_expected_values(monkeypatch: pytest.MonkeyPatc
     assert env["aws_region"] == "us-west-2"
     assert env["client_id"] == "dewey"
     assert env["database_name"] == "dewey"
-    assert env["tapdb_env"] == "dev"
     assert env["config_path"] == str(
         Path("/tmp/dewey-home/.config/tapdb/dewey/dewey/tapdb-config.yaml").resolve()
     )
@@ -115,8 +114,8 @@ def test_export_database_url_for_target_returns_url_without_mutating_environment
     monkeypatch.setattr(tapdb_runtime, "ensure_tapdb_version", lambda: "3.0.9")
     monkeypatch.setattr(
         tapdb_runtime,
-        "_get_tapdb_db_config_for_env",
-        lambda _env, **_kwargs: {
+        "_get_tapdb_db_config",
+        lambda **_kwargs: {
             "user": "dewey",
             "password": "secret",
             "host": "localhost",
@@ -163,12 +162,10 @@ def test_run_tapdb_cli_builds_command_and_raises_on_failure(
         )
 
     assert calls
-    assert calls[0][0][:5] == [
+    assert calls[0][0][:3] == [
         "tapdb",
         "--config",
         str(Path("/tmp/dewey-tapdb.yaml").resolve()),
-        "--env",
-        "dev",
     ]
 
 
@@ -203,7 +200,7 @@ def test_run_tapdb_cli_exports_resolved_profile_and_identity_env(
     )
 
     assert result.returncode == 0
-    assert captured["cmd"][:5] == ["tapdb", "--config", "/tmp/dewey-tapdb.yaml", "--env", "dev"]
+    assert captured["cmd"][:3] == ["tapdb", "--config", "/tmp/dewey-tapdb.yaml"]
     assert captured["env"]["AWS_PROFILE"] == "config-profile"
     assert captured["env"]["MERIDIAN_DOMAIN_CODE"] == "D"
     assert captured["env"]["TAPDB_OWNER_REPO"] == "dewey"
@@ -293,7 +290,7 @@ def test_run_schema_drift_check_maps_exit_codes(monkeypatch: pytest.MonkeyPatch)
 
     assert result["status"] == "drift"
     assert result["tool_version"] == "3.0.9"
-    assert result["environment"] == "dev"
+    assert result["target"] == "local"
 
 
 def test_run_tapdb_cli_requires_tapdb_executable(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -361,15 +358,15 @@ def test_require_config_path_and_cli_resolution(monkeypatch: pytest.MonkeyPatch)
     assert tapdb_runtime._resolve_tapdb_cli_executable() == "/usr/local/bin/tapdb"
 
 
-def test_get_tapdb_db_config_for_env_and_sqlalchemy_url(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_get_tapdb_db_config_and_sqlalchemy_url(monkeypatch: pytest.MonkeyPatch) -> None:
     db_config_mod = import_module("daylily_tapdb.cli.db_config")
-    seen: list[tuple[object, object, object, object]] = []
+    seen: list[tuple[object, object, object]] = []
 
     monkeypatch.setattr(
         db_config_mod,
-        "get_db_config_for_env",
-        lambda env, *, config_path, client_id, database_name: (
-            seen.append((env, config_path, client_id, database_name))
+        "get_db_config",
+        lambda *, config_path, client_id, database_name: (
+            seen.append((config_path, client_id, database_name))
             or {
                 "user": "postgres",
                 "password": "",
@@ -380,14 +377,13 @@ def test_get_tapdb_db_config_for_env_and_sqlalchemy_url(monkeypatch: pytest.Monk
         ),
     )
 
-    cfg = tapdb_runtime._get_tapdb_db_config_for_env(
-        "dev",
+    cfg = tapdb_runtime._get_tapdb_db_config(
         config_path="/tmp/tapdb.yaml",
         client_id="dewey",
         database_name="dewey",
     )
 
-    assert seen == [("dev", "/tmp/tapdb.yaml", "dewey", "dewey")]
+    assert seen == [("/tmp/tapdb.yaml", "dewey", "dewey")]
     assert cfg["database"] == "dewey_dev"
     assert (
         tapdb_runtime._build_sqlalchemy_url(cfg)
@@ -396,12 +392,11 @@ def test_get_tapdb_db_config_for_env_and_sqlalchemy_url(monkeypatch: pytest.Monk
 
     monkeypatch.setattr(
         db_config_mod,
-        "get_db_config_for_env",
+        "get_db_config",
         lambda *args, **kwargs: {},
     )
     with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="No TapDB database config resolved"):
-        tapdb_runtime._get_tapdb_db_config_for_env(
-            "dev",
+        tapdb_runtime._get_tapdb_db_config(
             config_path="/tmp/tapdb.yaml",
             client_id="dewey",
             database_name="dewey",
@@ -427,7 +422,7 @@ def test_run_schema_drift_check_covers_clean_invalid_json_and_failed_stderr(
     assert clean == {
         "status": "clean",
         "checked_at": "2026-04-05T18:00:00+00:00",
-        "environment": "dev",
+        "target": "local",
         "tool_version": "4.1.1",
         "summary": "no schema drift reported",
         "report": {},
@@ -439,12 +434,12 @@ def test_run_schema_drift_check_covers_clean_invalid_json_and_failed_stderr(
         "run_tapdb_cli",
         lambda *args, **kwargs: SimpleNamespace(returncode=2, stdout="not-json", stderr="boom"),
     )
-    failed = tapdb_runtime.run_schema_drift_check(target="local", tapdb_env="prod")
+    failed = tapdb_runtime.run_schema_drift_check(target="local")
 
     assert failed == {
         "status": "check_failed",
         "checked_at": "2026-04-05T18:00:00+00:00",
-        "environment": "prod",
+        "target": "local",
         "tool_version": "4.1.1",
         "summary": "schema drift report unavailable",
         "report": {"raw_stdout": "not-json"},
