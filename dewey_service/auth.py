@@ -261,7 +261,9 @@ async def complete_browser_login(
 
 
 async def exchange_external_broker_handoff(*, settings: Settings, code: str) -> dict[str, Any]:
-    async with httpx.AsyncClient(timeout=10.0) as client:
+    ca_bundle = str(settings.external_broker_ca_bundle or "").strip()
+    verify: bool | str = ca_bundle if ca_bundle else True
+    async with httpx.AsyncClient(timeout=10.0, verify=verify) as client:
         response = await client.post(
             settings.external_broker_handoff_exchange_url, json={"code": code}
         )

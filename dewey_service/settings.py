@@ -267,6 +267,7 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "auth_external_broker_callback_url": "external_broker_callback_url",
         "auth_external_broker_logout_url": "external_broker_logout_url",
         "auth_external_broker_share_recipient_prepare_url": "external_broker_share_recipient_prepare_url",
+        "auth_external_broker_ca_bundle": "external_broker_ca_bundle",
         "deployment_name": "deployment_name",
         "deployment_color": "deployment_color",
         "deployment_is_production": "deployment_is_production",
@@ -343,6 +344,7 @@ def _display_config_path(path: str) -> str:
         "external_broker_callback_url": "auth.external_broker.callback_url",
         "external_broker_logout_url": "auth.external_broker.logout_url",
         "external_broker_share_recipient_prepare_url": "auth.external_broker.share_recipient_prepare_url",
+        "external_broker_ca_bundle": "auth.external_broker.ca_bundle",
         "database_backend": "database.backend",
         "database_target": "database.target",
         "tapdb_client_id": "database.client_id",
@@ -448,6 +450,7 @@ class Settings(BaseSettings):
     external_broker_callback_url: str = ""
     external_broker_logout_url: str = ""
     external_broker_share_recipient_prepare_url: str = ""
+    external_broker_ca_bundle: str = ""
 
     deployment_name: str = ""
     deployment_color: str = ""
@@ -635,6 +638,9 @@ class Settings(BaseSettings):
                 self.external_broker_share_recipient_prepare_url,
                 field_name="external_broker_share_recipient_prepare_url",
             )
+            ca_bundle = str(self.external_broker_ca_bundle or "").strip()
+            if ca_bundle and not Path(ca_bundle).is_file():
+                raise ValueError("external_broker_ca_bundle does not exist")
         if str(self.cognito_domain or "").strip():
             self.cognito_domain = _require_bare_host(
                 self.cognito_domain,
@@ -807,6 +813,7 @@ def load_settings(config_path: Path | None = None) -> Settings:
         "external_broker_callback_url": "",
         "external_broker_logout_url": "",
         "external_broker_share_recipient_prepare_url": "",
+        "external_broker_ca_bundle": "",
         "deployment_name": "",
         "deployment_color": "",
         "deployment_is_production": False,
@@ -833,6 +840,7 @@ def load_settings(config_path: Path | None = None) -> Settings:
             "LSMC_AUTH_BROKER_SHARE_RECIPIENT_PREPARE_URL",
             "DEWEY_EXTERNAL_SHARE_RECIPIENT_PREPARE_URL",
         ),
+        "external_broker_ca_bundle": _read_first_env("LSMC_AUTH_BROKER_CA_BUNDLE"),
     }
     merged = {**seed}
     for key, default in yaml_only_defaults.items():

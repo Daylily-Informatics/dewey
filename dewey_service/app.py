@@ -223,7 +223,9 @@ async def _prepare_external_share_recipient(
     if not share_ref_euid:
         raise RuntimeError("Dewey share reference response is missing share_reference_euid")
     share_url = f"{str(request.base_url).rstrip('/')}/share-references/{share_ref_euid}"
-    async with httpx.AsyncClient(timeout=10.0) as client:
+    ca_bundle = str(settings.external_broker_ca_bundle or "").strip()
+    verify: bool | str = ca_bundle if ca_bundle else True
+    async with httpx.AsyncClient(timeout=10.0, verify=verify) as client:
         response = await client.post(
             prepare_url,
             json={
