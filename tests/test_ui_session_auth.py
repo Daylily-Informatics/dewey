@@ -384,10 +384,10 @@ def test_external_broker_login_sets_admin_session(monkeypatch, tmp_path, fake_se
         session_secret_key="session-secret",
         auth_mode="external_broker",
         external_broker_service_id="dewey",
-        external_broker_login_url="https://dev.login.lsmc.com/login",
-        external_broker_handoff_exchange_url="https://dev.login.lsmc.com/api/handoff/exchange",
+        external_broker_login_url="https://dev.login.lsmc.com:8916/login",
+        external_broker_handoff_exchange_url="https://dev.login.lsmc.com:8916/api/handoff/exchange",
         external_broker_callback_url="https://localhost:8914/auth/lsmc/callback",
-        external_broker_logout_url="https://dev.login.lsmc.com/logout",
+        external_broker_logout_url="https://dev.login.lsmc.com:8916/logout",
     )
 
     async def _exchange(*_args, **_kwargs):
@@ -410,7 +410,7 @@ def test_external_broker_login_sets_admin_session(monkeypatch, tmp_path, fake_se
         assert login.status_code == 303
         parsed = urlparse(login.headers["location"])
         params = parse_qs(parsed.query)
-        assert parsed.netloc == "dev.login.lsmc.com"
+        assert parsed.netloc == "dev.login.lsmc.com:8916"
         assert params["service"] == ["dewey"]
         assert params["callback_url"] == ["https://localhost:8914/auth/lsmc/callback"]
 
@@ -428,7 +428,7 @@ def test_external_broker_login_sets_admin_session(monkeypatch, tmp_path, fake_se
 
         logout = broker_client.post("/auth/logout", follow_redirects=False)
         assert logout.status_code == 303
-        assert logout.headers["location"] == "https://dev.login.lsmc.com/logout"
+        assert logout.headers["location"] == "https://dev.login.lsmc.com:8916/logout"
 
 
 def test_external_broker_callback_rejects_missing_roles(monkeypatch, fake_service) -> None:
@@ -437,10 +437,10 @@ def test_external_broker_callback_rejects_missing_roles(monkeypatch, fake_servic
         session_secret_key="session-secret",
         auth_mode="external_broker",
         external_broker_service_id="dewey",
-        external_broker_login_url="https://dev.login.lsmc.com/login",
-        external_broker_handoff_exchange_url="https://dev.login.lsmc.com/api/handoff/exchange",
+        external_broker_login_url="https://dev.login.lsmc.com:8916/login",
+        external_broker_handoff_exchange_url="https://dev.login.lsmc.com:8916/api/handoff/exchange",
         external_broker_callback_url="https://localhost:8914/auth/lsmc/callback",
-        external_broker_logout_url="https://dev.login.lsmc.com/logout",
+        external_broker_logout_url="https://dev.login.lsmc.com:8916/logout",
     )
 
     async def _exchange(*_args, **_kwargs):

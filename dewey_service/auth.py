@@ -124,7 +124,10 @@ def build_web_session_config(
 
     public_base_url = _origin(settings.external_broker_callback_url)
     return CognitoWebSessionConfig(
-        domain=urlsplit(settings.external_broker_login_url).netloc,
+        domain=_url_hostname(
+            settings.external_broker_login_url,
+            field_name="external_broker_login_url",
+        ),
         client_id=settings.external_broker_service_id,
         redirect_uri=settings.external_broker_callback_url,
         logout_uri=public_base_url,
@@ -135,6 +138,13 @@ def build_web_session_config(
         server_instance_id=server_instance_id or secrets.token_urlsafe(16),
         auth_mode="external_broker",
     )
+
+
+def _url_hostname(value: str, *, field_name: str) -> str:
+    parsed = urlsplit(str(value or "").strip())
+    if not parsed.scheme or not parsed.netloc or not parsed.hostname:
+        raise RuntimeError(f"{field_name} must be an absolute URL with host")
+    return parsed.hostname
 
 
 def build_cognito_login_url(*, settings: Settings, state: str) -> str:
