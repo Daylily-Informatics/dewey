@@ -7,6 +7,7 @@ from urllib.parse import parse_qs, urlparse
 
 import yaml
 
+from dewey_service.defaults import build_default_config_template
 from dewey_service.services.base import BaseDeweyService
 
 
@@ -168,6 +169,7 @@ def test_admin_page_updates_managed_artifact_bucket(monkeypatch, client, tmp_pat
     )
 
     config_path = tmp_path / "dewey-config-local.yaml"
+    config_path.write_bytes(build_default_config_template(session_secret_key="test-session-secret"))
     monkeypatch.setattr("dewey_service.app.get_config_file_path", lambda: config_path)
 
     def _persist(bucket: str):

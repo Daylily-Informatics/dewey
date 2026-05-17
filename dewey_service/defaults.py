@@ -57,6 +57,7 @@ def build_default_config_template(
     *,
     managed_storage_bucket: str = "",
     managed_storage_prefix: str = "artifacts",
+    session_secret_key: str | None = None,
 ) -> bytes:
     deployment = _sanitize_deployment_code(
         os.environ.get("DEWEY_DEPLOYMENT_CODE")
@@ -66,6 +67,7 @@ def build_default_config_template(
     tapdb_config_path = DEFAULT_TAPDB_CONFIG_DIR / "dewey" / "dewey" / "tapdb-config.yaml"
     bucket = str(managed_storage_bucket or "").strip()
     prefix = str(managed_storage_prefix or "artifacts").strip().strip("/") or "artifacts"
+    resolved_session_secret_key = session_secret_key or secrets.token_urlsafe(64)
     return f"""# Dewey Configuration
 # ===================
 # Create this file with:
@@ -80,7 +82,7 @@ def build_default_config_template(
 application:
   environment: development
   api_bearer_token: dewey-dev-token
-  session_secret_key: {secrets.token_urlsafe(64)}
+  session_secret_key: {resolved_session_secret_key}
   host: 127.0.0.1
   port: {DEFAULT_APP_PORT}
   verify_ssl: true

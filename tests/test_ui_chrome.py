@@ -9,9 +9,13 @@ from fastapi.testclient import TestClient
 from dewey_service.app import create_app
 from dewey_service.settings import (
     Settings,
-    _stable_deployment_color_hex,
     _stable_region_color_hex,
 )
+
+
+@pytest.fixture(autouse=True)
+def _explicit_config_file(explicit_config_file) -> None:
+    _ = explicit_config_file
 
 
 def _settings_with_deployment() -> Settings:
@@ -50,7 +54,7 @@ def test_login_page_renders_chrome_and_footer(monkeypatch, fake_service) -> None
 
     assert response.status_code == 200
     assert "510X2" in response.text
-    assert _stable_deployment_color_hex("510x2") in response.text
+    assert "#124e78" in response.text
     assert _stable_region_color_hex("us-east-1") in response.text
     assert "/static/favicon.svg" in response.text
     assert "Dewey Access Login" in response.text
@@ -148,7 +152,7 @@ def test_ui_page_renders_chrome_after_login(monkeypatch, fake_service) -> None:
 
     assert ui.status_code == 200
     assert "510X2" in ui.text
-    assert _stable_deployment_color_hex("510x2") in ui.text
+    assert "#124e78" in ui.text
     assert _stable_region_color_hex("us-east-1") in ui.text
     assert "/static/favicon.svg" in ui.text
     assert "/literature" in ui.text
