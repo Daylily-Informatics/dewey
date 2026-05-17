@@ -26,6 +26,7 @@ auth:
     callback_url: ""
     logout_url: ""
     share_recipient_prepare_url: ""
+    ca_bundle: ""
   cognito:
     domain: dewey-auth.example.com
     app_client_id: dewey-client-id
