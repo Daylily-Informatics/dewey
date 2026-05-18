@@ -193,6 +193,7 @@ def test_backend_init_builds_connection(monkeypatch: pytest.MonkeyPatch) -> None
     backend = backend_mod.TapDBBackend(app_username="svc")
 
     assert seen["db_hostname"] == "localhost:5432"
+    assert seen["db_hostaddr"] is None
     assert seen["db_user"] == "dewey"
     assert seen["db_pass"] == "secret"
     assert seen["db_name"] == "dewey_dev"
