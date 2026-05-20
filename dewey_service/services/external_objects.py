@@ -13,7 +13,6 @@ from dewey_service.tapdb_backend import (
     utc_now_iso,
 )
 
-
 DEWEY_EXTERNAL_GRAPH_SOURCE_FIELD = "dewey.external_object_relation"
 
 
