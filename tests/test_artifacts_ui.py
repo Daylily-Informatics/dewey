@@ -240,7 +240,7 @@ def test_artifact_detail_page_and_direct_download_redirect(
     assert download.headers["location"] == "/share-references/SH-000001"
     assert len(fake_service.share_references) == 1
 
-    opened = client.get(download.headers["location"], follow_redirects=False)
+    opened = client.get("/share-references/SH-000001", follow_redirects=False)
     assert opened.status_code == 303
     assert opened.headers["location"] == "https://downloads.example.com/SH-000001"
     assert fake_service.share_references["SH-000001"]["access_count"] == 1
