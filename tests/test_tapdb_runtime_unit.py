@@ -54,7 +54,7 @@ def test_validate_database_target_and_sqlalchemy_url() -> None:
                 "port": "5432",
                 "database": "dewey",
                 "schema_name": "tapdb_dewey_dev",
-            "sslrootcert": "/tmp/rds-ca-bundle.pem",
+                "sslrootcert": "/tmp/rds-ca-bundle.pem",
             }
         )
         == "postgresql+psycopg2://alice:secret@db:5432/dewey"
@@ -77,7 +77,7 @@ def test_build_sqlalchemy_url_supports_explicit_aurora_hostaddr() -> None:
                 "port": "15432",
                 "database": "tapdb_unidbtst_local",
                 "schema_name": "tapdb_dewey_unidbtst_local",
-            "sslrootcert": "/tmp/rds-ca-bundle.pem",
+                "sslrootcert": "/tmp/rds-ca-bundle.pem",
             }
         )
         == "postgresql+psycopg2://dewey_user:secret@"
@@ -98,7 +98,7 @@ def test_build_sqlalchemy_url_supports_direct_aurora_without_hostaddr() -> None:
                 "port": "5432",
                 "database": "tapdb_unidbtst_local",
                 "schema_name": "tapdb_dewey_unidbtst_local",
-            "sslrootcert": "/tmp/rds-ca-bundle.pem",
+                "sslrootcert": "/tmp/rds-ca-bundle.pem",
             }
         )
         == "postgresql+psycopg2://dewey_user:secret@"
@@ -418,7 +418,7 @@ def test_get_tapdb_db_config_and_sqlalchemy_url(monkeypatch: pytest.MonkeyPatch)
                 "port": "5432",
                 "database": "dewey_dev",
                 "schema_name": "tapdb_dewey_dev",
-            "sslrootcert": "/tmp/rds-ca-bundle.pem",
+                "sslrootcert": "/tmp/rds-ca-bundle.pem",
             }
         ),
     )

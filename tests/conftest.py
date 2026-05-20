@@ -1037,7 +1037,8 @@ class FakeDeweyService:
             "transport_config": dict(transport_config or {}),
             "issued_by": issued_by,
             "recipient_email": None,
-            "managed_access": target_type == "artifact" and (transport or "presigned_s3") == "presigned_s3",
+            "managed_access": target_type == "artifact"
+            and (transport or "presigned_s3") == "presigned_s3",
             "access_count": 0,
             "last_accessed_at": None,
             "revoked_at": None,

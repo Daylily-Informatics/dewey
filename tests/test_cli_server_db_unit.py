@@ -585,14 +585,16 @@ def test_db_cli_aurora_build_uses_existing_explicit_target(monkeypatch: pytest.M
     monkeypatch.setattr(
         db_cli,
         "run_tapdb_cli",
-        lambda args, **kwargs: calls.append(("run", {"args": args, **kwargs}))
-        or _proc(returncode=0, stdout="ok"),
+        lambda args, **kwargs: (
+            calls.append(("run", {"args": args, **kwargs})) or _proc(returncode=0, stdout="ok")
+        ),
     )
     monkeypatch.setattr(
         db_cli,
         "export_database_url_for_target",
         lambda **kwargs: (
-            calls.append(("export", kwargs)) or "postgresql+psycopg2://dewey@db.example.test:5432/dewey"
+            calls.append(("export", kwargs))
+            or "postgresql+psycopg2://dewey@db.example.test:5432/dewey"
         ),
     )
     monkeypatch.setattr(db_cli.subprocess, "run", lambda *args, **kwargs: None)

@@ -284,13 +284,18 @@ class SharingServiceMixin:
                     "connection": connection or {},
                     "member_count": member_count,
                     "transport_config": clean_transport_config,
-                    "managed_access": clean_target_type == "artifact" and clean_transport == "presigned_s3",
+                    "managed_access": clean_target_type == "artifact"
+                    and clean_transport == "presigned_s3",
                     "access_count": 0,
                     "last_accessed_at": None,
                     "created_at": utc_now_iso(),
                 },
             )
-            if clean_target_type == "artifact" and clean_transport == "presigned_s3" and status_value == "active":
+            if (
+                clean_target_type == "artifact"
+                and clean_transport == "presigned_s3"
+                and status_value == "active"
+            ):
                 access_url = f"/share-references/{instance.euid}"
                 self.backend.update_instance_json(
                     session,
@@ -317,7 +322,6 @@ class SharingServiceMixin:
             )
             return 201, body
 
-
     def revoke_share_reference(
         self,
         *,
@@ -328,7 +332,10 @@ class SharingServiceMixin:
         clean_euid = str(share_reference_euid or "").strip()
         if not clean_euid:
             raise ValueError("share_reference_euid is required")
-        payload = {"share_reference_euid": clean_euid, "revoked_by": str(revoked_by or "").strip() or None}
+        payload = {
+            "share_reference_euid": clean_euid,
+            "revoked_by": str(revoked_by or "").strip() or None,
+        }
         fingerprint = self._fingerprint(payload)
         with self.backend.session_scope(commit=True) as session:
             replay = self._idempotency_replay(

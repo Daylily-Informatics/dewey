@@ -392,8 +392,9 @@ def test_artifacts_bulk_directory_limit_and_artifact_set_routes(
     assert len(fake_service.share_references) == 1
 
 
-
-def test_artifact_detail_external_reference_validate_and_create(monkeypatch, test_settings, fake_service) -> None:
+def test_artifact_detail_external_reference_validate_and_create(
+    monkeypatch, test_settings, fake_service
+) -> None:
     test_settings.external_reference_targets = [
         {
             "service_id": "ursa",

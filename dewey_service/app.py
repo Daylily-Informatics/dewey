@@ -483,7 +483,6 @@ def create_app(
     def _viewer_context(profile: dict[str, Any]) -> ViewerContext:
         return ViewerContext.from_operator_profile(profile)
 
-
     def _parse_share_duration_days(value: Any) -> float:
         raw = str(value or "").strip()
         if not raw:
@@ -499,12 +498,15 @@ def create_app(
     def _share_duration_to_seconds(days: float) -> int:
         return max(60, int(days * 86400))
 
-    def _share_reference_can_be_revoked(profile: dict[str, Any], share_reference: dict[str, Any]) -> bool:
+    def _share_reference_can_be_revoked(
+        profile: dict[str, Any], share_reference: dict[str, Any]
+    ) -> bool:
         if _is_admin(profile):
             return True
-        return str(share_reference.get("issued_by") or "").strip().lower() == str(
-            profile.get("email") or ""
-        ).strip().lower()
+        return (
+            str(share_reference.get("issued_by") or "").strip().lower()
+            == str(profile.get("email") or "").strip().lower()
+        )
 
     def _configured_external_reference_targets() -> list[dict[str, Any]]:
         raw_targets = settings.external_reference_targets
@@ -523,15 +525,21 @@ def create_app(
             if not service_id:
                 raise ValueError(f"external_reference_targets[{index}].service_id is required")
             if not base_url.startswith("https://"):
-                raise ValueError(f"external_reference_targets[{index}].base_url must be an https:// URL")
+                raise ValueError(
+                    f"external_reference_targets[{index}].base_url must be an https:// URL"
+                )
             if "{euid}" not in object_path:
-                raise ValueError(f"external_reference_targets[{index}].object_path must include {{euid}}")
+                raise ValueError(
+                    f"external_reference_targets[{index}].object_path must include {{euid}}"
+                )
             if "{euid}" not in detail_url_template:
                 raise ValueError(
                     f"external_reference_targets[{index}].detail_url_template must include {{euid}}"
                 )
             if not isinstance(verify_ssl, bool):
-                raise ValueError(f"external_reference_targets[{index}].verify_ssl must be true or false")
+                raise ValueError(
+                    f"external_reference_targets[{index}].verify_ssl must be true or false"
+                )
             headers = raw.get("headers") or {}
             if not isinstance(headers, dict):
                 raise ValueError(f"external_reference_targets[{index}].headers must be a mapping")
@@ -549,7 +557,10 @@ def create_app(
         return targets
 
     def _extract_euid_from_peer_payload(payload: dict[str, Any]) -> str:
-        for container in (payload, payload.get("data") if isinstance(payload.get("data"), dict) else {}):
+        for container in (
+            payload,
+            payload.get("data") if isinstance(payload.get("data"), dict) else {},
+        ):
             if not isinstance(container, dict):
                 continue
             for key in ("euid", "uid", "raw_id", "id"):
@@ -581,7 +592,9 @@ def create_app(
             payload = response.json()
             peer_euid = _extract_euid_from_peer_payload(payload)
             if peer_euid.lower() != requested_euid.lower():
-                errors.append(f"{target['service_id']}: response did not contain EUID {requested_euid}")
+                errors.append(
+                    f"{target['service_id']}: response did not contain EUID {requested_euid}"
+                )
                 continue
             detail_url = target["detail_url_template"].replace("{euid}", encoded)
             matches.append(
@@ -610,10 +623,14 @@ def create_app(
             )
         if len(matches) > 1:
             service_ids = ", ".join(sorted({item["service_id"] for item in matches}))
-            raise ValueError(f"External EUID {requested_euid} matched multiple services: {service_ids}")
+            raise ValueError(
+                f"External EUID {requested_euid} matched multiple services: {service_ids}"
+            )
         if not matches:
             suffix = f" Details: {'; '.join(errors)}" if errors else ""
-            raise ValueError(f"External EUID {requested_euid} was not found in configured services.{suffix}")
+            raise ValueError(
+                f"External EUID {requested_euid} was not found in configured services.{suffix}"
+            )
         return matches[0]
 
     def _is_admin(profile: dict[str, Any]) -> bool:
@@ -1831,8 +1848,9 @@ def create_app(
         artifact = service.get_artifact(artifact_euid)
         return _artifact_detail_response(request, profile=profile, artifact=artifact)
 
-
-    @app.post("/artifacts/euid/{artifact_euid}/external-reference/validate", include_in_schema=False)
+    @app.post(
+        "/artifacts/euid/{artifact_euid}/external-reference/validate", include_in_schema=False
+    )
     async def artifact_external_reference_validate(
         request: Request,
         artifact_euid: str,
@@ -2446,7 +2464,6 @@ def create_app(
             )
         return RedirectResponse(url=access_url, status_code=status.HTTP_303_SEE_OTHER)
 
-
     @app.get("/share-references/{share_reference_euid}", include_in_schema=False)
     async def open_share_reference(share_reference_euid: str) -> Response:
         try:
@@ -2459,7 +2476,9 @@ def create_app(
             raise HTTPException(status_code=410, detail=str(exc)) from exc
         access_url = str(payload.get("presigned_access_url") or "").strip()
         if not access_url:
-            raise HTTPException(status_code=502, detail="Share reference did not produce an access URL")
+            raise HTTPException(
+                status_code=502, detail="Share reference did not produce an access URL"
+            )
         return RedirectResponse(url=access_url, status_code=status.HTTP_303_SEE_OTHER)
 
     @app.post("/share-references/{share_reference_euid}/revoke", include_in_schema=False)
@@ -2471,19 +2490,28 @@ def create_app(
         form = await request.form()
         share_reference = service.get_share_reference(share_reference_euid)
         if not _share_reference_can_be_revoked(profile, share_reference):
-            raise HTTPException(status_code=403, detail="Only admins or the issuing user can revoke this share reference")
+            raise HTTPException(
+                status_code=403,
+                detail="Only admins or the issuing user can revoke this share reference",
+            )
         _, payload = service.revoke_share_reference(
             share_reference_euid=share_reference_euid,
             revoked_by=str(profile.get("email") or "").strip() or None,
             idempotency_key=_new_idempotency_key("ui-share-revoke"),
         )
         return_to = str(form.get("return_to") or "").strip()
-        target_euid = str(payload.get("target_euid") or share_reference.get("target_euid") or "").strip()
+        target_euid = str(
+            payload.get("target_euid") or share_reference.get("target_euid") or ""
+        ).strip()
         if return_to == "shares":
             return RedirectResponse(url="/shares", status_code=status.HTTP_303_SEE_OTHER)
         if target_euid:
-            return RedirectResponse(url=f"/artifacts/euid/{target_euid}", status_code=status.HTTP_303_SEE_OTHER)
-        raise HTTPException(status_code=400, detail="Revoked share reference is missing target_euid")
+            return RedirectResponse(
+                url=f"/artifacts/euid/{target_euid}", status_code=status.HTTP_303_SEE_OTHER
+            )
+        raise HTTPException(
+            status_code=400, detail="Revoked share reference is missing target_euid"
+        )
 
     @app.get("/shares", include_in_schema=False)
     async def shared_data_report(

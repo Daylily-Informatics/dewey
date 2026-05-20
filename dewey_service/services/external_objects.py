@@ -114,9 +114,7 @@ class ExternalObjectServiceMixin:
             euid=external_euid,
         )
         if external is None:
-            relation_euid = str(
-                relation_payload.get("external_object_relation_euid") or ""
-            ).strip()
+            relation_euid = str(relation_payload.get("external_object_relation_euid") or "").strip()
             raise DeweyNotFoundError(
                 f"External object not found for relation {relation_euid}: {external_euid}"
             )
@@ -186,6 +184,7 @@ class ExternalObjectServiceMixin:
         if target_payload.get("properties") == next_properties:
             return
         self.backend.update_instance_json(session, target, {"properties": next_properties})
+
     def _find_or_create_external_object(
         self,
         session,
