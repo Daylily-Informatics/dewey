@@ -107,6 +107,7 @@ class TapDBBackend:
 
         self.connection = TAPDBConnection(
             db_hostname=db_hostname,
+            db_hostaddr=cfg.get("hostaddr") or None,
             db_user=cfg["user"],
             db_pass=cfg["password"],
             db_name=cfg["database"],

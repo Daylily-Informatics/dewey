@@ -125,6 +125,8 @@ def build(
         resolved_client_id = str(settings.tapdb_client_id or "").strip()
         if not resolved_client_id:
             raise TapDBRuntimeError("settings.tapdb_client_id is required")
+        if target not in {"local", "aurora"}:
+            raise TapDBRuntimeError("Unsupported database target. Use local or aurora.")
         if target == "local":
             result = run_tapdb_cli(
                 ["bootstrap", "local", "--no-gui"],
@@ -137,18 +139,8 @@ def build(
                 cwd=PROJECT_ROOT,
             )
         else:
-            if not cluster.strip():
-                raise TapDBRuntimeError("--cluster is required for aurora target")
             result = run_tapdb_cli(
-                [
-                    "bootstrap",
-                    "aurora",
-                    "--cluster",
-                    cluster.strip(),
-                    "--region",
-                    resolved_region,
-                    "--no-gui",
-                ],
+                ["db", "setup"],
                 target=target,
                 client_id=resolved_client_id,
                 profile=resolved_profile,

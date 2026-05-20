@@ -11,7 +11,7 @@ import subprocess
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 
 from dewey_service.defaults import (
     AWS_PROFILE_REQUIRED_MESSAGE,
@@ -179,10 +179,17 @@ def _build_sqlalchemy_url(cfg: Mapping[str, str]) -> str:
     if not schema_name:
         raise TapDBRuntimeError("TapDB DB config is missing schema_name")
     auth = f"{user}:{password}@" if password else f"{user}@"
-    return (
-        f"postgresql+psycopg2://{auth}{host}:{port}/{database}"
-        f"?options={quote(f'-csearch_path={schema_name}', safe='')}"
-    )
+    query = {"options": f"-csearch_path={schema_name}"}
+    if str(cfg.get("engine_type") or "").strip().lower() == "aurora":
+        sslrootcert = str(cfg.get("sslrootcert") or "").strip()
+        if not sslrootcert:
+            raise TapDBRuntimeError("TapDB Aurora config is missing sslrootcert")
+        query["sslmode"] = "verify-full"
+        query["sslrootcert"] = sslrootcert
+        hostaddr = str(cfg.get("hostaddr") or "").strip()
+        if hostaddr:
+            query["hostaddr"] = hostaddr
+    return f"postgresql+psycopg2://{auth}{host}:{port}/{database}?{urlencode(query)}"
 
 
 def export_database_url_for_target(

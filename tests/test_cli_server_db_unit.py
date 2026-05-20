@@ -455,7 +455,7 @@ def test_db_cli_error_branches(monkeypatch: pytest.MonkeyPatch) -> None:
 
     with pytest.raises(typer.Exit) as exc:
         db_cli.build(
-            target="aurora",
+            target="bogus",
             cluster="",
             profile="team-profile",
             region="us-west-2",
@@ -566,6 +566,59 @@ def test_db_cli_resolves_profile_from_config_when_flag_missing(
             "export",
             {
                 "target": "local",
+                "client_id": "dewey",
+                "profile": "config-profile",
+                "region": "us-west-2",
+                "namespace": "dewey",
+                "config_path": _tapdb_config_path(),
+            },
+        ),
+    ]
+
+
+def test_db_cli_aurora_build_uses_existing_explicit_target(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[tuple[str, dict[str, object]]] = []
+
+    monkeypatch.setattr(db_cli, "ensure_tapdb_version", lambda: "3.0.6")
+    monkeypatch.setattr(db_cli, "get_settings", _settings)
+    monkeypatch.setattr(db_cli, "load_config_aws_profile", lambda: "config-profile")
+    monkeypatch.setattr(
+        db_cli,
+        "run_tapdb_cli",
+        lambda args, **kwargs: (
+            calls.append(("run", {"args": args, **kwargs})) or _proc(returncode=0, stdout="ok")
+        ),
+    )
+    monkeypatch.setattr(
+        db_cli,
+        "export_database_url_for_target",
+        lambda **kwargs: (
+            calls.append(("export", kwargs))
+            or "postgresql+psycopg2://dewey@db.example.test:5432/dewey"
+        ),
+    )
+    monkeypatch.setattr(db_cli.subprocess, "run", lambda *args, **kwargs: None)
+
+    db_cli.build(target="aurora", cluster="", profile="", region="us-west-2", namespace="dewey")
+
+    assert calls == [
+        (
+            "run",
+            {
+                "args": ["db", "setup"],
+                "target": "aurora",
+                "client_id": "dewey",
+                "profile": "config-profile",
+                "region": "us-west-2",
+                "namespace": "dewey",
+                "config_path": _tapdb_config_path(),
+                "cwd": db_cli.PROJECT_ROOT,
+            },
+        ),
+        (
+            "export",
+            {
+                "target": "aurora",
                 "client_id": "dewey",
                 "profile": "config-profile",
                 "region": "us-west-2",

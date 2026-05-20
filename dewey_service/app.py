@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from time import monotonic, time_ns
 from typing import Any
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 from uuid import uuid4
 
 import httpx
@@ -87,7 +87,7 @@ from dewey_service.settings import (
     get_settings,
     persist_managed_storage_bucket,
 )
-from dewey_service.storage import S3StorageClient
+from dewey_service.storage import S3StorageClient, StorageObjectNotFoundError
 from dewey_service.tapdb_backend import TapDBBackend
 from dewey_service.ui_metadata import resolve_git_metadata, resolve_package_version
 
@@ -482,6 +482,156 @@ def create_app(
 
     def _viewer_context(profile: dict[str, Any]) -> ViewerContext:
         return ViewerContext.from_operator_profile(profile)
+
+    def _parse_share_duration_days(value: Any) -> float:
+        raw = str(value or "").strip()
+        if not raw:
+            raise ValueError("share duration days is required")
+        try:
+            days = float(raw)
+        except ValueError as exc:
+            raise ValueError("share duration days must be a number") from exc
+        if days <= 0 or days > 365.0:
+            raise ValueError("share duration days must be greater than 0 and at most 365.0")
+        return days
+
+    def _share_duration_to_seconds(days: float) -> int:
+        return max(60, int(days * 86400))
+
+    def _share_reference_can_be_revoked(
+        profile: dict[str, Any], share_reference: dict[str, Any]
+    ) -> bool:
+        if _is_admin(profile):
+            return True
+        return (
+            str(share_reference.get("issued_by") or "").strip().lower()
+            == str(profile.get("email") or "").strip().lower()
+        )
+
+    def _configured_external_reference_targets() -> list[dict[str, Any]]:
+        raw_targets = settings.external_reference_targets
+        if not isinstance(raw_targets, list) or not raw_targets:
+            raise ValueError("external_reference_targets is required for external EUID validation")
+        targets: list[dict[str, Any]] = []
+        for index, raw in enumerate(raw_targets, start=1):
+            if not isinstance(raw, dict):
+                raise ValueError(f"external_reference_targets[{index}] must be a mapping")
+            service_id = str(raw.get("service_id") or "").strip()
+            base_url = str(raw.get("base_url") or "").strip().rstrip("/")
+            object_path = str(raw.get("object_path") or "").strip()
+            detail_url_template = str(raw.get("detail_url_template") or "").strip()
+            verify_ssl = raw.get("verify_ssl")
+            graph_data_path = str(raw.get("graph_data_path") or "").strip() or None
+            if not service_id:
+                raise ValueError(f"external_reference_targets[{index}].service_id is required")
+            if not base_url.startswith("https://"):
+                raise ValueError(
+                    f"external_reference_targets[{index}].base_url must be an https:// URL"
+                )
+            if "{euid}" not in object_path:
+                raise ValueError(
+                    f"external_reference_targets[{index}].object_path must include {{euid}}"
+                )
+            if "{euid}" not in detail_url_template:
+                raise ValueError(
+                    f"external_reference_targets[{index}].detail_url_template must include {{euid}}"
+                )
+            if not isinstance(verify_ssl, bool):
+                raise ValueError(
+                    f"external_reference_targets[{index}].verify_ssl must be true or false"
+                )
+            headers = raw.get("headers") or {}
+            if not isinstance(headers, dict):
+                raise ValueError(f"external_reference_targets[{index}].headers must be a mapping")
+            targets.append(
+                {
+                    "service_id": service_id,
+                    "base_url": base_url,
+                    "object_path": object_path,
+                    "detail_url_template": detail_url_template,
+                    "verify_ssl": verify_ssl,
+                    "graph_data_path": graph_data_path,
+                    "headers": {str(k): str(v) for k, v in headers.items()},
+                }
+            )
+        return targets
+
+    def _extract_euid_from_peer_payload(payload: dict[str, Any]) -> str:
+        for container in (
+            payload,
+            payload.get("data") if isinstance(payload.get("data"), dict) else {},
+        ):
+            if not isinstance(container, dict):
+                continue
+            for key in ("euid", "uid", "raw_id", "id"):
+                value = str(container.get(key) or "").strip()
+                if value:
+                    return value
+        return ""
+
+    async def _validate_external_reference_euid(euid: str) -> dict[str, Any]:
+        requested_euid = str(euid or "").strip()
+        if not requested_euid:
+            raise ValueError("External EUID is required")
+        matches: list[dict[str, Any]] = []
+        errors: list[str] = []
+        for target in _configured_external_reference_targets():
+            encoded = quote(requested_euid, safe="")
+            url = f"{target['base_url']}{target['object_path'].replace('{euid}', encoded)}"
+            try:
+                async with httpx.AsyncClient(timeout=5.0, verify=target["verify_ssl"]) as client:
+                    response = await client.get(url, headers=target["headers"])
+            except httpx.HTTPError as exc:
+                errors.append(f"{target['service_id']}: {exc}")
+                continue
+            if response.status_code == 404:
+                continue
+            if response.status_code >= 400:
+                errors.append(f"{target['service_id']}: HTTP {response.status_code}")
+                continue
+            payload = response.json()
+            peer_euid = _extract_euid_from_peer_payload(payload)
+            if peer_euid.lower() != requested_euid.lower():
+                errors.append(
+                    f"{target['service_id']}: response did not contain EUID {requested_euid}"
+                )
+                continue
+            detail_url = target["detail_url_template"].replace("{euid}", encoded)
+            matches.append(
+                {
+                    "service_id": target["service_id"],
+                    "euid": peer_euid,
+                    "external_uri": detail_url,
+                    "external_object_type": str(
+                        payload.get("record_type")
+                        or payload.get("type")
+                        or payload.get("classifier")
+                        or payload.get("template_code")
+                        or "tapdb_object"
+                    ),
+                    "label": str(
+                        payload.get("label")
+                        or payload.get("display_label")
+                        or payload.get("name")
+                        or peer_euid
+                    ),
+                    "source_payload": payload,
+                    "base_url": target["base_url"],
+                    "graph_data_path": target.get("graph_data_path"),
+                    "object_detail_path_template": target["object_path"],
+                }
+            )
+        if len(matches) > 1:
+            service_ids = ", ".join(sorted({item["service_id"] for item in matches}))
+            raise ValueError(
+                f"External EUID {requested_euid} matched multiple services: {service_ids}"
+            )
+        if not matches:
+            suffix = f" Details: {'; '.join(errors)}" if errors else ""
+            raise ValueError(
+                f"External EUID {requested_euid} was not found in configured services.{suffix}"
+            )
+        return matches[0]
 
     def _is_admin(profile: dict[str, Any]) -> bool:
         return profile_has_role(profile, Role.ADMIN)
@@ -899,6 +1049,8 @@ def create_app(
         profile: dict[str, Any],
         artifact: dict[str, Any],
         detail_message: dict[str, Any] | None = None,
+        external_reference_form: dict[str, Any] | None = None,
+        external_reference_candidate: dict[str, Any] | None = None,
         status_code: int = 200,
     ) -> HTMLResponse:
         return templates.TemplateResponse(
@@ -925,6 +1077,8 @@ def create_app(
                     artifact_euid=artifact["artifact_euid"],
                     limit=200,
                 ),
+                external_reference_form=external_reference_form or {},
+                external_reference_candidate=external_reference_candidate,
                 detail_message=detail_message,
                 is_admin=_is_admin(profile),
             ),
@@ -1694,6 +1848,105 @@ def create_app(
         artifact = service.get_artifact(artifact_euid)
         return _artifact_detail_response(request, profile=profile, artifact=artifact)
 
+    @app.post(
+        "/artifacts/euid/{artifact_euid}/external-reference/validate", include_in_schema=False
+    )
+    async def artifact_external_reference_validate(
+        request: Request,
+        artifact_euid: str,
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> HTMLResponse:
+        artifact = service.get_artifact(artifact_euid)
+        form = await request.form()
+        values = _string_form_values(form)
+        candidate_euid = str(values.get("external_reference_euid") or "").strip()
+        try:
+            candidate = await _validate_external_reference_euid(candidate_euid)
+        except Exception as exc:
+            return _artifact_detail_response(
+                request,
+                profile=profile,
+                artifact=artifact,
+                external_reference_form=values,
+                detail_message={"state": "error", "detail": str(exc)},
+                status_code=400,
+            )
+        return _artifact_detail_response(
+            request,
+            profile=profile,
+            artifact=artifact,
+            external_reference_form=values,
+            external_reference_candidate=candidate,
+            detail_message={
+                "state": "ok",
+                "detail": f"Validated {candidate['service_id']} / {candidate['euid']}",
+            },
+        )
+
+    @app.post("/artifacts/euid/{artifact_euid}/external-reference/create", include_in_schema=False)
+    async def artifact_external_reference_create(
+        request: Request,
+        artifact_euid: str,
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> HTMLResponse:
+        artifact = service.get_artifact(artifact_euid)
+        form = await request.form()
+        values = _string_form_values(form)
+        candidate_euid = str(values.get("external_reference_euid") or "").strip()
+        relation_type = str(values.get("relation_type") or "linked").strip() or "linked"
+        try:
+            candidate = await _validate_external_reference_euid(candidate_euid)
+            _, external_object = service.create_external_object(
+                external_system=candidate["service_id"],
+                external_object_type=candidate["external_object_type"],
+                external_object_id=candidate["euid"],
+                external_uri=candidate["external_uri"],
+                metadata={
+                    "validated_by": "dewey.artifact_detail",
+                    "validated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+                    "label": candidate["label"],
+                    "service_id": candidate["service_id"],
+                    "base_url": candidate.get("base_url"),
+                    "graph_data_path": candidate.get("graph_data_path"),
+                    "object_detail_path_template": candidate.get("object_detail_path_template"),
+                },
+                idempotency_key=_new_idempotency_key("ui-external-object"),
+            )
+            _, relation = service.attach_external_object_relation(
+                target_type="artifact",
+                target_euid=artifact_euid,
+                external_object_euid=external_object["external_object_euid"],
+                relation_type=relation_type,
+                metadata={
+                    "validated_service_id": candidate["service_id"],
+                    "validated_euid": candidate["euid"],
+                    "validated_label": candidate["label"],
+                    "validated_uri": candidate["external_uri"],
+                    "base_url": candidate.get("base_url"),
+                    "graph_data_path": candidate.get("graph_data_path"),
+                    "object_detail_path_template": candidate.get("object_detail_path_template"),
+                },
+                idempotency_key=_new_idempotency_key("ui-external-object-relation"),
+            )
+        except Exception as exc:
+            return _artifact_detail_response(
+                request,
+                profile=profile,
+                artifact=artifact,
+                external_reference_form=values,
+                detail_message={"state": "error", "detail": str(exc)},
+                status_code=400,
+            )
+        return _artifact_detail_response(
+            request,
+            profile=profile,
+            artifact=artifact,
+            detail_message={
+                "state": "ok",
+                "detail": f"Created external relation {relation['external_object_relation_euid']} to {candidate['service_id']} / {candidate['euid']}",
+            },
+        )
+
     @app.get("/artifacts/bulk-template.tsv", include_in_schema=False)
     async def artifacts_bulk_template(
         profile: dict[str, Any] = Depends(require_ui_session),
@@ -2175,8 +2428,8 @@ def create_app(
     ) -> Response:
         artifact = service.get_artifact(artifact_euid)
         form = await request.form()
-        ttl_hours = max(1, int(form.get("share_ttl_hours") or 24))
         try:
+            duration_days = _parse_share_duration_days(form.get("share_duration_days"))
             _, payload = service.create_share_reference(
                 target_type="artifact",
                 target_euid=artifact_euid,
@@ -2186,7 +2439,7 @@ def create_app(
                 issued_by=str(profile.get("email") or "").strip() or None,
                 transport="presigned_s3",
                 transport_config={},
-                ttl_seconds=ttl_hours * 3600,
+                ttl_seconds=_share_duration_to_seconds(duration_days),
                 idempotency_key=_new_idempotency_key("ui-artifact-direct-download"),
             )
         except Exception as exc:
@@ -2210,6 +2463,71 @@ def create_app(
                 status_code=400,
             )
         return RedirectResponse(url=access_url, status_code=status.HTTP_303_SEE_OTHER)
+
+    @app.get("/share-references/{share_reference_euid}", include_in_schema=False)
+    async def open_share_reference(share_reference_euid: str) -> Response:
+        try:
+            payload = service.open_share_reference(share_reference_euid)
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except StorageObjectNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=410, detail=str(exc)) from exc
+        access_url = str(payload.get("presigned_access_url") or "").strip()
+        if not access_url:
+            raise HTTPException(
+                status_code=502, detail="Share reference did not produce an access URL"
+            )
+        return RedirectResponse(url=access_url, status_code=status.HTTP_303_SEE_OTHER)
+
+    @app.post("/share-references/{share_reference_euid}/revoke", include_in_schema=False)
+    async def revoke_share_reference_page(
+        request: Request,
+        share_reference_euid: str,
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> Response:
+        form = await request.form()
+        share_reference = service.get_share_reference(share_reference_euid)
+        if not _share_reference_can_be_revoked(profile, share_reference):
+            raise HTTPException(
+                status_code=403,
+                detail="Only admins or the issuing user can revoke this share reference",
+            )
+        _, payload = service.revoke_share_reference(
+            share_reference_euid=share_reference_euid,
+            revoked_by=str(profile.get("email") or "").strip() or None,
+            idempotency_key=_new_idempotency_key("ui-share-revoke"),
+        )
+        return_to = str(form.get("return_to") or "").strip()
+        target_euid = str(
+            payload.get("target_euid") or share_reference.get("target_euid") or ""
+        ).strip()
+        if return_to == "shares":
+            return RedirectResponse(url="/shares", status_code=status.HTTP_303_SEE_OTHER)
+        if target_euid:
+            return RedirectResponse(
+                url=f"/artifacts/euid/{target_euid}", status_code=status.HTTP_303_SEE_OTHER
+            )
+        raise HTTPException(
+            status_code=400, detail="Revoked share reference is missing target_euid"
+        )
+
+    @app.get("/shares", include_in_schema=False)
+    async def shared_data_report(
+        request: Request,
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> HTMLResponse:
+        share_references = service.list_share_references(limit=500)
+        return templates.TemplateResponse(
+            request,
+            "shares.html",
+            _template_context(
+                profile=profile,
+                is_admin=_is_admin(profile),
+                share_references=share_references,
+            ),
+        )
 
     @app.post("/artifacts/share", include_in_schema=False)
     async def artifacts_share(

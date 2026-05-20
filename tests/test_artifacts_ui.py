@@ -6,6 +6,10 @@ import json
 import zipfile
 from urllib.parse import parse_qs, urlparse
 
+from fastapi.testclient import TestClient
+
+from dewey_service.app import create_app
+
 
 def _login_user(monkeypatch, client, groups: list[str] | None = None) -> None:
     monkeypatch.setattr(
@@ -229,12 +233,29 @@ def test_artifact_detail_page_and_direct_download_redirect(
 
     download = client.post(
         f"/artifacts/euid/{artifact_euid}/download",
-        data={"share_ttl_hours": "24"},
+        data={"share_duration_days": "1.25"},
         follow_redirects=False,
     )
     assert download.status_code == 303
-    assert download.headers["location"] == "https://downloads.example.com/SH-000001"
+    assert download.headers["location"] == "/share-references/SH-000001"
     assert len(fake_service.share_references) == 1
+
+    opened = client.get("/share-references/SH-000001", follow_redirects=False)
+    assert opened.status_code == 303
+    assert opened.headers["location"] == "https://downloads.example.com/SH-000001"
+    assert fake_service.share_references["SH-000001"]["access_count"] == 1
+
+    shares = client.get("/shares")
+    assert shares.status_code == 200
+    assert "Dewey Share References" in shares.text
+
+    revoke = client.post(
+        "/share-references/SH-000001/revoke",
+        data={"return_to": "artifact"},
+        follow_redirects=False,
+    )
+    assert revoke.status_code == 303
+    assert fake_service.share_references["SH-000001"]["status"] == "revoked"
 
 
 def test_artifacts_register_infers_artifact_type_from_extension(
@@ -369,3 +390,100 @@ def test_artifacts_bulk_directory_limit_and_artifact_set_routes(
     assert "Latest Set Share" in set_share.text
     assert "http://shares.example.com:8088/" in set_share.text
     assert len(fake_service.share_references) == 1
+
+
+def test_artifact_detail_external_reference_validate_and_create(
+    monkeypatch, test_settings, fake_service
+) -> None:
+    test_settings.external_reference_targets = [
+        {
+            "service_id": "ursa",
+            "base_url": "https://localhost:8913",
+            "object_path": "/api/dag/object/{euid}",
+            "detail_url_template": "https://ursa.dev.lsmc.life/object/{euid}",
+            "verify_ssl": False,
+            "headers": {"Authorization": "Bearer token"},
+        }
+    ]
+
+    class _Response:
+        status_code = 200
+
+        @staticmethod
+        def json() -> dict:
+            return {"euid": "Z-RGX-15T", "label": "Result Graph", "record_type": "analysis_result"}
+
+    class _AsyncClient:
+        def __init__(self, *, timeout: float, verify: bool) -> None:
+            self.timeout = timeout
+            self.verify = verify
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, exc_type, exc, tb):
+            return False
+
+        async def get(self, url: str, *, headers: dict):
+            assert url == "https://localhost:8913/api/dag/object/Z-RGX-15T"
+            assert headers["Authorization"] == "Bearer token"
+            return _Response()
+
+    monkeypatch.setattr("dewey_service.app.httpx.AsyncClient", _AsyncClient)
+    app = create_app(settings=test_settings, service=fake_service)
+    with TestClient(app, base_url="https://localhost:8914") as local_client:
+        _login_user(monkeypatch, local_client)
+        register = local_client.post(
+            "/artifacts/register",
+            data={"artifact_type": "report"},
+            files=[("file_data", ("linked-report.txt", b"alpha", "text/plain"))],
+        )
+        assert register.status_code == 200
+        artifact_euid = next(iter(fake_service.artifacts))
+        validate = local_client.post(
+            f"/artifacts/euid/{artifact_euid}/external-reference/validate",
+            data={"external_reference_euid": "Z-RGX-15T", "relation_type": "analysis_result"},
+        )
+        assert validate.status_code == 200
+        assert "Validated ursa / Z-RGX-15T" in validate.text
+        create = local_client.post(
+            f"/artifacts/euid/{artifact_euid}/external-reference/create",
+            data={"external_reference_euid": "Z-RGX-15T", "relation_type": "analysis_result"},
+        )
+        assert create.status_code == 200
+        assert len(fake_service.external_relations) == 1
+        assert fake_service.external_relations[0]["relation_type"] == "analysis_result"
+
+
+def test_artifact_detail_external_reference_requires_explicit_targets(monkeypatch, client) -> None:
+    _login_user(monkeypatch, client)
+    register = client.post(
+        "/artifacts/register",
+        data={"artifact_type": "report"},
+        files=[("file_data", ("missing-target-report.txt", b"alpha", "text/plain"))],
+    )
+    assert register.status_code == 200
+    artifact_euid = "AT-000001"
+    validate = client.post(
+        f"/artifacts/euid/{artifact_euid}/external-reference/validate",
+        data={"external_reference_euid": "Z-RGX-15T"},
+    )
+    assert validate.status_code == 400
+    assert "external_reference_targets is required" in validate.text
+
+
+def test_artifact_detail_rejects_invalid_share_days(monkeypatch, client) -> None:
+    _login_user(monkeypatch, client)
+    register = client.post(
+        "/artifacts/register",
+        data={"artifact_type": "report"},
+        files=[("file_data", ("duration-report.txt", b"alpha", "text/plain"))],
+    )
+    assert register.status_code == 200
+    artifact_euid = "AT-000001"
+    too_long = client.post(
+        f"/artifacts/euid/{artifact_euid}/download",
+        data={"share_duration_days": "365.01"},
+    )
+    assert too_long.status_code == 400
+    assert "at most 365.0" in too_long.text

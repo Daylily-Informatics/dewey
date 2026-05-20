@@ -13,8 +13,178 @@ from dewey_service.tapdb_backend import (
     utc_now_iso,
 )
 
+DEWEY_EXTERNAL_GRAPH_SOURCE_FIELD = "dewey.external_object_relation"
+
 
 class ExternalObjectServiceMixin:
+    @staticmethod
+    def _copy_graph_field(
+        ref: dict[str, Any],
+        *,
+        field: str,
+        relation_payload: dict[str, Any],
+        external_payload: dict[str, Any],
+    ) -> None:
+        relation_metadata = relation_payload.get("metadata")
+        external_metadata = external_payload.get("metadata")
+        candidates = []
+        if isinstance(relation_metadata, dict):
+            candidates.append(relation_metadata)
+        if isinstance(external_metadata, dict):
+            candidates.append(external_metadata)
+        candidates.append(external_payload)
+        for source in candidates:
+            value = source.get(field)
+            if value is not None and str(value).strip():
+                ref[field] = value
+                return
+
+    @staticmethod
+    def _is_dewey_external_graph_ref(ref: Any) -> bool:
+        return (
+            isinstance(ref, dict)
+            and str(ref.get("source_field") or "") == DEWEY_EXTERNAL_GRAPH_SOURCE_FIELD
+        )
+
+    @staticmethod
+    def _external_graph_ref_key(ref: dict[str, Any]) -> tuple[str, str, str, str]:
+        return (
+            str(ref.get("system") or "").strip().lower(),
+            str(ref.get("root_euid") or "").strip(),
+            str(ref.get("relationship_type") or "").strip(),
+            str(ref.get("tenant_id") or "").strip(),
+        )
+
+    def _external_graph_ref_from_payloads(
+        self,
+        *,
+        relation_payload: dict[str, Any],
+        external_payload: dict[str, Any],
+    ) -> dict[str, Any]:
+        relation_euid = str(relation_payload.get("external_object_relation_euid") or "").strip()
+        external_euid = str(relation_payload.get("external_object_euid") or "").strip()
+        system = str(external_payload.get("external_system") or "").strip().lower()
+        root_euid = str(external_payload.get("external_object_id") or "").strip()
+        relationship_type = str(relation_payload.get("relation_type") or "").strip()
+        if not system:
+            raise ValueError(f"External object relation {relation_euid} is missing external_system")
+        if not root_euid:
+            raise ValueError(
+                f"External object relation {relation_euid} is missing external_object_id"
+            )
+        if not relationship_type:
+            raise ValueError(f"External object relation {relation_euid} is missing relation_type")
+
+        ref: dict[str, Any] = {
+            "system": system,
+            "root_euid": root_euid,
+            "target_euid": root_euid,
+            "relationship_type": relationship_type,
+            "source_field": DEWEY_EXTERNAL_GRAPH_SOURCE_FIELD,
+            "label": f"{system}:{relationship_type}:{root_euid}",
+            "external_object_euid": external_euid,
+            "external_object_relation_euid": relation_euid,
+        }
+        object_type = external_payload.get("external_object_type")
+        if object_type is not None and str(object_type).strip():
+            ref["external_object_type"] = object_type
+        external_uri = external_payload.get("external_uri")
+        if external_uri is not None and str(external_uri).strip():
+            ref["href"] = external_uri
+        for field in (
+            "tenant_id",
+            "base_url",
+            "graph_data_path",
+            "object_detail_path_template",
+            "auth_mode",
+        ):
+            self._copy_graph_field(
+                ref,
+                field=field,
+                relation_payload=relation_payload,
+                external_payload=external_payload,
+            )
+        return ref
+
+    def _external_object_for_relation(self, session, relation_payload: dict[str, Any]):
+        external_euid = str(relation_payload.get("external_object_euid") or "").strip()
+        external = self.backend.find_by_euid(
+            session,
+            template_code=EXTERNAL_OBJECT_TEMPLATE,
+            euid=external_euid,
+        )
+        if external is None:
+            relation_euid = str(relation_payload.get("external_object_relation_euid") or "").strip()
+            raise DeweyNotFoundError(
+                f"External object not found for relation {relation_euid}: {external_euid}"
+            )
+        return external
+
+    def _external_object_relation_response_with_external(
+        self,
+        session,
+        relation,
+    ) -> dict[str, Any]:
+        body = self._external_object_relation_response(relation)
+        external = self._external_object_for_relation(session, body)
+        external_payload = self._external_object_response(external)
+        graph_ref = self._external_graph_ref_from_payloads(
+            relation_payload=body,
+            external_payload=external_payload,
+        )
+        return {
+            **body,
+            "external_system": external_payload.get("external_system"),
+            "external_object_type": external_payload.get("external_object_type"),
+            "external_object_id": external_payload.get("external_object_id"),
+            "external_uri": external_payload.get("external_uri"),
+            "external_object": external_payload,
+            "external_graph_ref": graph_ref,
+        }
+
+    def _sync_external_graph_refs_for_target(self, session, target) -> None:
+        target_payload = dict(target.json_addl or {})
+        properties = dict(target_payload.get("properties") or {})
+        external_payload = dict(properties.get("external_payload") or {})
+        raw_refs = external_payload.get("tapdb_graph", [])
+        if raw_refs is None:
+            raw_refs = []
+        if not isinstance(raw_refs, list):
+            raise ValueError("properties.external_payload.tapdb_graph must be a list")
+
+        preserved_refs = [ref for ref in raw_refs if not self._is_dewey_external_graph_ref(ref)]
+        relations = self.backend.list_children(
+            session,
+            parent=target,
+            relationship_type="has_external_relation",
+        )
+        derived_refs: list[dict[str, Any]] = []
+        seen: set[tuple[str, str, str, str]] = set()
+        for relation in relations:
+            relation_payload = self._external_object_relation_response(relation)
+            external = self._external_object_for_relation(session, relation_payload)
+            ref = self._external_graph_ref_from_payloads(
+                relation_payload=relation_payload,
+                external_payload=self._external_object_response(external),
+            )
+            key = self._external_graph_ref_key(ref)
+            if key in seen:
+                continue
+            seen.add(key)
+            derived_refs.append(ref)
+
+        next_external_payload = {
+            **external_payload,
+            "tapdb_graph": preserved_refs + derived_refs,
+        }
+        next_properties = {
+            **properties,
+            "external_payload": next_external_payload,
+        }
+        if target_payload.get("properties") == next_properties:
+            return
+        self.backend.update_instance_json(session, target, {"properties": next_properties})
+
     def _find_or_create_external_object(
         self,
         session,
@@ -92,6 +262,7 @@ class ExternalObjectServiceMixin:
             child=existing,
             relationship_type="is_external_relation_for",
         )
+        self._sync_external_graph_refs_for_target(session, artifact_instance)
 
     def _find_artifact_by_external_identity(
         self,
@@ -278,7 +449,20 @@ class ExternalObjectServiceMixin:
                 value=relation_identity,
             )
             if existing is not None:
-                body = self._external_object_relation_response(existing)
+                self.backend.create_lineage(
+                    session,
+                    parent=target,
+                    child=existing,
+                    relationship_type="has_external_relation",
+                )
+                self.backend.create_lineage(
+                    session,
+                    parent=external_object,
+                    child=existing,
+                    relationship_type="is_external_relation_for",
+                )
+                self._sync_external_graph_refs_for_target(session, target)
+                body = self._external_object_relation_response_with_external(session, existing)
                 self._store_idempotency(
                     session,
                     operation="external_object_relation.attach",
@@ -311,8 +495,9 @@ class ExternalObjectServiceMixin:
                 child=relation,
                 relationship_type="is_external_relation_for",
             )
+            self._sync_external_graph_refs_for_target(session, target)
 
-            body = self._external_object_relation_response(relation)
+            body = self._external_object_relation_response_with_external(session, relation)
             self._store_idempotency(
                 session,
                 operation="external_object_relation.attach",
@@ -334,7 +519,7 @@ class ExternalObjectServiceMixin:
         if clean_target_type not in {"artifact", "artifact_set"}:
             raise ValueError("target_type must be artifact or artifact_set")
 
-        with self.backend.session_scope(commit=False) as session:
+        with self.backend.session_scope(commit=True) as session:
             if clean_target_type == "artifact":
                 target = self.backend.find_by_euid(
                     session,
@@ -350,9 +535,13 @@ class ExternalObjectServiceMixin:
             if target is None:
                 raise DeweyNotFoundError(f"Target not found: {target_euid}")
 
+            self._sync_external_graph_refs_for_target(session, target)
             rows = self.backend.list_children(
                 session,
                 parent=target,
                 relationship_type="has_external_relation",
             )
-            return [self._external_object_relation_response(row) for row in rows[:limit]]
+            return [
+                self._external_object_relation_response_with_external(session, row)
+                for row in rows[:limit]
+            ]

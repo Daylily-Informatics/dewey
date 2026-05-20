@@ -1,0 +1,82 @@
+<!doctype html>
+{% from "_chrome.html" import environment_chrome, page_footer %}
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dewey Shared Data</title>
+    <link rel="icon" href="{{ static_url('favicon.svg') }}" type="image/svg+xml" />
+    <link rel="stylesheet" href="{{ static_url('console.css') }}" />
+  </head>
+  <body>
+    {{ environment_chrome(deployment, region, show_environment_chrome|default(true)) }}
+    <div class="shell">
+      <header class="topbar">
+        <div class="brandline">
+          <div class="eyebrow">Shared Data</div>
+          <h1 class="title">Dewey Share References</h1>
+          <div class="subtitle">{{ profile.email }}</div>
+        </div>
+        <div class="navlinks">
+          <a class="navlink" href="/ui">Dashboard</a>
+          <a class="navlink" href="/artifacts">Artifacts</a>
+          <a class="navlink" href="/search">Search</a>
+          {% if is_admin %}<a class="navlink" href="/admin">Admin</a>{% endif %}
+          <form class="logout-form" method="post" action="/auth/logout"><button type="submit">Logout</button></form>
+        </div>
+      </header>
+      <main class="page">
+        <section class="hero">
+          <div class="hero-copy">
+            <div class="eyebrow">Report</div>
+            <h2>All shared data</h2>
+            <p>Share references issued by Dewey, including status, recipient when known, expiration, revoke state, and observed access counts.</p>
+          </div>
+          <div class="results-meta"><span class="pill pill-active">{{ share_references|length }} shares</span></div>
+        </section>
+        <section class="panel">
+          {% if share_references %}
+          <div class="table-wrap">
+            <table class="share-report-table">
+              <thead>
+                <tr>
+                  <th>Share</th><th>Target</th><th>Recipient</th><th>Status</th><th>Issued By</th><th>Created</th><th>Expires</th><th>Accesses</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in share_references %}
+                <tr>
+                  <td class="mono">{{ item.share_reference_euid }}</td>
+                  <td><div>{{ item.target_type }}</div><div class="mono">{{ item.target_euid }}</div></td>
+                  <td>{{ item.recipient_email or "unknown" }}</td>
+                  <td>{{ item.status }}{% if item.revoked_at %}<div class="compact-note">revoked {{ item.revoked_at }}</div>{% endif %}</td>
+                  <td>{{ item.issued_by or "unknown" }}</td>
+                  <td>{{ item.created_at or "n/a" }}</td>
+                  <td>{{ item.expires_at or "n/a" }}</td>
+                  <td>{{ item.access_count or 0 }}{% if item.last_accessed_at %}<div class="compact-note">{{ item.last_accessed_at }}</div>{% endif %}</td>
+                  <td>
+                    <div class="action-cluster">
+                      {% if item.target_type == "artifact" and item.target_euid %}<a class="button" href="/artifacts/euid/{{ item.target_euid }}">Artifact</a>{% endif %}
+                      {% if item.access_url and item.status == "active" %}<a class="button" href="{{ item.access_url }}" target="_blank" rel="noreferrer">Open</a>{% endif %}
+                      {% if item.status == "active" %}
+                      <form method="post" action="/share-references/{{ item.share_reference_euid }}/revoke" onsubmit="return confirm('Revoke {{ item.share_reference_euid }}?');">
+                        <input type="hidden" name="return_to" value="shares" />
+                        <button class="button" type="submit">Revoke</button>
+                      </form>
+                      {% endif %}
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="empty-state">No share references have been issued.</div>
+          {% endif %}
+        </section>
+      </main>
+      {{ page_footer(git_meta, build_version) }}
+    </div>
+  </body>
+</html>

@@ -365,6 +365,7 @@ def _display_config_path(path: str) -> str:
         "literature_request_timeout_seconds": "literature.request_timeout_seconds",
         "literature_max_redirects": "literature.max_redirects",
         "default_share_reference_ttl_seconds": "share_reference.default_ttl_seconds",
+        "external_reference_targets": "external_references.targets",
         "search_export_max_rows": "search.export_max_rows",
         "config_path": "config.file_path",
     }
@@ -487,6 +488,7 @@ class Settings(BaseSettings):
 
     # Share reference defaults
     default_share_reference_ttl_seconds: int = 3600
+    external_reference_targets: list[dict[str, Any]] = Field(default_factory=list)
     search_export_max_rows: int = 1000
 
     @field_validator("cognito_redirect_uri", "cognito_logout_url")

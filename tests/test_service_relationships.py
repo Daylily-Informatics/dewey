@@ -104,7 +104,10 @@ def test_share_reference_behaviors(service: DeweyService) -> None:
     assert explicit_code == 201
     assert auto_share["issued_by"] == "tester@example.com"
     assert explicit_share["expires_at"] == "2026-04-01T00:00:00Z"
-    assert auto_share["access_url"].startswith("https://downloads.example.com/")
+    assert auto_share["access_url"] == f"/share-references/{auto_share['share_reference_euid']}"
+    opened_share = service.open_share_reference(auto_share["share_reference_euid"])
+    assert opened_share["presigned_access_url"].startswith("https://downloads.example.com/")
+    assert opened_share["access_count"] == 1
     assert (
         service.list_share_references(
             target_type="artifact",

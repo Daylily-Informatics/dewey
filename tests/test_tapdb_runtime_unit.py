@@ -54,6 +54,7 @@ def test_validate_database_target_and_sqlalchemy_url() -> None:
                 "port": "5432",
                 "database": "dewey",
                 "schema_name": "tapdb_dewey_dev",
+                "sslrootcert": "/tmp/rds-ca-bundle.pem",
             }
         )
         == "postgresql+psycopg2://alice:secret@db:5432/dewey"
@@ -62,6 +63,48 @@ def test_validate_database_target_and_sqlalchemy_url() -> None:
 
     with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="Unsupported database target"):
         tapdb_runtime.validate_database_target("staging")
+
+
+def test_build_sqlalchemy_url_supports_explicit_aurora_hostaddr() -> None:
+    assert (
+        tapdb_runtime._build_sqlalchemy_url(
+            {
+                "engine_type": "aurora",
+                "user": "dewey_user",
+                "password": "secret",
+                "host": "dayhoff-test.cluster-example.us-west-2.rds.amazonaws.com",
+                "hostaddr": "127.0.0.1",
+                "port": "15432",
+                "database": "tapdb_unidbtst_local",
+                "schema_name": "tapdb_dewey_unidbtst_local",
+                "sslrootcert": "/tmp/rds-ca-bundle.pem",
+            }
+        )
+        == "postgresql+psycopg2://dewey_user:secret@"
+        "dayhoff-test.cluster-example.us-west-2.rds.amazonaws.com:15432/tapdb_unidbtst_local"
+        "?options=-csearch_path%3Dtapdb_dewey_unidbtst_local"
+        "&sslmode=verify-full&sslrootcert=%2Ftmp%2Frds-ca-bundle.pem&hostaddr=127.0.0.1"
+    )
+
+
+def test_build_sqlalchemy_url_supports_direct_aurora_without_hostaddr() -> None:
+    assert (
+        tapdb_runtime._build_sqlalchemy_url(
+            {
+                "engine_type": "aurora",
+                "user": "dewey_user",
+                "password": "secret",
+                "host": "dayhoff-test.cluster-example.us-west-2.rds.amazonaws.com",
+                "port": "5432",
+                "database": "tapdb_unidbtst_local",
+                "schema_name": "tapdb_dewey_unidbtst_local",
+                "sslrootcert": "/tmp/rds-ca-bundle.pem",
+            }
+        )
+        == "postgresql+psycopg2://dewey_user:secret@"
+        "dayhoff-test.cluster-example.us-west-2.rds.amazonaws.com:5432/tapdb_unidbtst_local"
+        "?options=-csearch_path%3Dtapdb_dewey_unidbtst_local&sslmode=verify-full&sslrootcert=%2Ftmp%2Frds-ca-bundle.pem"
+    )
 
 
 def test_resolve_tapdb_config_path_prefers_explicit_argument() -> None:
@@ -141,6 +184,7 @@ def test_export_database_url_for_target_returns_url_without_mutating_environment
             "port": "5439",
             "database": "dewey_dev",
             "schema_name": "tapdb_dewey_dev",
+            "sslrootcert": "/tmp/rds-ca-bundle.pem",
         },
     )
 
@@ -374,6 +418,7 @@ def test_get_tapdb_db_config_and_sqlalchemy_url(monkeypatch: pytest.MonkeyPatch)
                 "port": "5432",
                 "database": "dewey_dev",
                 "schema_name": "tapdb_dewey_dev",
+                "sslrootcert": "/tmp/rds-ca-bundle.pem",
             }
         ),
     )
