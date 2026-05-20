@@ -987,7 +987,7 @@ class FakeDeweyService:
                 raise ValueError("artifact sharing requires an object-backed artifact")
             manifest: list[dict[str, Any]] = []
             connection: dict[str, Any] = {}
-            access_url = f"https://downloads.example.com/{euid}"
+            access_url = f"/share-references/{euid}"
         else:
             artifact_set = self.get_artifact_set(target_euid)
             if (transport or "presigned_s3") == "presigned_s3":
@@ -1036,6 +1036,12 @@ class FakeDeweyService:
             "member_count": len(manifest) if target_type == "artifact_set" else 0,
             "transport_config": dict(transport_config or {}),
             "issued_by": issued_by,
+            "recipient_email": None,
+            "managed_access": target_type == "artifact" and (transport or "presigned_s3") == "presigned_s3",
+            "access_count": 0,
+            "last_accessed_at": None,
+            "revoked_at": None,
+            "revoked_by": None,
             "created_at": "2026-03-10T00:00:00Z",
         }
         self.share_references[euid] = body
@@ -1051,6 +1057,36 @@ class FakeDeweyService:
         if share_reference_euid not in self.share_references:
             raise DeweyNotFoundError(f"Share reference not found: {share_reference_euid}")
         return dict(self.share_references[share_reference_euid])
+
+    def revoke_share_reference(
+        self,
+        *,
+        share_reference_euid: str,
+        revoked_by: str | None,
+        idempotency_key: str,
+    ):
+        payload = {"share_reference_euid": share_reference_euid, "revoked_by": revoked_by}
+        replay = self._idempotent("share_reference.revoke", idempotency_key, payload)
+        if replay:
+            return replay
+        share = self.get_share_reference(share_reference_euid)
+        share["status"] = "revoked"
+        share["revoked_at"] = "2026-03-10T01:00:00Z"
+        share["revoked_by"] = revoked_by
+        self.share_references[share_reference_euid] = share
+        self._remember("share_reference.revoke", idempotency_key, payload, 200, share)
+        return 200, dict(share)
+
+    def open_share_reference(self, share_reference_euid: str):
+        share = self.get_share_reference(share_reference_euid)
+        if share.get("status") != "active":
+            raise ValueError("Share reference is not active")
+        share["access_count"] = int(share.get("access_count") or 0) + 1
+        share["last_accessed_at"] = "2026-03-10T01:05:00Z"
+        self.share_references[share_reference_euid] = share
+        body = dict(share)
+        body["presigned_access_url"] = f"https://downloads.example.com/{share_reference_euid}"
+        return body
 
     def list_share_references(
         self,

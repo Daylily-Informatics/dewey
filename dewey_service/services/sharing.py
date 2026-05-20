@@ -148,22 +148,11 @@ class SharingServiceMixin:
                     raise ValueError("artifact sharing requires an object-backed artifact")
                 if str(artifact_payload.get("storage_backend") or "").lower() != "s3":
                     raise ValueError("artifact sharing requires an s3-backed artifact")
-                expires_dt = datetime.fromisoformat(expiry.replace("Z", "+00:00"))
-                ttl_value = max(
-                    60,
-                    int((expires_dt - datetime.now(timezone.utc)).total_seconds()),
-                )
                 try:
                     self._require_storage().head_object(
                         bucket=str(artifact_payload.get("bucket") or ""),
                         key=str(artifact_payload.get("key") or ""),
                         version_id=str(artifact_payload.get("version_id") or "").strip() or None,
-                    )
-                    access_url = self._require_storage().generate_presigned_get_url(
-                        bucket=str(artifact_payload.get("bucket") or ""),
-                        key=str(artifact_payload.get("key") or ""),
-                        version_id=str(artifact_payload.get("version_id") or "").strip() or None,
-                        expires_in=ttl_value,
                     )
                 except StorageObjectNotFoundError:
                     status_value = "error"
@@ -295,9 +284,22 @@ class SharingServiceMixin:
                     "connection": connection or {},
                     "member_count": member_count,
                     "transport_config": clean_transport_config,
+                    "managed_access": clean_target_type == "artifact" and clean_transport == "presigned_s3",
+                    "access_count": 0,
+                    "last_accessed_at": None,
                     "created_at": utc_now_iso(),
                 },
             )
+            if clean_target_type == "artifact" and clean_transport == "presigned_s3" and status_value == "active":
+                access_url = f"/share-references/{instance.euid}"
+                self.backend.update_instance_json(
+                    session,
+                    instance,
+                    {
+                        "access_url": access_url,
+                        "managed_access": True,
+                    },
+                )
             self.backend.create_lineage(
                 session,
                 parent=target,
@@ -314,6 +316,126 @@ class SharingServiceMixin:
                 response=body,
             )
             return 201, body
+
+
+    def revoke_share_reference(
+        self,
+        *,
+        share_reference_euid: str,
+        revoked_by: str | None,
+        idempotency_key: str,
+    ) -> tuple[int, dict[str, Any]]:
+        clean_euid = str(share_reference_euid or "").strip()
+        if not clean_euid:
+            raise ValueError("share_reference_euid is required")
+        payload = {"share_reference_euid": clean_euid, "revoked_by": str(revoked_by or "").strip() or None}
+        fingerprint = self._fingerprint(payload)
+        with self.backend.session_scope(commit=True) as session:
+            replay = self._idempotency_replay(
+                session,
+                operation="share_reference.revoke",
+                idempotency_key=idempotency_key,
+                fingerprint=fingerprint,
+            )
+            if replay is not None:
+                return replay.status_code, replay.response
+            instance = self.backend.find_by_euid(
+                session,
+                template_code=SHARE_REFERENCE_TEMPLATE,
+                euid=clean_euid,
+                for_update=True,
+            )
+            if instance is None:
+                raise DeweyNotFoundError(f"Share reference not found: {clean_euid}")
+            current = normalize_instance_payload(instance)
+            if current.get("status") != "revoked":
+                self.backend.update_instance_json(
+                    session,
+                    instance,
+                    {
+                        "status": "revoked",
+                        "revoked_at": utc_now_iso(),
+                        "revoked_by": payload["revoked_by"],
+                    },
+                )
+            body = self._share_reference_response(instance)
+            self._store_idempotency(
+                session,
+                operation="share_reference.revoke",
+                idempotency_key=idempotency_key,
+                fingerprint=fingerprint,
+                status_code=200,
+                response=body,
+            )
+            return 200, body
+
+    def open_share_reference(self, share_reference_euid: str) -> dict[str, Any]:
+        clean_euid = str(share_reference_euid or "").strip()
+        if not clean_euid:
+            raise ValueError("share_reference_euid is required")
+        now = datetime.now(timezone.utc)
+        with self.backend.session_scope(commit=True) as session:
+            instance = self.backend.find_by_euid(
+                session,
+                template_code=SHARE_REFERENCE_TEMPLATE,
+                euid=clean_euid,
+                for_update=True,
+            )
+            if instance is None:
+                raise DeweyNotFoundError(f"Share reference not found: {clean_euid}")
+            payload = normalize_instance_payload(instance)
+            if str(payload.get("status") or "").lower() != "active":
+                raise ValueError("Share reference is not active")
+            expires_at = str(payload.get("expires_at") or "").strip()
+            if not expires_at:
+                raise ValueError("Share reference is missing expires_at")
+            expires_dt = datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
+            if expires_dt <= now:
+                self.backend.update_instance_json(session, instance, {"status": "expired"})
+                raise ValueError("Share reference is expired")
+            if str(payload.get("target_type") or "").lower() != "artifact":
+                raise ValueError("Dewey-gated browser access requires an artifact share reference")
+            if str(payload.get("transport") or "").lower() != "presigned_s3":
+                raise ValueError("Dewey-gated browser access requires presigned_s3 transport")
+            target = self.backend.find_by_euid(
+                session,
+                template_code=ARTIFACT_TEMPLATE,
+                euid=str(payload.get("target_euid") or "").strip(),
+            )
+            if target is None:
+                raise DeweyNotFoundError(f"Target not found: {payload.get('target_euid')}")
+            artifact_payload = normalize_instance_payload(target)
+            if str(artifact_payload.get("storage_kind") or "object").lower() != "object":
+                raise ValueError("Share reference target is not an object-backed artifact")
+            if str(artifact_payload.get("storage_backend") or "").lower() != "s3":
+                raise ValueError("Share reference target is not s3-backed")
+            self._require_storage().head_object(
+                bucket=str(artifact_payload.get("bucket") or ""),
+                key=str(artifact_payload.get("key") or ""),
+                version_id=str(artifact_payload.get("version_id") or "").strip() or None,
+            )
+            access_url = self._require_storage().generate_presigned_get_url(
+                bucket=str(artifact_payload.get("bucket") or ""),
+                key=str(artifact_payload.get("key") or ""),
+                version_id=str(artifact_payload.get("version_id") or "").strip() or None,
+                expires_in=900,
+            )
+            access_count = int(payload.get("access_count") or 0) + 1
+            accessed_at = utc_now_iso()
+            events = list(payload.get("access_events") or [])
+            events.append({"accessed_at": accessed_at})
+            self.backend.update_instance_json(
+                session,
+                instance,
+                {
+                    "access_count": access_count,
+                    "last_accessed_at": accessed_at,
+                    "access_events": events[-25:],
+                },
+            )
+            body = self._share_reference_response(instance)
+            body["presigned_access_url"] = access_url
+            return body
 
     def _normalize_expiry(self, expires_at: str | None, ttl_seconds: int | None = None) -> str:
         clean = str(expires_at or "").strip()

@@ -32,7 +32,7 @@ def test_create_share_reference(client) -> None:
     payload = share.json()
     assert payload["status_code"] == 201
     assert payload["share_reference_euid"].startswith("SH-")
-    assert payload["access_url"].startswith("https://downloads.example.com/")
+    assert payload["access_url"].startswith("/share-references/SH-")
 
     listed = client.get(
         f"/api/v1/artifacts/{artifact['artifact_euid']}/share-references",
@@ -73,8 +73,9 @@ def test_create_share_reference_prepares_external_recipient(
             }
 
     class _AsyncClient:
-        def __init__(self, *, timeout: float) -> None:
+        def __init__(self, *, timeout: float, verify: bool = True) -> None:
             self.timeout = timeout
+            self.verify = verify
 
         async def __aenter__(self):
             return self

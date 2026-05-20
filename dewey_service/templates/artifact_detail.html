@@ -21,6 +21,7 @@
         <div class="navlinks">
           <a class="navlink" href="/ui">Dashboard</a>
           <a class="navlink" href="/artifacts?section=search#section-search">Artifact Search</a>
+          <a class="navlink" href="/shares">Shared Data</a>
           <a class="navlink" href="/artifacts/dag?artifact_euid={{ artifact.artifact_euid }}">DAG And Browser</a>
           <a class="navlink" href="/artifacts?section=recent_artifacts#section-recent_artifacts">Recent Artifacts</a>
           {% if is_admin %}
@@ -60,7 +61,7 @@
         </div>
         {% endif %}
 
-        <section class="content-grid" style="grid-template-columns: minmax(320px, 1.05fr) minmax(0, 1.15fr);">
+        <section class="content-grid artifact-detail-grid">
           <section class="stack">
             <section class="panel">
               <div class="panel-header">
@@ -105,7 +106,7 @@
                   </tr>
                   <tr>
                     <th>Storage URI</th>
-                    <td>{{ artifact_links.artifact_storage_action(artifact.artifact_euid, artifact.storage_uri, artifact.storage_kind, artifact.storage_console_url) }}</td>
+                    <td class="long-value">{{ artifact_links.artifact_storage_action(artifact.artifact_euid, artifact.storage_uri, artifact.storage_kind, artifact.storage_console_url) }}</td>
                   </tr>
                   <tr>
                     <th>Storage Kind</th>
@@ -138,7 +139,7 @@
                     <th>Source URI</th>
                     <td>
                       {% if artifact.source_uri %}
-                      <span class="mono">{{ artifact.source_uri }}</span>
+                      <span class="mono long-value">{{ artifact.source_uri }}</span>
                       {% else %}
                       n/a
                       {% endif %}
@@ -150,7 +151,7 @@
                   </tr>
                   <tr>
                     <th>Key</th>
-                    <td><span class="mono">{{ artifact.key or "n/a" }}</span></td>
+                    <td><span class="mono long-value">{{ artifact.key or "n/a" }}</span></td>
                   </tr>
                 </tbody>
               </table>
@@ -161,14 +162,14 @@
               <div class="panel-header">
                 <div>
                   <h3>Download</h3>
-                  <div class="panel-copy">Generate a fresh presigned URL and immediately download the artifact.</div>
+                  <div class="panel-copy">Create a revokable Dewey share reference, then download through a short-lived S3 URL.</div>
                 </div>
               </div>
               <form method="post" action="/artifacts/euid/{{ artifact.artifact_euid }}/download" onsubmit="return confirm('Download {{ artifact.artifact_euid }}?');">
                 <div class="form-grid">
                   <div class="field">
-                    <label for="detail_share_ttl_hours">TTL Hours</label>
-                    <input id="detail_share_ttl_hours" name="share_ttl_hours" type="number" min="1" value="24" />
+                    <label for="detail_share_duration_days">Days</label>
+                    <input id="detail_share_duration_days" name="share_duration_days" type="number" min="0.01" max="365" step="0.01" value="1" />
                   </div>
                 </div>
                 <div class="form-actions">
@@ -286,22 +287,36 @@
                     <tr>
                       <th>Share</th>
                       <th>Status</th>
+                      <th>Recipient</th>
+                      <th>Created</th>
                       <th>Expires</th>
-                      <th>Access</th>
+                      <th>Accesses</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {% for item in artifact_share_references %}
                     <tr>
-                      <td class="mono">{{ item.share_reference_euid }}</td>
+                      <td class="mono long-value">{{ item.share_reference_euid }}</td>
                       <td>{{ item.status }}</td>
+                      <td>{{ item.recipient_email or "unknown" }}</td>
+                      <td>{{ item.created_at or "n/a" }}</td>
                       <td>{{ item.expires_at or "n/a" }}</td>
+                      <td>{{ item.access_count or 0 }}{% if item.last_accessed_at %}<div class="compact-note">{{ item.last_accessed_at }}</div>{% endif %}</td>
                       <td>
-                        {% if item.access_url %}
-                        <a class="button" href="{{ item.access_url }}" target="_blank" rel="noreferrer">Open</a>
-                        {% else %}
-                        <span class="note">No access URL</span>
-                        {% endif %}
+                        <div class="action-cluster">
+                          {% if item.access_url and item.status == "active" %}
+                          <a class="button" href="{{ item.access_url }}" target="_blank" rel="noreferrer">Open</a>
+                          {% else %}
+                          <span class="note">No active link</span>
+                          {% endif %}
+                          {% if item.status == "active" %}
+                          <form method="post" action="/share-references/{{ item.share_reference_euid }}/revoke" onsubmit="return confirm('Revoke {{ item.share_reference_euid }}?');">
+                            <input type="hidden" name="return_to" value="artifact" />
+                            <button class="button" type="submit">Revoke</button>
+                          </form>
+                          {% endif %}
+                        </div>
                       </td>
                     </tr>
                     {% endfor %}
@@ -320,6 +335,31 @@
                   <div class="panel-copy">Attached external-object links, if any.</div>
                 </div>
               </div>
+              <form method="post" action="/artifacts/euid/{{ artifact.artifact_euid }}/external-reference/validate" style="margin-bottom: 1rem;">
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="external_reference_euid">External EUID</label>
+                    <input id="external_reference_euid" name="external_reference_euid" type="text" value="{{ external_reference_form.get('external_reference_euid', '') }}" placeholder="Z-RGX-15T" />
+                  </div>
+                  <div class="field">
+                    <label for="relation_type">Relation Type</label>
+                    <input id="relation_type" name="relation_type" type="text" value="{{ external_reference_form.get('relation_type', 'linked') }}" />
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button class="button button-primary" type="submit">Validate EUID</button>
+                </div>
+              </form>
+              {% if external_reference_candidate %}
+              <div class="status-ok" style="margin-bottom: 0.8rem;">
+                Validated {{ external_reference_candidate.service_id }} / {{ external_reference_candidate.euid }}.
+              </div>
+              <form method="post" action="/artifacts/euid/{{ artifact.artifact_euid }}/external-reference/create" style="margin-bottom: 1rem;">
+                <input type="hidden" name="external_reference_euid" value="{{ external_reference_candidate.euid }}" />
+                <input type="hidden" name="relation_type" value="{{ external_reference_form.get('relation_type', 'linked') }}" />
+                <button class="button button-primary" type="submit">Create Link</button>
+              </form>
+              {% endif %}
               {% if artifact_external_relations %}
               <div class="table-wrap">
                 <table>
@@ -334,7 +374,17 @@
                     {% for item in artifact_external_relations %}
                     <tr>
                       <td>{{ item.relation_type }}</td>
-                      <td class="mono">{{ item.external_object_euid }}</td>
+                      <td>
+                        {% set external_label = item.external_object_id or item.external_object_euid %}
+                        {% if item.external_uri %}
+                        <a class="mono mono-link" href="{{ item.external_uri }}" target="_blank" rel="noreferrer">{{ external_label }}</a>
+                        {% else %}
+                        <span class="mono">{{ external_label }}</span>
+                        {% endif %}
+                        {% if item.external_system or item.external_object_type %}
+                        <div class="note">{{ item.external_system }}{% if item.external_object_type %} / {{ item.external_object_type }}{% endif %}</div>
+                        {% endif %}
+                      </td>
                       <td><pre class="json-block">{{ item.metadata | tojson(indent=2) }}</pre></td>
                     </tr>
                     {% endfor %}
