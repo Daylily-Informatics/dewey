@@ -249,6 +249,13 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "storage_managed_bucket": "managed_storage_bucket",
         "storage_managed_prefix": "managed_storage_prefix",
         "storage_upload_session_ttl_seconds": "upload_session_ttl_seconds",
+        "storage_cloudfront_enabled": "cloudfront_enabled",
+        "storage_cloudfront_distribution_domain": "cloudfront_distribution_domain",
+        "storage_cloudfront_distribution_id": "cloudfront_distribution_id",
+        "storage_cloudfront_key_pair_id": "cloudfront_key_pair_id",
+        "storage_cloudfront_private_key_path": "cloudfront_private_key_path",
+        "storage_cloudfront_default_ttl_seconds": "cloudfront_default_ttl_seconds",
+        "storage_cloudfront_cookie_ttl_seconds": "cloudfront_cookie_ttl_seconds",
         "auth_cognito_domain": "cognito_domain",
         "auth_cognito_app_client_id": "cognito_app_client_id",
         "auth_cognito_app_client_secret": "cognito_app_client_secret",
@@ -360,6 +367,13 @@ def _display_config_path(path: str) -> str:
         "managed_storage_bucket": "storage.managed_bucket",
         "managed_storage_prefix": "storage.managed_prefix",
         "upload_session_ttl_seconds": "storage.upload_session_ttl_seconds",
+        "cloudfront_enabled": "storage.cloudfront.enabled",
+        "cloudfront_distribution_domain": "storage.cloudfront.distribution_domain",
+        "cloudfront_distribution_id": "storage.cloudfront.distribution_id",
+        "cloudfront_key_pair_id": "storage.cloudfront.key_pair_id",
+        "cloudfront_private_key_path": "storage.cloudfront.private_key_path",
+        "cloudfront_default_ttl_seconds": "storage.cloudfront.default_ttl_seconds",
+        "cloudfront_cookie_ttl_seconds": "storage.cloudfront.cookie_ttl_seconds",
         "literature_managed_copy_allowed_domains": "literature.managed_copy_allowed_domains",
         "literature_metapub_cache_dir": "literature.metapub_cache_dir",
         "literature_request_timeout_seconds": "literature.request_timeout_seconds",
@@ -479,6 +493,13 @@ class Settings(BaseSettings):
     managed_storage_bucket: str = ""
     managed_storage_prefix: str = "artifacts"
     upload_session_ttl_seconds: int = 900
+    cloudfront_enabled: bool = False
+    cloudfront_distribution_domain: str = ""
+    cloudfront_distribution_id: str = ""
+    cloudfront_key_pair_id: str = ""
+    cloudfront_private_key_path: str = ""
+    cloudfront_default_ttl_seconds: int = 900
+    cloudfront_cookie_ttl_seconds: int = 900
 
     # Literature integration
     literature_managed_copy_allowed_domains: str = "europepmc.org,ncbi.nlm.nih.gov"
@@ -683,6 +704,24 @@ class Settings(BaseSettings):
             self.tapdb_config_path,
             field_name="tapdb_config_path",
         )
+        if self.cloudfront_enabled:
+            domain = str(self.cloudfront_distribution_domain or "").strip().rstrip("/")
+            if not domain:
+                raise ValueError("cloudfront_distribution_domain is required when CloudFront is enabled")
+            if domain.startswith(("https://", "http://")) or any(char in domain for char in "/?#"):
+                raise ValueError("cloudfront_distribution_domain must be a bare host")
+            self.cloudfront_distribution_domain = domain
+            if not str(self.cloudfront_key_pair_id or "").strip():
+                raise ValueError("cloudfront_key_pair_id is required when CloudFront is enabled")
+            self.cloudfront_key_pair_id = str(self.cloudfront_key_pair_id).strip()
+            self.cloudfront_private_key_path = _require_absolute_path(
+                self.cloudfront_private_key_path,
+                field_name="cloudfront_private_key_path",
+            )
+            if not Path(self.cloudfront_private_key_path).is_file():
+                raise ValueError("cloudfront_private_key_path does not exist")
+            self.cloudfront_default_ttl_seconds = max(60, int(self.cloudfront_default_ttl_seconds))
+            self.cloudfront_cookie_ttl_seconds = max(60, int(self.cloudfront_cookie_ttl_seconds))
         return self
 
     def api_tokens(self) -> set[str]:

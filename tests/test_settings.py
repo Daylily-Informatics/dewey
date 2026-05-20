@@ -119,6 +119,51 @@ storage:
     assert loaded.show_environment_chrome is True
 
 
+def test_settings_loads_explicit_cloudfront_config(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "local")
+    cfg_dir = tmp_path / "dewey-local"
+    cfg_dir.mkdir(parents=True)
+    key_path = tmp_path / "cloudfront-private-key.pem"
+    key_path.write_text("not-a-real-key-for-settings-validation", encoding="utf-8")
+    cfg = cfg_dir / "dewey-config-local.yaml"
+    cfg.write_text(
+        f"""
+application:
+  api_bearer_token: yaml-token
+auth:
+  cognito:
+    domain: auth.example.com
+    app_client_id: client-1
+    redirect_uri: https://localhost:8914/auth/callback
+    logout_url: https://localhost:8914/login
+database:
+  backend: tapdb
+storage:
+  cloudfront:
+    enabled: true
+    distribution_domain: d111111abcdef8.cloudfront.net
+    distribution_id: EDIST123
+    key_pair_id: KTEST123
+    private_key_path: {key_path}
+    default_ttl_seconds: 300
+    cookie_ttl_seconds: 600
+""",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
+
+    loaded = load_settings()
+
+    assert loaded.cloudfront_enabled is True
+    assert loaded.cloudfront_distribution_domain == "d111111abcdef8.cloudfront.net"
+    assert loaded.cloudfront_key_pair_id == "KTEST123"
+    assert loaded.cloudfront_private_key_path == str(key_path.resolve())
+    assert loaded.cloudfront_default_ttl_seconds == 300
+    assert loaded.cloudfront_cookie_ttl_seconds == 600
+
+
 def test_load_settings_aws_profile_prefers_dewey_env_over_config_and_shell_env(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

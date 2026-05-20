@@ -70,7 +70,7 @@ Share references describe a sharing action for an artifact or artifact set. Curr
 - concrete presigned URLs for S3-backed shares where available
 - manifest rows for artifact-set sharing
 
-Artifact shares currently require `presigned_s3`. Artifact-set shares support `presigned_s3`, `rclone_http`, and `rclone_sftp`.
+Artifact shares support `presigned_s3` and Dewey-authorized `cloudfront`. Artifact-set shares support `presigned_s3`, `rclone_http`, `rclone_sftp`, and `cloudfront`. CloudFront/S3 remain private delivery mechanisms behind Dewey's access decision.
 
 ### External Object And Relation
 

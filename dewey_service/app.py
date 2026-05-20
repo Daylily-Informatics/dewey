@@ -51,6 +51,7 @@ from dewey_service.auth import (
     require_ui_session,
     start_browser_login,
 )
+from dewey_service.cloudfront import CloudFrontShareSigner
 from dewey_service.defaults import AWS_PROFILE_REQUIRED_MESSAGE, resolve_aws_profile
 from dewey_service.domain_access import (
     build_allowed_origin_regex,
@@ -192,11 +193,19 @@ class ShareReferenceCreateRequest(BaseModel):
     issued_by: str | None = None
     transport: str = Field(
         default="presigned_s3",
-        pattern="^(presigned_s3|rclone_http|rclone_sftp)$",
+        pattern="^(presigned_s3|rclone_http|rclone_sftp|cloudfront)$",
     )
     transport_config: dict[str, Any] = Field(default_factory=dict)
     ttl_seconds: int | None = None
     recipient_email: str | None = None
+    visibility: str | None = Field(default=None, pattern="^(authenticated|public)$")
+    permissions: list[str] = Field(default_factory=list)
+    recipient_emails: list[str] = Field(default_factory=list)
+    recipient_domains: list[str] = Field(default_factory=list)
+    pending_recipient_emails: list[str] = Field(default_factory=list)
+    mode: str | None = Field(default=None, pattern="^(snapshot|live_prefix)$")
+    recursive: bool = False
+    relative_path: str | None = None
 
 
 class ArtifactStorageLockRequest(BaseModel):
@@ -342,6 +351,15 @@ def create_app(
             profile=aws_profile,
             region=settings.aws_region,
         )
+        cloudfront_signer = None
+        if settings.cloudfront_enabled:
+            cloudfront_signer = CloudFrontShareSigner(
+                distribution_domain=settings.cloudfront_distribution_domain,
+                key_pair_id=settings.cloudfront_key_pair_id,
+                private_key_path=settings.cloudfront_private_key_path,
+                default_ttl_seconds=settings.cloudfront_default_ttl_seconds,
+                cookie_ttl_seconds=settings.cloudfront_cookie_ttl_seconds,
+            )
         literature_adapter = None
         try:
             literature_adapter = MetapubAdapter(
@@ -363,6 +381,7 @@ def create_app(
             literature_adapter=literature_adapter,
             literature_allowed_domains=settings.literature_allowed_domains,
             literature_request_timeout_seconds=settings.literature_request_timeout_seconds,
+            cloudfront_signer=cloudfront_signer,
         )
         service.bootstrap()
 
@@ -1592,6 +1611,70 @@ def create_app(
     ) -> HTMLResponse:
         return _admin_page_response(request, profile=profile)
 
+    @app.get("/admin/external-shares", include_in_schema=False)
+    async def admin_external_shares_report(
+        request: Request,
+        status_filter: str | None = Query(default=None, alias="status"),
+        visibility: str | None = Query(default=None),
+        creator: str | None = Query(default=None),
+        target_euid: str | None = Query(default=None),
+        external_recipient: bool | None = Query(default=None),
+        pending_external_recipient: bool | None = Query(default=None),
+        profile: dict[str, Any] = Depends(require_ui_admin_session),
+    ) -> HTMLResponse:
+        rows = service.list_external_share_report(limit=1000)
+        if status_filter:
+            rows = [
+                row
+                for row in rows
+                if str(row.get("status") or "").lower() == str(status_filter).lower()
+            ]
+        if visibility:
+            rows = [
+                row
+                for row in rows
+                if str(row.get("visibility") or "").lower() == str(visibility).lower()
+            ]
+        if creator:
+            needle = str(creator).strip().lower()
+            rows = [row for row in rows if needle in str(row.get("issued_by") or "").lower()]
+        if target_euid:
+            rows = [
+                row
+                for row in rows
+                if str(row.get("target_euid") or "").strip() == str(target_euid).strip()
+            ]
+        if external_recipient is not None:
+            rows = [
+                row
+                for row in rows
+                if bool(row.get("recipient_emails") or row.get("recipient_domains"))
+                is bool(external_recipient)
+            ]
+        if pending_external_recipient is not None:
+            rows = [
+                row
+                for row in rows
+                if bool(row.get("pending_recipient_emails")) is bool(pending_external_recipient)
+            ]
+        return templates.TemplateResponse(
+            request,
+            "admin_external_shares_report.html",
+            _template_context(
+                profile=profile,
+                is_admin=True,
+                share_references=rows,
+                filters={
+                    "status": status_filter or "",
+                    "visibility": visibility or "",
+                    "creator": creator or "",
+                    "target_euid": target_euid or "",
+                    "external_recipient": external_recipient,
+                    "pending_external_recipient": pending_external_recipient,
+                },
+            ),
+        )
+
     @app.post("/admin/artifact-storage", include_in_schema=False)
     async def admin_update_artifact_storage(
         request: Request, profile: dict[str, Any] = Depends(require_ui_admin_session)
@@ -2465,19 +2548,55 @@ def create_app(
         return RedirectResponse(url=access_url, status_code=status.HTTP_303_SEE_OTHER)
 
     @app.get("/share-references/{share_reference_euid}", include_in_schema=False)
-    async def open_share_reference(share_reference_euid: str) -> Response:
+    async def open_share_reference(request: Request, share_reference_euid: str) -> Response:
         try:
-            payload = service.open_share_reference(share_reference_euid)
+            share = service.get_share_reference(share_reference_euid)
+            profile = None
+            if (
+                str(share.get("transport") or "").lower() == "cloudfront"
+                and str(share.get("visibility") or "authenticated").lower() == "authenticated"
+            ):
+                profile = require_ui_session(request)
+            payload = service.open_share_reference(
+                share_reference_euid,
+                viewer_email=str((profile or {}).get("email") or "").strip() or None,
+                viewer_groups=list((profile or {}).get("groups") or []),
+            )
         except DeweyNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         except StorageObjectNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         except ValueError as exc:
             raise HTTPException(status_code=410, detail=str(exc)) from exc
+        browser_view_url = str(payload.get("browser_view_url") or "").strip()
+        if browser_view_url:
+            return RedirectResponse(url=browser_view_url, status_code=status.HTTP_303_SEE_OTHER)
         access_url = str(payload.get("presigned_access_url") or "").strip()
         if not access_url:
             raise HTTPException(
                 status_code=502, detail="Share reference did not produce an access URL"
+            )
+        return RedirectResponse(url=access_url, status_code=status.HTTP_303_SEE_OTHER)
+
+    @app.get("/public-shares/{public_share_id}", include_in_schema=False)
+    async def open_public_share(request: Request, public_share_id: str) -> Response:
+        _ = request
+        try:
+            share = service.get_share_reference_by_public_id(public_share_id)
+            payload = service.open_share_reference(share["share_reference_euid"])
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except StorageObjectNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=410, detail=str(exc)) from exc
+        browser_view_url = str(payload.get("browser_view_url") or "").strip()
+        if browser_view_url:
+            return RedirectResponse(url=browser_view_url, status_code=status.HTTP_303_SEE_OTHER)
+        access_url = str(payload.get("presigned_access_url") or "").strip()
+        if not access_url:
+            raise HTTPException(
+                status_code=502, detail="Public share did not produce an access URL"
             )
         return RedirectResponse(url=access_url, status_code=status.HTTP_303_SEE_OTHER)
 
@@ -2512,6 +2631,188 @@ def create_app(
         raise HTTPException(
             status_code=400, detail="Revoked share reference is missing target_euid"
         )
+
+    @app.get("/shares/cloudfront/new", include_in_schema=False)
+    async def cloudfront_share_create_page(
+        request: Request,
+        target_type: str = Query(default="artifact"),
+        target_euid: str = Query(default=""),
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> HTMLResponse:
+        return templates.TemplateResponse(
+            request,
+            "share_create_cloudfront.html",
+            _template_context(
+                profile=profile,
+                is_admin=_is_admin(profile),
+                form={
+                    "target_type": target_type,
+                    "target_euid": target_euid,
+                    "visibility": "authenticated",
+                    "mode": "snapshot",
+                    "recursive": "no",
+                    "permissions": "view_metadata,download",
+                },
+                result=None,
+            ),
+        )
+
+    @app.post("/shares/cloudfront", include_in_schema=False)
+    async def cloudfront_share_create(
+        request: Request,
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> HTMLResponse:
+        form = await request.form()
+        form_state = {
+            "target_type": str(form.get("target_type") or "artifact").strip(),
+            "target_euid": str(form.get("target_euid") or "").strip(),
+            "visibility": str(form.get("visibility") or "authenticated").strip(),
+            "mode": str(form.get("mode") or "snapshot").strip(),
+            "recursive": str(form.get("recursive") or "no").strip(),
+            "permissions": str(form.get("permissions") or "").strip(),
+            "recipient_emails": str(form.get("recipient_emails") or "").strip(),
+            "recipient_domains": str(form.get("recipient_domains") or "").strip(),
+            "pending_recipient_emails": str(form.get("pending_recipient_emails") or "").strip(),
+            "relative_path": str(form.get("relative_path") or "").strip(),
+            "purpose": str(form.get("purpose") or "cloudfront-share").strip(),
+        }
+        try:
+            _, payload = service.create_share_reference(
+                target_type=form_state["target_type"],
+                target_euid=form_state["target_euid"],
+                purpose=form_state["purpose"],
+                scope="cloudfront",
+                expires_at=None,
+                issued_by=str(profile.get("email") or "").strip() or None,
+                transport="cloudfront",
+                transport_config={},
+                ttl_seconds=_share_duration_to_seconds(
+                    _parse_share_duration_days(form.get("share_duration_days") or "7")
+                ),
+                idempotency_key=_new_idempotency_key("ui-cloudfront-share"),
+                visibility=form_state["visibility"],
+                permissions=split_csv(form_state["permissions"]),
+                recipient_emails=split_csv(form_state["recipient_emails"]),
+                recipient_domains=split_csv(form_state["recipient_domains"]),
+                pending_recipient_emails=split_csv(form_state["pending_recipient_emails"]),
+                mode=form_state["mode"],
+                recursive=form_state["recursive"].lower() == "yes",
+                relative_path=form_state["relative_path"],
+                creator_profile=profile,
+            )
+            result = {"state": "success", "share": payload}
+        except Exception as exc:
+            result = {"state": "error", "detail": str(exc)}
+        return templates.TemplateResponse(
+            request,
+            "share_create_cloudfront.html",
+            _template_context(
+                profile=profile,
+                is_admin=_is_admin(profile),
+                form=form_state,
+                result=result,
+            ),
+            status_code=400 if result["state"] == "error" else 200,
+        )
+
+    @app.get("/shares/cloudfront/{share_reference_euid}", include_in_schema=False)
+    async def cloudfront_share_detail(
+        request: Request,
+        share_reference_euid: str,
+    ) -> HTMLResponse:
+        share = service.get_share_reference(share_reference_euid)
+        profile = None
+        if str(share.get("visibility") or "authenticated").lower() == "authenticated":
+            profile = require_ui_session(request)
+        return templates.TemplateResponse(
+            request,
+            "share_detail_cloudfront.html",
+            _template_context(
+                profile=profile,
+                is_admin=_is_admin(profile or {}),
+                share=share,
+            ),
+        )
+
+    @app.get("/shares/cloudfront/{share_reference_euid}/browse", include_in_schema=False)
+    async def cloudfront_share_browse(
+        request: Request,
+        share_reference_euid: str,
+        key: str | None = Query(default=None),
+    ) -> HTMLResponse:
+        share = service.get_share_reference(share_reference_euid)
+        profile = None
+        if str(share.get("visibility") or "authenticated").lower() == "authenticated":
+            profile = require_ui_session(request)
+        try:
+            payload = service.open_share_reference(
+                share_reference_euid,
+                viewer_email=str((profile or {}).get("email") or "").strip() or None,
+                viewer_groups=list((profile or {}).get("groups") or []),
+                access_mode="browse",
+                requested_key=key,
+            )
+            return templates.TemplateResponse(
+                request,
+                "share_browse_cloudfront.html",
+                _template_context(
+                    profile=profile,
+                    is_admin=_is_admin(profile or {}),
+                    share=payload,
+                    access=payload.get("cloudfront_access") or {},
+                ),
+            )
+        except Exception as exc:
+            return templates.TemplateResponse(
+                request,
+                "share_denied.html",
+                _template_context(
+                    profile=profile,
+                    is_admin=_is_admin(profile or {}),
+                    share=share,
+                    denial_reason=str(exc),
+                ),
+                status_code=403,
+            )
+
+    @app.get("/shares/cloudfront/{share_reference_euid}/programmatic", include_in_schema=False)
+    async def cloudfront_programmatic_access(
+        request: Request,
+        share_reference_euid: str,
+    ) -> HTMLResponse:
+        share = service.get_share_reference(share_reference_euid)
+        profile = None
+        if str(share.get("visibility") or "authenticated").lower() == "authenticated":
+            profile = require_ui_session(request)
+        try:
+            payload = service.open_share_reference(
+                share_reference_euid,
+                viewer_email=str((profile or {}).get("email") or "").strip() or None,
+                viewer_groups=list((profile or {}).get("groups") or []),
+                access_mode="programmatic",
+            )
+            return templates.TemplateResponse(
+                request,
+                "share_programmatic_access.html",
+                _template_context(
+                    profile=profile,
+                    is_admin=_is_admin(profile or {}),
+                    share=payload,
+                    access=payload.get("cloudfront_access") or {},
+                ),
+            )
+        except Exception as exc:
+            return templates.TemplateResponse(
+                request,
+                "share_denied.html",
+                _template_context(
+                    profile=profile,
+                    is_admin=_is_admin(profile or {}),
+                    share=share,
+                    denial_reason=str(exc),
+                ),
+                status_code=403,
+            )
 
     @app.get("/shares", include_in_schema=False)
     async def shared_data_report(
@@ -3177,16 +3478,15 @@ def create_app(
         except DeweyNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
-    @app.post(
-        "/api/v1/share-references",
-        dependencies=[Depends(api_auth_dep)],
-    )
+    @app.post("/api/v1/share-references")
     async def create_share_reference(
         request: Request,
         body: ShareReferenceCreateRequest,
+        auth_context: dict[str, Any] = Depends(session_or_api_auth_dep),
         idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
     ) -> dict[str, Any]:
         try:
+            creator_profile = auth_context.get("profile") if isinstance(auth_context, dict) else None
             status_code, payload = service.create_share_reference(
                 target_type=body.target_type,
                 target_euid=body.target_euid,
@@ -3197,6 +3497,15 @@ def create_app(
                 transport=body.transport,
                 transport_config=body.transport_config,
                 ttl_seconds=body.ttl_seconds,
+                visibility=body.visibility,
+                permissions=body.permissions,
+                recipient_emails=body.recipient_emails,
+                recipient_domains=body.recipient_domains,
+                pending_recipient_emails=body.pending_recipient_emails,
+                mode=body.mode,
+                recursive=body.recursive,
+                relative_path=body.relative_path,
+                creator_profile=creator_profile,
                 idempotency_key=_require_idempotency_key(idempotency_key),
             )
             if body.recipient_email:

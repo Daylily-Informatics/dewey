@@ -1,0 +1,64 @@
+<!doctype html>
+{% from "_chrome.html" import environment_chrome, page_footer %}
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dewey CloudFront Share</title>
+    <link rel="icon" href="{{ static_url('favicon.svg') }}" type="image/svg+xml" />
+    <link rel="stylesheet" href="{{ static_url('console.css') }}" />
+  </head>
+  <body>
+    {{ environment_chrome(deployment, region, show_environment_chrome|default(true)) }}
+    <div class="shell">
+      <header class="topbar">
+        <div class="brandline">
+          <div class="eyebrow">CloudFront Share</div>
+          <h1 class="title">Create Share</h1>
+          <div class="subtitle">{{ profile.email }}</div>
+        </div>
+        <div class="navlinks">
+          <a class="navlink" href="/ui">Dashboard</a>
+          <a class="navlink" href="/artifacts">Artifacts</a>
+          <a class="navlink" href="/shares">Shares</a>
+          {% if is_admin %}<a class="navlink" href="/admin/external-shares">External Shares</a>{% endif %}
+        </div>
+      </header>
+      <main class="page">
+        {% if result and result.state == "success" %}
+        <section class="panel">
+          <h2>Share Created</h2>
+          <p class="mono">{{ result.share.share_reference_euid }}</p>
+          <div class="action-cluster">
+            <a class="button button-primary" href="{{ result.share.access_url }}">Open</a>
+            <a class="button" href="/shares/cloudfront/{{ result.share.share_reference_euid }}">Details</a>
+          </div>
+        </section>
+        {% elif result and result.state == "error" %}
+        <section class="panel panel-danger">
+          <h2>Share Denied</h2>
+          <p>{{ result.detail }}</p>
+        </section>
+        {% endif %}
+        <section class="panel">
+          <form class="form-grid" method="post" action="/shares/cloudfront">
+            <label>Target Type <select name="target_type"><option value="artifact" {% if form.target_type == "artifact" %}selected{% endif %}>artifact</option><option value="artifact_set" {% if form.target_type == "artifact_set" %}selected{% endif %}>artifact_set</option></select></label>
+            <label>Target EUID <input name="target_euid" value="{{ form.target_euid }}" required /></label>
+            <label>Visibility <select name="visibility"><option value="authenticated" {% if form.visibility == "authenticated" %}selected{% endif %}>authenticated</option><option value="public" {% if form.visibility == "public" %}selected{% endif %}>public</option></select></label>
+            <label>Mode <select name="mode"><option value="snapshot" {% if form.mode == "snapshot" %}selected{% endif %}>snapshot</option><option value="live_prefix" {% if form.mode == "live_prefix" %}selected{% endif %}>live_prefix</option></select></label>
+            <label>Recursive <select name="recursive"><option value="no" {% if form.recursive != "yes" %}selected{% endif %}>no</option><option value="yes" {% if form.recursive == "yes" %}selected{% endif %}>yes</option></select></label>
+            <label>Duration Days <input name="share_duration_days" type="number" value="7" min="0.01" max="365" step="0.01" /></label>
+            <label>Permissions <input name="permissions" value="{{ form.permissions }}" /></label>
+            <label>Recipient Emails <input name="recipient_emails" value="{{ form.recipient_emails }}" /></label>
+            <label>Recipient Domains <input name="recipient_domains" value="{{ form.recipient_domains }}" /></label>
+            <label>Pending External Emails <input name="pending_recipient_emails" value="{{ form.pending_recipient_emails }}" /></label>
+            <label>Relative Path <input name="relative_path" value="{{ form.relative_path }}" /></label>
+            <label>Purpose <input name="purpose" value="{{ form.purpose or 'cloudfront-share' }}" /></label>
+            <button class="button button-primary" type="submit">Create</button>
+          </form>
+        </section>
+      </main>
+      {{ page_footer(git_meta, build_version) }}
+    </div>
+  </body>
+</html>

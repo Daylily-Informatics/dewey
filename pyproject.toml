@@ -12,6 +12,7 @@ dependencies = [
     "boto3>=1.35.0",
     "bandit[toml]>=1.8.0",
     "cli-core-yo==2.1.1",
+    "cryptography>=42.0.0",
     "build>=1.2.0",
     "daylily-tapdb>=7.0.5,<8.0.0",
     "daylily-auth-cognito==2.1.5",

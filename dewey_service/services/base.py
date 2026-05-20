@@ -55,6 +55,7 @@ class BaseDeweyService:
         literature_adapter: Any | None = None,
         literature_allowed_domains: set[str] | None = None,
         literature_request_timeout_seconds: int = 10,
+        cloudfront_signer: Any | None = None,
     ):
         self.backend = backend
         self.default_share_ttl_seconds = max(60, int(default_share_ttl_seconds))
@@ -70,6 +71,7 @@ class BaseDeweyService:
             if str(item or "").strip()
         }
         self.literature_request_timeout_seconds = max(1, int(literature_request_timeout_seconds))
+        self.cloudfront_signer = cloudfront_signer
         self._upload_serializer = URLSafeTimedSerializer(
             str(upload_token_secret or "dewey-upload-secret"),
             salt="dewey-upload-session-v1",
@@ -400,6 +402,18 @@ class BaseDeweyService:
             "transport_config": dict(payload.get("transport_config") or {}),
             "issued_by": payload.get("issued_by"),
             "recipient_email": payload.get("recipient_email"),
+            "visibility": payload.get("visibility"),
+            "public_share_id": payload.get("public_share_id"),
+            "recipient_emails": list(payload.get("recipient_emails") or []),
+            "recipient_domains": list(payload.get("recipient_domains") or []),
+            "pending_recipient_emails": list(payload.get("pending_recipient_emails") or []),
+            "permissions": list(payload.get("permissions") or []),
+            "mode": payload.get("mode"),
+            "recursive": bool(payload.get("recursive")),
+            "cloudfront": dict(payload.get("cloudfront") or {}),
+            "audit_events": list(payload.get("audit_events") or []),
+            "last_denial_reason": payload.get("last_denial_reason"),
+            "programmatic_package_count": int(payload.get("programmatic_package_count") or 0),
             "managed_access": bool(payload.get("managed_access")),
             "access_count": int(payload.get("access_count") or 0),
             "last_accessed_at": payload.get("last_accessed_at"),

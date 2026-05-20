@@ -964,7 +964,24 @@ class FakeDeweyService:
         transport_config: dict[str, Any] | None = None,
         ttl_seconds: int | None = None,
         idempotency_key: str,
+        visibility: str | None = None,
+        permissions: list[str] | tuple[str, ...] | str | None = None,
+        recipient_emails: list[str] | tuple[str, ...] | str | None = None,
+        recipient_domains: list[str] | tuple[str, ...] | str | None = None,
+        pending_recipient_emails: list[str] | tuple[str, ...] | str | None = None,
+        mode: str | None = None,
+        recursive: bool = False,
+        relative_path: str | None = None,
+        creator_profile: dict[str, Any] | None = None,
     ):
+        def _as_list(value):
+            if value is None:
+                return []
+            if isinstance(value, str):
+                return [item.strip() for item in value.split(",") if item.strip()]
+            return [str(item).strip() for item in value if str(item).strip()]
+
+        clean_transport = transport or "presigned_s3"
         payload = {
             "target_type": target_type,
             "target_euid": target_euid,
@@ -972,16 +989,60 @@ class FakeDeweyService:
             "scope": scope,
             "expires_at": expires_at,
             "issued_by": issued_by,
-            "transport": transport or "presigned_s3",
+            "transport": clean_transport,
             "transport_config": dict(transport_config or {}),
             "ttl_seconds": ttl_seconds,
+            "visibility": visibility,
+            "permissions": _as_list(permissions),
+            "recipient_emails": _as_list(recipient_emails),
+            "recipient_domains": _as_list(recipient_domains),
+            "pending_recipient_emails": _as_list(pending_recipient_emails),
+            "mode": mode,
+            "recursive": recursive,
+            "relative_path": relative_path,
         }
         replay = self._idempotent("share_reference.create", idempotency_key, payload)
         if replay:
             return replay
         euid = f"SH-{self._share_seq:06d}"
         self._share_seq += 1
-        if target_type == "artifact":
+        public_share_id = "public-test-token" if visibility == "public" else None
+        if clean_transport == "cloudfront":
+            if visibility == "public":
+                email = str((creator_profile or {}).get("email") or issued_by or "").lower()
+                groups = set((creator_profile or {}).get("groups") or [])
+                if not email.endswith("@lsmc.com") or "lsmc:dewey:share-writer" not in groups:
+                    raise ValueError("public CloudFront shares require lsmc:dewey:share-writer")
+            if target_type == "artifact":
+                artifact = self.get_artifact(target_euid)
+                manifest = [
+                    {
+                        "artifact_euid": artifact["artifact_euid"],
+                        "filename": artifact.get("original_filename") or artifact["artifact_euid"],
+                        "bucket": artifact["bucket"],
+                        "key": artifact["key"],
+                        "storage_uri": artifact["storage_uri"],
+                        "status": "active",
+                        "cloudfront_resource": f"https://d111111abcdef8.cloudfront.net/{artifact['key']}",
+                    }
+                ]
+            else:
+                artifact_set = self.get_artifact_set(target_euid)
+                manifest = [
+                    {
+                        "artifact_euid": artifact["artifact_euid"],
+                        "filename": artifact.get("original_filename") or artifact["artifact_euid"],
+                        "bucket": artifact["bucket"],
+                        "key": artifact["key"],
+                        "storage_uri": artifact["storage_uri"],
+                        "status": "active",
+                        "cloudfront_resource": f"https://d111111abcdef8.cloudfront.net/{artifact['key']}",
+                    }
+                    for artifact in artifact_set["members"]
+                ]
+            connection = {}
+            access_url = f"/public-shares/{public_share_id}" if public_share_id else f"/share-references/{euid}"
+        elif target_type == "artifact":
             artifact = self.get_artifact(target_euid)
             if artifact.get("storage_kind") == "prefix":
                 raise ValueError("artifact sharing requires an object-backed artifact")
@@ -1026,7 +1087,7 @@ class FakeDeweyService:
             "target_euid": target_euid,
             "purpose": purpose,
             "scope": scope,
-            "transport": transport or "presigned_s3",
+            "transport": clean_transport,
             "status": "active",
             "starts_at": "2026-03-10T00:00:00Z",
             "expires_at": expires_at or "2026-03-10T12:00:00Z",
@@ -1037,8 +1098,28 @@ class FakeDeweyService:
             "transport_config": dict(transport_config or {}),
             "issued_by": issued_by,
             "recipient_email": None,
+            "visibility": visibility,
+            "public_share_id": public_share_id,
+            "recipient_emails": _as_list(recipient_emails),
+            "recipient_domains": _as_list(recipient_domains),
+            "pending_recipient_emails": _as_list(pending_recipient_emails),
+            "permissions": _as_list(permissions),
+            "mode": mode,
+            "recursive": recursive,
+            "relative_path": relative_path,
+            "cloudfront": {
+                "bucket": manifest[0]["bucket"] if manifest else None,
+                "object_key": manifest[0]["key"] if len(manifest) == 1 else None,
+                "snapshot_object_keys": [item["key"] for item in manifest],
+                "manifest": manifest,
+            }
+            if clean_transport == "cloudfront"
+            else {},
+            "audit_events": [],
+            "last_denial_reason": None,
+            "programmatic_package_count": 0,
             "managed_access": target_type == "artifact"
-            and (transport or "presigned_s3") == "presigned_s3",
+            and clean_transport in {"presigned_s3", "cloudfront"},
             "access_count": 0,
             "last_accessed_at": None,
             "revoked_at": None,
@@ -1078,16 +1159,87 @@ class FakeDeweyService:
         self._remember("share_reference.revoke", idempotency_key, payload, 200, share)
         return 200, dict(share)
 
-    def open_share_reference(self, share_reference_euid: str):
+    def open_share_reference(
+        self,
+        share_reference_euid: str,
+        *,
+        viewer_email: str | None = None,
+        viewer_groups: list[str] | tuple[str, ...] | None = None,
+        access_mode: str = "download",
+        requested_key: str | None = None,
+    ):
+        _ = viewer_groups
         share = self.get_share_reference(share_reference_euid)
         if share.get("status") != "active":
             raise ValueError("Share reference is not active")
+        if share.get("transport") == "cloudfront":
+            if share.get("visibility") == "authenticated":
+                email = str(viewer_email or "").lower()
+                if not email:
+                    raise ValueError("missing_login")
+                if email in set(share.get("pending_recipient_emails") or []):
+                    raise ValueError("unverified_pending_recipient")
+                domain = email.split("@")[-1]
+                if email not in set(share.get("recipient_emails") or []) and domain not in set(
+                    share.get("recipient_domains") or []
+                ):
+                    raise ValueError("wrong_email_or_domain")
+            share["access_count"] = int(share.get("access_count") or 0) + 1
+            share["last_accessed_at"] = "2026-03-10T01:05:00Z"
+            if access_mode == "programmatic":
+                share["programmatic_package_count"] = (
+                    int(share.get("programmatic_package_count") or 0) + 1
+                )
+            self.share_references[share_reference_euid] = share
+            body = dict(share)
+            manifest = list(share.get("manifest") or [])
+            if access_mode == "browse":
+                body["cloudfront_access"] = {
+                    "type": "browse",
+                    "manifest": [
+                        {
+                            **item,
+                            "signed_url": f"https://d111111abcdef8.cloudfront.net/{item['key']}?Signature=test",
+                        }
+                        for item in manifest
+                    ],
+                }
+                return body
+            if access_mode == "programmatic":
+                body["cloudfront_access"] = {
+                    "type": "signed_url_manifest",
+                    "manifest": [
+                        {
+                            **item,
+                            "signed_url": f"https://d111111abcdef8.cloudfront.net/{item['key']}?Signature=test",
+                        }
+                        for item in manifest
+                    ],
+                }
+                return body
+            if len(manifest) != 1 and not requested_key:
+                body["browser_view_url"] = f"/shares/cloudfront/{share_reference_euid}/browse"
+                return body
+            key = requested_key or (manifest[0]["key"] if manifest else "object.bin")
+            body["presigned_access_url"] = (
+                f"https://d111111abcdef8.cloudfront.net/{key}?Signature=test"
+            )
+            body["cloudfront_access"] = {"type": "signed_url"}
+            return body
         share["access_count"] = int(share.get("access_count") or 0) + 1
         share["last_accessed_at"] = "2026-03-10T01:05:00Z"
         self.share_references[share_reference_euid] = share
         body = dict(share)
         body["presigned_access_url"] = f"https://downloads.example.com/{share_reference_euid}"
         return body
+
+    def get_share_reference_by_public_id(self, public_share_id: str):
+        for share in self.share_references.values():
+            if share.get("public_share_id") == public_share_id:
+                return dict(share)
+        from dewey_service.service import DeweyNotFoundError
+
+        raise DeweyNotFoundError(f"Public share not found: {public_share_id}")
 
     def list_share_references(
         self,
@@ -1102,6 +1254,13 @@ class FakeDeweyService:
         if target_euid:
             rows = [row for row in rows if row["target_euid"] == target_euid]
         return rows[:limit]
+
+    def list_external_share_report(self, *, limit: int = 500):
+        return [
+            row
+            for row in list(self.share_references.values())[:limit]
+            if row.get("transport") == "cloudfront"
+        ]
 
     def list_anomalies(self, *, limit: int = 200):
         return list(self.anomalies.values())[:limit]

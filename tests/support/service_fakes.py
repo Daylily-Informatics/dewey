@@ -8,6 +8,7 @@ from typing import Any
 
 import pytest
 
+from dewey_service.cloudfront import NullCloudFrontShareSigner
 from dewey_service.service import DeweyService
 from dewey_service.storage import StorageObject, StorageObjectNotFoundError, StoragePrefix
 from dewey_service.tapdb_backend import (
@@ -454,6 +455,7 @@ def service(backend: _InMemoryBackend, storage: _FakeStorageClient) -> DeweyServ
         literature_adapter=_FakeLiteratureAdapter(),
         literature_allowed_domains={"europepmc.org", "ncbi.nlm.nih.gov"},
         literature_request_timeout_seconds=5,
+        cloudfront_signer=NullCloudFrontShareSigner(),
     )
 
 

@@ -1,0 +1,56 @@
+<!doctype html>
+{% from "_chrome.html" import environment_chrome, page_footer %}
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dewey External Shares</title>
+    <link rel="icon" href="{{ static_url('favicon.svg') }}" type="image/svg+xml" />
+    <link rel="stylesheet" href="{{ static_url('console.css') }}" />
+  </head>
+  <body>
+    {{ environment_chrome(deployment, region, show_environment_chrome|default(true)) }}
+    <div class="shell">
+      <header class="topbar">
+        <div class="brandline"><div class="eyebrow">Admin</div><h1 class="title">External Shares</h1><div class="subtitle">{{ profile.email }}</div></div>
+        <div class="navlinks"><a class="navlink" href="/admin">Admin</a><a class="navlink" href="/shares">Shares</a></div>
+      </header>
+      <main class="page">
+        <section class="panel">
+          <form class="form-grid" method="get" action="/admin/external-shares">
+            <label>Status <input name="status" value="{{ filters.status }}" /></label>
+            <label>Visibility <input name="visibility" value="{{ filters.visibility }}" /></label>
+            <label>Creator <input name="creator" value="{{ filters.creator }}" /></label>
+            <label>Target EUID <input name="target_euid" value="{{ filters.target_euid }}" /></label>
+            <button class="button" type="submit">Filter</button>
+          </form>
+        </section>
+        <section class="panel">
+          <div class="results-meta"><span class="pill pill-active">{{ share_references|length }} shares</span></div>
+          <div class="table-wrap">
+            <table class="share-report-table">
+              <thead><tr><th>Share</th><th>Creator</th><th>Visibility</th><th>Target</th><th>Recipients</th><th>Permissions</th><th>Mode</th><th>Expires</th><th>Audit</th><th>Action</th></tr></thead>
+              <tbody>
+                {% for item in share_references %}
+                <tr>
+                  <td class="mono">{{ item.share_reference_euid }}</td>
+                  <td>{{ item.issued_by or "unknown" }}</td>
+                  <td>{{ item.visibility }}</td>
+                  <td>{{ item.target_type }} <span class="mono">{{ item.target_euid }}</span></td>
+                  <td>{{ item.recipient_emails|join(", ") or item.recipient_domains|join(", ") or item.pending_recipient_emails|join(", ") or "public" }}</td>
+                  <td>{{ item.permissions|join(", ") }}</td>
+                  <td>{{ item.mode }}{% if item.recursive %} recursive{% endif %}</td>
+                  <td>{{ item.expires_at }}</td>
+                  <td>{{ item.access_count }} allowed{% if item.last_denial_reason %}<div class="compact-note">{{ item.last_denial_reason }}</div>{% endif %}</td>
+                  <td><a class="button" href="/shares/cloudfront/{{ item.share_reference_euid }}">Detail</a></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+      {{ page_footer(git_meta, build_version) }}
+    </div>
+  </body>
+</html>

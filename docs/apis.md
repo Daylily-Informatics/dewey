@@ -182,11 +182,13 @@ Current create fields include:
 - `transport`
 - `transport_config`
 - `ttl_seconds`
+- CloudFront fields when `transport=cloudfront`: `visibility`, `permissions`, `recipient_emails`, `recipient_domains`, `pending_recipient_emails`, `mode`, `recursive`, and `relative_path`
 
 Current transport behavior:
 
-- artifacts: `presigned_s3` only
-- artifact sets: `presigned_s3`, `rclone_http`, or `rclone_sftp`
+- artifacts: `presigned_s3` or `cloudfront`
+- artifact sets: `presigned_s3`, `rclone_http`, `rclone_sftp`, or `cloudfront`
+- CloudFront shares use Dewey URLs as canonical access URLs; Dewey authorizes each request before issuing short-lived CloudFront signed URLs or packages.
 
 ## Search API
 

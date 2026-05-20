@@ -1,0 +1,39 @@
+<!doctype html>
+{% from "_chrome.html" import environment_chrome, page_footer %}
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dewey CloudFront Share Detail</title>
+    <link rel="icon" href="{{ static_url('favicon.svg') }}" type="image/svg+xml" />
+    <link rel="stylesheet" href="{{ static_url('console.css') }}" />
+  </head>
+  <body>
+    {{ environment_chrome(deployment, region, show_environment_chrome|default(true)) }}
+    <div class="shell">
+      <header class="topbar">
+        <div class="brandline"><div class="eyebrow">CloudFront Share</div><h1 class="title">{{ share.share_reference_euid }}</h1></div>
+        <div class="navlinks"><a class="navlink" href="/shares">Shares</a><a class="navlink" href="/shares/cloudfront/{{ share.share_reference_euid }}/browse">Browse</a><a class="navlink" href="/shares/cloudfront/{{ share.share_reference_euid }}/programmatic">Programmatic</a></div>
+      </header>
+      <main class="page">
+        <section class="panel">
+          <div class="table-wrap">
+            <table class="share-report-table">
+              <tbody>
+                <tr><th>Status</th><td>{{ share.status }}</td></tr>
+                <tr><th>Visibility</th><td>{{ share.visibility }}</td></tr>
+                <tr><th>Target</th><td>{{ share.target_type }} <span class="mono">{{ share.target_euid }}</span></td></tr>
+                <tr><th>Mode</th><td>{{ share.mode }}{% if share.recursive %} recursive{% endif %}</td></tr>
+                <tr><th>Recipients</th><td>{{ share.recipient_emails|join(", ") or share.recipient_domains|join(", ") or "public" }}</td></tr>
+                <tr><th>Permissions</th><td>{{ share.permissions|join(", ") }}</td></tr>
+                <tr><th>Expires</th><td>{{ share.expires_at }}</td></tr>
+                <tr><th>Last Denial</th><td>{{ share.last_denial_reason or "none" }}</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+      {{ page_footer(git_meta, build_version) }}
+    </div>
+  </body>
+</html>

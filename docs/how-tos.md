@@ -218,6 +218,7 @@ Current code-backed transport behavior:
 
 - `presigned_s3` for concrete per-member presigned URLs
 - `rclone_http` and `rclone_sftp` for artifact-set connection metadata
+- `cloudfront` for Dewey-authorized CloudFront shares using Dewey URLs as canonical access links
 
 Artifact-level browser sharing currently produces individual links for the selected artifacts.
 

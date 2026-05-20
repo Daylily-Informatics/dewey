@@ -1,0 +1,24 @@
+<!doctype html>
+{% from "_chrome.html" import environment_chrome, page_footer %}
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dewey Share Denied</title>
+    <link rel="icon" href="{{ static_url('favicon.svg') }}" type="image/svg+xml" />
+    <link rel="stylesheet" href="{{ static_url('console.css') }}" />
+  </head>
+  <body>
+    {{ environment_chrome(deployment, region, show_environment_chrome|default(true)) }}
+    <div class="shell">
+      <main class="page">
+        <section class="panel panel-danger">
+          <div class="eyebrow">Access Denied</div>
+          <h1 class="title">{{ share.share_reference_euid }}</h1>
+          <p>{{ denial_reason }}</p>
+        </section>
+      </main>
+      {{ page_footer(git_meta, build_version) }}
+    </div>
+  </body>
+</html>

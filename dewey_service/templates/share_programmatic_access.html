@@ -1,0 +1,29 @@
+<!doctype html>
+{% from "_chrome.html" import environment_chrome, page_footer %}
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dewey Programmatic Share Access</title>
+    <link rel="icon" href="{{ static_url('favicon.svg') }}" type="image/svg+xml" />
+    <link rel="stylesheet" href="{{ static_url('console.css') }}" />
+  </head>
+  <body>
+    {{ environment_chrome(deployment, region, show_environment_chrome|default(true)) }}
+    <div class="shell">
+      <header class="topbar"><div class="brandline"><div class="eyebrow">Programmatic Access</div><h1 class="title">{{ share.share_reference_euid }}</h1></div></header>
+      <main class="page">
+        <section class="panel">
+          <p class="mono">{{ access.type }}</p>
+          {% if access.cookies %}
+          <pre>{{ access.cookies }}</pre>
+          {% endif %}
+          {% if access.manifest %}
+          <div class="table-wrap"><table class="share-report-table"><thead><tr><th>Object</th><th>Signed URL</th></tr></thead><tbody>{% for item in access.manifest %}<tr><td class="mono">{{ item.key }}</td><td class="mono">{{ item.signed_url }}</td></tr>{% endfor %}</tbody></table></div>
+          {% endif %}
+        </section>
+      </main>
+      {{ page_footer(git_meta, build_version) }}
+    </div>
+  </body>
+</html>

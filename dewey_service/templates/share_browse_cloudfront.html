@@ -1,0 +1,40 @@
+<!doctype html>
+{% from "_chrome.html" import environment_chrome, page_footer %}
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dewey CloudFront Browse</title>
+    <link rel="icon" href="{{ static_url('favicon.svg') }}" type="image/svg+xml" />
+    <link rel="stylesheet" href="{{ static_url('console.css') }}" />
+  </head>
+  <body>
+    {{ environment_chrome(deployment, region, show_environment_chrome|default(true)) }}
+    <div class="shell">
+      <header class="topbar">
+        <div class="brandline"><div class="eyebrow">CloudFront Browse</div><h1 class="title">{{ share.share_reference_euid }}</h1></div>
+        <div class="navlinks"><a class="navlink" href="/shares/cloudfront/{{ share.share_reference_euid }}">Details</a><a class="navlink" href="/shares/cloudfront/{{ share.share_reference_euid }}/programmatic">Programmatic</a></div>
+      </header>
+      <main class="page">
+        <section class="panel">
+          {% set items = access.manifest or [] %}
+          {% if items %}
+          <div class="table-wrap">
+            <table class="share-report-table">
+              <thead><tr><th>Object</th><th>Size</th><th>Action</th></tr></thead>
+              <tbody>
+                {% for item in items %}
+                <tr><td class="mono">{{ item.key }}</td><td>{{ item.size or "n/a" }}</td><td>{% if item.signed_url %}<a class="button" href="{{ item.signed_url }}">Download</a>{% endif %}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="empty-state">No authorized objects are visible for this share.</div>
+          {% endif %}
+        </section>
+      </main>
+      {{ page_footer(git_meta, build_version) }}
+    </div>
+  </body>
+</html>

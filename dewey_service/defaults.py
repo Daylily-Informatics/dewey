@@ -147,6 +147,14 @@ storage:
   managed_bucket: "{bucket}"
   managed_prefix: {prefix}
   upload_session_ttl_seconds: 900
+  cloudfront:
+    enabled: false
+    distribution_domain: ""
+    distribution_id: ""
+    key_pair_id: ""
+    private_key_path: ""
+    default_ttl_seconds: 900
+    cookie_ttl_seconds: 900
 
 deployment:
   name: ""
