@@ -38,6 +38,15 @@ source ./activate <deploy-name>
 - If the intended CLI path is broken or incomplete, stop, diagnose, and ask for permission before circumventing it.
 - Prefer patience and repair of the intended CLI workflow over inventing a shortcut.
 
+## Dayhoff Service Exposure Security
+
+- Dewey is an approved-network customer/collaborator Dayhoff service, not a globally public internet service.
+- Do not add global service ingress, wildcard/fallback vhosts, old callback aliases, inferred return URLs, or service-side host discovery.
+- Dewey-to-login share-recipient preparation must use Dewey's registered-service credential. Missing tokens, wrong-service tokens, and browser/session callers must fail closed.
+- `kahlo`, `bloom`, and `zebra_day` are LSMC-internal only; `login`, `atlas`, `dewey`, and `ursa` are approved-network customer/collaborator services.
+- Service-host certs use DNS-01 renewal; do not depend on HTTP-01 public reachability for Dewey service hosts.
+- Future dev, test, and stage deployments must use their own approved-source lists, credentials, certificates, share policies, and tenant data, separate from production.
+
 ## Dewey Examples
 
 - Start with `source ./activate <deploy-name>`

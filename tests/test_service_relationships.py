@@ -115,6 +115,23 @@ def test_share_reference_behaviors(service: DeweyService) -> None:
         )[0]["share_reference_euid"]
         == auto_share["share_reference_euid"]
     )
+    access = service.issue_share_reference_access(
+        auto_share["share_reference_euid"],
+        accessed_by="recipient@example.com",
+    )
+    assert access["access_url"].startswith("https://downloads.example.com/")
+    assert access["access_count"] == 2
+    assert access["last_accessed_by"] == "recipient@example.com"
+    revoked = service.revoke_share_reference(
+        auto_share["share_reference_euid"],
+        revoked_by="tester@example.com",
+        reason="recipient request",
+    )
+    assert revoked["status"] == "revoked"
+    assert revoked["revoked_by"] == "tester@example.com"
+    assert revoked["access_url"] is None
+    with pytest.raises(ValueError, match="revoked"):
+        service.issue_share_reference_access(auto_share["share_reference_euid"])
 
     with pytest.raises(ValueError, match="target_type must be artifact or artifact_set"):
         service.create_share_reference(

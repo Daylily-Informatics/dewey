@@ -192,6 +192,7 @@ auth:
     service_id: dewey
     login_url: https://dev.login.lsmc.com/login
     handoff_exchange_url: https://dev.login.lsmc.com/api/handoff/exchange
+    service_token: dewey-service-token
     callback_url: https://localhost:8914/auth/lsmc/callback
     logout_url: https://dev.login.lsmc.com/logout
     share_recipient_prepare_url: https://dev.login.lsmc.com/api/v1/dewey/share-recipient/prepare
@@ -210,6 +211,7 @@ database:
         loaded.external_broker_handoff_exchange_url
         == "https://dev.login.lsmc.com/api/handoff/exchange"
     )
+    assert loaded.external_broker_service_token == "dewey-service-token"
     assert loaded.external_broker_callback_url == "https://localhost:8914/auth/lsmc/callback"
     assert loaded.external_broker_logout_url == "https://dev.login.lsmc.com/logout"
     assert (
@@ -236,6 +238,7 @@ def test_settings_reads_shared_external_broker_env(
         "LSMC_AUTH_BROKER_HANDOFF_EXCHANGE_URL",
         "https://dev.login.lsmc.com/api/handoff/exchange",
     )
+    monkeypatch.setenv("LSMC_AUTH_BROKER_SERVICE_TOKEN", "dewey-service-token")
     monkeypatch.setenv(
         "LSMC_AUTH_BROKER_CALLBACK_URL",
         "https://localhost:8914/auth/lsmc/callback",
@@ -250,6 +253,7 @@ def test_settings_reads_shared_external_broker_env(
 
     assert loaded.auth_mode == "external_broker"
     assert loaded.external_broker_service_id == "dewey"
+    assert loaded.external_broker_service_token == "dewey-service-token"
     assert (
         loaded.external_broker_share_recipient_prepare_url
         == "https://dev.login.lsmc.com/api/v1/dewey/share-recipient/prepare"

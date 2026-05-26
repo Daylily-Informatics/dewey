@@ -30,6 +30,113 @@ class SharingServiceMixin:
                 raise DeweyNotFoundError(f"Share reference not found: {share_reference_euid}")
             return self._share_reference_response(instance)
 
+    def issue_share_reference_access(
+        self,
+        share_reference_euid: str,
+        *,
+        accessed_by: str | None = None,
+        presign_ttl_seconds: int = 900,
+    ) -> dict[str, Any]:
+        accessed_at = utc_now_iso()
+        ttl_limit = max(60, min(3600, int(presign_ttl_seconds)))
+        with self.backend.session_scope(commit=True) as session:
+            instance = self.backend.find_by_euid(
+                session,
+                template_code=SHARE_REFERENCE_TEMPLATE,
+                euid=str(share_reference_euid or "").strip(),
+                for_update=True,
+            )
+            if instance is None:
+                raise DeweyNotFoundError(f"Share reference not found: {share_reference_euid}")
+            payload = normalize_instance_payload(instance)
+            if payload.get("revoked_at") or str(payload.get("status") or "").lower() == "revoked":
+                raise ValueError("share reference has been revoked")
+            expires_at = str(payload.get("expires_at") or "").strip()
+            if expires_at:
+                expires_dt = datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
+                seconds_remaining = int((expires_dt - datetime.now(timezone.utc)).total_seconds())
+                if seconds_remaining <= 0:
+                    raise ValueError("share reference has expired")
+                ttl_limit = max(60, min(ttl_limit, seconds_remaining))
+
+            access_url = str(payload.get("access_url") or "").strip() or None
+            manifest: list[dict[str, Any]] = []
+            target_type = str(payload.get("target_type") or "").lower()
+            transport = str(payload.get("transport") or "").lower()
+            if transport == "presigned_s3" and target_type == "artifact":
+                target = self.backend.find_by_euid(
+                    session,
+                    template_code=ARTIFACT_TEMPLATE,
+                    euid=str(payload.get("target_euid") or "").strip(),
+                )
+                if target is None:
+                    raise DeweyNotFoundError(f"Target not found: {payload.get('target_euid')}")
+                artifact_payload = normalize_instance_payload(target)
+                self._require_storage().head_object(
+                    bucket=str(artifact_payload.get("bucket") or ""),
+                    key=str(artifact_payload.get("key") or ""),
+                    version_id=str(artifact_payload.get("version_id") or "").strip() or None,
+                )
+                access_url = self._require_storage().generate_presigned_get_url(
+                    bucket=str(artifact_payload.get("bucket") or ""),
+                    key=str(artifact_payload.get("key") or ""),
+                    version_id=str(artifact_payload.get("version_id") or "").strip() or None,
+                    expires_in=ttl_limit,
+                )
+            elif transport == "presigned_s3" and target_type == "artifact_set":
+                target = self.backend.find_by_euid(
+                    session,
+                    template_code=ARTIFACT_SET_TEMPLATE,
+                    euid=str(payload.get("target_euid") or "").strip(),
+                )
+                if target is None:
+                    raise DeweyNotFoundError(f"Target not found: {payload.get('target_euid')}")
+                for member in self.backend.list_children(
+                    session,
+                    parent=target,
+                    relationship_type="artifact_set_member",
+                ):
+                    artifact_payload = normalize_instance_payload(member)
+                    entry = {
+                        "artifact_euid": member.euid,
+                        "filename": str(artifact_payload.get("original_filename") or member.euid),
+                        "storage_uri": str(artifact_payload.get("storage_uri") or ""),
+                    }
+                    if str(artifact_payload.get("storage_backend") or "").lower() != "s3":
+                        entry["status"] = "error"
+                        entry["detail"] = "artifact is not s3-backed"
+                    else:
+                        self._require_storage().head_object(
+                            bucket=str(artifact_payload.get("bucket") or ""),
+                            key=str(artifact_payload.get("key") or ""),
+                            version_id=str(artifact_payload.get("version_id") or "").strip() or None,
+                        )
+                        entry["status"] = "active"
+                        entry["access_url"] = self._require_storage().generate_presigned_get_url(
+                            bucket=str(artifact_payload.get("bucket") or ""),
+                            key=str(artifact_payload.get("key") or ""),
+                            version_id=str(artifact_payload.get("version_id") or "").strip() or None,
+                            expires_in=ttl_limit,
+                        )
+                    manifest.append(entry)
+
+            access_count = int(payload.get("access_count") or 0) + 1
+            self.backend.update_instance_json(
+                session,
+                instance,
+                {
+                    "last_accessed_at": accessed_at,
+                    "last_accessed_by": str(accessed_by or "").strip() or None,
+                    "access_count": access_count,
+                },
+            )
+            body = self._share_reference_response(instance)
+            if access_url:
+                body["access_url"] = access_url
+            if manifest:
+                body["manifest"] = manifest
+            return body
+
     def list_share_references(
         self,
         *,
@@ -288,6 +395,10 @@ class SharingServiceMixin:
                     and clean_transport == "presigned_s3",
                     "access_count": 0,
                     "last_accessed_at": None,
+                    "last_accessed_by": None,
+                    "revoked_at": None,
+                    "revoked_by": None,
+                    "revocation_reason": None,
                     "created_at": utc_now_iso(),
                 },
             )
@@ -324,28 +435,31 @@ class SharingServiceMixin:
 
     def revoke_share_reference(
         self,
+        share_reference_euid: str = "",
         *,
-        share_reference_euid: str,
-        revoked_by: str | None,
-        idempotency_key: str,
-    ) -> tuple[int, dict[str, Any]]:
+        revoked_by: str | None = None,
+        reason: str | None = None,
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any] | tuple[int, dict[str, Any]]:
         clean_euid = str(share_reference_euid or "").strip()
         if not clean_euid:
             raise ValueError("share_reference_euid is required")
         payload = {
             "share_reference_euid": clean_euid,
             "revoked_by": str(revoked_by or "").strip() or None,
+            "revocation_reason": str(reason or "").strip() or None,
         }
         fingerprint = self._fingerprint(payload)
         with self.backend.session_scope(commit=True) as session:
-            replay = self._idempotency_replay(
-                session,
-                operation="share_reference.revoke",
-                idempotency_key=idempotency_key,
-                fingerprint=fingerprint,
-            )
-            if replay is not None:
-                return replay.status_code, replay.response
+            if idempotency_key:
+                replay = self._idempotency_replay(
+                    session,
+                    operation="share_reference.revoke",
+                    idempotency_key=idempotency_key,
+                    fingerprint=fingerprint,
+                )
+                if replay is not None:
+                    return replay.status_code, replay.response
             instance = self.backend.find_by_euid(
                 session,
                 template_code=SHARE_REFERENCE_TEMPLATE,
@@ -355,6 +469,12 @@ class SharingServiceMixin:
             if instance is None:
                 raise DeweyNotFoundError(f"Share reference not found: {clean_euid}")
             current = normalize_instance_payload(instance)
+            manifest = []
+            for entry in list(current.get("manifest") or []):
+                clean_entry = dict(entry)
+                clean_entry.pop("access_url", None)
+                clean_entry["status"] = "revoked"
+                manifest.append(clean_entry)
             if current.get("status") != "revoked":
                 self.backend.update_instance_json(
                     session,
@@ -363,18 +483,23 @@ class SharingServiceMixin:
                         "status": "revoked",
                         "revoked_at": utc_now_iso(),
                         "revoked_by": payload["revoked_by"],
+                        "revocation_reason": payload["revocation_reason"],
+                        "access_url": None,
+                        "manifest": manifest,
                     },
                 )
             body = self._share_reference_response(instance)
-            self._store_idempotency(
-                session,
-                operation="share_reference.revoke",
-                idempotency_key=idempotency_key,
-                fingerprint=fingerprint,
-                status_code=200,
-                response=body,
-            )
-            return 200, body
+            if idempotency_key:
+                self._store_idempotency(
+                    session,
+                    operation="share_reference.revoke",
+                    idempotency_key=idempotency_key,
+                    fingerprint=fingerprint,
+                    status_code=200,
+                    response=body,
+                )
+                return 200, body
+            return body
 
     def open_share_reference(self, share_reference_euid: str) -> dict[str, Any]:
         clean_euid = str(share_reference_euid or "").strip()

@@ -265,7 +265,12 @@ async def exchange_external_broker_handoff(*, settings: Settings, code: str) -> 
     verify: bool | str = ca_bundle if ca_bundle else True
     async with httpx.AsyncClient(timeout=10.0, verify=verify) as client:
         response = await client.post(
-            settings.external_broker_handoff_exchange_url, json={"code": code}
+            settings.external_broker_handoff_exchange_url,
+            json={"code": code},
+            headers={
+                "Authorization": f"Bearer {settings.external_broker_service_token}",
+                "X-LSMC-Service-ID": settings.external_broker_service_id,
+            },
         )
     if response.status_code >= 400:
         raise CognitoWebAuthError(

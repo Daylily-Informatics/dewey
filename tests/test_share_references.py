@@ -58,6 +58,7 @@ def test_create_share_reference_prepares_external_recipient(
     test_settings.external_broker_share_recipient_prepare_url = (
         "https://dev.login.lsmc.com/api/v1/dewey/share-recipient/prepare"
     )
+    test_settings.external_broker_service_token = "dewey-service-token"
 
     class _Response:
         status_code = 200
@@ -73,7 +74,7 @@ def test_create_share_reference_prepares_external_recipient(
             }
 
     class _AsyncClient:
-        def __init__(self, *, timeout: float, verify: bool = True) -> None:
+        def __init__(self, *, timeout: float, verify: object = True) -> None:
             self.timeout = timeout
             self.verify = verify
 
@@ -83,8 +84,16 @@ def test_create_share_reference_prepares_external_recipient(
         async def __aexit__(self, exc_type, exc, tb):
             return False
 
-        async def post(self, url: str, *, json: dict) -> _Response:
-            calls.append({"url": url, "json": json, "timeout": self.timeout})
+        async def post(self, url: str, *, json: dict, headers: dict[str, str]) -> _Response:
+            calls.append(
+                {
+                    "url": url,
+                    "json": json,
+                    "headers": headers,
+                    "timeout": self.timeout,
+                    "verify": self.verify,
+                }
+            )
             return _Response()
 
     monkeypatch.setattr("dewey_service.app.httpx.AsyncClient", _AsyncClient)
@@ -122,6 +131,10 @@ def test_create_share_reference_prepares_external_recipient(
     assert calls[0]["json"]["recipient_email"] == "JOHNM@LSMC.LIFE"
     assert calls[0]["json"]["share_ref_euid"] == payload["share_reference_euid"]
     assert calls[0]["json"]["share_url"].startswith("https://localhost:8914/share-references/")
+    assert calls[0]["headers"] == {
+        "Authorization": "Bearer dewey-service-token",
+        "X-LSMC-Service-ID": "dewey",
+    }
 
 
 def test_create_share_reference_requires_broker_url_for_external_recipient(client) -> None:

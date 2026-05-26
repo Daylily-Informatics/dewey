@@ -199,6 +199,12 @@ class ShareReferenceCreateRequest(BaseModel):
     recipient_email: str | None = None
 
 
+class ShareReferenceRevokeRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    reason: str | None = None
+
+
 class ArtifactStorageLockRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -225,6 +231,11 @@ async def _prepare_external_share_recipient(
     share_url = f"{str(request.base_url).rstrip('/')}/share-references/{share_ref_euid}"
     ca_bundle = str(settings.external_broker_ca_bundle or "").strip()
     verify: bool | str = ca_bundle if ca_bundle else True
+    service_token = str(settings.external_broker_service_token or "").strip()
+    if not service_token:
+        raise RuntimeError(
+            "Dewey external share recipient preparation requires external_broker_service_token"
+        )
     async with httpx.AsyncClient(timeout=10.0, verify=verify) as client:
         response = await client.post(
             prepare_url,
@@ -233,6 +244,10 @@ async def _prepare_external_share_recipient(
                 "share_ref_euid": share_ref_euid,
                 "share_url": share_url,
                 "expires_at": share_reference.get("expires_at"),
+            },
+            headers={
+                "Authorization": f"Bearer {service_token}",
+                "X-LSMC-Service-ID": settings.external_broker_service_id,
             },
         )
     if response.status_code >= 400:
@@ -3225,6 +3240,54 @@ def create_app(
             return service.get_share_reference(share_reference_euid)
         except DeweyNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post(
+        "/api/v1/share-references/{share_reference_euid}/access",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def issue_share_reference_access(share_reference_euid: str) -> dict[str, Any]:
+        try:
+            return service.issue_share_reference_access(share_reference_euid, accessed_by="api")
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    @app.post(
+        "/api/v1/share-references/{share_reference_euid}/revoke",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def revoke_share_reference(
+        share_reference_euid: str,
+        body: ShareReferenceRevokeRequest,
+    ) -> dict[str, Any]:
+        try:
+            return service.revoke_share_reference(
+                share_reference_euid,
+                revoked_by="api",
+                reason=body.reason,
+            )
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.get("/share-references/{share_reference_euid}", include_in_schema=False)
+    async def share_reference_access_redirect(
+        share_reference_euid: str,
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> Response:
+        try:
+            payload = service.issue_share_reference_access(
+                share_reference_euid,
+                accessed_by=str(profile.get("email") or "").strip() or None,
+            )
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=410, detail=str(exc)) from exc
+        access_url = str(payload.get("access_url") or "").strip()
+        if access_url:
+            return RedirectResponse(url=access_url, status_code=status.HTTP_303_SEE_OTHER)
+        return JSONResponse(payload)
 
     @app.get(
         "/api/v1/artifacts/{artifact_euid}/share-references",

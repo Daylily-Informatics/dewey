@@ -401,10 +401,12 @@ class BaseDeweyService:
             "issued_by": payload.get("issued_by"),
             "recipient_email": payload.get("recipient_email"),
             "managed_access": bool(payload.get("managed_access")),
-            "access_count": int(payload.get("access_count") or 0),
-            "last_accessed_at": payload.get("last_accessed_at"),
             "revoked_at": payload.get("revoked_at"),
             "revoked_by": payload.get("revoked_by"),
+            "revocation_reason": payload.get("revocation_reason"),
+            "access_count": int(payload.get("access_count") or 0),
+            "last_accessed_at": payload.get("last_accessed_at"),
+            "last_accessed_by": payload.get("last_accessed_by"),
             "created_at": payload.get("created_at"),
         }
 

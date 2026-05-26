@@ -264,6 +264,7 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "auth_external_broker_service_id": "external_broker_service_id",
         "auth_external_broker_login_url": "external_broker_login_url",
         "auth_external_broker_handoff_exchange_url": "external_broker_handoff_exchange_url",
+        "auth_external_broker_service_token": "external_broker_service_token",
         "auth_external_broker_callback_url": "external_broker_callback_url",
         "auth_external_broker_logout_url": "external_broker_logout_url",
         "auth_external_broker_share_recipient_prepare_url": "external_broker_share_recipient_prepare_url",
@@ -341,6 +342,7 @@ def _display_config_path(path: str) -> str:
         "external_broker_service_id": "auth.external_broker.service_id",
         "external_broker_login_url": "auth.external_broker.login_url",
         "external_broker_handoff_exchange_url": "auth.external_broker.handoff_exchange_url",
+        "external_broker_service_token": "auth.external_broker.service_token",
         "external_broker_callback_url": "auth.external_broker.callback_url",
         "external_broker_logout_url": "auth.external_broker.logout_url",
         "external_broker_share_recipient_prepare_url": "auth.external_broker.share_recipient_prepare_url",
@@ -448,6 +450,7 @@ class Settings(BaseSettings):
     external_broker_service_id: str = "dewey"
     external_broker_login_url: str = ""
     external_broker_handoff_exchange_url: str = ""
+    external_broker_service_token: str = ""
     external_broker_callback_url: str = ""
     external_broker_logout_url: str = ""
     external_broker_share_recipient_prepare_url: str = ""
@@ -610,6 +613,7 @@ class Settings(BaseSettings):
                     "external_broker_service_id",
                     "external_broker_login_url",
                     "external_broker_handoff_exchange_url",
+                    "external_broker_service_token",
                     "external_broker_callback_url",
                     "external_broker_logout_url",
                 )
@@ -836,6 +840,7 @@ def load_settings(config_path: Path | None = None) -> Settings:
         "external_broker_handoff_exchange_url": _read_first_env(
             "LSMC_AUTH_BROKER_HANDOFF_EXCHANGE_URL"
         ),
+        "external_broker_service_token": _read_first_env("LSMC_AUTH_BROKER_SERVICE_TOKEN"),
         "external_broker_callback_url": _read_first_env("LSMC_AUTH_BROKER_CALLBACK_URL"),
         "external_broker_logout_url": _read_first_env("LSMC_AUTH_BROKER_LOGOUT_URL"),
         "external_broker_share_recipient_prepare_url": _read_first_env(

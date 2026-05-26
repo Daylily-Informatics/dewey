@@ -386,6 +386,7 @@ def test_external_broker_login_sets_admin_session(monkeypatch, tmp_path, fake_se
         external_broker_service_id="dewey",
         external_broker_login_url="https://dev.login.lsmc.com:8916/login",
         external_broker_handoff_exchange_url="https://dev.login.lsmc.com:8916/api/handoff/exchange",
+        external_broker_service_token="dewey-service-token",
         external_broker_callback_url="https://localhost:8914/auth/lsmc/callback",
         external_broker_logout_url="https://dev.login.lsmc.com:8916/logout",
     )
@@ -439,6 +440,7 @@ def test_external_broker_callback_rejects_missing_roles(monkeypatch, fake_servic
         external_broker_service_id="dewey",
         external_broker_login_url="https://dev.login.lsmc.com:8916/login",
         external_broker_handoff_exchange_url="https://dev.login.lsmc.com:8916/api/handoff/exchange",
+        external_broker_service_token="dewey-service-token",
         external_broker_callback_url="https://localhost:8914/auth/lsmc/callback",
         external_broker_logout_url="https://dev.login.lsmc.com:8916/logout",
     )

@@ -93,6 +93,7 @@ auth:
     service_id: dewey
     login_url: ""
     handoff_exchange_url: ""
+    service_token: ""
     callback_url: ""
     logout_url: ""
     share_recipient_prepare_url: ""
