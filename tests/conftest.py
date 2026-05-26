@@ -313,6 +313,48 @@ class FakeDeweyService:
             idempotency_key=idempotency_key,
         )
 
+    def register_artifact_prefix(
+        self,
+        *,
+        root_uri: str,
+        artifact_type: str,
+        producer_system: str | None = None,
+        producer_object_euid: str | None = None,
+        metadata: dict[str, Any] | None,
+        idempotency_key: str,
+    ):
+        if not root_uri.startswith("s3://"):
+            raise ValueError("root_uri must use s3:// for S3 prefix registration")
+        normalized = root_uri.rstrip("/") + "/"
+        bucket_and_key = normalized[5:]
+        bucket, key = bucket_and_key.split("/", 1)
+        if not bucket or not key:
+            raise ValueError("root_uri must include bucket and key")
+        label = key.rstrip("/").split("/")[-1]
+        return self.register_artifact(
+            artifact_type=artifact_type,
+            storage_backend="s3",
+            bucket=bucket,
+            key=key,
+            version_id=None,
+            size=None,
+            checksums={},
+            content_type=None,
+            original_filename=label,
+            producer_system=producer_system,
+            producer_object_euid=producer_object_euid,
+            storage_class=None,
+            availability_status="available",
+            metadata=dict(metadata or {}),
+            source_uri=normalized,
+            import_mode="register",
+            storage_status="registered",
+            storage_kind="prefix",
+            node_kind="prefix",
+            is_terminal=False,
+            idempotency_key=idempotency_key,
+        )
+
     def create_upload_session(
         self,
         *,

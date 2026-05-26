@@ -134,6 +134,16 @@ class ArtifactRunPrefixImportRequest(BaseModel):
     finalize: bool = False
 
 
+class ArtifactPrefixRegisterRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    root_uri: str
+    artifact_type: str
+    producer_system: str | None = None
+    producer_object_euid: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
 class UploadSessionCreateRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -924,6 +934,17 @@ def create_app(
             "artifact_set_search_form_json": "{}",
             "register_report": [],
             "bulk_report": [],
+            "prefix_form": {
+                "root_uri": "",
+                "artifact_type": "folder",
+                "producer_system": "",
+                "producer_object_euid": "",
+                "prefix_meta_title": "",
+                "prefix_meta_tags": "",
+                "prefix_meta_notes": "",
+                "prefix_additional_metadata_json": "",
+            },
+            "prefix_register_result": None,
             "run_prefix_form": {
                 "root_uri": "",
                 "platform": "ultima",
@@ -2325,6 +2346,56 @@ def create_app(
             active_section="register",
         )
 
+    @app.post("/artifacts/register-prefix", include_in_schema=False)
+    async def artifacts_register_prefix(
+        request: Request, profile: dict[str, Any] = Depends(require_ui_session)
+    ) -> HTMLResponse:
+        form = await request.form()
+        values = _string_form_values(form)
+        prefix_form = {
+            "root_uri": str(values.get("root_uri") or "").strip(),
+            "artifact_type": str(values.get("artifact_type") or "folder").strip().lower()
+            or "folder",
+            "producer_system": str(values.get("producer_system") or "").strip(),
+            "producer_object_euid": str(values.get("producer_object_euid") or "").strip(),
+            "prefix_meta_title": str(values.get("prefix_meta_title") or "").strip(),
+            "prefix_meta_tags": str(values.get("prefix_meta_tags") or "").strip(),
+            "prefix_meta_notes": str(values.get("prefix_meta_notes") or "").strip(),
+            "prefix_additional_metadata_json": str(
+                values.get("prefix_additional_metadata_json") or ""
+            ).strip(),
+        }
+        metadata = collect_metadata(
+            values,
+            fields=_artifact_metadata_fields(),
+            prefix="prefix_meta",
+            extra_json_field="prefix_additional_metadata_json",
+        )
+        try:
+            _, payload = service.register_artifact_prefix(
+                root_uri=prefix_form["root_uri"],
+                artifact_type=prefix_form["artifact_type"],
+                producer_system=prefix_form["producer_system"] or None,
+                producer_object_euid=prefix_form["producer_object_euid"] or None,
+                metadata=metadata,
+                idempotency_key=_new_idempotency_key("ui-prefix-register"),
+            )
+            return _artifact_page_response(
+                request,
+                profile=profile,
+                prefix_form=prefix_form,
+                prefix_register_result={"state": "ok", "artifact": payload},
+                active_section="register",
+            )
+        except Exception as exc:
+            return _artifact_page_response(
+                request,
+                profile=profile,
+                prefix_form=prefix_form,
+                prefix_register_result={"state": "error", "detail": str(exc)},
+                active_section="register",
+            )
+
     @app.post("/artifacts/import-run-prefix", include_in_schema=False)
     async def artifacts_import_run_prefix(
         request: Request, profile: dict[str, Any] = Depends(require_ui_session)
@@ -3000,6 +3071,29 @@ def create_app(
             raise HTTPException(status_code=400, detail=str(exc)) from exc
         except RuntimeError as exc:
             raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    @app.post(
+        "/api/v1/artifact-prefixes",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def register_artifact_prefix(
+        body: ArtifactPrefixRegisterRequest,
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ) -> dict[str, Any]:
+        try:
+            status_code, payload = service.register_artifact_prefix(
+                root_uri=body.root_uri,
+                artifact_type=body.artifact_type,
+                producer_system=body.producer_system,
+                producer_object_euid=body.producer_object_euid,
+                metadata=body.metadata,
+                idempotency_key=_require_idempotency_key(idempotency_key),
+            )
+            return {"status_code": status_code, **payload}
+        except DeweyConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     @app.post("/api/v1/artifacts/import-run-prefix")
     async def import_run_prefix(

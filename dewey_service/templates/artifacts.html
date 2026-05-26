@@ -218,11 +218,11 @@
             </section>
 
             <section class="stack">
-              <section class="panel">
-                <div class="panel-header">
-                  <div>
-                    <h3>Bulk TSV Intake</h3>
-                    <div class="panel-copy">Use the template to register or import many remote artifacts at once.</div>
+                <section class="panel">
+                  <div class="panel-header">
+                    <div>
+                      <h3>Bulk TSV Intake</h3>
+                      <div class="panel-copy">Use the template to register or import many remote artifacts at once.</div>
                   </div>
                   <a class="button" href="{{ bulk_template_url }}">Download Template</a>
                 </div>
@@ -241,14 +241,90 @@
                   </div>
                   <div class="form-actions">
                     <button class="button button-primary" type="submit">Run Bulk Intake</button>
-                  </div>
-                </form>
-              </section>
+                    </div>
+                  </form>
+                </section>
 
-              <section class="panel">
-                <div class="panel-header">
-                  <div>
-                    <h3>Sequencing Run Intake</h3>
+                <section class="panel">
+                  <div class="panel-header">
+                    <div>
+                      <h3>S3 Prefix Registration</h3>
+                      <div class="panel-copy">Create one Dewey artifact for a prefix without expanding child objects.</div>
+                    </div>
+                  </div>
+                  <form method="post" action="/artifacts/register-prefix">
+                    <div class="form-grid">
+                      <div class="field field-wide">
+                        <label for="prefix_root_uri">S3 Prefix URI</label>
+                        <textarea id="prefix_root_uri" name="root_uri" placeholder="s3://bucket/path/to/prefix/">{{ prefix_form.get("root_uri", "") }}</textarea>
+                      </div>
+                      <div class="field">
+                        <label for="prefix_artifact_type">Artifact Type</label>
+                        <select id="prefix_artifact_type" name="artifact_type">
+                          {% for item in artifact_types %}
+                          <option value="{{ item }}" {% if prefix_form.get("artifact_type", "folder") == item %}selected{% endif %}>{{ item }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                      <div class="field">
+                        <label for="prefix_producer_system">Producer System</label>
+                        <input id="prefix_producer_system" name="producer_system" type="text" value="{{ prefix_form.get('producer_system', '') }}" placeholder="atlas, bloom, ursa" />
+                      </div>
+                      <div class="field">
+                        <label for="prefix_producer_object_euid">Producer Object EUID</label>
+                        <input id="prefix_producer_object_euid" name="producer_object_euid" type="text" value="{{ prefix_form.get('producer_object_euid', '') }}" placeholder="Optional upstream EUID" />
+                      </div>
+                      <div class="field">
+                        <label for="prefix_meta_title">Title</label>
+                        <input id="prefix_meta_title" name="prefix_meta_title" type="text" value="{{ prefix_form.get('prefix_meta_title', '') }}" placeholder="Optional display title" />
+                      </div>
+                      <div class="field">
+                        <label for="prefix_meta_tags">Tags</label>
+                        <input id="prefix_meta_tags" name="prefix_meta_tags" type="text" value="{{ prefix_form.get('prefix_meta_tags', '') }}" placeholder="space or comma separated tags" />
+                      </div>
+                      <div class="field field-wide">
+                        <label for="prefix_meta_notes">Notes</label>
+                        <textarea id="prefix_meta_notes" name="prefix_meta_notes">{{ prefix_form.get('prefix_meta_notes', '') }}</textarea>
+                      </div>
+                      <div class="field field-wide">
+                        <label for="prefix_additional_metadata_json">Additional Metadata JSON</label>
+                        <textarea id="prefix_additional_metadata_json" name="prefix_additional_metadata_json" placeholder='{"cohort":"batch-a"}'>{{ prefix_form.get("prefix_additional_metadata_json", "") }}</textarea>
+                      </div>
+                    </div>
+                    <div class="form-actions">
+                      <button class="button button-primary" type="submit">Register Prefix</button>
+                    </div>
+                  </form>
+                  {% if prefix_register_result %}
+                  <div style="margin-top: 1rem;">
+                    {% if prefix_register_result.state == "error" %}
+                    <div class="status-error">{{ prefix_register_result.detail }}</div>
+                    {% else %}
+                    <div class="results-meta" style="margin-bottom: 0.75rem;">
+                      <span class="pill pill-active">Prefix Artifact</span>
+                      <span class="pill">{{ prefix_register_result.artifact.storage_kind }}</span>
+                    </div>
+                    <table class="kv-table">
+                      <tbody>
+                        <tr>
+                          <th>Artifact</th>
+                          <td>{{ artifact_links.artifact_euid_link(prefix_register_result.artifact.artifact_euid) }}</td>
+                        </tr>
+                        <tr>
+                          <th>Storage</th>
+                          <td>{{ artifact_links.artifact_storage_action(prefix_register_result.artifact.artifact_euid, prefix_register_result.artifact.storage_uri, prefix_register_result.artifact.storage_kind, prefix_register_result.artifact.storage_console_url) }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    {% endif %}
+                  </div>
+                  {% endif %}
+                </section>
+
+                <section class="panel">
+                  <div class="panel-header">
+                    <div>
+                      <h3>Sequencing Run Intake</h3>
                     <div class="panel-copy">Register an Ultima run prefix as a Dewey hierarchy: run node, sample-folder nodes, and CRAM plus sidecars.</div>
                   </div>
                 </div>

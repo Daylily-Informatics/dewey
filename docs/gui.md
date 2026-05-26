@@ -52,6 +52,7 @@ The Artifacts surface is the broadest browser workflow in the repo today. It cov
 - directory intake
 - public URL intake
 - S3 URI or prefix intake
+- prefix-only S3 registration that creates one prefix artifact without enumerating children
 - optional artifact-set grouping during intake
 - bulk TSV intake
 - artifact search and export

@@ -63,6 +63,7 @@ Current auth modes used in this document:
 | `GET` | `/artifacts/euid/{artifact_euid}` | `UI session` | Artifact detail page |
 | `GET` | `/artifacts/bulk-template.tsv` | `UI session` | Bulk TSV template |
 | `POST` | `/artifacts/register` | `UI session` | Artifact intake workflow |
+| `POST` | `/artifacts/register-prefix` | `UI session` | Prefix-only artifact registration |
 | `POST` | `/artifacts/bulk-upload` | `UI session` | Bulk TSV intake |
 | `POST` | `/artifacts/search` | `UI session` | Artifact search page action |
 | `POST` | `/artifacts/search/export` | `UI session` | Artifact search export |
@@ -107,6 +108,7 @@ Current save request fields:
 | `GET` | `/api/v1/artifacts` | `bearer token` | no |
 | `POST` | `/api/v1/artifacts` | `bearer token` | yes |
 | `POST` | `/api/v1/artifacts/import` | `bearer token` | yes |
+| `POST` | `/api/v1/artifact-prefixes` | `bearer token` | yes |
 | `POST` | `/api/v1/artifacts/upload-sessions` | `bearer token` | yes |
 | `POST` | `/api/v1/artifacts/upload-sessions/{upload_token}/complete` | `bearer token` | yes |
 | `GET` | `/api/v1/artifacts/{artifact_euid}` | `bearer token` | no |
@@ -121,6 +123,8 @@ Current artifact register fields include:
 - producer system and producer object EUID
 - storage class and availability status
 - freeform metadata
+
+Prefix-only registration uses `POST /api/v1/artifact-prefixes` with `root_uri`, `artifact_type`, optional producer fields, and metadata. It creates one `storage_kind=prefix` artifact and does not expand or list child objects.
 
 Current import fields include:
 
