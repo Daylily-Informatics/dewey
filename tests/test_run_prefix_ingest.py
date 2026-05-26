@@ -76,6 +76,7 @@ def test_service_import_run_prefix_creates_hierarchy_and_freeze_behavior(
 
     sample_a_children = service.list_artifact_children(artifact_euid=sample_a_node["artifact_euid"])
     assert {item["artifact_type"] for item in sample_a_children} == {"cram", "crai", "json", "csv"}
+    assert {item["storage_status"] for item in sample_a_children} == {"observed"}
     cram_artifact = next(item for item in sample_a_children if item["artifact_type"] == "cram")
     cram_parents = service.list_artifact_parents(artifact_euid=cram_artifact["artifact_euid"])
     assert [item["artifact_euid"] for item in cram_parents] == [sample_a_node["artifact_euid"]]

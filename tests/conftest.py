@@ -898,6 +898,131 @@ class FakeDeweyService:
         self._remember("artifact.import_run_prefix", idempotency_key, payload, 201, body)
         return 201, body
 
+    def register_sequencer_run(
+        self,
+        *,
+        request_body,
+        idempotency_key: str | None,
+        request_id: str,
+        correlation_id: str,
+    ):
+        from dewey_service.sequencer_run_contracts import deterministic_idempotency_key
+
+        computed = deterministic_idempotency_key("sequencer_run.register", request_body)
+        clean_key = idempotency_key or computed
+        if clean_key != computed:
+            from dewey_service.service import DeweyConflictError
+
+            raise DeweyConflictError("Idempotency-Key does not match deterministic request key")
+        payload = request_body.model_dump(mode="json", exclude_none=True)
+        replay = self._idempotent("sequencer_run.register", clean_key, payload)
+        if replay:
+            return replay
+        artifact_set_euid = f"AS-{self._artifact_set_seq:06d}"
+        self._artifact_set_seq += 1
+        receipt = {
+            "schema_version": "1.0",
+            "request_id": request_id,
+            "idempotency_key": clean_key,
+            "registration_kind": "sequencer_run",
+            "artifact_set_euid": artifact_set_euid,
+            "registered_artifacts": [],
+            "skipped_existing": [],
+            "failed": [],
+            "registered_at": "2026-03-10T00:00:00Z",
+            "status": "registered_trigger_pending"
+            if payload.get("trigger_policy") == "trigger_ursa"
+            else "local_only",
+            "local_only": payload.get("trigger_policy") != "trigger_ursa",
+        }
+        body = {
+            "receipt_euid": "RCP-000001",
+            "receipt": receipt,
+            "artifact_set": {
+                "artifact_set_euid": artifact_set_euid,
+                "artifact_set_type": "sequencer_run",
+                "metadata": {
+                    "platform": payload["platform"],
+                    "run_root_uri": payload["run_root_uri"],
+                },
+                "artifact_euids": [],
+                "members": [],
+                "member_count": 0,
+                "created_at": "2026-03-10T00:00:00Z",
+            },
+            "manifest": [],
+            "manifest_sha256": "0" * 64,
+            "pipeline_plan": [],
+            "outbox_event": {
+                "event_type": "lsmc.dewey.sequencer-run.registered.v1",
+                "payload": {"artifact_set_euid": artifact_set_euid},
+                "correlation_id": correlation_id,
+            },
+        }
+        self._remember("sequencer_run.register", clean_key, payload, 201, body)
+        return 201, body
+
+    def register_analysis_results(
+        self,
+        *,
+        request_body,
+        idempotency_key: str | None,
+        request_id: str,
+        correlation_id: str,
+    ):
+        from dewey_service.sequencer_run_contracts import deterministic_idempotency_key
+
+        computed = deterministic_idempotency_key("analysis_results.register", request_body)
+        clean_key = idempotency_key or computed
+        if clean_key != computed:
+            from dewey_service.service import DeweyConflictError
+
+            raise DeweyConflictError("Idempotency-Key does not match deterministic request key")
+        payload = request_body.model_dump(mode="json", exclude_none=True)
+        replay = self._idempotent("analysis_results.register", clean_key, payload)
+        if replay:
+            return replay
+        artifact_set_euid = f"AS-{self._artifact_set_seq:06d}"
+        self._artifact_set_seq += 1
+        receipt = {
+            "schema_version": "1.0",
+            "request_id": request_id,
+            "idempotency_key": clean_key,
+            "registration_kind": "analysis_results",
+            "artifact_set_euid": artifact_set_euid,
+            "registered_artifacts": [],
+            "skipped_existing": [],
+            "failed": [],
+            "registered_at": "2026-03-10T00:00:00Z",
+            "status": "registered",
+            "local_only": False,
+        }
+        body = {
+            "receipt_euid": "RCP-000002",
+            "receipt": receipt,
+            "artifact_set": {
+                "artifact_set_euid": artifact_set_euid,
+                "artifact_set_type": "analysis_results",
+                "metadata": {
+                    "analysis_euid": payload["analysis_euid"],
+                    "command_id": payload["command_id"],
+                },
+                "artifact_euids": [],
+                "members": [],
+                "member_count": 0,
+                "created_at": "2026-03-10T00:00:00Z",
+            },
+            "manifest": [],
+            "manifest_sha256": "1" * 64,
+            "outbox_event": {
+                "event_type": "lsmc.dewey.analysis-results.registered.v1",
+                "payload": {"analysis_euid": payload["analysis_euid"]},
+                "correlation_id": correlation_id,
+            },
+        }
+        self._remember("analysis_results.register", clean_key, payload, 201, body)
+        return 201, body
+
     def create_artifact_set(
         self,
         *,

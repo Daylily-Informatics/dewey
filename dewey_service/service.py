@@ -8,10 +8,12 @@ from dewey_service.services.base import BaseDeweyService, DeweyConflictError, De
 from dewey_service.services.external_objects import ExternalObjectServiceMixin
 from dewey_service.services.literature import LiteratureServiceMixin
 from dewey_service.services.search import SearchServiceMixin
+from dewey_service.services.sequencer_runs import SequencerRunRegistrationServiceMixin
 from dewey_service.services.sharing import SharingServiceMixin
 
 
 class DeweyService(
+    SequencerRunRegistrationServiceMixin,
     ArtifactServiceMixin,
     LiteratureServiceMixin,
     SearchServiceMixin,
