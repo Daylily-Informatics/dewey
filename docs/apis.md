@@ -143,6 +143,8 @@ Current upload-session flow:
 | --- | --- | --- | --- |
 | `GET` | `/api/v1/artifact-sets` | `bearer token` | no |
 | `POST` | `/api/v1/artifact-sets` | `bearer token` | yes |
+| `POST` | `/api/v1/artifact-sets/analysis/register` | `bearer token` | computed |
+| `POST` | `/api/v1/artifact-sets/multiqc/register` | `bearer token` | computed |
 | `GET` | `/api/v1/artifact-sets/{artifact_set_euid}` | `bearer token` | no |
 | `POST` | `/api/v1/artifact-sets/{artifact_set_euid}/members` | `bearer token` | yes |
 | `DELETE` | `/api/v1/artifact-sets/{artifact_set_euid}/members/{artifact_euid}` | `bearer token` | yes |
@@ -153,6 +155,11 @@ Current create fields:
 - `label`
 - `description`
 - `metadata`
+
+QEO/KEO registration fields are defined in
+`docs/qeo/QEO_DEWEY_REGISTRATION_CONTRACT.md`. These two endpoints compute their
+idempotency key from canonical request JSON; a supplied `Idempotency-Key` must
+match that computed key.
 
 ## Resolution API
 

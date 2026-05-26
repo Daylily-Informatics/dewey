@@ -1061,22 +1061,31 @@ class FakeDeweyService:
 
     def revoke_share_reference(
         self,
+        share_reference_euid: str = "",
         *,
-        share_reference_euid: str,
         revoked_by: str | None,
-        idempotency_key: str,
+        reason: str | None = None,
+        idempotency_key: str | None = None,
     ):
-        payload = {"share_reference_euid": share_reference_euid, "revoked_by": revoked_by}
-        replay = self._idempotent("share_reference.revoke", idempotency_key, payload)
-        if replay:
-            return replay
+        payload = {
+            "share_reference_euid": share_reference_euid,
+            "revoked_by": revoked_by,
+            "revocation_reason": reason,
+        }
+        if idempotency_key:
+            replay = self._idempotent("share_reference.revoke", idempotency_key, payload)
+            if replay:
+                return replay
         share = self.get_share_reference(share_reference_euid)
         share["status"] = "revoked"
         share["revoked_at"] = "2026-03-10T01:00:00Z"
         share["revoked_by"] = revoked_by
+        share["revocation_reason"] = reason
         self.share_references[share_reference_euid] = share
-        self._remember("share_reference.revoke", idempotency_key, payload, 200, share)
-        return 200, dict(share)
+        if idempotency_key:
+            self._remember("share_reference.revoke", idempotency_key, payload, 200, share)
+            return 200, dict(share)
+        return dict(share)
 
     def open_share_reference(self, share_reference_euid: str):
         share = self.get_share_reference(share_reference_euid)
@@ -1088,6 +1097,17 @@ class FakeDeweyService:
         body = dict(share)
         body["presigned_access_url"] = f"https://downloads.example.com/{share_reference_euid}"
         return body
+
+    def issue_share_reference_access(
+        self,
+        share_reference_euid: str,
+        *,
+        accessed_by: str | None = None,
+        presign_ttl_seconds: int = 900,
+    ):
+        _ = accessed_by
+        _ = presign_ttl_seconds
+        return self.open_share_reference(share_reference_euid)
 
     def list_share_references(
         self,

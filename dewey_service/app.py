@@ -78,6 +78,10 @@ from dewey_service.observability import (
     route_template_from_request,
 )
 from dewey_service.rbac import Role, profile_has_role
+from dewey_service.registration_contracts import (
+    AnalysisArtifactSetRegistrationRequest,
+    MultiQCArtifactSetRegistrationRequest,
+)
 from dewey_service.service import DeweyConflictError, DeweyNotFoundError, DeweyService
 from dewey_service.settings import (
     Settings,
@@ -3103,6 +3107,52 @@ def create_app(
             limit=limit,
         )
         return {"items": rows, "total": len(rows)}
+
+    @app.post(
+        "/api/v1/artifact-sets/analysis/register",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def register_analysis_artifact_set(
+        body: AnalysisArtifactSetRegistrationRequest,
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ) -> dict[str, Any]:
+        try:
+            status_code, payload = service.register_analysis_artifact_set(
+                body,
+                idempotency_key=idempotency_key,
+            )
+            return {"status_code": status_code, **payload}
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except DeweyConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except RuntimeError as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    @app.post(
+        "/api/v1/artifact-sets/multiqc/register",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def register_multiqc_artifact_set(
+        body: MultiQCArtifactSetRegistrationRequest,
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ) -> dict[str, Any]:
+        try:
+            status_code, payload = service.register_multiqc_artifact_set(
+                body,
+                idempotency_key=idempotency_key,
+            )
+            return {"status_code": status_code, **payload}
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except DeweyConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except RuntimeError as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
 
     @app.post(
         "/api/v1/artifact-sets",

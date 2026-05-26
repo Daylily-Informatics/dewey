@@ -18,6 +18,8 @@ from dewey_service.tapdb_backend import (
     EXTERNAL_OBJECT_TEMPLATE,
     IDEMPOTENCY_TEMPLATE,
     LITERATURE_SAVE_TEMPLATE,
+    OUTBOX_EVENT_TEMPLATE,
+    REGISTRATION_RECEIPT_TEMPLATE,
     SHARE_REFERENCE_TEMPLATE,
 )
 
@@ -57,6 +59,8 @@ class _InMemoryBackend:
             EXTERNAL_OBJECT_RELATION_TEMPLATE: 1,
             LITERATURE_SAVE_TEMPLATE: 1,
             IDEMPOTENCY_TEMPLATE: 1,
+            REGISTRATION_RECEIPT_TEMPLATE: 1,
+            OUTBOX_EVENT_TEMPLATE: 1,
         }
         self.prefixes = {
             ANOMALY_TEMPLATE: "ANM",
@@ -67,6 +71,8 @@ class _InMemoryBackend:
             EXTERNAL_OBJECT_RELATION_TEMPLATE: "ER",
             LITERATURE_SAVE_TEMPLATE: "SAV",
             IDEMPOTENCY_TEMPLATE: "KDP",
+            REGISTRATION_RECEIPT_TEMPLATE: "RR",
+            OUTBOX_EVENT_TEMPLATE: "OE",
         }
 
     @contextmanager
@@ -238,6 +244,7 @@ class _FakeStorageClient:
         content_type: str | None = "application/octet-stream",
         storage_class: str | None = "STANDARD",
         version_id: str | None = None,
+        sha256: str | None = None,
     ) -> StorageObject:
         obj = StorageObject(
             bucket=bucket,
@@ -247,6 +254,7 @@ class _FakeStorageClient:
             content_type=content_type,
             storage_class=storage_class,
             etag="etag-1",
+            sha256=sha256,
         )
         self.objects[(bucket, key)] = obj
         return obj
@@ -274,6 +282,7 @@ class _FakeStorageClient:
             content_type=source.content_type,
             storage_class=source.storage_class,
             version_id=source.version_id,
+            sha256=source.sha256,
         )
 
     def put_bytes(

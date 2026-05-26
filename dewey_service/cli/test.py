@@ -15,7 +15,7 @@ import typer
 from cli_core_yo import ccyo_out
 
 from dewey_service.cli._registry_v2 import REQUIRED, register_group_commands
-from dewey_service.cli.common import PROJECT_ROOT
+from dewey_service.cli.common import PROJECT_ROOT, project_subprocess_env
 
 test_app = typer.Typer(help="Test commands")
 _PYTEST_PASSTHROUGH = {"allow_extra_args": True, "ignore_unknown_options": True}
@@ -40,7 +40,12 @@ def run_tests(
 ) -> None:
     """Run the Dewey test suite."""
     args = _pytest_passthrough_args(ctx, ["-q"])
-    proc = subprocess.run([sys.executable, "-m", "pytest", *args], cwd=PROJECT_ROOT, check=False)
+    proc = subprocess.run(
+        [sys.executable, "-m", "pytest", *args],
+        cwd=PROJECT_ROOT,
+        env=project_subprocess_env(),
+        check=False,
+    )
     raise typer.Exit(proc.returncode)
 
 
@@ -57,7 +62,7 @@ def run_coverage(
         cmd.append("--cov-report=html:htmlcov")
     cmd.extend(_pytest_passthrough_args(ctx, []))
 
-    proc = subprocess.run(cmd, cwd=PROJECT_ROOT, check=False)
+    proc = subprocess.run(cmd, cwd=PROJECT_ROOT, env=project_subprocess_env(), check=False)
     if html and proc.returncode == 0:
         ccyo_out.success("HTML report: htmlcov/index.html")
     raise typer.Exit(proc.returncode)

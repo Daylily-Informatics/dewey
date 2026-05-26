@@ -104,6 +104,32 @@
       "bstatus": "active",
       "is_singleton": false,
       "json_addl": {}
+    },
+    {
+      "name": "Dewey Registration Receipt",
+      "polymorphic_discriminator": "data_template",
+      "category": "DGX",
+      "type": "system",
+      "subtype": "registration_receipt",
+      "version": "1.0",
+      "instance_prefix": "DGX",
+      "instance_polymorphic_identity": "data_instance",
+      "bstatus": "active",
+      "is_singleton": false,
+      "json_addl": {}
+    },
+    {
+      "name": "Dewey Outbox Event",
+      "polymorphic_discriminator": "data_template",
+      "category": "DGX",
+      "type": "system",
+      "subtype": "outbox_event",
+      "version": "1.0",
+      "instance_prefix": "DGX",
+      "instance_polymorphic_identity": "data_instance",
+      "bstatus": "active",
+      "is_singleton": false,
+      "json_addl": {}
     }
   ]
 }
