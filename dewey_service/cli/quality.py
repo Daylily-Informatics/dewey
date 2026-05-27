@@ -14,7 +14,7 @@ import sys
 import typer
 
 from dewey_service.cli._registry_v2 import REQUIRED, REQUIRED_MUTATING, register_group_commands
-from dewey_service.cli.common import PROJECT_ROOT
+from dewey_service.cli.common import PROJECT_ROOT, project_subprocess_env
 
 quality_app = typer.Typer(help="Quality commands")
 
@@ -52,6 +52,7 @@ def check_all() -> None:
     tests_proc = subprocess.run(
         [sys.executable, "-m", "pytest", "-q"],
         cwd=PROJECT_ROOT,
+        env=project_subprocess_env(),
         check=False,
     )
     raise typer.Exit(tests_proc.returncode)

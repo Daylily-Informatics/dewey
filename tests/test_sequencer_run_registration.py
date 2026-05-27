@@ -239,6 +239,40 @@ def test_route_requires_deterministic_idempotency_key(client) -> None:
     assert response.status_code == 200
     assert response.json()["receipt"]["registration_kind"] == "sequencer_run"
 
+    analysis_response = client.post(
+        "/api/v1/analysis-results/register",
+        headers=_auth_headers(),
+        json={
+            "analysis_euid": "AN-EUID-ROUTE",
+            "command_id": "illumina_snv_alignstats_relatedness_vep_multiqc",
+            "result_status": "succeeded",
+            "result_root_uri": "s3://analysis-bucket/results/route/",
+            "artifacts": [
+                {
+                    "logical_name": "multiqc",
+                    "artifact_role": "multiqc_html",
+                    "relative_path": "multiqc_report.html",
+                }
+            ],
+        },
+    )
+    assert analysis_response.status_code == 200
+    assert analysis_response.json()["receipt"]["registration_kind"] == "analysis_results"
+
+
+def test_browser_sequencer_run_registration_requires_session(client) -> None:
+    response = client.post(
+        "/sequencer-runs/register",
+        data={
+            "run_root_uri": "s3://seq-bucket/runs/RUN-DIR-9901-RT4/",
+            "platform": "ILMN",
+            "trigger_policy": "register_only",
+            "metadata_json": "{}",
+        },
+        follow_redirects=False,
+    )
+    assert response.status_code in {303, 401, 403}
+
 
 def test_browser_share_route_is_single_session_route(client) -> None:
     routes = [

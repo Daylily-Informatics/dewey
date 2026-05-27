@@ -245,6 +245,7 @@ class _FakeStorageClient:
         content_type: str | None = "application/octet-stream",
         storage_class: str | None = "STANDARD",
         version_id: str | None = None,
+        sha256: str | None = None,
     ) -> StorageObject:
         obj = StorageObject(
             bucket=bucket,
@@ -254,6 +255,7 @@ class _FakeStorageClient:
             content_type=content_type,
             storage_class=storage_class,
             etag="etag-1",
+            sha256=sha256,
         )
         self.objects[(bucket, key)] = obj
         return obj
@@ -281,6 +283,7 @@ class _FakeStorageClient:
             content_type=source.content_type,
             storage_class=source.storage_class,
             version_id=source.version_id,
+            sha256=source.sha256,
         )
 
     def put_bytes(

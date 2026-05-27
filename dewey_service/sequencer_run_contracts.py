@@ -8,7 +8,6 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-
 SequencerPlatform = Literal["ILMN", "ONT", "ULTIMA", "HYBRID_ILMN_ONT"]
 TriggerPolicy = Literal["register_only", "trigger_ursa"]
 TerminalResultStatus = Literal["succeeded", "failed", "canceled"]

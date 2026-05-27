@@ -28,6 +28,7 @@ class StorageObject:
     content_type: str | None = None
     storage_class: str | None = None
     etag: str | None = None
+    sha256: str | None = None
 
 
 @dataclass(frozen=True)
@@ -325,6 +326,7 @@ class S3StorageClient:
             content_type=response.get("ContentType"),
             storage_class=response.get("StorageClass"),
             etag=str(response.get("ETag") or "").strip('"') or None,
+            sha256=str(response.get("ChecksumSHA256") or "").strip() or None,
         )
 
     def _translate_error(self, exc: Exception, *, bucket: str, key: str) -> StorageError:
