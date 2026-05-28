@@ -14,6 +14,7 @@ WORKDIR /app
 COPY pyproject.toml uv.lock README.md ./
 RUN uv sync --frozen --no-dev --no-install-project
 
+COPY config ./config
 COPY dewey_service ./dewey_service
 RUN uv sync --frozen --no-dev
 

@@ -70,6 +70,13 @@ def test_pyproject_packages_dewey_config_template() -> None:
     ]
 
 
+def test_dockerfile_copies_tapdb_template_config() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    dockerfile = (repo_root / "Dockerfile").read_text(encoding="utf-8")
+
+    assert "COPY config ./config" in dockerfile
+
+
 def test_packaged_tapdb_registry_fixtures_match_owned_prefixes() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     templates = json.loads(
