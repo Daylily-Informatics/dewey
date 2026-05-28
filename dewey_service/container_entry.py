@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+
 def _required_env(name: str) -> str:
     value = os.environ.get(name, "").strip()
     if not value:
@@ -21,6 +22,19 @@ def _required_absolute_file(name: str) -> Path:
     return path
 
 
+def _initialize_cli_runtime(config_path: Path) -> None:
+    from cli_core_yo.errors import ContextNotInitializedError
+    from cli_core_yo.runtime import get_context, initialize
+    from cli_core_yo.xdg import resolve_paths
+
+    from dewey_service.cli import spec
+
+    try:
+        get_context()
+    except ContextNotInitializedError:
+        initialize(spec, resolve_paths(spec.xdg), config_path=config_path)
+
+
 def _start_server(**kwargs: object) -> None:
     from dewey_service.cli.server import start
 
@@ -28,8 +42,9 @@ def _start_server(**kwargs: object) -> None:
 
 
 def main() -> None:
-    _required_absolute_file("DEWEY_CONFIG")
+    config_path = _required_absolute_file("DEWEY_CONFIG")
     _required_absolute_file("TAPDB_CONFIG_PATH")
+    _initialize_cli_runtime(config_path)
     _start_server(
         host=_required_env("HOST"),
         port=int(_required_env("PORT")),
