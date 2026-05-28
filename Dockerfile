@@ -24,6 +24,10 @@ ENV PATH="/app/.venv/bin:${PATH}" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN addgroup --system lsmc && adduser --system --ingroup lsmc --home /app lsmc
 WORKDIR /app
 COPY --from=builder --chown=lsmc:lsmc /app /app

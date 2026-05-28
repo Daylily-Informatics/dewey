@@ -77,6 +77,13 @@ def test_dockerfile_copies_tapdb_template_config() -> None:
     assert "COPY config ./config" in dockerfile
 
 
+def test_dockerfile_installs_postgresql_client_for_tapdb_bootstrap() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    dockerfile = (repo_root / "Dockerfile").read_text(encoding="utf-8")
+
+    assert "postgresql-client" in dockerfile
+
+
 def test_packaged_tapdb_registry_fixtures_match_owned_prefixes() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     templates = json.loads(
