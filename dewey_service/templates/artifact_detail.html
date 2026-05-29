@@ -37,7 +37,12 @@
         <section class="hero">
           <div class="hero-copy">
             <div class="eyebrow">Artifact EUID</div>
-            <h2>{{ artifact.artifact_euid }}</h2>
+            <h2>
+              {{ artifact.artifact_euid }}
+              {% if artifact.original_filename %}
+              <span class="artifact-heading-filename">({{ artifact.original_filename }})</span>
+              {% endif %}
+            </h2>
             <p>
               {% if artifact.storage_kind == "prefix" %}
               Inspect the registered Dewey hierarchy node, review its metadata, and follow its S3 location.

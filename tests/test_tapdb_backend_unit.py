@@ -256,6 +256,8 @@ def test_template_definitions_are_required_codes() -> None:
         backend_mod.LITERATURE_SAVE_TEMPLATE,
         backend_mod.ANOMALY_TEMPLATE,
         backend_mod.IDEMPOTENCY_TEMPLATE,
+        backend_mod.REGISTRATION_RECEIPT_TEMPLATE,
+        backend_mod.OUTBOX_EVENT_TEMPLATE,
     )
 
 

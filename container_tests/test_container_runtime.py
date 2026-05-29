@@ -46,9 +46,13 @@ def test_container_entry_runs_foreground_http_server(
     monkeypatch.setenv("HOST", "127.0.0.1")
     monkeypatch.setenv("PORT", "8914")
 
-    with patch("dewey_service.container_entry._start_server") as start:
+    with (
+        patch("dewey_service.container_entry._initialize_runtime_context") as init_runtime,
+        patch("dewey_service.container_entry._start_server") as start,
+    ):
         container_entry.main()
 
+    init_runtime.assert_called_once_with(config_path)
     assert start.call_args.kwargs == {
         "host": "127.0.0.1",
         "port": 8914,

@@ -18,6 +18,8 @@ from dewey_service.tapdb_backend import (
     EXTERNAL_OBJECT_TEMPLATE,
     IDEMPOTENCY_TEMPLATE,
     LITERATURE_SAVE_TEMPLATE,
+    OUTBOX_EVENT_TEMPLATE,
+    REGISTRATION_RECEIPT_TEMPLATE,
     SHARE_REFERENCE_TEMPLATE,
 )
 
@@ -57,6 +59,8 @@ class _InMemoryBackend:
             EXTERNAL_OBJECT_RELATION_TEMPLATE: 1,
             LITERATURE_SAVE_TEMPLATE: 1,
             IDEMPOTENCY_TEMPLATE: 1,
+            REGISTRATION_RECEIPT_TEMPLATE: 1,
+            OUTBOX_EVENT_TEMPLATE: 1,
         }
         self.prefixes = {
             ANOMALY_TEMPLATE: "ANM",
@@ -67,6 +71,8 @@ class _InMemoryBackend:
             EXTERNAL_OBJECT_RELATION_TEMPLATE: "ER",
             LITERATURE_SAVE_TEMPLATE: "SAV",
             IDEMPOTENCY_TEMPLATE: "KDP",
+            REGISTRATION_RECEIPT_TEMPLATE: "RCP",
+            OUTBOX_EVENT_TEMPLATE: "EVT",
         }
 
     @contextmanager
@@ -226,6 +232,7 @@ class _InMemoryBackend:
 class _FakeStorageClient:
     def __init__(self) -> None:
         self.objects: dict[tuple[str, str], StorageObject] = {}
+        self.object_bodies: dict[tuple[str, str], bytes] = {}
         self.tags: dict[tuple[str, str], dict[str, str]] = {}
         self.retentions: dict[tuple[str, str], dict[str, str]] = {}
 
@@ -238,6 +245,7 @@ class _FakeStorageClient:
         content_type: str | None = "application/octet-stream",
         storage_class: str | None = "STANDARD",
         version_id: str | None = None,
+        sha256: str | None = None,
     ) -> StorageObject:
         obj = StorageObject(
             bucket=bucket,
@@ -247,6 +255,7 @@ class _FakeStorageClient:
             content_type=content_type,
             storage_class=storage_class,
             etag="etag-1",
+            sha256=sha256,
         )
         self.objects[(bucket, key)] = obj
         return obj
@@ -274,6 +283,7 @@ class _FakeStorageClient:
             content_type=source.content_type,
             storage_class=source.storage_class,
             version_id=source.version_id,
+            sha256=source.sha256,
         )
 
     def put_bytes(
@@ -284,13 +294,15 @@ class _FakeStorageClient:
         body: bytes,
         content_type: str | None = None,
     ) -> StorageObject:
-        return self.seed_object(
+        obj = self.seed_object(
             bucket=bucket,
             key=key,
             size=len(body),
             content_type=content_type,
             storage_class="STANDARD",
         )
+        self.object_bodies[(bucket, key)] = bytes(body)
+        return obj
 
     def list_objects(self, *, bucket: str, prefix: str, limit: int = 1000) -> list[StorageObject]:
         rows = [
@@ -341,6 +353,8 @@ class _FakeStorageClient:
     ) -> bytes:
         _ = version_id
         self.head_object(bucket=bucket, key=key)
+        if (bucket, key) in self.object_bodies:
+            return self.object_bodies[(bucket, key)]
         return f"payload:{bucket}/{key}".encode("utf-8")
 
     def put_object_tags(self, *, bucket: str, key: str, tags: dict[str, str]) -> None:
