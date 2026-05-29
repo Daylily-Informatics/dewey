@@ -48,6 +48,21 @@ def test_create_share_reference(client) -> None:
     assert fetched.status_code == 200
     assert fetched.json()["share_reference_euid"] == payload["share_reference_euid"]
 
+    access = client.post(
+        f"/api/v1/share-references/{payload['share_reference_euid']}/access",
+        headers={"Authorization": "Bearer token-123"},
+    )
+    assert access.status_code == 200
+    assert access.json()["access_count"] == 1
+
+    revoked = client.post(
+        f"/api/v1/share-references/{payload['share_reference_euid']}/revoke",
+        headers={"Authorization": "Bearer token-123"},
+        json={"reason": "test cleanup"},
+    )
+    assert revoked.status_code == 200
+    assert revoked.json()["status"] == "revoked"
+
 
 def test_create_share_reference_prepares_external_recipient(
     monkeypatch,

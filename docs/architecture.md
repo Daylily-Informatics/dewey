@@ -93,7 +93,7 @@ The current application boot path lives in `dewey_service.app:create_app`.
 At startup, Dewey wires together:
 
 - FastAPI app and route surface
-- a `DeweyService` composed from artifact, artifact-set, search, literature, sharing, and external-object mixins
+- a `DeweyService` composed from artifact, artifact-set, QEO/KEO registration, outbox, search, literature, sharing, and external-object mixins
 - a TapDB backend for persistence
 - an S3 storage client for object inspection, upload sessions, downloads, locking, and presigned URLs
 - a `MetapubAdapter` for PubMed search and record retrieval when available
@@ -111,13 +111,15 @@ Bloom, Ursa, operators, scripts"] --> FastAPI
 daylily-auth-cognito sessions
 and bearer-token checks"]
     FastAPI --> Service["DeweyService
-artifact, set, search, share,
-literature, external-object mixins"]
+artifact, set, registration, outbox,
+search, share, literature,
+external-object mixins"]
     FastAPI --> Obs["In-memory observability store"]
 
     Service --> TapDB["TapDB backend
 templates, instances, lineage,
-idempotency records"]
+idempotency records,
+registration receipts, outbox"]
     Service --> S3["S3 storage client
 head/get/list/upload/presign/lock"]
     Service --> Metapub["metapub adapter
@@ -243,6 +245,10 @@ Current code and docs do not support claims that Dewey owns:
 - analysis truth
 - customer release authority
 - a public messaging/event API
+
+The QEO/KEO registration path adds a local transactional outbox for internal
+handoff evidence. It is persisted in TapDB and is not exposed as a public event
+stream.
 
 ### Relation To Other Services
 

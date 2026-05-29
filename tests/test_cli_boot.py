@@ -255,7 +255,8 @@ def test_config_validate_and_status(monkeypatch, tmp_path: Path, capsys) -> None
     assert status_exit == 0
     assert "Config path:" in status_output
     assert "dewey-config-local.yaml" in status_output.replace("\n", "")
-    assert '"tapdb_database_name": "dewey"' in status_output
+    assert "database.namespace=dewey" in status_output
+    assert "application.api_bearer_token=<redacted>" in status_output
 
 
 def test_env_commands_render(monkeypatch, capsys) -> None:

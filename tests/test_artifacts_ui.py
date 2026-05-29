@@ -59,6 +59,38 @@ def test_artifacts_page_requires_login_and_serves_bulk_template(monkeypatch, cli
     assert "artifact_set_label" in template.text
 
 
+def test_artifacts_prefix_registration_form_creates_one_prefix_artifact(
+    monkeypatch,
+    client,
+    fake_service,
+) -> None:
+    _login_user(monkeypatch, client)
+
+    response = client.post(
+        "/artifacts/register-prefix",
+        data={
+            "root_uri": "s3://bucket-8/prefix-only/run-a",
+            "artifact_type": "folder",
+            "producer_system": "atlas",
+            "producer_object_euid": "RUN-A",
+            "prefix_meta_title": "Prefix Run A",
+            "prefix_meta_tags": "prefix only",
+        },
+    )
+
+    assert response.status_code == 200
+    assert "S3 Prefix Registration" in response.text
+    assert "Prefix Artifact" in response.text
+    assert len(fake_service.artifacts) == 1
+    artifact = next(iter(fake_service.artifacts.values()))
+    assert artifact["storage_kind"] == "prefix"
+    assert artifact["node_kind"] == "prefix"
+    assert artifact["is_terminal"] is False
+    assert artifact["storage_uri"] == "s3://bucket-8/prefix-only/run-a/"
+    assert artifact["producer_system"] == "atlas"
+    assert artifact["metadata"]["tags"] == ["prefix", "only"]
+
+
 def test_artifacts_register_search_download_and_artifact_share(
     monkeypatch,
     client,
@@ -224,11 +256,17 @@ def test_artifact_detail_page_and_direct_download_redirect(
     assert register.status_code == 200
 
     artifact_euid = next(iter(fake_service.artifacts))
+    artifact = fake_service.artifacts.pop(artifact_euid)
+    artifact["artifact_euid"] = "M-DGX-9S5Q"
+    artifact_euid = artifact["artifact_euid"]
+    fake_service.artifacts[artifact_euid] = artifact
 
     detail = client.get(f"/artifacts/euid/{artifact_euid}")
     assert detail.status_code == 200
     assert artifact_euid in detail.text
     assert "detail-report.txt" in detail.text
+    assert "(detail-report.txt)" in detail.text
+    assert 'class="artifact-heading-filename"' in detail.text
     assert "Storage URI" in detail.text
 
     download = client.post(

@@ -46,6 +46,31 @@ def test_import_artifact_from_s3_uri(client) -> None:
     assert payload["import_mode"] == "reference"
 
 
+def test_register_artifact_prefix_api(client) -> None:
+    response = client.post(
+        "/api/v1/artifact-prefixes",
+        headers={"Authorization": "Bearer token-123", "Idempotency-Key": "idem-prefix-api"},
+        json={
+            "artifact_type": "folder",
+            "root_uri": "s3://bucket-2/path/prefix",
+            "producer_system": "atlas",
+            "producer_object_euid": "RUN-2",
+            "metadata": {"tags": ["prefix"], "title": "Prefix Only"},
+        },
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status_code"] == 201
+    assert payload["storage_kind"] == "prefix"
+    assert payload["node_kind"] == "prefix"
+    assert payload["is_terminal"] is False
+    assert payload["bucket"] == "bucket-2"
+    assert payload["key"] == "path/prefix/"
+    assert payload["storage_uri"] == "s3://bucket-2/path/prefix/"
+    assert payload["source_uri"] == "s3://bucket-2/path/prefix/"
+    assert payload["metadata"]["title"] == "Prefix Only"
+
+
 def test_upload_session_round_trip(client) -> None:
     create = client.post(
         "/api/v1/artifacts/upload-sessions",

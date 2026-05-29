@@ -25,10 +25,10 @@ def test_pyproject_declares_shared_library_versions() -> None:
 
     assert "cli-core-yo==2.1.1" in dependencies
     assert "daylily-auth-cognito==2.1.5" in dependencies
-    assert "daylily-tapdb>=7.0.5,<8.0.0" in dependencies
+    assert "daylily-tapdb==7.0.9" in dependencies
     assert "psycopg2-binary>=2.9.9" in dependencies
     assert tapdb_dependency == _tapdb_dependency_spec()
-    assert tapdb_dependency == "daylily-tapdb>=7.0.5,<8.0.0"
+    assert tapdb_dependency == "daylily-tapdb==7.0.9"
 
 
 def test_pyproject_uses_a_single_dependency_set() -> None:
@@ -68,6 +68,20 @@ def test_pyproject_packages_dewey_config_template() -> None:
         "templates/*.html",
         "static/*",
     ]
+
+
+def test_dockerfile_copies_tapdb_template_config() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    dockerfile = (repo_root / "Dockerfile").read_text(encoding="utf-8")
+
+    assert "COPY config ./config" in dockerfile
+
+
+def test_dockerfile_installs_postgresql_client_for_tapdb_bootstrap() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    dockerfile = (repo_root / "Dockerfile").read_text(encoding="utf-8")
+
+    assert "postgresql-client" in dockerfile
 
 
 def test_packaged_tapdb_registry_fixtures_match_owned_prefixes() -> None:

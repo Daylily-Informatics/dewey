@@ -179,7 +179,10 @@ class ArtifactServiceMixin:
 
     @staticmethod
     def _normalize_s3_prefix_uri(uri: str) -> tuple[str, str, str]:
-        bucket, key = ArtifactServiceMixin._parse_s3_uri(uri)
+        try:
+            bucket, key = ArtifactServiceMixin._parse_s3_uri(uri)
+        except ValueError as exc:
+            raise ValueError(str(exc).replace("source_uri", "root_uri")) from exc
         prefix = key.rstrip("/") + "/"
         return bucket, prefix, f"s3://{bucket}/{prefix}"
 
@@ -971,8 +974,8 @@ class ArtifactServiceMixin:
                         },
                         source_uri=f"s3://{bucket}/{object_key}",
                         import_mode="reference",
-                        storage_status="verified",
-                        storage_verified_at=utc_now_iso(),
+                        storage_status="observed",
+                        storage_verified_at=None,
                         storage_kind="object",
                         node_kind="file",
                         is_terminal=True,
@@ -1014,6 +1017,78 @@ class ArtifactServiceMixin:
                 response=response,
             )
             return status_code, response
+
+    def register_artifact_prefix(
+        self,
+        *,
+        root_uri: str,
+        artifact_type: str,
+        producer_system: str | None = None,
+        producer_object_euid: str | None = None,
+        metadata: dict[str, Any] | None,
+        idempotency_key: str,
+    ) -> tuple[int, dict[str, Any]]:
+        bucket, prefix, normalized_root_uri = self._normalize_s3_prefix_uri(root_uri)
+        prefix_label = self._folder_label_from_prefix(prefix)
+        meta = dict(metadata or {})
+        payload = self._artifact_payload(
+            artifact_type=artifact_type,
+            storage_backend="s3",
+            bucket=bucket,
+            key=prefix,
+            version_id=None,
+            size=None,
+            checksums={},
+            content_type=None,
+            original_filename=prefix_label,
+            producer_system=producer_system,
+            producer_object_euid=producer_object_euid,
+            storage_class=None,
+            availability_status=str(meta.get("availability_status") or "").strip()
+            or "available",
+            metadata=meta,
+            source_uri=normalized_root_uri,
+            import_mode="register",
+            storage_status="registered",
+            storage_kind="prefix",
+            node_kind="prefix",
+            is_terminal=False,
+        )
+        fingerprint = self._fingerprint(
+            {
+                "root_uri": normalized_root_uri,
+                "artifact_type": payload["artifact_type"],
+                "producer_system": payload["producer_system"],
+                "producer_object_euid": payload["producer_object_euid"],
+                "metadata": payload["metadata"],
+            }
+        )
+
+        with self.backend.session_scope(commit=True) as session:
+            self.backend.ensure_templates(session)
+            replay = self._idempotency_replay(
+                session,
+                operation="artifact.register_prefix",
+                idempotency_key=idempotency_key,
+                fingerprint=fingerprint,
+            )
+            if replay is not None:
+                return replay.status_code, replay.response
+
+            status_code, body = self._upsert_artifact_record(
+                session,
+                payload=payload,
+                created_at=utc_now_iso(),
+            )
+            self._store_idempotency(
+                session,
+                operation="artifact.register_prefix",
+                idempotency_key=idempotency_key,
+                fingerprint=fingerprint,
+                status_code=status_code,
+                response=body,
+            )
+            return status_code, body
 
     def import_artifact_from_uri(
         self,

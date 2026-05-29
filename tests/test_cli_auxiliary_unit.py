@@ -378,9 +378,18 @@ def test_quality_check_stops_after_lint_failure(monkeypatch: pytest.MonkeyPatch)
 def test_quality_check_runs_tests_after_clean_lint(monkeypatch: pytest.MonkeyPatch) -> None:
     calls: list[list[str]] = []
 
-    def fake_run(cmd: list[str], *, cwd: Path, check: bool) -> SimpleNamespace:
+    def fake_run(
+        cmd: list[str],
+        *,
+        cwd: Path,
+        check: bool,
+        env: dict[str, str] | None = None,
+    ) -> SimpleNamespace:
         assert cwd == quality_cli.PROJECT_ROOT
         assert check is False
+        if len(calls) == 1:
+            assert env is not None
+            assert env["DAYHOFF_PROJECT_ROOT"] == str(quality_cli.PROJECT_ROOT)
         calls.append(cmd)
         return _proc(returncode=0 if len(calls) == 1 else 4)
 

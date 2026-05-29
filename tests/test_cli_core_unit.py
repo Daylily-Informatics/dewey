@@ -10,6 +10,7 @@ from cli_core_yo.registry import CommandRegistry
 
 import dewey_service.cli as cli_module
 import dewey_service.cli.config_extra as config_extra
+import dewey_service.cli.qeo as qeo_cli
 from dewey_service.cli._registry_v2 import REQUIRED, REQUIRED_MUTATING
 
 
@@ -179,13 +180,20 @@ def test_main_runs_prebuilt_spec(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_config_status_prints_runtime_settings(monkeypatch: pytest.MonkeyPatch) -> None:
     clear_calls: list[str] = []
     printed: list[str] = []
+    settings = SimpleNamespace()
 
     monkeypatch.setattr(config_extra, "clear_settings_cache", lambda: clear_calls.append("clear"))
     monkeypatch.setattr(config_extra, "get_config_file_path", lambda: "/tmp/dewey-config.yaml")
+    monkeypatch.setattr(config_extra, "get_settings", lambda: settings)
     monkeypatch.setattr(
         config_extra,
-        "get_settings",
-        lambda: SimpleNamespace(model_dump_json=lambda indent=2: '{"ok": true}'),
+        "build_effective_config_rows",
+        lambda passed_settings, *, config_path: [
+            {"path": "application.api_bearer_token", "value": "<redacted>"},
+            {"path": "qeo.api_token", "value": "<redacted>"},
+        ]
+        if passed_settings is settings and str(config_path) == "/tmp/dewey-config.yaml"
+        else [],
     )
     monkeypatch.setattr(
         config_extra.ccyo_out, "print_text", lambda message: printed.append(message)
@@ -196,7 +204,8 @@ def test_config_status_prints_runtime_settings(monkeypatch: pytest.MonkeyPatch) 
     assert clear_calls == ["clear"]
     assert printed == [
         "Config path: [cyan]/tmp/dewey-config.yaml[/cyan]",
-        '{"ok": true}',
+        "application.api_bearer_token=<redacted>",
+        "qeo.api_token=<redacted>",
     ]
 
 
@@ -216,6 +225,46 @@ def test_config_status_exits_on_invalid_settings(monkeypatch: pytest.MonkeyPatch
 
     assert exc.value.exit_code == 1
     assert errors == ["Configuration invalid: invalid config"]
+
+
+def test_qeo_status_redacts_token(monkeypatch: pytest.MonkeyPatch) -> None:
+    printed: list[str] = []
+    monkeypatch.setattr(qeo_cli, "clear_settings_cache", lambda: None)
+    monkeypatch.setattr(
+        qeo_cli,
+        "get_settings",
+        lambda: SimpleNamespace(
+            qeo_ingest_url="https://qeo.example.com/api/v1/ingest/dewey-events",
+            qeo_api_token="secret-token",
+            qeo_consumer_group="qeo.dewey",
+        ),
+    )
+    monkeypatch.setattr(qeo_cli.ccyo_out, "print_text", lambda message: printed.append(message))
+
+    qeo_cli._status()
+
+    assert "qeo.dispatch_configured=true" in printed
+    assert "qeo.api_token=<redacted>" in printed
+    assert all("secret-token" not in line for line in printed)
+
+
+def test_qeo_dispatch_cli_emits_result(monkeypatch: pytest.MonkeyPatch) -> None:
+    emitted: list[dict[str, object]] = []
+
+    class FakeService:
+        def dispatch_qeo_outbox(self, *, limit: int, retry_errors: bool):
+            return {
+                "attempted": 1,
+                "limit": limit,
+                "retry_errors": retry_errors,
+            }
+
+    monkeypatch.setattr(qeo_cli, "build_cli_service", lambda: FakeService())
+    monkeypatch.setattr(qeo_cli.ccyo_out, "emit_json", lambda payload: emitted.append(payload))
+
+    qeo_cli._dispatch(limit=3, retry_errors=True)
+
+    assert emitted == [{"attempted": 1, "limit": 3, "retry_errors": True}]
 
 
 def test_set_artifact_bucket_persists_and_prints(monkeypatch: pytest.MonkeyPatch) -> None:

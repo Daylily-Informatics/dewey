@@ -163,6 +163,7 @@ def test_primary_documented_routes_exist_in_app_surface() -> None:
         ("GET", "/api/v1/artifacts"),
         ("POST", "/api/v1/artifacts"),
         ("POST", "/api/v1/artifacts/import"),
+        ("POST", "/api/v1/artifact-prefixes"),
         ("POST", "/api/v1/artifacts/upload-sessions"),
         ("POST", "/api/v1/artifacts/upload-sessions/{upload_token}/complete"),
         ("GET", "/api/v1/artifacts/{artifact_euid}"),

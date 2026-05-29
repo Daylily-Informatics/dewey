@@ -11,6 +11,10 @@ from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 
 import dewey_service.auth as auth_mod
+from dewey_service.audit import (
+    authenticated_user_email_context,
+    current_authenticated_user_email,
+)
 from dewey_service.rbac import Role
 from dewey_service.settings import Settings
 
@@ -103,17 +107,23 @@ def test_require_api_auth_validates_tokens() -> None:
     good = HTTPAuthorizationCredentials(scheme="Bearer", credentials="dewey-dev-token")
     bad = HTTPAuthorizationCredentials(scheme="Bearer", credentials="wrong-token")
 
-    assert dependency(good) == "dewey-dev-token"
+    with authenticated_user_email_context("operator@example.com"):
+        assert dependency(good) == "dewey-dev-token"
+        assert current_authenticated_user_email() is None
 
     with pytest.raises(HTTPException) as missing_exc:
-        dependency(None)
+        with authenticated_user_email_context("operator@example.com"):
+            dependency(None)
     assert missing_exc.value.status_code == 401
     assert missing_exc.value.detail == "Missing bearer token"
+    assert current_authenticated_user_email() is None
 
     with pytest.raises(HTTPException) as invalid_exc:
-        dependency(bad)
+        with authenticated_user_email_context("operator@example.com"):
+            dependency(bad)
     assert invalid_exc.value.status_code == 401
     assert invalid_exc.value.detail == "Invalid bearer token"
+    assert current_authenticated_user_email() is None
 
 
 def test_require_ui_session_requires_profile(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -132,19 +142,23 @@ def test_require_ui_session_requires_profile(monkeypatch: pytest.MonkeyPatch) ->
             roles=[Role.READ_WRITE.value],
         ),
     )
-    profile = auth_mod.require_ui_session(request)
-    assert profile["email"] == "user@example.com"
-    assert profile["roles"] == [Role.READ_WRITE.value]
+    with authenticated_user_email_context(None):
+        profile = auth_mod.require_ui_session(request)
+        assert profile["email"] == "user@example.com"
+        assert profile["roles"] == [Role.READ_WRITE.value]
+        assert current_authenticated_user_email() == "user@example.com"
 
     monkeypatch.setattr(auth_mod, "load_session_principal", lambda _request: None)
-    with pytest.raises(HTTPException) as exc:
-        auth_mod.require_ui_session(
-            SimpleNamespace(
-                session={},
-                app=SimpleNamespace(state=SimpleNamespace(settings=_settings())),
-                state=SimpleNamespace(),
+    with authenticated_user_email_context("operator@example.com"):
+        with pytest.raises(HTTPException) as exc:
+            auth_mod.require_ui_session(
+                SimpleNamespace(
+                    session={},
+                    app=SimpleNamespace(state=SimpleNamespace(settings=_settings())),
+                    state=SimpleNamespace(),
+                )
             )
-        )
+        assert current_authenticated_user_email() is None
     assert exc.value.status_code == 401
     assert exc.value.detail == "Login required"
 
@@ -165,7 +179,9 @@ def test_require_ui_admin_session_requires_admin_role(monkeypatch: pytest.Monkey
             roles=[Role.ADMIN.value],
         ),
     )
-    assert auth_mod.require_ui_admin_session(request)["email"] == "user@example.com"
+    with authenticated_user_email_context(None):
+        assert auth_mod.require_ui_admin_session(request)["email"] == "user@example.com"
+        assert current_authenticated_user_email() == "user@example.com"
 
     monkeypatch.setattr(
         auth_mod,
@@ -177,14 +193,16 @@ def test_require_ui_admin_session_requires_admin_role(monkeypatch: pytest.Monkey
             roles=[Role.READ_WRITE.value],
         ),
     )
-    with pytest.raises(HTTPException) as exc:
-        auth_mod.require_ui_admin_session(
-            SimpleNamespace(
-                session={},
-                app=SimpleNamespace(state=SimpleNamespace(settings=_settings())),
-                state=SimpleNamespace(),
+    with authenticated_user_email_context(None):
+        with pytest.raises(HTTPException) as exc:
+            auth_mod.require_ui_admin_session(
+                SimpleNamespace(
+                    session={},
+                    app=SimpleNamespace(state=SimpleNamespace(settings=_settings())),
+                    state=SimpleNamespace(),
+                )
             )
-        )
+        assert current_authenticated_user_email() == "user@example.com"
     assert exc.value.status_code == 403
 
 

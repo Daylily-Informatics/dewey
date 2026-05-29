@@ -159,6 +159,51 @@ def test_import_artifact_and_validation_errors(
     assert copied["retention_mode"] == "GOVERNANCE"
 
 
+def test_register_artifact_prefix_creates_single_prefix_without_s3_scan(
+    service: DeweyService,
+    storage: _FakeStorageClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service.bootstrap()
+
+    def _fail_list_objects(*args, **kwargs):
+        raise AssertionError("prefix-only registration must not list S3 objects")
+
+    def _fail_put_tags(*args, **kwargs):
+        raise AssertionError("prefix-only registration must not tag S3 objects")
+
+    monkeypatch.setattr(storage, "list_objects", _fail_list_objects)
+    monkeypatch.setattr(storage, "put_object_tags", _fail_put_tags)
+
+    status_code, created = service.register_artifact_prefix(
+        root_uri="s3://bucket-7/projects/run-a",
+        artifact_type="folder",
+        producer_system="atlas",
+        producer_object_euid="RUN-A",
+        metadata={"tags": ["prefix-only"], "title": "Run A"},
+        idempotency_key="idem-prefix-only",
+    )
+    replay_code, replay = service.register_artifact_prefix(
+        root_uri="s3://bucket-7/projects/run-a/",
+        artifact_type="folder",
+        producer_system="atlas",
+        producer_object_euid="RUN-A",
+        metadata={"tags": ["prefix-only"], "title": "Run A"},
+        idempotency_key="idem-prefix-only",
+    )
+
+    assert status_code == 201
+    assert replay_code == 201
+    assert replay["artifact_euid"] == created["artifact_euid"]
+    assert created["storage_kind"] == "prefix"
+    assert created["node_kind"] == "prefix"
+    assert created["is_terminal"] is False
+    assert created["storage_uri"] == "s3://bucket-7/projects/run-a/"
+    assert created["source_uri"] == "s3://bucket-7/projects/run-a/"
+    assert created["metadata"]["tags"] == ["prefix-only"]
+    assert service.list_artifacts(artifact_type="folder") == [created]
+
+
 def test_expand_s3_sources_and_build_download_archive(
     service: DeweyService,
     storage: _FakeStorageClient,

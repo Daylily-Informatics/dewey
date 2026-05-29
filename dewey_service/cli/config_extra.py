@@ -13,6 +13,7 @@ from cli_core_yo import ccyo_out
 
 from dewey_service.cli._registry_v2 import REQUIRED, REQUIRED_MUTATING
 from dewey_service.settings import (
+    build_effective_config_rows,
     clear_settings_cache,
     get_config_file_path,
     get_settings,
@@ -30,7 +31,8 @@ def _status() -> None:
         raise typer.Exit(1) from exc
 
     ccyo_out.print_text(f"Config path: [cyan]{get_config_file_path()}[/cyan]")
-    ccyo_out.print_text(settings.model_dump_json(indent=2))
+    for row in build_effective_config_rows(settings, config_path=get_config_file_path()):
+        ccyo_out.print_text(f"{row['path']}={row['value']}")
 
 
 def _set_artifact_bucket(

@@ -55,6 +55,11 @@ class BaseDeweyService:
         literature_adapter: Any | None = None,
         literature_allowed_domains: set[str] | None = None,
         literature_request_timeout_seconds: int = 10,
+        qeo_ingest_url: str = "",
+        qeo_api_token: str = "",
+        qeo_consumer_group: str = "",
+        qeo_timeout_seconds: int = 10,
+        qeo_ca_bundle_path: str = "",
     ):
         self.backend = backend
         self.default_share_ttl_seconds = max(60, int(default_share_ttl_seconds))
@@ -70,6 +75,11 @@ class BaseDeweyService:
             if str(item or "").strip()
         }
         self.literature_request_timeout_seconds = max(1, int(literature_request_timeout_seconds))
+        self.qeo_ingest_url = str(qeo_ingest_url or "").strip().rstrip("/")
+        self.qeo_api_token = str(qeo_api_token or "").strip()
+        self.qeo_consumer_group = str(qeo_consumer_group or "").strip()
+        self.qeo_timeout_seconds = max(1, int(qeo_timeout_seconds or 10))
+        self.qeo_ca_bundle_path = str(qeo_ca_bundle_path or "").strip()
         self._upload_serializer = URLSafeTimedSerializer(
             str(upload_token_secret or "dewey-upload-secret"),
             salt="dewey-upload-session-v1",

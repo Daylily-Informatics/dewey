@@ -21,6 +21,7 @@ from daylily_tapdb.cli.db_config import get_db_config
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
+from dewey_service.audit import creation_audit_fields, update_audit_fields
 from dewey_service.settings import get_settings
 from dewey_service.ui_metadata import resolve_package_version
 
@@ -54,6 +55,8 @@ EXTERNAL_OBJECT_RELATION_TEMPLATE = (
 LITERATURE_SAVE_TEMPLATE = f"{DEWEY_TEMPLATE_CATEGORY}/access/literature_save/1.0/"
 ANOMALY_TEMPLATE = f"{DEWEY_TEMPLATE_CATEGORY}/operational/anomaly/1.0/"
 IDEMPOTENCY_TEMPLATE = f"{DEWEY_TEMPLATE_CATEGORY}/system/idempotency_request/1.0/"
+REGISTRATION_RECEIPT_TEMPLATE = f"{DEWEY_TEMPLATE_CATEGORY}/system/registration_receipt/1.0/"
+OUTBOX_EVENT_TEMPLATE = f"{DEWEY_TEMPLATE_CATEGORY}/system/outbox_event/1.0/"
 
 
 TEMPLATE_DEFINITIONS: tuple[str, ...] = (
@@ -65,6 +68,8 @@ TEMPLATE_DEFINITIONS: tuple[str, ...] = (
     LITERATURE_SAVE_TEMPLATE,
     ANOMALY_TEMPLATE,
     IDEMPOTENCY_TEMPLATE,
+    REGISTRATION_RECEIPT_TEMPLATE,
+    OUTBOX_EVENT_TEMPLATE,
 )
 
 
@@ -189,7 +194,7 @@ class TapDBBackend:
             properties={},
             create_children=False,
         )
-        instance.json_addl = dict(json_addl)
+        instance.json_addl = {**dict(json_addl), **creation_audit_fields()}
         instance.bstatus = status
         instance.is_singleton = False
         session.flush()
@@ -200,6 +205,7 @@ class TapDBBackend:
     ) -> None:
         payload = dict(instance.json_addl or {})
         payload.update(updates)
+        payload.update(update_audit_fields())
         instance.json_addl = payload
         session.flush()
 

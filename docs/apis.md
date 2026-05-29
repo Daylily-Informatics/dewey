@@ -63,6 +63,7 @@ Current auth modes used in this document:
 | `GET` | `/artifacts/euid/{artifact_euid}` | `UI session` | Artifact detail page |
 | `GET` | `/artifacts/bulk-template.tsv` | `UI session` | Bulk TSV template |
 | `POST` | `/artifacts/register` | `UI session` | Artifact intake workflow |
+| `POST` | `/artifacts/register-prefix` | `UI session` | Prefix-only artifact registration |
 | `POST` | `/artifacts/bulk-upload` | `UI session` | Bulk TSV intake |
 | `POST` | `/artifacts/search` | `UI session` | Artifact search page action |
 | `POST` | `/artifacts/search/export` | `UI session` | Artifact search export |
@@ -107,6 +108,7 @@ Current save request fields:
 | `GET` | `/api/v1/artifacts` | `bearer token` | no |
 | `POST` | `/api/v1/artifacts` | `bearer token` | yes |
 | `POST` | `/api/v1/artifacts/import` | `bearer token` | yes |
+| `POST` | `/api/v1/artifact-prefixes` | `bearer token` | yes |
 | `POST` | `/api/v1/artifacts/upload-sessions` | `bearer token` | yes |
 | `POST` | `/api/v1/artifacts/upload-sessions/{upload_token}/complete` | `bearer token` | yes |
 | `GET` | `/api/v1/artifacts/{artifact_euid}` | `bearer token` | no |
@@ -121,6 +123,8 @@ Current artifact register fields include:
 - producer system and producer object EUID
 - storage class and availability status
 - freeform metadata
+
+Prefix-only registration uses `POST /api/v1/artifact-prefixes` with `root_uri`, `artifact_type`, optional producer fields, and metadata. It creates one `storage_kind=prefix` artifact and does not expand or list child objects.
 
 Current import fields include:
 
@@ -143,6 +147,8 @@ Current upload-session flow:
 | --- | --- | --- | --- |
 | `GET` | `/api/v1/artifact-sets` | `bearer token` | no |
 | `POST` | `/api/v1/artifact-sets` | `bearer token` | yes |
+| `POST` | `/api/v1/artifact-sets/analysis/register` | `bearer token` | computed |
+| `POST` | `/api/v1/artifact-sets/multiqc/register` | `bearer token` | computed |
 | `GET` | `/api/v1/artifact-sets/{artifact_set_euid}` | `bearer token` | no |
 | `POST` | `/api/v1/artifact-sets/{artifact_set_euid}/members` | `bearer token` | yes |
 | `DELETE` | `/api/v1/artifact-sets/{artifact_set_euid}/members/{artifact_euid}` | `bearer token` | yes |
@@ -153,6 +159,11 @@ Current create fields:
 - `label`
 - `description`
 - `metadata`
+
+QEO/KEO registration fields are defined in
+`docs/qeo/QEO_DEWEY_REGISTRATION_CONTRACT.md`. These two endpoints compute their
+idempotency key from canonical request JSON; a supplied `Idempotency-Key` must
+match that computed key.
 
 ## Resolution API
 
