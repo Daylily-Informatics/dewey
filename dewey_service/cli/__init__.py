@@ -157,6 +157,7 @@ def _build_spec() -> CliSpec:
                 "dewey_service.cli.tapdb.register",
                 "dewey_service.cli.cognito.register",
                 "dewey_service.cli.config_extra.register",
+                "dewey_service.cli.qeo.register",
             ]
         ),
         info_hooks=[_dewey_info_hook],

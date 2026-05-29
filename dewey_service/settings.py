@@ -269,6 +269,11 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "auth_external_broker_logout_url": "external_broker_logout_url",
         "auth_external_broker_share_recipient_prepare_url": "external_broker_share_recipient_prepare_url",
         "auth_external_broker_ca_bundle": "external_broker_ca_bundle",
+        "qeo_ingest_url": "qeo_ingest_url",
+        "qeo_api_token": "qeo_api_token",
+        "qeo_consumer_group": "qeo_consumer_group",
+        "qeo_timeout_seconds": "qeo_timeout_seconds",
+        "qeo_ca_bundle_path": "qeo_ca_bundle_path",
         "deployment_name": "deployment_name",
         "deployment_color": "deployment_color",
         "deployment_is_production": "deployment_is_production",
@@ -347,6 +352,11 @@ def _display_config_path(path: str) -> str:
         "external_broker_logout_url": "auth.external_broker.logout_url",
         "external_broker_share_recipient_prepare_url": "auth.external_broker.share_recipient_prepare_url",
         "external_broker_ca_bundle": "auth.external_broker.ca_bundle",
+        "qeo_ingest_url": "qeo.ingest_url",
+        "qeo_api_token": "qeo.api_token",
+        "qeo_consumer_group": "qeo.consumer_group",
+        "qeo_timeout_seconds": "qeo.timeout_seconds",
+        "qeo_ca_bundle_path": "qeo.ca_bundle_path",
         "database_backend": "database.backend",
         "database_target": "database.target",
         "tapdb_client_id": "database.client_id",
@@ -456,6 +466,13 @@ class Settings(BaseSettings):
     external_broker_share_recipient_prepare_url: str = ""
     external_broker_ca_bundle: str = ""
 
+    # Explicit Dewey -> QEO outbox dispatch. Empty values disable dispatch by failing hard.
+    qeo_ingest_url: str = ""
+    qeo_api_token: str = ""
+    qeo_consumer_group: str = ""
+    qeo_timeout_seconds: int = 10
+    qeo_ca_bundle_path: str = ""
+
     deployment_name: str = ""
     deployment_color: str = ""
     deployment_is_production: bool = False
@@ -509,6 +526,24 @@ class Settings(BaseSettings):
     @classmethod
     def validate_external_broker_urls(cls, value: str, info):
         return _validate_optional_https_url(value, field_name=str(info.field_name))
+
+    @field_validator("qeo_ingest_url")
+    @classmethod
+    def validate_qeo_ingest_url(cls, value: str, info):
+        return _validate_optional_https_url(value, field_name=str(info.field_name))
+
+    @field_validator("qeo_ca_bundle_path")
+    @classmethod
+    def validate_qeo_ca_bundle_path(cls, value: str) -> str:
+        normalized = str(value or "").strip()
+        if not normalized:
+            return ""
+        path = Path(normalized)
+        if not path.is_absolute():
+            raise ValueError("qeo_ca_bundle_path must be an absolute file path")
+        if not path.is_file():
+            raise ValueError("qeo_ca_bundle_path does not exist")
+        return str(path)
 
     @field_validator("auth_mode")
     @classmethod

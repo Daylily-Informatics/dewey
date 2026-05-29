@@ -29,6 +29,7 @@ from fastapi import Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from dewey_service.audit import set_current_authenticated_user_email
 from dewey_service.rbac import Role, normalize_session_profile, profile_has_role
 from dewey_service.settings import Settings
 
@@ -456,6 +457,7 @@ def require_api_auth(settings: Settings):
         credentials: HTTPAuthorizationCredentials | None = Depends(bearer),
     ) -> str:
         if credentials is None:
+            set_current_authenticated_user_email(None)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Missing bearer token",
@@ -463,11 +465,13 @@ def require_api_auth(settings: Settings):
             )
         token = str(credentials.credentials or "").strip()
         if token not in settings.api_tokens():
+            set_current_authenticated_user_email(None)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid bearer token",
                 headers={"WWW-Authenticate": "Bearer"},
             )
+        set_current_authenticated_user_email(None)
         return token
 
     return _require_api_auth
@@ -478,12 +482,21 @@ def _load_ui_profile(request: Request) -> dict[str, Any] | None:
     if principal is not None:
         settings: Settings = request.app.state.settings
         request.state.auth_mode = principal.auth_mode
-        return normalize_session_profile(
+        profile = normalize_session_profile(
             email=principal.email,
             sub=principal.user_sub,
             groups=principal.cognito_groups,
             group_role_map=settings.cognito_group_role_map,
         )
+        email = str(profile.get("email") or "").strip().lower()
+        if not email:
+            set_current_authenticated_user_email(None)
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Authenticated Dewey user email is required",
+            )
+        set_current_authenticated_user_email(email)
+        return profile
 
     return None
 
@@ -491,6 +504,7 @@ def _load_ui_profile(request: Request) -> dict[str, Any] | None:
 def require_ui_session(request: Request) -> dict[str, Any]:
     profile = _load_ui_profile(request)
     if profile is None:
+        set_current_authenticated_user_email(None)
         store = getattr(request.app.state, "observability", None)
         if store is not None:
             store.record_auth_event(
@@ -562,9 +576,11 @@ def require_observability_access(settings: Settings):
                 )
             return {"auth_mode": auth_mode, "service_principal": False, "profile": profile}
 
+        set_current_authenticated_user_email(None)
         if credentials is not None:
             token = str(credentials.credentials or "").strip()
             if token in settings.api_tokens():
+                set_current_authenticated_user_email(None)
                 store = getattr(request.app.state, "observability", None)
                 if store is not None:
                     store.record_auth_event(
@@ -576,6 +592,7 @@ def require_observability_access(settings: Settings):
                 request.state.auth_mode = "service_token"
                 return {"auth_mode": "service_token", "service_principal": True}
 
+        set_current_authenticated_user_email(None)
         store = getattr(request.app.state, "observability", None)
         if store is not None:
             store.record_auth_event(
@@ -613,9 +630,11 @@ def require_session_or_api_auth(settings: Settings):
                 )
             return {"auth_mode": auth_mode, "service_principal": False, "profile": profile}
 
+        set_current_authenticated_user_email(None)
         if credentials is not None:
             token = str(credentials.credentials or "").strip()
             if token in settings.api_tokens():
+                set_current_authenticated_user_email(None)
                 store = getattr(request.app.state, "observability", None)
                 if store is not None:
                     store.record_auth_event(
@@ -627,6 +646,7 @@ def require_session_or_api_auth(settings: Settings):
                 request.state.auth_mode = "service_token"
                 return {"auth_mode": "service_token", "service_principal": True}
 
+        set_current_authenticated_user_email(None)
         store = getattr(request.app.state, "observability", None)
         if store is not None:
             store.record_auth_event(

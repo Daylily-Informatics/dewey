@@ -522,7 +522,7 @@ wheels = [
 
 [[package]]
 name = "daylily-tapdb"
-version = "7.0.5"
+version = "7.0.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cli-core-yo" },
@@ -536,9 +536,9 @@ dependencies = [
     { name = "typer" },
     { name = "uuid6" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/02/f0/e43d08ff8dd476e7b162408b58680fbc3d3c82e3b89119d5457f303d6bac/daylily_tapdb-7.0.5.tar.gz", hash = "sha256:51fa260efc3c57a67496d0c7cdebca72a51ca28ee4156fe14744d62d5f6ea2ae", size = 375380, upload-time = "2026-05-18T14:02:42.708Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/80/8e/e719791ed396e6dd54fef7fa095ad02926d7747b819831def09a4e828b78/daylily_tapdb-7.0.9.tar.gz", hash = "sha256:b0cb9a731ae9bde37369dcad38c427a4ed565e0c8bd676accfabd3fc5eddca17", size = 476038, upload-time = "2026-05-28T09:47:33.84Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/56/6c/f5b3f2143076144fa8315acd839205bcd29790980136ac232abe5f1bd5da/daylily_tapdb-7.0.5-py3-none-any.whl", hash = "sha256:6cad6a5ec40337c4fa9fb05e7e871c082d47ad06ee78eb1a7005da30aeef7f07", size = 254541, upload-time = "2026-05-18T14:02:40.958Z" },
+    { url = "https://files.pythonhosted.org/packages/2d/a6/2bfbfd9321e012e254dae4be7d1bb95dab536eac1f93dc6161e41e4e5f80/daylily_tapdb-7.0.9-py3-none-any.whl", hash = "sha256:c0d86106d417cb693a8046fc1fb236091930b348df65d4f619f76b3ede9cf2b1", size = 258536, upload-time = "2026-05-28T09:47:32.47Z" },
 ]
 
 [[package]]
@@ -591,7 +591,7 @@ requires-dist = [
     { name = "build", specifier = ">=1.2.0" },
     { name = "cli-core-yo", specifier = "==2.1.1" },
     { name = "daylily-auth-cognito", specifier = "==2.1.5" },
-    { name = "daylily-tapdb", specifier = ">=7.0.5,<8.0.0" },
+    { name = "daylily-tapdb", specifier = "==7.0.9" },
     { name = "djlint" },
     { name = "fastapi", specifier = ">=0.115.0" },
     { name = "httpx", specifier = ">=0.27.0" },

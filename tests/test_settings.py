@@ -84,6 +84,11 @@ network:
 storage:
   managed_bucket: dewey-artifacts-staging
   managed_prefix: managed
+qeo:
+  ingest_url: https://qeo.example.com/api/v1/ingest/dewey-events
+  api_token: qeo-token
+  consumer_group: qeo.dewey
+  timeout_seconds: 12
 """,
         encoding="utf-8",
     )
@@ -116,6 +121,10 @@ storage:
     assert loaded.network_allowed_hosts == ["dewey.dev2.lsmc.life", "54.218.100.68"]
     assert loaded.managed_storage_bucket == "dewey-artifacts-staging"
     assert loaded.managed_storage_prefix == "managed"
+    assert loaded.qeo_ingest_url == "https://qeo.example.com/api/v1/ingest/dewey-events"
+    assert loaded.qeo_api_token == "qeo-token"
+    assert loaded.qeo_consumer_group == "qeo.dewey"
+    assert loaded.qeo_timeout_seconds == 12
     assert loaded.show_environment_chrome is True
 
 
@@ -453,6 +462,7 @@ def test_effective_config_rows_redact_secret_values(tmp_path: Path) -> None:
         cognito_logout_url="https://localhost:8914/login",
         show_environment_chrome=False,
         aws_region="us-east-1",
+        qeo_api_token="qeo-secret-token",
     )
 
     rows = build_effective_config_rows(settings, config_path=tmp_path / "dewey.yaml")
@@ -462,6 +472,7 @@ def test_effective_config_rows_redact_secret_values(tmp_path: Path) -> None:
     assert row_map["auth.cognito.app_client_secret"] == "<redacted>"
     assert row_map["application.session_secret_key"] == "<redacted>"
     assert row_map["application.api_bearer_token"] == "<redacted>"
+    assert row_map["qeo.api_token"] == "<redacted>"
     assert row_map["aws.region"] == "us-east-1"
     assert row_map["auth.cognito.group_role_map.platform-admin"] == "ADMIN"
     assert row_map["config.file_path"] == str(tmp_path / "dewey.yaml")

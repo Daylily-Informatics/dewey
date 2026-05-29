@@ -279,11 +279,6 @@ class SharingServiceMixin:
                 )
                 member_count = len(members)
                 if clean_transport == "presigned_s3":
-                    expires_dt = datetime.fromisoformat(expiry.replace("Z", "+00:00"))
-                    ttl_value = max(
-                        60,
-                        int((expires_dt - datetime.now(timezone.utc)).total_seconds()),
-                    )
                     errors = 0
                     for member in members:
                         artifact_payload = normalize_instance_payload(member)
@@ -307,17 +302,6 @@ class SharingServiceMixin:
                                     or None,
                                 )
                                 entry["status"] = "active"
-                                entry["access_url"] = (
-                                    self._require_storage().generate_presigned_get_url(
-                                        bucket=str(artifact_payload.get("bucket") or ""),
-                                        key=str(artifact_payload.get("key") or ""),
-                                        version_id=str(
-                                            artifact_payload.get("version_id") or ""
-                                        ).strip()
-                                        or None,
-                                        expires_in=ttl_value,
-                                    )
-                                )
                             except StorageObjectNotFoundError:
                                 entry["status"] = "error"
                                 entry["detail"] = "artifact object missing"

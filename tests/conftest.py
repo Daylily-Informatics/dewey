@@ -898,6 +898,131 @@ class FakeDeweyService:
         self._remember("artifact.import_run_prefix", idempotency_key, payload, 201, body)
         return 201, body
 
+    def register_sequencer_run(
+        self,
+        *,
+        request_body,
+        idempotency_key: str | None,
+        request_id: str,
+        correlation_id: str,
+    ):
+        from dewey_service.sequencer_run_contracts import deterministic_idempotency_key
+
+        computed = deterministic_idempotency_key("sequencer_run.register", request_body)
+        clean_key = idempotency_key or computed
+        if clean_key != computed:
+            from dewey_service.service import DeweyConflictError
+
+            raise DeweyConflictError("Idempotency-Key does not match deterministic request key")
+        payload = request_body.model_dump(mode="json", exclude_none=True)
+        replay = self._idempotent("sequencer_run.register", clean_key, payload)
+        if replay:
+            return replay
+        artifact_set_euid = f"AS-{self._artifact_set_seq:06d}"
+        self._artifact_set_seq += 1
+        receipt = {
+            "schema_version": "1.0",
+            "request_id": request_id,
+            "idempotency_key": clean_key,
+            "registration_kind": "sequencer_run",
+            "artifact_set_euid": artifact_set_euid,
+            "registered_artifacts": [],
+            "skipped_existing": [],
+            "failed": [],
+            "registered_at": "2026-03-10T00:00:00Z",
+            "status": "registered_trigger_pending"
+            if payload.get("trigger_policy") == "trigger_ursa"
+            else "local_only",
+            "local_only": payload.get("trigger_policy") != "trigger_ursa",
+        }
+        body = {
+            "receipt_euid": "RCP-000001",
+            "receipt": receipt,
+            "artifact_set": {
+                "artifact_set_euid": artifact_set_euid,
+                "artifact_set_type": "sequencer_run",
+                "metadata": {
+                    "platform": payload["platform"],
+                    "run_root_uri": payload["run_root_uri"],
+                },
+                "artifact_euids": [],
+                "members": [],
+                "member_count": 0,
+                "created_at": "2026-03-10T00:00:00Z",
+            },
+            "manifest": [],
+            "manifest_sha256": "0" * 64,
+            "pipeline_plan": [],
+            "outbox_event": {
+                "event_type": "lsmc.dewey.sequencer-run.registered.v1",
+                "payload": {"artifact_set_euid": artifact_set_euid},
+                "correlation_id": correlation_id,
+            },
+        }
+        self._remember("sequencer_run.register", clean_key, payload, 201, body)
+        return 201, body
+
+    def register_analysis_results(
+        self,
+        *,
+        request_body,
+        idempotency_key: str | None,
+        request_id: str,
+        correlation_id: str,
+    ):
+        from dewey_service.sequencer_run_contracts import deterministic_idempotency_key
+
+        computed = deterministic_idempotency_key("analysis_results.register", request_body)
+        clean_key = idempotency_key or computed
+        if clean_key != computed:
+            from dewey_service.service import DeweyConflictError
+
+            raise DeweyConflictError("Idempotency-Key does not match deterministic request key")
+        payload = request_body.model_dump(mode="json", exclude_none=True)
+        replay = self._idempotent("analysis_results.register", clean_key, payload)
+        if replay:
+            return replay
+        artifact_set_euid = f"AS-{self._artifact_set_seq:06d}"
+        self._artifact_set_seq += 1
+        receipt = {
+            "schema_version": "1.0",
+            "request_id": request_id,
+            "idempotency_key": clean_key,
+            "registration_kind": "analysis_results",
+            "artifact_set_euid": artifact_set_euid,
+            "registered_artifacts": [],
+            "skipped_existing": [],
+            "failed": [],
+            "registered_at": "2026-03-10T00:00:00Z",
+            "status": "registered",
+            "local_only": False,
+        }
+        body = {
+            "receipt_euid": "RCP-000002",
+            "receipt": receipt,
+            "artifact_set": {
+                "artifact_set_euid": artifact_set_euid,
+                "artifact_set_type": "analysis_results",
+                "metadata": {
+                    "analysis_euid": payload["analysis_euid"],
+                    "command_id": payload["command_id"],
+                },
+                "artifact_euids": [],
+                "members": [],
+                "member_count": 0,
+                "created_at": "2026-03-10T00:00:00Z",
+            },
+            "manifest": [],
+            "manifest_sha256": "1" * 64,
+            "outbox_event": {
+                "event_type": "lsmc.dewey.analysis-results.registered.v1",
+                "payload": {"analysis_euid": payload["analysis_euid"]},
+                "correlation_id": correlation_id,
+            },
+        }
+        self._remember("analysis_results.register", clean_key, payload, 201, body)
+        return 201, body
+
     def create_artifact_set(
         self,
         *,
@@ -1103,22 +1228,31 @@ class FakeDeweyService:
 
     def revoke_share_reference(
         self,
+        share_reference_euid: str = "",
         *,
-        share_reference_euid: str,
         revoked_by: str | None,
-        idempotency_key: str,
+        reason: str | None = None,
+        idempotency_key: str | None = None,
     ):
-        payload = {"share_reference_euid": share_reference_euid, "revoked_by": revoked_by}
-        replay = self._idempotent("share_reference.revoke", idempotency_key, payload)
-        if replay:
-            return replay
+        payload = {
+            "share_reference_euid": share_reference_euid,
+            "revoked_by": revoked_by,
+            "revocation_reason": reason,
+        }
+        if idempotency_key:
+            replay = self._idempotent("share_reference.revoke", idempotency_key, payload)
+            if replay:
+                return replay
         share = self.get_share_reference(share_reference_euid)
         share["status"] = "revoked"
         share["revoked_at"] = "2026-03-10T01:00:00Z"
         share["revoked_by"] = revoked_by
+        share["revocation_reason"] = reason
         self.share_references[share_reference_euid] = share
-        self._remember("share_reference.revoke", idempotency_key, payload, 200, share)
-        return 200, dict(share)
+        if idempotency_key:
+            self._remember("share_reference.revoke", idempotency_key, payload, 200, share)
+            return 200, dict(share)
+        return dict(share)
 
     def open_share_reference(self, share_reference_euid: str):
         share = self.get_share_reference(share_reference_euid)
@@ -1128,8 +1262,20 @@ class FakeDeweyService:
         share["last_accessed_at"] = "2026-03-10T01:05:00Z"
         self.share_references[share_reference_euid] = share
         body = dict(share)
+        body["access_url"] = f"https://downloads.example.com/{share_reference_euid}"
         body["presigned_access_url"] = f"https://downloads.example.com/{share_reference_euid}"
         return body
+
+    def issue_share_reference_access(
+        self,
+        share_reference_euid: str,
+        *,
+        accessed_by: str | None = None,
+        presign_ttl_seconds: int = 900,
+    ):
+        _ = accessed_by
+        _ = presign_ttl_seconds
+        return self.open_share_reference(share_reference_euid)
 
     def list_share_references(
         self,

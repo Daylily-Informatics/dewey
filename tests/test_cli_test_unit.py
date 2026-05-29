@@ -17,8 +17,14 @@ def _proc(returncode: int = 0) -> SimpleNamespace:
 def test_run_tests_defaults_to_quiet_pytest(monkeypatch: pytest.MonkeyPatch) -> None:
     calls: list[dict[str, object]] = []
 
-    def fake_run(cmd: list[str], *, cwd: Path, check: bool) -> SimpleNamespace:
-        calls.append({"cmd": cmd, "cwd": cwd, "check": check})
+    def fake_run(
+        cmd: list[str],
+        *,
+        cwd: Path,
+        check: bool,
+        env: dict[str, str] | None = None,
+    ) -> SimpleNamespace:
+        calls.append({"cmd": cmd, "cwd": cwd, "check": check, "env": env})
         return _proc()
 
     monkeypatch.setattr(test_cli.subprocess, "run", fake_run)
@@ -32,6 +38,7 @@ def test_run_tests_defaults_to_quiet_pytest(monkeypatch: pytest.MonkeyPatch) -> 
             "cmd": [sys.executable, "-m", "pytest", "-q"],
             "cwd": test_cli.PROJECT_ROOT,
             "check": False,
+            "env": test_cli.project_subprocess_env(),
         }
     ]
 
@@ -39,9 +46,17 @@ def test_run_tests_defaults_to_quiet_pytest(monkeypatch: pytest.MonkeyPatch) -> 
 def test_run_tests_passes_through_pytest_args(monkeypatch: pytest.MonkeyPatch) -> None:
     calls: list[list[str]] = []
 
-    def fake_run(cmd: list[str], *, cwd: Path, check: bool) -> SimpleNamespace:
+    def fake_run(
+        cmd: list[str],
+        *,
+        cwd: Path,
+        check: bool,
+        env: dict[str, str] | None = None,
+    ) -> SimpleNamespace:
         assert cwd == test_cli.PROJECT_ROOT
         assert check is False
+        assert env is not None
+        assert env["DAYHOFF_PROJECT_ROOT"] == str(test_cli.PROJECT_ROOT)
         calls.append(cmd)
         return _proc()
 
@@ -73,9 +88,17 @@ def test_run_coverage_builds_pytest_cov_command(monkeypatch: pytest.MonkeyPatch)
 
     monkeypatch.setattr(test_cli.importlib.util, "find_spec", lambda name: object())
 
-    def fake_run(cmd: list[str], *, cwd: Path, check: bool) -> SimpleNamespace:
+    def fake_run(
+        cmd: list[str],
+        *,
+        cwd: Path,
+        check: bool,
+        env: dict[str, str] | None = None,
+    ) -> SimpleNamespace:
         assert cwd == test_cli.PROJECT_ROOT
         assert check is False
+        assert env is not None
+        assert env["DAYHOFF_PROJECT_ROOT"] == str(test_cli.PROJECT_ROOT)
         calls.append(cmd)
         return _proc()
 

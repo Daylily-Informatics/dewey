@@ -35,6 +35,10 @@ from dewey_service.artifact_ui import (
     split_csv,
     split_lines,
 )
+from dewey_service.audit import (
+    reset_current_authenticated_user_email,
+    set_current_authenticated_user_email,
+)
 from dewey_service.auth import (
     build_browser_login_href,
     build_cognito_logout_url,
@@ -78,6 +82,14 @@ from dewey_service.observability import (
     route_template_from_request,
 )
 from dewey_service.rbac import Role, profile_has_role
+from dewey_service.registration_contracts import (
+    AnalysisArtifactSetRegistrationRequest,
+    MultiQCArtifactSetRegistrationRequest,
+)
+from dewey_service.sequencer_run_contracts import (
+    AnalysisResultsRegistrationRequest,
+    SequencerRunRegistrationRequest,
+)
 from dewey_service.service import DeweyConflictError, DeweyNotFoundError, DeweyService
 from dewey_service.settings import (
     Settings,
@@ -388,6 +400,11 @@ def create_app(
             literature_adapter=literature_adapter,
             literature_allowed_domains=settings.literature_allowed_domains,
             literature_request_timeout_seconds=settings.literature_request_timeout_seconds,
+            qeo_ingest_url=settings.qeo_ingest_url,
+            qeo_api_token=settings.qeo_api_token,
+            qeo_consumer_group=settings.qeo_consumer_group,
+            qeo_timeout_seconds=settings.qeo_timeout_seconds,
+            qeo_ca_bundle_path=settings.qeo_ca_bundle_path,
         )
         service.bootstrap()
 
@@ -1151,6 +1168,14 @@ def create_app(
         payload = _artifact_set_search_payload(form_state)
         result = service.query_search_v2(payload, viewer_context=_viewer_context(profile))
         return form_state, result
+
+    @app.middleware("http")
+    async def _reset_audit_principal(request: Request, call_next):
+        token = set_current_authenticated_user_email(None)
+        try:
+            return await call_next(request)
+        finally:
+            reset_current_authenticated_user_email(token)
 
     @app.middleware("http")
     async def _enforce_origin_allowlist(request: Request, call_next):
@@ -2442,6 +2467,42 @@ def create_app(
                 active_section="register",
             )
 
+    @app.post("/sequencer-runs/register", include_in_schema=False)
+    async def sequencer_runs_register_page(
+        request: Request,
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> Response:
+        form = await request.form()
+        values = _string_form_values(form)
+        try:
+            metadata = parse_json_object(values.get("metadata_json"), label="metadata_json")
+            body = SequencerRunRegistrationRequest(
+                run_root_uri=str(values.get("run_root_uri") or "").strip(),
+                platform=str(values.get("platform") or "").strip().upper(),
+                trigger_policy=str(values.get("trigger_policy") or "").strip(),
+                run_euid=str(values.get("run_euid") or "").strip() or None,
+                run_xid=str(values.get("run_xid") or "").strip() or None,
+                bloom_run_euid=str(values.get("bloom_run_euid") or "").strip() or None,
+                atlas_order_euid=str(values.get("atlas_order_euid") or "").strip() or None,
+                metadata={
+                    **metadata,
+                    "ui_registered_by": str(profile.get("email") or "").strip() or None,
+                },
+                sidecar_required=str(values.get("sidecar_required") or "").strip().lower()
+                in {"yes", "on", "true", "1"},
+            )
+            status_code, payload = service.register_sequencer_run(
+                request_body=body,
+                idempotency_key=None,
+                request_id=str(getattr(request.state, "request_id", "") or _new_idempotency_key("req")),
+                correlation_id=str(
+                    getattr(request.state, "correlation_id", "") or _new_idempotency_key("corr")
+                ),
+            )
+            return JSONResponse(status_code=status_code, content=payload)
+        except Exception as exc:
+            return JSONResponse(status_code=400, content={"detail": str(exc)})
+
     @app.post("/artifacts/search", include_in_schema=False)
     async def artifacts_search(
         request: Request, profile: dict[str, Any] = Depends(require_ui_session)
@@ -2551,23 +2612,6 @@ def create_app(
                     "detail": "Could not generate a presigned download URL for this artifact.",
                 },
                 status_code=400,
-            )
-        return RedirectResponse(url=access_url, status_code=status.HTTP_303_SEE_OTHER)
-
-    @app.get("/share-references/{share_reference_euid}", include_in_schema=False)
-    async def open_share_reference(share_reference_euid: str) -> Response:
-        try:
-            payload = service.open_share_reference(share_reference_euid)
-        except DeweyNotFoundError as exc:
-            raise HTTPException(status_code=404, detail=str(exc)) from exc
-        except StorageObjectNotFoundError as exc:
-            raise HTTPException(status_code=404, detail=str(exc)) from exc
-        except ValueError as exc:
-            raise HTTPException(status_code=410, detail=str(exc)) from exc
-        access_url = str(payload.get("presigned_access_url") or "").strip()
-        if not access_url:
-            raise HTTPException(
-                status_code=502, detail="Share reference did not produce an access URL"
             )
         return RedirectResponse(url=access_url, status_code=status.HTTP_303_SEE_OTHER)
 
@@ -3126,6 +3170,64 @@ def create_app(
             raise HTTPException(status_code=502, detail=str(exc)) from exc
 
     @app.post(
+        "/api/v1/sequencer-runs/register",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def register_sequencer_run(
+        request: Request,
+        body: SequencerRunRegistrationRequest,
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ) -> dict[str, Any]:
+        try:
+            status_code, payload = service.register_sequencer_run(
+                request_body=body,
+                idempotency_key=idempotency_key,
+                request_id=str(getattr(request.state, "request_id", "") or _new_idempotency_key("req")),
+                correlation_id=str(
+                    getattr(request.state, "correlation_id", "") or _new_idempotency_key("corr")
+                ),
+            )
+            return {"status_code": status_code, **payload}
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except DeweyConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except RuntimeError as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    @app.post(
+        "/api/v1/analysis-results/register",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def register_analysis_results(
+        request: Request,
+        body: AnalysisResultsRegistrationRequest,
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ) -> dict[str, Any]:
+        try:
+            status_code, payload = service.register_analysis_results(
+                request_body=body,
+                idempotency_key=idempotency_key,
+                request_id=str(getattr(request.state, "request_id", "") or _new_idempotency_key("req")),
+                correlation_id=str(
+                    getattr(request.state, "correlation_id", "") or _new_idempotency_key("corr")
+                ),
+            )
+            return {"status_code": status_code, **payload}
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except StorageObjectNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except DeweyConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except RuntimeError as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    @app.post(
         "/api/v1/artifacts/upload-sessions",
         dependencies=[Depends(api_auth_dep)],
     )
@@ -3201,6 +3303,52 @@ def create_app(
             limit=limit,
         )
         return {"items": rows, "total": len(rows)}
+
+    @app.post(
+        "/api/v1/artifact-sets/analysis/register",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def register_analysis_artifact_set(
+        body: AnalysisArtifactSetRegistrationRequest,
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ) -> dict[str, Any]:
+        try:
+            status_code, payload = service.register_analysis_artifact_set(
+                body,
+                idempotency_key=idempotency_key,
+            )
+            return {"status_code": status_code, **payload}
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except DeweyConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except RuntimeError as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    @app.post(
+        "/api/v1/artifact-sets/multiqc/register",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def register_multiqc_artifact_set(
+        body: MultiQCArtifactSetRegistrationRequest,
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ) -> dict[str, Any]:
+        try:
+            status_code, payload = service.register_multiqc_artifact_set(
+                body,
+                idempotency_key=idempotency_key,
+            )
+            return {"status_code": status_code, **payload}
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except DeweyConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except RuntimeError as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
 
     @app.post(
         "/api/v1/artifact-sets",
@@ -3289,6 +3437,8 @@ def create_app(
             return service.resolve_artifact_set(body.artifact_set_euid)
         except DeweyNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except DeweyConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
 
     @app.post(
         "/api/v1/share-references",

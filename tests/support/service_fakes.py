@@ -8,6 +8,7 @@ from typing import Any
 
 import pytest
 
+from dewey_service.audit import creation_audit_fields, update_audit_fields
 from dewey_service.service import DeweyService
 from dewey_service.storage import StorageObject, StorageObjectNotFoundError, StoragePrefix
 from dewey_service.tapdb_backend import (
@@ -18,6 +19,8 @@ from dewey_service.tapdb_backend import (
     EXTERNAL_OBJECT_TEMPLATE,
     IDEMPOTENCY_TEMPLATE,
     LITERATURE_SAVE_TEMPLATE,
+    OUTBOX_EVENT_TEMPLATE,
+    REGISTRATION_RECEIPT_TEMPLATE,
     SHARE_REFERENCE_TEMPLATE,
 )
 
@@ -57,6 +60,8 @@ class _InMemoryBackend:
             EXTERNAL_OBJECT_RELATION_TEMPLATE: 1,
             LITERATURE_SAVE_TEMPLATE: 1,
             IDEMPOTENCY_TEMPLATE: 1,
+            REGISTRATION_RECEIPT_TEMPLATE: 1,
+            OUTBOX_EVENT_TEMPLATE: 1,
         }
         self.prefixes = {
             ANOMALY_TEMPLATE: "ANM",
@@ -67,6 +72,8 @@ class _InMemoryBackend:
             EXTERNAL_OBJECT_RELATION_TEMPLATE: "ER",
             LITERATURE_SAVE_TEMPLATE: "SAV",
             IDEMPOTENCY_TEMPLATE: "KDP",
+            REGISTRATION_RECEIPT_TEMPLATE: "RCP",
+            OUTBOX_EVENT_TEMPLATE: "EVT",
         }
 
     @contextmanager
@@ -97,7 +104,7 @@ class _InMemoryBackend:
             euid=f"{prefix}-{seq:06d}",
             template_code=template_code,
             name=name,
-            json_addl=dict(json_addl),
+            json_addl={**dict(json_addl), **creation_audit_fields()},
         )
         self.next_uid += 1
         self.instances.setdefault(template_code, []).append(instance)
@@ -112,6 +119,7 @@ class _InMemoryBackend:
         _ = session
         payload = dict(instance.json_addl or {})
         payload.update(updates)
+        payload.update(update_audit_fields())
         instance.json_addl = payload
 
     def find_by_json_field(self, session, *, template_code: str, field: str, value: str):
@@ -226,6 +234,7 @@ class _InMemoryBackend:
 class _FakeStorageClient:
     def __init__(self) -> None:
         self.objects: dict[tuple[str, str], StorageObject] = {}
+        self.object_bodies: dict[tuple[str, str], bytes] = {}
         self.tags: dict[tuple[str, str], dict[str, str]] = {}
         self.retentions: dict[tuple[str, str], dict[str, str]] = {}
 
@@ -238,6 +247,7 @@ class _FakeStorageClient:
         content_type: str | None = "application/octet-stream",
         storage_class: str | None = "STANDARD",
         version_id: str | None = None,
+        sha256: str | None = None,
     ) -> StorageObject:
         obj = StorageObject(
             bucket=bucket,
@@ -247,6 +257,7 @@ class _FakeStorageClient:
             content_type=content_type,
             storage_class=storage_class,
             etag="etag-1",
+            sha256=sha256,
         )
         self.objects[(bucket, key)] = obj
         return obj
@@ -274,6 +285,7 @@ class _FakeStorageClient:
             content_type=source.content_type,
             storage_class=source.storage_class,
             version_id=source.version_id,
+            sha256=source.sha256,
         )
 
     def put_bytes(
@@ -284,13 +296,15 @@ class _FakeStorageClient:
         body: bytes,
         content_type: str | None = None,
     ) -> StorageObject:
-        return self.seed_object(
+        obj = self.seed_object(
             bucket=bucket,
             key=key,
             size=len(body),
             content_type=content_type,
             storage_class="STANDARD",
         )
+        self.object_bodies[(bucket, key)] = bytes(body)
+        return obj
 
     def list_objects(self, *, bucket: str, prefix: str, limit: int = 1000) -> list[StorageObject]:
         rows = [
@@ -341,6 +355,8 @@ class _FakeStorageClient:
     ) -> bytes:
         _ = version_id
         self.head_object(bucket=bucket, key=key)
+        if (bucket, key) in self.object_bodies:
+            return self.object_bodies[(bucket, key)]
         return f"payload:{bucket}/{key}".encode("utf-8")
 
     def put_object_tags(self, *, bucket: str, key: str, tags: dict[str, str]) -> None:
@@ -454,6 +470,9 @@ def service(backend: _InMemoryBackend, storage: _FakeStorageClient) -> DeweyServ
         literature_adapter=_FakeLiteratureAdapter(),
         literature_allowed_domains={"europepmc.org", "ncbi.nlm.nih.gov"},
         literature_request_timeout_seconds=5,
+        qeo_ingest_url="https://qeo.test/api/v1/ingest/dewey-events",
+        qeo_api_token="qeo-token",
+        qeo_consumer_group="qeo.test",
     )
 
 

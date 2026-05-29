@@ -256,11 +256,17 @@ def test_artifact_detail_page_and_direct_download_redirect(
     assert register.status_code == 200
 
     artifact_euid = next(iter(fake_service.artifacts))
+    artifact = fake_service.artifacts.pop(artifact_euid)
+    artifact["artifact_euid"] = "M-DGX-9S5Q"
+    artifact_euid = artifact["artifact_euid"]
+    fake_service.artifacts[artifact_euid] = artifact
 
     detail = client.get(f"/artifacts/euid/{artifact_euid}")
     assert detail.status_code == 200
     assert artifact_euid in detail.text
     assert "detail-report.txt" in detail.text
+    assert "(detail-report.txt)" in detail.text
+    assert 'class="artifact-heading-filename"' in detail.text
     assert "Storage URI" in detail.text
 
     download = client.post(
