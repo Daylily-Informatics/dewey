@@ -64,10 +64,10 @@ def test_html_login_redirect_preserves_next_path(client) -> None:
     assert 'href="/auth/login?next=%2Fui"' in login_page.text
 
 
-def test_root_redirects_to_ui(client) -> None:
+def test_root_redirects_to_login_page(client) -> None:
     response = client.get("/", follow_redirects=False)
-    assert response.status_code == 307
-    assert response.headers["location"] == "/ui"
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login?next=/"
 
 
 def test_ui_requires_session_login(client) -> None:
@@ -303,6 +303,12 @@ def test_plain_logout_post_clears_session_and_redirects_to_cognito(
     assert parsed.path == "/logout"
     assert params["client_id"] == [test_settings.cognito_app_client_id]
     assert params["redirect_uri"] == [test_settings.cognito_redirect_uri.rstrip("/")]
+
+
+def test_plain_logout_get_alias_redirects_to_canonical_auth_logout(client) -> None:
+    logout = client.get("/logout", follow_redirects=False)
+    assert logout.status_code == 303
+    assert logout.headers["location"] == "/auth/logout"
     assert params["response_type"] == ["code"]
 
 

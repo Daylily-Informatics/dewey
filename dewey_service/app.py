@@ -1230,7 +1230,7 @@ def create_app(
 
     @app.get("/", include_in_schema=False)
     async def root() -> RedirectResponse:
-        return RedirectResponse(url="/ui", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+        return RedirectResponse(url="/login?next=/", status_code=status.HTTP_303_SEE_OTHER)
 
     @app.get("/favicon.ico", include_in_schema=False)
     async def favicon() -> RedirectResponse:
@@ -1361,6 +1361,10 @@ def create_app(
     @app.post("/logout", include_in_schema=False)
     async def logout(request: Request) -> RedirectResponse:
         return await _logout_response(request)
+
+    @app.get("/logout", include_in_schema=False)
+    async def logout_get_alias() -> RedirectResponse:
+        return RedirectResponse(url="/auth/logout", status_code=status.HTTP_303_SEE_OTHER)
 
     @app.get("/healthz")
     async def healthz(request: Request) -> dict[str, Any]:
