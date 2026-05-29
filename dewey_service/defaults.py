@@ -125,6 +125,13 @@ auth:
       lsmc:dewey:readwrite: READ_WRITE
       lsmc:dewey:readonly: READ_ONLY
 
+qeo:
+  ingest_url: ""
+  api_token: ""
+  consumer_group: ""
+  timeout_seconds: 10
+  ca_bundle_path: ""
+
 database:
   backend: tapdb
   target: local

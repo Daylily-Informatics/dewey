@@ -119,6 +119,11 @@ def test_multiqc_directory_and_key_file_registration(service, storage) -> None:
 
     assert code == 201
     assert receipt["status"] == "registered"
+    assert receipt["artifact_set_kind"] == "multiqc_artifact_set"
+    assert receipt["report_kind"] == "multiqc_general"
+    assert receipt["manifest_sha256"] == request.manifest_sha256
+    assert receipt["source_service"] == "dewey"
+    assert receipt["parser_hint"] == "multiqc"
     assert artifact_set["artifact_set_type"] == "multiqc_artifact_set"
     assert artifact_set["member_count"] == 4
     roles = {item["artifact_role"] for item in receipt["registered_artifacts"]}
@@ -128,6 +133,12 @@ def test_multiqc_directory_and_key_file_registration(service, storage) -> None:
         "multiqc_key_file",
         "parser_relevant_file",
     }
+
+    resolved = service.resolve_artifact_set(receipt["artifact_set_euid"])
+    assert resolved["artifact_set_kind"] == "multiqc_artifact_set"
+    assert resolved["report_kind"] == "multiqc_general"
+    assert resolved["manifest_sha256"] == request.manifest_sha256
+    assert "artifact_euids" not in resolved
 
 
 def test_multiqc_local_only_receipt_and_outbox(service, storage) -> None:
@@ -161,8 +172,16 @@ def test_multiqc_registration_route_auth_and_computed_idempotency(
             headers={"Authorization": "Bearer token-123"},
             json=request.model_dump(mode="json"),
         )
+        resolved = client.post(
+            "/api/v1/resolve/artifact-set",
+            headers={"Authorization": "Bearer token-123"},
+            json={"artifact_set_euid": authenticated.json()["artifact_set_euid"]},
+        )
 
     assert unauthenticated.status_code == 401
     assert authenticated.status_code == 200
     assert authenticated.json()["status_code"] == 201
     assert authenticated.json()["artifact_set_euid"].startswith("AS-")
+    assert resolved.status_code == 200
+    assert resolved.json()["artifact_set_kind"] == "multiqc_artifact_set"
+    assert resolved.json()["manifest_sha256"] == request.manifest_sha256

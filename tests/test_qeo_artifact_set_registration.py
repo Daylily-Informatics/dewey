@@ -12,6 +12,7 @@ from dewey_service.registration_contracts import (
     manifest_sha256_for_request,
 )
 from dewey_service.service import DeweyConflictError, DeweyNotFoundError
+from dewey_service.tapdb_backend import ARTIFACT_SET_TEMPLATE
 
 
 def _digest(value: str) -> str:
@@ -130,9 +131,19 @@ def test_analysis_artifact_set_registration_replay(service, storage) -> None:
     assert first_code == second_code == 201
     assert first == second
     assert first["artifact_set_euid"].startswith("AS-")
+    assert first["artifact_set_kind"] == "analysis_artifact_set"
+    assert first["manifest_sha256"] == request.manifest_sha256
+    assert first["source_service"] == "dewey"
+    assert first["parser_hint"] == "alignstats"
     assert first["registered_artifacts"][0]["artifact_role"] == "analysis_json"
     assert service.get_artifact_set(first["artifact_set_euid"])["member_count"] == 1
     assert len(service.list_outbox_events()) == 1
+
+    resolved = service.resolve_artifact_set(first["artifact_set_euid"])
+    assert resolved["artifact_set_kind"] == "analysis_artifact_set"
+    assert resolved["manifest_sha256"] == request.manifest_sha256
+    assert resolved["registered_artifacts"][0]["artifact_role"] == "analysis_json"
+    assert "artifact_euids" not in resolved
 
 
 def test_idempotency_key_mismatch_rejected(service, storage) -> None:
@@ -174,6 +185,25 @@ def test_required_artifact_missing_rejected_before_mutation(service, backend) ->
 
     assert service.list_artifact_sets() == []
     assert backend.lineages == []
+
+
+def test_qeo_marked_artifact_set_without_receipt_fails_closed(service, backend) -> None:
+    with backend.session_scope(commit=True) as session:
+        artifact_set = backend.create_instance(
+            session,
+            template_code=ARTIFACT_SET_TEMPLATE,
+            name="multiqc_artifact_set:orphan",
+            json_addl={
+                "artifact_set_type": "multiqc_artifact_set",
+                "registration_kind": "multiqc",
+                "label": "orphan",
+                "description": None,
+                "metadata": {},
+            },
+        )
+
+    with pytest.raises(DeweyConflictError, match="missing its registration receipt"):
+        service.resolve_artifact_set(artifact_set.euid)
 
 
 def test_artifact_set_rerun_linkage(service, storage, backend) -> None:

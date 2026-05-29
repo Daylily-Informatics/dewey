@@ -21,6 +21,7 @@ from daylily_tapdb.cli.db_config import get_db_config
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
+from dewey_service.audit import creation_audit_fields, update_audit_fields
 from dewey_service.settings import get_settings
 from dewey_service.ui_metadata import resolve_package_version
 
@@ -193,7 +194,7 @@ class TapDBBackend:
             properties={},
             create_children=False,
         )
-        instance.json_addl = dict(json_addl)
+        instance.json_addl = {**dict(json_addl), **creation_audit_fields()}
         instance.bstatus = status
         instance.is_singleton = False
         session.flush()
@@ -204,6 +205,7 @@ class TapDBBackend:
     ) -> None:
         payload = dict(instance.json_addl or {})
         payload.update(updates)
+        payload.update(update_audit_fields())
         instance.json_addl = payload
         session.flush()
 

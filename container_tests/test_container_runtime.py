@@ -7,7 +7,6 @@ import pytest
 
 from dewey_service import container_entry
 
-
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 

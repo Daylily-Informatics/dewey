@@ -297,11 +297,17 @@ class RegistrationReceipt(StrictContractModel):
     request_id: str
     idempotency_key: str
     artifact_set_euid: str
+    artifact_set_kind: str
+    report_kind: str | None = None
+    manifest_sha256: str
     registered_artifacts: list[ReceiptArtifact] = Field(default_factory=list)
     skipped_existing: list[ReceiptArtifact] = Field(default_factory=list)
     failed: list[ReceiptFailure] = Field(default_factory=list)
     registered_at: str
     status: Literal["registered", "replayed", "local_only"]
+    source_service: str = "dewey"
+    source_version: str | None = None
+    parser_hint: str | None = None
 
 
 class OutboxEventEnvelope(StrictContractModel):

@@ -35,6 +35,10 @@ from dewey_service.artifact_ui import (
     split_csv,
     split_lines,
 )
+from dewey_service.audit import (
+    reset_current_authenticated_user_email,
+    set_current_authenticated_user_email,
+)
 from dewey_service.auth import (
     build_browser_login_href,
     build_cognito_logout_url,
@@ -396,6 +400,11 @@ def create_app(
             literature_adapter=literature_adapter,
             literature_allowed_domains=settings.literature_allowed_domains,
             literature_request_timeout_seconds=settings.literature_request_timeout_seconds,
+            qeo_ingest_url=settings.qeo_ingest_url,
+            qeo_api_token=settings.qeo_api_token,
+            qeo_consumer_group=settings.qeo_consumer_group,
+            qeo_timeout_seconds=settings.qeo_timeout_seconds,
+            qeo_ca_bundle_path=settings.qeo_ca_bundle_path,
         )
         service.bootstrap()
 
@@ -1159,6 +1168,14 @@ def create_app(
         payload = _artifact_set_search_payload(form_state)
         result = service.query_search_v2(payload, viewer_context=_viewer_context(profile))
         return form_state, result
+
+    @app.middleware("http")
+    async def _reset_audit_principal(request: Request, call_next):
+        token = set_current_authenticated_user_email(None)
+        try:
+            return await call_next(request)
+        finally:
+            reset_current_authenticated_user_email(token)
 
     @app.middleware("http")
     async def _enforce_origin_allowlist(request: Request, call_next):
@@ -3416,6 +3433,8 @@ def create_app(
             return service.resolve_artifact_set(body.artifact_set_euid)
         except DeweyNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except DeweyConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
 
     @app.post(
         "/api/v1/share-references",

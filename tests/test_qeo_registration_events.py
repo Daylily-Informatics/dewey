@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from hashlib import sha256
 
+import httpx
+
 from dewey_service.registration_contracts import (
     AnalysisArtifactSetRegistrationRequest,
     FileArtifact,
@@ -80,6 +82,116 @@ def test_analysis_registration_outbox_event(service, storage) -> None:
         "parser_family_hint": "alignstats",
     }
     assert event["dispatch_status"] == "pending"
+    assert event["dispatch_attempt_count"] == 0
+
+
+def test_qeo_outbox_dispatch_marks_parsed_success(service, storage, monkeypatch) -> None:
+    request = _request_with_sensitive_metadata()
+    artifact = request.artifacts[0]
+    storage.seed_object(
+        bucket="qeo-bucket",
+        key="analysis/AN-2/qc-summary.json",
+        size=artifact.size_bytes,
+        content_type=artifact.mime_type,
+        sha256=artifact.sha256,
+    )
+    service.register_analysis_artifact_set(request)
+    sent: dict[str, object] = {}
+
+    def fake_post(url, *, headers, json, timeout, verify):
+        sent.update(
+            {
+                "url": url,
+                "headers": headers,
+                "json": json,
+                "timeout": timeout,
+                "verify": verify,
+            }
+        )
+        return httpx.Response(
+            200,
+            json={
+                "request_id": "qeo-request-1",
+                "payload": {
+                    "status": "PARSED",
+                    "ingest_id": "qeo-ingest-1",
+                    "qeo_ingestion_id": "qeo-parser-ingestion-1",
+                    "artifact_set_euid": json["event"]["payload"]["artifact_set_euid"],
+                },
+            },
+        )
+
+    monkeypatch.setattr("dewey_service.services.outbox.httpx.post", fake_post)
+
+    result = service.dispatch_qeo_outbox()
+
+    assert result["attempted"] == 1
+    assert result["counts"] == {"dispatched": 1}
+    updated = result["results"][0]
+    assert updated["dispatch_status"] == "dispatched"
+    assert updated["dispatch_attempt_count"] == 1
+    assert updated["last_dispatch_http_status"] == 200
+    assert updated["qeo_request_id"] == "qeo-request-1"
+    assert updated["qeo_ingest_id"] == "qeo-ingest-1"
+    assert updated["qeo_parser_ingestion_id"] == "qeo-parser-ingestion-1"
+    assert sent["url"] == "https://qeo.test/api/v1/ingest/dewey-events"
+    assert sent["headers"] == {
+        "Authorization": "Bearer qeo-token",
+        "Content-Type": "application/json",
+    }
+    assert sent["json"]["consumer_group"] == "qeo.test"
+    assert sent["json"]["event"]["event_type"] == "lsmc.dewey.artifact_set.registered.v1"
+
+
+def test_qeo_outbox_dispatch_missing_explicit_config_fails_hard(service) -> None:
+    service.qeo_ingest_url = ""
+
+    try:
+        service.dispatch_qeo_outbox()
+    except RuntimeError as exc:
+        assert "qeo.ingest_url is required" in str(exc)
+    else:
+        raise AssertionError("dispatch without qeo.ingest_url should fail")
+
+
+def test_qeo_outbox_dispatch_records_dead_letter_error(service, storage, monkeypatch) -> None:
+    request = _request_with_sensitive_metadata()
+    artifact = request.artifacts[0]
+    storage.seed_object(
+        bucket="qeo-bucket",
+        key="analysis/AN-2/qc-summary.json",
+        size=artifact.size_bytes,
+        content_type=artifact.mime_type,
+        sha256=artifact.sha256,
+    )
+    service.register_analysis_artifact_set(request)
+
+    def fake_post(url, *, headers, json, timeout, verify):
+        _ = url, headers, json, timeout, verify
+        return httpx.Response(
+            200,
+            json={
+                "request_id": "qeo-request-2",
+                "payload": {
+                    "status": "DEAD_LETTERED",
+                    "ingest_id": "qeo-ingest-2",
+                    "dead_letter_id": "qeo-dead-letter-1",
+                    "message": "parser-readable files missing",
+                },
+            },
+        )
+
+    monkeypatch.setattr("dewey_service.services.outbox.httpx.post", fake_post)
+
+    result = service.dispatch_qeo_outbox()
+
+    assert result["counts"] == {"error": 1}
+    updated = result["results"][0]
+    assert updated["dispatch_status"] == "error"
+    assert updated["qeo_request_id"] == "qeo-request-2"
+    assert updated["qeo_ingest_id"] == "qeo-ingest-2"
+    assert updated["qeo_dead_letter_id"] == "qeo-dead-letter-1"
+    assert updated["last_dispatch_error_class"] == "QeoIngestRejected"
 
 
 def test_receipt_and_outbox_persist_once_on_replay(service, storage) -> None:

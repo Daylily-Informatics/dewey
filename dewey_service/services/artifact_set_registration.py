@@ -26,6 +26,7 @@ from dewey_service.tapdb_backend import (
     ARTIFACT_TEMPLATE,
     OUTBOX_EVENT_TEMPLATE,
     REGISTRATION_RECEIPT_TEMPLATE,
+    SERVICE_VERSION,
     normalize_instance_payload,
     utc_now_iso,
 )
@@ -98,10 +99,14 @@ class ArtifactSetRegistrationServiceMixin:
             receipt = self._build_registration_receipt(
                 idempotency_key=computed_key,
                 artifact_set_euid=artifact_set.euid,
+                artifact_set_kind="analysis_artifact_set",
+                report_kind=None,
+                manifest_sha256=body.manifest_sha256,
                 registered_artifacts=registered,
                 skipped_existing=skipped,
                 registered_at=now_iso,
                 local_only=body.local_only,
+                parser_hint=body.parser_family_hint,
             )
             receipt_instance = self._persist_registration_receipt(
                 session,
@@ -185,10 +190,14 @@ class ArtifactSetRegistrationServiceMixin:
             receipt = self._build_registration_receipt(
                 idempotency_key=computed_key,
                 artifact_set_euid=artifact_set.euid,
+                artifact_set_kind="multiqc_artifact_set",
+                report_kind=body.report_kind,
+                manifest_sha256=body.manifest_sha256,
                 registered_artifacts=registered,
                 skipped_existing=skipped,
                 registered_at=now_iso,
                 local_only=body.local_only,
+                parser_hint=body.parser_family_hint or body.report_kind,
             )
             receipt_instance = self._persist_registration_receipt(
                 session,
@@ -569,20 +578,30 @@ class ArtifactSetRegistrationServiceMixin:
         *,
         idempotency_key: str,
         artifact_set_euid: str,
+        artifact_set_kind: str,
+        report_kind: str | None,
+        manifest_sha256: str,
         registered_artifacts: list[ReceiptArtifact],
         skipped_existing: list[ReceiptArtifact],
         registered_at: str,
         local_only: bool,
+        parser_hint: str | None,
     ) -> RegistrationReceipt:
         return RegistrationReceipt(
             request_id=deterministic_request_id(idempotency_key),
             idempotency_key=idempotency_key,
             artifact_set_euid=artifact_set_euid,
+            artifact_set_kind=artifact_set_kind,
+            report_kind=report_kind,
+            manifest_sha256=manifest_sha256,
             registered_artifacts=registered_artifacts,
             skipped_existing=skipped_existing,
             failed=[],
             registered_at=registered_at,
             status="local_only" if local_only else "registered",
+            source_service="dewey",
+            source_version=SERVICE_VERSION,
+            parser_hint=parser_hint,
         )
 
     def _persist_registration_receipt(

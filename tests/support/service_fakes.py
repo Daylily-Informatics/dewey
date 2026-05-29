@@ -8,6 +8,7 @@ from typing import Any
 
 import pytest
 
+from dewey_service.audit import creation_audit_fields, update_audit_fields
 from dewey_service.service import DeweyService
 from dewey_service.storage import StorageObject, StorageObjectNotFoundError, StoragePrefix
 from dewey_service.tapdb_backend import (
@@ -103,7 +104,7 @@ class _InMemoryBackend:
             euid=f"{prefix}-{seq:06d}",
             template_code=template_code,
             name=name,
-            json_addl=dict(json_addl),
+            json_addl={**dict(json_addl), **creation_audit_fields()},
         )
         self.next_uid += 1
         self.instances.setdefault(template_code, []).append(instance)
@@ -118,6 +119,7 @@ class _InMemoryBackend:
         _ = session
         payload = dict(instance.json_addl or {})
         payload.update(updates)
+        payload.update(update_audit_fields())
         instance.json_addl = payload
 
     def find_by_json_field(self, session, *, template_code: str, field: str, value: str):
@@ -468,6 +470,9 @@ def service(backend: _InMemoryBackend, storage: _FakeStorageClient) -> DeweyServ
         literature_adapter=_FakeLiteratureAdapter(),
         literature_allowed_domains={"europepmc.org", "ncbi.nlm.nih.gov"},
         literature_request_timeout_seconds=5,
+        qeo_ingest_url="https://qeo.test/api/v1/ingest/dewey-events",
+        qeo_api_token="qeo-token",
+        qeo_consumer_group="qeo.test",
     )
 
 
