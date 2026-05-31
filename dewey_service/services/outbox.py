@@ -83,6 +83,8 @@ class OutboxServiceMixin:
         *,
         limit: int = 100,
         retry_errors: bool = False,
+        event_ids: set[str] | None = None,
+        artifact_set_euids: set[str] | None = None,
     ) -> dict[str, Any]:
         """Dispatch pending Dewey outbox events to QEO through explicit config."""
 
@@ -90,7 +92,17 @@ class OutboxServiceMixin:
         statuses = set(_DISPATCHABLE_STATUSES)
         if retry_errors:
             statuses.add("error")
-        rows = self._list_qeo_outbox_candidates(limit=limit, statuses=statuses)
+        clean_event_ids = self._clean_filter_values(event_ids, label="event_ids")
+        clean_artifact_set_euids = self._clean_filter_values(
+            artifact_set_euids,
+            label="artifact_set_euids",
+        )
+        rows = self._list_qeo_outbox_candidates(
+            limit=limit,
+            statuses=statuses,
+            event_ids=clean_event_ids,
+            artifact_set_euids=clean_artifact_set_euids,
+        )
         results = [
             self._dispatch_qeo_outbox_row(
                 row,
@@ -107,6 +119,10 @@ class OutboxServiceMixin:
             counts[str(result["dispatch_status"])] = counts.get(str(result["dispatch_status"]), 0) + 1
         return {
             "requested_limit": max(1, min(int(limit or 100), 1000)),
+            "filters": {
+                "event_ids": sorted(clean_event_ids),
+                "artifact_set_euids": sorted(clean_artifact_set_euids),
+            },
             "attempted": len(results),
             "counts": counts,
             "results": results,
@@ -133,14 +149,28 @@ class OutboxServiceMixin:
         *,
         limit: int,
         statuses: set[str],
+        event_ids: set[str],
+        artifact_set_euids: set[str],
     ) -> list[dict[str, Any]]:
         capped_limit = max(1, min(int(limit or 100), 1000))
         with self.backend.session_scope(commit=False) as session:
-            rows = self.backend.list_by_template(
-                session,
-                template_code=OUTBOX_EVENT_TEMPLATE,
-                limit=max(capped_limit, 1000),
-            )
+            if event_ids:
+                rows = []
+                for event_id in sorted(event_ids):
+                    row = self.backend.find_by_json_field(
+                        session,
+                        template_code=OUTBOX_EVENT_TEMPLATE,
+                        field="event_id",
+                        value=event_id,
+                    )
+                    if row is not None:
+                        rows.append(row)
+            else:
+                rows = self.backend.list_by_template(
+                    session,
+                    template_code=OUTBOX_EVENT_TEMPLATE,
+                    limit=max(capped_limit, 1000),
+                )
             candidates: list[dict[str, Any]] = []
             for row in rows:
                 payload = normalize_instance_payload(row)
@@ -151,10 +181,42 @@ class OutboxServiceMixin:
                 event_type = str(payload.get("event_type") or "")
                 if not event_type.startswith("lsmc.dewey."):
                     continue
+                if not self._outbox_row_matches_filters(
+                    payload,
+                    event_ids=event_ids,
+                    artifact_set_euids=artifact_set_euids,
+                ):
+                    continue
                 candidates.append(payload)
                 if len(candidates) >= capped_limit:
                     break
             return candidates
+
+    @staticmethod
+    def _clean_filter_values(values: set[str] | None, *, label: str) -> set[str]:
+        if values is None:
+            return set()
+        cleaned = {str(value).strip() for value in values if str(value).strip()}
+        if not cleaned:
+            raise ValueError(f"{label} must include at least one non-empty value when supplied")
+        return cleaned
+
+    @staticmethod
+    def _outbox_row_matches_filters(
+        row: dict[str, Any],
+        *,
+        event_ids: set[str],
+        artifact_set_euids: set[str],
+    ) -> bool:
+        if event_ids and str(row.get("event_id") or "").strip() not in event_ids:
+            return False
+        payload = row.get("payload")
+        artifact_set_euid = ""
+        if isinstance(payload, dict):
+            artifact_set_euid = str(payload.get("artifact_set_euid") or "").strip()
+        if artifact_set_euids and artifact_set_euid not in artifact_set_euids:
+            return False
+        return True
 
     def _dispatch_qeo_outbox_row(
         self,

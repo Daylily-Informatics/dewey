@@ -75,6 +75,7 @@ class FileArtifact(StrictContractModel):
     required: bool = True
     produced_by: str = Field(min_length=1)
     parent_artifact_euids: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
     @field_validator(
         "logical_name",
@@ -172,6 +173,7 @@ class AnalysisArtifactSetRegistrationRequest(StrictContractModel):
     status: str = Field(min_length=1)
     artifacts: list[FileArtifact] = Field(min_length=1)
     lineage_refs: list[LineageRef] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
     local_only: bool = False
     parser_family_hint: str | None = None
 
@@ -232,6 +234,7 @@ class MultiQCArtifactSetRegistrationRequest(StrictContractModel):
     parser_relevant_files: list[FileArtifact] = Field(default_factory=list)
     generated_at: str = Field(min_length=1)
     manifest_sha256: str = Field(min_length=64, max_length=64)
+    metadata: dict[str, Any] = Field(default_factory=dict)
     local_only: bool = False
     parser_family_hint: str | None = None
 
@@ -284,6 +287,7 @@ class ReceiptArtifact(StrictContractModel):
     artifact_role: str
     parser_hint: str | None = None
     required: bool
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class ReceiptFailure(StrictContractModel):
@@ -308,6 +312,7 @@ class RegistrationReceipt(StrictContractModel):
     source_service: str = "dewey"
     source_version: str | None = None
     parser_hint: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class OutboxEventEnvelope(StrictContractModel):
