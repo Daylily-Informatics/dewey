@@ -24,14 +24,14 @@
           <div class="panel" style="padding: 2rem; border: 1px solid rgba(148, 163, 184, 0.25); background: rgba(15, 23, 42, 0.7);">
             <div class="eyebrow">{{ "Status " ~ auth_status_code if auth_error else "Access" }}</div>
             <h2 class="title" style="font-size: 1.8rem; margin-top: 0.35rem;">{{ auth_card_title|default("Sign In") }}</h2>
-            <p class="panel-copy">{{ auth_card_copy|default("Continue through Cognito Hosted UI to access the Dewey console.") }}</p>
+            <p class="panel-copy">{{ auth_card_copy|default("Continue through the shared LSMC login to access the Dewey console.") }}</p>
             {% if auth_error %}
             <div class="panel" style="margin-top: 1rem; border-color: rgba(248, 113, 113, 0.4); background: rgba(127, 29, 29, 0.18);">
               <p class="panel-copy" style="margin: 0;">{{ auth_error }}</p>
             </div>
             {% endif %}
             <div class="form-actions" style="margin-top: 1.5rem;">
-              <a class="button button-primary" href="{{ auth_primary_href|default(cognito_login_url) }}">{{ auth_primary_label|default("Sign In with Cognito") }}</a>
+              <a class="button button-primary" href="{{ auth_primary_href|default(cognito_login_url) }}">{{ auth_primary_label|default("Continue with LSMC Login") }}</a>
               <span class="pill">Control Room UI</span>
             </div>
           </div>

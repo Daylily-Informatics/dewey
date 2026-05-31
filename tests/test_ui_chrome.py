@@ -58,6 +58,9 @@ def test_login_page_renders_chrome_and_footer(monkeypatch, fake_service) -> None
     assert _stable_region_color_hex("us-east-1") in response.text
     assert "/static/favicon.svg" in response.text
     assert "Dewey Access Login" in response.text
+    assert "Continue with LSMC Login" in response.text
+    assert "Continue through the shared LSMC login" in response.text
+    assert "Sign In with Cognito" not in response.text
     assert "Version" in response.text
     assert "9.9.9" in response.text
     assert "Branch" in response.text

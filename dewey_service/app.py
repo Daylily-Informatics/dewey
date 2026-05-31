@@ -491,9 +491,9 @@ def create_app(
         title: str = "Dewey Access Login",
         description: str = "Canonical artifact intake, lifecycle, sharing, and search for Dewey users and admins.",
         card_title: str = "Sign In",
-        card_copy: str = "Continue through Cognito Hosted UI to access the Dewey console.",
+        card_copy: str = "Continue through the shared LSMC login to access the Dewey console.",
         primary_href: str = "/auth/login",
-        primary_label: str = "Sign In with Cognito",
+        primary_label: str = "Continue with LSMC Login",
         error_message: str = "",
         status_code: int = 200,
     ) -> tuple[dict[str, Any], int]:

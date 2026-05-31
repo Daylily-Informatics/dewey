@@ -8,7 +8,7 @@ from playwright.sync_api import Page, expect
 def perform_login(page: Page, *, base_url: str, email: str, password: str) -> None:
     page.goto(f"{base_url}/login")
     expect(page.locator("body")).to_be_visible()
-    page.locator("a:has-text('Sign In with Cognito')").click()
+    page.locator("a:has-text('Continue with LSMC Login')").click()
     _complete_identity_provider_login(page, email=email, password=password)
     page.wait_for_url(f"{base_url}/**", timeout=30000)
     assert_authenticated_page(page)

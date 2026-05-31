@@ -62,6 +62,9 @@ def test_html_login_redirect_preserves_next_path(client) -> None:
     login_page = client.get(response.headers["location"])
     assert login_page.status_code == 200
     assert 'href="/auth/login?next=%2Fui"' in login_page.text
+    assert "Continue with LSMC Login" in login_page.text
+    assert "Continue through the shared LSMC login" in login_page.text
+    assert "Sign In with Cognito" not in login_page.text
 
 
 def test_root_redirects_to_login_page(client) -> None:
@@ -309,7 +312,6 @@ def test_plain_logout_get_alias_redirects_to_canonical_auth_logout(client) -> No
     logout = client.get("/logout", follow_redirects=False)
     assert logout.status_code == 303
     assert logout.headers["location"] == "/auth/logout"
-    assert params["response_type"] == ["code"]
 
 
 def test_logout_redirects_to_local_auth_error_when_cognito_is_misconfigured(
