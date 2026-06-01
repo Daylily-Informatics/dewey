@@ -17,6 +17,7 @@ from dewey_service.settings import get_settings
 from dewey_service.storage import S3StorageClient
 from dewey_service.tapdb_backend import (
     ANOMALY_TEMPLATE,
+    BOOT_TEMPLATE_DEFINITIONS,
     IDEMPOTENCY_TEMPLATE,
     TapDBBackend,
     normalize_instance_payload,
@@ -87,7 +88,7 @@ class BaseDeweyService:
 
     def bootstrap(self) -> None:
         with self.backend.session_scope(commit=True) as session:
-            self.backend.ensure_templates(session)
+            self.backend.ensure_templates(session, BOOT_TEMPLATE_DEFINITIONS)
             self._seed_default_anomalies(session)
 
     @staticmethod
