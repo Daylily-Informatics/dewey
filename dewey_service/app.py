@@ -48,6 +48,7 @@ from dewey_service.auth import (
     complete_external_broker_login,
     configure_session_middleware,
     generate_state,
+    has_ui_session,
     require_api_auth,
     require_observability_access,
     require_session_or_api_auth,
@@ -1254,7 +1255,9 @@ def create_app(
         return HTMLResponse(status_code=exc.status_code, content=exc.detail or "")
 
     @app.get("/", include_in_schema=False)
-    async def root() -> RedirectResponse:
+    async def root(request: Request) -> RedirectResponse:
+        if has_ui_session(request):
+            return RedirectResponse(url="/ui", status_code=status.HTTP_303_SEE_OTHER)
         return RedirectResponse(url="/login?next=/", status_code=status.HTTP_303_SEE_OTHER)
 
     @app.get("/favicon.ico", include_in_schema=False)

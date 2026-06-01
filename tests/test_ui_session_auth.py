@@ -73,6 +73,15 @@ def test_root_redirects_to_login_page(client) -> None:
     assert response.headers["location"] == "/login?next=/"
 
 
+def test_root_redirects_authenticated_session_to_ui(monkeypatch, client) -> None:
+    _login_user(monkeypatch, client)
+
+    response = client.get("/", follow_redirects=False)
+
+    assert response.status_code == 303
+    assert response.headers["location"] == "/ui"
+
+
 def test_ui_requires_session_login(client) -> None:
     response = client.get("/ui")
     assert response.status_code == 401
@@ -438,6 +447,57 @@ def test_external_broker_login_sets_admin_session(monkeypatch, tmp_path, fake_se
         logout = broker_client.post("/auth/logout", follow_redirects=False)
         assert logout.status_code == 303
         assert logout.headers["location"] == "https://dev.login.lsmc.com:8916/logout"
+
+
+def test_external_broker_login_next_root_reaches_ui(monkeypatch, tmp_path, fake_service) -> None:
+    _set_explicit_config_path(monkeypatch, tmp_path)
+    settings = Settings(
+        api_bearer_token="token-123",
+        session_secret_key="session-secret",
+        auth_mode="external_broker",
+        external_broker_service_id="dewey",
+        external_broker_login_url="https://dev.login.lsmc.com:8916/login",
+        external_broker_handoff_exchange_url="https://dev.login.lsmc.com:8916/api/handoff/exchange",
+        external_broker_service_token="dewey-service-token",
+        external_broker_callback_url="https://localhost:8914/auth/lsmc/callback",
+        external_broker_logout_url="https://dev.login.lsmc.com:8916/logout",
+    )
+
+    async def _exchange(*_args, **_kwargs):
+        return {
+            "user": {
+                "email": "johnm@lsmc.com",
+                "canonical_user_id": "user-johnm",
+                "display_name": "John M",
+                "groups": ["lsmc:global-admin"],
+                "service_entitlements": [
+                    {"service": "dewey", "roles": ["admin"]},
+                ],
+            }
+        }
+
+    monkeypatch.setattr("dewey_service.auth.exchange_external_broker_handoff", _exchange)
+    app = create_app(settings=settings, service=fake_service)
+    with TestClient(app, base_url="https://localhost:8914") as broker_client:
+        login = broker_client.get("/auth/login?next=/", follow_redirects=False)
+        assert login.status_code == 303
+        state = parse_qs(urlparse(login.headers["location"]).query)["state"][0]
+
+        callback = broker_client.get(
+            "/auth/lsmc/callback",
+            params={"code": "handoff-1", "state": state},
+            follow_redirects=False,
+        )
+        assert callback.status_code == 303
+        assert callback.headers["location"] == "/"
+
+        root = broker_client.get("/", follow_redirects=False)
+        assert root.status_code == 303
+        assert root.headers["location"] == "/ui"
+
+        ui = broker_client.get("/ui")
+        assert ui.status_code == 200
+        assert "Dewey Console" in ui.text
 
 
 def test_external_broker_callback_rejects_missing_roles(monkeypatch, fake_service) -> None:
