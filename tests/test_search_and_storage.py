@@ -131,6 +131,12 @@ def test_search_page_renders_after_login(monkeypatch, client) -> None:
     response = client.get("/search")
     assert response.status_code == 200
     assert "Artifact and Share Search" in response.text
+    assert "search-filter-panel" in response.text
+    assert "search-results-table" in response.text
+    assert "Download Selected" in response.text
+    assert "Quick Presigned Links" in response.text
+    assert "Create Artifact Set" in response.text
+    assert "data-sort=\"record\"" in response.text
 
 
 def test_search_export_page_returns_authenticated_json_results(monkeypatch, client) -> None:

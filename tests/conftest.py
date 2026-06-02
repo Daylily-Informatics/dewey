@@ -1419,6 +1419,18 @@ class FakeDeweyService:
 
     def search_literature(self, *, viewer, query: str, page: int = 1, page_size: int = 20):
         self._require_literature()
+        if hasattr(self.literature, "search"):
+            from dewey_service.literature import LiteratureUnavailableError
+
+            try:
+                self.literature.search(query=query, page=page, page_size=page_size)
+            except LiteratureUnavailableError:
+                raise
+            except Exception as exc:
+                raise LiteratureUnavailableError(
+                    "Literature search is unavailable. Verify the Dewey container can read its "
+                    "metapub/NCBI configuration, including the staged NCBI API key."
+                ) from exc
         rows = []
         lowered = str(query or "").strip().lower()
         for record in self.literature_records.values():

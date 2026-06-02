@@ -111,6 +111,14 @@ def test_optional_ncbi_api_key_file(monkeypatch: pytest.MonkeyPatch, tmp_path: P
     server_cli._maybe_set_ncbi_api_key()
     assert os.environ["NCBI_API_KEY"] == "already-set"
 
+    explicit_key_file = tmp_path / "mounted" / "key.txt"
+    explicit_key_file.parent.mkdir()
+    explicit_key_file.write_text("explicit-container-key\n", encoding="utf-8")
+    monkeypatch.delenv("NCBI_API_KEY", raising=False)
+    monkeypatch.setenv("DEWEY_NCBI_API_KEY_FILE", str(explicit_key_file))
+    server_cli._maybe_set_ncbi_api_key()
+    assert os.environ["NCBI_API_KEY"] == "explicit-container-key"
+
 
 def test_tls_resolution_precedence(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     shared_dir = tmp_path / "shared"
