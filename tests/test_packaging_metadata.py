@@ -4,6 +4,8 @@ import json
 import tomllib
 from pathlib import Path
 
+from dewey_service import tapdb_backend
+
 
 def _tapdb_dependency_spec() -> str:
     repo_root = Path(__file__).resolve().parents[1]
@@ -110,6 +112,31 @@ def test_packaged_tapdb_registry_fixtures_match_owned_prefixes() -> None:
     assert {claim["issuer_app_code"] for claim in prefix_registry["ownership"]["Z"].values()} == {
         "dewey"
     }
+
+
+def test_required_template_definitions_exist_in_source_pack() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    templates = json.loads(
+        (repo_root / "config" / "tapdb_templates" / "dewey" / "templates.json").read_text(
+            encoding="utf-8"
+        )
+    )["templates"]
+    source_codes = {
+        "/".join(
+            [
+                str(template["category"]).strip(),
+                str(template["type"]).strip(),
+                str(template["subtype"]).strip(),
+                str(template["version"]).strip(),
+                "",
+            ]
+        )
+        for template in templates
+    }
+
+    assert set(tapdb_backend.TEMPLATE_DEFINITIONS) <= source_codes
+    assert tapdb_backend.REGISTRATION_RECEIPT_TEMPLATE in source_codes
+    assert tapdb_backend.OUTBOX_EVENT_TEMPLATE in source_codes
 
 
 def test_pyproject_uses_dynamic_version_from_git_tags() -> None:

@@ -268,9 +268,10 @@ def test_template_definitions_are_required_codes() -> None:
         backend_mod.LITERATURE_SAVE_TEMPLATE,
         backend_mod.ANOMALY_TEMPLATE,
         backend_mod.IDEMPOTENCY_TEMPLATE,
+        backend_mod.REGISTRATION_RECEIPT_TEMPLATE,
+        backend_mod.OUTBOX_EVENT_TEMPLATE,
     )
-    assert backend_mod.REGISTRATION_RECEIPT_TEMPLATE not in backend_mod.BOOT_TEMPLATE_DEFINITIONS
-    assert backend_mod.OUTBOX_EVENT_TEMPLATE not in backend_mod.BOOT_TEMPLATE_DEFINITIONS
+    assert backend_mod.BOOT_TEMPLATE_DEFINITIONS == backend_mod.TEMPLATE_DEFINITIONS
 
 
 def test_ensure_templates_raises_on_missing() -> None:
@@ -322,8 +323,8 @@ def test_ensure_templates_can_verify_startup_subset() -> None:
     backend.ensure_templates(session, backend_mod.BOOT_TEMPLATE_DEFINITIONS)
 
     assert tuple(calls) == backend_mod.BOOT_TEMPLATE_DEFINITIONS
-    assert backend_mod.REGISTRATION_RECEIPT_TEMPLATE not in calls
-    assert backend_mod.OUTBOX_EVENT_TEMPLATE not in calls
+    assert backend_mod.REGISTRATION_RECEIPT_TEMPLATE in calls
+    assert backend_mod.OUTBOX_EVENT_TEMPLATE in calls
 
 
 def test_create_instance_covers_success_and_missing_template() -> None:
