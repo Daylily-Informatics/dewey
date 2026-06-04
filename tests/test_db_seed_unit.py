@@ -8,6 +8,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+import typer
 
 
 def test_db_seed_main_claims_prefixes_before_seeding(
@@ -488,3 +489,41 @@ def test_db_seed_identity_prefix_helper_registers_lineage_prefix() -> None:
         "owner_repo_name": "dewey",
         "prefix": "EDG",
     }
+
+
+def test_db_repair_templates_requires_explicit_approval(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "unit")
+    db_commands = importlib.import_module("dewey_service.cli.db")
+    calls: list[str] = []
+    monkeypatch.setattr(db_commands, "_verify_dewey_templates", lambda: calls.append("verify"))
+    monkeypatch.setattr(db_commands, "_seed_dewey_template_overlay", lambda: calls.append("seed"))
+
+    with pytest.raises(typer.Exit) as exc_info:
+        db_commands.repair_templates(confirm_dewey_template_repair="")
+
+    assert exc_info.value.exit_code == 1
+    assert calls == []
+
+
+def test_db_repair_templates_seeds_only_when_verification_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "unit")
+    db_commands = importlib.import_module("dewey_service.cli.db")
+    calls: list[str] = []
+
+    def fake_verify() -> None:
+        calls.append("verify")
+        if calls == ["verify"]:
+            raise RuntimeError(
+                "Missing Dewey templates: DGX/system/registration_receipt/1.0/"
+            )
+
+    monkeypatch.setattr(db_commands, "_verify_dewey_templates", fake_verify)
+    monkeypatch.setattr(db_commands, "_seed_dewey_template_overlay", lambda: calls.append("seed"))
+
+    db_commands.repair_templates(
+        confirm_dewey_template_repair=db_commands.DEWEY_PROD_TEMPLATE_SEED_APPROVAL
+    )
+
+    assert calls == ["verify", "seed", "verify"]

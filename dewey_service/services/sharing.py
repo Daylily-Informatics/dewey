@@ -19,6 +19,39 @@ DEFAULT_SHARE_HOST = "127.0.0.1"
 
 
 class SharingServiceMixin:
+    @staticmethod
+    def _share_reference_diagnostic(
+        *,
+        code: str,
+        summary: str,
+        retryable: bool,
+        checked_at: str | None = None,
+        admin_detail: str | None = None,
+    ) -> dict[str, Any]:
+        diagnostic = {
+            "diagnostic_code": str(code or "").strip(),
+            "diagnostic_summary": str(summary or "").strip(),
+            "last_checked_at": checked_at or utc_now_iso(),
+            "retryable": bool(retryable),
+        }
+        detail = str(admin_detail or "").strip()
+        if detail:
+            diagnostic["admin_detail"] = detail
+        return diagnostic
+
+    @classmethod
+    def _missing_storage_object_diagnostic(cls, checked_at: str | None = None) -> dict[str, Any]:
+        return cls._share_reference_diagnostic(
+            code="storage_object_missing",
+            summary="Target artifact object was not found in configured storage.",
+            retryable=True,
+            checked_at=checked_at,
+            admin_detail=(
+                "Repair the artifact storage metadata or restore the target object, then retry "
+                "the share reference."
+            ),
+        )
+
     def get_share_reference(self, share_reference_euid: str) -> dict[str, Any]:
         with self.backend.session_scope(commit=False) as session:
             instance = self.backend.find_by_euid(
@@ -58,6 +91,9 @@ class SharingServiceMixin:
                 if seconds_remaining <= 0:
                     raise ValueError("share reference has expired")
                 ttl_limit = max(60, min(ttl_limit, seconds_remaining))
+            status_value = str(payload.get("status") or "").lower()
+            if status_value and status_value != "active":
+                raise ValueError(f"share reference is {status_value}; retry after repair")
 
             access_url = str(payload.get("access_url") or "").strip() or None
             manifest: list[dict[str, Any]] = []
@@ -72,11 +108,25 @@ class SharingServiceMixin:
                 if target is None:
                     raise DeweyNotFoundError(f"Target not found: {payload.get('target_euid')}")
                 artifact_payload = normalize_instance_payload(target)
-                self._require_storage().head_object(
-                    bucket=str(artifact_payload.get("bucket") or ""),
-                    key=str(artifact_payload.get("key") or ""),
-                    version_id=str(artifact_payload.get("version_id") or "").strip() or None,
-                )
+                try:
+                    self._require_storage().head_object(
+                        bucket=str(artifact_payload.get("bucket") or ""),
+                        key=str(artifact_payload.get("key") or ""),
+                        version_id=str(artifact_payload.get("version_id") or "").strip() or None,
+                    )
+                except StorageObjectNotFoundError as exc:
+                    diagnostic = self._missing_storage_object_diagnostic(checked_at=accessed_at)
+                    self.backend.update_instance_json(
+                        session,
+                        instance,
+                        {
+                            "status": "error",
+                            "access_url": None,
+                            "diagnostic": diagnostic,
+                            "last_checked_at": accessed_at,
+                        },
+                    )
+                    raise ValueError(diagnostic["diagnostic_summary"]) from exc
                 access_url = self._require_storage().generate_presigned_get_url(
                     bucket=str(artifact_payload.get("bucket") or ""),
                     key=str(artifact_payload.get("key") or ""),
@@ -244,6 +294,7 @@ class SharingServiceMixin:
 
             access_url: str | None = None
             status_value = "active"
+            diagnostic: dict[str, Any] | None = None
             manifest: list[dict[str, Any]] = []
             connection: dict[str, Any] | None = None
             member_count = 0
@@ -263,6 +314,7 @@ class SharingServiceMixin:
                     )
                 except StorageObjectNotFoundError:
                     status_value = "error"
+                    diagnostic = self._missing_storage_object_diagnostic(checked_at=starts_at)
                 self.backend.update_instance_json(
                     session,
                     target,
@@ -371,6 +423,7 @@ class SharingServiceMixin:
                     "expires_at": payload["expires_at"],
                     "access_url": access_url,
                     "issued_by": payload["issued_by"],
+                    "diagnostic": diagnostic,
                     "manifest": manifest,
                     "connection": connection or {},
                     "member_count": member_count,
@@ -416,6 +469,101 @@ class SharingServiceMixin:
                 response=body,
             )
             return 201, body
+
+    def retry_share_reference(
+        self,
+        share_reference_euid: str,
+        *,
+        retried_by: str | None = None,
+    ) -> dict[str, Any]:
+        clean_euid = str(share_reference_euid or "").strip()
+        if not clean_euid:
+            raise ValueError("share_reference_euid is required")
+        checked_at = utc_now_iso()
+        with self.backend.session_scope(commit=True) as session:
+            instance = self.backend.find_by_euid(
+                session,
+                template_code=SHARE_REFERENCE_TEMPLATE,
+                euid=clean_euid,
+                for_update=True,
+            )
+            if instance is None:
+                raise DeweyNotFoundError(f"Share reference not found: {clean_euid}")
+            payload = normalize_instance_payload(instance)
+            status_value = str(payload.get("status") or "").lower()
+            if payload.get("revoked_at") or status_value == "revoked":
+                raise ValueError("share reference has been revoked")
+            expires_at = str(payload.get("expires_at") or "").strip()
+            if expires_at:
+                expires_dt = datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
+                if expires_dt <= datetime.now(timezone.utc):
+                    self.backend.update_instance_json(session, instance, {"status": "expired"})
+                    raise ValueError("share reference has expired")
+            if str(payload.get("target_type") or "").lower() != "artifact":
+                raise ValueError("retry is only supported for artifact share references")
+            if str(payload.get("transport") or "").lower() != "presigned_s3":
+                raise ValueError("retry is only supported for presigned_s3 share references")
+            if not payload.get("managed_access"):
+                raise ValueError("retry is only supported for Dewey-managed share references")
+
+            target = self.backend.find_by_euid(
+                session,
+                template_code=ARTIFACT_TEMPLATE,
+                euid=str(payload.get("target_euid") or "").strip(),
+            )
+            if target is None:
+                raise DeweyNotFoundError(f"Target not found: {payload.get('target_euid')}")
+            artifact_payload = normalize_instance_payload(target)
+            if str(artifact_payload.get("storage_kind") or "object").lower() != "object":
+                raise ValueError("share reference target is not an object-backed artifact")
+            if str(artifact_payload.get("storage_backend") or "").lower() != "s3":
+                raise ValueError("share reference target is not s3-backed")
+
+            try:
+                self._require_storage().head_object(
+                    bucket=str(artifact_payload.get("bucket") or ""),
+                    key=str(artifact_payload.get("key") or ""),
+                    version_id=str(artifact_payload.get("version_id") or "").strip() or None,
+                )
+            except StorageObjectNotFoundError:
+                diagnostic = self._missing_storage_object_diagnostic(checked_at=checked_at)
+                self.backend.update_instance_json(
+                    session,
+                    instance,
+                    {
+                        "status": "error",
+                        "access_url": None,
+                        "diagnostic": diagnostic,
+                        "last_checked_at": checked_at,
+                        "last_retried_at": checked_at,
+                        "last_retried_by": str(retried_by or "").strip() or None,
+                    },
+                )
+                return self._share_reference_response(instance)
+
+            access_url = f"/share-references/{instance.euid}"
+            self.backend.update_instance_json(
+                session,
+                instance,
+                {
+                    "status": "active",
+                    "access_url": access_url,
+                    "managed_access": True,
+                    "diagnostic": None,
+                    "last_checked_at": checked_at,
+                    "last_retried_at": checked_at,
+                    "last_retried_by": str(retried_by or "").strip() or None,
+                },
+            )
+            self.backend.update_instance_json(
+                session,
+                target,
+                {
+                    "share_status": "active",
+                    "share_last_issued_at": checked_at,
+                },
+            )
+            return self._share_reference_response(instance)
 
     def revoke_share_reference(
         self,
@@ -525,11 +673,25 @@ class SharingServiceMixin:
                 raise ValueError("Share reference target is not an object-backed artifact")
             if str(artifact_payload.get("storage_backend") or "").lower() != "s3":
                 raise ValueError("Share reference target is not s3-backed")
-            self._require_storage().head_object(
-                bucket=str(artifact_payload.get("bucket") or ""),
-                key=str(artifact_payload.get("key") or ""),
-                version_id=str(artifact_payload.get("version_id") or "").strip() or None,
-            )
+            try:
+                self._require_storage().head_object(
+                    bucket=str(artifact_payload.get("bucket") or ""),
+                    key=str(artifact_payload.get("key") or ""),
+                    version_id=str(artifact_payload.get("version_id") or "").strip() or None,
+                )
+            except StorageObjectNotFoundError as exc:
+                diagnostic = self._missing_storage_object_diagnostic(checked_at=utc_now_iso())
+                self.backend.update_instance_json(
+                    session,
+                    instance,
+                    {
+                        "status": "error",
+                        "access_url": None,
+                        "diagnostic": diagnostic,
+                        "last_checked_at": diagnostic["last_checked_at"],
+                    },
+                )
+                raise ValueError(diagnostic["diagnostic_summary"]) from exc
             access_url = self._require_storage().generate_presigned_get_url(
                 bucket=str(artifact_payload.get("bucket") or ""),
                 key=str(artifact_payload.get("key") or ""),

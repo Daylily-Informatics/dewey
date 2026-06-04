@@ -130,3 +130,20 @@ def test_literature_endpoints_return_503_when_unavailable(
     )
     assert response.status_code == 503
     assert "metapub" in response.json()["detail"].lower()
+
+
+def test_literature_page_returns_503_for_runtime_config_failure(
+    monkeypatch, client, fake_service
+) -> None:
+    class BrokenLiteratureAdapter:
+        def search(self, **_kwargs):
+            raise RuntimeError("NCBI key missing")
+
+    fake_service.literature = BrokenLiteratureAdapter()
+    _login_user(monkeypatch, client)
+
+    response = client.get("/literature", params={"q": "PTEN"})
+
+    assert response.status_code == 503
+    assert "Literature search is unavailable" in response.text
+    assert "NCBI" in response.text

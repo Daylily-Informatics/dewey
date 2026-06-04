@@ -1,6 +1,6 @@
 <!doctype html>
 {% from "_chrome.html" import environment_chrome, page_footer %}
-<html lang="en">
+<html lang="en" data-lsmc-service="dewey" data-theme="original">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -44,6 +44,12 @@
       .tapdb-graph-canvas {
         width: 100%;
         height: 640px;
+      }
+      .cyto-instructions {
+        margin: 0.55rem 0 0;
+        color: #94a3b8;
+        font-size: 0.78rem;
+        line-height: 1.35;
       }
       .tapdb-graph-sidebar,
       .tapdb-detail-list,
@@ -199,6 +205,9 @@
                 <div id="dewey-tapdb-graph" class="tapdb-graph-canvas">
                   <div class="empty-state">Search for an object or enter a root EUID.</div>
                 </div>
+                <p class="cyto-instructions">
+                  Pinch to zoom. Mouse wheel scrolls the page; hold z while wheeling to zoom. Arrowheads point to parent nodes.
+                </p>
               </article>
               <aside class="tapdb-graph-sidebar">
                 <article class="panel">
@@ -225,7 +234,14 @@
     <script src="https://cdn.jsdelivr.net/npm/dagre@0.8.5/dist/dagre.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.min.js"></script>
     <script>
-      const tapdbState = { graph: null, nodes: new Map() };
+      const tapdbState = { graph: null, nodes: new Map(), zoomModifierHeld: false };
+
+      window.addEventListener("keydown", (event) => {
+        if ((event.key || "").toLowerCase() === "z") tapdbState.zoomModifierHeld = true;
+      });
+      window.addEventListener("keyup", (event) => {
+        if ((event.key || "").toLowerCase() === "z") tapdbState.zoomModifierHeld = false;
+      });
 
       function graphParams(form) {
         const params = new URLSearchParams();
@@ -264,6 +280,16 @@
           }).filter((node) => node.data.id),
           edges: edges.map((edge) => ({ data: Object.assign({}, edge.data || {}) })),
         };
+      }
+
+      function configureCytoscapeInteractions(container) {
+        if (container.dataset.cytoscapeWheelGate === "installed") return;
+        container.dataset.cytoscapeWheelGate = "installed";
+        container.addEventListener("wheel", (event) => {
+          const isPinchZoom = event.ctrlKey || event.metaKey;
+          if (isPinchZoom || tapdbState.zoomModifierHeld) return;
+          event.stopImmediatePropagation();
+        }, { capture: true, passive: true });
       }
 
       function renderDetail(data) {
@@ -335,6 +361,7 @@
         }
         if (window.cytoscapeDagre) window.cytoscape.use(window.cytoscapeDagre);
         tapdbState.nodes = new Map(nodes.map((node) => [node.data.id, node.data]));
+        configureCytoscapeInteractions(mount);
         tapdbState.graph = window.cytoscape({
           container: mount,
           elements: nodes.concat(edges),
@@ -363,8 +390,9 @@
               style: {
                 width: 2,
                 "line-color": "#4c7781",
-                "target-arrow-color": "#4c7781",
-                "target-arrow-shape": "triangle",
+                "source-arrow-color": "#4c7781",
+                "source-arrow-shape": "triangle",
+                "target-arrow-shape": "none",
                 "curve-style": "bezier",
               },
             },
@@ -486,5 +514,6 @@
         }
       });
     </script>
+    <script src="{{ static_url('lsmc_ui.js') }}"></script>
   </body>
 </html>

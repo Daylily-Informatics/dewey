@@ -14,6 +14,7 @@ import sys
 import typer
 from cli_core_yo import ccyo_out
 
+from dewey_service import db_seed
 from dewey_service.cli._registry_v2 import (
     REQUIRED_MUTATING,
     REQUIRED_MUTATING_INTERACTIVE,
@@ -30,6 +31,7 @@ from dewey_service.integrations.tapdb_runtime import (
 from dewey_service.settings import get_settings, load_config_aws_profile
 
 db_app = typer.Typer(help="TapDB lifecycle and Dewey overlay commands")
+DEWEY_PROD_TEMPLATE_SEED_APPROVAL = "APPROVE DEWEY PROD TEMPLATE SEED FOR DAY"
 
 
 def _resolve_cli_aws_profile(profile: str) -> str:
@@ -100,6 +102,18 @@ def _delete_db_target(
     except TapDBRuntimeError as exc:
         ccyo_out.error(f"Delete failed: {exc}")
         raise typer.Exit(1) from exc
+
+
+def _verify_dewey_templates() -> None:
+    from dewey_service.tapdb_backend import TapDBBackend
+
+    backend = TapDBBackend(app_username="dewey")
+    with backend.session_scope(commit=False) as session:
+        backend.ensure_templates(session)
+
+
+def _seed_dewey_template_overlay() -> None:
+    db_seed.main()
 
 
 @db_app.command("build")
@@ -180,6 +194,47 @@ def seed() -> None:
         )
     except subprocess.CalledProcessError as exc:
         raise typer.Exit(exc.returncode) from exc
+
+
+@db_app.command("verify-templates")
+def verify_templates() -> None:
+    """Verify that all Dewey-required TapDB templates are present."""
+    try:
+        _verify_dewey_templates()
+        ccyo_out.success("Dewey required templates are present")
+    except RuntimeError as exc:
+        ccyo_out.error(str(exc))
+        raise typer.Exit(1) from exc
+
+
+@db_app.command("repair-templates")
+def repair_templates(
+    confirm_dewey_template_repair: str = typer.Option(
+        "",
+        "--confirm-dewey-template-repair",
+        help=f"Required approval text: {DEWEY_PROD_TEMPLATE_SEED_APPROVAL}",
+    ),
+) -> None:
+    """Verify, seed Dewey-owned templates when missing, then verify again."""
+    if confirm_dewey_template_repair != DEWEY_PROD_TEMPLATE_SEED_APPROVAL:
+        ccyo_out.error(
+            "Dewey template repair is a TapDB template write. "
+            f"Re-run with --confirm-dewey-template-repair {DEWEY_PROD_TEMPLATE_SEED_APPROVAL!r}."
+        )
+        raise typer.Exit(1)
+    try:
+        try:
+            _verify_dewey_templates()
+        except RuntimeError as exc:
+            ccyo_out.print_text(f"Template verification before repair failed: {exc}")
+            _seed_dewey_template_overlay()
+            _verify_dewey_templates()
+            ccyo_out.success("Dewey template repair complete")
+            return
+        ccyo_out.success("Dewey templates already present; no repair needed")
+    except RuntimeError as exc:
+        ccyo_out.error(str(exc))
+        raise typer.Exit(1) from exc
 
 
 @db_app.command("reset")

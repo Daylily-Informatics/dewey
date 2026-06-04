@@ -259,6 +259,19 @@ def test_template_definitions_are_required_codes() -> None:
         backend_mod.REGISTRATION_RECEIPT_TEMPLATE,
         backend_mod.OUTBOX_EVENT_TEMPLATE,
     )
+    assert backend_mod.BOOT_TEMPLATE_DEFINITIONS == (
+        backend_mod.ARTIFACT_TEMPLATE,
+        backend_mod.ARTIFACT_SET_TEMPLATE,
+        backend_mod.SHARE_REFERENCE_TEMPLATE,
+        backend_mod.EXTERNAL_OBJECT_TEMPLATE,
+        backend_mod.EXTERNAL_OBJECT_RELATION_TEMPLATE,
+        backend_mod.LITERATURE_SAVE_TEMPLATE,
+        backend_mod.ANOMALY_TEMPLATE,
+        backend_mod.IDEMPOTENCY_TEMPLATE,
+        backend_mod.REGISTRATION_RECEIPT_TEMPLATE,
+        backend_mod.OUTBOX_EVENT_TEMPLATE,
+    )
+    assert backend_mod.BOOT_TEMPLATE_DEFINITIONS == backend_mod.TEMPLATE_DEFINITIONS
 
 
 def test_ensure_templates_raises_on_missing() -> None:
@@ -292,6 +305,26 @@ def test_ensure_templates_passes_when_seeded() -> None:
     backend.ensure_templates(session)
     assert calls
     assert all(domain_code == "Z" for _, domain_code in calls)
+
+
+def test_ensure_templates_can_verify_startup_subset() -> None:
+    backend = _backend()
+    session = _FakeSession()
+    calls: list[str] = []
+
+    def get_template(_session, code, *, domain_code=None):
+        calls.append(code)
+        if code in backend_mod.BOOT_TEMPLATE_DEFINITIONS:
+            return SimpleNamespace(uid=1)
+        return None
+
+    backend.templates = SimpleNamespace(get_template=get_template)
+
+    backend.ensure_templates(session, backend_mod.BOOT_TEMPLATE_DEFINITIONS)
+
+    assert tuple(calls) == backend_mod.BOOT_TEMPLATE_DEFINITIONS
+    assert backend_mod.REGISTRATION_RECEIPT_TEMPLATE in calls
+    assert backend_mod.OUTBOX_EVENT_TEMPLATE in calls
 
 
 def test_create_instance_covers_success_and_missing_template() -> None:

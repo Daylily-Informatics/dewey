@@ -48,6 +48,7 @@ from dewey_service.auth import (
     complete_external_broker_login,
     configure_session_middleware,
     generate_state,
+    has_ui_session,
     require_api_auth,
     require_observability_access,
     require_session_or_api_auth,
@@ -491,9 +492,9 @@ def create_app(
         title: str = "Dewey Access Login",
         description: str = "Canonical artifact intake, lifecycle, sharing, and search for Dewey users and admins.",
         card_title: str = "Sign In",
-        card_copy: str = "Continue through Cognito Hosted UI to access the Dewey console.",
+        card_copy: str = "Continue through the shared LSMC login to access the Dewey console.",
         primary_href: str = "/auth/login",
-        primary_label: str = "Sign In with Cognito",
+        primary_label: str = "Continue with LSMC Login",
         error_message: str = "",
         status_code: int = 200,
     ) -> tuple[dict[str, Any], int]:
@@ -548,6 +549,16 @@ def create_app(
         return (
             str(share_reference.get("issued_by") or "").strip().lower()
             == str(profile.get("email") or "").strip().lower()
+        )
+
+    def _share_reference_can_be_retried(share_reference: dict[str, Any]) -> bool:
+        diagnostic = dict(share_reference.get("diagnostic") or {})
+        return (
+            str(share_reference.get("status") or "").strip().lower() == "error"
+            and str(share_reference.get("target_type") or "").strip().lower() == "artifact"
+            and str(share_reference.get("transport") or "").strip().lower() == "presigned_s3"
+            and bool(share_reference.get("managed_access"))
+            and bool(diagnostic.get("retryable"))
         )
 
     def _configured_external_reference_targets() -> list[dict[str, Any]]:
@@ -1254,8 +1265,10 @@ def create_app(
         return HTMLResponse(status_code=exc.status_code, content=exc.detail or "")
 
     @app.get("/", include_in_schema=False)
-    async def root() -> RedirectResponse:
-        return RedirectResponse(url="/ui", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+    async def root(request: Request) -> RedirectResponse:
+        if has_ui_session(request):
+            return RedirectResponse(url="/ui", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(url="/login?next=/", status_code=status.HTTP_303_SEE_OTHER)
 
     @app.get("/favicon.ico", include_in_schema=False)
     async def favicon() -> RedirectResponse:
@@ -1386,6 +1399,10 @@ def create_app(
     @app.post("/logout", include_in_schema=False)
     async def logout(request: Request) -> RedirectResponse:
         return await _logout_response(request)
+
+    @app.get("/logout", include_in_schema=False)
+    async def logout_get_alias() -> RedirectResponse:
+        return RedirectResponse(url="/auth/logout", status_code=status.HTTP_303_SEE_OTHER)
 
     @app.get("/healthz")
     async def healthz(request: Request) -> dict[str, Any]:
@@ -2643,6 +2660,42 @@ def create_app(
             status_code=400, detail="Revoked share reference is missing target_euid"
         )
 
+    @app.post("/share-references/{share_reference_euid}/retry", include_in_schema=False)
+    async def retry_share_reference_page(
+        request: Request,
+        share_reference_euid: str,
+        profile: dict[str, Any] = Depends(require_ui_admin_session),
+    ) -> Response:
+        form = await request.form()
+        share_reference = service.get_share_reference(share_reference_euid)
+        if not _share_reference_can_be_retried(share_reference):
+            raise HTTPException(
+                status_code=409,
+                detail="Only retryable managed artifact share references can be retried",
+            )
+        try:
+            payload = service.retry_share_reference(
+                share_reference_euid=share_reference_euid,
+                retried_by=str(profile.get("email") or "").strip() or None,
+            )
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        return_to = str(form.get("return_to") or "").strip()
+        if return_to == "search":
+            return RedirectResponse(url="/search", status_code=status.HTTP_303_SEE_OTHER)
+        if return_to == "shares":
+            return RedirectResponse(url="/shares", status_code=status.HTTP_303_SEE_OTHER)
+        target_euid = str(
+            payload.get("target_euid") or share_reference.get("target_euid") or ""
+        ).strip()
+        if target_euid:
+            return RedirectResponse(
+                url=f"/artifacts/euid/{target_euid}", status_code=status.HTTP_303_SEE_OTHER
+            )
+        return RedirectResponse(url="/shares", status_code=status.HTTP_303_SEE_OTHER)
+
     @app.get("/shares", include_in_schema=False)
     async def shared_data_report(
         request: Request,
@@ -3492,6 +3545,18 @@ def create_app(
     async def issue_share_reference_access(share_reference_euid: str) -> dict[str, Any]:
         try:
             return service.issue_share_reference_access(share_reference_euid, accessed_by="api")
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    @app.post(
+        "/api/v1/share-references/{share_reference_euid}/retry",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def retry_share_reference(share_reference_euid: str) -> dict[str, Any]:
+        try:
+            return service.retry_share_reference(share_reference_euid, retried_by="api")
         except DeweyNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         except ValueError as exc:

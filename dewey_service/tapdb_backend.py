@@ -71,6 +71,18 @@ TEMPLATE_DEFINITIONS: tuple[str, ...] = (
     REGISTRATION_RECEIPT_TEMPLATE,
     OUTBOX_EVENT_TEMPLATE,
 )
+BOOT_TEMPLATE_DEFINITIONS: tuple[str, ...] = (
+    ARTIFACT_TEMPLATE,
+    ARTIFACT_SET_TEMPLATE,
+    SHARE_REFERENCE_TEMPLATE,
+    EXTERNAL_OBJECT_TEMPLATE,
+    EXTERNAL_OBJECT_RELATION_TEMPLATE,
+    LITERATURE_SAVE_TEMPLATE,
+    ANOMALY_TEMPLATE,
+    IDEMPOTENCY_TEMPLATE,
+    REGISTRATION_RECEIPT_TEMPLATE,
+    OUTBOX_EVENT_TEMPLATE,
+)
 
 
 class TapDBBackend:
@@ -160,10 +172,14 @@ class TapDBBackend:
                 return f"app:{frame_info.function}"
         return "tapdb_session"
 
-    def ensure_templates(self, session: Session) -> None:
+    def ensure_templates(
+        self,
+        session: Session,
+        template_codes: tuple[str, ...] = TEMPLATE_DEFINITIONS,
+    ) -> None:
         missing = [
             template_code
-            for template_code in TEMPLATE_DEFINITIONS
+            for template_code in template_codes
             if self.templates.get_template(session, template_code, domain_code=self.domain_code)
             is None
         ]

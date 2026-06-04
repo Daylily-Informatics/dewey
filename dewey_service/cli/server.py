@@ -155,8 +155,11 @@ def _normalize_option_default(value):
 def _maybe_set_ncbi_api_key() -> None:
     if os.environ.get("NCBI_API_KEY", "").strip():
         return
+    key_file = Path(
+        os.environ.get("DEWEY_NCBI_API_KEY_FILE", "").strip() or str(NCBI_API_KEY_FILE)
+    ).expanduser()
     try:
-        key = NCBI_API_KEY_FILE.read_text(encoding="utf-8").strip()
+        key = key_file.read_text(encoding="utf-8").strip()
     except FileNotFoundError:
         return
     except OSError:

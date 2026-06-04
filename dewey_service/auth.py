@@ -501,6 +501,14 @@ def _load_ui_profile(request: Request) -> dict[str, Any] | None:
     return None
 
 
+def has_ui_session(request: Request) -> bool:
+    """Return whether the current browser request has a usable Dewey UI session."""
+    try:
+        return _load_ui_profile(request) is not None
+    except HTTPException:
+        return False
+
+
 def require_ui_session(request: Request) -> dict[str, Any]:
     profile = _load_ui_profile(request)
     if profile is None:

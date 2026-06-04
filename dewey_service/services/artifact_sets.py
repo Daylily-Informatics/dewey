@@ -31,6 +31,7 @@ _QEO_RECEIPT_FIELDS = {
     "source_service",
     "source_version",
     "parser_hint",
+    "metadata",
 }
 
 

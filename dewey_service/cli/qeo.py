@@ -39,6 +39,16 @@ def _status() -> None:
 def _dispatch(
     limit: int = typer.Option(100, min=1, max=1000, help="Maximum outbox rows to dispatch."),
     retry_errors: bool = typer.Option(False, help="Retry rows currently marked error."),
+    event_id: list[str] | None = typer.Option(
+        None,
+        "--event-id",
+        help="Dispatch only the matching Dewey outbox event id. Repeat for multiple ids.",
+    ),
+    artifact_set_euid: list[str] | None = typer.Option(
+        None,
+        "--artifact-set-euid",
+        help="Dispatch only events for the matching Dewey artifact-set EUID. Repeat for multiple EUIDs.",
+    ),
 ) -> None:
     """Dispatch pending Dewey outbox events to QEO."""
 
@@ -46,6 +56,8 @@ def _dispatch(
         result = build_cli_service().dispatch_qeo_outbox(
             limit=limit,
             retry_errors=retry_errors,
+            event_ids=set(event_id) if event_id is not None else None,
+            artifact_set_euids=set(artifact_set_euid) if artifact_set_euid is not None else None,
         )
     except Exception as exc:
         ccyo_out.error(f"QEO dispatch failed: {exc}")

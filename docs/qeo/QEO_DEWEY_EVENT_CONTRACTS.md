@@ -53,6 +53,8 @@ Payloads intentionally do not contain:
 
 Consumers must resolve details from Dewey receipts and artifact/set read APIs using scoped service auth.
 
+`dewey qeo dispatch` may be scoped with explicit event IDs and/or artifact-set EUIDs. Scoped dispatch still applies the normal dispatch-status, local-only, and Dewey event-type checks before sending rows to QEO.
+
 ## Local-Only Mode
 
 When registration request `local_only` is true:

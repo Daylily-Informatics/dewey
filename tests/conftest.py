@@ -1198,6 +1198,7 @@ class FakeDeweyService:
             "starts_at": "2026-03-10T00:00:00Z",
             "expires_at": expires_at or "2026-03-10T12:00:00Z",
             "access_url": access_url,
+            "diagnostic": {},
             "manifest": manifest,
             "connection": connection,
             "member_count": len(manifest) if target_type == "artifact_set" else 0,
@@ -1276,6 +1277,24 @@ class FakeDeweyService:
         _ = accessed_by
         _ = presign_ttl_seconds
         return self.open_share_reference(share_reference_euid)
+
+    def retry_share_reference(self, share_reference_euid: str, *, retried_by: str | None = None):
+        share = self.get_share_reference(share_reference_euid)
+        diagnostic = dict(share.get("diagnostic") or {})
+        if share.get("status") != "error" or not diagnostic.get("retryable"):
+            raise ValueError("Only retryable managed artifact share references can be retried")
+        if share.get("target_type") != "artifact" or share.get("transport") != "presigned_s3":
+            raise ValueError("retry is only supported for managed presigned_s3 artifact shares")
+        if not share.get("managed_access"):
+            raise ValueError("retry is only supported for Dewey-managed share references")
+        share["status"] = "active"
+        share["access_url"] = f"/share-references/{share_reference_euid}"
+        share["diagnostic"] = {}
+        share["last_checked_at"] = "2026-03-10T01:10:00Z"
+        share["last_retried_at"] = "2026-03-10T01:10:00Z"
+        share["last_retried_by"] = retried_by
+        self.share_references[share_reference_euid] = share
+        return dict(share)
 
     def list_share_references(
         self,
@@ -1419,6 +1438,18 @@ class FakeDeweyService:
 
     def search_literature(self, *, viewer, query: str, page: int = 1, page_size: int = 20):
         self._require_literature()
+        if hasattr(self.literature, "search"):
+            from dewey_service.literature import LiteratureUnavailableError
+
+            try:
+                self.literature.search(query=query, page=page, page_size=page_size)
+            except LiteratureUnavailableError:
+                raise
+            except Exception as exc:
+                raise LiteratureUnavailableError(
+                    "Literature search is unavailable. Verify the Dewey container can read its "
+                    "metapub/NCBI configuration, including the staged NCBI API key."
+                ) from exc
         rows = []
         lowered = str(query or "").strip().lower()
         for record in self.literature_records.values():
