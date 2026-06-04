@@ -180,6 +180,7 @@ Current resolution is a lookup contract, not a workflow engine.
 | --- | --- | --- | --- |
 | `POST` | `/api/v1/share-references` | `bearer token` | yes |
 | `GET` | `/api/v1/share-references/{share_reference_euid}` | `bearer token` | no |
+| `POST` | `/api/v1/share-references/{share_reference_euid}/retry` | `bearer token` | no |
 | `GET` | `/api/v1/artifacts/{artifact_euid}/share-references` | `bearer token` | no |
 
 Current create fields include:

@@ -405,6 +405,7 @@ class BaseDeweyService:
             "starts_at": payload.get("starts_at"),
             "expires_at": payload.get("expires_at"),
             "access_url": payload.get("access_url"),
+            "diagnostic": dict(payload.get("diagnostic") or {}),
             "manifest": list(payload.get("manifest") or []),
             "connection": dict(payload.get("connection") or {}),
             "member_count": int(payload.get("member_count") or 0),

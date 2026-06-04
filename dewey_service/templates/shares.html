@@ -1,6 +1,6 @@
 <!doctype html>
 {% from "_chrome.html" import environment_chrome, page_footer %}
-<html lang="en">
+<html lang="en" data-lsmc-service="dewey" data-theme="original">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -45,11 +45,16 @@
               </thead>
               <tbody>
                 {% for item in share_references %}
+                {% set diagnostic = item.diagnostic or {} %}
                 <tr>
                   <td class="mono">{{ item.share_reference_euid }}</td>
                   <td><div>{{ item.target_type }}</div><div class="mono">{{ item.target_euid }}</div></td>
                   <td>{{ item.recipient_email or "unknown" }}</td>
-                  <td>{{ item.status }}{% if item.revoked_at %}<div class="compact-note">revoked {{ item.revoked_at }}</div>{% endif %}</td>
+                  <td>
+                    {{ item.status }}
+                    {% if item.revoked_at %}<div class="compact-note">revoked {{ item.revoked_at }}</div>{% endif %}
+                    {% if item.status == "error" and diagnostic %}<div class="compact-note">{{ diagnostic.diagnostic_summary or "Access URL unavailable." }}</div>{% endif %}
+                  </td>
                   <td>{{ item.issued_by or "unknown" }}</td>
                   <td>{{ item.created_at or "n/a" }}</td>
                   <td>{{ item.expires_at or "n/a" }}</td>
@@ -62,6 +67,12 @@
                       <form method="post" action="/share-references/{{ item.share_reference_euid }}/revoke" onsubmit="return confirm('Revoke {{ item.share_reference_euid }}?');">
                         <input type="hidden" name="return_to" value="shares" />
                         <button class="button" type="submit">Revoke</button>
+                      </form>
+                      {% endif %}
+                      {% if is_admin and item.status == "error" and diagnostic.retryable and item.managed_access %}
+                      <form method="post" action="/share-references/{{ item.share_reference_euid }}/retry">
+                        <input type="hidden" name="return_to" value="shares" />
+                        <button class="button" type="submit">Retry</button>
                       </form>
                       {% endif %}
                     </div>
@@ -78,5 +89,6 @@
       </main>
       {{ page_footer(git_meta, build_version) }}
     </div>
+    <script src="{{ static_url('lsmc_ui.js') }}"></script>
   </body>
 </html>

@@ -1,8 +1,263 @@
 from __future__ import annotations
 
+import asyncio
+import json
+from urllib.parse import parse_qs, urlparse
+
+import pytest
 from fastapi.testclient import TestClient
 
 from dewey_service.app import create_app
+from dewey_service.service import DeweyService
+
+
+def _login_user(monkeypatch, client, groups: list[str] | None = None) -> None:
+    monkeypatch.setattr(
+        "daylily_auth_cognito.browser.session.exchange_authorization_code_async",
+        lambda **kwargs: asyncio.sleep(0, result={"id_token": "header.payload.sig"}),
+    )
+    monkeypatch.setattr(
+        "dewey_service.auth.decode_jwt_claims_noverify",
+        lambda token: {
+            "email": "operator@lsmc.bio",
+            "sub": "sub-1",
+            "cognito:groups": groups or ["dewey-readwrite"],
+        },
+    )
+    login = client.get("/auth/login", follow_redirects=False)
+    parsed = urlparse(login.headers["location"])
+    state = parse_qs(parsed.query)["state"][0]
+    client.get(
+        "/auth/callback",
+        params={"code": "code-1", "state": state},
+        follow_redirects=False,
+    )
+
+
+def _register_s3_artifact(
+    service: DeweyService,
+    *,
+    bucket: str,
+    key: str,
+    idempotency_key: str,
+) -> dict:
+    _, artifact = service.register_artifact(
+        artifact_type="pdf",
+        storage_backend="s3",
+        bucket=bucket,
+        key=key,
+        version_id=None,
+        size=None,
+        checksums=None,
+        content_type=None,
+        original_filename=None,
+        producer_system=None,
+        producer_object_euid=None,
+        storage_class=None,
+        availability_status=None,
+        metadata=None,
+        idempotency_key=idempotency_key,
+    )
+    return artifact
+
+
+def _fake_retryable_error_share(fake_service) -> str:
+    share_euid = "SH-ERROR"
+    fake_service.share_references[share_euid] = {
+        "share_reference_euid": share_euid,
+        "target_type": "artifact",
+        "target_euid": "AT-MISSING",
+        "purpose": "download",
+        "scope": "external",
+        "transport": "presigned_s3",
+        "status": "error",
+        "starts_at": "2026-03-10T00:00:00Z",
+        "expires_at": "2026-03-10T12:00:00Z",
+        "access_url": None,
+        "diagnostic": {
+            "diagnostic_code": "storage_object_missing",
+            "diagnostic_summary": "Target artifact object was not found in configured storage.",
+            "last_checked_at": "2026-03-10T00:00:00Z",
+            "retryable": True,
+            "admin_detail": "private-bucket/sensitive-key.pdf",
+        },
+        "manifest": [],
+        "connection": {},
+        "member_count": 0,
+        "transport_config": {},
+        "issued_by": "operator@lsmc.bio",
+        "recipient_email": None,
+        "managed_access": True,
+        "access_count": 0,
+        "last_accessed_at": None,
+        "revoked_at": None,
+        "revoked_by": None,
+        "created_at": "2026-03-10T00:00:00Z",
+    }
+    return share_euid
+
+
+def test_missing_target_object_creates_error_with_sanitized_diagnostic(
+    service: DeweyService,
+) -> None:
+    artifact = _register_s3_artifact(
+        service,
+        bucket="private-bucket",
+        key="sensitive/path/report.pdf",
+        idempotency_key="idem-share-missing-artifact",
+    )
+
+    status_code, share = service.create_share_reference(
+        target_type="artifact",
+        target_euid=artifact["artifact_euid"],
+        purpose="download",
+        scope="external",
+        expires_at=None,
+        issued_by="operator@lsmc.bio",
+        transport="presigned_s3",
+        ttl_seconds=600,
+        idempotency_key="idem-share-missing",
+    )
+
+    assert status_code == 201
+    assert share["status"] == "error"
+    assert share["access_url"] is None
+    assert share["diagnostic"]["diagnostic_code"] == "storage_object_missing"
+    assert share["diagnostic"]["retryable"] is True
+    diagnostic_text = json.dumps(share["diagnostic"], sort_keys=True)
+    assert "private-bucket" not in diagnostic_text
+    assert "sensitive/path/report.pdf" not in diagnostic_text
+
+    with pytest.raises(ValueError, match="share reference is error"):
+        service.issue_share_reference_access(share["share_reference_euid"])
+
+
+def test_retry_succeeds_after_repaired_storage_metadata(
+    service: DeweyService,
+) -> None:
+    artifact = _register_s3_artifact(
+        service,
+        bucket="repair-bucket",
+        key="reports/repaired.pdf",
+        idempotency_key="idem-share-repair-artifact",
+    )
+    _, share = service.create_share_reference(
+        target_type="artifact",
+        target_euid=artifact["artifact_euid"],
+        purpose="download",
+        scope="external",
+        expires_at=None,
+        issued_by="operator@lsmc.bio",
+        transport="presigned_s3",
+        ttl_seconds=600,
+        idempotency_key="idem-share-repair",
+    )
+    assert share["status"] == "error"
+
+    service._require_storage().seed_object(bucket="repair-bucket", key="reports/repaired.pdf")
+    retried = service.retry_share_reference(
+        share["share_reference_euid"],
+        retried_by="admin@lsmc.bio",
+    )
+
+    assert retried["status"] == "active"
+    assert retried["access_url"] == f"/share-references/{share['share_reference_euid']}"
+    assert retried["diagnostic"] == {}
+    access = service.issue_share_reference_access(share["share_reference_euid"])
+    assert access["access_url"].startswith("https://downloads.example.com/")
+
+
+def test_revoked_and_error_refs_do_not_generate_access_url(service: DeweyService) -> None:
+    service._require_storage().seed_object(bucket="safe-bucket", key="reports/active.pdf")
+    artifact = _register_s3_artifact(
+        service,
+        bucket="safe-bucket",
+        key="reports/active.pdf",
+        idempotency_key="idem-share-no-access-artifact",
+    )
+    _, active_share = service.create_share_reference(
+        target_type="artifact",
+        target_euid=artifact["artifact_euid"],
+        purpose="download",
+        scope="external",
+        expires_at=None,
+        issued_by="operator@lsmc.bio",
+        transport="presigned_s3",
+        ttl_seconds=600,
+        idempotency_key="idem-share-no-access",
+    )
+    service.revoke_share_reference(
+        active_share["share_reference_euid"],
+        revoked_by="operator@lsmc.bio",
+        reason="cleanup",
+    )
+    with pytest.raises(ValueError, match="revoked"):
+        service.issue_share_reference_access(active_share["share_reference_euid"])
+
+    missing_artifact = _register_s3_artifact(
+        service,
+        bucket="missing-bucket",
+        key="reports/missing.pdf",
+        idempotency_key="idem-share-error-no-access-artifact",
+    )
+    _, error_share = service.create_share_reference(
+        target_type="artifact",
+        target_euid=missing_artifact["artifact_euid"],
+        purpose="download",
+        scope="external",
+        expires_at=None,
+        issued_by="operator@lsmc.bio",
+        transport="presigned_s3",
+        ttl_seconds=600,
+        idempotency_key="idem-share-error-no-access",
+    )
+    with pytest.raises(ValueError, match="share reference is error"):
+        service.issue_share_reference_access(error_share["share_reference_euid"])
+
+
+def test_retry_share_reference_api_route(client, fake_service) -> None:
+    share_euid = _fake_retryable_error_share(fake_service)
+
+    retry = client.post(
+        f"/api/v1/share-references/{share_euid}/retry",
+        headers={"Authorization": "Bearer token-123"},
+    )
+
+    assert retry.status_code == 200
+    payload = retry.json()
+    assert payload["status"] == "active"
+    assert payload["access_url"] == f"/share-references/{share_euid}"
+    assert payload["diagnostic"] == {}
+
+
+def test_search_ui_shows_sanitized_share_error_and_admin_retry(
+    monkeypatch,
+    client,
+    fake_service,
+) -> None:
+    share_euid = _fake_retryable_error_share(fake_service)
+
+    _login_user(monkeypatch, client)
+    ordinary = client.get("/search", params={"scope": "share_reference", "q": share_euid})
+    assert ordinary.status_code == 200
+    assert "Target artifact object was not found in configured storage." in ordinary.text
+    assert "private-bucket/sensitive-key.pdf" not in ordinary.text
+    assert "Retry share" not in ordinary.text
+
+    client.cookies.clear()
+    _login_user(monkeypatch, client, groups=["platform-admin"])
+    admin = client.get("/search", params={"scope": "share_reference", "q": share_euid})
+    assert admin.status_code == 200
+    assert "Retry share" in admin.text
+    assert "private-bucket/sensitive-key.pdf" not in admin.text
+
+    retried = client.post(
+        f"/share-references/{share_euid}/retry",
+        data={"return_to": "search"},
+        follow_redirects=False,
+    )
+    assert retried.status_code == 303
+    assert retried.headers["location"] == "/search"
 
 
 def test_create_share_reference(client) -> None:

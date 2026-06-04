@@ -1,6 +1,6 @@
 <!doctype html>
 {% from "_chrome.html" import environment_chrome, page_footer %}
-<html lang="en">
+<html lang="en" data-lsmc-service="dewey" data-theme="original">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -317,8 +317,20 @@
                       <div class="note">{{ item.producer_system or "No producer" }}</div>
                         {% endif %}
                       {% else %}
-                      <div class="mono">{{ item.access_url or "No access url" }}</div>
+                      {% set diagnostic = item.diagnostic or {} %}
+                      {% if item.status == "error" and diagnostic %}
+                      <div class="mono">Share reference error</div>
+                      <div class="note">{{ diagnostic.diagnostic_summary or "Access URL unavailable." }}</div>
+                        {% if is_admin and diagnostic.retryable and item.managed_access %}
+                      <form method="post" action="/share-references/{{ item.share_reference_euid }}/retry" class="compact-form">
+                        <input type="hidden" name="return_to" value="search" />
+                        <button class="button" type="submit">Retry share</button>
+                      </form>
+                        {% endif %}
+                      {% else %}
+                      <div class="mono">{{ item.access_url or "No access URL" }}</div>
                       <div class="note">{{ item.expires_at or "No expiry" }}</div>
+                      {% endif %}
                       {% endif %}
                     </td>
                     <td>
@@ -447,5 +459,6 @@
         syncCounter();
       })();
     </script>
+    <script src="{{ static_url('lsmc_ui.js') }}"></script>
   </body>
 </html>

@@ -1,7 +1,7 @@
 <!doctype html>
 {% from "_chrome.html" import environment_chrome, page_footer %}
 {% import "_artifact_links.html" as artifact_links %}
-<html lang="en">
+<html lang="en" data-lsmc-service="dewey" data-theme="original">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -465,5 +465,6 @@
         renderDag(normalizeGraph(graph));
       });
     </script>
+    <script src="{{ static_url('lsmc_ui.js') }}"></script>
   </body>
 </html>

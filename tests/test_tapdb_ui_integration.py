@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from pathlib import Path
 
 from fastapi import APIRouter, FastAPI
 from fastapi.responses import HTMLResponse
@@ -160,3 +161,16 @@ def test_tapdb_graph_page_renders_for_logged_in_user(
     assert response.status_code == 200
     assert "Dewey TapDB Object Graph" in response.text
     assert "/api/dag/search" in response.text
+    assert "hold z while wheeling to zoom" in response.text
+    assert "Arrowheads point to parent nodes." in response.text
+
+
+def test_tapdb_graph_template_requires_z_for_wheel_zoom_and_parent_arrows() -> None:
+    template = Path("dewey_service/templates/tapdb_graph.html").read_text(encoding="utf-8")
+
+    assert "configureCytoscapeInteractions(mount);" in template
+    assert '"wheel"' in template
+    assert "stopImmediatePropagation()" in template
+    assert 'toLowerCase() === "z"' in template
+    assert '"source-arrow-shape": "triangle"' in template
+    assert '"target-arrow-shape": "none"' in template
