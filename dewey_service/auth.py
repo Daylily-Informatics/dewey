@@ -29,6 +29,11 @@ from fastapi import Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from dewey_service.ai_agent_access import (
+    AgentTokenError,
+    is_ai_agent_token,
+    validate_ai_agent_request,
+)
 from dewey_service.audit import set_current_authenticated_user_email
 from dewey_service.rbac import Role, normalize_session_profile, profile_has_role
 from dewey_service.settings import Settings
@@ -496,6 +501,7 @@ def _load_ui_profile(request: Request) -> dict[str, Any] | None:
                 detail="Authenticated Dewey user email is required",
             )
         set_current_authenticated_user_email(email)
+        request.state.authorized_by_email = email
         return profile
 
     return None
@@ -587,6 +593,34 @@ def require_observability_access(settings: Settings):
         set_current_authenticated_user_email(None)
         if credentials is not None:
             token = str(credentials.credentials or "").strip()
+            if is_ai_agent_token(token):
+                try:
+                    grant = validate_ai_agent_request(request, token)
+                except AgentTokenError as exc:
+                    raise HTTPException(
+                        status_code=exc.status_code,
+                        detail=exc.detail,
+                        headers={"WWW-Authenticate": "Bearer"}
+                        if exc.status_code == status.HTTP_401_UNAUTHORIZED
+                        else None,
+                    ) from exc
+                return {
+                    "auth_mode": "ai_agent_token",
+                    "service_principal": False,
+                    "ai_agent": {
+                        "agent_id": grant.agent_id,
+                        "token_id": grant.token_id,
+                        "authorized_by_email": grant.issued_by_email,
+                        "endpoint_id": grant.endpoint_id,
+                        "expires_at": grant.expires_at,
+                    },
+                    "profile": {
+                        "email": grant.issued_by_email,
+                        "sub": f"ai-agent:{grant.agent_id}",
+                        "roles": ["dewey-readonly"],
+                        "groups": ["ai-agent"],
+                    },
+                }
             if token in settings.api_tokens():
                 set_current_authenticated_user_email(None)
                 store = getattr(request.app.state, "observability", None)

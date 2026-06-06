@@ -5,6 +5,8 @@ from __future__ import annotations
 import csv
 import io
 import json
+import logging
+import os
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from time import monotonic, time_ns
@@ -471,6 +473,28 @@ def create_app(
     api_auth_dep = require_api_auth(settings)
     observability_auth_dep = require_observability_access(settings)
     session_or_api_auth_dep = require_session_or_api_auth(settings)
+    theme_names = {"original", "lsmc", "dark", "light", "tacky"}
+
+    def _broker_preferences_contract(email: str) -> tuple[str, dict[str, str]]:
+        raw_url = str(os.environ.get("LSMC_AUTH_BROKER_USER_PREFERENCES_URL") or "").strip()
+        token = str(os.environ.get("LSMC_AUTH_BROKER_SERVICE_TOKEN") or "").strip()
+        service_id = str(os.environ.get("LSMC_AUTH_BROKER_SERVICE_ID") or "dewey").strip()
+        if not raw_url:
+            raise HTTPException(
+                status_code=503,
+                detail="Broker user preferences URL is not configured",
+            )
+        if not token:
+            raise HTTPException(status_code=503, detail="Broker service token is not configured")
+        if "{email}" not in raw_url:
+            raise HTTPException(
+                status_code=503,
+                detail="Broker user preferences URL must include {email}",
+            )
+        return raw_url.replace("{email}", quote(email, safe="")), {
+            "Authorization": f"Bearer {token}",
+            "X-LSMC-Service-ID": service_id,
+        }
 
     def _template_context(**kwargs: Any) -> dict[str, Any]:
         context = {
@@ -1226,6 +1250,23 @@ def create_app(
                 duration_ms=(monotonic() - started) * 1000,
                 path=request.url.path,
             )
+            logging.getLogger("lsmc.access").info(
+                "request_completed",
+                extra={
+                    "request_id": getattr(request.state, "request_id", ""),
+                    "correlation_id": getattr(request.state, "correlation_id", ""),
+                    "service_id": "dewey",
+                    "actor": getattr(request.state, "authorized_by_email", None),
+                    "agent_id": getattr(request.state, "agent_id", None),
+                    "ip": request.client.host if request.client else None,
+                    "method": request.method,
+                    "path": request.url.path,
+                    "route": route_template_from_request(request),
+                    "status": status_code,
+                    "duration_ms": round((monotonic() - started) * 1000, 2),
+                    "auth_mode": getattr(request.state, "auth_mode", None),
+                },
+            )
 
     def _require_idempotency_key(value: str | None) -> str:
         normalized = str(value or "").strip()
@@ -1496,6 +1537,39 @@ def create_app(
         profile: dict[str, Any] = Depends(require_ui_session),
     ) -> dict[str, Any]:
         return build_my_health_payload(request, profile)
+
+    @app.get("/api/v1/me/preferences")
+    async def current_user_preferences(
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> dict[str, Any]:
+        email = str(profile.get("email") or "").strip()
+        if not email:
+            raise HTTPException(status_code=400, detail="Authenticated user email is required")
+        url, headers = _broker_preferences_contract(email)
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.get(url, headers=headers)
+        if response.status_code >= 400:
+            raise HTTPException(status_code=response.status_code, detail=response.text)
+        return response.json()
+
+    @app.put("/api/v1/me/preferences")
+    async def update_current_user_preferences(
+        request: Request,
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> dict[str, Any]:
+        email = str(profile.get("email") or "").strip()
+        if not email:
+            raise HTTPException(status_code=400, detail="Authenticated user email is required")
+        payload = await request.json()
+        theme = str(payload.get("theme") or "").strip()
+        if theme and theme not in theme_names:
+            raise HTTPException(status_code=400, detail="Unknown theme")
+        url, headers = _broker_preferences_contract(email)
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.put(url, headers=headers, json={"theme": theme or None})
+        if response.status_code >= 400:
+            raise HTTPException(status_code=response.status_code, detail=response.text)
+        return response.json()
 
     @app.get("/auth_health")
     async def auth_health(
