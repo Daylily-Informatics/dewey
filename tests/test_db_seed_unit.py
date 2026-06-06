@@ -61,10 +61,36 @@ def test_db_seed_main_claims_prefixes_before_seeding(
     monkeypatch.setattr(db_seed, "TapDBBackend", FakeBackend)
     monkeypatch.setattr(db_seed, "resolve_seed_config_dirs", fake_resolve)
     monkeypatch.setattr(db_seed, "get_settings", fake_get_settings)
-    monkeypatch.setattr(
-        db_seed,
-        "validate_template_configs",
-        lambda config_dirs, strict: (
+    def fake_validate_template_configs(config_dirs, strict):  # noqa: ANN001 - test double
+        if config_dirs == [core_config_dir]:
+            return (
+                [
+                    {
+                        "_source_file": str(core_config_dir / "system" / "system.json"),
+                        "name": "TapDB System User",
+                        "polymorphic_discriminator": "actor_template",
+                        "category": "SYS",
+                        "type": "actor",
+                        "subtype": "system_user",
+                        "version": "1.0",
+                        "instance_prefix": "SYS",
+                    },
+                    {
+                        "_source_file": str(
+                            core_config_dir / "external_refs" / "external_ref.json"
+                        ),
+                        "name": "TapDB External Reference",
+                        "polymorphic_discriminator": "external_reference_template",
+                        "category": "XRF",
+                        "type": "reference",
+                        "subtype": "external_object",
+                        "version": "1.0",
+                        "instance_prefix": "XRF",
+                    },
+                ],
+                [],
+            )
+        return (
             [
                 {
                     "_source_file": str(
@@ -79,19 +105,20 @@ def test_db_seed_main_claims_prefixes_before_seeding(
                     "instance_prefix": "DGX",
                 },
                 {
-                    "_source_file": str(core_config_dir / "system" / "system.json"),
-                    "name": "TapDB System User",
-                    "polymorphic_discriminator": "actor_template",
-                    "category": "SYS",
-                    "type": "actor",
-                    "subtype": "system_user",
+                    "_source_file": str(tmp_path / "config" / "external_refs" / "external_ref.json"),
+                    "name": "TapDB External Reference",
+                    "polymorphic_discriminator": "external_reference_template",
+                    "category": "XRF",
+                    "type": "reference",
+                    "subtype": "external_object",
                     "version": "1.0",
-                    "instance_prefix": "SYS",
+                    "instance_prefix": "XRF",
                 },
             ],
             [],
-        ),
-    )
+        )
+
+    monkeypatch.setattr(db_seed, "validate_template_configs", fake_validate_template_configs)
     monkeypatch.setattr(
         db_seed,
         "seed_templates",
@@ -126,6 +153,7 @@ def test_db_seed_main_claims_prefixes_before_seeding(
     assert calls["seed_calls"][0]["seed_kwargs"]["owner_repo_name"] == "daylily-tapdb"
     assert calls["seed_calls"][1]["overwrite"] is True
     assert len(calls["seed_calls"][1]["templates"]) == 1
+    assert calls["seed_calls"][1]["templates"][0]["instance_prefix"] == "DGX"
     assert calls["seed_calls"][1]["seed_kwargs"]["domain_code"] == "Z"
     assert calls["seed_calls"][1]["seed_kwargs"]["owner_repo_name"] == "dewey"
     assert str(calls["seed_calls"][1]["seed_kwargs"]["domain_registry_path"]).endswith(
@@ -176,6 +204,7 @@ def test_db_seed_main_claims_prefixes_before_seeding(
     registry = json.loads(prefix_registry.read_text(encoding="utf-8"))
     assert registry["ownership"]["Z"]["DGX"]["issuer_app_code"] == "dewey"
     assert "SYS" not in registry["ownership"]["Z"]
+    assert "XRF" not in registry["ownership"]["Z"]
 
 
 def test_db_seed_claim_helper_rejects_collisions(tmp_path: Path) -> None:
@@ -255,6 +284,16 @@ def test_db_seed_claim_helper_skips_core_prefixes(tmp_path: Path) -> None:
             "subtype": "webhook_event",
             "version": "1.0",
             "instance_prefix": "MSG",
+        },
+        {
+            "_source_file": str(tmp_path / "client_config" / "external_refs" / "external_ref.json"),
+            "name": "TapDB External Reference",
+            "polymorphic_discriminator": "external_reference_template",
+            "category": "XRF",
+            "type": "reference",
+            "subtype": "external_object",
+            "version": "1.0",
+            "instance_prefix": "XRF",
         },
     ]
 
