@@ -1567,6 +1567,8 @@ def create_app(
         url, headers = _broker_preferences_contract(email)
         async with httpx.AsyncClient(timeout=5.0) as client:
             response = await client.put(url, headers=headers, json={"theme": theme or None})
+            if response.status_code < 400:
+                response = await client.get(url, headers=headers)
         if response.status_code >= 400:
             raise HTTPException(status_code=response.status_code, detail=response.text)
         return response.json()
