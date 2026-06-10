@@ -89,7 +89,7 @@ def _build_runtime_app(*, monkeypatch, embed_tapdb: bool) -> FastAPI:
             lambda settings: "/tmp/dewey-tapdb.yaml",
         )
         monkeypatch.setattr(
-            "dewey_service.integrations.tapdb_ui.create_tapdb_web_app",
+            "dewey_service.integrations.tapdb_ui.create_tapdb_gui_app",
             lambda **kwargs: _build_dummy_tapdb_app(),
         )
         monkeypatch.setattr(
