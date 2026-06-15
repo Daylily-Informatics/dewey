@@ -79,6 +79,15 @@ def test_dockerfile_copies_tapdb_template_config() -> None:
     assert "COPY config ./config" in dockerfile
 
 
+def test_dockerfile_installs_git_before_git_pinned_dependencies() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    dockerfile = (repo_root / "Dockerfile").read_text(encoding="utf-8")
+
+    first_uv_sync = dockerfile.index("RUN uv sync")
+    git_install = dockerfile.index("git")
+    assert git_install < first_uv_sync
+
+
 def test_dockerfile_installs_postgresql_client_for_tapdb_bootstrap() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     dockerfile = (repo_root / "Dockerfile").read_text(encoding="utf-8")
