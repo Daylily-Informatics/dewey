@@ -52,12 +52,17 @@ def _dispatch(
 ) -> None:
     """Dispatch pending Dewey outbox events to QEO."""
 
+    def _normalize_repeated_option(value: object) -> set[str] | None:
+        if value is None or not isinstance(value, (list, tuple, set)):
+            return None
+        return {str(item) for item in value}
+
     try:
         result = build_cli_service().dispatch_qeo_outbox(
             limit=limit,
             retry_errors=retry_errors,
-            event_ids=set(event_id) if event_id is not None else None,
-            artifact_set_euids=set(artifact_set_euid) if artifact_set_euid is not None else None,
+            event_ids=_normalize_repeated_option(event_id),
+            artifact_set_euids=_normalize_repeated_option(artifact_set_euid),
         )
     except Exception as exc:
         ccyo_out.error(f"QEO dispatch failed: {exc}")

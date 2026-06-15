@@ -519,7 +519,7 @@ def create_app(
     api_auth_dep = require_api_auth(settings)
     observability_auth_dep = require_observability_access(settings)
     session_or_api_auth_dep = require_session_or_api_auth(settings)
-    theme_names = {"original", "lsmc", "dark", "light", "tacky"}
+    theme_names = {"original", "light", "dark", "cbf"}
 
     def _broker_preferences_contract(email: str) -> tuple[str, dict[str, str]]:
         raw_url = str(os.environ.get("LSMC_AUTH_BROKER_USER_PREFERENCES_URL") or "").strip()

@@ -252,7 +252,16 @@ def test_qeo_dispatch_cli_emits_result(monkeypatch: pytest.MonkeyPatch) -> None:
     emitted: list[dict[str, object]] = []
 
     class FakeService:
-        def dispatch_qeo_outbox(self, *, limit: int, retry_errors: bool):
+        def dispatch_qeo_outbox(
+            self,
+            *,
+            limit: int,
+            retry_errors: bool,
+            event_ids=None,
+            artifact_set_euids=None,
+        ):
+            assert event_ids is None
+            assert artifact_set_euids is None
             return {
                 "attempted": 1,
                 "limit": limit,

@@ -27,10 +27,10 @@ def test_pyproject_declares_shared_library_versions() -> None:
 
     assert "cli-core-yo==2.1.1" in dependencies
     assert "daylily-auth-cognito==2.1.5" in dependencies
-    assert "daylily-tapdb==8.0.1" in dependencies
+    assert "daylily-tapdb==9.0.0" in dependencies
     assert "psycopg2-binary>=2.9.9" in dependencies
     assert tapdb_dependency == _tapdb_dependency_spec()
-    assert tapdb_dependency == "daylily-tapdb==8.0.1"
+    assert tapdb_dependency == "daylily-tapdb==9.0.0"
 
 
 def test_pyproject_uses_a_single_dependency_set() -> None:

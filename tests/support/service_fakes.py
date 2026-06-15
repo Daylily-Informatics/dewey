@@ -81,8 +81,9 @@ class _InMemoryBackend:
         _ = commit
         yield self
 
-    def ensure_templates(self, session) -> None:
+    def ensure_templates(self, session, template_definitions=None) -> None:
         _ = session
+        _ = template_definitions
         return
 
     def create_instance(
