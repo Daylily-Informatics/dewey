@@ -114,6 +114,16 @@ def test_db_seed_main_claims_prefixes_before_seeding(
                     "version": "1.0",
                     "instance_prefix": "XRF",
                 },
+                {
+                    "_source_file": str(tmp_path / "config" / "generic_viewer" / "viewer.json"),
+                    "name": "TapDB Generic Viewer",
+                    "polymorphic_discriminator": "generic_viewer_template",
+                    "category": "GVR",
+                    "type": "viewer",
+                    "subtype": "generic",
+                    "version": "1.0",
+                    "instance_prefix": "GVR",
+                },
             ],
             [],
         )
@@ -205,6 +215,7 @@ def test_db_seed_main_claims_prefixes_before_seeding(
     assert registry["ownership"]["Z"]["DGX"]["issuer_app_code"] == "dewey"
     assert "SYS" not in registry["ownership"]["Z"]
     assert "XRF" not in registry["ownership"]["Z"]
+    assert "GVR" not in registry["ownership"]["Z"]
 
 
 def test_db_seed_claim_helper_rejects_collisions(tmp_path: Path) -> None:
@@ -294,6 +305,16 @@ def test_db_seed_claim_helper_skips_core_prefixes(tmp_path: Path) -> None:
             "subtype": "external_object",
             "version": "1.0",
             "instance_prefix": "XRF",
+        },
+        {
+            "_source_file": str(tmp_path / "client_config" / "generic_viewer" / "viewer.json"),
+            "name": "TapDB Generic Viewer",
+            "polymorphic_discriminator": "generic_viewer_template",
+            "category": "GVR",
+            "type": "viewer",
+            "subtype": "generic",
+            "version": "1.0",
+            "instance_prefix": "GVR",
         },
     ]
 

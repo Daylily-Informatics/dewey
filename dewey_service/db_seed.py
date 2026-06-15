@@ -19,7 +19,7 @@ from dewey_service.settings import get_settings
 from dewey_service.tapdb_backend import TapDBBackend
 
 _PREFIX_OWNERSHIP_REGISTRY_VERSION = "0.4.0"
-_TAPDB_CORE_PREFIXES = {"ADT", "EDG", "MSG", "SYS", "TPX", "XRF"}
+_TAPDB_CORE_PREFIXES = {"ADT", "EDG", "GVR", "MSG", "SYS", "TPX", "XRF"}
 
 
 def _is_source_under_dir(source_file: str | None, directory: Path) -> bool:
