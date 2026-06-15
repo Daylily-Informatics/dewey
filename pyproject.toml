@@ -13,7 +13,7 @@ dependencies = [
     "bandit[toml]>=1.8.0",
     "cli-core-yo==2.1.1",
     "build>=1.2.0",
-    "daylily-tapdb @ git+https://github.com/Daylily-Informatics/daylily-tapdb.git@9.0.3",
+    "daylily-tapdb @ git+https://github.com/Daylily-Informatics/daylily-tapdb.git@9.0.4",
     "daylily-auth-cognito==2.1.5",
     "djlint",
     "fastapi>=0.115.0",
