@@ -51,6 +51,10 @@ def test_artifacts_page_requires_login_and_serves_bulk_template(monkeypatch, cli
     assert 'href="/artifacts"' in page.text
     assert 'href="/artifacts/dag"' in page.text
     assert "section=recent_artifacts#section-recent_artifacts" in page.text
+    assert 'data-testid="dewey-artifact-register-form"' in page.text
+    assert 'data-testid="dewey-artifact-s3-mode"' in page.text
+    assert 'data-testid="dewey-artifact-s3-sources"' in page.text
+    assert 'data-testid="dewey-artifact-register-submit"' in page.text
 
     template = client.get("/artifacts/bulk-template.tsv")
     assert template.status_code == 200
