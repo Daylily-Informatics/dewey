@@ -1,4 +1,14 @@
-# Dewey
+<p align="center">
+  <strong>Dewey</strong><br>
+  Artifact, reference, share, and external-object registry for Dayhoff.
+</p>
+
+<p align="center">
+  <a href="docs/apis.md">API</a> ·
+  <a href="docs/gui.md">GUI</a> ·
+  <a href="docs/architecture.md">Architecture</a> ·
+  <a href="docs/sequencer_run_registration.md">Run registration</a>
+</p>
 
 ## Overview
 
@@ -15,6 +25,19 @@ flowchart LR
     Artifact --> External["External-object links"]
     Artifact --> TapDB["TapDB object and lineage view"]
 ```
+
+## What It Does
+
+| Capability | Current surface |
+|---|---|
+| Artifact registry | CLI, GUI search/details, and `/api/v1/*` artifact routes |
+| Share references | Managed stable access routes with sanitized error diagnostics |
+| External objects | Cross-service object references and relation records |
+| TapDB substrate | Generic object, lineage, audit, template, and external-link inspection at `/tapdb` |
+
+## How It Works
+
+Dewey writes registry objects and share-reference state through explicit service config and TapDB-backed storage. Access URLs stay lazy and managed: active share references expose stable Dewey routes, while raw presigned URLs, object keys, and storage internals are not shown to unauthorized users. CLI, GUI, and API surfaces are alternate entrypoints over that same registry/share logic where the feature is implemented.
 
 ## Quickstart
 
