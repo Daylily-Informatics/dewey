@@ -225,7 +225,7 @@ def test_runtime_route_inventory_covers_first_party_surfaces(monkeypatch) -> Non
 def test_docs_and_static_runtime_routes_have_direct_request_coverage(client) -> None:
     openapi = client.get("/openapi.json")
     assert openapi.status_code == 200
-    assert "/api/v1/share-references" in openapi.json()["paths"]
+    assert "/api/v1/share-references" not in openapi.json()["paths"]
     assert "/api/v1/shares" in openapi.json()["paths"]
     assert "/api/v1/share-roots" in openapi.json()["paths"]
 

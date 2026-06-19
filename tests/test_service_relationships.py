@@ -56,7 +56,7 @@ def test_artifact_set_member_lifecycle(service: DeweyService) -> None:
         service.get_artifact_set("AS-999999")
 
 
-def test_share_reference_behaviors(service: DeweyService) -> None:
+def test_share_behaviors(service: DeweyService) -> None:
     service._require_storage().seed_object(
         bucket="bucket-4", key="alignments/sample.bam", size=1024
     )
@@ -78,82 +78,110 @@ def test_share_reference_behaviors(service: DeweyService) -> None:
         idempotency_key="idem-share-artifact",
     )
 
-    auto_code, auto_share = service.create_share_reference(
-        target_type="artifact",
+    auto_code, auto_share = service.create_share(
+        target_kind="artifact_object",
         target_euid=artifact["artifact_euid"],
+        targets=[],
+        name="download share",
         purpose="download",
-        scope=None,
+        owner_email="tester@example.com",
+        allowed_users=[],
+        allowed_domains=[],
+        allowed_groups=[],
+        delivery_modes=["presigned_s3"],
         expires_at=None,
-        issued_by="tester@example.com",
-        transport="presigned_s3",
         ttl_seconds=120,
         idempotency_key="idem-share-auto",
     )
-    explicit_code, explicit_share = service.create_share_reference(
-        target_type="artifact",
+    explicit_code, explicit_share = service.create_share(
+        target_kind="artifact_object",
         target_euid=artifact["artifact_euid"],
+        targets=[],
+        name="explicit share",
         purpose=None,
-        scope="internal",
+        owner_email="tester@example.com",
+        allowed_users=[],
+        allowed_domains=[],
+        allowed_groups=[],
+        delivery_modes=["presigned_s3"],
         expires_at="2026-04-01T00:00:00Z",
-        issued_by=None,
-        transport="presigned_s3",
+        ttl_seconds=None,
         idempotency_key="idem-share-explicit",
     )
 
     assert auto_code == 201
     assert explicit_code == 201
-    assert auto_share["issued_by"] == "tester@example.com"
+    assert auto_share["owner_email"] == "tester@example.com"
     assert explicit_share["expires_at"] == "2026-04-01T00:00:00Z"
-    assert auto_share["access_url"] == f"/share-references/{auto_share['share_reference_euid']}"
-    opened_share = service.open_share_reference(auto_share["share_reference_euid"])
-    assert opened_share["presigned_access_url"].startswith("https://downloads.example.com/")
-    assert opened_share["access_count"] == 1
-    assert (
-        service.list_share_references(
-            target_type="artifact",
-            target_euid=artifact["artifact_euid"],
-        )[0]["share_reference_euid"]
-        == auto_share["share_reference_euid"]
+    opened_share = service.create_share_access_package(
+        auto_share["share_euid"],
+        delivery_mode="presigned_s3",
+        actor_email="tester@example.com",
+        actor_groups=[],
     )
-    access = service.issue_share_reference_access(
-        auto_share["share_reference_euid"],
-        accessed_by="recipient@example.com",
+    assert opened_share["signed_url"].startswith("https://downloads.example.com/")
+    artifact_shares = service.list_shares(
+        target_kind="artifact_object",
+        target_euid=artifact["artifact_euid"],
     )
-    assert access["access_url"].startswith("https://downloads.example.com/")
-    assert access["access_count"] == 2
-    assert access["last_accessed_by"] == "recipient@example.com"
-    revoked = service.revoke_share_reference(
-        auto_share["share_reference_euid"],
+    assert {item["share_euid"] for item in artifact_shares} >= {
+        auto_share["share_euid"],
+        explicit_share["share_euid"],
+    }
+    access = service.create_share_access_package(
+        auto_share["share_euid"],
+        delivery_mode="presigned_s3",
+        actor_email="tester@example.com",
+        actor_groups=[],
+    )
+    assert access["signed_url"].startswith("https://downloads.example.com/")
+    assert service.get_share(auto_share["share_euid"])["access_count"] == 2
+    revoked = service.revoke_share(
+        auto_share["share_euid"],
         revoked_by="tester@example.com",
         reason="recipient request",
     )
     assert revoked["status"] == "revoked"
     assert revoked["revoked_by"] == "tester@example.com"
-    assert revoked["access_url"] is None
-    with pytest.raises(ValueError, match="revoked"):
-        service.issue_share_reference_access(auto_share["share_reference_euid"])
+    with pytest.raises(ValueError, match="not active"):
+        service.create_share_access_package(
+            auto_share["share_euid"],
+            delivery_mode="presigned_s3",
+            actor_email="tester@example.com",
+            actor_groups=[],
+        )
 
-    with pytest.raises(ValueError, match="target_type must be artifact or artifact_set"):
-        service.create_share_reference(
-            target_type="report",
+    with pytest.raises(ValueError, match="target_kind must be"):
+        service.create_share(
+            target_kind="report",
             target_euid="AT-1",
+            targets=[],
+            name=None,
             purpose=None,
-            scope=None,
+            owner_email=None,
+            allowed_users=[],
+            allowed_domains=[],
+            allowed_groups=[],
+            delivery_modes=["presigned_s3"],
             expires_at=None,
-            issued_by=None,
-            transport="presigned_s3",
+            ttl_seconds=None,
             idempotency_key="idem-share-bad-target",
         )
 
     with pytest.raises(ValueError, match="expires_at must be ISO8601"):
-        service.create_share_reference(
-            target_type="artifact",
+        service.create_share(
+            target_kind="artifact_object",
             target_euid=artifact["artifact_euid"],
+            targets=[],
+            name=None,
             purpose=None,
-            scope=None,
+            owner_email="tester@example.com",
+            allowed_users=[],
+            allowed_domains=[],
+            allowed_groups=[],
+            delivery_modes=["presigned_s3"],
             expires_at="not-a-date",
-            issued_by=None,
-            transport="presigned_s3",
+            ttl_seconds=None,
             idempotency_key="idem-share-bad-expiry",
         )
 

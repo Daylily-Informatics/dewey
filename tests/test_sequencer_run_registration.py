@@ -274,19 +274,19 @@ def test_browser_sequencer_run_registration_requires_session(client) -> None:
     assert response.status_code in {303, 401, 403}
 
 
-def test_browser_share_route_is_single_session_route(client) -> None:
+def test_browser_share_reference_route_is_removed(client) -> None:
     routes = [
         route
         for route in client.app.routes
         if getattr(route, "path", None) == "/share-references/{share_reference_euid}"
         and "GET" in getattr(route, "methods", set())
     ]
-    assert len(routes) == 1
+    assert routes == []
     response = client.get("/share-references/SH-000001", follow_redirects=False)
-    assert response.status_code in {401, 403}
+    assert response.status_code == 404
 
 
-def test_create_share_reference_does_not_persist_presigned_urls(
+def test_create_share_does_not_persist_presigned_urls(
     service: DeweyService,
     storage: _FakeStorageClient,
 ) -> None:
@@ -343,23 +343,27 @@ def test_create_share_reference_does_not_persist_presigned_urls(
         artifact_euid=artifact_b["artifact_euid"],
         idempotency_key="share-set-b",
     )
-    _, share = service.create_share_reference(
-        target_type="artifact_set",
+    _, share = service.create_share(
+        target_kind="artifact_set",
         target_euid=artifact_set["artifact_set_euid"],
+        targets=[],
+        name="artifact set share",
         purpose="download",
-        scope="external",
+        owner_email="operator@example.com",
+        allowed_users=[],
+        allowed_domains=[],
+        allowed_groups=[],
+        delivery_modes=["presigned_s3_manifest"],
         expires_at=None,
-        issued_by="operator@example.com",
-        transport="presigned_s3",
-        transport_config={},
         ttl_seconds=900,
         idempotency_key="share-create",
     )
 
-    assert share["manifest"]
-    assert all("access_url" not in item for item in share["manifest"])
-    issued = service.issue_share_reference_access(
-        share["share_reference_euid"],
-        accessed_by="operator@example.com",
+    assert "manifest" not in share
+    issued = service.create_share_access_package(
+        share["share_euid"],
+        delivery_mode="presigned_s3_manifest",
+        actor_email="operator@example.com",
+        actor_groups=[],
     )
-    assert all("access_url" in item for item in issued["manifest"])
+    assert all("signed_url" in item for item in issued["manifest"])

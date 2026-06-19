@@ -111,7 +111,7 @@
               <div class="eyebrow">Search V2</div>
               <h2>Query Dewey records, then export the result set cleanly.</h2>
               <p>
-                Search spans artifact records and share-reference records with focused filters
+                Search spans artifact records and managed-share records with focused filters
                 for lifecycle status, producer identity, and external-object linkage.
               </p>
             </div>
@@ -204,7 +204,7 @@
                   <label>Scopes</label>
                   <div class="stack">
                     <label class="pill"><input type="checkbox" name="scope" value="artifact" {% if not request.query_params.getlist('scope') or 'artifact' in request.query_params.getlist('scope') %}checked{% endif %} /> Artifact</label>
-                    <label class="pill"><input type="checkbox" name="scope" value="share_reference" {% if not request.query_params.getlist('scope') or 'share_reference' in request.query_params.getlist('scope') %}checked{% endif %} /> Share Reference</label>
+                    <label class="pill"><input type="checkbox" name="scope" value="share" {% if not request.query_params.getlist('scope') or 'share' in request.query_params.getlist('scope') %}checked{% endif %} /> Share</label>
                   </div>
                 </div>
               </div>
@@ -229,7 +229,7 @@
 
             <div class="results-meta">
               <span class="pill pill-active">Artifacts {{ result["facets"]["artifact"] }}</span>
-              <span class="pill">Share Refs {{ result["facets"]["share_reference"] }}</span>
+              <span class="pill">Shares {{ result["facets"]["share"] }}</span>
               <span class="pill">Page {{ result["page"] }}</span>
             </div>
 
@@ -273,7 +273,7 @@
                 <tbody>
                   {% if result["items"] %}
                   {% for item in result["items"] %}
-                  <tr data-record="{{ item.euid }} {{ item.record_type }}" data-primary="{{ item.original_filename or item.title or item.name or item.target_euid }}" data-secondary="{{ item.storage_uri or item.access_url or item.pmid or '' }}" data-status="{{ item.storage_status or item.status or '' }}">
+                  <tr data-record="{{ item.euid }} {{ item.record_type }}" data-primary="{{ item.original_filename or item.title or item.name or item.target_euid }}" data-secondary="{{ item.storage_uri or item.share_euid or item.pmid or '' }}" data-status="{{ item.storage_status or item.status or '' }}">
                     <td>
                       {% if item.record_type == "artifact" %}
                       <input type="checkbox" class="js-artifact-select" value="{{ item.euid }}" aria-label="Select {{ item.euid }}" />
@@ -283,7 +283,7 @@
                       {% if item.record_type == "artifact" %}
                       <a class="mono" href="/artifacts/euid/{{ item.euid }}">{{ item.euid }}</a>
                       {% else %}
-                      <div class="mono">{{ item.euid }}</div>
+                      <a class="mono" href="/shares/{{ item.euid }}">{{ item.euid }}</a>
                       {% endif %}
                       <div>{{ item.record_type }}</div>
                     </td>
@@ -300,7 +300,7 @@
                         {% endif %}
                       {% else %}
                       <div>{{ item.target_euid }}</div>
-                      <div class="note">{{ item.transport or "share" }}</div>
+                      <div class="note">{{ item.delivery_modes|join(", ") if item.delivery_modes else "share" }}</div>
                       {% endif %}
                     </td>
                     <td>
@@ -317,20 +317,8 @@
                       <div class="note">{{ item.producer_system or "No producer" }}</div>
                         {% endif %}
                       {% else %}
-                      {% set diagnostic = item.diagnostic or {} %}
-                      {% if item.status == "error" and diagnostic %}
-                      <div class="mono">Share reference error</div>
-                      <div class="note">{{ diagnostic.diagnostic_summary or "Access URL unavailable." }}</div>
-                        {% if is_admin and diagnostic.retryable and item.managed_access %}
-                      <form method="post" action="/share-references/{{ item.share_reference_euid }}/retry" class="compact-form">
-                        <input type="hidden" name="return_to" value="search" />
-                        <button class="button" type="submit">Retry share</button>
-                      </form>
-                        {% endif %}
-                      {% else %}
-                      <div class="mono">{{ item.access_url or "No access URL" }}</div>
+                      <div class="mono">{{ item.share_euid or item.euid }}</div>
                       <div class="note">{{ item.expires_at or "No expiry" }}</div>
-                      {% endif %}
                       {% endif %}
                     </td>
                     <td>

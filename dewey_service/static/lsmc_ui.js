@@ -85,7 +85,7 @@
     if (location.pathname.startsWith("/search")) return "dewey search query --help";
     if (location.pathname.startsWith("/artifacts/dag")) return "dewey dag --help";
     if (location.pathname.startsWith("/artifacts")) return "dewey artifacts --help";
-    if (location.pathname.startsWith("/shares")) return "dewey share-references --help";
+    if (location.pathname.startsWith("/shares")) return "dewey shares --help";
     if (location.pathname.startsWith("/admin")) return "dewey admin --help";
     return `No CLI equivalent for dewey ${location.pathname}`;
   }

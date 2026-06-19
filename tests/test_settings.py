@@ -204,7 +204,6 @@ auth:
     service_token: dewey-service-token
     callback_url: https://localhost:8914/auth/lsmc/callback
     logout_url: https://dev.login.lsmc.com/logout
-    share_recipient_prepare_url: https://dev.login.lsmc.com/api/v1/dewey/share-recipient/prepare
 database:
   backend: tapdb
 """,
@@ -223,10 +222,6 @@ database:
     assert loaded.external_broker_service_token == "dewey-service-token"
     assert loaded.external_broker_callback_url == "https://localhost:8914/auth/lsmc/callback"
     assert loaded.external_broker_logout_url == "https://dev.login.lsmc.com/logout"
-    assert (
-        loaded.external_broker_share_recipient_prepare_url
-        == "https://dev.login.lsmc.com/api/v1/dewey/share-recipient/prepare"
-    )
 
 
 def test_settings_external_broker_mode_requires_explicit_urls() -> None:
@@ -253,20 +248,11 @@ def test_settings_reads_shared_external_broker_env(
         "https://localhost:8914/auth/lsmc/callback",
     )
     monkeypatch.setenv("LSMC_AUTH_BROKER_LOGOUT_URL", "https://dev.login.lsmc.com/logout")
-    monkeypatch.setenv(
-        "LSMC_AUTH_BROKER_SHARE_RECIPIENT_PREPARE_URL",
-        "https://dev.login.lsmc.com/api/v1/dewey/share-recipient/prepare",
-    )
-
     loaded = load_settings()
 
     assert loaded.auth_mode == "external_broker"
     assert loaded.external_broker_service_id == "dewey"
     assert loaded.external_broker_service_token == "dewey-service-token"
-    assert (
-        loaded.external_broker_share_recipient_prepare_url
-        == "https://dev.login.lsmc.com/api/v1/dewey/share-recipient/prepare"
-    )
 
 
 def test_settings_aws_profile_uses_config_when_present(monkeypatch: pytest.MonkeyPatch) -> None:

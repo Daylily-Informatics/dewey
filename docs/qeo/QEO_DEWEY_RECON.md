@@ -55,8 +55,8 @@
 
 - Current storage is S3-oriented: `s3://bucket/key` objects and prefix pointers.
 - Existing browser/download flows can generate ZIPs and presigned links for object-backed artifacts.
-- Share references live in `dewey_service/services/sharing.py:SharingServiceMixin` and `DGX/data/share_reference/1.0/`.
-- QEO registration does not expand bearer sharing, does not create share references, and does not crawl prefixes.
+- Shares live in `dewey_service/services/sharing.py:SharingServiceMixin` and `DGX/data/share/1.0/`.
+- QEO registration does not expand bearer sharing, does not create shares, and does not crawl prefixes.
 
 ## MDR/TapDB Linkage
 

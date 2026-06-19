@@ -28,19 +28,6 @@
       "json_addl": {}
     },
     {
-      "name": "Dewey Share Reference",
-      "polymorphic_discriminator": "data_template",
-      "category": "DGX",
-      "type": "data",
-      "subtype": "share_reference",
-      "version": "1.0",
-      "instance_prefix": "DGX",
-      "instance_polymorphic_identity": "data_instance",
-      "bstatus": "active",
-      "is_singleton": false,
-      "json_addl": {}
-    },
-    {
       "name": "Dewey Share",
       "polymorphic_discriminator": "data_template",
       "category": "DGX",

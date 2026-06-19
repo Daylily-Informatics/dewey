@@ -278,7 +278,6 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "auth_external_broker_service_token": "external_broker_service_token",
         "auth_external_broker_callback_url": "external_broker_callback_url",
         "auth_external_broker_logout_url": "external_broker_logout_url",
-        "auth_external_broker_share_recipient_prepare_url": "external_broker_share_recipient_prepare_url",
         "auth_external_broker_ca_bundle": "external_broker_ca_bundle",
         "qeo_ingest_url": "qeo_ingest_url",
         "qeo_api_token": "qeo_api_token",
@@ -361,7 +360,6 @@ def _display_config_path(path: str) -> str:
         "external_broker_service_token": "auth.external_broker.service_token",
         "external_broker_callback_url": "auth.external_broker.callback_url",
         "external_broker_logout_url": "auth.external_broker.logout_url",
-        "external_broker_share_recipient_prepare_url": "auth.external_broker.share_recipient_prepare_url",
         "external_broker_ca_bundle": "auth.external_broker.ca_bundle",
         "qeo_ingest_url": "qeo.ingest_url",
         "qeo_api_token": "qeo.api_token",
@@ -387,7 +385,6 @@ def _display_config_path(path: str) -> str:
         "literature_metapub_cache_dir": "literature.metapub_cache_dir",
         "literature_request_timeout_seconds": "literature.request_timeout_seconds",
         "literature_max_redirects": "literature.max_redirects",
-        "default_share_reference_ttl_seconds": "share_reference.default_ttl_seconds",
         "external_reference_targets": "external_references.targets",
         "search_export_max_rows": "search.export_max_rows",
         "config_path": "config.file_path",
@@ -474,7 +471,6 @@ class Settings(BaseSettings):
     external_broker_service_token: str = ""
     external_broker_callback_url: str = ""
     external_broker_logout_url: str = ""
-    external_broker_share_recipient_prepare_url: str = ""
     external_broker_ca_bundle: str = ""
 
     # Explicit Dewey -> QEO outbox dispatch. Empty values disable dispatch by failing hard.
@@ -531,8 +527,6 @@ class Settings(BaseSettings):
     literature_request_timeout_seconds: int = 10
     literature_max_redirects: int = 3
 
-    # Share reference defaults
-    default_share_reference_ttl_seconds: int = 3600
     external_reference_targets: list[dict[str, Any]] = Field(default_factory=list)
     search_export_max_rows: int = 1000
 
@@ -546,7 +540,6 @@ class Settings(BaseSettings):
         "external_broker_handoff_exchange_url",
         "external_broker_callback_url",
         "external_broker_logout_url",
-        "external_broker_share_recipient_prepare_url",
     )
     @classmethod
     def validate_external_broker_urls(cls, value: str, info):
@@ -736,10 +729,6 @@ class Settings(BaseSettings):
             self.external_broker_logout_url = _require_https_url(
                 self.external_broker_logout_url,
                 field_name="external_broker_logout_url",
-            )
-            self.external_broker_share_recipient_prepare_url = _validate_optional_https_url(
-                self.external_broker_share_recipient_prepare_url,
-                field_name="external_broker_share_recipient_prepare_url",
             )
             ca_bundle = str(self.external_broker_ca_bundle or "").strip()
             if ca_bundle and not Path(ca_bundle).is_file():
@@ -940,7 +929,6 @@ def load_settings(config_path: Path | None = None) -> Settings:
         "external_broker_handoff_exchange_url": "",
         "external_broker_callback_url": "",
         "external_broker_logout_url": "",
-        "external_broker_share_recipient_prepare_url": "",
         "external_broker_ca_bundle": "",
         "deployment_name": "",
         "deployment_color": "",
@@ -965,10 +953,6 @@ def load_settings(config_path: Path | None = None) -> Settings:
         "external_broker_service_token": _read_first_env("LSMC_AUTH_BROKER_SERVICE_TOKEN"),
         "external_broker_callback_url": _read_first_env("LSMC_AUTH_BROKER_CALLBACK_URL"),
         "external_broker_logout_url": _read_first_env("LSMC_AUTH_BROKER_LOGOUT_URL"),
-        "external_broker_share_recipient_prepare_url": _read_first_env(
-            "LSMC_AUTH_BROKER_SHARE_RECIPIENT_PREPARE_URL",
-            "DEWEY_EXTERNAL_SHARE_RECIPIENT_PREPARE_URL",
-        ),
         "external_broker_ca_bundle": _read_first_env("LSMC_AUTH_BROKER_CA_BUNDLE"),
     }
     merged = {**seed}

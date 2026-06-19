@@ -30,7 +30,8 @@ class FakeDeweyService:
         self.artifacts: dict[str, dict[str, Any]] = {}
         self.artifact_lineage: list[tuple[str, str]] = []
         self.artifact_sets: dict[str, dict[str, Any]] = {}
-        self.share_references: dict[str, dict[str, Any]] = {}
+        self.shares: dict[str, dict[str, Any]] = {}
+        self.share_roots: dict[str, dict[str, Any]] = {}
         self.external_objects: dict[str, dict[str, Any]] = {}
         self.external_relations: list[dict[str, Any]] = []
         self.literature_saves: dict[str, dict[str, Any]] = {}
@@ -1118,197 +1119,205 @@ class FakeDeweyService:
     def resolve_artifact_set(self, artifact_set_euid: str):
         return self.get_artifact_set(artifact_set_euid)
 
-    def create_share_reference(
+    def create_share(
         self,
         *,
-        target_type: str,
-        target_euid: str,
+        target_kind: str,
+        target_euid: str | None,
+        targets: list[dict[str, Any]] | None = None,
+        name: str | None = None,
         purpose: str | None,
-        scope: str | None,
+        owner_email: str | None,
+        allowed_users: list[str] | None,
+        allowed_domains: list[str] | None,
+        allowed_groups: list[str] | None,
+        delivery_modes: list[str] | None,
         expires_at: str | None,
-        issued_by: str | None,
-        transport: str | None = None,
-        transport_config: dict[str, Any] | None = None,
         ttl_seconds: int | None = None,
         idempotency_key: str,
     ):
         payload = {
-            "target_type": target_type,
+            "target_kind": target_kind,
             "target_euid": target_euid,
+            "targets": list(targets or []),
+            "name": name,
             "purpose": purpose,
-            "scope": scope,
+            "owner_email": owner_email,
+            "allowed_users": list(allowed_users or []),
+            "allowed_domains": list(allowed_domains or []),
+            "allowed_groups": list(allowed_groups or []),
+            "delivery_modes": list(delivery_modes or ["presigned_s3_manifest"]),
             "expires_at": expires_at,
-            "issued_by": issued_by,
-            "transport": transport or "presigned_s3",
-            "transport_config": dict(transport_config or {}),
             "ttl_seconds": ttl_seconds,
         }
-        replay = self._idempotent("share_reference.create", idempotency_key, payload)
+        replay = self._idempotent("share.create", idempotency_key, payload)
         if replay:
             return replay
-        euid = f"SH-{self._share_seq:06d}"
+        euid = f"SHR-{self._share_seq:06d}"
         self._share_seq += 1
-        if target_type == "artifact":
-            artifact = self.get_artifact(target_euid)
+        if target_kind == "artifact_object":
+            artifact = self.get_artifact(str(target_euid))
             if artifact.get("storage_kind") == "prefix":
-                raise ValueError("artifact sharing requires an object-backed artifact")
-            manifest: list[dict[str, Any]] = []
-            connection: dict[str, Any] = {}
-            access_url = f"/share-references/{euid}"
-        else:
-            artifact_set = self.get_artifact_set(target_euid)
-            if (transport or "presigned_s3") == "presigned_s3":
-                manifest = [
-                    {
-                        "artifact_euid": artifact["artifact_euid"],
-                        "status": "active",
-                        "access_url": f"https://downloads.example.com/{artifact['artifact_euid']}",
-                    }
-                    for artifact in artifact_set["members"]
-                ]
-                connection = {}
-                access_url = None
-            else:
-                host = str((transport_config or {}).get("host") or "0.0.0.0")
-                port = int((transport_config or {}).get("port") or 8080)
-                user = str((transport_config or {}).get("user") or "user")
-                password = str((transport_config or {}).get("passwd") or "passwd")
-                connection = {
-                    "endpoint": (
-                        f"http://{host}:{port}/"
-                        if (transport or "") == "rclone_http"
-                        else f"sftp://{user}@{host}:{port}/"
-                    ),
-                    "username": user,
-                    "password": password,
-                    "host": host,
-                    "port": port,
-                    "bucket": (transport_config or {}).get("bucket"),
-                }
-                manifest = []
-                access_url = connection["endpoint"] if (transport or "") == "rclone_http" else None
+                raise ValueError("artifact_object shares require an object-backed artifact")
+        elif target_kind == "artifact_set":
+            self.get_artifact_set(str(target_euid))
+        elif target_kind == "mixed_set" and not targets:
+            raise ValueError("mixed_set requires targets")
         body = {
-            "share_reference_euid": euid,
-            "target_type": target_type,
+            "share_euid": euid,
+            "target_kind": target_kind,
             "target_euid": target_euid,
+            "targets": list(targets or []),
+            "name": name or f"share:{target_kind}",
             "purpose": purpose,
-            "scope": scope,
-            "transport": transport or "presigned_s3",
             "status": "active",
             "starts_at": "2026-03-10T00:00:00Z",
             "expires_at": expires_at or "2026-03-10T12:00:00Z",
-            "access_url": access_url,
-            "diagnostic": {},
-            "manifest": manifest,
-            "connection": connection,
-            "member_count": len(manifest) if target_type == "artifact_set" else 0,
-            "transport_config": dict(transport_config or {}),
-            "issued_by": issued_by,
-            "recipient_email": None,
-            "managed_access": target_type == "artifact"
-            and (transport or "presigned_s3") == "presigned_s3",
+            "owner_email": owner_email,
+            "allowed_users": list(allowed_users or []),
+            "allowed_domains": list(allowed_domains or []),
+            "allowed_groups": list(allowed_groups or []),
+            "delivery_modes": list(delivery_modes or ["presigned_s3_manifest"]),
+            "default_signed_ttl_seconds": ttl_seconds or 900,
+            "member_count": 1,
             "access_count": 0,
             "last_accessed_at": None,
+            "last_accessed_by": None,
             "revoked_at": None,
             "revoked_by": None,
+            "revocation_reason": None,
             "created_at": "2026-03-10T00:00:00Z",
+            "audit_events": [],
         }
-        self.share_references[euid] = body
-        if target_type == "artifact" and target_euid in self.artifacts:
+        self.shares[euid] = body
+        if target_kind == "artifact_object" and target_euid in self.artifacts:
             self.artifacts[target_euid]["share_status"] = "active"
             self.artifacts[target_euid]["share_last_issued_at"] = body["created_at"]
-        self._remember("share_reference.create", idempotency_key, payload, 201, body)
+        self._remember("share.create", idempotency_key, payload, 201, body)
         return 201, body
 
-    def get_share_reference(self, share_reference_euid: str):
+    def get_share(self, share_euid: str):
         from dewey_service.service import DeweyNotFoundError
 
-        if share_reference_euid not in self.share_references:
-            raise DeweyNotFoundError(f"Share reference not found: {share_reference_euid}")
-        return dict(self.share_references[share_reference_euid])
+        if share_euid not in self.shares:
+            raise DeweyNotFoundError(f"Share not found: {share_euid}")
+        return dict(self.shares[share_euid])
 
-    def revoke_share_reference(
+    def revoke_share(
         self,
-        share_reference_euid: str = "",
+        share_euid: str = "",
         *,
         revoked_by: str | None,
         reason: str | None = None,
-        idempotency_key: str | None = None,
     ):
-        payload = {
-            "share_reference_euid": share_reference_euid,
-            "revoked_by": revoked_by,
-            "revocation_reason": reason,
-        }
-        if idempotency_key:
-            replay = self._idempotent("share_reference.revoke", idempotency_key, payload)
-            if replay:
-                return replay
-        share = self.get_share_reference(share_reference_euid)
+        share = self.get_share(share_euid)
         share["status"] = "revoked"
         share["revoked_at"] = "2026-03-10T01:00:00Z"
         share["revoked_by"] = revoked_by
         share["revocation_reason"] = reason
-        self.share_references[share_reference_euid] = share
-        if idempotency_key:
-            self._remember("share_reference.revoke", idempotency_key, payload, 200, share)
-            return 200, dict(share)
+        self.shares[share_euid] = share
         return dict(share)
 
-    def open_share_reference(self, share_reference_euid: str):
-        share = self.get_share_reference(share_reference_euid)
+    def create_share_access_package(
+        self,
+        share_euid: str,
+        *,
+        delivery_mode: str,
+        actor_email: str | None,
+        actor_groups: list[str] | None = None,
+        ip: str | None = None,
+        user_agent: str | None = None,
+        signed_ttl_seconds: int | None = None,
+    ):
+        _ = actor_groups
+        _ = ip
+        _ = user_agent
+        _ = signed_ttl_seconds
+        share = self.get_share(share_euid)
         if share.get("status") != "active":
-            raise ValueError("Share reference is not active")
+            raise ValueError("share is not active")
         share["access_count"] = int(share.get("access_count") or 0) + 1
         share["last_accessed_at"] = "2026-03-10T01:05:00Z"
-        self.share_references[share_reference_euid] = share
-        body = dict(share)
-        body["access_url"] = f"https://downloads.example.com/{share_reference_euid}"
-        body["presigned_access_url"] = f"https://downloads.example.com/{share_reference_euid}"
-        return body
+        share["last_accessed_by"] = actor_email
+        self.shares[share_euid] = share
+        signed_url = f"https://downloads.example.com/{share_euid}"
+        return {
+            "share_euid": share_euid,
+            "delivery_mode": delivery_mode,
+            "expires_in": signed_ttl_seconds or 900,
+            "signed_url": signed_url if delivery_mode == "presigned_s3" else None,
+            "manifest": [
+                {
+                    "target_kind": share.get("target_kind"),
+                    "target_euid": share.get("target_euid"),
+                    "status": "active",
+                    "signed_url": signed_url,
+                }
+            ],
+        }
 
-    def issue_share_reference_access(
-        self,
-        share_reference_euid: str,
-        *,
-        accessed_by: str | None = None,
-        presign_ttl_seconds: int = 900,
-    ):
-        _ = accessed_by
-        _ = presign_ttl_seconds
-        return self.open_share_reference(share_reference_euid)
-
-    def retry_share_reference(self, share_reference_euid: str, *, retried_by: str | None = None):
-        share = self.get_share_reference(share_reference_euid)
-        diagnostic = dict(share.get("diagnostic") or {})
-        if share.get("status") != "error" or not diagnostic.get("retryable"):
-            raise ValueError("Only retryable managed artifact share references can be retried")
-        if share.get("target_type") != "artifact" or share.get("transport") != "presigned_s3":
-            raise ValueError("retry is only supported for managed presigned_s3 artifact shares")
-        if not share.get("managed_access"):
-            raise ValueError("retry is only supported for Dewey-managed share references")
-        share["status"] = "active"
-        share["access_url"] = f"/share-references/{share_reference_euid}"
-        share["diagnostic"] = {}
-        share["last_checked_at"] = "2026-03-10T01:10:00Z"
-        share["last_retried_at"] = "2026-03-10T01:10:00Z"
-        share["last_retried_by"] = retried_by
-        self.share_references[share_reference_euid] = share
-        return dict(share)
-
-    def list_share_references(
+    def list_shares(
         self,
         *,
-        target_type: str | None = None,
+        target_kind: str | None = None,
         target_euid: str | None = None,
         limit: int = 200,
     ):
-        rows = list(self.share_references.values())
-        if target_type:
-            rows = [row for row in rows if row["target_type"] == target_type]
+        rows = list(self.shares.values())
+        if target_kind:
+            rows = [row for row in rows if row["target_kind"] == target_kind]
         if target_euid:
             rows = [row for row in rows if row["target_euid"] == target_euid]
         return rows[:limit]
+
+    def list_share_audit(self, share_euid: str):
+        share = self.get_share(share_euid)
+        return {"items": list(share.get("audit_events") or []), "total": 0}
+
+    def create_share_root(
+        self,
+        *,
+        root_uri: str,
+        name: str | None,
+        purpose: str | None,
+        owner_email: str | None,
+        allowed_delivery_modes: list[str] | None,
+        idempotency_key: str,
+    ):
+        payload = {
+            "root_uri": root_uri,
+            "name": name,
+            "purpose": purpose,
+            "owner_email": owner_email,
+            "allowed_delivery_modes": list(allowed_delivery_modes or []),
+        }
+        replay = self._idempotent("share_root.create", idempotency_key, payload)
+        if replay:
+            return replay
+        euid = f"SRT-{len(self.share_roots) + 1:06d}"
+        body = {
+            "share_root_euid": euid,
+            **payload,
+            "status": "active",
+            "created_at": "2026-03-10T00:00:00Z",
+        }
+        self.share_roots[euid] = body
+        self._remember("share_root.create", idempotency_key, payload, 201, body)
+        return 201, body
+
+    def list_share_roots(self, *, limit: int = 200):
+        return list(self.share_roots.values())[:limit]
+
+    def create_share_root_subset(self, share_root_euid: str, **kwargs):
+        self.get_share_root(share_root_euid)
+        return self.create_share(target_kind="mixed_set", target_euid=None, **kwargs)
+
+    def get_share_root(self, share_root_euid: str):
+        from dewey_service.service import DeweyNotFoundError
+
+        if share_root_euid not in self.share_roots:
+            raise DeweyNotFoundError(f"Share root not found: {share_root_euid}")
+        return dict(self.share_roots[share_root_euid])
 
     def list_anomalies(self, *, limit: int = 200):
         return list(self.anomalies.values())[:limit]
@@ -1705,7 +1714,7 @@ class FakeDeweyService:
 
     def query_search_v2(self, request: dict[str, Any] | None, *, viewer_context=None):
         query = dict(request or {})
-        scopes = query.get("scopes") or ["artifact", "share_reference"]
+        scopes = query.get("scopes") or ["artifact", "share"]
         viewer = viewer_context
         rows: list[dict[str, Any]] = []
         if "artifact" in scopes:
@@ -1745,18 +1754,18 @@ class FakeDeweyService:
                 }
                 for row in self.artifact_sets.values()
             )
-        if "share_reference" in scopes:
+        if "share" in scopes:
             rows.extend(
                 {
-                    "record_type": "share_reference",
-                    "source_kind": "dewey.share_reference",
-                    "euid": row["share_reference_euid"],
-                    "name": row["share_reference_euid"],
+                    "record_type": "share",
+                    "source_kind": "dewey.share",
+                    "euid": row["share_euid"],
+                    "name": row.get("name") or row["share_euid"],
                     "created_at": row["created_at"],
                     "modified_at": row["created_at"],
                     **row,
                 }
-                for row in self.share_references.values()
+                for row in self.shares.values()
             )
         q = str(query.get("q") or "").strip().lower()
         if q:
@@ -1777,9 +1786,7 @@ class FakeDeweyService:
             "facets": {
                 "artifact": sum(1 for row in rows if row["record_type"] == "artifact"),
                 "artifact_set": sum(1 for row in rows if row["record_type"] == "artifact_set"),
-                "share_reference": sum(
-                    1 for row in rows if row["record_type"] == "share_reference"
-                ),
+                "share": sum(1 for row in rows if row["record_type"] == "share"),
             },
             "total": len(rows),
             "page": int(query.get("page") or 1),

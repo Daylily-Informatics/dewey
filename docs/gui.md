@@ -34,7 +34,7 @@ The dashboard is the main landing page after login. It provides:
 - headline metrics for artifacts, shares, recent imports, and verification flags
 - quick register for one source at a time
 - shortcuts into the other specialized surfaces
-- recent artifacts and recent share references
+- recent artifacts and recent managed shares
 
 Current live caveat: dashboard local-file and copy/import flows depend on the managed artifact bucket being configured. S3 reference intake remains useful even when that bucket is empty or unset.
 
@@ -90,7 +90,7 @@ Current screenshot:
 
 Path: `/search`
 
-Unified Search is the normalized search surface for Dewey records. In the browser, it currently emphasizes artifacts and share references.
+Unified Search is the normalized search surface for Dewey records. In the browser, it currently emphasizes artifacts and managed shares.
 
 Current live filters include:
 

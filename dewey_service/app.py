@@ -207,30 +207,6 @@ class ResolveArtifactSetRequest(BaseModel):
     artifact_set_euid: str
 
 
-class ShareReferenceCreateRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    target_type: str = Field(pattern="^(artifact|artifact_set)$")
-    target_euid: str
-    purpose: str | None = None
-    scope: str | None = None
-    expires_at: str | None = None
-    issued_by: str | None = None
-    transport: str = Field(
-        default="presigned_s3",
-        pattern="^(presigned_s3|rclone_http|rclone_sftp)$",
-    )
-    transport_config: dict[str, Any] = Field(default_factory=dict)
-    ttl_seconds: int | None = None
-    recipient_email: str | None = None
-
-
-class ShareReferenceRevokeRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    reason: str | None = None
-
-
 class ShareTargetRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -292,52 +268,6 @@ class ArtifactStorageLockRequest(BaseModel):
 
     mode: str = "GOVERNANCE"
     retain_until: str
-
-
-async def _prepare_external_share_recipient(
-    *,
-    settings: Settings,
-    recipient_email: str,
-    share_reference: dict[str, Any],
-    request: Request,
-) -> dict[str, Any]:
-    prepare_url = str(settings.external_broker_share_recipient_prepare_url or "").strip()
-    if not prepare_url:
-        raise RuntimeError(
-            "Dewey external share recipient preparation requires "
-            "external_broker_share_recipient_prepare_url"
-        )
-    share_ref_euid = str(share_reference.get("share_reference_euid") or "").strip()
-    if not share_ref_euid:
-        raise RuntimeError("Dewey share reference response is missing share_reference_euid")
-    share_url = f"{str(request.base_url).rstrip('/')}/share-references/{share_ref_euid}"
-    ca_bundle = str(settings.external_broker_ca_bundle or "").strip()
-    verify: bool | str = ca_bundle if ca_bundle else True
-    service_token = str(settings.external_broker_service_token or "").strip()
-    if not service_token:
-        raise RuntimeError(
-            "Dewey external share recipient preparation requires external_broker_service_token"
-        )
-    async with httpx.AsyncClient(timeout=10.0, verify=verify) as client:
-        response = await client.post(
-            prepare_url,
-            json={
-                "recipient_email": recipient_email,
-                "share_ref_euid": share_ref_euid,
-                "share_url": share_url,
-                "expires_at": share_reference.get("expires_at"),
-            },
-            headers={
-                "Authorization": f"Bearer {service_token}",
-                "X-LSMC-Service-ID": settings.external_broker_service_id,
-            },
-        )
-    if response.status_code >= 400:
-        raise RuntimeError(f"Broker recipient preparation failed: {response.status_code}")
-    payload = response.json()
-    if not isinstance(payload, dict):
-        raise RuntimeError("Broker recipient preparation returned a non-object payload")
-    return payload
 
 
 class ExternalObjectCreateRequest(BaseModel):
@@ -505,7 +435,7 @@ def create_app(
             literature_adapter = None
         service = DeweyService(
             backend,
-            default_share_ttl_seconds=settings.default_share_reference_ttl_seconds,
+            default_share_ttl_seconds=settings.share_default_signed_ttl_seconds,
             storage_client=storage_client,
             managed_storage_bucket=settings.managed_storage_bucket,
             managed_storage_prefix=settings.managed_storage_prefix,
@@ -681,26 +611,6 @@ def create_app(
 
     def _share_duration_to_seconds(days: float) -> int:
         return max(60, int(days * 86400))
-
-    def _share_reference_can_be_revoked(
-        profile: dict[str, Any], share_reference: dict[str, Any]
-    ) -> bool:
-        if _is_admin(profile):
-            return True
-        return (
-            str(share_reference.get("issued_by") or "").strip().lower()
-            == str(profile.get("email") or "").strip().lower()
-        )
-
-    def _share_reference_can_be_retried(share_reference: dict[str, Any]) -> bool:
-        diagnostic = dict(share_reference.get("diagnostic") or {})
-        return (
-            str(share_reference.get("status") or "").strip().lower() == "error"
-            and str(share_reference.get("target_type") or "").strip().lower() == "artifact"
-            and str(share_reference.get("transport") or "").strip().lower() == "presigned_s3"
-            and bool(share_reference.get("managed_access"))
-            and bool(diagnostic.get("retryable"))
-        )
 
     def _share_list_context(
         *,
@@ -958,7 +868,7 @@ def create_app(
         scopes = [item for item in raw_scopes if item]
         return {
             "q": str(params.get("q") or "").strip() or None,
-            "scopes": scopes or ["artifact", "share_reference"],
+            "scopes": scopes or ["artifact", "share"],
             "page": int(params.get("page") or 1),
             "page_size": int(params.get("page_size") or 25),
             "sort_field": str(params.get("sort_field") or "created_at"),
@@ -1078,7 +988,7 @@ def create_app(
     def _empty_artifact_search_result() -> dict[str, Any]:
         return {
             "items": [],
-            "facets": {"artifact": 0, "artifact_set": 0, "share_reference": 0},
+            "facets": {"artifact": 0, "artifact_set": 0, "share": 0},
             "total": 0,
             "page": 1,
             "page_size": 25,
@@ -1089,7 +999,7 @@ def create_app(
     def _empty_artifact_set_search_result() -> dict[str, Any]:
         return {
             "items": [],
-            "facets": {"artifact": 0, "artifact_set": 0, "share_reference": 0},
+            "facets": {"artifact": 0, "artifact_set": 0, "share": 0},
             "total": 0,
             "page": 1,
             "page_size": 25,
@@ -1186,8 +1096,8 @@ def create_app(
         status_code: int = 200,
     ) -> HTMLResponse:
         artifacts = service.list_artifacts(limit=100)
-        share_references = service.list_share_references(limit=100)
-        active_share_count = sum(1 for item in share_references if item.get("status") == "active")
+        shares = service.list_shares(limit=100)
+        active_share_count = sum(1 for item in shares if item.get("status") == "active")
         verification_failures = sum(
             1 for item in artifacts if item.get("storage_status") in {"missing", "error"}
         )
@@ -1200,7 +1110,7 @@ def create_app(
             _template_context(
                 profile=profile,
                 artifacts=artifacts,
-                share_references=share_references[:12],
+                shares=shares[:12],
                 metrics={
                     "artifact_count": len(artifacts),
                     "active_share_count": active_share_count,
@@ -1311,8 +1221,8 @@ def create_app(
             _template_context(
                 profile=profile,
                 artifact=artifact,
-                artifact_share_references=service.list_share_references(
-                    target_type="artifact",
+                artifact_shares=service.list_shares(
+                    target_kind="artifact_object",
                     target_euid=artifact["artifact_euid"],
                     limit=20,
                 ),
@@ -2844,17 +2754,30 @@ def create_app(
         form = await request.form()
         try:
             duration_days = _parse_share_duration_days(form.get("share_duration_days"))
-            _, payload = service.create_share_reference(
-                target_type="artifact",
+            actor_email = str(profile.get("email") or "").strip()
+            _, share = service.create_share(
+                target_kind="artifact_object",
                 target_euid=artifact_euid,
+                targets=[],
+                name=f"Direct download {artifact_euid}",
                 purpose="download",
-                scope="external",
+                owner_email=actor_email or None,
+                allowed_users=[actor_email] if actor_email else [],
+                allowed_domains=[],
+                allowed_groups=[],
+                delivery_modes=["presigned_s3"],
                 expires_at=None,
-                issued_by=str(profile.get("email") or "").strip() or None,
-                transport="presigned_s3",
-                transport_config={},
                 ttl_seconds=_share_duration_to_seconds(duration_days),
                 idempotency_key=_new_idempotency_key("ui-artifact-direct-download"),
+            )
+            payload = service.create_share_access_package(
+                share["share_euid"],
+                delivery_mode="presigned_s3",
+                actor_email=actor_email,
+                actor_groups=list(profile.get("groups") or []),
+                ip=request.client.host if request.client else None,
+                user_agent=request.headers.get("user-agent"),
+                signed_ttl_seconds=_share_duration_to_seconds(duration_days),
             )
         except Exception as exc:
             return _artifact_detail_response(
@@ -2864,7 +2787,7 @@ def create_app(
                 detail_message={"state": "error", "detail": str(exc)},
                 status_code=400,
             )
-        access_url = str(payload.get("access_url") or "").strip()
+        access_url = str(payload.get("signed_url") or payload.get("access_url") or "").strip()
         if not access_url:
             return _artifact_detail_response(
                 request,
@@ -2877,74 +2800,6 @@ def create_app(
                 status_code=400,
             )
         return RedirectResponse(url=access_url, status_code=status.HTTP_303_SEE_OTHER)
-
-    @app.post("/share-references/{share_reference_euid}/revoke", include_in_schema=False)
-    async def revoke_share_reference_page(
-        request: Request,
-        share_reference_euid: str,
-        profile: dict[str, Any] = Depends(require_ui_session),
-    ) -> Response:
-        form = await request.form()
-        share_reference = service.get_share_reference(share_reference_euid)
-        if not _share_reference_can_be_revoked(profile, share_reference):
-            raise HTTPException(
-                status_code=403,
-                detail="Only admins or the issuing user can revoke this share reference",
-            )
-        _, payload = service.revoke_share_reference(
-            share_reference_euid=share_reference_euid,
-            revoked_by=str(profile.get("email") or "").strip() or None,
-            idempotency_key=_new_idempotency_key("ui-share-revoke"),
-        )
-        return_to = str(form.get("return_to") or "").strip()
-        target_euid = str(
-            payload.get("target_euid") or share_reference.get("target_euid") or ""
-        ).strip()
-        if return_to == "shares":
-            return RedirectResponse(url="/shares", status_code=status.HTTP_303_SEE_OTHER)
-        if target_euid:
-            return RedirectResponse(
-                url=f"/artifacts/euid/{target_euid}", status_code=status.HTTP_303_SEE_OTHER
-            )
-        raise HTTPException(
-            status_code=400, detail="Revoked share reference is missing target_euid"
-        )
-
-    @app.post("/share-references/{share_reference_euid}/retry", include_in_schema=False)
-    async def retry_share_reference_page(
-        request: Request,
-        share_reference_euid: str,
-        profile: dict[str, Any] = Depends(require_ui_admin_session),
-    ) -> Response:
-        form = await request.form()
-        share_reference = service.get_share_reference(share_reference_euid)
-        if not _share_reference_can_be_retried(share_reference):
-            raise HTTPException(
-                status_code=409,
-                detail="Only retryable managed artifact share references can be retried",
-            )
-        try:
-            payload = service.retry_share_reference(
-                share_reference_euid=share_reference_euid,
-                retried_by=str(profile.get("email") or "").strip() or None,
-            )
-        except DeweyNotFoundError as exc:
-            raise HTTPException(status_code=404, detail=str(exc)) from exc
-        except ValueError as exc:
-            raise HTTPException(status_code=409, detail=str(exc)) from exc
-        return_to = str(form.get("return_to") or "").strip()
-        if return_to == "search":
-            return RedirectResponse(url="/search", status_code=status.HTTP_303_SEE_OTHER)
-        if return_to == "shares":
-            return RedirectResponse(url="/shares", status_code=status.HTTP_303_SEE_OTHER)
-        target_euid = str(
-            payload.get("target_euid") or share_reference.get("target_euid") or ""
-        ).strip()
-        if target_euid:
-            return RedirectResponse(
-                url=f"/artifacts/euid/{target_euid}", status_code=status.HTTP_303_SEE_OTHER
-            )
-        return RedirectResponse(url="/shares", status_code=status.HTTP_303_SEE_OTHER)
 
     @app.get("/shares", include_in_schema=False)
     async def shared_data_report(
@@ -3211,17 +3066,21 @@ def create_app(
             str(item).strip() for item in form.getlist("artifact_euids") if str(item).strip()
         ]
         ttl_hours = max(1, int(form.get("share_ttl_hours") or 24))
+        actor_email = str(profile.get("email") or "").strip()
         share_rows: list[dict[str, Any]] = []
         for artifact_euid in artifact_euids:
-            _, payload = service.create_share_reference(
-                target_type="artifact",
+            _, payload = service.create_share(
+                target_kind="artifact_object",
                 target_euid=artifact_euid,
+                targets=[],
+                name=f"Artifact share {artifact_euid}",
                 purpose="download",
-                scope="external",
                 expires_at=None,
-                issued_by=str(profile.get("email") or "").strip() or None,
-                transport="presigned_s3",
-                transport_config={},
+                owner_email=actor_email or None,
+                allowed_users=[actor_email] if actor_email else [],
+                allowed_domains=[],
+                allowed_groups=[],
+                delivery_modes=["presigned_s3"],
                 ttl_seconds=ttl_hours * 3600,
                 idempotency_key=_new_idempotency_key("ui-artifact-share"),
             )
@@ -3354,22 +3213,20 @@ def create_app(
             .isoformat()
             .replace("+00:00", "Z")
         )
-        transport = str(form.get("share_transport") or "presigned_s3").strip().lower()
-        _, payload = service.create_share_reference(
-            target_type="artifact_set",
+        delivery_mode = str(form.get("share_transport") or "presigned_s3_manifest").strip().lower()
+        actor_email = str(profile.get("email") or "").strip()
+        _, payload = service.create_share(
+            target_kind="artifact_set",
             target_euid=artifact_set_euid,
+            targets=[],
+            name=f"Artifact set share {artifact_set_euid}",
             purpose="artifact-set-share",
-            scope="external",
             expires_at=expires_at,
-            issued_by=str(profile.get("email") or "").strip() or None,
-            transport=transport,
-            transport_config={
-                "bucket": str(form.get("share_bucket") or "").strip() or None,
-                "host": str(form.get("share_host") or "").strip() or None,
-                "port": int(form.get("share_port") or 0) or None,
-                "user": str(form.get("share_user") or "").strip() or None,
-                "passwd": str(form.get("share_password") or "").strip() or None,
-            },
+            owner_email=actor_email or None,
+            allowed_users=[actor_email] if actor_email else [],
+            allowed_domains=[],
+            allowed_groups=[],
+            delivery_modes=[delivery_mode],
             ttl_seconds=None,
             idempotency_key=_new_idempotency_key("ui-set-share"),
         )
@@ -3980,45 +3837,6 @@ def create_app(
             raise HTTPException(status_code=409, detail=str(exc)) from exc
 
     @app.post(
-        "/api/v1/share-references",
-        dependencies=[Depends(api_auth_dep)],
-    )
-    async def create_share_reference(
-        request: Request,
-        body: ShareReferenceCreateRequest,
-        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
-    ) -> dict[str, Any]:
-        try:
-            status_code, payload = service.create_share_reference(
-                target_type=body.target_type,
-                target_euid=body.target_euid,
-                purpose=body.purpose,
-                scope=body.scope,
-                expires_at=body.expires_at,
-                issued_by=body.issued_by,
-                transport=body.transport,
-                transport_config=body.transport_config,
-                ttl_seconds=body.ttl_seconds,
-                idempotency_key=_require_idempotency_key(idempotency_key),
-            )
-            if body.recipient_email:
-                payload["broker_recipient"] = await _prepare_external_share_recipient(
-                    settings=settings,
-                    recipient_email=body.recipient_email,
-                    share_reference=payload,
-                    request=request,
-                )
-            return {"status_code": status_code, **payload}
-        except DeweyNotFoundError as exc:
-            raise HTTPException(status_code=404, detail=str(exc)) from exc
-        except DeweyConflictError as exc:
-            raise HTTPException(status_code=409, detail=str(exc)) from exc
-        except ValueError as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
-        except RuntimeError as exc:
-            raise HTTPException(status_code=502, detail=str(exc)) from exc
-
-    @app.post(
         "/api/v1/shares",
         dependencies=[Depends(api_auth_dep)],
     )
@@ -4170,86 +3988,16 @@ def create_app(
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     @app.get(
-        "/api/v1/share-references/{share_reference_euid}",
+        "/api/v1/artifacts/{artifact_euid}/shares",
         dependencies=[Depends(api_auth_dep)],
     )
-    async def get_share_reference(share_reference_euid: str) -> dict[str, Any]:
-        try:
-            return service.get_share_reference(share_reference_euid)
-        except DeweyNotFoundError as exc:
-            raise HTTPException(status_code=404, detail=str(exc)) from exc
-
-    @app.post(
-        "/api/v1/share-references/{share_reference_euid}/access",
-        dependencies=[Depends(api_auth_dep)],
-    )
-    async def issue_share_reference_access(share_reference_euid: str) -> dict[str, Any]:
-        try:
-            return service.issue_share_reference_access(share_reference_euid, accessed_by="api")
-        except DeweyNotFoundError as exc:
-            raise HTTPException(status_code=404, detail=str(exc)) from exc
-        except ValueError as exc:
-            raise HTTPException(status_code=409, detail=str(exc)) from exc
-
-    @app.post(
-        "/api/v1/share-references/{share_reference_euid}/retry",
-        dependencies=[Depends(api_auth_dep)],
-    )
-    async def retry_share_reference(share_reference_euid: str) -> dict[str, Any]:
-        try:
-            return service.retry_share_reference(share_reference_euid, retried_by="api")
-        except DeweyNotFoundError as exc:
-            raise HTTPException(status_code=404, detail=str(exc)) from exc
-        except ValueError as exc:
-            raise HTTPException(status_code=409, detail=str(exc)) from exc
-
-    @app.post(
-        "/api/v1/share-references/{share_reference_euid}/revoke",
-        dependencies=[Depends(api_auth_dep)],
-    )
-    async def revoke_share_reference(
-        share_reference_euid: str,
-        body: ShareReferenceRevokeRequest,
-    ) -> dict[str, Any]:
-        try:
-            return service.revoke_share_reference(
-                share_reference_euid,
-                revoked_by="api",
-                reason=body.reason,
-            )
-        except DeweyNotFoundError as exc:
-            raise HTTPException(status_code=404, detail=str(exc)) from exc
-
-    @app.get("/share-references/{share_reference_euid}", include_in_schema=False)
-    async def share_reference_access_redirect(
-        share_reference_euid: str,
-        profile: dict[str, Any] = Depends(require_ui_session),
-    ) -> Response:
-        try:
-            payload = service.issue_share_reference_access(
-                share_reference_euid,
-                accessed_by=str(profile.get("email") or "").strip() or None,
-            )
-        except DeweyNotFoundError as exc:
-            raise HTTPException(status_code=404, detail=str(exc)) from exc
-        except ValueError as exc:
-            raise HTTPException(status_code=410, detail=str(exc)) from exc
-        access_url = str(payload.get("access_url") or "").strip()
-        if access_url:
-            return RedirectResponse(url=access_url, status_code=status.HTTP_303_SEE_OTHER)
-        return JSONResponse(payload)
-
-    @app.get(
-        "/api/v1/artifacts/{artifact_euid}/share-references",
-        dependencies=[Depends(api_auth_dep)],
-    )
-    async def list_artifact_share_references(
+    async def list_artifact_shares(
         artifact_euid: str,
         limit: int = Query(default=200, ge=1, le=2000),
     ) -> dict[str, Any]:
         try:
-            rows = service.list_share_references(
-                target_type="artifact",
+            rows = service.list_shares(
+                target_kind="artifact_object",
                 target_euid=artifact_euid,
                 limit=limit,
             )

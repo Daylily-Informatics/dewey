@@ -21,7 +21,6 @@ from dewey_service.tapdb_backend import (
     LITERATURE_SAVE_TEMPLATE,
     OUTBOX_EVENT_TEMPLATE,
     REGISTRATION_RECEIPT_TEMPLATE,
-    SHARE_REFERENCE_TEMPLATE,
     SHARE_ROOT_TEMPLATE,
     SHARE_TEMPLATE,
 )
@@ -57,7 +56,6 @@ class _InMemoryBackend:
             ANOMALY_TEMPLATE: 1,
             ARTIFACT_TEMPLATE: 1,
             ARTIFACT_SET_TEMPLATE: 1,
-            SHARE_REFERENCE_TEMPLATE: 1,
             SHARE_TEMPLATE: 1,
             SHARE_ROOT_TEMPLATE: 1,
             EXTERNAL_OBJECT_TEMPLATE: 1,
@@ -71,7 +69,6 @@ class _InMemoryBackend:
             ANOMALY_TEMPLATE: "ANM",
             ARTIFACT_TEMPLATE: "AT",
             ARTIFACT_SET_TEMPLATE: "AS",
-            SHARE_REFERENCE_TEMPLATE: "SH",
             SHARE_TEMPLATE: "SHR",
             SHARE_ROOT_TEMPLATE: "SRT",
             EXTERNAL_OBJECT_TEMPLATE: "EX",

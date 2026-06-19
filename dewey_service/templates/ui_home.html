@@ -206,12 +206,12 @@
                   <div class="panel-copy">Most recent artifact access records.</div>
                 </div>
               </div>
-              {% if share_references %}
+              {% if shares %}
               <div class="stack">
-                {% for item in share_references %}
+                {% for item in shares %}
                 <article class="panel" style="padding: 0.85rem 0.95rem; background: rgba(11, 17, 32, 0.78);">
-                  <div class="eyebrow">{{ item.transport or "share" }}</div>
-                  <div class="mono">{{ item.share_reference_euid }}</div>
+                  <div class="eyebrow">{{ item.delivery_modes|join(", ") if item.delivery_modes else "share" }}</div>
+                  <a class="mono" href="/shares/{{ item.share_euid }}">{{ item.share_euid }}</a>
                   <div class="note">Target: {{ item.target_euid }}</div>
                   <div class="results-meta" style="margin-top: 0.55rem;">
                     {% if item.status == "active" %}
@@ -227,7 +227,7 @@
                 {% endfor %}
               </div>
               {% else %}
-              <div class="empty-state">No share references issued yet.</div>
+              <div class="empty-state">No shares issued yet.</div>
               {% endif %}
             </section>
 

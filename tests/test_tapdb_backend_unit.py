@@ -250,7 +250,8 @@ def test_template_definitions_are_required_codes() -> None:
     assert backend_mod.TEMPLATE_DEFINITIONS == (
         backend_mod.ARTIFACT_TEMPLATE,
         backend_mod.ARTIFACT_SET_TEMPLATE,
-        backend_mod.SHARE_REFERENCE_TEMPLATE,
+        backend_mod.SHARE_TEMPLATE,
+        backend_mod.SHARE_ROOT_TEMPLATE,
         backend_mod.EXTERNAL_OBJECT_TEMPLATE,
         backend_mod.EXTERNAL_OBJECT_RELATION_TEMPLATE,
         backend_mod.LITERATURE_SAVE_TEMPLATE,
@@ -262,7 +263,8 @@ def test_template_definitions_are_required_codes() -> None:
     assert backend_mod.BOOT_TEMPLATE_DEFINITIONS == (
         backend_mod.ARTIFACT_TEMPLATE,
         backend_mod.ARTIFACT_SET_TEMPLATE,
-        backend_mod.SHARE_REFERENCE_TEMPLATE,
+        backend_mod.SHARE_TEMPLATE,
+        backend_mod.SHARE_ROOT_TEMPLATE,
         backend_mod.EXTERNAL_OBJECT_TEMPLATE,
         backend_mod.EXTERNAL_OBJECT_RELATION_TEMPLATE,
         backend_mod.LITERATURE_SAVE_TEMPLATE,

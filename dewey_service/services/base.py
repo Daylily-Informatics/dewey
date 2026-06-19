@@ -410,36 +410,6 @@ class BaseDeweyService:
             "created_at": str(payload.get("created_at") or utc_now_iso()),
         }
 
-    def _share_reference_response(self, instance) -> dict[str, Any]:
-        payload = normalize_instance_payload(instance)
-        return {
-            "share_reference_euid": instance.euid,
-            "target_type": payload.get("target_type"),
-            "target_euid": payload.get("target_euid"),
-            "purpose": payload.get("purpose"),
-            "scope": payload.get("scope"),
-            "transport": payload.get("transport"),
-            "status": payload.get("status"),
-            "starts_at": payload.get("starts_at"),
-            "expires_at": payload.get("expires_at"),
-            "access_url": payload.get("access_url"),
-            "diagnostic": dict(payload.get("diagnostic") or {}),
-            "manifest": list(payload.get("manifest") or []),
-            "connection": dict(payload.get("connection") or {}),
-            "member_count": int(payload.get("member_count") or 0),
-            "transport_config": dict(payload.get("transport_config") or {}),
-            "issued_by": payload.get("issued_by"),
-            "recipient_email": payload.get("recipient_email"),
-            "managed_access": bool(payload.get("managed_access")),
-            "revoked_at": payload.get("revoked_at"),
-            "revoked_by": payload.get("revoked_by"),
-            "revocation_reason": payload.get("revocation_reason"),
-            "access_count": int(payload.get("access_count") or 0),
-            "last_accessed_at": payload.get("last_accessed_at"),
-            "last_accessed_by": payload.get("last_accessed_by"),
-            "created_at": payload.get("created_at"),
-        }
-
     def _share_response(self, instance) -> dict[str, Any]:
         payload = normalize_instance_payload(instance)
         return {

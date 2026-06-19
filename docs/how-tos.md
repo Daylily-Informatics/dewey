@@ -164,7 +164,7 @@ The current template supports:
 
 ## Search And Export
 
-Use `Unified Search` for normalized artifact and share-reference query flows.
+Use `Unified Search` for normalized artifact and managed-share query flows.
 
 1. Open `Unified Search`.
 2. Enter full-text query, filters, and scopes.
