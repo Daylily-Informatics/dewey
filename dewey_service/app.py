@@ -58,6 +58,7 @@ from dewey_service.auth import (
     require_ui_session,
     start_browser_login,
 )
+from dewey_service.cloudfront import CloudFrontShareSigner
 from dewey_service.defaults import AWS_PROFILE_REQUIRED_MESSAGE, resolve_aws_profile
 from dewey_service.domain_access import (
     build_allowed_origin_regex,
@@ -228,6 +229,62 @@ class ShareReferenceRevokeRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     reason: str | None = None
+
+
+class ShareTargetRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    target_kind: str = Field(pattern="^(artifact_object|artifact_prefix|artifact_set|mixed_set)$")
+    target_euid: str
+
+
+class ShareCreateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    target_kind: str = Field(pattern="^(artifact_object|artifact_prefix|artifact_set|mixed_set)$")
+    target_euid: str | None = None
+    targets: list[ShareTargetRequest] = Field(default_factory=list)
+    name: str | None = None
+    purpose: str | None = None
+    owner_email: str | None = None
+    allowed_users: list[str] = Field(default_factory=list)
+    allowed_domains: list[str] = Field(default_factory=list)
+    allowed_groups: list[str] = Field(default_factory=list)
+    delivery_modes: list[str] = Field(default_factory=list)
+    expires_at: str | None = None
+    ttl_seconds: int | None = None
+
+
+class ShareAccessPackageRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    delivery_mode: str = Field(
+        default="presigned_s3_manifest",
+        pattern="^(presigned_s3|presigned_s3_manifest|cloudfront_signed_url|cloudfront_signed_cookie|dewey_html_browser)$",
+    )
+    actor_email: str | None = None
+    actor_groups: list[str] = Field(default_factory=list)
+    signed_ttl_seconds: int | None = None
+
+
+class ShareRevokeRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    reason: str | None = None
+
+
+class ShareRootCreateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    root_uri: str
+    name: str | None = None
+    purpose: str | None = None
+    owner_email: str | None = None
+    allowed_delivery_modes: list[str] = Field(default_factory=list)
+
+
+class ShareRootSubsetCreateRequest(ShareCreateRequest):
+    pass
 
 
 class ArtifactStorageLockRequest(BaseModel):
@@ -428,6 +485,15 @@ def create_app(
             profile=aws_profile,
             region=settings.aws_region,
         )
+        cloudfront_signer = None
+        if settings.cloudfront_enabled:
+            cloudfront_signer = CloudFrontShareSigner(
+                distribution_domain=settings.cloudfront_distribution_domain,
+                key_pair_id=settings.cloudfront_key_pair_id,
+                private_key_path=settings.cloudfront_private_key_path,
+                default_ttl_seconds=settings.cloudfront_default_ttl_seconds,
+                cookie_ttl_seconds=settings.cloudfront_cookie_ttl_seconds,
+            )
         literature_adapter = None
         try:
             literature_adapter = MetapubAdapter(
@@ -454,6 +520,11 @@ def create_app(
             qeo_consumer_group=settings.qeo_consumer_group,
             qeo_timeout_seconds=settings.qeo_timeout_seconds,
             qeo_ca_bundle_path=settings.qeo_ca_bundle_path,
+            cloudfront_signer=cloudfront_signer,
+            requester_pays_buckets=set(settings.requester_pays_buckets),
+            share_approved_origins=list(settings.share_approved_origins),
+            share_default_signed_ttl_seconds=settings.share_default_signed_ttl_seconds,
+            share_max_lifetime_days=settings.share_max_lifetime_days,
         )
         service.bootstrap()
 
@@ -630,6 +701,53 @@ def create_app(
             and bool(share_reference.get("managed_access"))
             and bool(diagnostic.get("retryable"))
         )
+
+    def _share_list_context(
+        *,
+        profile: dict[str, Any],
+        share_message: dict[str, Any] | None = None,
+        share_form: dict[str, Any] | None = None,
+        share_root_form: dict[str, Any] | None = None,
+        share_subset_form: dict[str, Any] | None = None,
+        selected_share: dict[str, Any] | None = None,
+        share_audit: dict[str, Any] | None = None,
+        access_package: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return _template_context(
+            profile=profile,
+            is_admin=_is_admin(profile),
+            shares=service.list_shares(limit=500),
+            share_roots=service.list_share_roots(limit=500),
+            share_message=share_message,
+            share_form=share_form or {},
+            share_root_form=share_root_form or {},
+            share_subset_form=share_subset_form or {},
+            selected_share=selected_share,
+            share_audit=share_audit or {},
+            access_package=access_package,
+        )
+
+    def _share_form_targets(values: dict[str, Any]) -> list[dict[str, Any]]:
+        raw_targets = str(values.get("targets_json") or "").strip()
+        if not raw_targets:
+            return []
+        try:
+            parsed = json.loads(raw_targets)
+        except json.JSONDecodeError as exc:
+            raise ValueError("targets_json must be a JSON array") from exc
+        if not isinstance(parsed, list):
+            raise ValueError("targets_json must be a JSON array")
+        targets: list[dict[str, Any]] = []
+        for index, item in enumerate(parsed, start=1):
+            if not isinstance(item, dict):
+                raise ValueError(f"targets_json[{index}] must be an object")
+            targets.append(
+                {
+                    "target_kind": str(item.get("target_kind") or "").strip(),
+                    "target_euid": str(item.get("target_euid") or "").strip(),
+                }
+            )
+        return targets
 
     def _configured_external_reference_targets() -> list[dict[str, Any]]:
         raw_targets = settings.external_reference_targets
@@ -2833,16 +2951,256 @@ def create_app(
         request: Request,
         profile: dict[str, Any] = Depends(require_ui_session),
     ) -> HTMLResponse:
-        share_references = service.list_share_references(limit=500)
         return templates.TemplateResponse(
             request,
             "shares.html",
-            _template_context(
-                profile=profile,
-                is_admin=_is_admin(profile),
-                share_references=share_references,
-            ),
+            _share_list_context(profile=profile),
         )
+
+    @app.get("/admin/shares", include_in_schema=False)
+    async def admin_shares_report(
+        request: Request,
+        profile: dict[str, Any] = Depends(require_ui_admin_session),
+    ) -> HTMLResponse:
+        return templates.TemplateResponse(
+            request,
+            "shares.html",
+            _share_list_context(profile=profile),
+        )
+
+    @app.post("/shares/create", include_in_schema=False)
+    async def shares_create_page(
+        request: Request,
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> HTMLResponse:
+        form = await request.form()
+        values = _string_form_values(form)
+        delivery_modes = [
+            str(item).strip()
+            for item in form.getlist("delivery_modes")
+            if str(item).strip()
+        ]
+        try:
+            _, payload = service.create_share(
+                target_kind=str(values.get("target_kind") or "").strip(),
+                target_euid=str(values.get("target_euid") or "").strip() or None,
+                targets=_share_form_targets(values),
+                name=str(values.get("name") or "").strip() or None,
+                purpose=str(values.get("purpose") or "").strip() or None,
+                owner_email=str(values.get("owner_email") or "").strip()
+                or str(profile.get("email") or "").strip(),
+                allowed_users=split_csv(values.get("allowed_users")),
+                allowed_domains=split_csv(values.get("allowed_domains")),
+                allowed_groups=split_csv(values.get("allowed_groups")),
+                delivery_modes=delivery_modes,
+                expires_at=str(values.get("expires_at") or "").strip() or None,
+                ttl_seconds=int(values.get("ttl_seconds") or 0) or None,
+                idempotency_key=_new_idempotency_key("ui-share-create"),
+            )
+            return templates.TemplateResponse(
+                request,
+                "shares.html",
+                _share_list_context(
+                    profile=profile,
+                    share_message={"state": "ok", "detail": "Share created.", "share": payload},
+                    selected_share=payload,
+                    share_audit=service.list_share_audit(payload["share_euid"]),
+                ),
+                status_code=201,
+            )
+        except Exception as exc:
+            return templates.TemplateResponse(
+                request,
+                "shares.html",
+                _share_list_context(
+                    profile=profile,
+                    share_message={"state": "error", "detail": str(exc)},
+                    share_form=values,
+                ),
+                status_code=400,
+            )
+
+    @app.get("/shares/{share_euid}", include_in_schema=False)
+    async def share_detail_page(
+        request: Request,
+        share_euid: str,
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> HTMLResponse:
+        try:
+            share = service.get_share(share_euid)
+            return templates.TemplateResponse(
+                request,
+                "shares.html",
+                _share_list_context(
+                    profile=profile,
+                    selected_share=share,
+                    share_audit=service.list_share_audit(share_euid),
+                ),
+            )
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post("/shares/{share_euid}/access-package", include_in_schema=False)
+    async def share_access_package_page(
+        request: Request,
+        share_euid: str,
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> HTMLResponse:
+        form = await request.form()
+        delivery_mode = str(form.get("delivery_mode") or "").strip()
+        try:
+            package = service.create_share_access_package(
+                share_euid,
+                delivery_mode=delivery_mode,
+                actor_email=str(profile.get("email") or "").strip(),
+                actor_groups=list(profile.get("groups") or []),
+                ip=request.client.host if request.client else None,
+                user_agent=request.headers.get("user-agent"),
+                signed_ttl_seconds=int(form.get("signed_ttl_seconds") or 0) or None,
+            )
+            share = service.get_share(share_euid)
+            return templates.TemplateResponse(
+                request,
+                "shares.html",
+                _share_list_context(
+                    profile=profile,
+                    selected_share=share,
+                    share_audit=service.list_share_audit(share_euid),
+                    access_package=package,
+                    share_message={"state": "ok", "detail": "Access package generated."},
+                ),
+            )
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except (PermissionError, ValueError) as exc:
+            share = service.get_share(share_euid)
+            return templates.TemplateResponse(
+                request,
+                "shares.html",
+                _share_list_context(
+                    profile=profile,
+                    selected_share=share,
+                    share_audit=service.list_share_audit(share_euid),
+                    share_message={"state": "error", "detail": str(exc)},
+                ),
+                status_code=400,
+            )
+
+    @app.post("/shares/{share_euid}/revoke", include_in_schema=False)
+    async def share_revoke_page(
+        request: Request,
+        share_euid: str,
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> HTMLResponse:
+        form = await request.form()
+        try:
+            payload = service.revoke_share(
+                share_euid,
+                revoked_by=str(profile.get("email") or "").strip(),
+                reason=str(form.get("reason") or "").strip() or None,
+            )
+            return templates.TemplateResponse(
+                request,
+                "shares.html",
+                _share_list_context(
+                    profile=profile,
+                    selected_share=payload,
+                    share_audit=service.list_share_audit(share_euid),
+                    share_message={"state": "ok", "detail": "Share revoked."},
+                ),
+            )
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post("/share-roots/create", include_in_schema=False)
+    async def share_roots_create_page(
+        request: Request,
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> HTMLResponse:
+        form = await request.form()
+        values = _string_form_values(form)
+        try:
+            _, payload = service.create_share_root(
+                root_uri=str(values.get("root_uri") or "").strip(),
+                name=str(values.get("name") or "").strip() or None,
+                purpose=str(values.get("purpose") or "").strip() or None,
+                owner_email=str(values.get("owner_email") or "").strip()
+                or str(profile.get("email") or "").strip(),
+                allowed_delivery_modes=split_csv(values.get("allowed_delivery_modes")),
+                idempotency_key=_new_idempotency_key("ui-share-root-create"),
+            )
+            return templates.TemplateResponse(
+                request,
+                "shares.html",
+                _share_list_context(
+                    profile=profile,
+                    share_message={
+                        "state": "ok",
+                        "detail": "Tracked share root registered.",
+                        "share_root": payload,
+                    },
+                ),
+                status_code=201,
+            )
+        except Exception as exc:
+            return templates.TemplateResponse(
+                request,
+                "shares.html",
+                _share_list_context(
+                    profile=profile,
+                    share_message={"state": "error", "detail": str(exc)},
+                    share_root_form=values,
+                ),
+                status_code=400,
+            )
+
+    @app.post("/share-roots/{share_root_euid}/subsets/create", include_in_schema=False)
+    async def share_root_subset_create_page(
+        request: Request,
+        share_root_euid: str,
+        profile: dict[str, Any] = Depends(require_ui_session),
+    ) -> HTMLResponse:
+        form = await request.form()
+        values = _string_form_values(form)
+        delivery_modes = split_csv(values.get("delivery_modes"))
+        try:
+            _, payload = service.create_share_root_subset(
+                share_root_euid,
+                targets=_share_form_targets(values),
+                name=str(values.get("name") or "").strip() or None,
+                purpose=str(values.get("purpose") or "").strip() or None,
+                owner_email=str(values.get("owner_email") or "").strip()
+                or str(profile.get("email") or "").strip(),
+                allowed_users=split_csv(values.get("allowed_users")),
+                allowed_domains=split_csv(values.get("allowed_domains")),
+                allowed_groups=split_csv(values.get("allowed_groups")),
+                delivery_modes=delivery_modes,
+                expires_at=str(values.get("expires_at") or "").strip() or None,
+                ttl_seconds=int(values.get("ttl_seconds") or 0) or None,
+                idempotency_key=_new_idempotency_key("ui-share-root-subset-create"),
+            )
+            return templates.TemplateResponse(
+                request,
+                "shares.html",
+                _share_list_context(
+                    profile=profile,
+                    selected_share=payload,
+                    share_audit=service.list_share_audit(payload["share_euid"]),
+                    share_message={"state": "ok", "detail": "Share root subset created."},
+                ),
+                status_code=201,
+            )
+        except Exception as exc:
+            return templates.TemplateResponse(
+                request,
+                "shares.html",
+                _share_list_context(
+                    profile=profile,
+                    share_message={"state": "error", "detail": str(exc)},
+                    share_subset_form=values,
+                ),
+                status_code=400,
+            )
 
     @app.post("/artifacts/share", include_in_schema=False)
     async def artifacts_share(
@@ -3659,6 +4017,157 @@ def create_app(
             raise HTTPException(status_code=400, detail=str(exc)) from exc
         except RuntimeError as exc:
             raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    @app.post(
+        "/api/v1/shares",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def create_share(
+        body: ShareCreateRequest,
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ) -> dict[str, Any]:
+        try:
+            status_code, payload = service.create_share(
+                target_kind=body.target_kind,
+                target_euid=body.target_euid,
+                targets=[item.model_dump() for item in body.targets],
+                name=body.name,
+                purpose=body.purpose,
+                owner_email=body.owner_email,
+                allowed_users=body.allowed_users,
+                allowed_domains=body.allowed_domains,
+                allowed_groups=body.allowed_groups,
+                delivery_modes=body.delivery_modes,
+                expires_at=body.expires_at,
+                ttl_seconds=body.ttl_seconds,
+                idempotency_key=_require_idempotency_key(idempotency_key),
+            )
+            return {"status_code": status_code, **payload}
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except DeweyConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except RuntimeError as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    @app.get(
+        "/api/v1/shares/{share_euid}",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def get_share(share_euid: str) -> dict[str, Any]:
+        try:
+            return service.get_share(share_euid)
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post("/api/v1/shares/{share_euid}/access-package")
+    async def create_share_access_package(
+        request: Request,
+        share_euid: str,
+        body: ShareAccessPackageRequest,
+        auth_context: dict[str, Any] = Depends(session_or_api_auth_dep),
+    ) -> dict[str, Any]:
+        profile = auth_context.get("profile") if isinstance(auth_context, dict) else None
+        actor_email = str(body.actor_email or "").strip()
+        actor_groups = list(body.actor_groups or [])
+        if isinstance(profile, dict):
+            actor_email = str(profile.get("email") or "").strip()
+            actor_groups = list(profile.get("groups") or [])
+        try:
+            return service.create_share_access_package(
+                share_euid,
+                delivery_mode=body.delivery_mode,
+                actor_email=actor_email,
+                actor_groups=actor_groups,
+                ip=request.client.host if request.client else None,
+                user_agent=request.headers.get("user-agent"),
+                signed_ttl_seconds=body.signed_ttl_seconds,
+            )
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except PermissionError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except RuntimeError as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    @app.post(
+        "/api/v1/shares/{share_euid}/revoke",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def revoke_share(share_euid: str, body: ShareRevokeRequest) -> dict[str, Any]:
+        try:
+            return service.revoke_share(share_euid, revoked_by="api", reason=body.reason)
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.get(
+        "/api/v1/shares/{share_euid}/audit",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def list_share_audit(share_euid: str) -> dict[str, Any]:
+        try:
+            return service.list_share_audit(share_euid)
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post(
+        "/api/v1/share-roots",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def create_share_root(
+        body: ShareRootCreateRequest,
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ) -> dict[str, Any]:
+        try:
+            status_code, payload = service.create_share_root(
+                root_uri=body.root_uri,
+                name=body.name,
+                purpose=body.purpose,
+                owner_email=body.owner_email,
+                allowed_delivery_modes=body.allowed_delivery_modes,
+                idempotency_key=_require_idempotency_key(idempotency_key),
+            )
+            return {"status_code": status_code, **payload}
+        except DeweyConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post(
+        "/api/v1/share-roots/{share_root_euid}/subsets",
+        dependencies=[Depends(api_auth_dep)],
+    )
+    async def create_share_root_subset(
+        share_root_euid: str,
+        body: ShareRootSubsetCreateRequest,
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ) -> dict[str, Any]:
+        try:
+            status_code, payload = service.create_share_root_subset(
+                share_root_euid,
+                targets=[item.model_dump() for item in body.targets],
+                name=body.name,
+                purpose=body.purpose,
+                owner_email=body.owner_email,
+                allowed_users=body.allowed_users,
+                allowed_domains=body.allowed_domains,
+                allowed_groups=body.allowed_groups,
+                delivery_modes=body.delivery_modes,
+                expires_at=body.expires_at,
+                ttl_seconds=body.ttl_seconds,
+                idempotency_key=_require_idempotency_key(idempotency_key),
+            )
+            return {"status_code": status_code, **payload}
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except DeweyConflictError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     @app.get(
         "/api/v1/share-references/{share_reference_euid}",

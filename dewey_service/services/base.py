@@ -61,6 +61,11 @@ class BaseDeweyService:
         qeo_consumer_group: str = "",
         qeo_timeout_seconds: int = 10,
         qeo_ca_bundle_path: str = "",
+        cloudfront_signer: Any | None = None,
+        requester_pays_buckets: set[str] | None = None,
+        share_approved_origins: list[str] | None = None,
+        share_default_signed_ttl_seconds: int = 900,
+        share_max_lifetime_days: int = 3650,
     ):
         self.backend = backend
         self.default_share_ttl_seconds = max(60, int(default_share_ttl_seconds))
@@ -81,6 +86,19 @@ class BaseDeweyService:
         self.qeo_consumer_group = str(qeo_consumer_group or "").strip()
         self.qeo_timeout_seconds = max(1, int(qeo_timeout_seconds or 10))
         self.qeo_ca_bundle_path = str(qeo_ca_bundle_path or "").strip()
+        self.cloudfront_signer = cloudfront_signer
+        self.requester_pays_buckets = {
+            str(item or "").strip()
+            for item in (requester_pays_buckets or set())
+            if str(item or "").strip()
+        }
+        self.share_approved_origins = [
+            str(item or "").strip().rstrip("/")
+            for item in (share_approved_origins or [])
+            if str(item or "").strip()
+        ]
+        self.share_default_signed_ttl_seconds = max(60, int(share_default_signed_ttl_seconds))
+        self.share_max_lifetime_days = max(1, int(share_max_lifetime_days))
         self._upload_serializer = URLSafeTimedSerializer(
             str(upload_token_secret or "dewey-upload-secret"),
             salt="dewey-upload-session-v1",
@@ -419,6 +437,50 @@ class BaseDeweyService:
             "access_count": int(payload.get("access_count") or 0),
             "last_accessed_at": payload.get("last_accessed_at"),
             "last_accessed_by": payload.get("last_accessed_by"),
+            "created_at": payload.get("created_at"),
+        }
+
+    def _share_response(self, instance) -> dict[str, Any]:
+        payload = normalize_instance_payload(instance)
+        return {
+            "share_euid": instance.euid,
+            "target_kind": payload.get("target_kind"),
+            "target_euid": payload.get("target_euid"),
+            "targets": list(payload.get("targets") or []),
+            "name": payload.get("name") or getattr(instance, "name", instance.euid),
+            "purpose": payload.get("purpose"),
+            "owner_email": payload.get("owner_email"),
+            "allowed_users": list(payload.get("allowed_users") or []),
+            "allowed_domains": list(payload.get("allowed_domains") or []),
+            "allowed_groups": list(payload.get("allowed_groups") or []),
+            "delivery_modes": list(payload.get("delivery_modes") or []),
+            "status": payload.get("status"),
+            "starts_at": payload.get("starts_at"),
+            "expires_at": payload.get("expires_at"),
+            "default_signed_ttl_seconds": int(payload.get("default_signed_ttl_seconds") or 0),
+            "cloudfront": dict(payload.get("cloudfront") or {}),
+            "member_count": int(payload.get("member_count") or 0),
+            "created_at": payload.get("created_at"),
+            "revoked_at": payload.get("revoked_at"),
+            "revoked_by": payload.get("revoked_by"),
+            "revocation_reason": payload.get("revocation_reason"),
+            "last_accessed_at": payload.get("last_accessed_at"),
+            "last_accessed_by": payload.get("last_accessed_by"),
+            "access_count": int(payload.get("access_count") or 0),
+        }
+
+    def _share_root_response(self, instance) -> dict[str, Any]:
+        payload = normalize_instance_payload(instance)
+        return {
+            "share_root_euid": instance.euid,
+            "root_uri": payload.get("root_uri"),
+            "bucket": payload.get("bucket"),
+            "prefix": payload.get("prefix"),
+            "name": payload.get("name") or getattr(instance, "name", instance.euid),
+            "purpose": payload.get("purpose"),
+            "owner_email": payload.get("owner_email"),
+            "allowed_delivery_modes": list(payload.get("allowed_delivery_modes") or []),
+            "status": payload.get("status"),
             "created_at": payload.get("created_at"),
         }
 

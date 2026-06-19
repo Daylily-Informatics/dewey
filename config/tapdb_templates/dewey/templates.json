@@ -41,6 +41,32 @@
       "json_addl": {}
     },
     {
+      "name": "Dewey Share",
+      "polymorphic_discriminator": "data_template",
+      "category": "DGX",
+      "type": "access",
+      "subtype": "share",
+      "version": "1.0",
+      "instance_prefix": "DGX",
+      "instance_polymorphic_identity": "data_instance",
+      "bstatus": "active",
+      "is_singleton": false,
+      "json_addl": {}
+    },
+    {
+      "name": "Dewey Share Root",
+      "polymorphic_discriminator": "data_template",
+      "category": "DGX",
+      "type": "access",
+      "subtype": "share_root",
+      "version": "1.0",
+      "instance_prefix": "DGX",
+      "instance_polymorphic_identity": "data_instance",
+      "bstatus": "active",
+      "is_singleton": false,
+      "json_addl": {}
+    },
+    {
       "name": "Dewey External Object",
       "polymorphic_discriminator": "data_template",
       "category": "DGX",

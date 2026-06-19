@@ -226,6 +226,8 @@ def test_docs_and_static_runtime_routes_have_direct_request_coverage(client) -> 
     openapi = client.get("/openapi.json")
     assert openapi.status_code == 200
     assert "/api/v1/share-references" in openapi.json()["paths"]
+    assert "/api/v1/shares" in openapi.json()["paths"]
+    assert "/api/v1/share-roots" in openapi.json()["paths"]
 
     docs = client.get("/docs")
     assert docs.status_code == 200

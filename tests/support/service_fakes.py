@@ -22,6 +22,8 @@ from dewey_service.tapdb_backend import (
     OUTBOX_EVENT_TEMPLATE,
     REGISTRATION_RECEIPT_TEMPLATE,
     SHARE_REFERENCE_TEMPLATE,
+    SHARE_ROOT_TEMPLATE,
+    SHARE_TEMPLATE,
 )
 
 
@@ -56,6 +58,8 @@ class _InMemoryBackend:
             ARTIFACT_TEMPLATE: 1,
             ARTIFACT_SET_TEMPLATE: 1,
             SHARE_REFERENCE_TEMPLATE: 1,
+            SHARE_TEMPLATE: 1,
+            SHARE_ROOT_TEMPLATE: 1,
             EXTERNAL_OBJECT_TEMPLATE: 1,
             EXTERNAL_OBJECT_RELATION_TEMPLATE: 1,
             LITERATURE_SAVE_TEMPLATE: 1,
@@ -68,6 +72,8 @@ class _InMemoryBackend:
             ARTIFACT_TEMPLATE: "AT",
             ARTIFACT_SET_TEMPLATE: "AS",
             SHARE_REFERENCE_TEMPLATE: "SH",
+            SHARE_TEMPLATE: "SHR",
+            SHARE_ROOT_TEMPLATE: "SRT",
             EXTERNAL_OBJECT_TEMPLATE: "EX",
             EXTERNAL_OBJECT_RELATION_TEMPLATE: "ER",
             LITERATURE_SAVE_TEMPLATE: "SAV",
@@ -238,6 +244,7 @@ class _FakeStorageClient:
         self.object_bodies: dict[tuple[str, str], bytes] = {}
         self.tags: dict[tuple[str, str], dict[str, str]] = {}
         self.retentions: dict[tuple[str, str], dict[str, str]] = {}
+        self.calls: list[tuple[str, dict[str, Any]]] = []
 
     def seed_object(
         self,
@@ -263,8 +270,19 @@ class _FakeStorageClient:
         self.objects[(bucket, key)] = obj
         return obj
 
-    def head_object(self, *, bucket: str, key: str, version_id: str | None = None) -> StorageObject:
+    def head_object(
+        self,
+        *,
+        bucket: str,
+        key: str,
+        version_id: str | None = None,
+        request_payer: str | None = None,
+    ) -> StorageObject:
         _ = version_id
+        _ = request_payer
+        self.calls.append(
+            ("head_object", {"bucket": bucket, "key": key, "request_payer": request_payer})
+        )
         obj = self.objects.get((bucket, key))
         if obj is None:
             raise StorageObjectNotFoundError(f"{bucket}/{key}")
@@ -307,7 +325,18 @@ class _FakeStorageClient:
         self.object_bodies[(bucket, key)] = bytes(body)
         return obj
 
-    def list_objects(self, *, bucket: str, prefix: str, limit: int = 1000) -> list[StorageObject]:
+    def list_objects(
+        self,
+        *,
+        bucket: str,
+        prefix: str,
+        limit: int = 1000,
+        request_payer: str | None = None,
+    ) -> list[StorageObject]:
+        _ = request_payer
+        self.calls.append(
+            ("list_objects", {"bucket": bucket, "prefix": prefix, "request_payer": request_payer})
+        )
         rows = [
             obj
             for (obj_bucket, _), obj in self.objects.items()
@@ -323,8 +352,13 @@ class _FakeStorageClient:
         prefix: str = "",
         limit: int = 200,
         continuation_token: str | None = None,
+        request_payer: str | None = None,
     ) -> dict[str, Any]:
         _ = continuation_token
+        _ = request_payer
+        self.calls.append(
+            ("browse_prefix", {"bucket": bucket, "prefix": prefix, "request_payer": request_payer})
+        )
         prefixes: set[str] = set()
         objects: list[StorageObject] = []
         for (obj_bucket, _), obj in self.objects.items():
@@ -353,8 +387,13 @@ class _FakeStorageClient:
         bucket: str,
         key: str,
         version_id: str | None = None,
+        request_payer: str | None = None,
     ) -> bytes:
         _ = version_id
+        _ = request_payer
+        self.calls.append(
+            ("get_object_bytes", {"bucket": bucket, "key": key, "request_payer": request_payer})
+        )
         self.head_object(bucket=bucket, key=key)
         if (bucket, key) in self.object_bodies:
             return self.object_bodies[(bucket, key)]
@@ -380,10 +419,13 @@ class _FakeStorageClient:
         key: str,
         expires_in: int,
         version_id: str | None = None,
+        request_payer: str | None = None,
     ) -> str:
         _ = version_id
+        _ = request_payer
         self.head_object(bucket=bucket, key=key)
-        return f"https://downloads.example.com/{bucket}/{key}?expires_in={expires_in}"
+        payer = "&x-amz-request-payer=requester" if request_payer == "requester" else ""
+        return f"https://downloads.example.com/{bucket}/{key}?expires_in={expires_in}{payer}"
 
     def generate_presigned_upload(
         self,

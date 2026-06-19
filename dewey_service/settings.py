@@ -249,6 +249,17 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "storage_managed_bucket": "managed_storage_bucket",
         "storage_managed_prefix": "managed_storage_prefix",
         "storage_upload_session_ttl_seconds": "upload_session_ttl_seconds",
+        "storage_requester_pays_buckets": "requester_pays_buckets",
+        "storage_cloudfront_enabled": "cloudfront_enabled",
+        "storage_cloudfront_distribution_domain": "cloudfront_distribution_domain",
+        "storage_cloudfront_distribution_id": "cloudfront_distribution_id",
+        "storage_cloudfront_key_pair_id": "cloudfront_key_pair_id",
+        "storage_cloudfront_private_key_path": "cloudfront_private_key_path",
+        "storage_cloudfront_default_ttl_seconds": "cloudfront_default_ttl_seconds",
+        "storage_cloudfront_cookie_ttl_seconds": "cloudfront_cookie_ttl_seconds",
+        "share_approved_origins": "share_approved_origins",
+        "share_default_signed_ttl_seconds": "share_default_signed_ttl_seconds",
+        "share_max_lifetime_days": "share_max_lifetime_days",
         "auth_cognito_domain": "cognito_domain",
         "auth_cognito_app_client_id": "cognito_app_client_id",
         "auth_cognito_app_client_secret": "cognito_app_client_secret",
@@ -499,6 +510,20 @@ class Settings(BaseSettings):
     managed_storage_bucket: str = ""
     managed_storage_prefix: str = "artifacts"
     upload_session_ttl_seconds: int = 900
+    requester_pays_buckets: list[str] = Field(default_factory=list)
+    cloudfront_enabled: bool = False
+    cloudfront_distribution_domain: str = ""
+    cloudfront_distribution_id: str = ""
+    cloudfront_key_pair_id: str = ""
+    cloudfront_private_key_path: str = ""
+    cloudfront_default_ttl_seconds: int = 900
+    cloudfront_cookie_ttl_seconds: int = 900
+
+    # Dewey share control-plane policy. Empty approved_origins means no CloudFront
+    # origin is approved; S3 presign still requires explicit S3 artifact metadata.
+    share_approved_origins: list[str] = Field(default_factory=list)
+    share_default_signed_ttl_seconds: int = 900
+    share_max_lifetime_days: int = 3650
 
     # Literature integration
     literature_managed_copy_allowed_domains: str = "europepmc.org,ncbi.nlm.nih.gov"
@@ -609,6 +634,43 @@ class Settings(BaseSettings):
         normalized = str(value or "").strip().strip("/")
         return normalized or "artifacts"
 
+    @field_validator("requester_pays_buckets", "share_approved_origins", mode="before")
+    @classmethod
+    def validate_string_list(cls, value: Any) -> list[str]:
+        if value is None:
+            return []
+        if isinstance(value, str):
+            raw_items = value.split(",")
+        elif isinstance(value, (list, tuple, set)):
+            raw_items = list(value)
+        else:
+            raise ValueError("value must be a string or list of strings")
+        return [str(item or "").strip() for item in raw_items if str(item or "").strip()]
+
+    @field_validator("cloudfront_distribution_domain")
+    @classmethod
+    def validate_cloudfront_domain(cls, value: str) -> str:
+        normalized = str(value or "").strip().removeprefix("https://").removeprefix("http://")
+        normalized = normalized.strip().strip("/")
+        if not normalized:
+            return ""
+        if "/" in normalized or "?" in normalized or "#" in normalized:
+            raise ValueError("cloudfront_distribution_domain must be a bare host")
+        return normalized
+
+    @field_validator("cloudfront_private_key_path")
+    @classmethod
+    def validate_cloudfront_private_key_path(cls, value: str) -> str:
+        normalized = str(value or "").strip()
+        if not normalized:
+            return ""
+        path = Path(normalized).expanduser()
+        if not path.is_absolute():
+            raise ValueError("cloudfront_private_key_path must be an absolute file path")
+        if not path.is_file():
+            raise ValueError("cloudfront_private_key_path does not exist")
+        return str(path)
+
     @field_validator("cognito_group_role_map", mode="before")
     @classmethod
     def validate_cognito_group_role_map(cls, value: Any) -> dict[str, str]:
@@ -697,6 +759,31 @@ class Settings(BaseSettings):
                 self.cognito_logout_url,
                 field_name="cognito_logout_url",
             )
+        if self.cloudfront_enabled:
+            missing = [
+                field_name
+                for field_name in (
+                    "cloudfront_distribution_domain",
+                    "cloudfront_key_pair_id",
+                    "cloudfront_private_key_path",
+                )
+                if not str(getattr(self, field_name) or "").strip()
+            ]
+            if missing:
+                raise ValueError(
+                    "storage.cloudfront.enabled requires explicit settings: "
+                    + ", ".join(sorted(missing))
+                )
+            self.cloudfront_default_ttl_seconds = max(
+                60,
+                int(self.cloudfront_default_ttl_seconds),
+            )
+            self.cloudfront_cookie_ttl_seconds = max(
+                60,
+                int(self.cloudfront_cookie_ttl_seconds),
+            )
+        self.share_default_signed_ttl_seconds = max(60, int(self.share_default_signed_ttl_seconds))
+        self.share_max_lifetime_days = max(1, int(self.share_max_lifetime_days))
         self.cognito_allowed_email_domains = _normalize_email_domains(
             self.cognito_allowed_email_domains,
             default=DEFAULT_COGNITO_ALLOWED_EMAIL_DOMAINS,
