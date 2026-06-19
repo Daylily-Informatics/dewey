@@ -213,9 +213,9 @@ def test_backend_helpers_cover_utility_functions() -> None:
         == hashlib.sha256(str({"a": 1}).encode("utf-8")).hexdigest()
     )
     assert backend_mod._parse_template_code(backend_mod.ARTIFACT_TEMPLATE) == (
-        backend_mod.DEWEY_TEMPLATE_CATEGORY,
         "data",
         "artifact",
+        "generic",
         "1.0",
     )
     with pytest.raises(ValueError, match="Invalid template code"):

@@ -14,7 +14,7 @@ dependencies = [
     "cli-core-yo==2.1.1",
     "build>=1.2.0",
     "cryptography>=42.0.0",
-    "daylily-tapdb @ git+https://github.com/Daylily-Informatics/daylily-tapdb.git@9.0.5",
+    "daylily-tapdb @ git+https://github.com/Daylily-Informatics/daylily-tapdb.git@9.0.6",
     "daylily-auth-cognito==2.1.5",
     "djlint",
     "fastapi>=0.115.0",

@@ -14,7 +14,7 @@
 
 Dewey is the LSMC artifact and reference registry. It tracks durable artifacts such as sequencing run directories, VCFs, reports, external objects, external-object relations, managed shares, and access routes. It is the registry layer for data products and referenceable outputs, not the laboratory material graph.
 
-Current Dayhoff pins are maintained in `/Users/jmajor/projects/mega_dayhoff/dayhoff/services/pins.toml`. Current TapDB dependency: `daylily-tapdb @ ...@9.0.5`.
+Current Dayhoff pins are maintained in `/Users/jmajor/projects/mega_dayhoff/dayhoff/services/pins.toml`. Current TapDB dependency: `daylily-tapdb @ ...@9.0.6`.
 
 Dewey is an approved-network customer/collaborator service in Dayhoff exposure policy.
 

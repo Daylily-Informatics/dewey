@@ -6,7 +6,7 @@ Dewey persists a local transactional outbox for QEO/KEO handoff. It does not exp
 
 Outbox rows are stored as TapDB instances:
 
-- Template: `DGX/system/outbox_event/1.0/`
+- Template: `system/outbox_event/generic/1.0/`
 - Code: `dewey_service/services/outbox.py`
 
 The outbox write occurs in the same TapDB transaction as artifact records, artifact-set records, lineage, receipt, and idempotency state.
