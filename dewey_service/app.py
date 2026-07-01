@@ -11,7 +11,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from time import monotonic, time_ns
 from typing import Any
-from urllib.parse import quote, urlencode
+from urllib.parse import quote, urlencode, urlsplit, urlunsplit
 from uuid import uuid4
 
 import httpx
@@ -538,7 +538,33 @@ def create_app(
                 status_code=503,
                 detail="Broker user preferences URL must include {email}",
             )
-        return raw_url.replace("{email}", quote(email, safe="")), {
+        parsed = urlsplit(raw_url)
+        if parsed.scheme != "https" or not parsed.hostname:
+            raise HTTPException(
+                status_code=503,
+                detail="Broker user preferences URL must be an HTTPS URL with a host",
+            )
+        if parsed.username or parsed.password or parsed.fragment:
+            raise HTTPException(
+                status_code=503,
+                detail="Broker user preferences URL must not include credentials or fragments",
+            )
+        allowed_hosts = {
+            host.strip().lower()
+            for host in str(os.environ.get("LSMC_AUTH_BROKER_ALLOWED_HOSTS") or "").split(",")
+            if host.strip()
+        }
+        login_url_host = urlsplit(str(settings.external_broker_login_url or "")).hostname
+        if login_url_host:
+            allowed_hosts.add(login_url_host.lower())
+        if allowed_hosts and parsed.hostname.lower() not in allowed_hosts:
+            raise HTTPException(
+                status_code=503,
+                detail="Broker user preferences URL host is not allowed",
+            )
+        path = parsed.path.replace("{email}", quote(email, safe=""))
+        url = urlunsplit(("https", parsed.netloc, path, parsed.query, ""))
+        return url, {
             "Authorization": f"Bearer {token}",
             "X-LSMC-Service-ID": service_id,
         }

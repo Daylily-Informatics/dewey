@@ -233,3 +233,42 @@ def test_user_preferences_proxy_routes_call_broker(
             None,
         ),
     ]
+
+
+def test_user_preferences_proxy_rejects_non_https_broker_url(
+    monkeypatch, test_settings, fake_service
+) -> None:
+    monkeypatch.setenv(
+        "LSMC_AUTH_BROKER_USER_PREFERENCES_URL",
+        "http://login.example.test/api/users/{email}/preferences",
+    )
+    monkeypatch.setenv("LSMC_AUTH_BROKER_SERVICE_TOKEN", "broker-token")
+
+    with _configured_client(monkeypatch, test_settings, fake_service) as client:
+        _login_operator(monkeypatch, client)
+
+        response = client.get("/api/v1/me/preferences")
+
+    assert response.status_code == 503
+    assert (
+        response.json()["detail"] == "Broker user preferences URL must be an HTTPS URL with a host"
+    )
+
+
+def test_user_preferences_proxy_rejects_disallowed_broker_host(
+    monkeypatch, test_settings, fake_service
+) -> None:
+    monkeypatch.setenv(
+        "LSMC_AUTH_BROKER_USER_PREFERENCES_URL",
+        "https://unexpected.example.test/api/users/{email}/preferences",
+    )
+    monkeypatch.setenv("LSMC_AUTH_BROKER_SERVICE_TOKEN", "broker-token")
+    monkeypatch.setenv("LSMC_AUTH_BROKER_ALLOWED_HOSTS", "login.example.test")
+
+    with _configured_client(monkeypatch, test_settings, fake_service) as client:
+        _login_operator(monkeypatch, client)
+
+        response = client.get("/api/v1/me/preferences")
+
+    assert response.status_code == 503
+    assert response.json()["detail"] == "Broker user preferences URL host is not allowed"
