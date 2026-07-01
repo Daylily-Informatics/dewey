@@ -188,12 +188,14 @@ def test_config_status_prints_runtime_settings(monkeypatch: pytest.MonkeyPatch) 
     monkeypatch.setattr(
         config_extra,
         "build_effective_config_rows",
-        lambda passed_settings, *, config_path: [
-            {"path": "application.api_bearer_token", "value": "<redacted>"},
-            {"path": "qeo.api_token", "value": "<redacted>"},
-        ]
-        if passed_settings is settings and str(config_path) == "/tmp/dewey-config.yaml"
-        else [],
+        lambda passed_settings, *, config_path: (
+            [
+                {"path": "application.api_bearer_token", "value": "<redacted>"},
+                {"path": "qeo.api_token", "value": "<redacted>"},
+            ]
+            if passed_settings is settings and str(config_path) == "/tmp/dewey-config.yaml"
+            else []
+        ),
     )
     monkeypatch.setattr(
         config_extra.ccyo_out, "print_text", lambda message: printed.append(message)

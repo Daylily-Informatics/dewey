@@ -30,7 +30,9 @@ def test_common_access_log_payload_is_json(caplog) -> None:
     with caplog.at_level(logging.INFO, logger="lsmc.access"):
         _emit_access_log(payload)
 
-    body = json.loads([record for record in caplog.records if record.name == "lsmc.access"][-1].getMessage())
+    body = json.loads(
+        [record for record in caplog.records if record.name == "lsmc.access"][-1].getMessage()
+    )
     assert body["event"] == "request_completed"
     assert body["request_id"] == "req-1"
     assert body["service_id"] == "dewey"

@@ -61,6 +61,7 @@ def test_db_seed_main_claims_prefixes_before_seeding(
     monkeypatch.setattr(db_seed, "TapDBBackend", FakeBackend)
     monkeypatch.setattr(db_seed, "resolve_seed_config_dirs", fake_resolve)
     monkeypatch.setattr(db_seed, "get_settings", fake_get_settings)
+
     def fake_validate_template_configs(config_dirs, strict):  # noqa: ANN001 - test double
         if config_dirs == [core_config_dir]:
             return (
@@ -105,7 +106,9 @@ def test_db_seed_main_claims_prefixes_before_seeding(
                     "instance_prefix": "DGX",
                 },
                 {
-                    "_source_file": str(tmp_path / "config" / "external_refs" / "external_ref.json"),
+                    "_source_file": str(
+                        tmp_path / "config" / "external_refs" / "external_ref.json"
+                    ),
                     "name": "TapDB External Reference",
                     "polymorphic_discriminator": "external_reference_template",
                     "category": "reference",
@@ -575,9 +578,7 @@ def test_db_repair_templates_seeds_only_when_verification_fails(
     def fake_verify() -> None:
         calls.append("verify")
         if calls == ["verify"]:
-            raise RuntimeError(
-                "Missing Dewey templates: system/registration_receipt/generic/1.0/"
-            )
+            raise RuntimeError("Missing Dewey templates: system/registration_receipt/generic/1.0/")
 
     monkeypatch.setattr(db_commands, "_verify_dewey_templates", fake_verify)
     monkeypatch.setattr(db_commands, "_seed_dewey_template_overlay", lambda: calls.append("seed"))

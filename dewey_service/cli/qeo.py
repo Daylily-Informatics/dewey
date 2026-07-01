@@ -24,11 +24,7 @@ def _status() -> None:
     ccyo_out.print_text(
         "qeo.dispatch_configured="
         + str(
-            bool(
-                settings.qeo_ingest_url
-                and settings.qeo_api_token
-                and settings.qeo_consumer_group
-            )
+            bool(settings.qeo_ingest_url and settings.qeo_api_token and settings.qeo_consumer_group)
         ).lower()
     )
     ccyo_out.print_text(f"qeo.ingest_url={settings.qeo_ingest_url or '<unset>'}")

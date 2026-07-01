@@ -2667,7 +2667,9 @@ def create_app(
             status_code, payload = service.register_sequencer_run(
                 request_body=body,
                 idempotency_key=None,
-                request_id=str(getattr(request.state, "request_id", "") or _new_idempotency_key("req")),
+                request_id=str(
+                    getattr(request.state, "request_id", "") or _new_idempotency_key("req")
+                ),
                 correlation_id=str(
                     getattr(request.state, "correlation_id", "") or _new_idempotency_key("corr")
                 ),
@@ -2831,9 +2833,7 @@ def create_app(
         form = await request.form()
         values = _string_form_values(form)
         delivery_modes = [
-            str(item).strip()
-            for item in form.getlist("delivery_modes")
-            if str(item).strip()
+            str(item).strip() for item in form.getlist("delivery_modes") if str(item).strip()
         ]
         try:
             _, payload = service.create_share(
@@ -3578,7 +3578,9 @@ def create_app(
             status_code, payload = service.register_sequencer_run(
                 request_body=body,
                 idempotency_key=idempotency_key,
-                request_id=str(getattr(request.state, "request_id", "") or _new_idempotency_key("req")),
+                request_id=str(
+                    getattr(request.state, "request_id", "") or _new_idempotency_key("req")
+                ),
                 correlation_id=str(
                     getattr(request.state, "correlation_id", "") or _new_idempotency_key("corr")
                 ),
@@ -3606,7 +3608,9 @@ def create_app(
             status_code, payload = service.register_analysis_results(
                 request_body=body,
                 idempotency_key=idempotency_key,
-                request_id=str(getattr(request.state, "request_id", "") or _new_idempotency_key("req")),
+                request_id=str(
+                    getattr(request.state, "request_id", "") or _new_idempotency_key("req")
+                ),
                 correlation_id=str(
                     getattr(request.state, "correlation_id", "") or _new_idempotency_key("corr")
                 ),

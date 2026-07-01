@@ -116,7 +116,9 @@ class OutboxServiceMixin:
         ]
         counts: dict[str, int] = {}
         for result in results:
-            counts[str(result["dispatch_status"])] = counts.get(str(result["dispatch_status"]), 0) + 1
+            counts[str(result["dispatch_status"])] = (
+                counts.get(str(result["dispatch_status"]), 0) + 1
+            )
         return {
             "requested_limit": max(1, min(int(limit or 100), 1000)),
             "filters": {

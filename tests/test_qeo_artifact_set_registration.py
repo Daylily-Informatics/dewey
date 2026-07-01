@@ -303,9 +303,10 @@ def test_reprocessing_creates_new_set_and_skips_existing_artifact(service, stora
 
     assert first["artifact_set_euid"] != second["artifact_set_euid"]
     assert second["registered_artifacts"] == []
-    assert second["skipped_existing"][0]["artifact_euid"] == first["registered_artifacts"][0][
-        "artifact_euid"
-    ]
+    assert (
+        second["skipped_existing"][0]["artifact_euid"]
+        == first["registered_artifacts"][0]["artifact_euid"]
+    )
 
 
 def test_supplied_matching_idempotency_key_is_accepted(service, storage) -> None:

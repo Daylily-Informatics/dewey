@@ -351,7 +351,9 @@ def test_share_api_routes_round_trip() -> None:
         headers={"Authorization": "Bearer token-123", "Idempotency-Key": "route-subset-1"},
         json={
             "target_kind": "mixed_set",
-            "targets": [{"target_kind": "artifact_object", "target_euid": artifact["artifact_euid"]}],
+            "targets": [
+                {"target_kind": "artifact_object", "target_euid": artifact["artifact_euid"]}
+            ],
             "owner_email": "owner@lsmc.com",
             "allowed_users": ["reader@lsmc.com"],
             "delivery_modes": ["presigned_s3_manifest"],

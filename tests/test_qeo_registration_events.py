@@ -209,9 +209,7 @@ def test_qeo_outbox_dispatch_filters_by_event_id(service, storage, monkeypatch) 
         "artifact_set_euids": [],
     }
     assert sent_event_ids == [target["event_id"]]
-    statuses = {
-        row["event_id"]: row["dispatch_status"] for row in service.list_outbox_events()
-    }
+    statuses = {row["event_id"]: row["dispatch_status"] for row in service.list_outbox_events()}
     assert statuses[target["event_id"]] == "dispatched"
     other_event_id = next(
         row["event_id"]
@@ -221,9 +219,7 @@ def test_qeo_outbox_dispatch_filters_by_event_id(service, storage, monkeypatch) 
     assert statuses[other_event_id] == "pending"
 
 
-def test_qeo_outbox_dispatch_filters_by_artifact_set_euid(
-    service, storage, monkeypatch
-) -> None:
+def test_qeo_outbox_dispatch_filters_by_artifact_set_euid(service, storage, monkeypatch) -> None:
     first = _request_with_sensitive_metadata()
     second = _request_with_sensitive_metadata(
         analysis_euid="AN-000004",

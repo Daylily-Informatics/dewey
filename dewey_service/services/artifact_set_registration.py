@@ -317,9 +317,7 @@ class ArtifactSetRegistrationServiceMixin:
                 )
                 continue
             if uri_is_prefix:
-                raise ValueError(
-                    "directory-shaped storage_uri requires artifact_role=directory"
-                )
+                raise ValueError("directory-shaped storage_uri requires artifact_role=directory")
             try:
                 storage_object = storage.head_object(bucket=bucket, key=key)
             except StorageObjectNotFoundError as exc:
@@ -467,9 +465,7 @@ class ArtifactSetRegistrationServiceMixin:
             "registration_metadata": dict(artifact.metadata),
         }
         payload = self._artifact_payload(
-            artifact_type="folder"
-            if prepared.storage_kind == "prefix"
-            else artifact.artifact_role,
+            artifact_type="folder" if prepared.storage_kind == "prefix" else artifact.artifact_role,
             storage_backend="s3",
             bucket=prepared.bucket,
             key=prepared.key,
@@ -487,9 +483,7 @@ class ArtifactSetRegistrationServiceMixin:
             metadata=metadata,
             source_uri=artifact.storage_uri,
             import_mode="register",
-            storage_status="registered"
-            if prepared.storage_kind == "prefix"
-            else "verified",
+            storage_status="registered" if prepared.storage_kind == "prefix" else "verified",
             storage_verified_at=None if prepared.storage_kind == "prefix" else created_at,
             storage_kind=prepared.storage_kind,
             node_kind=prepared.node_kind,
@@ -710,9 +704,7 @@ class ArtifactSetRegistrationServiceMixin:
         metadata["registration_metadata"] = dict(request.metadata)
         metadata["html_artifact"] = request.html_artifact.model_dump(mode="json")
         metadata["data_dir_artifact"] = request.data_dir_artifact.model_dump(mode="json")
-        metadata["key_files"] = [
-            artifact.model_dump(mode="json") for artifact in request.key_files
-        ]
+        metadata["key_files"] = [artifact.model_dump(mode="json") for artifact in request.key_files]
         metadata["parser_relevant_files"] = [
             artifact.model_dump(mode="json") for artifact in request.parser_relevant_files
         ]

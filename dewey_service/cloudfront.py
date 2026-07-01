@@ -143,7 +143,8 @@ class CloudFrontShareSigner:
             Path(self.private_key_path).read_bytes(),
             password=None,
         )
-        return private_key.sign(message, padding.PKCS1v15(), hashes.SHA1())
+        # CloudFront canned/custom policy signatures require RSA-SHA1.
+        return private_key.sign(message, padding.PKCS1v15(), hashes.SHA1())  # nosec B303
 
 
 class NullCloudFrontShareSigner:

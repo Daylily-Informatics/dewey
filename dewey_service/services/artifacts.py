@@ -1044,8 +1044,7 @@ class ArtifactServiceMixin:
             producer_system=producer_system,
             producer_object_euid=producer_object_euid,
             storage_class=None,
-            availability_status=str(meta.get("availability_status") or "").strip()
-            or "available",
+            availability_status=str(meta.get("availability_status") or "").strip() or "available",
             metadata=meta,
             source_uri=normalized_root_uri,
             import_mode="register",

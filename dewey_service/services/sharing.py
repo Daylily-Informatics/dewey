@@ -60,11 +60,16 @@ class SharingServiceMixin:
         approved = [item.rstrip("/") for item in getattr(self, "share_approved_origins", [])]
         if not approved:
             raise RuntimeError("CloudFront delivery requires explicit approved share origins")
-        if any(storage_uri == origin or storage_uri.startswith(origin.rstrip("/") + "/") for origin in approved):
+        if any(
+            storage_uri == origin or storage_uri.startswith(origin.rstrip("/") + "/")
+            for origin in approved
+        ):
             return
         raise ValueError(f"CloudFront origin is not approved for sharing: s3://{bucket}")
 
-    def _normalize_share_expiry(self, expires_at: str | None, ttl_seconds: int | None = None) -> str:
+    def _normalize_share_expiry(
+        self, expires_at: str | None, ttl_seconds: int | None = None
+    ) -> str:
         expiry = self._normalize_expiry(expires_at, ttl_seconds=ttl_seconds)
         parsed = datetime.fromisoformat(expiry.replace("Z", "+00:00"))
         max_expiry = datetime.now(timezone.utc) + timedelta(days=int(self.share_max_lifetime_days))
@@ -89,10 +94,14 @@ class SharingServiceMixin:
         if email in allowed_users:
             return True
         _, _, domain = email.partition("@")
-        allowed_domains = {item.lower().lstrip("@") for item in _clean_list(payload.get("allowed_domains"))}
+        allowed_domains = {
+            item.lower().lstrip("@") for item in _clean_list(payload.get("allowed_domains"))
+        }
         if domain and domain in allowed_domains:
             return True
-        groups = {str(item or "").strip() for item in (actor_groups or []) if str(item or "").strip()}
+        groups = {
+            str(item or "").strip() for item in (actor_groups or []) if str(item or "").strip()
+        }
         allowed_groups = set(_clean_list(payload.get("allowed_groups")))
         return bool(groups & allowed_groups)
 
@@ -182,7 +191,9 @@ class SharingServiceMixin:
         visited = visited or set()
         clean_kind = str(target_kind or "").strip().lower()
         if clean_kind not in SHARE_TARGET_KINDS:
-            raise ValueError("target_kind must be artifact_object, artifact_prefix, artifact_set, or mixed_set")
+            raise ValueError(
+                "target_kind must be artifact_object, artifact_prefix, artifact_set, or mixed_set"
+            )
         clean_euid = str(target_euid or "").strip()
         if clean_kind in {"artifact_object", "artifact_prefix"}:
             target = self.backend.find_by_euid(
@@ -262,7 +273,9 @@ class SharingServiceMixin:
     ) -> tuple[int, dict[str, Any]]:
         clean_kind = str(target_kind or "").strip().lower()
         if clean_kind not in SHARE_TARGET_KINDS:
-            raise ValueError("target_kind must be artifact_object, artifact_prefix, artifact_set, or mixed_set")
+            raise ValueError(
+                "target_kind must be artifact_object, artifact_prefix, artifact_set, or mixed_set"
+            )
         clean_modes = _clean_list(delivery_modes) or ["presigned_s3_manifest"]
         invalid_modes = sorted(set(clean_modes) - SHARE_DELIVERY_MODES)
         if invalid_modes:
@@ -304,7 +317,10 @@ class SharingServiceMixin:
             )
             if not members:
                 raise ValueError("share target expansion produced no members")
-            if any(mode.startswith("cloudfront") or mode == "dewey_html_browser" for mode in clean_modes):
+            if any(
+                mode.startswith("cloudfront") or mode == "dewey_html_browser"
+                for mode in clean_modes
+            ):
                 self._require_cloudfront_signer()
                 for member in members:
                     self._validate_cloudfront_origin(
@@ -335,11 +351,18 @@ class SharingServiceMixin:
                             None,
                         )
                     }
-                    if any(mode.startswith("cloudfront") or mode == "dewey_html_browser" for mode in clean_modes)
+                    if any(
+                        mode.startswith("cloudfront") or mode == "dewey_html_browser"
+                        for mode in clean_modes
+                    )
                     else {},
                 },
             )
-            for raw_target in ([{"target_kind": clean_kind, "target_euid": payload["target_euid"]}] if clean_kind != "mixed_set" else clean_targets):
+            for raw_target in (
+                [{"target_kind": clean_kind, "target_euid": payload["target_euid"]}]
+                if clean_kind != "mixed_set"
+                else clean_targets
+            ):
                 raw_kind = str(raw_target.get("target_kind") or "").strip().lower()
                 raw_euid = str(raw_target.get("target_euid") or "").strip()
                 template_code = (
@@ -349,7 +372,9 @@ class SharingServiceMixin:
                     if raw_kind == "mixed_set"
                     else ARTIFACT_TEMPLATE
                 )
-                target = self.backend.find_by_euid(session, template_code=template_code, euid=raw_euid)
+                target = self.backend.find_by_euid(
+                    session, template_code=template_code, euid=raw_euid
+                )
                 if target is not None:
                     self.backend.create_lineage(
                         session,
@@ -498,7 +523,14 @@ class SharingServiceMixin:
                 )
                 self._append_share_audit(session, share, event)
                 raise PermissionError("share access denied")
-            ttl_limit = max(60, int(signed_ttl_seconds or payload.get("default_signed_ttl_seconds") or self.share_default_signed_ttl_seconds))
+            ttl_limit = max(
+                60,
+                int(
+                    signed_ttl_seconds
+                    or payload.get("default_signed_ttl_seconds")
+                    or self.share_default_signed_ttl_seconds
+                ),
+            )
             members = self._expand_share_targets(
                 session,
                 target_kind=str(payload.get("target_kind") or ""),
@@ -552,9 +584,18 @@ class SharingServiceMixin:
                 for member in members:
                     if member["target_kind"] != "artifact_object":
                         raise ValueError("cloudfront_signed_url requires object targets")
-                    self._validate_cloudfront_origin(bucket=str(member["bucket"]), key=str(member["key"]))
+                    self._validate_cloudfront_origin(
+                        bucket=str(member["bucket"]), key=str(member["key"])
+                    )
                     signed = signer.sign_url(key=str(member["key"]), expires_in=ttl_limit)
-                    manifest.append({**member, "signed_url": signed.access_url, "resource": signed.resource, "expires_at": signed.expires_at})
+                    manifest.append(
+                        {
+                            **member,
+                            "signed_url": signed.access_url,
+                            "resource": signed.resource,
+                            "expires_at": signed.expires_at,
+                        }
+                    )
                 package["manifest"] = manifest
                 if len(manifest) == 1:
                     package["signed_url"] = manifest[0]["signed_url"]
@@ -563,10 +604,25 @@ class SharingServiceMixin:
                 prefixes = []
                 for member in members:
                     key = str(member["key"])
-                    prefix = key if member["target_kind"] == "artifact_prefix" else key.rsplit("/", 1)[0] + "/" if "/" in key else ""
-                    self._validate_cloudfront_origin(bucket=str(member["bucket"]), key=prefix or key)
+                    prefix = (
+                        key
+                        if member["target_kind"] == "artifact_prefix"
+                        else key.rsplit("/", 1)[0] + "/"
+                        if "/" in key
+                        else ""
+                    )
+                    self._validate_cloudfront_origin(
+                        bucket=str(member["bucket"]), key=prefix or key
+                    )
                     signed = signer.sign_prefix_cookies(prefix=prefix or key, expires_in=ttl_limit)
-                    prefixes.append({**member, "resource": signed.resource, "cookies": signed.cookies, "expires_at": signed.expires_at})
+                    prefixes.append(
+                        {
+                            **member,
+                            "resource": signed.resource,
+                            "cookies": signed.cookies,
+                            "expires_at": signed.expires_at,
+                        }
+                    )
                 package["manifest"] = prefixes
                 if prefixes:
                     package["cookies"] = prefixes[0].get("cookies", {})
@@ -647,7 +703,10 @@ class SharingServiceMixin:
             root_uri,
             require_prefix=True,
         )
-        modes = _clean_list(allowed_delivery_modes) or ["presigned_s3_manifest", "cloudfront_signed_cookie"]
+        modes = _clean_list(allowed_delivery_modes) or [
+            "presigned_s3_manifest",
+            "cloudfront_signed_cookie",
+        ]
         invalid_modes = sorted(set(modes) - SHARE_DELIVERY_MODES)
         if invalid_modes:
             raise ValueError("unsupported delivery modes: " + ", ".join(invalid_modes))
@@ -734,7 +793,9 @@ class SharingServiceMixin:
                 targets=targets,
             )
             for member in members:
-                if str(member["bucket"]) != root_bucket or not str(member["key"]).startswith(root_prefix):
+                if str(member["bucket"]) != root_bucket or not str(member["key"]).startswith(
+                    root_prefix
+                ):
                     raise ValueError("subset target is outside the registered share root")
         return self.create_share(
             target_kind="mixed_set",
