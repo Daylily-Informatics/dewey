@@ -51,6 +51,10 @@ def test_artifacts_page_requires_login_and_serves_bulk_template(monkeypatch, cli
     assert 'href="/artifacts"' in page.text
     assert 'href="/artifacts/dag"' in page.text
     assert "section=recent_artifacts#section-recent_artifacts" in page.text
+    assert 'data-testid="dewey-artifact-register-form"' in page.text
+    assert 'data-testid="dewey-artifact-s3-mode"' in page.text
+    assert 'data-testid="dewey-artifact-s3-sources"' in page.text
+    assert 'data-testid="dewey-artifact-register-submit"' in page.text
 
     template = client.get("/artifacts/bulk-template.tsv")
     assert template.status_code == 200
@@ -187,8 +191,8 @@ def test_artifacts_register_search_download_and_artifact_share(
         },
     )
     assert share.status_code == 200
-    assert "Issued Artifact Links" in share.text
-    assert len(fake_service.share_references) == 2
+    assert "Issued Artifact Shares" in share.text
+    assert len(fake_service.shares) == 2
 
     recent = client.get("/artifacts?section=recent_artifacts")
     assert recent.status_code == 200
@@ -274,26 +278,29 @@ def test_artifact_detail_page_and_direct_download_redirect(
         data={"share_duration_days": "1.25"},
         follow_redirects=False,
     )
-    assert download.status_code == 303
-    assert download.headers["location"] == "/share-references/SH-000001"
-    assert len(fake_service.share_references) == 1
+    assert download.status_code == 303, download.text
+    assert download.headers["location"] == "https://downloads.example.com/SHR-000001"
+    assert len(fake_service.shares) == 1
 
-    opened = client.get("/share-references/SH-000001", follow_redirects=False)
-    assert opened.status_code == 303
-    assert opened.headers["location"] == "https://downloads.example.com/SH-000001"
-    assert fake_service.share_references["SH-000001"]["access_count"] == 1
+    opened = client.post(
+        "/shares/SHR-000001/access-package",
+        data={"delivery_mode": "presigned_s3", "signed_ttl_seconds": "300"},
+    )
+    assert opened.status_code == 200
+    assert "downloads.example.com/SHR-000001" in opened.text
+    assert fake_service.shares["SHR-000001"]["access_count"] == 2
 
     shares = client.get("/shares")
     assert shares.status_code == 200
-    assert "Dewey Share References" in shares.text
+    assert "S3 and CloudFront Shares" in shares.text
 
     revoke = client.post(
-        "/share-references/SH-000001/revoke",
+        "/shares/SHR-000001/revoke",
         data={"return_to": "artifact"},
         follow_redirects=False,
     )
-    assert revoke.status_code == 303
-    assert fake_service.share_references["SH-000001"]["status"] == "revoked"
+    assert revoke.status_code == 200
+    assert fake_service.shares["SHR-000001"]["status"] == "revoked"
 
 
 def test_artifacts_register_infers_artifact_type_from_extension(
@@ -426,8 +433,8 @@ def test_artifacts_bulk_directory_limit_and_artifact_set_routes(
     )
     assert set_share.status_code == 200
     assert "Latest Set Share" in set_share.text
-    assert "http://shares.example.com:8088/" in set_share.text
-    assert len(fake_service.share_references) == 1
+    assert "artifact-set-share" in set_share.text
+    assert len(fake_service.shares) == 1
 
 
 def test_artifact_detail_external_reference_validate_and_create(

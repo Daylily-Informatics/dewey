@@ -11,7 +11,7 @@ from dewey_service.tapdb_backend import (
     ARTIFACT_SET_TEMPLATE,
     ARTIFACT_TEMPLATE,
     EXTERNAL_OBJECT_TEMPLATE,
-    SHARE_REFERENCE_TEMPLATE,
+    SHARE_TEMPLATE,
 )
 
 
@@ -36,8 +36,8 @@ class SearchServiceMixin:
                 rows.extend(self._search_artifact_items(session, viewer_context=viewer_context))
             if "artifact_set" in scopes:
                 rows.extend(self._search_artifact_set_items(session))
-            if "share_reference" in scopes:
-                rows.extend(self._search_share_reference_items(session))
+            if "share" in scopes:
+                rows.extend(self._search_share_items(session))
 
         filtered = self._apply_search_filters(rows, query)
         filtered = self._sort_search_rows(filtered, sort_field=sort_field, sort_dir=sort_dir)
@@ -49,9 +49,7 @@ class SearchServiceMixin:
         facets = {
             "artifact": sum(1 for row in filtered if row["record_type"] == "artifact"),
             "artifact_set": sum(1 for row in filtered if row["record_type"] == "artifact_set"),
-            "share_reference": sum(
-                1 for row in filtered if row["record_type"] == "share_reference"
-            ),
+            "share": sum(1 for row in filtered if row["record_type"] == "share"),
         }
         return {
             "items": items,
@@ -89,13 +87,13 @@ class SearchServiceMixin:
 
     @staticmethod
     def _normalize_search_scopes(raw: Any) -> list[str]:
-        allowed = {"artifact", "artifact_set", "share_reference"}
+        allowed = {"artifact", "artifact_set", "share"}
         if raw is None:
-            return ["artifact", "share_reference"]
+            return ["artifact", "share"]
         values = raw if isinstance(raw, list) else [raw]
         scopes = [str(item or "").strip().lower() for item in values if str(item or "").strip()]
         normalized = [scope for scope in scopes if scope in allowed]
-        return normalized or ["artifact", "share_reference"]
+        return normalized or ["artifact", "share"]
 
     def _search_artifact_items(
         self,
@@ -177,21 +175,21 @@ class SearchServiceMixin:
             )
         return rows
 
-    def _search_share_reference_items(self, session) -> list[dict[str, Any]]:
+    def _search_share_items(self, session) -> list[dict[str, Any]]:
         rows = self.backend.list_by_template(
             session,
-            template_code=SHARE_REFERENCE_TEMPLATE,
+            template_code=SHARE_TEMPLATE,
             limit=5000,
         )
         items: list[dict[str, Any]] = []
         for row in rows:
-            payload = self._share_reference_response(row)
+            payload = self._share_response(row)
             items.append(
                 {
-                    "record_type": "share_reference",
-                    "source_kind": "dewey.share_reference",
-                    "euid": payload["share_reference_euid"],
-                    "name": payload["share_reference_euid"],
+                    "record_type": "share",
+                    "source_kind": "dewey.share",
+                    "euid": payload["share_euid"],
+                    "name": payload.get("name") or payload["share_euid"],
                     "created_at": payload.get("created_at"),
                     "modified_at": payload.get("created_at"),
                     **payload,

@@ -249,6 +249,17 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "storage_managed_bucket": "managed_storage_bucket",
         "storage_managed_prefix": "managed_storage_prefix",
         "storage_upload_session_ttl_seconds": "upload_session_ttl_seconds",
+        "storage_requester_pays_buckets": "requester_pays_buckets",
+        "storage_cloudfront_enabled": "cloudfront_enabled",
+        "storage_cloudfront_distribution_domain": "cloudfront_distribution_domain",
+        "storage_cloudfront_distribution_id": "cloudfront_distribution_id",
+        "storage_cloudfront_key_pair_id": "cloudfront_key_pair_id",
+        "storage_cloudfront_private_key_path": "cloudfront_private_key_path",
+        "storage_cloudfront_default_ttl_seconds": "cloudfront_default_ttl_seconds",
+        "storage_cloudfront_cookie_ttl_seconds": "cloudfront_cookie_ttl_seconds",
+        "share_approved_origins": "share_approved_origins",
+        "share_default_signed_ttl_seconds": "share_default_signed_ttl_seconds",
+        "share_max_lifetime_days": "share_max_lifetime_days",
         "auth_cognito_domain": "cognito_domain",
         "auth_cognito_app_client_id": "cognito_app_client_id",
         "auth_cognito_app_client_secret": "cognito_app_client_secret",
@@ -267,7 +278,6 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "auth_external_broker_service_token": "external_broker_service_token",
         "auth_external_broker_callback_url": "external_broker_callback_url",
         "auth_external_broker_logout_url": "external_broker_logout_url",
-        "auth_external_broker_share_recipient_prepare_url": "external_broker_share_recipient_prepare_url",
         "auth_external_broker_ca_bundle": "external_broker_ca_bundle",
         "qeo_ingest_url": "qeo_ingest_url",
         "qeo_api_token": "qeo_api_token",
@@ -350,7 +360,6 @@ def _display_config_path(path: str) -> str:
         "external_broker_service_token": "auth.external_broker.service_token",
         "external_broker_callback_url": "auth.external_broker.callback_url",
         "external_broker_logout_url": "auth.external_broker.logout_url",
-        "external_broker_share_recipient_prepare_url": "auth.external_broker.share_recipient_prepare_url",
         "external_broker_ca_bundle": "auth.external_broker.ca_bundle",
         "qeo_ingest_url": "qeo.ingest_url",
         "qeo_api_token": "qeo.api_token",
@@ -376,7 +385,6 @@ def _display_config_path(path: str) -> str:
         "literature_metapub_cache_dir": "literature.metapub_cache_dir",
         "literature_request_timeout_seconds": "literature.request_timeout_seconds",
         "literature_max_redirects": "literature.max_redirects",
-        "default_share_reference_ttl_seconds": "share_reference.default_ttl_seconds",
         "external_reference_targets": "external_references.targets",
         "search_export_max_rows": "search.export_max_rows",
         "config_path": "config.file_path",
@@ -463,7 +471,6 @@ class Settings(BaseSettings):
     external_broker_service_token: str = ""
     external_broker_callback_url: str = ""
     external_broker_logout_url: str = ""
-    external_broker_share_recipient_prepare_url: str = ""
     external_broker_ca_bundle: str = ""
 
     # Explicit Dewey -> QEO outbox dispatch. Empty values disable dispatch by failing hard.
@@ -499,6 +506,20 @@ class Settings(BaseSettings):
     managed_storage_bucket: str = ""
     managed_storage_prefix: str = "artifacts"
     upload_session_ttl_seconds: int = 900
+    requester_pays_buckets: list[str] = Field(default_factory=list)
+    cloudfront_enabled: bool = False
+    cloudfront_distribution_domain: str = ""
+    cloudfront_distribution_id: str = ""
+    cloudfront_key_pair_id: str = ""
+    cloudfront_private_key_path: str = ""
+    cloudfront_default_ttl_seconds: int = 900
+    cloudfront_cookie_ttl_seconds: int = 900
+
+    # Dewey share control-plane policy. Empty approved_origins means no CloudFront
+    # origin is approved; S3 presign still requires explicit S3 artifact metadata.
+    share_approved_origins: list[str] = Field(default_factory=list)
+    share_default_signed_ttl_seconds: int = 900
+    share_max_lifetime_days: int = 3650
 
     # Literature integration
     literature_managed_copy_allowed_domains: str = "europepmc.org,ncbi.nlm.nih.gov"
@@ -506,8 +527,6 @@ class Settings(BaseSettings):
     literature_request_timeout_seconds: int = 10
     literature_max_redirects: int = 3
 
-    # Share reference defaults
-    default_share_reference_ttl_seconds: int = 3600
     external_reference_targets: list[dict[str, Any]] = Field(default_factory=list)
     search_export_max_rows: int = 1000
 
@@ -521,7 +540,6 @@ class Settings(BaseSettings):
         "external_broker_handoff_exchange_url",
         "external_broker_callback_url",
         "external_broker_logout_url",
-        "external_broker_share_recipient_prepare_url",
     )
     @classmethod
     def validate_external_broker_urls(cls, value: str, info):
@@ -609,6 +627,43 @@ class Settings(BaseSettings):
         normalized = str(value or "").strip().strip("/")
         return normalized or "artifacts"
 
+    @field_validator("requester_pays_buckets", "share_approved_origins", mode="before")
+    @classmethod
+    def validate_string_list(cls, value: Any) -> list[str]:
+        if value is None:
+            return []
+        if isinstance(value, str):
+            raw_items = value.split(",")
+        elif isinstance(value, (list, tuple, set)):
+            raw_items = list(value)
+        else:
+            raise ValueError("value must be a string or list of strings")
+        return [str(item or "").strip() for item in raw_items if str(item or "").strip()]
+
+    @field_validator("cloudfront_distribution_domain")
+    @classmethod
+    def validate_cloudfront_domain(cls, value: str) -> str:
+        normalized = str(value or "").strip().removeprefix("https://").removeprefix("http://")
+        normalized = normalized.strip().strip("/")
+        if not normalized:
+            return ""
+        if "/" in normalized or "?" in normalized or "#" in normalized:
+            raise ValueError("cloudfront_distribution_domain must be a bare host")
+        return normalized
+
+    @field_validator("cloudfront_private_key_path")
+    @classmethod
+    def validate_cloudfront_private_key_path(cls, value: str) -> str:
+        normalized = str(value or "").strip()
+        if not normalized:
+            return ""
+        path = Path(normalized).expanduser()
+        if not path.is_absolute():
+            raise ValueError("cloudfront_private_key_path must be an absolute file path")
+        if not path.is_file():
+            raise ValueError("cloudfront_private_key_path does not exist")
+        return str(path)
+
     @field_validator("cognito_group_role_map", mode="before")
     @classmethod
     def validate_cognito_group_role_map(cls, value: Any) -> dict[str, str]:
@@ -675,10 +730,6 @@ class Settings(BaseSettings):
                 self.external_broker_logout_url,
                 field_name="external_broker_logout_url",
             )
-            self.external_broker_share_recipient_prepare_url = _validate_optional_https_url(
-                self.external_broker_share_recipient_prepare_url,
-                field_name="external_broker_share_recipient_prepare_url",
-            )
             ca_bundle = str(self.external_broker_ca_bundle or "").strip()
             if ca_bundle and not Path(ca_bundle).is_file():
                 raise ValueError("external_broker_ca_bundle does not exist")
@@ -697,6 +748,31 @@ class Settings(BaseSettings):
                 self.cognito_logout_url,
                 field_name="cognito_logout_url",
             )
+        if self.cloudfront_enabled:
+            missing = [
+                field_name
+                for field_name in (
+                    "cloudfront_distribution_domain",
+                    "cloudfront_key_pair_id",
+                    "cloudfront_private_key_path",
+                )
+                if not str(getattr(self, field_name) or "").strip()
+            ]
+            if missing:
+                raise ValueError(
+                    "storage.cloudfront.enabled requires explicit settings: "
+                    + ", ".join(sorted(missing))
+                )
+            self.cloudfront_default_ttl_seconds = max(
+                60,
+                int(self.cloudfront_default_ttl_seconds),
+            )
+            self.cloudfront_cookie_ttl_seconds = max(
+                60,
+                int(self.cloudfront_cookie_ttl_seconds),
+            )
+        self.share_default_signed_ttl_seconds = max(60, int(self.share_default_signed_ttl_seconds))
+        self.share_max_lifetime_days = max(1, int(self.share_max_lifetime_days))
         self.cognito_allowed_email_domains = _normalize_email_domains(
             self.cognito_allowed_email_domains,
             default=DEFAULT_COGNITO_ALLOWED_EMAIL_DOMAINS,
@@ -853,7 +929,6 @@ def load_settings(config_path: Path | None = None) -> Settings:
         "external_broker_handoff_exchange_url": "",
         "external_broker_callback_url": "",
         "external_broker_logout_url": "",
-        "external_broker_share_recipient_prepare_url": "",
         "external_broker_ca_bundle": "",
         "deployment_name": "",
         "deployment_color": "",
@@ -878,10 +953,6 @@ def load_settings(config_path: Path | None = None) -> Settings:
         "external_broker_service_token": _read_first_env("LSMC_AUTH_BROKER_SERVICE_TOKEN"),
         "external_broker_callback_url": _read_first_env("LSMC_AUTH_BROKER_CALLBACK_URL"),
         "external_broker_logout_url": _read_first_env("LSMC_AUTH_BROKER_LOGOUT_URL"),
-        "external_broker_share_recipient_prepare_url": _read_first_env(
-            "LSMC_AUTH_BROKER_SHARE_RECIPIENT_PREPARE_URL",
-            "DEWEY_EXTERNAL_SHARE_RECIPIENT_PREPARE_URL",
-        ),
         "external_broker_ca_bundle": _read_first_env("LSMC_AUTH_BROKER_CA_BUNDLE"),
     }
     merged = {**seed}

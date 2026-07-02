@@ -4,19 +4,22 @@ ARG PYTHON_VERSION=3.12
 FROM ghcr.io/astral-sh/uv:0.5.30-python${PYTHON_VERSION}-bookworm-slim AS builder
 
 ARG SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0
-ENV SETUPTOOLS_SCM_PRETEND_VERSION=${SETUPTOOLS_SCM_PRETEND_VERSION} \
+ENV SETUPTOOLS_SCM_PRETEND_VERSION_FOR_DEWEY_SERVICE=${SETUPTOOLS_SCM_PRETEND_VERSION} \
     UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 WORKDIR /app
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates git \
+    && rm -rf /var/lib/apt/lists/*
 COPY pyproject.toml uv.lock README.md ./
-RUN uv sync --frozen --no-dev --no-install-project
+RUN unset SETUPTOOLS_SCM_PRETEND_VERSION && uv sync --frozen --no-dev --no-install-project
 
 COPY config ./config
 COPY dewey_service ./dewey_service
-RUN uv sync --frozen --no-dev
+RUN unset SETUPTOOLS_SCM_PRETEND_VERSION && uv sync --frozen --no-dev
 
 FROM python:${PYTHON_VERSION}-slim-bookworm AS runtime
 

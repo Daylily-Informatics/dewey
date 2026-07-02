@@ -96,7 +96,6 @@ auth:
     service_token: ""
     callback_url: ""
     logout_url: ""
-    share_recipient_prepare_url: ""
     ca_bundle: ""
   cognito:
     domain: dewey-auth.example.com

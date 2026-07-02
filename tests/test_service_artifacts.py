@@ -78,7 +78,11 @@ def test_register_artifact_replay_and_identity_reuse(service: DeweyService) -> N
     assert service.list_artifacts(artifact_type="fastq", producer_system="atlas") == [created]
 
 
-def test_bootstrap_seeds_and_reads_local_anomalies(service: DeweyService) -> None:
+def test_bootstrap_seeds_and_reads_local_anomalies(
+    service: DeweyService,
+    explicit_config_file,
+) -> None:
+    _ = explicit_config_file
     service.bootstrap()
 
     anomalies = service.list_anomalies()

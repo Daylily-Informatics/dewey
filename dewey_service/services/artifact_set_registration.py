@@ -107,6 +107,7 @@ class ArtifactSetRegistrationServiceMixin:
                 registered_at=now_iso,
                 local_only=body.local_only,
                 parser_hint=body.parser_family_hint,
+                metadata=body.metadata,
             )
             receipt_instance = self._persist_registration_receipt(
                 session,
@@ -198,6 +199,7 @@ class ArtifactSetRegistrationServiceMixin:
                 registered_at=now_iso,
                 local_only=body.local_only,
                 parser_hint=body.parser_family_hint or body.report_kind,
+                metadata=body.metadata,
             )
             receipt_instance = self._persist_registration_receipt(
                 session,
@@ -315,9 +317,7 @@ class ArtifactSetRegistrationServiceMixin:
                 )
                 continue
             if uri_is_prefix:
-                raise ValueError(
-                    "directory-shaped storage_uri requires artifact_role=directory"
-                )
+                raise ValueError("directory-shaped storage_uri requires artifact_role=directory")
             try:
                 storage_object = storage.head_object(bucket=bucket, key=key)
             except StorageObjectNotFoundError as exc:
@@ -462,11 +462,10 @@ class ArtifactSetRegistrationServiceMixin:
             "required": artifact.required,
             "produced_by": artifact.produced_by,
             "parent_artifact_euids": list(artifact.parent_artifact_euids),
+            "registration_metadata": dict(artifact.metadata),
         }
         payload = self._artifact_payload(
-            artifact_type="folder"
-            if prepared.storage_kind == "prefix"
-            else artifact.artifact_role,
+            artifact_type="folder" if prepared.storage_kind == "prefix" else artifact.artifact_role,
             storage_backend="s3",
             bucket=prepared.bucket,
             key=prepared.key,
@@ -484,9 +483,7 @@ class ArtifactSetRegistrationServiceMixin:
             metadata=metadata,
             source_uri=artifact.storage_uri,
             import_mode="register",
-            storage_status="registered"
-            if prepared.storage_kind == "prefix"
-            else "verified",
+            storage_status="registered" if prepared.storage_kind == "prefix" else "verified",
             storage_verified_at=None if prepared.storage_kind == "prefix" else created_at,
             storage_kind=prepared.storage_kind,
             node_kind=prepared.node_kind,
@@ -564,6 +561,7 @@ class ArtifactSetRegistrationServiceMixin:
             artifact_role=artifact.artifact_role,
             parser_hint=artifact.parser_hint,
             required=artifact.required,
+            metadata=dict(artifact.metadata),
         )
 
     @staticmethod
@@ -586,6 +584,7 @@ class ArtifactSetRegistrationServiceMixin:
         registered_at: str,
         local_only: bool,
         parser_hint: str | None,
+        metadata: dict[str, Any],
     ) -> RegistrationReceipt:
         return RegistrationReceipt(
             request_id=deterministic_request_id(idempotency_key),
@@ -602,6 +601,7 @@ class ArtifactSetRegistrationServiceMixin:
             source_service="dewey",
             source_version=SERVICE_VERSION,
             parser_hint=parser_hint,
+            metadata=dict(metadata),
         )
 
     def _persist_registration_receipt(
@@ -664,9 +664,10 @@ class ArtifactSetRegistrationServiceMixin:
     ) -> dict[str, Any]:
         metadata = request.model_dump(
             mode="json",
-            exclude={"artifacts", "manifest_sha256"},
+            exclude={"artifacts", "manifest_sha256", "metadata"},
         )
         metadata["manifest_sha256"] = request.manifest_sha256
+        metadata["registration_metadata"] = dict(request.metadata)
         metadata["artifact_manifest"] = [
             artifact.model_dump(mode="json") for artifact in request.artifacts
         ]
@@ -696,14 +697,14 @@ class ArtifactSetRegistrationServiceMixin:
                 "key_files",
                 "parser_relevant_files",
                 "manifest_sha256",
+                "metadata",
             },
         )
         metadata["manifest_sha256"] = request.manifest_sha256
+        metadata["registration_metadata"] = dict(request.metadata)
         metadata["html_artifact"] = request.html_artifact.model_dump(mode="json")
         metadata["data_dir_artifact"] = request.data_dir_artifact.model_dump(mode="json")
-        metadata["key_files"] = [
-            artifact.model_dump(mode="json") for artifact in request.key_files
-        ]
+        metadata["key_files"] = [artifact.model_dump(mode="json") for artifact in request.key_files]
         metadata["parser_relevant_files"] = [
             artifact.model_dump(mode="json") for artifact in request.parser_relevant_files
         ]

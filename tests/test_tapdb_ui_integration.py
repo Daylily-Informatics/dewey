@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import asyncio
+from pathlib import Path
 
+import httpx
 from fastapi import APIRouter, FastAPI
 from fastapi.responses import HTMLResponse
 from fastapi.testclient import TestClient
@@ -51,7 +53,7 @@ def _configured_client(monkeypatch, test_settings, fake_service) -> TestClient:
         lambda settings: "/tmp/dewey-tapdb.yaml",
     )
     monkeypatch.setattr(
-        "dewey_service.integrations.tapdb_ui.create_tapdb_web_app",
+        "dewey_service.integrations.tapdb_ui.create_tapdb_gui_app",
         lambda **kwargs: _build_dummy_tapdb_app(),
     )
     monkeypatch.setattr(
@@ -60,6 +62,25 @@ def _configured_client(monkeypatch, test_settings, fake_service) -> TestClient:
     )
     app = create_app(settings=test_settings, service=fake_service)
     return TestClient(app, base_url="https://localhost:8914")
+
+
+def _login_operator(monkeypatch, client: TestClient) -> None:
+    monkeypatch.setattr(
+        "daylily_auth_cognito.browser.session.exchange_authorization_code_async",
+        lambda **kwargs: asyncio.sleep(0, result={"id_token": "header.payload.sig"}),
+    )
+    monkeypatch.setattr(
+        "dewey_service.auth.decode_jwt_claims_noverify",
+        lambda _token: {
+            "email": "operator@lsmc.bio",
+            "sub": "sub-1",
+            "cognito:groups": ["operators"],
+        },
+    )
+
+    login = client.get("/auth/login", follow_redirects=False)
+    state = login.headers["location"].split("state=")[1].split("&")[0]
+    client.get("/auth/callback", params={"code": "code-1", "state": state})
 
 
 def test_obs_services_advertises_embedded_tapdb_dag(
@@ -88,22 +109,7 @@ def test_dashboard_surfaces_tapdb_link_when_embedded(
     monkeypatch, test_settings, fake_service
 ) -> None:
     with _configured_client(monkeypatch, test_settings, fake_service) as client:
-        monkeypatch.setattr(
-            "daylily_auth_cognito.browser.session.exchange_authorization_code_async",
-            lambda **kwargs: asyncio.sleep(0, result={"id_token": "header.payload.sig"}),
-        )
-        monkeypatch.setattr(
-            "dewey_service.auth.decode_jwt_claims_noverify",
-            lambda _token: {
-                "email": "operator@lsmc.bio",
-                "sub": "sub-1",
-                "cognito:groups": ["operators"],
-            },
-        )
-
-        login = client.get("/auth/login", follow_redirects=False)
-        state = login.headers["location"].split("state=")[1].split("&")[0]
-        client.get("/auth/callback", params={"code": "code-1", "state": state})
+        _login_operator(monkeypatch, client)
 
         response = client.get("/ui")
         assert response.status_code == 200
@@ -138,25 +144,131 @@ def test_tapdb_graph_page_renders_for_logged_in_user(
     monkeypatch, test_settings, fake_service
 ) -> None:
     with _configured_client(monkeypatch, test_settings, fake_service) as client:
-        monkeypatch.setattr(
-            "daylily_auth_cognito.browser.session.exchange_authorization_code_async",
-            lambda **kwargs: asyncio.sleep(0, result={"id_token": "header.payload.sig"}),
-        )
-        monkeypatch.setattr(
-            "dewey_service.auth.decode_jwt_claims_noverify",
-            lambda _token: {
-                "email": "operator@lsmc.bio",
-                "sub": "sub-1",
-                "cognito:groups": ["operators"],
-            },
-        )
-
-        login = client.get("/auth/login", follow_redirects=False)
-        state = login.headers["location"].split("state=")[1].split("&")[0]
-        client.get("/auth/callback", params={"code": "code-1", "state": state})
+        _login_operator(monkeypatch, client)
 
         response = client.get("/graph")
 
     assert response.status_code == 200
     assert "Dewey TapDB Object Graph" in response.text
     assert "/api/dag/search" in response.text
+    assert "hold z while wheeling to zoom" in response.text
+    assert "Arrowheads point to parent nodes." in response.text
+
+
+def test_tapdb_graph_template_requires_z_for_wheel_zoom_and_parent_arrows() -> None:
+    template = Path("dewey_service/templates/tapdb_graph.html").read_text(encoding="utf-8")
+
+    assert "configureCytoscapeInteractions(mount);" in template
+    assert '"wheel"' in template
+    assert "stopImmediatePropagation()" in template
+    assert 'toLowerCase() === "z"' in template
+    assert '"source-arrow-shape": "triangle"' in template
+    assert '"target-arrow-shape": "none"' in template
+
+
+def test_user_preferences_proxy_routes_call_broker(
+    monkeypatch, test_settings, fake_service
+) -> None:
+    calls: list[tuple[str, str, dict[str, str], dict[str, str] | None]] = []
+
+    class FakeAsyncClient:
+        def __init__(self, *, timeout: float):
+            assert timeout == 5.0
+
+        async def __aenter__(self) -> "FakeAsyncClient":
+            return self
+
+        async def __aexit__(self, exc_type, exc, tb) -> None:
+            return None
+
+        async def get(self, url: str, *, headers: dict[str, str]) -> httpx.Response:
+            calls.append(("GET", url, headers, None))
+            return httpx.Response(
+                200,
+                json={"preferences": {"theme": "dark"}},
+            )
+
+        async def put(
+            self, url: str, *, headers: dict[str, str], json: dict[str, str | None]
+        ) -> httpx.Response:
+            calls.append(("PUT", url, headers, json))
+            return httpx.Response(204)
+
+    monkeypatch.setenv(
+        "LSMC_AUTH_BROKER_USER_PREFERENCES_URL",
+        "https://login.example.test/api/users/{email}/preferences",
+    )
+    monkeypatch.setenv("LSMC_AUTH_BROKER_SERVICE_TOKEN", "broker-token")
+    monkeypatch.setenv("LSMC_AUTH_BROKER_SERVICE_ID", "dewey")
+    monkeypatch.setattr("dewey_service.app.httpx.AsyncClient", FakeAsyncClient)
+
+    with _configured_client(monkeypatch, test_settings, fake_service) as client:
+        _login_operator(monkeypatch, client)
+
+        get_response = client.get("/api/v1/me/preferences")
+        assert get_response.status_code == 200
+        assert get_response.json()["preferences"]["theme"] == "dark"
+
+        put_response = client.put("/api/v1/me/preferences", json={"theme": "light"})
+        assert put_response.status_code == 200
+        assert put_response.json()["preferences"]["theme"] == "dark"
+
+    assert calls == [
+        (
+            "GET",
+            "https://login.example.test/api/users/operator%40lsmc.bio/preferences",
+            {"Authorization": "Bearer broker-token", "X-LSMC-Service-ID": "dewey"},
+            None,
+        ),
+        (
+            "PUT",
+            "https://login.example.test/api/users/operator%40lsmc.bio/preferences",
+            {"Authorization": "Bearer broker-token", "X-LSMC-Service-ID": "dewey"},
+            {"theme": "light"},
+        ),
+        (
+            "GET",
+            "https://login.example.test/api/users/operator%40lsmc.bio/preferences",
+            {"Authorization": "Bearer broker-token", "X-LSMC-Service-ID": "dewey"},
+            None,
+        ),
+    ]
+
+
+def test_user_preferences_proxy_rejects_non_https_broker_url(
+    monkeypatch, test_settings, fake_service
+) -> None:
+    monkeypatch.setenv(
+        "LSMC_AUTH_BROKER_USER_PREFERENCES_URL",
+        "http://login.example.test/api/users/{email}/preferences",
+    )
+    monkeypatch.setenv("LSMC_AUTH_BROKER_SERVICE_TOKEN", "broker-token")
+
+    with _configured_client(monkeypatch, test_settings, fake_service) as client:
+        _login_operator(monkeypatch, client)
+
+        response = client.get("/api/v1/me/preferences")
+
+    assert response.status_code == 503
+    assert (
+        response.json()["detail"] == "Broker user preferences URL must be an HTTPS URL with a host"
+    )
+
+
+def test_user_preferences_proxy_rejects_disallowed_broker_host(
+    monkeypatch, test_settings, fake_service
+) -> None:
+    monkeypatch.setenv(
+        "LSMC_AUTH_BROKER_USER_PREFERENCES_URL",
+        "https://unexpected.example.test/api/users/{email}/preferences",
+    )
+    monkeypatch.setenv("LSMC_AUTH_BROKER_SERVICE_TOKEN", "broker-token")
+    monkeypatch.setenv("LSMC_AUTH_BROKER_ALLOWED_HOSTS", "login.example.test")
+
+    with _configured_client(monkeypatch, test_settings, fake_service) as client:
+        _login_operator(monkeypatch, client)
+
+        response = client.get("/api/v1/me/preferences")
+
+    assert response.status_code == 503
+    assert response.json()["detail"] == "Broker user preferences URL host is not allowed"

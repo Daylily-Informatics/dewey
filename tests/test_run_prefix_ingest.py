@@ -94,13 +94,19 @@ def test_service_import_run_prefix_creates_hierarchy_and_freeze_behavior(
             idempotency_key="idem-run-prefix-lock",
         )
     with pytest.raises(ValueError, match="object-backed artifact"):
-        service.create_share_reference(
-            target_type="artifact",
+        service.create_share(
+            target_kind="artifact_object",
             target_euid=run_artifact["artifact_euid"],
+            targets=[],
+            name=None,
             purpose="download",
-            scope="external",
+            owner_email="johnm@lsmc.com",
+            allowed_users=[],
+            allowed_domains=[],
+            allowed_groups=[],
+            delivery_modes=["presigned_s3"],
             expires_at=None,
-            issued_by="johnm@lsmc.com",
+            ttl_seconds=None,
             idempotency_key="idem-run-prefix-share",
         )
 
@@ -217,5 +223,5 @@ def test_run_prefix_ui_flow_renders_hierarchy_detail(monkeypatch, client, fake_s
     assert detail.status_code == 200
     assert "Hierarchy" in detail.text
     assert "Open In Console" in detail.text
-    assert "Prefix nodes do not issue direct file share references." in detail.text
+    assert "Prefix nodes use prefix or mixed-set shares from the Shares page." in detail.text
     assert f'action="/artifacts/euid/{run_artifact["artifact_euid"]}/download"' not in detail.text

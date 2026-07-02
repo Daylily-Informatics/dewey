@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import base64
 import json
+import threading
 from types import SimpleNamespace
 
 import pytest
@@ -33,6 +34,24 @@ def _jwt(payload: dict[str, object]) -> str:
     raw = json.dumps(payload).encode("utf-8")
     encoded = base64.urlsafe_b64encode(raw).decode("utf-8").rstrip("=")
     return f"header.{encoded}.signature"
+
+
+def _run_coro_in_thread(coro):
+    result: list[object] = []
+    errors: list[BaseException] = []
+
+    def _target() -> None:
+        try:
+            result.append(asyncio.run(coro))
+        except BaseException as exc:  # pragma: no cover - propagated below
+            errors.append(exc)
+
+    thread = threading.Thread(target=_target)
+    thread.start()
+    thread.join()
+    if errors:
+        raise errors[0]
+    return result[0]
 
 
 def test_decode_jwt_claims_noverify_handles_valid_and_invalid_tokens() -> None:
@@ -88,7 +107,7 @@ def test_exchange_code_success_and_error_wrapping(monkeypatch: pytest.MonkeyPatc
         lambda **kwargs: asyncio.sleep(0, result={"id_token": "abc", "access_token": "xyz"}),
     )
 
-    payload = asyncio.run(auth_mod.exchange_code(settings=_settings(), code="code-123"))
+    payload = _run_coro_in_thread(auth_mod.exchange_code(settings=_settings(), code="code-123"))
     assert payload["id_token"] == "abc"
 
     def fail_exchange(**kwargs: str) -> dict[str, str]:
@@ -99,7 +118,7 @@ def test_exchange_code_success_and_error_wrapping(monkeypatch: pytest.MonkeyPatc
         fail_exchange,
     )
     with pytest.raises(auth_mod.AuthError, match="exchange failed"):
-        asyncio.run(auth_mod.exchange_code(settings=_settings(), code="bad-code"))
+        _run_coro_in_thread(auth_mod.exchange_code(settings=_settings(), code="bad-code"))
 
 
 def test_require_api_auth_validates_tokens() -> None:

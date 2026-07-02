@@ -167,7 +167,9 @@ class SequencerRunRegistrationServiceMixin:
                 continue
             if relative_path in expected_paths:
                 role = next(
-                    item.artifact_role for item in expected_files if item.relative_path == relative_path
+                    item.artifact_role
+                    for item in expected_files
+                    if item.relative_path == relative_path
                 )
                 selected[relative_path] = (obj, role)
                 continue
@@ -186,7 +188,9 @@ class SequencerRunRegistrationServiceMixin:
             row = selected.get(expected.relative_path)
             if row is None:
                 if expected.required:
-                    raise DeweyNotFoundError(f"required run artifact missing: {expected.relative_path}")
+                    raise DeweyNotFoundError(
+                        f"required run artifact missing: {expected.relative_path}"
+                    )
                 continue
             obj, _role = row
             if expected.size_bytes is not None and int(obj.size or -1) != expected.size_bytes:
@@ -445,7 +449,10 @@ class SequencerRunRegistrationServiceMixin:
                 "pipeline_plan": pipeline_plan,
             }
         )
-        if request_body.expected_manifest_sha256 and request_body.expected_manifest_sha256 != manifest_sha256:
+        if (
+            request_body.expected_manifest_sha256
+            and request_body.expected_manifest_sha256 != manifest_sha256
+        ):
             raise ValueError("manifest_sha256 mismatch")
 
         fingerprint = canonical_sha256(request_body)
@@ -689,10 +696,9 @@ class SequencerRunRegistrationServiceMixin:
             observed_sha = str(getattr(obj, "sha256", "") or "").strip().lower()
             if artifact.sha256 and observed_sha and observed_sha != artifact.sha256:
                 raise ValueError(f"checksum mismatch for {artifact.logical_name}")
-            relative_path = (
-                str(artifact.relative_path or "").strip().lstrip("/")
-                or item_key.removeprefix(root_prefix).lstrip("/")
-            )
+            relative_path = str(artifact.relative_path or "").strip().lstrip(
+                "/"
+            ) or item_key.removeprefix(root_prefix).lstrip("/")
             preflight.append((artifact, obj, normalized_uri, relative_path))
 
         fingerprint = canonical_sha256(request_body)
@@ -755,7 +761,9 @@ class SequencerRunRegistrationServiceMixin:
 
             for artifact, obj, _normalized_uri, relative_path in preflight:
                 checksums = {"sha256": artifact.sha256} if artifact.sha256 else {}
-                storage_status = "verified" if artifact.sha256 and artifact.version_id else "observed"
+                storage_status = (
+                    "verified" if artifact.sha256 and artifact.version_id else "observed"
+                )
                 payload = self._artifact_payload(
                     artifact_type=resolve_artifact_type(None, obj.key),
                     storage_backend="s3",

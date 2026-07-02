@@ -73,7 +73,7 @@ def test_upload_session_complete_route_round_trip(client) -> None:
     assert payload["import_mode"] == "upload"
 
 
-def test_share_reference_lookup_and_external_object_relation_routes(client) -> None:
+def test_share_lookup_and_external_object_relation_routes(client) -> None:
     artifact = client.post(
         "/api/v1/artifacts",
         headers={"Authorization": "Bearer token-123", "Idempotency-Key": "idem-gap-share-art"},
@@ -86,32 +86,32 @@ def test_share_reference_lookup_and_external_object_relation_routes(client) -> N
     ).json()
 
     share = client.post(
-        "/api/v1/share-references",
-        headers={"Authorization": "Bearer token-123", "Idempotency-Key": "idem-gap-share-ref"},
+        "/api/v1/shares",
+        headers={"Authorization": "Bearer token-123", "Idempotency-Key": "idem-gap-share"},
         json={
-            "target_type": "artifact",
+            "target_kind": "artifact_object",
             "target_euid": artifact["artifact_euid"],
             "purpose": "download",
-            "scope": "external",
-            "transport": "presigned_s3",
+            "owner_email": "tester@example.com",
+            "delivery_modes": ["presigned_s3"],
         },
     )
     assert share.status_code == 200
-    share_reference_euid = share.json()["share_reference_euid"]
+    share_euid = share.json()["share_euid"]
 
     fetched_share = client.get(
-        f"/api/v1/share-references/{share_reference_euid}",
+        f"/api/v1/shares/{share_euid}",
         headers={"Authorization": "Bearer token-123"},
     )
     assert fetched_share.status_code == 200
-    assert fetched_share.json()["share_reference_euid"] == share_reference_euid
+    assert fetched_share.json()["share_euid"] == share_euid
 
-    listed_share_refs = client.get(
-        f"/api/v1/artifacts/{artifact['artifact_euid']}/share-references",
+    listed_shares = client.get(
+        f"/api/v1/artifacts/{artifact['artifact_euid']}/shares",
         headers={"Authorization": "Bearer token-123"},
     )
-    assert listed_share_refs.status_code == 200
-    assert listed_share_refs.json()["total"] == 1
+    assert listed_shares.status_code == 200
+    assert listed_shares.json()["total"] == 1
 
     external_object = client.post(
         "/api/v1/external-objects",

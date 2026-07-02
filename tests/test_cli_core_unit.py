@@ -188,12 +188,14 @@ def test_config_status_prints_runtime_settings(monkeypatch: pytest.MonkeyPatch) 
     monkeypatch.setattr(
         config_extra,
         "build_effective_config_rows",
-        lambda passed_settings, *, config_path: [
-            {"path": "application.api_bearer_token", "value": "<redacted>"},
-            {"path": "qeo.api_token", "value": "<redacted>"},
-        ]
-        if passed_settings is settings and str(config_path) == "/tmp/dewey-config.yaml"
-        else [],
+        lambda passed_settings, *, config_path: (
+            [
+                {"path": "application.api_bearer_token", "value": "<redacted>"},
+                {"path": "qeo.api_token", "value": "<redacted>"},
+            ]
+            if passed_settings is settings and str(config_path) == "/tmp/dewey-config.yaml"
+            else []
+        ),
     )
     monkeypatch.setattr(
         config_extra.ccyo_out, "print_text", lambda message: printed.append(message)
@@ -252,7 +254,16 @@ def test_qeo_dispatch_cli_emits_result(monkeypatch: pytest.MonkeyPatch) -> None:
     emitted: list[dict[str, object]] = []
 
     class FakeService:
-        def dispatch_qeo_outbox(self, *, limit: int, retry_errors: bool):
+        def dispatch_qeo_outbox(
+            self,
+            *,
+            limit: int,
+            retry_errors: bool,
+            event_ids=None,
+            artifact_set_euids=None,
+        ):
+            assert event_ids is None
+            assert artifact_set_euids is None
             return {
                 "attempted": 1,
                 "limit": limit,

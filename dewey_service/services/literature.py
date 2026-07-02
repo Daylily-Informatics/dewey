@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 import requests
 
 from dewey_service.literature import (
+    LiteratureUnavailableError,
     ViewerContext,
     classify_fulltext,
     dedupe_strings,
@@ -38,7 +39,15 @@ class LiteratureServiceMixin:
     ) -> dict[str, Any]:
         adapter = self._require_literature()
         started = perf_counter()
-        raw_items = adapter.search(query=query, page=page, page_size=page_size)
+        try:
+            raw_items = adapter.search(query=query, page=page, page_size=page_size)
+        except LiteratureUnavailableError:
+            raise
+        except Exception as exc:
+            raise LiteratureUnavailableError(
+                "Literature search is unavailable. Verify the Dewey container can read its "
+                "metapub/NCBI configuration, including the staged NCBI API key."
+            ) from exc
         with self.backend.session_scope(commit=False) as session:
             items = [
                 self._enrich_literature_search_item(

@@ -49,6 +49,7 @@ Use `dewey_service.registration_contracts.manifest_sha256_for_request` when cons
 - `required`
 - `produced_by`
 - `parent_artifact_euids`
+- `metadata`
 
 `relative_path` is a manifest path, not a filesystem path to crawl. It must be relative and must not contain `..`.
 
@@ -86,6 +87,7 @@ Dewey records the prefix pointer and never expands descendants.
 - `status`
 - `artifacts`
 - `lineage_refs`
+- `metadata`
 - `local_only`
 - `parser_family_hint`
 
@@ -105,6 +107,7 @@ Dewey creates `artifact_set_type == "analysis_artifact_set"` and member lineage 
 - `parser_relevant_files`
 - `generated_at`
 - `manifest_sha256`
+- `metadata`
 - `local_only`
 - `parser_family_hint`
 
@@ -125,6 +128,7 @@ Registration returns deterministic receipt JSON:
 - `failed`
 - `registered_at`
 - `status`
+- `metadata`
 
 `registered_artifacts` and `skipped_existing` carry Dewey artifact EUIDs plus manifest artifact refs. On success, `failed` is empty. Dewey rejects invalid requests before mutation rather than returning partial success.
 

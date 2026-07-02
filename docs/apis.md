@@ -174,30 +174,40 @@ match that computed key.
 
 Current resolution is a lookup contract, not a workflow engine.
 
-## Share Reference API
+## Share API
 
 | Method | Path | Auth | `Idempotency-Key` |
 | --- | --- | --- | --- |
-| `POST` | `/api/v1/share-references` | `bearer token` | yes |
-| `GET` | `/api/v1/share-references/{share_reference_euid}` | `bearer token` | no |
-| `GET` | `/api/v1/artifacts/{artifact_euid}/share-references` | `bearer token` | no |
+| `POST` | `/api/v1/shares` | `bearer token` | yes |
+| `GET` | `/api/v1/shares/{share_euid}` | `bearer token` | no |
+| `POST` | `/api/v1/shares/{share_euid}/access-package` | browser session or bearer token | no |
+| `POST` | `/api/v1/shares/{share_euid}/revoke` | `bearer token` | no |
+| `GET` | `/api/v1/shares/{share_euid}/audit` | `bearer token` | no |
+| `POST` | `/api/v1/share-roots` | `bearer token` | yes |
+| `POST` | `/api/v1/share-roots/{share_root_euid}/subsets` | `bearer token` | yes |
+| `GET` | `/api/v1/artifacts/{artifact_euid}/shares` | `bearer token` | no |
 
 Current create fields include:
 
-- `target_type`: `artifact` or `artifact_set`
+- `target_kind`: `artifact_object`, `artifact_prefix`, `artifact_set`, or `mixed_set`
 - `target_euid`
+- `targets` for mixed sets
+- `name`
 - `purpose`
-- `scope`
+- `owner_email`
+- `allowed_users`
+- `allowed_domains`
+- `allowed_groups`
+- `delivery_modes`
 - `expires_at`
-- `issued_by`
-- `transport`
-- `transport_config`
 - `ttl_seconds`
 
-Current transport behavior:
+Current delivery behavior:
 
-- artifacts: `presigned_s3` only
-- artifact sets: `presigned_s3`, `rclone_http`, or `rclone_sftp`
+- `presigned_s3` is object-only and returns one short-lived URL from an access package.
+- `presigned_s3_manifest` returns a manifest for object/set/mixed targets.
+- CloudFront signed URL/cookie and Dewey HTML browser modes require explicit configured origins and signing material.
+- Share roots register collaborator/customer bucket/prefix roots without automatically registering changing child objects.
 
 ## Search API
 
@@ -226,9 +236,9 @@ Current searchable record families:
 
 - `artifact`
 - `artifact_set`
-- `share_reference`
+- `share`
 
-The browser Unified Search page currently focuses on artifacts and share references. Artifact-set search is currently more explicit in the Artifacts page.
+The browser Unified Search page currently focuses on artifacts and shares. Artifact-set search is currently more explicit in the Artifacts page.
 
 ## External Objects API
 

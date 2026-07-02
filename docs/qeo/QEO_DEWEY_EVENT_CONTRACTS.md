@@ -6,7 +6,7 @@ Dewey persists a local transactional outbox for QEO/KEO handoff. It does not exp
 
 Outbox rows are stored as TapDB instances:
 
-- Template: `DGX/system/outbox_event/1.0/`
+- Template: `system/outbox_event/generic/1.0/`
 - Code: `dewey_service/services/outbox.py`
 
 The outbox write occurs in the same TapDB transaction as artifact records, artifact-set records, lineage, receipt, and idempotency state.
@@ -52,6 +52,8 @@ Payloads intentionally do not contain:
 - bearer tokens
 
 Consumers must resolve details from Dewey receipts and artifact/set read APIs using scoped service auth.
+
+`dewey qeo dispatch` may be scoped with explicit event IDs and/or artifact-set EUIDs. Scoped dispatch still applies the normal dispatch-status, local-only, and Dewey event-type checks before sending rows to QEO.
 
 ## Local-Only Mode
 

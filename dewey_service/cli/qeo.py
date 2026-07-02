@@ -24,11 +24,7 @@ def _status() -> None:
     ccyo_out.print_text(
         "qeo.dispatch_configured="
         + str(
-            bool(
-                settings.qeo_ingest_url
-                and settings.qeo_api_token
-                and settings.qeo_consumer_group
-            )
+            bool(settings.qeo_ingest_url and settings.qeo_api_token and settings.qeo_consumer_group)
         ).lower()
     )
     ccyo_out.print_text(f"qeo.ingest_url={settings.qeo_ingest_url or '<unset>'}")
@@ -39,13 +35,30 @@ def _status() -> None:
 def _dispatch(
     limit: int = typer.Option(100, min=1, max=1000, help="Maximum outbox rows to dispatch."),
     retry_errors: bool = typer.Option(False, help="Retry rows currently marked error."),
+    event_id: list[str] | None = typer.Option(
+        None,
+        "--event-id",
+        help="Dispatch only the matching Dewey outbox event id. Repeat for multiple ids.",
+    ),
+    artifact_set_euid: list[str] | None = typer.Option(
+        None,
+        "--artifact-set-euid",
+        help="Dispatch only events for the matching Dewey artifact-set EUID. Repeat for multiple EUIDs.",
+    ),
 ) -> None:
     """Dispatch pending Dewey outbox events to QEO."""
+
+    def _normalize_repeated_option(value: object) -> set[str] | None:
+        if value is None or not isinstance(value, (list, tuple, set)):
+            return None
+        return {str(item) for item in value}
 
     try:
         result = build_cli_service().dispatch_qeo_outbox(
             limit=limit,
             retry_errors=retry_errors,
+            event_ids=_normalize_repeated_option(event_id),
+            artifact_set_euids=_normalize_repeated_option(artifact_set_euid),
         )
     except Exception as exc:
         ccyo_out.error(f"QEO dispatch failed: {exc}")

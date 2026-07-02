@@ -1,6 +1,6 @@
 <!doctype html>
 {% from "_chrome.html" import environment_chrome, page_footer %}
-<html lang="en">
+<html lang="en" data-lsmc-service="dewey" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -245,5 +245,6 @@
       </main>
       {{ page_footer(git_meta, build_version) }}
     </div>
+    <script src="{{ static_url('lsmc_ui.js') }}"></script>
   </body>
 </html>

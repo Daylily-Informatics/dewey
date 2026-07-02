@@ -83,42 +83,31 @@ def test_artifact_set_search_scope_and_share_transports(
     assert search["total"] == 1
     assert search["items"][0]["artifact_set_euid"] == artifact_set["artifact_set_euid"]
 
-    _, presigned = service.create_share_reference(
-        target_type="artifact_set",
+    _, presigned = service.create_share(
+        target_kind="artifact_set",
         target_euid=artifact_set["artifact_set_euid"],
+        targets=[],
+        name="delivery share",
         purpose="delivery",
-        scope="external",
+        owner_email="release@example.com",
+        allowed_users=[],
+        allowed_domains=[],
+        allowed_groups=[],
+        delivery_modes=["presigned_s3_manifest"],
         expires_at=None,
-        issued_by="release@example.com",
-        transport="presigned_s3",
         ttl_seconds=300,
         idempotency_key="idem-set-share-presigned",
     )
-    assert presigned["transport"] == "presigned_s3"
+    assert presigned["delivery_modes"] == ["presigned_s3_manifest"]
     assert presigned["member_count"] == 2
-    assert len(presigned["manifest"]) == 2
-    assert all(item["status"] == "active" for item in presigned["manifest"])
-
-    _, sftp_share = service.create_share_reference(
-        target_type="artifact_set",
-        target_euid=artifact_set["artifact_set_euid"],
-        purpose="delivery",
-        scope="external",
-        expires_at=None,
-        issued_by="release@example.com",
-        transport="rclone_sftp",
-        transport_config={
-            "bucket": "managed-bucket",
-            "host": "shares.example.com",
-            "port": 9022,
-            "user": "release",
-            "passwd": "secret",
-        },
-        idempotency_key="idem-set-share-sftp",
+    package = service.create_share_access_package(
+        presigned["share_euid"],
+        delivery_mode="presigned_s3_manifest",
+        actor_email="release@example.com",
+        actor_groups=[],
     )
-    assert sftp_share["transport"] == "rclone_sftp"
-    assert sftp_share["connection"]["endpoint"] == "sftp://release@shares.example.com:9022/"
-    assert sftp_share["connection"]["bucket"] == "managed-bucket"
+    assert len(package["manifest"]) == 2
+    assert all(item["status"] == "active" for item in package["manifest"])
 
 
 def test_upload_complete_verify_lock_and_search(

@@ -44,25 +44,38 @@ def _parse_template_code(template_code: str) -> tuple[str, str, str, str]:
     return parts[0], parts[1], parts[2], parts[3]
 
 
-DEWEY_TEMPLATE_CATEGORY = "DGX"
-ARTIFACT_TEMPLATE = f"{DEWEY_TEMPLATE_CATEGORY}/data/artifact/1.0/"
-ARTIFACT_SET_TEMPLATE = f"{DEWEY_TEMPLATE_CATEGORY}/data/artifact_set/1.0/"
-SHARE_REFERENCE_TEMPLATE = f"{DEWEY_TEMPLATE_CATEGORY}/data/share_reference/1.0/"
-EXTERNAL_OBJECT_TEMPLATE = f"{DEWEY_TEMPLATE_CATEGORY}/integration/external_object/1.0/"
-EXTERNAL_OBJECT_RELATION_TEMPLATE = (
-    f"{DEWEY_TEMPLATE_CATEGORY}/integration/external_object_relation/1.0/"
-)
-LITERATURE_SAVE_TEMPLATE = f"{DEWEY_TEMPLATE_CATEGORY}/access/literature_save/1.0/"
-ANOMALY_TEMPLATE = f"{DEWEY_TEMPLATE_CATEGORY}/operational/anomaly/1.0/"
-IDEMPOTENCY_TEMPLATE = f"{DEWEY_TEMPLATE_CATEGORY}/system/idempotency_request/1.0/"
-REGISTRATION_RECEIPT_TEMPLATE = f"{DEWEY_TEMPLATE_CATEGORY}/system/registration_receipt/1.0/"
-OUTBOX_EVENT_TEMPLATE = f"{DEWEY_TEMPLATE_CATEGORY}/system/outbox_event/1.0/"
+DEWEY_TEMPLATE_EUID_PREFIX = "DGX"
+ARTIFACT_TEMPLATE = "data/artifact/generic/1.0/"
+ARTIFACT_SET_TEMPLATE = "data/artifact_set/generic/1.0/"
+SHARE_TEMPLATE = "access/share/generic/1.0/"
+SHARE_ROOT_TEMPLATE = "access/share_root/generic/1.0/"
+EXTERNAL_OBJECT_TEMPLATE = "integration/external_object/generic/1.0/"
+EXTERNAL_OBJECT_RELATION_TEMPLATE = "integration/external_object_relation/generic/1.0/"
+LITERATURE_SAVE_TEMPLATE = "access/literature_save/generic/1.0/"
+ANOMALY_TEMPLATE = "operational/anomaly/generic/1.0/"
+IDEMPOTENCY_TEMPLATE = "system/idempotency_request/generic/1.0/"
+REGISTRATION_RECEIPT_TEMPLATE = "system/registration_receipt/generic/1.0/"
+OUTBOX_EVENT_TEMPLATE = "system/outbox_event/generic/1.0/"
 
 
 TEMPLATE_DEFINITIONS: tuple[str, ...] = (
     ARTIFACT_TEMPLATE,
     ARTIFACT_SET_TEMPLATE,
-    SHARE_REFERENCE_TEMPLATE,
+    SHARE_TEMPLATE,
+    SHARE_ROOT_TEMPLATE,
+    EXTERNAL_OBJECT_TEMPLATE,
+    EXTERNAL_OBJECT_RELATION_TEMPLATE,
+    LITERATURE_SAVE_TEMPLATE,
+    ANOMALY_TEMPLATE,
+    IDEMPOTENCY_TEMPLATE,
+    REGISTRATION_RECEIPT_TEMPLATE,
+    OUTBOX_EVENT_TEMPLATE,
+)
+BOOT_TEMPLATE_DEFINITIONS: tuple[str, ...] = (
+    ARTIFACT_TEMPLATE,
+    ARTIFACT_SET_TEMPLATE,
+    SHARE_TEMPLATE,
+    SHARE_ROOT_TEMPLATE,
     EXTERNAL_OBJECT_TEMPLATE,
     EXTERNAL_OBJECT_RELATION_TEMPLATE,
     LITERATURE_SAVE_TEMPLATE,
@@ -160,10 +173,14 @@ class TapDBBackend:
                 return f"app:{frame_info.function}"
         return "tapdb_session"
 
-    def ensure_templates(self, session: Session) -> None:
+    def ensure_templates(
+        self,
+        session: Session,
+        template_codes: tuple[str, ...] = TEMPLATE_DEFINITIONS,
+    ) -> None:
         missing = [
             template_code
-            for template_code in TEMPLATE_DEFINITIONS
+            for template_code in template_codes
             if self.templates.get_template(session, template_code, domain_code=self.domain_code)
             is None
         ]

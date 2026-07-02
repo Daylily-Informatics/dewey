@@ -24,6 +24,7 @@ def _object_artifact(
     mime_type: str,
     parser_hint: str | None = "multiqc",
     size_bytes: int = 256,
+    metadata: dict[str, object] | None = None,
 ) -> FileArtifact:
     return FileArtifact(
         logical_name=logical_name,
@@ -37,6 +38,7 @@ def _object_artifact(
         required=True,
         produced_by="daylily-snakemake",
         parent_artifact_euids=[],
+        metadata=metadata or {},
     )
 
 
@@ -53,10 +55,15 @@ def _directory_artifact() -> FileArtifact:
         required=True,
         produced_by="daylily-snakemake",
         parent_artifact_euids=[],
+        metadata={"report_kind": "multiqc_general"},
     )
 
 
-def _multiqc_request(*, local_only: bool = False) -> MultiQCArtifactSetRegistrationRequest:
+def _multiqc_request(
+    *,
+    local_only: bool = False,
+    metadata: dict[str, object] | None = None,
+) -> MultiQCArtifactSetRegistrationRequest:
     request = MultiQCArtifactSetRegistrationRequest(
         schema_version="1.0",
         analysis_euid="AN-000001",
@@ -75,6 +82,7 @@ def _multiqc_request(*, local_only: bool = False) -> MultiQCArtifactSetRegistrat
                 key="analysis/AN-1/multiqc/multiqc_data/multiqc_data.json",
                 role="multiqc_key_file",
                 mime_type="application/json",
+                metadata={"parser_input": True},
             )
         ],
         parser_relevant_files=[
@@ -88,6 +96,7 @@ def _multiqc_request(*, local_only: bool = False) -> MultiQCArtifactSetRegistrat
         ],
         generated_at="2026-05-26T18:05:00Z",
         manifest_sha256="0" * 64,
+        metadata=metadata or {},
         local_only=local_only,
         parser_family_hint="multiqc",
     )
@@ -139,6 +148,23 @@ def test_multiqc_directory_and_key_file_registration(service, storage) -> None:
     assert resolved["report_kind"] == "multiqc_general"
     assert resolved["manifest_sha256"] == request.manifest_sha256
     assert "artifact_euids" not in resolved
+
+
+def test_multiqc_registration_metadata_persisted(service, storage) -> None:
+    request = _multiqc_request(
+        metadata={"command_id": "ccv20260530r57", "report_kind": "bclconvert"}
+    )
+    _seed_multiqc_storage(storage, request)
+
+    _, receipt = service.register_multiqc_artifact_set(request)
+    artifact_set = service.get_artifact_set(receipt["artifact_set_euid"])
+    resolved = service.resolve_artifact_set(receipt["artifact_set_euid"])
+
+    assert receipt["metadata"] == request.metadata
+    assert any(row["metadata"] for row in receipt["registered_artifacts"])
+    assert artifact_set["metadata"]["registration_metadata"] == request.metadata
+    assert artifact_set["metadata"]["key_files"][0]["metadata"] == {"parser_input": True}
+    assert resolved["metadata"] == request.metadata
 
 
 def test_multiqc_local_only_receipt_and_outbox(service, storage) -> None:

@@ -35,14 +35,14 @@
 
 - `dewey_service/auth.py:require_api_auth` protects bearer-token API routes.
 - `dewey_service/app.py:api_auth_dep` applies bearer auth to the registry surface.
-- `dewey_service/services/base.py:BaseDeweyService._fingerprint`, `_idempotency_replay`, and `_store_idempotency` persist replay-safe write responses in `DGX/system/idempotency_request/1.0/`.
+- `dewey_service/services/base.py:BaseDeweyService._fingerprint`, `_idempotency_replay`, and `_store_idempotency` persist replay-safe write responses in `system/idempotency_request/generic/1.0/`.
 - Existing write routes require `Idempotency-Key`; the new deterministic registration routes may omit it because Dewey computes the key from canonical JSON.
 
 ## Event And Outbox Patterns
 
 - Before this work, docs stated Dewey had no public event bus API.
 - This work keeps that boundary: no public event-stream route was added.
-- `dewey_service/services/outbox.py:OutboxServiceMixin._persist_outbox_event` stores local transactional outbox rows in `DGX/system/outbox_event/1.0/`.
+- `dewey_service/services/outbox.py:OutboxServiceMixin._persist_outbox_event` stores local transactional outbox rows in `system/outbox_event/generic/1.0/`.
 - Events are persisted in the same TapDB transaction as artifacts, artifact sets, lineage, idempotency rows, and receipts.
 
 ## API Style And UI Conventions
@@ -55,13 +55,13 @@
 
 - Current storage is S3-oriented: `s3://bucket/key` objects and prefix pointers.
 - Existing browser/download flows can generate ZIPs and presigned links for object-backed artifacts.
-- Share references live in `dewey_service/services/sharing.py:SharingServiceMixin` and `DGX/data/share_reference/1.0/`.
-- QEO registration does not expand bearer sharing, does not create share references, and does not crawl prefixes.
+- Shares live in `dewey_service/services/sharing.py:SharingServiceMixin` and `data/share/generic/1.0/`.
+- QEO registration does not expand bearer sharing, does not create shares, and does not crawl prefixes.
 
 ## MDR/TapDB Linkage
 
 - TapDB is the persistence substrate for generic instances and lineages; Dewey owns artifact semantics.
-- External system linkage is represented by `dewey_service/services/external_objects.py:ExternalObjectServiceMixin`, `DGX/integration/external_object/1.0/`, and `DGX/integration/external_object_relation/1.0/`.
+- External system linkage is represented by `dewey_service/services/external_objects.py:ExternalObjectServiceMixin`, `integration/external_object/generic/1.0/`, and `integration/external_object_relation/generic/1.0/`.
 - QEO registration stores lineage references as manifest metadata and only creates set-to-set lineage where a supplied artifact-set EUID is resolvable.
 
 ## Integration Seams

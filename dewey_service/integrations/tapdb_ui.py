@@ -12,7 +12,7 @@ from daylily_tapdb.web import (
     TapdbHostNavLink,
     build_dag_capability_advertisement,
     create_tapdb_dag_router,
-    create_tapdb_web_app,
+    create_tapdb_gui_app,
 )
 from daylily_tapdb.web import runtime as tapdb_dag_runtime
 from fastapi import Depends, HTTPException, Query, Request
@@ -322,7 +322,7 @@ def mount_tapdb_surfaces(app, *, settings: Settings) -> bool:
 
     app.mount(
         "/tapdb",
-        create_tapdb_web_app(
+        create_tapdb_gui_app(
             config_path=config_path,
             host_bridge=bridge,
         ),

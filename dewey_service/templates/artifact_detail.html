@@ -1,7 +1,7 @@
 <!doctype html>
 {% from "_chrome.html" import environment_chrome, page_footer %}
 {% import "_artifact_links.html" as artifact_links %}
-<html lang="en">
+<html lang="en" data-lsmc-service="dewey" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -167,7 +167,7 @@
               <div class="panel-header">
                 <div>
                   <h3>Download</h3>
-                  <div class="panel-copy">Create a revokable Dewey share reference, then download through a short-lived S3 URL.</div>
+                          <div class="panel-copy">Create a revokable Dewey share, then download through a short-lived S3 URL.</div>
                 </div>
               </div>
               <form method="post" action="/artifacts/euid/{{ artifact.artifact_euid }}/download" onsubmit="return confirm('Download {{ artifact.artifact_euid }}?');">
@@ -279,13 +279,13 @@
             <section class="panel">
               <div class="panel-header">
                 <div>
-                  <h3>Share References</h3>
-                  <div class="panel-copy">Most recent issued download/share records for this artifact.</div>
+                  <h3>Shares</h3>
+                  <div class="panel-copy">Most recent Dewey-managed share policies for this artifact.</div>
                 </div>
               </div>
               {% if artifact.storage_kind != "object" %}
-              <div class="empty-state">Prefix nodes do not issue direct file share references.</div>
-              {% elif artifact_share_references %}
+              <div class="empty-state">Prefix nodes use prefix or mixed-set shares from the Shares page.</div>
+              {% elif artifact_shares %}
               <div class="table-wrap">
                 <table>
                   <thead>
@@ -300,23 +300,19 @@
                     </tr>
                   </thead>
                   <tbody>
-                    {% for item in artifact_share_references %}
+                    {% for item in artifact_shares %}
                     <tr>
-                      <td class="mono long-value">{{ item.share_reference_euid }}</td>
+                      <td><a class="mono long-value" href="/shares/{{ item.share_euid }}">{{ item.share_euid }}</a></td>
                       <td>{{ item.status }}</td>
-                      <td>{{ item.recipient_email or "unknown" }}</td>
+                      <td>{{ item.allowed_users|join(", ") if item.allowed_users else item.owner_email or "owner only" }}</td>
                       <td>{{ item.created_at or "n/a" }}</td>
                       <td>{{ item.expires_at or "n/a" }}</td>
                       <td>{{ item.access_count or 0 }}{% if item.last_accessed_at %}<div class="compact-note">{{ item.last_accessed_at }}</div>{% endif %}</td>
                       <td>
                         <div class="action-cluster">
-                          {% if item.access_url and item.status == "active" %}
-                          <a class="button" href="{{ item.access_url }}" target="_blank" rel="noreferrer">Open</a>
-                          {% else %}
-                          <span class="note">No active link</span>
-                          {% endif %}
+                          <a class="button" href="/shares/{{ item.share_euid }}">Open Share</a>
                           {% if item.status == "active" %}
-                          <form method="post" action="/share-references/{{ item.share_reference_euid }}/revoke" onsubmit="return confirm('Revoke {{ item.share_reference_euid }}?');">
+                          <form method="post" action="/shares/{{ item.share_euid }}/revoke" onsubmit="return confirm('Revoke {{ item.share_euid }}?');">
                             <input type="hidden" name="return_to" value="artifact" />
                             <button class="button" type="submit">Revoke</button>
                           </form>
@@ -329,7 +325,7 @@
                 </table>
               </div>
               {% else %}
-              <div class="empty-state">No share references issued yet for this artifact.</div>
+              <div class="empty-state">No shares issued yet for this artifact.</div>
               {% endif %}
             </section>
 
@@ -405,5 +401,6 @@
       </main>
       {{ page_footer(git_meta, build_version) }}
     </div>
+    <script src="{{ static_url('lsmc_ui.js') }}"></script>
   </body>
 </html>

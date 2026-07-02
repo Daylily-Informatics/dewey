@@ -4,6 +4,8 @@ import json
 import tomllib
 from pathlib import Path
 
+from dewey_service import tapdb_backend
+
 
 def _tapdb_dependency_spec() -> str:
     repo_root = Path(__file__).resolve().parents[1]
@@ -25,10 +27,16 @@ def test_pyproject_declares_shared_library_versions() -> None:
 
     assert "cli-core-yo==2.1.1" in dependencies
     assert "daylily-auth-cognito==2.1.5" in dependencies
-    assert "daylily-tapdb==7.0.9" in dependencies
+    assert (
+        "daylily-tapdb @ git+https://github.com/Daylily-Informatics/daylily-tapdb.git@9.0.9"
+        in dependencies
+    )
     assert "psycopg2-binary>=2.9.9" in dependencies
     assert tapdb_dependency == _tapdb_dependency_spec()
-    assert tapdb_dependency == "daylily-tapdb==7.0.9"
+    assert (
+        tapdb_dependency
+        == "daylily-tapdb @ git+https://github.com/Daylily-Informatics/daylily-tapdb.git@9.0.9"
+    )
 
 
 def test_pyproject_uses_a_single_dependency_set() -> None:
@@ -77,6 +85,27 @@ def test_dockerfile_copies_tapdb_template_config() -> None:
     assert "COPY config ./config" in dockerfile
 
 
+def test_dockerfile_installs_git_before_git_pinned_dependencies() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    dockerfile = (repo_root / "Dockerfile").read_text(encoding="utf-8")
+
+    first_uv_sync = dockerfile.index("uv sync")
+    git_install = dockerfile.index("git")
+    assert git_install < first_uv_sync
+
+
+def test_dockerfile_uses_package_specific_scm_version() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    dockerfile = (repo_root / "Dockerfile").read_text(encoding="utf-8")
+
+    assert "ENV SETUPTOOLS_SCM_PRETEND_VERSION=${SETUPTOOLS_SCM_PRETEND_VERSION}" not in dockerfile
+    assert (
+        "ENV SETUPTOOLS_SCM_PRETEND_VERSION_FOR_DEWEY_SERVICE=${SETUPTOOLS_SCM_PRETEND_VERSION}"
+        in dockerfile
+    )
+    assert dockerfile.count("unset SETUPTOOLS_SCM_PRETEND_VERSION && uv sync") == 2
+
+
 def test_dockerfile_installs_postgresql_client_for_tapdb_bootstrap() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     dockerfile = (repo_root / "Dockerfile").read_text(encoding="utf-8")
@@ -110,6 +139,31 @@ def test_packaged_tapdb_registry_fixtures_match_owned_prefixes() -> None:
     assert {claim["issuer_app_code"] for claim in prefix_registry["ownership"]["Z"].values()} == {
         "dewey"
     }
+
+
+def test_required_template_definitions_exist_in_source_pack() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    templates = json.loads(
+        (repo_root / "config" / "tapdb_templates" / "dewey" / "templates.json").read_text(
+            encoding="utf-8"
+        )
+    )["templates"]
+    source_codes = {
+        "/".join(
+            [
+                str(template["category"]).strip(),
+                str(template["type"]).strip(),
+                str(template["subtype"]).strip(),
+                str(template["version"]).strip(),
+                "",
+            ]
+        )
+        for template in templates
+    }
+
+    assert set(tapdb_backend.TEMPLATE_DEFINITIONS) <= source_codes
+    assert tapdb_backend.REGISTRATION_RECEIPT_TEMPLATE in source_codes
+    assert tapdb_backend.OUTBOX_EVENT_TEMPLATE in source_codes
 
 
 def test_pyproject_uses_dynamic_version_from_git_tags() -> None:

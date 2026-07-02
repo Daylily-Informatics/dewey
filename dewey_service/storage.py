@@ -67,10 +67,13 @@ class S3StorageClient:
         bucket: str,
         key: str,
         version_id: str | None = None,
+        request_payer: str | None = None,
     ) -> StorageObject:
         params: dict[str, Any] = {"Bucket": bucket, "Key": key}
         if version_id:
             params["VersionId"] = version_id
+        if str(request_payer or "").strip():
+            params["RequestPayer"] = str(request_payer).strip()
         try:
             response = self._client.head_object(**params)
         except self._client_error as exc:
@@ -83,11 +86,15 @@ class S3StorageClient:
         bucket: str,
         prefix: str,
         limit: int = 1000,
+        request_payer: str | None = None,
     ) -> list[StorageObject]:
         paginator = self._client.get_paginator("list_objects_v2")
         rows: list[StorageObject] = []
         try:
-            pages = paginator.paginate(Bucket=bucket, Prefix=prefix)
+            params: dict[str, Any] = {"Bucket": bucket, "Prefix": prefix}
+            if str(request_payer or "").strip():
+                params["RequestPayer"] = str(request_payer).strip()
+            pages = paginator.paginate(**params)
             for page in pages:
                 for item in page.get("Contents", []):
                     rows.append(
@@ -114,6 +121,7 @@ class S3StorageClient:
         prefix: str = "",
         limit: int = 200,
         continuation_token: str | None = None,
+        request_payer: str | None = None,
     ) -> dict[str, Any]:
         params: dict[str, Any] = {
             "Bucket": bucket,
@@ -123,6 +131,8 @@ class S3StorageClient:
         }
         if str(continuation_token or "").strip():
             params["ContinuationToken"] = str(continuation_token).strip()
+        if str(request_payer or "").strip():
+            params["RequestPayer"] = str(request_payer).strip()
         try:
             response = self._client.list_objects_v2(**params)
         except self._client_error as exc:
@@ -164,10 +174,13 @@ class S3StorageClient:
         bucket: str,
         key: str,
         version_id: str | None = None,
+        request_payer: str | None = None,
     ) -> bytes:
         params: dict[str, Any] = {"Bucket": bucket, "Key": key}
         if version_id:
             params["VersionId"] = version_id
+        if str(request_payer or "").strip():
+            params["RequestPayer"] = str(request_payer).strip()
         try:
             response = self._client.get_object(**params)
         except self._client_error as exc:
@@ -269,10 +282,13 @@ class S3StorageClient:
         key: str,
         expires_in: int,
         version_id: str | None = None,
+        request_payer: str | None = None,
     ) -> str:
         params: dict[str, Any] = {"Bucket": bucket, "Key": key}
         if version_id:
             params["VersionId"] = version_id
+        if str(request_payer or "").strip():
+            params["RequestPayer"] = str(request_payer).strip()
         try:
             return str(
                 self._client.generate_presigned_url(

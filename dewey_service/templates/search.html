@@ -1,12 +1,85 @@
 <!doctype html>
 {% from "_chrome.html" import environment_chrome, page_footer %}
-<html lang="en">
+<html lang="en" data-lsmc-service="dewey" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Dewey Search</title>
     <link rel="icon" href="{{ static_url('favicon.svg') }}" type="image/svg+xml" />
     <link rel="stylesheet" href="{{ static_url('console.css') }}" />
+    <style>
+      .dewey-search-workspace {
+        display: grid;
+        gap: 1rem;
+      }
+      .search-filter-panel .panel-header {
+        margin-bottom: 0.65rem;
+      }
+      .search-filter-panel .form-grid {
+        grid-template-columns: minmax(18rem, 2fr) repeat(4, minmax(9rem, 1fr));
+        gap: 0.55rem;
+      }
+      .search-filter-panel .field-wide {
+        grid-column: auto;
+      }
+      .search-filter-panel .form-actions {
+        margin-top: 0.65rem;
+      }
+      .search-results-panel {
+        width: 100%;
+      }
+      .bulk-action-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+        margin: 0.75rem 0;
+      }
+      .bulk-action-bar form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        align-items: center;
+        margin: 0;
+      }
+      .bulk-action-bar input[type="text"],
+      .bulk-action-bar select {
+        min-height: 2.1rem;
+      }
+      .selected-count {
+        font-size: 0.82rem;
+      }
+      .search-results-table {
+        width: 100%;
+        table-layout: fixed;
+      }
+      .search-results-table th {
+        white-space: nowrap;
+      }
+      .search-results-table th:first-child {
+        width: 2.5rem;
+      }
+      .search-results-table th:nth-child(2) {
+        width: 11rem;
+      }
+      .table-sort {
+        border: 0;
+        padding: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+      }
+      .table-sort::after {
+        content: " ↕";
+        opacity: 0.55;
+      }
+      @media (max-width: 980px) {
+        .search-filter-panel .form-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+    </style>
   </head>
   <body>
     {{ environment_chrome(deployment, region, show_environment_chrome|default(true)) }}
@@ -38,7 +111,7 @@
               <div class="eyebrow">Search V2</div>
               <h2>Query Dewey records, then export the result set cleanly.</h2>
               <p>
-                Search spans artifact records and share-reference records with focused filters
+                Search spans artifact records and managed-share records with focused filters
                 for lifecycle status, producer identity, and external-object linkage.
               </p>
             </div>
@@ -48,8 +121,8 @@
               </div>
             </section>
 
-        <section class="content-grid" style="grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.4fr);">
-          <section class="panel">
+        <section class="dewey-search-workspace">
+          <section class="panel search-filter-panel">
             <div class="panel-header">
               <div>
                 <h3>Query Composer</h3>
@@ -131,7 +204,7 @@
                   <label>Scopes</label>
                   <div class="stack">
                     <label class="pill"><input type="checkbox" name="scope" value="artifact" {% if not request.query_params.getlist('scope') or 'artifact' in request.query_params.getlist('scope') %}checked{% endif %} /> Artifact</label>
-                    <label class="pill"><input type="checkbox" name="scope" value="share_reference" {% if not request.query_params.getlist('scope') or 'share_reference' in request.query_params.getlist('scope') %}checked{% endif %} /> Share Reference</label>
+                    <label class="pill"><input type="checkbox" name="scope" value="share" {% if not request.query_params.getlist('scope') or 'share' in request.query_params.getlist('scope') %}checked{% endif %} /> Share</label>
                   </div>
                 </div>
               </div>
@@ -142,7 +215,7 @@
             </form>
           </section>
 
-          <section class="panel">
+          <section class="panel search-results-panel">
             <div class="panel-header">
               <div>
                 <h3>Result Surface</h3>
@@ -156,26 +229,62 @@
 
             <div class="results-meta">
               <span class="pill pill-active">Artifacts {{ result["facets"]["artifact"] }}</span>
-              <span class="pill">Share Refs {{ result["facets"]["share_reference"] }}</span>
+              <span class="pill">Shares {{ result["facets"]["share"] }}</span>
               <span class="pill">Page {{ result["page"] }}</span>
             </div>
 
-            {% if result["items"] %}
+            <div class="bulk-action-bar">
+              <span class="pill selected-count" id="selected-count">0 selected</span>
+              <form method="post" action="/artifacts/download" class="selected-action-form" data-requires-selection="true">
+                <select name="download_naming_mode" aria-label="Download naming">
+                  <option value="hybrid">hybrid names</option>
+                  <option value="filename">filenames</option>
+                  <option value="euid">EUID names</option>
+                </select>
+                <input type="hidden" name="download_include_metadata" value="yes" />
+                <button class="button" type="submit">Download Selected</button>
+              </form>
+              <form method="post" action="/artifacts/share" class="selected-action-form" data-requires-selection="true">
+                <input type="hidden" name="artifact_search_form_state" value='{{ export_payload_json }}' />
+                <input type="hidden" name="share_ttl_hours" value="24" />
+                <button class="button" type="submit">Quick Presigned Links</button>
+              </form>
+              <form method="post" action="/artifacts/sets/create" class="selected-action-form" data-requires-selection="true">
+                <input type="hidden" name="artifact_search_form_state" value='{{ export_payload_json }}' />
+                <input type="hidden" name="artifact_set_search_form_state" value="{}" />
+                <input type="hidden" name="artifact_set_type" value="collection" />
+                <input type="hidden" name="artifact_set_description" value="Artifacts selected from Dewey unified search." />
+                <input name="artifact_set_label" type="text" placeholder="artifact set label" required />
+                <button class="button" type="submit">Create Artifact Set</button>
+              </form>
+            </div>
+
             <div class="table-wrap">
-              <table>
+              <table class="search-results-table" id="search-results-table">
                 <thead>
                   <tr>
-                    <th>Record</th>
-                    <th>Primary</th>
-                    <th>Secondary</th>
-                    <th>Status</th>
+                    <th><input type="checkbox" id="select-all-artifacts" aria-label="Select all artifact rows" /></th>
+                    <th><button class="table-sort" type="button" data-sort="record">Record</button></th>
+                    <th><button class="table-sort" type="button" data-sort="primary">Primary</button></th>
+                    <th><button class="table-sort" type="button" data-sort="secondary">Secondary</button></th>
+                    <th><button class="table-sort" type="button" data-sort="status">Status</button></th>
                   </tr>
                 </thead>
                 <tbody>
+                  {% if result["items"] %}
                   {% for item in result["items"] %}
-                  <tr>
+                  <tr data-record="{{ item.euid }} {{ item.record_type }}" data-primary="{{ item.original_filename or item.title or item.name or item.target_euid }}" data-secondary="{{ item.storage_uri or item.share_euid or item.pmid or '' }}" data-status="{{ item.storage_status or item.status or '' }}">
                     <td>
-                      <div class="mono">{{ item.euid }}</div>
+                      {% if item.record_type == "artifact" %}
+                      <input type="checkbox" class="js-artifact-select" value="{{ item.euid }}" aria-label="Select {{ item.euid }}" />
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if item.record_type == "artifact" %}
+                      <a class="mono" href="/artifacts/euid/{{ item.euid }}">{{ item.euid }}</a>
+                      {% else %}
+                      <a class="mono" href="/shares/{{ item.euid }}">{{ item.euid }}</a>
+                      {% endif %}
                       <div>{{ item.record_type }}</div>
                     </td>
                     <td>
@@ -191,7 +300,7 @@
                         {% endif %}
                       {% else %}
                       <div>{{ item.target_euid }}</div>
-                      <div class="note">{{ item.transport or "share" }}</div>
+                      <div class="note">{{ item.delivery_modes|join(", ") if item.delivery_modes else "share" }}</div>
                       {% endif %}
                     </td>
                     <td>
@@ -208,7 +317,7 @@
                       <div class="note">{{ item.producer_system or "No producer" }}</div>
                         {% endif %}
                       {% else %}
-                      <div class="mono">{{ item.access_url or "No access url" }}</div>
+                      <div class="mono">{{ item.share_euid or item.euid }}</div>
                       <div class="note">{{ item.expires_at or "No expiry" }}</div>
                       {% endif %}
                     </td>
@@ -257,16 +366,87 @@
                     </td>
                   </tr>
                   {% endfor %}
+                  {% else %}
+                  <tr>
+                    <td colspan="5">
+                      <div class="empty-state">No rows matched the current search.</div>
+                    </td>
+                  </tr>
+                  {% endif %}
                 </tbody>
               </table>
             </div>
-            {% else %}
-            <div class="empty-state">No rows matched the current search.</div>
-            {% endif %}
           </section>
         </section>
       </main>
       {{ page_footer(git_meta, build_version) }}
     </div>
+    <script>
+      (() => {
+        const selected = new Set();
+        const counter = document.getElementById('selected-count');
+        const selectAll = document.getElementById('select-all-artifacts');
+        const checkboxes = Array.from(document.querySelectorAll('.js-artifact-select'));
+        const syncCounter = () => {
+          if (counter) counter.textContent = `${selected.size} selected`;
+          if (selectAll) {
+            selectAll.checked = checkboxes.length > 0 && selected.size === checkboxes.length;
+            selectAll.indeterminate = selected.size > 0 && selected.size < checkboxes.length;
+          }
+        };
+        checkboxes.forEach((box) => {
+          box.addEventListener('change', () => {
+            if (box.checked) selected.add(box.value);
+            else selected.delete(box.value);
+            syncCounter();
+          });
+        });
+        selectAll?.addEventListener('change', () => {
+          checkboxes.forEach((box) => {
+            box.checked = selectAll.checked;
+            if (box.checked) selected.add(box.value);
+            else selected.delete(box.value);
+          });
+          syncCounter();
+        });
+        document.querySelectorAll('.selected-action-form').forEach((form) => {
+          form.addEventListener('submit', (event) => {
+            form.querySelectorAll('input[data-selected-euid]').forEach((node) => node.remove());
+            if (form.dataset.requiresSelection === 'true' && selected.size === 0) {
+              event.preventDefault();
+              alert('Select at least one artifact row first.');
+              return;
+            }
+            selected.forEach((euid) => {
+              const input = document.createElement('input');
+              input.type = 'hidden';
+              input.name = 'artifact_euids';
+              input.value = euid;
+              input.dataset.selectedEuid = 'true';
+              form.appendChild(input);
+            });
+          });
+        });
+        document.querySelectorAll('.table-sort').forEach((button) => {
+          button.addEventListener('click', () => {
+            const table = document.getElementById('search-results-table');
+            const body = table?.querySelector('tbody');
+            if (!body) return;
+            const key = button.dataset.sort || 'record';
+            const nextDir = button.dataset.dir === 'asc' ? 'desc' : 'asc';
+            button.dataset.dir = nextDir;
+            const rows = Array.from(body.querySelectorAll('tr'));
+            rows.sort((a, b) => {
+              const av = (a.dataset[key] || '').toLowerCase();
+              const bv = (b.dataset[key] || '').toLowerCase();
+              return nextDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+            });
+            rows.forEach((row) => body.appendChild(row));
+          });
+        });
+        syncCounter();
+      })();
+    </script>
+    <script src="{{ static_url('lsmc_ui.js') }}"></script>
   </body>
 </html>

@@ -70,13 +70,14 @@ def test_search_api_query_and_export(client) -> None:
         },
     ).json()
     client.post(
-        "/api/v1/share-references",
+        "/api/v1/shares",
         headers={"Authorization": "Bearer token-123", "Idempotency-Key": "idem-search-share-1"},
         json={
-            "target_type": "artifact",
+            "target_kind": "artifact_object",
             "target_euid": artifact["artifact_euid"],
             "purpose": "download",
-            "transport": "presigned_s3",
+            "owner_email": "tester@example.com",
+            "delivery_modes": ["presigned_s3"],
         },
     )
 
@@ -99,7 +100,7 @@ def test_search_api_query_and_export(client) -> None:
     export = client.post(
         "/api/search/v2/export",
         headers={"Authorization": "Bearer token-123"},
-        json={"format": "tsv", "scopes": ["artifact", "share_reference"], "max_rows": 25},
+        json={"format": "tsv", "scopes": ["artifact", "share"], "max_rows": 25},
     )
     assert export.status_code == 200
     assert export.headers["content-type"].startswith("text/tab-separated-values")
@@ -108,19 +109,19 @@ def test_search_api_query_and_export(client) -> None:
     json_export = client.post(
         "/api/search/v2/export",
         headers={"Authorization": "Bearer token-123"},
-        json={"format": "json", "scopes": ["artifact", "share_reference"], "max_rows": 25},
+        json={"format": "json", "scopes": ["artifact", "share"], "max_rows": 25},
     )
     assert json_export.status_code == 200
     assert json_export.json()["row_count"] == 2
     assert {item["record_type"] for item in json_export.json()["items"]} == {
         "artifact",
-        "share_reference",
+        "share",
     }
 
     removed_export = client.post(
         "/api/v1/search/v2/export",
         headers={"Authorization": "Bearer token-123"},
-        json={"format": "json", "scopes": ["artifact", "share_reference"], "max_rows": 25},
+        json={"format": "json", "scopes": ["artifact", "share"], "max_rows": 25},
     )
     assert removed_export.status_code == 404
 
@@ -131,6 +132,12 @@ def test_search_page_renders_after_login(monkeypatch, client) -> None:
     response = client.get("/search")
     assert response.status_code == 200
     assert "Artifact and Share Search" in response.text
+    assert "search-filter-panel" in response.text
+    assert "search-results-table" in response.text
+    assert "Download Selected" in response.text
+    assert "Quick Presigned Links" in response.text
+    assert "Create Artifact Set" in response.text
+    assert 'data-sort="record"' in response.text
 
 
 def test_search_export_page_returns_authenticated_json_results(monkeypatch, client) -> None:

@@ -26,7 +26,6 @@ auth:
     service_token: ""
     callback_url: ""
     logout_url: ""
-    share_recipient_prepare_url: ""
     ca_bundle: ""
   cognito:
     domain: dewey-auth.example.com
@@ -78,6 +77,20 @@ storage:
   managed_bucket: ""
   managed_prefix: artifacts
   upload_session_ttl_seconds: 900
+  requester_pays_buckets: []
+  cloudfront:
+    enabled: false
+    distribution_domain: ""
+    distribution_id: ""
+    key_pair_id: ""
+    private_key_path: ""
+    default_ttl_seconds: 900
+    cookie_ttl_seconds: 900
+
+share:
+  approved_origins: []
+  default_signed_ttl_seconds: 900
+  max_lifetime_days: 3650
 
 deployment:
   name: ""

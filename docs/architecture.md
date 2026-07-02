@@ -151,7 +151,7 @@ The API surface is grouped into:
 - health and observability endpoints
 - artifacts
 - artifact sets
-- share references
+- managed shares
 - resolution endpoints
 - literature endpoints
 - search endpoints
@@ -204,7 +204,7 @@ This is broader than a pure metadata catalog, but it is still bounded by artifac
 
 Current search is split between:
 
-- Unified Search for normalized search across artifacts and share references, and artifact sets through the API
+- Unified Search for normalized search across artifacts and managed shares, and artifact sets through the API
 - the dedicated Artifacts page for register/upload/download/set workflows and more detailed artifact-set actions
 
 Current live search behavior includes:

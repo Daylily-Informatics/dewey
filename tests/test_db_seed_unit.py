@@ -8,6 +8,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+import typer
 
 
 def test_db_seed_main_claims_prefixes_before_seeding(
@@ -60,10 +61,37 @@ def test_db_seed_main_claims_prefixes_before_seeding(
     monkeypatch.setattr(db_seed, "TapDBBackend", FakeBackend)
     monkeypatch.setattr(db_seed, "resolve_seed_config_dirs", fake_resolve)
     monkeypatch.setattr(db_seed, "get_settings", fake_get_settings)
-    monkeypatch.setattr(
-        db_seed,
-        "validate_template_configs",
-        lambda config_dirs, strict: (
+
+    def fake_validate_template_configs(config_dirs, strict):  # noqa: ANN001 - test double
+        if config_dirs == [core_config_dir]:
+            return (
+                [
+                    {
+                        "_source_file": str(core_config_dir / "system" / "system.json"),
+                        "name": "TapDB System User",
+                        "polymorphic_discriminator": "actor_template",
+                        "category": "actor",
+                        "type": "user",
+                        "subtype": "system",
+                        "version": "1.0",
+                        "instance_prefix": "SYS",
+                    },
+                    {
+                        "_source_file": str(
+                            core_config_dir / "external_refs" / "external_ref.json"
+                        ),
+                        "name": "TapDB External Reference",
+                        "polymorphic_discriminator": "external_reference_template",
+                        "category": "reference",
+                        "type": "external_identifier",
+                        "subtype": "tapdb_object",
+                        "version": "1.0",
+                        "instance_prefix": "XRF",
+                    },
+                ],
+                [],
+            )
+        return (
             [
                 {
                     "_source_file": str(
@@ -71,26 +99,39 @@ def test_db_seed_main_claims_prefixes_before_seeding(
                     ),
                     "name": "Dewey Artifact",
                     "polymorphic_discriminator": "data_template",
-                    "category": "DGX",
-                    "type": "data",
-                    "subtype": "artifact",
+                    "category": "data",
+                    "type": "artifact",
+                    "subtype": "generic",
                     "version": "1.0",
                     "instance_prefix": "DGX",
                 },
                 {
-                    "_source_file": str(core_config_dir / "system" / "system.json"),
-                    "name": "TapDB System User",
-                    "polymorphic_discriminator": "actor_template",
-                    "category": "SYS",
-                    "type": "actor",
-                    "subtype": "system_user",
+                    "_source_file": str(
+                        tmp_path / "config" / "external_refs" / "external_ref.json"
+                    ),
+                    "name": "TapDB External Reference",
+                    "polymorphic_discriminator": "external_reference_template",
+                    "category": "reference",
+                    "type": "external_identifier",
+                    "subtype": "tapdb_object",
                     "version": "1.0",
-                    "instance_prefix": "SYS",
+                    "instance_prefix": "XRF",
+                },
+                {
+                    "_source_file": str(tmp_path / "config" / "generic_viewer" / "viewer.json"),
+                    "name": "TapDB Generic Viewer",
+                    "polymorphic_discriminator": "generic_viewer_template",
+                    "category": "GVR",
+                    "type": "viewer",
+                    "subtype": "generic",
+                    "version": "1.0",
+                    "instance_prefix": "GVR",
                 },
             ],
             [],
-        ),
-    )
+        )
+
+    monkeypatch.setattr(db_seed, "validate_template_configs", fake_validate_template_configs)
     monkeypatch.setattr(
         db_seed,
         "seed_templates",
@@ -125,6 +166,7 @@ def test_db_seed_main_claims_prefixes_before_seeding(
     assert calls["seed_calls"][0]["seed_kwargs"]["owner_repo_name"] == "daylily-tapdb"
     assert calls["seed_calls"][1]["overwrite"] is True
     assert len(calls["seed_calls"][1]["templates"]) == 1
+    assert calls["seed_calls"][1]["templates"][0]["instance_prefix"] == "DGX"
     assert calls["seed_calls"][1]["seed_kwargs"]["domain_code"] == "Z"
     assert calls["seed_calls"][1]["seed_kwargs"]["owner_repo_name"] == "dewey"
     assert str(calls["seed_calls"][1]["seed_kwargs"]["domain_registry_path"]).endswith(
@@ -175,6 +217,8 @@ def test_db_seed_main_claims_prefixes_before_seeding(
     registry = json.loads(prefix_registry.read_text(encoding="utf-8"))
     assert registry["ownership"]["Z"]["DGX"]["issuer_app_code"] == "dewey"
     assert "SYS" not in registry["ownership"]["Z"]
+    assert "XRF" not in registry["ownership"]["Z"]
+    assert "GVR" not in registry["ownership"]["Z"]
 
 
 def test_db_seed_claim_helper_rejects_collisions(tmp_path: Path) -> None:
@@ -206,9 +250,9 @@ def test_db_seed_claim_helper_rejects_collisions(tmp_path: Path) -> None:
             ),
             "name": "Dewey Artifact",
             "polymorphic_discriminator": "data_template",
-            "category": "DGX",
-            "type": "data",
-            "subtype": "artifact",
+            "category": "data",
+            "type": "artifact",
+            "subtype": "generic",
             "version": "1.0",
             "instance_prefix": "DGX",
         }
@@ -239,9 +283,9 @@ def test_db_seed_claim_helper_skips_core_prefixes(tmp_path: Path) -> None:
             "_source_file": str(tmp_path / "core_config" / "system" / "system.json"),
             "name": "TapDB System User",
             "polymorphic_discriminator": "actor_template",
-            "category": "SYS",
-            "type": "actor",
-            "subtype": "system_user",
+            "category": "actor",
+            "type": "user",
+            "subtype": "system",
             "version": "1.0",
             "instance_prefix": "SYS",
         },
@@ -249,11 +293,31 @@ def test_db_seed_claim_helper_skips_core_prefixes(tmp_path: Path) -> None:
             "_source_file": str(tmp_path / "core_config" / "message" / "webhook_event.json"),
             "name": "TapDB Message",
             "polymorphic_discriminator": "message_template",
-            "category": "MSG",
-            "type": "message",
-            "subtype": "webhook_event",
+            "category": "message",
+            "type": "webhook",
+            "subtype": "event",
             "version": "1.0",
             "instance_prefix": "MSG",
+        },
+        {
+            "_source_file": str(tmp_path / "client_config" / "external_refs" / "external_ref.json"),
+            "name": "TapDB External Reference",
+            "polymorphic_discriminator": "external_reference_template",
+            "category": "reference",
+            "type": "external_identifier",
+            "subtype": "tapdb_object",
+            "version": "1.0",
+            "instance_prefix": "XRF",
+        },
+        {
+            "_source_file": str(tmp_path / "client_config" / "generic_viewer" / "viewer.json"),
+            "name": "TapDB Generic Viewer",
+            "polymorphic_discriminator": "generic_viewer_template",
+            "category": "GVR",
+            "type": "viewer",
+            "subtype": "generic",
+            "version": "1.0",
+            "instance_prefix": "GVR",
         },
     ]
 
@@ -368,9 +432,9 @@ def test_db_seed_module_runs_main_when_invoked_as_script(monkeypatch: pytest.Mon
                     ),
                     "name": "Dewey Artifact",
                     "polymorphic_discriminator": "data_template",
-                    "category": "DGX",
-                    "type": "data",
-                    "subtype": "artifact",
+                    "category": "data",
+                    "type": "artifact",
+                    "subtype": "generic",
                     "version": "1.0",
                     "instance_prefix": "DGX",
                 }
@@ -488,3 +552,39 @@ def test_db_seed_identity_prefix_helper_registers_lineage_prefix() -> None:
         "owner_repo_name": "dewey",
         "prefix": "EDG",
     }
+
+
+def test_db_repair_templates_requires_explicit_approval(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "unit")
+    db_commands = importlib.import_module("dewey_service.cli.db")
+    calls: list[str] = []
+    monkeypatch.setattr(db_commands, "_verify_dewey_templates", lambda: calls.append("verify"))
+    monkeypatch.setattr(db_commands, "_seed_dewey_template_overlay", lambda: calls.append("seed"))
+
+    with pytest.raises(typer.Exit) as exc_info:
+        db_commands.repair_templates(confirm_dewey_template_repair="")
+
+    assert exc_info.value.exit_code == 1
+    assert calls == []
+
+
+def test_db_repair_templates_seeds_only_when_verification_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("DEWEY_DEPLOYMENT_CODE", "unit")
+    db_commands = importlib.import_module("dewey_service.cli.db")
+    calls: list[str] = []
+
+    def fake_verify() -> None:
+        calls.append("verify")
+        if calls == ["verify"]:
+            raise RuntimeError("Missing Dewey templates: system/registration_receipt/generic/1.0/")
+
+    monkeypatch.setattr(db_commands, "_verify_dewey_templates", fake_verify)
+    monkeypatch.setattr(db_commands, "_seed_dewey_template_overlay", lambda: calls.append("seed"))
+
+    db_commands.repair_templates(
+        confirm_dewey_template_repair=db_commands.DEWEY_PROD_TEMPLATE_SEED_APPROVAL
+    )
+
+    assert calls == ["verify", "seed", "verify"]

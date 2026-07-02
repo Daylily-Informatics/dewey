@@ -27,6 +27,7 @@ def _file_artifact(
     digest: str | None = None,
     artifact_role: str = "analysis_json",
     parser_hint: str | None = "alignstats",
+    metadata: dict[str, object] | None = None,
 ) -> FileArtifact:
     checksum = digest or _digest(key)
     return FileArtifact(
@@ -41,6 +42,7 @@ def _file_artifact(
         required=True,
         produced_by="daylily-snakemake",
         parent_artifact_euids=[],
+        metadata=metadata or {},
     )
 
 
@@ -51,6 +53,7 @@ def _analysis_request(
     parent_analysis_artifact_set_euid: str | None = None,
     rerun_of: str | None = None,
     local_only: bool = False,
+    metadata: dict[str, object] | None = None,
 ) -> AnalysisArtifactSetRegistrationRequest:
     request = AnalysisArtifactSetRegistrationRequest(
         schema_version="1.0",
@@ -74,6 +77,7 @@ def _analysis_request(
         status="registered",
         artifacts=[artifact],
         lineage_refs=[],
+        metadata=metadata or {},
         local_only=local_only,
         parser_family_hint="alignstats",
     )
@@ -86,6 +90,7 @@ def test_deterministic_manifest_hashing() -> None:
     shuffled = {
         "status": request.status,
         "artifacts": [artifact.model_dump(mode="json")],
+        "metadata": {},
         "schema_version": request.schema_version,
         "analysis_euid": request.analysis_euid,
         "run_euid": request.run_euid,
@@ -144,6 +149,39 @@ def test_analysis_artifact_set_registration_replay(service, storage) -> None:
     assert resolved["manifest_sha256"] == request.manifest_sha256
     assert resolved["registered_artifacts"][0]["artifact_role"] == "analysis_json"
     assert "artifact_euids" not in resolved
+
+
+def test_analysis_registration_metadata_persisted_in_set_artifacts_and_receipt(
+    service, storage
+) -> None:
+    artifact = _file_artifact(
+        metadata={"sample_id": "HG002", "genome_build": "hg38", "result_role": "cram"}
+    )
+    storage.seed_object(
+        bucket="qeo-bucket",
+        key="analysis/AN-1/alignstats.json",
+        size=artifact.size_bytes,
+        content_type=artifact.mime_type,
+        sha256=artifact.sha256,
+    )
+    request = _analysis_request(
+        artifact,
+        metadata={"command_id": "ccv20260530r50", "analysis_root": "analysis_results"},
+    )
+
+    _, receipt = service.register_analysis_artifact_set(request)
+    artifact_set = service.get_artifact_set(receipt["artifact_set_euid"])
+    resolved = service.resolve_artifact_set(receipt["artifact_set_euid"])
+    artifact_euid = receipt["registered_artifacts"][0]["artifact_euid"]
+    artifact_record = service.get_artifact(artifact_euid)
+
+    assert receipt["metadata"] == request.metadata
+    assert receipt["registered_artifacts"][0]["metadata"] == artifact.metadata
+    assert artifact_set["metadata"]["registration_metadata"] == request.metadata
+    assert artifact_set["metadata"]["artifact_manifest"][0]["metadata"] == artifact.metadata
+    assert artifact_record["metadata"]["registration_metadata"] == artifact.metadata
+    assert resolved["metadata"] == request.metadata
+    assert resolved["registered_artifacts"][0]["metadata"] == artifact.metadata
 
 
 def test_idempotency_key_mismatch_rejected(service, storage) -> None:
@@ -265,9 +303,10 @@ def test_reprocessing_creates_new_set_and_skips_existing_artifact(service, stora
 
     assert first["artifact_set_euid"] != second["artifact_set_euid"]
     assert second["registered_artifacts"] == []
-    assert second["skipped_existing"][0]["artifact_euid"] == first["registered_artifacts"][0][
-        "artifact_euid"
-    ]
+    assert (
+        second["skipped_existing"][0]["artifact_euid"]
+        == first["registered_artifacts"][0]["artifact_euid"]
+    )
 
 
 def test_supplied_matching_idempotency_key_is_accepted(service, storage) -> None:
