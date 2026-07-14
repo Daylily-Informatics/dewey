@@ -145,6 +145,12 @@ class SharingServiceMixin:
             updates["access_count"] = int(payload.get("access_count") or 0) + 1
         self.backend.update_instance_json(session, share_instance, updates)
 
+    def _commit_denied_share_audit(self, session) -> None:
+        commit_session = getattr(self.backend, "commit_session", None)
+        if not callable(commit_session):
+            raise RuntimeError("Dewey backend must support durable denied-share audit commits")
+        commit_session(session)
+
     def _artifact_member_from_instance(
         self,
         artifact_instance,
@@ -475,6 +481,7 @@ class SharingServiceMixin:
                     denial_reason="inactive_or_revoked",
                 )
                 self._append_share_audit(session, share, event)
+                self._commit_denied_share_audit(session)
                 raise ValueError("share is not active")
             expires_at = str(payload.get("expires_at") or "").strip()
             if expires_at:
@@ -492,6 +499,7 @@ class SharingServiceMixin:
                         denial_reason="expired",
                     )
                     self._append_share_audit(session, share, event)
+                    self._commit_denied_share_audit(session)
                     raise ValueError("share has expired")
             if clean_mode not in set(payload.get("delivery_modes") or []):
                 event = self._share_audit_event(
@@ -505,6 +513,7 @@ class SharingServiceMixin:
                     denial_reason="delivery_mode_not_allowed",
                 )
                 self._append_share_audit(session, share, event)
+                self._commit_denied_share_audit(session)
                 raise ValueError("delivery mode is not allowed for this share")
             if not self._share_policy_allows(
                 payload=payload,
@@ -522,6 +531,7 @@ class SharingServiceMixin:
                     denial_reason="policy_denied",
                 )
                 self._append_share_audit(session, share, event)
+                self._commit_denied_share_audit(session)
                 raise PermissionError("share access denied")
             ttl_limit = max(
                 60,

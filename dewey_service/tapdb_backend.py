@@ -162,6 +162,11 @@ class TapDBBackend:
                     success=success,
                 )
 
+    @staticmethod
+    def commit_session(session: Session) -> None:
+        """Commit an audit event that must survive a subsequent access denial."""
+        session.commit()
+
     def _operation_label(self) -> str:
         for frame_info in inspect.stack(context=0):
             filename = str(frame_info.filename or "")

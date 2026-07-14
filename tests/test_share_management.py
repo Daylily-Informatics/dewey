@@ -15,13 +15,14 @@ from tests.support.service_fakes import _FakeLiteratureAdapter, _FakeStorageClie
 
 def _service(
     *,
+    backend: _InMemoryBackend | None = None,
     storage: _FakeStorageClient | None = None,
     cloudfront: bool = False,
     requester_pays_buckets: set[str] | None = None,
     share_approved_origins: list[str] | None = None,
 ) -> DeweyService:
     return DeweyService(
-        _InMemoryBackend(),
+        backend or _InMemoryBackend(),
         default_share_ttl_seconds=120,
         storage_client=storage or _FakeStorageClient(),
         managed_storage_bucket="managed-bucket",
@@ -145,7 +146,8 @@ def test_object_share_mints_requester_pays_presigned_package_and_audit() -> None
 
 def test_share_denies_unauthorized_actor_and_revoke_blocks_future_packages() -> None:
     storage = _FakeStorageClient()
-    service = _service(storage=storage)
+    backend = _InMemoryBackend()
+    service = _service(backend=backend, storage=storage)
     artifact = _register_object(service, storage, bucket="bucket-1", key="reports/a.txt")
     _, share = service.create_share(
         target_kind="artifact_object",
@@ -188,6 +190,7 @@ def test_share_denies_unauthorized_actor_and_revoke_blocks_future_packages() -> 
     audit = service.list_share_audit(share["share_euid"])
     decisions = [item["decision"] for item in audit["items"]]
     assert decisions == ["deny", "revoke", "deny"]
+    assert backend.commit_calls == 2
 
 
 def test_prefix_share_uses_cloudfront_signed_cookies_without_listing_children() -> None:
