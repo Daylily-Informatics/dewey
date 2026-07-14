@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -23,6 +24,12 @@ SHARE_DELIVERY_MODES = {
     "cloudfront_signed_cookie",
     "dewey_html_browser",
 }
+
+
+class _DeniedShareAccess(Exception):
+    def __init__(self, public_error: Exception) -> None:
+        super().__init__(str(public_error))
+        self.public_error = public_error
 
 
 def _clean_list(values: list[Any] | tuple[Any, ...] | set[Any] | None) -> list[str]:
@@ -145,11 +152,16 @@ class SharingServiceMixin:
             updates["access_count"] = int(payload.get("access_count") or 0) + 1
         self.backend.update_instance_json(session, share_instance, updates)
 
-    def _commit_denied_share_audit(self, session) -> None:
-        commit_session = getattr(self.backend, "commit_session", None)
-        if not callable(commit_session):
-            raise RuntimeError("Dewey backend must support durable denied-share audit commits")
-        commit_session(session)
+    @contextmanager
+    def _share_access_session(self):
+        denied: _DeniedShareAccess | None = None
+        with self.backend.session_scope(commit=True) as session:
+            try:
+                yield session
+            except _DeniedShareAccess as exc:
+                denied = exc
+        if denied is not None:
+            raise denied.public_error
 
     def _artifact_member_from_instance(
         self,
@@ -459,7 +471,7 @@ class SharingServiceMixin:
         clean_mode = str(delivery_mode or "").strip().lower() or "presigned_s3_manifest"
         if clean_mode not in SHARE_DELIVERY_MODES:
             raise ValueError("unsupported delivery mode")
-        with self.backend.session_scope(commit=True) as session:
+        with self._share_access_session() as session:
             share = self.backend.find_by_euid(
                 session,
                 template_code=SHARE_TEMPLATE,
@@ -481,8 +493,7 @@ class SharingServiceMixin:
                     denial_reason="inactive_or_revoked",
                 )
                 self._append_share_audit(session, share, event)
-                self._commit_denied_share_audit(session)
-                raise ValueError("share is not active")
+                raise _DeniedShareAccess(ValueError("share is not active"))
             expires_at = str(payload.get("expires_at") or "").strip()
             if expires_at:
                 expiry_dt = datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
@@ -499,8 +510,7 @@ class SharingServiceMixin:
                         denial_reason="expired",
                     )
                     self._append_share_audit(session, share, event)
-                    self._commit_denied_share_audit(session)
-                    raise ValueError("share has expired")
+                    raise _DeniedShareAccess(ValueError("share has expired"))
             if clean_mode not in set(payload.get("delivery_modes") or []):
                 event = self._share_audit_event(
                     route="access_package",
@@ -513,8 +523,9 @@ class SharingServiceMixin:
                     denial_reason="delivery_mode_not_allowed",
                 )
                 self._append_share_audit(session, share, event)
-                self._commit_denied_share_audit(session)
-                raise ValueError("delivery mode is not allowed for this share")
+                raise _DeniedShareAccess(
+                    ValueError("delivery mode is not allowed for this share")
+                )
             if not self._share_policy_allows(
                 payload=payload,
                 actor_email=actor_email,
@@ -531,8 +542,7 @@ class SharingServiceMixin:
                     denial_reason="policy_denied",
                 )
                 self._append_share_audit(session, share, event)
-                self._commit_denied_share_audit(session)
-                raise PermissionError("share access denied")
+                raise _DeniedShareAccess(PermissionError("share access denied"))
             ttl_limit = max(
                 60,
                 int(

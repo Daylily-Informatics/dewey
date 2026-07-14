@@ -190,7 +190,7 @@ def test_share_denies_unauthorized_actor_and_revoke_blocks_future_packages() -> 
     audit = service.list_share_audit(share["share_euid"])
     decisions = [item["decision"] for item in audit["items"]]
     assert decisions == ["deny", "revoke", "deny"]
-    assert backend.commit_calls == 2
+    assert backend.session_scope_errors == 0
 
 
 def test_prefix_share_uses_cloudfront_signed_cookies_without_listing_children() -> None:
