@@ -64,7 +64,7 @@ No audit agent edited the clean branch or any pre-existing candidate.
 | DOC-001 | Produce `docs/derived_features_and_capabilities.md` with complete evidence-backed surface inventory | COMPLETE | The reference distinguishes live production, released source, repository-only Labcore, and local-only candidates; it inventories API, browser, CLI, objects, lineage, storage, integrations, auth, configuration, findings, and exclusions. |
 | PLAN2-001 | Add a decision-ready Plan 2 intake register without implementing features | COMPLETE | The reference ends with evidence, impact, dependency/contract, risk, and acceptance proof for release blockers, misleading/redundant surfaces, hidden capabilities, and product opportunities. No Plan 2 feature was implemented. |
 | QA-001 | Reconcile route inventories; run bounded source/release checks and document validation | COMPLETE | Exact 55 OpenAPI and 50 non-schema first-party operations reconcile with the runtime app; five mounted TapDB DAG operations and eight Dewey CLI groups are separately inventoried. Validation evidence is recorded below. |
-| PR-001 | Open normal PRs and merge when green | READY | Documentation and ledger are locally complete and validated. No administrative bypass or force push is authorized. |
+| PR-001 | Open normal PRs and merge when green | COMPLETE | Documentation PR `lsmc-bio/dewey#11` merged normally into `main` as `fcb0636d3a02f21d4bcfca2d7936b43381f78321` at `2026-09-01T08:21:14Z`; it had no required or reported repository checks and was cleanly mergeable after the recorded local validation. Closeout PR `#12` carries this exact terminal receipt, so its presence on `main` proves the final normal merge. |
 
 ## Required Approval Table Columns
 
