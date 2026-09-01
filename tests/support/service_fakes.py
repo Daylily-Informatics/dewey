@@ -51,6 +51,7 @@ class _InMemoryBackend:
     def __init__(self) -> None:
         self.instances: dict[str, list[_FakeInstance]] = {}
         self.lineages: list[_FakeLineage] = []
+        self.session_scope_errors = 0
         self.next_uid = 1
         self.next_by_prefix = {
             ANOMALY_TEMPLATE: 1,
@@ -82,7 +83,11 @@ class _InMemoryBackend:
     @contextmanager
     def session_scope(self, commit: bool = False):
         _ = commit
-        yield self
+        try:
+            yield self
+        except Exception:
+            self.session_scope_errors += 1
+            raise
 
     def ensure_templates(self, session, template_definitions=None) -> None:
         _ = session
