@@ -85,6 +85,8 @@ from dewey_service.observability import (
     probe_database,
     route_template_from_request,
 )
+from dewey_service.qeo_package_contract import ResolveMultiqcRequest
+from dewey_service.qeo_resolver_auth import require_qeo_resolver_auth
 from dewey_service.rbac import Role, profile_has_role
 from dewey_service.registration_contracts import (
     AnalysisArtifactSetRegistrationRequest,
@@ -3843,6 +3845,18 @@ def create_app(
             raise HTTPException(status_code=409, detail=str(exc)) from exc
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post(
+        "/api/v1/resolve/multiqc",
+        dependencies=[Depends(require_qeo_resolver_auth(settings))],
+    )
+    async def resolve_multiqc(body: ResolveMultiqcRequest) -> dict[str, Any]:
+        try:
+            return service.resolve_qeo_package(kind=body.kind, euid=body.euid)
+        except DeweyNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except (DeweyConflictError, ValueError) as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
 
     @app.post(
         "/api/v1/resolve/artifact",

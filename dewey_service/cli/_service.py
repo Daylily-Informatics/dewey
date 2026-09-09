@@ -10,7 +10,7 @@ from dewey_service.storage import S3StorageClient
 from dewey_service.tapdb_backend import TapDBBackend
 
 
-def build_cli_service() -> DeweyService:
+def build_cli_service(*, bootstrap: bool = True) -> DeweyService:
     """Build a DeweyService from explicit runtime settings."""
 
     settings = get_settings()
@@ -50,7 +50,8 @@ def build_cli_service() -> DeweyService:
         share_default_signed_ttl_seconds=settings.share_default_signed_ttl_seconds,
         share_max_lifetime_days=settings.share_max_lifetime_days,
     )
-    service.bootstrap()
+    if bootstrap:
+        service.bootstrap()
     return service
 
 

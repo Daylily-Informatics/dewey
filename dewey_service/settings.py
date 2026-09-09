@@ -440,6 +440,9 @@ class Settings(BaseSettings):
     environment: str = "development"
     api_bearer_token: str = "dewey-dev-token"
     api_bearer_tokens: str = ""
+    # Dedicated read-only QEO resolver. Never add this token to api_bearer_tokens.
+    qeo_resolver_token_sha256: str = ""
+    qeo_resolver_token_expires_at: str = ""
     session_secret_key: str = "dewey-session-secret-change-me"
     host: str = "127.0.0.1"
     port: int = DEFAULT_APP_PORT
@@ -806,7 +809,8 @@ class Settings(BaseSettings):
             cleaned = str(item).strip()
             if cleaned:
                 tokens.add(cleaned)
-        return {item for item in tokens if item}
+        # Resolver-only credentials cannot become write credentials by misconfiguration.
+        return {item for item in tokens if item and not item.startswith("dewey_qeo_resolver_")}
 
     @property
     def is_production(self) -> bool:

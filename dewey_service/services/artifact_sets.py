@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from typing import Any
+from urllib.parse import urlsplit
 
+from dewey_service.qeo_package_contract import PackageRegistration
 from dewey_service.services.base import DeweyConflictError, DeweyNotFoundError
 from dewey_service.tapdb_backend import (
     ARTIFACT_SET_TEMPLATE,
@@ -36,6 +38,141 @@ _QEO_RECEIPT_FIELDS = {
 
 
 class ArtifactSetServiceMixin:
+    def _qeo_package_response(self, session, package, manifest):
+        members = self.backend.list_children(
+            session, parent=package, relationship_type="artifact_set_member"
+        )
+        by_id = {member.euid: member for member in members}
+        if set(by_id) != {item.artifact_euid for item in manifest.files}:
+            raise DeweyConflictError("Package manifest does not match authoritative lineage")
+        files = []
+        for item in manifest.files:
+            artifact = self._artifact_response(by_id[item.artifact_euid])
+            location = urlsplit(artifact["storage_uri"])
+            if (
+                artifact["storage_backend"] != "s3"
+                or artifact["storage_kind"] != "object"
+                or artifact["node_kind"] != "file"
+                or not artifact["storage_uri"].startswith("s3://")
+                or not location.netloc
+                or not location.path.lstrip("/")
+                or location.query
+                or location.fragment
+                or location.username
+                or artifact["storage_uri"].endswith("/")
+            ):
+                raise DeweyConflictError("Package members must be exact S3 file artifacts")
+            if artifact["size"] is not None and artifact["size"] != item.size_bytes:
+                raise DeweyConflictError("Manifest size disagrees with registered artifact")
+            checksum = artifact["checksums"].get("sha256")
+            if checksum is not None and checksum != item.sha256:
+                raise DeweyConflictError("Manifest checksum disagrees with registered artifact")
+            if artifact.get("version_id"):
+                raise DeweyConflictError(
+                    "Version-qualified artifacts require version-aware acquisition"
+                )
+            files.append({**item.model_dump(), "url": artifact["storage_uri"]})
+        return {
+            "contract": "dewey.multiqc-package/v1",
+            "artifact_set_euid": package.euid,
+            "complete_data_package": True,
+            "label": manifest.label,
+            "files": files,
+        }
+
+    def register_qeo_package(self, request: PackageRegistration, *, idempotency_key: str):
+        """Explicit operator write; all artifacts must already exist. No identity invention."""
+        payload = request.model_dump()
+        fingerprint = self._fingerprint(payload)
+        with self.backend.session_scope(commit=True) as session:
+            replay = self._idempotency_replay(
+                session,
+                operation="qeo.package.register",
+                idempotency_key=idempotency_key,
+                fingerprint=fingerprint,
+            )
+            if replay is not None:
+                return replay.status_code, replay.response
+            artifacts = []
+            for item in request.files:
+                artifact = self.backend.find_by_euid(
+                    session,
+                    template_code=ARTIFACT_TEMPLATE,
+                    euid=item.artifact_euid,
+                )
+                if artifact is None:
+                    raise DeweyNotFoundError(f"Artifact not found: {item.artifact_euid}")
+                artifacts.append(artifact)
+            package = self.backend.create_instance(
+                session,
+                template_code=ARTIFACT_SET_TEMPLATE,
+                name=request.label,
+                json_addl={
+                    "artifact_set_type": "qeo_multiqc_package",
+                    "label": request.label,
+                    "metadata": {"qeo_package": payload},
+                    "created_at": utc_now_iso(),
+                },
+            )
+            for artifact in artifacts:
+                self.backend.create_lineage(
+                    session, parent=package, child=artifact, relationship_type="artifact_set_member"
+                )
+            body = self._qeo_package_response(session, package, request)
+            self._store_idempotency(
+                session,
+                operation="qeo.package.register",
+                idempotency_key=idempotency_key,
+                fingerprint=fingerprint,
+                status_code=201,
+                response=body,
+            )
+            return 201, body
+
+    def resolve_qeo_package(self, *, kind: str, euid: str):
+        """Read only: report-to-package selection uses persisted membership, never paths."""
+        with self.backend.session_scope() as session:
+            if kind == "artifact_set":
+                package = self.backend.find_by_euid(
+                    session, template_code=ARTIFACT_SET_TEMPLATE, euid=euid
+                )
+                candidates = [package] if package is not None else []
+            elif kind == "artifact":
+                report = self.backend.find_by_euid(
+                    session, template_code=ARTIFACT_TEMPLATE, euid=euid
+                )
+                candidates = (
+                    self.backend.list_parents(
+                        session, child=report, relationship_type="artifact_set_member"
+                    )
+                    if report is not None
+                    else []
+                )
+            else:
+                raise ValueError("Unsupported resolver kind")
+            packages = []
+            for candidate in candidates:
+                payload = normalize_instance_payload(candidate)
+                if payload.get("artifact_set_type") != "qeo_multiqc_package":
+                    continue
+                manifest = PackageRegistration.model_validate(
+                    (payload.get("metadata") or {}).get("qeo_package")
+                )
+                if kind == "artifact" and not any(
+                    f.role == "report" and f.artifact_euid == euid for f in manifest.files
+                ):
+                    continue
+                packages.append((candidate, manifest))
+            if not packages:
+                raise DeweyNotFoundError(
+                    "No explicitly registered MultiQC package for this reference"
+                )
+            if len(packages) != 1:
+                raise DeweyConflictError(
+                    "Multiple packages match; supply the exact artifact-set EUID"
+                )
+            return self._qeo_package_response(session, *packages[0])
+
     def create_artifact_set(
         self,
         *,
