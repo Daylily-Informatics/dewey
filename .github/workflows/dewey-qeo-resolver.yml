@@ -92,6 +92,11 @@ jobs:
           assert callable(DeweyService.resolve_qeo_package)
           print(json.dumps({"candidate_source_matches":True, "resolver_imports":True}))
           ' | tee evidence/candidate.json
+          docker run --rm --network none --read-only --entrypoint dewey \
+            -e DEWEY_DEPLOYMENT_CODE=day --tmpfs /tmp:rw,mode=1777 \
+            -e XDG_CONFIG_HOME=/tmp/dewey/config -e XDG_DATA_HOME=/tmp/dewey/data \
+            -e XDG_STATE_HOME=/tmp/dewey/state -e XDG_CACHE_HOME=/tmp/dewey/cache \
+            "$IMAGE" runtime check | tee evidence/container-cli-runtime.txt
           printf '{"source_commit":"%s","image":"%s","base":"%s"}\n' "$GITHUB_SHA" "$IMAGE" "$BASE_IMAGE" > evidence/receipt.json
           printf 'Dewey image: `%s`\nSource: `%s`\n' "$IMAGE" "$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4

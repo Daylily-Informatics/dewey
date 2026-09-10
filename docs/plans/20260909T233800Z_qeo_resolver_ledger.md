@@ -1,5 +1,31 @@
 # QEO resolver access and report/package contract
 
+## 2026-09-10 — container CLI correction in approved resolver scope
+
+Live public `dewey qeo status` failed because only the Conda CLI backend was
+supported; package-register has the same enforced guard. No registration was
+attempted through persistence internals or spoofed Conda variables. Correct the
+actual public CLI: explicit dewey-container backend, actual container/file
+markers, same dependency checks, enforced guard and no skip flag. Keep the
+Conda backend for real local activation. Unknown explicit backend must fail.
+
+This is a source correction and GitHub rebuild/redeployment of the already
+approved Dewey resolver scope, not a QEO image rebuild or TapDB release.
+Only services.dewey may change. Baseline now includes the newer QEO deployment;
+the shared boot SHA is b64d9650729091b99c1cbe36eabbb25d969330d2dbe7fc909a7d346b908af333.
+Do not replay the original one-shot Dewey deployment helper or reissue its token.
+
+Local first test pass: two passed, one failed because cli-core's RuntimeSpec
+does not reject an unknown default backend at construction. ATTEMPTING_BUGFIX:
+validate the explicit selector in Dewey before constructing the spec.
+GitHub smoke must now exercise the real public `dewey runtime check` in the
+published container without a database or network. Source import alone is not
+proof of the CLI execution contract.
+
+Owner inventory found 19 actual MultiQC data files, although the producing
+analysis_artifacts.tsv lists only multiqc_data.json and the HTML report. Do not
+register a two-member JSON/report package as complete; preserve all 19 files.
+
 ## 2026-09-10 — approved Dewey production deployment
 
 User approved building/deploying the Dewey image and changing **only
