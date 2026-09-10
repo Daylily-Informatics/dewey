@@ -1,0 +1,55 @@
+name: Verify existing Dewey QEO resolver digest
+on:
+  push:
+    branches: [codex/dewey-qeo-resolver-20260909]
+    paths: [.github/workflows/verify-dewey-qeo-resolver.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SOURCE_COMMIT: 7782aef47b867c7389f96832c2bc4636aca46d92
+      IMAGE: 108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:c62cc4dd6076b076b1c10d5ab93caf6e6c1c74fdbf44982173bd3fb72571ad1b
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 7782aef47b867c7389f96832c2bc4636aca46d92
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::108782052779:role/github-actions-ecr-all-repos
+          role-session-name: dewey-qeo-verify
+      - uses: aws-actions/amazon-ecr-login@v2
+      - name: Verify exact published source and public CLI (no build, network or database)
+        run: |
+          set -euo pipefail
+          docker pull "$IMAGE"
+          test "$(docker image inspect --format '{{index .Config.Labels "org.opencontainers.image.revision"}}' "$IMAGE")" = "$SOURCE_COMMIT"
+          mkdir -p evidence
+          docker run --rm --network none --read-only --entrypoint python \
+            -e DEWEY_DEPLOYMENT_CODE=day \
+            -v "$PWD/dewey_service:/expected:ro" "$IMAGE" -c '
+          import pathlib,json,importlib.metadata as m
+          from dewey_service.qeo_package_contract import ResolveMultiqcRequest, PackageRegistration
+          from dewey_service.qeo_resolver_auth import require_qeo_resolver_auth
+          from dewey_service.service import DeweyService
+          from dewey_service.cli import app
+          expected=pathlib.Path("/expected")
+          for source in expected.rglob("*.py"):
+              assert source.read_bytes()==(pathlib.Path("/app/dewey_service")/source.relative_to(expected)).read_bytes(),source
+          assert callable(DeweyService.resolve_qeo_package)
+          versions={n:m.version(n) for n in ["dewey-service","daylily-tapdb","cli-core-yo","daylily-auth-cognito"]}
+          print(json.dumps({"source_matches":True,"resolver_imports":True,"versions":versions}))
+          ' | tee evidence/source-and-imports.json
+          docker run --rm --network none --read-only --entrypoint dewey \
+            -e DEWEY_DEPLOYMENT_CODE=day "$IMAGE" qeo resolver-credential-create --help > evidence/credential-cli.txt
+          printf '{"source_commit":"%s","image":"%s","image_builds":0}\n' "$SOURCE_COMMIT" "$IMAGE" > evidence/receipt.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: verified-dewey-resolver-7782aef47b86
+          path: evidence/

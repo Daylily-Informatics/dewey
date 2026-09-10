@@ -20,7 +20,7 @@ ECR repository exists and is immutable. Existing approved role's actual name is
 | ID | Requirement | Status | Evidence / limits |
 |---|---|---|---|
 | DEPLOY-BASE | Current image/source/config and rollback target | IN_PROGRESS | Read-only host inventory; inspect writable-layer source before replacement |
-| DEPLOY-BUILD | One GitHub-built immutable Dewey candidate | OPEN | No local/EC2 image build; preserve dependency baseline |
+| DEPLOY-BUILD | One GitHub-built immutable Dewey candidate | ATTEMPTING_BUGFIX | Run 34420189915 built/published c62cc4dd...; smoke failed because harness omitted DEWEY_DEPLOYMENT_CODE. Verify the existing digest with explicit day config; no rebuild |
 | DEPLOY-LIVE | Dewey-only replacement and generated boot entry | OPEN | Exact hash guard, private backup, sibling/global equality, no shared-unit execution |
 | DEPLOY-PROOF | Health, resolver and browser regression evidence | OPEN | Do not call the full QEO release complete from Dewey deployment |
 

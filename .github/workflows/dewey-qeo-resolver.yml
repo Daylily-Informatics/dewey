@@ -1,12 +1,6 @@
 name: Publish Dewey QEO resolver image
 
 on:
-  push:
-    branches: [codex/dewey-qeo-resolver-20260909]
-    paths:
-      - .github/workflows/dewey-qeo-resolver.yml
-      - docker/qeo-resolver.Dockerfile
-      - dewey_service/**
   workflow_dispatch:
 
 permissions:
@@ -81,6 +75,7 @@ jobs:
           docker pull "$IMAGE"
           test "$(docker image inspect --format '{{index .Config.Labels "org.opencontainers.image.revision"}}' "$IMAGE")" = "$GITHUB_SHA"
           docker run --rm --network none --read-only --entrypoint python \
+            -e DEWEY_DEPLOYMENT_CODE=day \
             -v "$PWD/dewey_service:/expected:ro" "$IMAGE" -c '
           import pathlib, json
           from dewey_service.qeo_package_contract import ResolveMultiqcRequest, PackageRegistration
