@@ -1,5 +1,29 @@
 # QEO resolver access and report/package contract
 
+## 2026-09-10 — approved Dewey production deployment
+
+User approved building/deploying the Dewey image and changing **only
+`services.dewey`** in the generated host boot Compose file. Prior shared-unit,
+Aurora, Dayhoff source and unrelated-service exclusions remain in force.
+This supersedes the earlier image/deployment approval blocker below.
+
+Gate 0: local clean commit `f52bc9a`; isolated branch unchanged. Host
+`i-07df3a933e4839f52`, interactive Ubuntu session. Dewey container
+`4b66bc39c7ef63980c6d7a164c15298524992dcfa4421f988ac7ea5f91d12dc2`,
+image `108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:0780a42dd2b3d5620de2c538cada32acd661f5be5a0f0b60a08c9f941ea3af42`.
+Generated Compose baseline SHA256
+`b2a9c0977e125c628c970a294235ee2fc590acc0a4af6e9b7022177aea58ea8a`.
+12 service definitions; preserve the other 11 and all global configuration.
+ECR repository exists and is immutable. Existing approved role's actual name is
+`github-actions-ecr-all-repos`; trust permits `repo:lsmc-bio/*`. No IAM changes.
+
+| ID | Requirement | Status | Evidence / limits |
+|---|---|---|---|
+| DEPLOY-BASE | Current image/source/config and rollback target | IN_PROGRESS | Read-only host inventory; inspect writable-layer source before replacement |
+| DEPLOY-BUILD | One GitHub-built immutable Dewey candidate | OPEN | No local/EC2 image build; preserve dependency baseline |
+| DEPLOY-LIVE | Dewey-only replacement and generated boot entry | OPEN | Exact hash guard, private backup, sibling/global equality, no shared-unit execution |
+| DEPLOY-PROOF | Health, resolver and browser regression evidence | OPEN | Do not call the full QEO release complete from Dewey deployment |
+
 ## Authority and Gate 0
 
 2026-09-09: user explicitly expanded scope to establish QEO's Dewey resolver
