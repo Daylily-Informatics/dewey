@@ -19,10 +19,60 @@ ECR repository exists and is immutable. Existing approved role's actual name is
 
 | ID | Requirement | Status | Evidence / limits |
 |---|---|---|---|
-| DEPLOY-BASE | Current image/source/config and rollback target | IN_PROGRESS | Read-only host inventory; inspect writable-layer source before replacement |
-| DEPLOY-BUILD | One GitHub-built immutable Dewey candidate | ATTEMPTING_BUGFIX | Run 34420189915 built/published c62cc4dd...; smoke failed because harness omitted DEWEY_DEPLOYMENT_CODE. Verify the existing digest with explicit day config; no rebuild |
-| DEPLOY-LIVE | Dewey-only replacement and generated boot entry | OPEN | Exact hash guard, private backup, sibling/global equality, no shared-unit execution |
-| DEPLOY-PROOF | Health, resolver and browser regression evidence | OPEN | Do not call the full QEO release complete from Dewey deployment |
+| DEPLOY-BASE | Current image/source/config and rollback target | SUCCESS | No application writable-layer changes; base Python source matches 8.0.2; old /tmp artifacts will be backed up |
+| DEPLOY-BUILD | One GitHub-built immutable Dewey candidate | SUCCESS | Build 34420189915 published c62cc4dd...; verification-only run 34420688236 passed against that exact digest, no rebuild |
+| DEPLOY-LIVE | Dewey-only replacement and generated boot entry | SUCCESS | Running c62cc4dd...; boot promoted after health; all 11 siblings unchanged; private backup and credential retained |
+| DEPLOY-PROOF | Health, resolver and browser regression evidence | BLOCKED | Health/readiness and credential isolation passed; Google requires interactive password reauthentication before authenticated GUI acceptance |
+
+Image source commit: `7782aef47b867c7389f96832c2bc4636aca46d92`.
+Image digest: `sha256:c62cc4dd6076b076b1c10d5ab93caf6e6c1c74fdbf44982173bd3fb72571ad1b`.
+Dependencies and package version stay at deployed Dewey 8.0.2 / TapDB 9.0.9;
+OCI revision identifies the resolver patch. One image was built. Two smoke-harness
+issues (missing deployment code, missing writable ephemeral XDG directories) were
+fixed without changing the image. Final verification run 34420688236 succeeded.
+Helper SHA256 `1740706bd2497fa8fbe45c22703554fd8cc25ae225468e05c40d94f9b8d33451`;
+SSM delivery `b940bdd4-242b-4cb8-8ebd-a4f26efb0719` succeeded. Dry preflight reports
+the original base hash and all 11 siblings. Application build source has not changed.
+
+### Live result — 2026-09-10 00:20–00:22 UTC
+
+- Deployment helper completed successfully. New container
+  `7b64910d60f9638679cb0bac5d759f99dfe8e3c2fe4945950b40e9abcc2db7f9`.
+- Boot Compose after SHA256:
+  `0cf8cfdaffc6e5f461c8656f398f8144fb9945bb31971fdbf228df4b5edde4de`.
+- Only `services.dewey` changed: image plus resolver hash/expiry and source SHA
+  environment values. All other service/global definitions preserved; all 11
+  sibling container IDs, images and start times unchanged.
+- `/healthz` 200; `/readyz` 200 with database check `ok`.
+- New resolver without token: 401. With dedicated token and actual report
+  `M-DGX-NKDM`: authenticated owner lookup returns 404, explicitly no package yet.
+  Same token against general artifact resolver: 401. **This proves credential
+  isolation, not successful package resolution or QEO ingestion.**
+- Host credential reference:
+  `/opt/dewey/day/releases/qeo-resolver-7782aef47b86/resolver.token` (private;
+  no token output/commit). Expiry `2026-12-09T00:20:01.857914+00:00`.
+- Host rollback backup, preserved old-container `/tmp`, candidate Compose,
+  credential receipt and deployment receipt are in
+  `/opt/dewey/day/releases/qeo-resolver-7782aef47b86/`.
+  Never replay the one-shot helper: baseline changed and its release directory
+  now exists. Explicit rollback would restore **only Dewey** using its retained
+  old image and definition after a fresh current-state check.
+- Browser via existing Chrome plugin: Dewey login page rendered; shared LSMC
+  login reached Cognito; Google option reached the expected account picker;
+  selecting the existing account required a password. No credential entered.
+  Tab 762551291 retained for user handoff. Login and challenge screenshots are
+  in the task's tool evidence (no local screenshot file exported); concise
+  browser evidence is recorded under `evidence/20260910_dewey_resolver/`.
+  Full authenticated GUI acceptance remains BLOCKED on user reauthentication.
+- No Dayhoff source, shared unit, QEO runtime, unrelated service or Aurora
+  configuration changed. No reboot, DB migration, new TapDB release or second
+  image build. Package version remains 8.0.2; image revision identifies the patch.
+
+Deployment rows terminal: **yes**, 3 SUCCESS / 1 BLOCKED.
+Approved image deployment and boot persistence: **complete**.
+Authenticated GUI acceptance: **incomplete**. Full QEO release: **incomplete**;
+real package registration, QEO consumer deployment and ingestion/query/export
+remain separate next execution work, not a reason to repeat Dewey deployment.
 
 ## Authority and Gate 0
 
