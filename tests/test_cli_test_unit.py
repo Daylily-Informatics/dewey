@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -56,7 +57,7 @@ def test_run_tests_passes_through_pytest_args(monkeypatch: pytest.MonkeyPatch) -
         assert cwd == test_cli.PROJECT_ROOT
         assert check is False
         assert env is not None
-        assert env["DAYHOFF_PROJECT_ROOT"] == str(test_cli.PROJECT_ROOT)
+        assert env.get("DAYHOFF_PROJECT_ROOT") == os.environ.get("DAYHOFF_PROJECT_ROOT")
         calls.append(cmd)
         return _proc()
 
@@ -98,7 +99,7 @@ def test_run_coverage_builds_pytest_cov_command(monkeypatch: pytest.MonkeyPatch)
         assert cwd == test_cli.PROJECT_ROOT
         assert check is False
         assert env is not None
-        assert env["DAYHOFF_PROJECT_ROOT"] == str(test_cli.PROJECT_ROOT)
+        assert env.get("DAYHOFF_PROJECT_ROOT") == os.environ.get("DAYHOFF_PROJECT_ROOT")
         calls.append(cmd)
         return _proc()
 

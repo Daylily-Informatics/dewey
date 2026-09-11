@@ -266,16 +266,22 @@ Current relation fields:
 
 ## TapDB DAG API
 
-These routes are Dewey's contribution surface for cross-service graph
-aggregation. They are backed by `daylily-tapdb`, but authenticated using Dewey's
-existing session-or-bearer contract.
+The unreleased Dewey 9 candidate mounts the published TapDB 10.1.1rc1 DAG v2
+contract with Dewey session-or-bearer authentication. The successful mount
+manifest is also advertised by `/obs_services`. Missing required configuration
+or an unsuccessful native mount prevents startup.
 
 | Method | Path | Auth | Notes |
 | --- | --- | --- | --- |
-| `GET` | `/api/dag/object/{euid}` | `session or bearer token` | Exact ownership lookup |
-| `GET` | `/api/dag/data` | `session or bearer token` | Native DAG for exact root |
-| `GET` | `/api/dag/external` | `session or bearer token` | Expand one external graph ref |
-| `GET` | `/api/dag/external/object` | `session or bearer token` | External object detail |
+| `GET` | `/api/dag/manifest` | `session or bearer token` | Exact mounted DAG v2 manifest |
+| `GET` | `/api/dag/v2/object/{euid}` | `session or bearer token` | Native ownership lookup |
+| `GET` | `/api/dag/v2/data` | `session or bearer token` | Native bounded DAG query |
+| `GET` | `/api/dag/v2/search` | `session or bearer token` | Native bounded search |
+
+The removed v1 endpoints and external graph proxy have no compatibility aliases.
+DAG v2 advertises `outbound_fetch: false`; typed persisted external references
+remain the owning substrate contract. Production remains on the earlier deployed
+version until the separate populated-data migration gate can pass.
 
 ## Idempotency Rules
 

@@ -25,10 +25,11 @@ class SearchServiceMixin:
         started = perf_counter()
         query = dict(request or {})
         scopes = self._normalize_search_scopes(query.get("scopes"))
+        self._validate_property_filters(query.get("property_filters"))
         page = max(1, int(query.get("page") or 1))
         page_size = max(1, min(int(query.get("page_size") or 25), self.search_export_max_rows))
-        sort_field = str(query.get("sort_field") or "created_at").strip() or "created_at"
-        sort_dir = str(query.get("sort_dir") or "desc").strip().lower() or "desc"
+        sort_field = str(query.get("sort_field", "created_at")).strip()
+        sort_dir = str(query.get("sort_dir", "desc")).strip().lower()
 
         with self.backend.session_scope(commit=False) as session:
             rows: list[dict[str, Any]] = []
@@ -91,9 +92,10 @@ class SearchServiceMixin:
         if raw is None:
             return ["artifact", "share"]
         values = raw if isinstance(raw, list) else [raw]
-        scopes = [str(item or "").strip().lower() for item in values if str(item or "").strip()]
-        normalized = [scope for scope in scopes if scope in allowed]
-        return normalized or ["artifact", "share"]
+        scopes = [str(item or "").strip().lower() for item in values]
+        if not scopes or any(scope not in allowed for scope in scopes):
+            raise ValueError("scopes must contain artifact, artifact_set, or share")
+        return scopes
 
     def _search_artifact_items(
         self,
@@ -285,11 +287,32 @@ class SearchServiceMixin:
         bound = self._parse_iso8601(raw_value, field_name="created_at")
         return row_dt >= bound if is_start else row_dt <= bound
 
-    def _row_matches_property_filter(self, row: dict[str, Any], raw_filter: Any) -> bool:
+    @staticmethod
+    def _validate_property_filters(raw_filters: Any) -> None:
+        if raw_filters is None:
+            return
+        if not isinstance(raw_filters, list):
+            raise ValueError("property_filters must be a list")
+        for raw_filter in raw_filters:
+            SearchServiceMixin._validate_property_filter(raw_filter)
+
+    @staticmethod
+    def _validate_property_filter(raw_filter: Any) -> None:
         if not isinstance(raw_filter, dict):
-            return True
+            raise ValueError("property filter must be an object")
         path = str(raw_filter.get("path") or "").strip()
-        op = str(raw_filter.get("op") or "eq").strip().lower()
+        op = str(raw_filter.get("op", "eq")).strip().lower()
+        if not path:
+            raise ValueError("property filter path is required")
+        if op not in {"exists", "eq", "neq", "contains", "in", "gte", "lte"}:
+            raise ValueError(f"Unsupported property filter operator: {op}")
+        if any(not part for part in path.split(".")):
+            raise ValueError("property filter path must contain nonempty components")
+
+    def _row_matches_property_filter(self, row: dict[str, Any], raw_filter: Any) -> bool:
+        self._validate_property_filter(raw_filter)
+        path = str(raw_filter["path"]).strip()
+        op = str(raw_filter.get("op", "eq")).strip().lower()
         value = raw_filter.get("value")
         values = self._extract_path_values(row, path)
         if op == "exists":
@@ -320,7 +343,7 @@ class SearchServiceMixin:
                 except (TypeError, ValueError):
                     return False
             return left_value >= right_value if op == "gte" else left_value <= right_value
-        return True
+        raise ValueError(f"Unsupported property filter operator: {op}")
 
     @staticmethod
     def _looks_like_datetime(value: str) -> bool:
@@ -356,12 +379,12 @@ class SearchServiceMixin:
         sort_field: str,
         sort_dir: str,
     ) -> list[dict[str, Any]]:
-        reverse = sort_dir != "asc"
-        key_name = (
-            sort_field
-            if sort_field in {"created_at", "modified_at", "name", "euid"}
-            else "created_at"
-        )
+        if sort_dir not in {"asc", "desc"}:
+            raise ValueError("sort_dir must be asc or desc")
+        if sort_field not in {"created_at", "modified_at", "name", "euid"}:
+            raise ValueError("Unsupported sort_field")
+        reverse = sort_dir == "desc"
+        key_name = sort_field
         return sorted(
             rows,
             key=lambda item: (

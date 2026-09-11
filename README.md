@@ -14,7 +14,7 @@
 
 Dewey is the LSMC artifact and reference registry. It tracks durable artifacts such as sequencing run directories, VCFs, reports, external objects, external-object relations, managed shares, and access routes. It is the registry layer for data products and referenceable outputs, not the laboratory material graph.
 
-Current Dayhoff pins are maintained in `/Users/jmajor/projects/mega_dayhoff/dayhoff/services/pins.toml`. Current TapDB dependency: `daylily-tapdb @ ...@9.0.9`.
+Current Dayhoff pins are maintained in `/Users/jmajor/projects/mega_dayhoff/dayhoff/services/pins.toml`. Current TapDB dependency: `daylily-tapdb[aurora,gui]==10.1.1rc1` with `meridian-euid==0.4.8` (Python >=3.12). This is the unreleased Dewey 9 candidate; production remains Dewey 8.0.2 on TapDB 9.0.9. Populated-data migration and production acceptance remain separate uncompleted gates.
 
 Dewey is an approved-network customer/collaborator service in Dayhoff exposure policy.
 
@@ -46,7 +46,8 @@ cd /Users/jmajor/projects/mega_dayhoff/repos_work/dewey
 source ./activate <deploy-name>
 dewey --help
 dewey config init --help
-dewey db build --target local
+dewey db lifecycle
+dewey db verify-templates
 dewey server start --port 8914
 ```
 
@@ -54,14 +55,14 @@ Use explicit absolute paths for service config and TapDB config. Do not document
 
 ## CLI Interface
 
-The primary CLI is `dewey`. It covers config initialization, local DB/bootstrap, server startup, artifact/reference operations, and operational utilities.
+The primary CLI is `dewey`. It covers config initialization, existing-template verification, server startup, artifact/reference operations, and operational utilities.
 
 Common command families:
 
 | Family | Purpose |
 |---|---|
 | `dewey config ...` | Create or inspect explicit runtime config. |
-| `dewey db ...` | Build or verify Dewey storage state through supported paths. |
+| `dewey db ...` | Verify existing Dewey templates or show native lifecycle guidance. |
 | `dewey server ...` | Start the FastAPI service. |
 | `dewey artifacts ...` | Register, resolve, and inspect artifact references where exposed by CLI. |
 | `dewey shares ...` | Inspect managed shares through safe routes where exposed by CLI. |
@@ -70,7 +71,7 @@ Dewey delegates low-level storage lifecycle to `tapdb` and shared Cognito lifecy
 
 ## GUI
 
-Dewey exposes a browser GUI for artifact search, artifact/reference details, share management, external refs, and operational workflows. The mounted TapDB GUI at `/tapdb` is used for generic object, lineage, audit, template, and external-link inspection when configured.
+Dewey exposes a browser GUI for artifact search, artifact/reference details, share management, external refs, and operational workflows. The mounted TapDB GUI at `/tapdb` is used for generic object, lineage, audit, template, and external-link inspection with explicit target configuration. DAG v2 is mounted at `/api/dag/v2/*`; `/api/dag/manifest` and `/obs_services` publish its successful mount contract.
 
 GUI pages must not expose raw presigned URLs, bucket keys, or sensitive storage details to unauthorized users.
 

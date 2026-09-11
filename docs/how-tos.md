@@ -27,47 +27,37 @@ dewey cognito status
 
 The v2 CLI owns root-global `--json`. A command either supports it explicitly or rejects it with a contract error, so use JSON at the root rather than looking for per-command `--json` flags.
 
-## Initialize Config And Build Local DB
+## Configure And Verify Existing Storage
 
-If the deployment-scoped config does not exist yet:
+This checkout is the unreleased Dewey 9 / TapDB 10.1.1rc1 candidate. The earlier 10.1.0 attempt exceeded its fixed identity-receipt size bound.
+The explicitly approved RC still requires populated-data migration acceptance. These
+commands do not authorize migration or establish populated-data acceptance.
 
 ```bash
 source ./activate <deploy-name>
 dewey config init
 dewey config validate
 dewey config status
-```
-
-Then bootstrap local persistence:
-
-```bash
-dewey db build --target local
-```
-
-Current published-package note from the April 15, 2026 TapDB hard cut:
-
-- this repo now pins the `daylily-tapdb` version declared in `pyproject.toml`
-- All Python dependencies needed by the repo live in `project.dependencies`
-- the shared TapDB config must be passed as an explicit full path such as `/absolute/path/to/tapdb-config.yaml`
-- if you invoke `tapdb` manually, use that shared config path directly:
-
-```bash
-tapdb --config /absolute/path/to/tapdb-config.yaml db setup --recreate
-```
-
-- if you just reset the Dewey config template, set the TapDB config path explicitly before `dewey db seed` or `dewey server start`:
-
-```bash
 export TAPDB_CONFIG_PATH=/absolute/path/to/tapdb-config.yaml
-dewey db seed
-dewey server start --port 8914
+dewey db lifecycle
+dewey db verify-templates
 ```
 
-If you need a destructive local reset, use Dewey's own CLI rather than bypassing it:
+All Python dependencies live in `project.dependencies`; the frozen lock selects
+`daylily-tapdb[aurora,gui]==10.1.1rc1` and `meridian-euid==0.4.8` on Python >=3.12.
+The explicit TapDB config must already describe the intended target and bound
+runtime principal. Missing configuration or templates fails startup.
 
-```bash
-dewey db reset --target local
-```
+`dewey db lifecycle` delegates operator work to the supported TapDB public CLI
+and controlling migration ledger. Backup, identity preservation, schema migration,
+sequence verification and runtime-principal preparation occur externally. There
+is no Dewey build, seed, reset, repair or nuke shortcut. Do not recreate a schema,
+overwrite historical DGX templates or mint replacements for existing identities.
+Dewey startup executes existing-template reads only.
+
+The historical resolver overlay image and its TapDB 9 deployment helper have
+been removed. Future candidates must build the complete image from `Dockerfile`
+and `uv.lock`; historical deployment receipts remain under `docs/plans/`.
 
 ## Start The Service
 

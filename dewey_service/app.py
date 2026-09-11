@@ -458,7 +458,7 @@ def create_app(
             share_default_signed_ttl_seconds=settings.share_default_signed_ttl_seconds,
             share_max_lifetime_days=settings.share_max_lifetime_days,
         )
-        service.bootstrap()
+        service.verify_existing()
 
     app = FastAPI(
         title="Dewey Artifact Service",
@@ -510,13 +510,14 @@ def create_app(
 
     tapdb_embedded = mount_tapdb_surfaces(app, settings=settings)
     if tapdb_embedded:
-        fragment = dewey_tapdb_obs_services_fragment()
+        fragment = dewey_tapdb_obs_services_fragment(app)
         app.state.observability.add_obs_services_fragment(
             endpoints=list(fragment.get("endpoints") or []),
             extensions=list(fragment.get("extensions") or []),
             capabilities=list(fragment.get("capabilities") or []),
             external_ref_models=list(fragment.get("external_ref_models") or []),
-            contract_version=str(fragment.get("contract_version") or ""),
+            contract_version=str(fragment["contract_version"]),
+            dag_v2=fragment["dag_v2"],
         )
 
     api_auth_dep = require_api_auth(settings)

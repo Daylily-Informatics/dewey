@@ -3,7 +3,6 @@ from __future__ import annotations
 import asyncio
 import importlib.metadata
 import json
-import os
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
@@ -11,10 +10,7 @@ import jsonschema
 
 
 def _schema_root() -> Path:
-    root = os.environ.get("DAYHOFF_PROJECT_ROOT")
-    if not root:
-        raise RuntimeError("DAYHOFF_PROJECT_ROOT must point at the canonical Dayhoff repo root")
-    return Path(root) / "contracts" / "observability"
+    return Path(__file__).parent / "fixtures" / "dayhoff_observability"
 
 
 def _validate(name: str, payload: dict) -> None:
@@ -110,31 +106,21 @@ def test_obs_services_advertises_canonical_capabilities(client) -> None:
             "kind": "anomaly_detail",
         },
         {
-            "path": "/api/dag/object/{euid}",
+            "path": "/api/dag/v2/object/{euid}",
             "auth": "session_or_bearer",
             "kind": "dag_exact_lookup",
         },
-        {"path": "/api/dag/data", "auth": "session_or_bearer", "kind": "dag_native_graph"},
+        {"path": "/api/dag/v2/data", "auth": "session_or_bearer", "kind": "dag_native_graph"},
         {
-            "path": "/api/dag/search",
+            "path": "/api/dag/v2/search",
             "auth": "session_or_bearer",
             "kind": "dag_object_search",
-        },
-        {
-            "path": "/api/dag/external",
-            "auth": "session_or_bearer",
-            "kind": "dag_external_graph",
-        },
-        {
-            "path": "/api/dag/external/object",
-            "auth": "session_or_bearer",
-            "kind": "dag_external_object",
         },
     ]
     assert body["extensions"] == [
         "dewey.operator_ui",
         "dewey.anomalies_v1",
-        "tapdb.dag_v1",
+        "tapdb.dag_v2",
     ]
     assert body["dependencies"] == {
         "configured_services": [],

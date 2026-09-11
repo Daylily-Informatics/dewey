@@ -1,0 +1,17 @@
+{
+  "owner": "Dayhoff",
+  "repository": "git@github.com:lsmc-bio/dayhoff.git",
+  "source_commit": "cb1491d34a3b0420c2182117db3eb7adada05200",
+  "files": [
+    {
+      "source_path": "contracts/observability/healthz.schema.json",
+      "fixture": "healthz.schema.json",
+      "sha256": "e56c37e83ec1d546e3f9d133f8721aa15015b10d7accdd55cfc5df2251318c8e"
+    },
+    {
+      "source_path": "contracts/observability/readyz.schema.json",
+      "fixture": "readyz.schema.json",
+      "sha256": "70d893404802c86aa45939fe4e742b1bf2175f76ed5bbe5a97da8108869c52e8"
+    }
+  ]
+}

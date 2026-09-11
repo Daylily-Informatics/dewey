@@ -333,7 +333,8 @@ def test_settings_honors_tapdb_config_path_env_override(
     assert loaded.tapdb_config_path == str(Path("/tmp/from-env-tapdb.yaml").resolve())
 
 
-def test_settings_require_absolute_tapdb_paths() -> None:
+def test_settings_require_absolute_tapdb_paths(monkeypatch) -> None:
+    monkeypatch.delenv("TAPDB_CONFIG_PATH")
     with pytest.raises(ValueError, match="absolute file path"):
         Settings(
             api_bearer_token="token",
