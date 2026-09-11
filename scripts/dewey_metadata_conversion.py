@@ -218,7 +218,7 @@ def check_new_audit(session, before, changes, objects, actor):
 
     original_rows = before["tables"]["audit_log"]["rows"]
     highest_uid = max(row["identity"]["uid"] for row in original_rows.values())
-    expected = {(item["table"], item["uid"], column): item for item in changes for column in ("json_addl", "modified_dt")}
+    expected = {(item["table"], item["uid"], column): item for item in changes for column in ("created_dt", "json_addl", "modified_dt")}
     observed, hashes = set(), {}
     statement = select(cast(func.to_jsonb(audit_log.__table__.table_valued()), Text)).where(audit_log.uid > highest_uid).order_by(audit_log.uid)
     for raw in session.execute(statement).scalars():
@@ -232,10 +232,21 @@ def check_new_audit(session, before, changes, objects, actor):
         if key[2] == "json_addl" and (content_hash(json.loads(row["old_value"], parse_float=str)) != item["json_before"]
                 or content_hash(json.loads(row["new_value"], parse_float=str)) != item["json_after"]):
             raise ValueError("Audit does not retain the exact original and converted metadata")
+        if key[2] == "created_dt":
+            # The released trigger compares SQL timestamp text with JSON text.
+            # Preserve its audit row while requiring the original instant exactly.
+            original_hash = before["tables"][key[0]]["rows"][item["row_key"]]["columns"]["created_dt"]
+            old_instant = dt.datetime.fromisoformat(row["old_value"])
+            new_instant = dt.datetime.fromisoformat(row["new_value"])
+            if (old_instant.tzinfo is None or new_instant.tzinfo is None
+                    or old_instant != new_instant
+                    or new_instant != objects[(key[0], key[1])][0].created_dt
+                    or content_hash(row["new_value"]) != original_hash):
+                raise ValueError("Native creation audit must retain the exact original timestamp")
         observed.add(key)
         hashes[content_hash([row["uid"]])] = content_hash(row)
     if observed != set(expected):
-        raise ValueError("Expected exact two audit additions per changed original row")
+        raise ValueError("Expected exact three native audit additions per changed original row")
     return hashes
 
 
@@ -323,10 +334,15 @@ def main():
             assert_operator_role(session, schema_name=SCHEMA, operator_user="dayhoff")
             if connection.execute(text("SELECT count(*) FROM pg_catalog.pg_stat_activity WHERE datname=current_database() AND pid<>pg_backend_pid()")).scalar_one() != 0:
                 raise RuntimeError("Another target session exists; preserve outage and inspect")
+            from daylily_tapdb.models.audit import audit_log
+
+            original_audit_uid = max(row["identity"]["uid"] for row in before["tables"]["audit_log"]["rows"].values())
+            if session.execute(select(func.count()).select_from(audit_log).where(audit_log.uid > original_audit_uid)).scalar_one():
+                raise ValueError("Persisted audit additions exist after the exact before inventory; reconcile before applying")
             changes, objects, counts = collect(session, before, lock=args.operation == "apply")
             plan = {**fingerprint, "counts": counts, "changes": changes,
                     "source_freeze": source, "candidate": {"id": candidate["Id"], "image": candidate["Image"]},
-                    "expected_audit_rows": 2 * len(changes)}
+                    "expected_audit_rows": 3 * len(changes)}
             if args.operation == "plan":
                 write_new(plan_path, plan)
                 print(json.dumps({"status": "planned", "plan": str(plan_path), "file_sha256": file_hash(plan_path), "counts": counts}))
@@ -366,5 +382,9 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as exc:
-        print(json.dumps({"status": "stopped", "error_class": type(exc).__name__}))
+        import traceback
+
+        frames = traceback.extract_tb(exc.__traceback__)
+        print(json.dumps({"status": "stopped", "error_class": type(exc).__name__,
+                          "locations": [{"file": Path(frame.filename).name, "line": frame.lineno} for frame in frames]}))
         raise SystemExit(1) from None
