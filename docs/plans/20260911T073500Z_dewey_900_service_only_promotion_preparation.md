@@ -46,9 +46,10 @@ The replacement contains only the accepted production runtime shape:
 - user `0:0`, `HOME=/home/ubuntu`, host network, `HOST=0.0.0.0`, `PORT=8914`;
 - all eight reviewed loopback `extra_hosts` entries from the owning service;
 - explicit Dewey/TapDB production identity and fixed new config paths;
-- explicit `lsmc` AWS profile/region/config paths and localhost OTEL endpoint;
-- read-only new Dewey/TapDB configs, AWS directory, RDS CA, CloudFront key, NCBI
-  key, AI grants and both TapDB registries;
+- explicit `lsmc` AWS profile/region/config paths, the retained optional NCBI
+  key path environment value and localhost OTEL endpoint;
+- read-only new Dewey/TapDB configs, AWS directory, RDS CA, CloudFront key, AI
+  grants and both TapDB registries;
 - one explicit writable production state-directory mount for XDG state/cache and
   metapub cache; and
 - the reviewed existing `unless-stopped` restart policy.
@@ -69,6 +70,15 @@ values directly under `environment`; it does not add `env_file`, `extends`,
 interpolation or credential values to a public receipt. Its secret-free receipt
 records `removed_isolated_override` or `restored_from_owning_compose` for each
 dispatch key without recording any value.
+
+The reviewed host has neither `/home/ubuntu/.config/ncbi/key.txt` nor its
+`ncbi` parent, and the stopped old container saw the same absence through its
+read-only broad `/home/ubuntu/.config` mount. Dewey server startup treats this
+file as optional: when `NCBI_API_KEY` is unset, it tries the configured path and
+continues without setting a key on `FileNotFoundError` or another read error.
+The container entrypoint does not require the path. The final mapping therefore
+retains the approved `DEWEY_NCBI_API_KEY_FILE` environment value but has no NCBI
+file bind. It does not create an empty credential or discover another path.
 
 Prepare D's private production environment first, using the exact accepted
 production config and an existing mode-0700 directory:
