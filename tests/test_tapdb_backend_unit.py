@@ -274,7 +274,15 @@ def test_ensure_templates_can_verify_startup_subset() -> None:
 def test_create_instance_covers_success_and_missing_template() -> None:
     backend = _backend()
     session = _FakeSession()
-    created = SimpleNamespace(json_addl={}, bstatus="", is_singleton=True)
+    created = SimpleNamespace(
+        json_addl={
+            "properties": {"template_default": "kept"},
+            "action_groups": {},
+            "audit_log": [],
+        },
+        bstatus="",
+        is_singleton=True,
+    )
     template = SimpleNamespace(instance_prefix=" AT ", uid=11)
 
     backend.templates = SimpleNamespace(
@@ -290,7 +298,12 @@ def test_create_instance_covers_success_and_missing_template() -> None:
     )
 
     assert instance is created
-    assert created.json_addl == {"foo": "bar"}
+    assert created.json_addl == {
+        "foo": "bar",
+        "properties": {"template_default": "kept"},
+        "action_groups": {},
+        "audit_log": [],
+    }
     assert created.bstatus == "active"
     assert created.is_singleton is False
     assert session.flush_count == 1
@@ -363,9 +376,9 @@ def test_update_instance_json_and_query_helpers(monkeypatch: pytest.MonkeyPatch)
         backend.find_by_euid(session, template_code=backend_mod.ARTIFACT_TEMPLATE, euid="") is None
     )
 
-    instance = SimpleNamespace(json_addl={"a": 1})
+    instance = SimpleNamespace(json_addl={"properties": {}, "a": 1})
     backend.update_instance_json(session, instance, {"b": 2})
-    assert instance.json_addl == {"a": 1, "b": 2}
+    assert instance.json_addl == {"properties": {}, "a": 1, "b": 2}
 
     backend.templates = SimpleNamespace(
         get_template=lambda session, code, *, domain_code=None: None
@@ -498,7 +511,7 @@ def test_find_lineage_instance_and_normalize_payload(monkeypatch: pytest.MonkeyP
     assert all(domain_code == "Z" for domain_code in seen_domain_codes)
 
     instance = SimpleNamespace(
-        json_addl={"artifact_type": "fastq"},
+        json_addl={"properties": {}, "artifact_type": "fastq"},
         euid="DGX-000001",
         name="artifact",
         created_dt=datetime(2026, 1, 1, tzinfo=timezone.utc),

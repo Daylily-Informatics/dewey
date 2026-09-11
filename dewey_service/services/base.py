@@ -384,18 +384,6 @@ class BaseDeweyService:
             "created_at": payload.get("created_at"),
         }
 
-    def _external_object_relation_response(self, instance) -> dict[str, Any]:
-        payload = normalize_instance_payload(instance)
-        return {
-            "external_object_relation_euid": instance.euid,
-            "target_type": payload.get("target_type"),
-            "target_euid": payload.get("target_euid"),
-            "external_object_euid": payload.get("external_object_euid"),
-            "relation_type": payload.get("relation_type"),
-            "metadata": dict(payload.get("metadata") or {}),
-            "created_at": payload.get("created_at"),
-        }
-
     def _idempotency_replay(
         self,
         session,
