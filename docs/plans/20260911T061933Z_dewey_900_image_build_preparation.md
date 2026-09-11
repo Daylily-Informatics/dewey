@@ -14,7 +14,7 @@ cutover, acceptance, a release tag, or a merge to `main`.
 | Exact source context | Prepared | `evidence/20260911_dewey_900_image_build/dewey-9.0.0-c484c95768a4-source-context.tar.gz`; SHA256 `78b70410759ab4abc08e17da962f77fbcda638a920a4b80b4fc88c1caf0cbefe`; 314,972 bytes; 79 tracked files |
 | Complete Dockerfile | Prepared | Source Dockerfile plus a release-only copy whose only changes are the two platform-specific base-image digest pins |
 | Local image build | Not run | Local Docker client `29.5.2` found; default and Colima engines were unavailable. No engine was started. |
-| Native build capsule | Prepared | `evidence/20260911_dewey_900_image_build/build-and-push-linux-amd64.sh` |
+| Native build capsule | Prepared | `evidence/20260911_dewey_900_image_build/build-and-push-linux-amd64.sh`; SHA256 `254dda2cd40b915c3919dc4123b19d877307055b375514e82741afff5bd08b50` |
 | Candidate image publish | Pending O | Exact candidate tag below; build capsule refuses an existing tag and records the immutable ECR digest after push |
 | Production deployment/DB | Unchanged | No EC2, ECR, database, runtime config, Compose, release tag, or production operation was performed here |
 
@@ -67,7 +67,9 @@ sha256sum -c SHA256SUMS
 
 The capsule fails before building unless the host and Docker engine are native
 `x86_64`/`linux/x86_64`, the context/Dockerfile/source lock hashes match, and
-the two base digest pins are intact. It performs the complete frozen build,
+the two base digest pins are intact. The receipt directory must be absent and
+must not be a symlink; the capsule creates it once and refuses reuse. It performs
+the complete frozen build,
 checks `linux/amd64`, OCI labels, default image user, `/app/.venv` interpreter,
 Dewey/TapDB/Meridian/Python versions, TapDB runtime version guard, CLI help and
 absence of runtime Git. It then fails closed if the candidate ECR tag already

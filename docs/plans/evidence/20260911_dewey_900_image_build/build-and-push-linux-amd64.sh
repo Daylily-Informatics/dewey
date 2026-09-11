@@ -84,7 +84,11 @@ grep -Fqx "FROM ${RUNTIME_BASE} AS runtime" "$RELEASE_DOCKERFILE" || {
     exit 66
 }
 
-mkdir -p -- "$RECEIPT_DIR"
+if [[ -e "$RECEIPT_DIR" || -L "$RECEIPT_DIR" ]]; then
+    printf 'Receipt directory must be absent: %s\n' "$RECEIPT_DIR" >&2
+    exit 67
+fi
+mkdir -- "$RECEIPT_DIR"
 readonly BUILD_ROOT="$(mktemp -d)"
 trap 'rm -rf -- "$BUILD_ROOT"' EXIT
 tar -xzf "$CONTEXT_ARCHIVE" -C "$BUILD_ROOT"
