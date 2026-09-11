@@ -74,3 +74,8 @@ Implementation started; production unchanged.
 +  No intermediate image build and no production data writes.
 +- CI concurrency cancels duplicate push/PR runs for the same branch. The final
 +  broad suite runs in the PR; a skip-CI merge message will reuse that result.
+
+- First broad CI: 569 passed, 2 skipped, four fixture failures. The new explicit
+  default fixture masked config paths intentionally selected by four CLI/settings
+  tests. ATTEMPTING_BUGFIX: those tests now explicitly select their own files;
+  no runtime behavior changed. Second CI pass is informative and authorized.

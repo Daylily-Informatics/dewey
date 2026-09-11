@@ -226,6 +226,7 @@ def test_config_set_artifact_bucket(monkeypatch, tmp_path: Path, capsys) -> None
     init_exit = _invoke(["config", "init"])
     capsys.readouterr()
     assert init_exit == 0
+    monkeypatch.setenv("DEWEY_CONFIG", str(tmp_path / "dewey-ci" / "dewey-config-ci.yaml"))
 
     exit_code = _invoke(["config", "set-artifact-bucket", "dewey-artifacts-test"])
     captured = capsys.readouterr().out
@@ -244,6 +245,7 @@ def test_config_validate_and_status(monkeypatch, tmp_path: Path, capsys) -> None
     init_exit = _invoke(["config", "init"])
     capsys.readouterr()
     assert init_exit == 0
+    monkeypatch.setenv("DEWEY_CONFIG", str(tmp_path / "dewey-local" / "dewey-config-local.yaml"))
 
     validate_exit = _invoke(["config", "validate"])
     validate_output = capsys.readouterr().out
