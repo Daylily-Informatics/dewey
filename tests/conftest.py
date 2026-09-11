@@ -1338,6 +1338,7 @@ class FakeDeweyService:
         external_uri: str | None,
         metadata: dict[str, Any] | None,
         idempotency_key: str,
+        reference_target: dict[str, Any] | None = None,
     ):
         payload = {
             "external_system": external_system,

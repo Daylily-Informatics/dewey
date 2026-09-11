@@ -212,6 +212,7 @@ def test_external_object_relation_lifecycle(service: DeweyService) -> None:
         external_uri="https://bloom.example.com/samples/123",
         metadata={"tenant": "acme"},
         idempotency_key="idem-external-object",
+        reference_target={"kind": "non_federated"},
     )
     replay_code, replay_external = service.create_external_object(
         external_system="bloom",
@@ -220,6 +221,7 @@ def test_external_object_relation_lifecycle(service: DeweyService) -> None:
         external_uri="https://bloom.example.com/samples/123",
         metadata={"tenant": "acme"},
         idempotency_key="idem-external-object-2",
+        reference_target={"kind": "non_federated"},
     )
     relation_code, relation = service.attach_external_object_relation(
         target_type="artifact",
@@ -251,6 +253,10 @@ def test_external_object_relation_lifecycle(service: DeweyService) -> None:
         target_type="artifact",
         target_euid=artifact["artifact_euid"],
     ) == [relation]
+    assert service.backend.commits[-1] is False
+    assert "external_graph_ref" not in relation
+    assert service.backend.source_locks
+    assert not service.backend.native_assertions  # Explicit non-federated target.
 
     with pytest.raises(ValueError, match="target_type must be artifact or artifact_set"):
         service.list_external_object_relations(target_type="report", target_euid="AT-1")

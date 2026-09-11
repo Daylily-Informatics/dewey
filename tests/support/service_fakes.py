@@ -4,9 +4,11 @@ import json
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
+from daylily_tapdb import generic_instance, generic_instance_lineage
 
 from dewey_service.audit import creation_audit_fields, update_audit_fields
 from dewey_service.service import DeweyService
@@ -37,6 +39,25 @@ class _FakeInstance:
     modified_dt: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     is_deleted: bool = False
     polymorphic_discriminator: str = "data_instance"
+    domain_code: str = "Z"
+    issuer_app_code: str = "dewey"
+    tenant_id: None = None
+
+    @property
+    def category(self):
+        return self.template_code.split("/")[0]
+
+    @property
+    def type(self):
+        return self.template_code.split("/")[1]
+
+    @property
+    def subtype(self):
+        return self.template_code.split("/")[2]
+
+    @property
+    def version(self):
+        return self.template_code.split("/")[3]
 
 
 @dataclass
@@ -45,6 +66,39 @@ class _FakeLineage:
     child_uid: int
     relationship_type: str
     is_deleted: bool = False
+    uid: int = 0
+    parent_instance: _FakeInstance | None = None
+    domain_code: str = "Z"
+    issuer_app_code: str = "dewey"
+    tenant_id: None = None
+
+    @property
+    def child_instance_uid(self):
+        return self.child_uid
+
+
+class _FakeReferenceQuery:
+    """Only the adapter's explicit equality/row-lock query boundary."""
+
+    def __init__(self, rows, backend):
+        self.rows, self.backend = list(rows), backend
+
+    def filter_by(self, **filters):
+        return _FakeReferenceQuery(
+            [row for row in self.rows if all(getattr(row, k) == v for k, v in filters.items())],
+            self.backend,
+        )
+
+    def with_for_update(self):
+        self.backend.source_locks.extend(row.uid for row in self.rows)
+        return self
+
+    def all(self):
+        return self.rows
+
+    def one_or_none(self):
+        assert len(self.rows) <= 1
+        return self.rows[0] if self.rows else None
 
 
 class _InMemoryBackend:
@@ -52,6 +106,9 @@ class _InMemoryBackend:
         self.instances: dict[str, list[_FakeInstance]] = {}
         self.lineages: list[_FakeLineage] = []
         self.session_scope_errors = 0
+        self.source_locks = []
+        self.commits = []
+        self.native_assertions = {}
         self.next_uid = 1
         self.next_by_prefix = {
             ANOMALY_TEMPLATE: 1,
@@ -82,12 +139,18 @@ class _InMemoryBackend:
 
     @contextmanager
     def session_scope(self, commit: bool = False):
-        _ = commit
+        self.commits.append(commit)
         try:
             yield self
         except Exception:
             self.session_scope_errors += 1
             raise
+
+    def query(self, model):
+        if model is generic_instance_lineage:
+            return _FakeReferenceQuery(self.lineages, self)
+        assert model is generic_instance
+        return _FakeReferenceQuery([row for rows in self.instances.values() for row in rows], self)
 
     def ensure_templates(self, session, template_definitions=None) -> None:
         _ = session
@@ -113,7 +176,7 @@ class _InMemoryBackend:
             euid=f"{prefix}-{seq:06d}",
             template_code=template_code,
             name=name,
-            json_addl={**dict(json_addl), **creation_audit_fields()},
+            json_addl={"properties": {}, **dict(json_addl), **creation_audit_fields()},
         )
         self.next_uid += 1
         self.instances.setdefault(template_code, []).append(instance)
@@ -177,6 +240,8 @@ class _InMemoryBackend:
             parent_uid=parent.uid,
             child_uid=child.uid,
             relationship_type=relationship_type,
+            uid=len(self.lineages) + 1,
+            parent_instance=parent,
         )
         self.lineages.append(lineage)
         return lineage
@@ -502,7 +567,24 @@ def storage() -> _FakeStorageClient:
 
 
 @pytest.fixture
-def service(backend: _InMemoryBackend, storage: _FakeStorageClient) -> DeweyService:
+def service(backend: _InMemoryBackend, storage: _FakeStorageClient, monkeypatch) -> DeweyService:
+    class NativeReferenceRecorder:
+        def __init__(self, session):
+            assert session is backend
+
+        def attach(self, source, spec):
+            assert source.uid in backend.source_locks
+            key = (source.uid, spec.target.identity_key, spec.relationship_type)
+            if key in backend.native_assertions:
+                assert backend.native_assertions[key] == spec
+                return SimpleNamespace(status="existing")
+            backend.native_assertions[key] = spec
+            return SimpleNamespace(status="created")
+
+    monkeypatch.setattr(
+        "dewey_service.integrations.tapdb_external_references.ExternalReferenceService",
+        NativeReferenceRecorder,
+    )
     return DeweyService(
         backend,
         default_share_ttl_seconds=120,

@@ -10,7 +10,6 @@ from dewey_service.literature import ViewerContext
 from dewey_service.tapdb_backend import (
     ARTIFACT_SET_TEMPLATE,
     ARTIFACT_TEMPLATE,
-    EXTERNAL_OBJECT_TEMPLATE,
     SHARE_TEMPLATE,
 )
 
@@ -161,17 +160,10 @@ class SearchServiceMixin:
         )
         rows: list[dict[str, Any]] = []
         for relation in relations:
-            relation_payload = self._external_object_relation_response(relation)
-            external = self.backend.find_by_euid(
-                session,
-                template_code=EXTERNAL_OBJECT_TEMPLATE,
-                euid=str(relation_payload.get("external_object_euid") or ""),
-            )
-            if external is None:
-                continue
+            relation_payload = self._external_object_relation_response_with_external(session, relation)
             rows.append(
                 {
-                    **self._external_object_response(external),
+                    **relation_payload["external_object"],
                     "relation_type": relation_payload.get("relation_type"),
                 }
             )
