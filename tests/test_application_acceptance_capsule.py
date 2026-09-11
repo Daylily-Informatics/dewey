@@ -178,3 +178,16 @@ def test_redirect_handler_never_follows_redirect():
         capsule.NoRedirect().redirect_request(None, None, 302, "redirect", {}, "https://outside")
         is None
     )
+
+
+def test_effective_primary_uses_selected_deployed_environment(monkeypatch):
+    monkeypatch.setenv("DEWEY_API_BEARER_TOKEN", "selected-test-primary")
+    capsule.verify_effective_primary(SimpleNamespace(api_bearer_token="selected-test-primary"))
+    with pytest.raises(capsule.AcceptanceError, match="Effective primary differs"):
+        capsule.verify_effective_primary(SimpleNamespace(api_bearer_token="different-test-primary"))
+
+
+def test_effective_primary_requires_explicit_selected_source(monkeypatch):
+    monkeypatch.delenv("DEWEY_API_BEARER_TOKEN", raising=False)
+    with pytest.raises(capsule.AcceptanceError, match="Explicit deployed primary"):
+        capsule.verify_effective_primary(SimpleNamespace(api_bearer_token="yaml-test-primary"))

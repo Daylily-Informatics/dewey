@@ -66,6 +66,15 @@ def validate_base_url(base_url):
     require(base_url == f"http://127.0.0.1:{parsed.port}", "Canonical loopback URL required")
 
 
+def verify_effective_primary(settings):
+    primary = os.environ.get("DEWEY_API_BEARER_TOKEN")
+    require(isinstance(primary, str) and primary.strip(), "Explicit deployed primary required")
+    require(
+        settings.api_bearer_token == primary.strip(),
+        "Effective primary differs from selected deployed environment credential",
+    )
+
+
 class NoRedirect(HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         return None
@@ -363,6 +372,8 @@ def main():
             config_path=runtime, client_id="dewey", database_name="dewey-day"
         )
         validate_runtime(runtime_cfg, args.lane, runtime)
+        settings = get_settings()
+        verify_effective_primary(settings)
         inputs = {
             "lane": args.lane,
             "base_url": args.base_url,
@@ -373,13 +384,13 @@ def main():
             "runtime_config_sha256": file_digest(runtime),
             "fixture_inputs_sha256": file_digest(fixture_path),
             "manifest_sha256": file_digest(manifest),
-            "general_bearer_selector": "application.api_bearer_token",
+            "general_bearer_selector": "DEWEY_API_BEARER_TOKEN (effective primary)",
             "capsule_sha256": file_digest(Path(__file__).resolve()),
             "runtime_target": {
                 key: runtime_cfg[key] for key in ("database", "schema_name", "user", "domain_code")
             },
         }
-        Capsule(args, get_settings(), inputs, fixture).run()
+        Capsule(args, settings, inputs, fixture).run()
         print(json.dumps({"status": "passed", "phase": args.phase, "receipt": args.receipt}))
         return 0
     except Exception as exc:
