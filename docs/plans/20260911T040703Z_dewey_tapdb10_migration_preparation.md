@@ -445,6 +445,14 @@ native operation releases its temporary database gate.
 
 ## 5. Conversion-manifest review
 
+The [source-backed fixed manifests and binding recipe](20260911T055609Z_dewey_conversion_manifest_review.md)
+now cover the untouched-copy and native migration boundaries. The mapped source
+has no NULL/empty audit-attribution or validator-reference hashes, no legacy
+outbox rows, and exactly five proven applied migrations. Its strict migration
+manifest permits no original-cell transformation. Bind only the actual copied
+target where physical relocation is intended; independently qualify the native
+preflight and every actual difference before using these prepared permissions.
+
 Capture a new destination inventory after each completed conversion stage:
 
 ```bash
