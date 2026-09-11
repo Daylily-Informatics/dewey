@@ -15,7 +15,7 @@ import yaml
 
 COMPOSE_PATH = Path("/opt/dayhoff/deployments/day/compose/docker-compose.yml")
 COMPOSE_SHA256 = "35a37f2c5df1cc84ebfd57ad19a9d56b14f88b3e6bc322aebadd3db081da8509"
-IMAGE_SHA = "c484c95768a4147acdcabd12a2da0332c4c750dc"
+REHEARSAL_IMAGE_SHA = "c484c95768a4147acdcabd12a2da0332c4c750dc"
 DIRECTORIES = {
     "rehearsal": "/opt/dewey/day/releases/tapdb10-rehearsal-20260911",
     "production": "/opt/dewey/day/releases/9.0.0",
@@ -112,8 +112,18 @@ def extract_dewey(compose_bytes):
     return dict(environment), list(EXTRA_HOSTS)
 
 
-def isolated_overrides(lane):
+def validate_image_sha(lane, image_sha):
+    require(
+        isinstance(image_sha, str) and re.fullmatch(r"[0-9a-f]{40}", image_sha),
+        "Explicit 40-character lowercase hexadecimal image source SHA required",
+    )
+    if lane == "rehearsal":
+        require(image_sha == REHEARSAL_IMAGE_SHA, "Rehearsal image source SHA changed")
+
+
+def isolated_overrides(lane, image_sha):
     """Only the approved runtime identity, mounts and loopback isolation change."""
+    validate_image_sha(lane, image_sha)
     directory = DIRECTORIES[lane]
     overrides = {
         "HOME": "/home/ubuntu",
@@ -135,8 +145,8 @@ def isolated_overrides(lane):
         "DEWEY_TAPDB_DATABASE_NAME": "dewey-day",
         "DEWEY_TAPDB_DOMAIN_CODE": "M",
         "DEWEY_TAPDB_OWNER_REPO_NAME": "dewey",
-        "DEWEY_BUILD_SHA": IMAGE_SHA,
-        "LSMC_RELEASE_SHA": IMAGE_SHA,
+        "DEWEY_BUILD_SHA": image_sha,
+        "LSMC_RELEASE_SHA": image_sha,
         "AWS_PROFILE": "lsmc",
         "AWS_REGION": "us-west-2",
         "AWS_DEFAULT_REGION": "us-west-2",
@@ -155,7 +165,7 @@ def isolated_overrides(lane):
     return overrides
 
 
-def prepare_payloads(compose_bytes, config_bytes, lane):
+def prepare_payloads(compose_bytes, config_bytes, lane, image_sha):
     environment, hosts = extract_dewey(compose_bytes)
     # UniqueLoader retains SafeLoader's prohibition on Python object construction.
     config = yaml.load(config_bytes, Loader=UniqueLoader)  # nosec B506
@@ -167,7 +177,7 @@ def prepare_payloads(compose_bytes, config_bytes, lane):
     deployed_primary = environment["DEWEY_API_BEARER_TOKEN"]
     require(deployed_primary.strip(), "Explicit deployed environment primary token required")
     require(deployed_primary != "dewey-dev-token", "Development primary token forbidden")
-    overrides = isolated_overrides(lane)
+    overrides = isolated_overrides(lane, image_sha)
     require(not (REQUIRED_PRESERVED & overrides.keys()), "Preserved environment override forbidden")
     result = {**environment, **overrides}
     env_bytes = "".join(f"{key}={value}\n" for key, value in sorted(result.items())).encode()
@@ -178,7 +188,7 @@ def prepare_payloads(compose_bytes, config_bytes, lane):
         "prepared_at": datetime.now(UTC).isoformat(),
         "compose_sha256": sha256(compose_bytes),
         "dewey_config_sha256": sha256(config_bytes),
-        "image_sha": IMAGE_SHA,
+        "image_sha": image_sha,
         "environment_file_sha256": sha256(env_bytes),
         "extra_hosts_file_sha256": sha256(host_bytes),
         "environment_keys": sorted(result),
@@ -205,9 +215,11 @@ def main():
     parser.add_argument("--compose", type=Path, required=True)
     parser.add_argument("--dewey-config", type=Path, required=True)
     parser.add_argument("--lane", choices=tuple(DIRECTORIES), required=True)
+    parser.add_argument("--image-sha", required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args()
     try:
+        validate_image_sha(args.lane, args.image_sha)
         require(args.compose == COMPOSE_PATH, "Wrong owning Compose path")
         require(
             str(args.dewey_config) == DIRECTORIES[args.lane] + "/dewey-config.yaml",
@@ -216,7 +228,9 @@ def main():
         compose_bytes = exact_file(args.compose)
         require(sha256(compose_bytes) == COMPOSE_SHA256, "Owning Compose hash changed")
         config_bytes = exact_file(args.dewey_config, private=True)
-        env_bytes, host_bytes, receipt = prepare_payloads(compose_bytes, config_bytes, args.lane)
+        env_bytes, host_bytes, receipt = prepare_payloads(
+            compose_bytes, config_bytes, args.lane, args.image_sha
+        )
         directory = args.output_dir
         require(
             directory.is_absolute() and directory.is_dir(), "Existing output directory required"
