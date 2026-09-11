@@ -5,7 +5,7 @@ closed. This C-authored SOP requires E's static and actual-plan acceptance.
 It creates no backup, restarts no process and edits no existing template.
 
 Script: `scripts/dewey_xrf_template_setup.py`, SHA-256
-`df765690de43da83c02938a74956123a0620c1c04a77ec4301dae544cdcdb49a`.
+`a59c18d74d3ebf251e418c79beb5597fcac42fba706a0f54512578e6ed14cdd9`.
 Stage under `/home/ubuntu/dewey_ops/tapdb101-20260911/` alongside the already
 accepted `dewey_rehearsal_copy.py` SHA `d7a316eb10e9788e8f5a0d7459845c31a52b2b813d7584c8f43323a0cc121733`.
 Use the installed exact RC operator Python and the existing targeted-sudo
@@ -13,7 +13,7 @@ interactive `ubuntu` invocation with its explicit AWS environment.
 
 ```bash
 C_PY=/home/ubuntu/dewey_ops/tapdb101-20260911/venv/bin/python
-C_SETUP=/home/ubuntu/dewey_ops/tapdb101-20260911/dewey_xrf_template_setup.py
+C_SETUP=/home/ubuntu/dewey_ops/tapdb101-20260911/dewey_xrf_template_setup_port_fix.py
 C_TEMPLATE_PLAN=/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-xrf-template-plan.json
 ```
 
@@ -80,3 +80,13 @@ New local validation only: exact installed RC loader returned both canonical
 XRF definitions; the all-template JSON projection compiled with PostgreSQL's
 dialect. Script AST, Ruff and diff checks passed. No broad/native test suite,
 live query or mutation was run by C.
+
+O's first read-only plan with the original `df765690...` helper failed before
+any plan/intent/template write: native `physical_target` rejects an unnormalized
+string port from `get_db_config`. The bounded correction passes the constructed
+target through public `validate_target` before physical verification. Preserve
+the original helper and diagnostic receipt; stage the corrected hash above
+under the explicit `_port_fix.py` filename. A new exact-RC offline check confirms
+the observed string `5432` becomes integer `5432`. An initial check incorrectly
+expected an unprovided optional `server_port` key; the corrected check verifies
+only the actual provided port. No deployment or package change is involved.

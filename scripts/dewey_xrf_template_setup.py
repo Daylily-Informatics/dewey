@@ -84,7 +84,7 @@ def frozen_source(control):
 
 
 def main():
-    from daylily_tapdb.identity_inventory import content_hash, physical_target
+    from daylily_tapdb.identity_inventory import content_hash, physical_target, validate_target
     from daylily_tapdb.runtime_principal import operator_connection
     from daylily_tapdb.security_context import (
         TapdbTransactionContext,
@@ -126,9 +126,9 @@ def main():
     paths = [ROOT / filename, ROOT / "control-operator.yaml", Path(__file__),
              Path(__file__).parent / "dewey_rehearsal_copy.py", Path(cfg["domain_registry_path"]),
              Path(cfg["prefix_ownership_registry_path"]), *{Path(row["_source_file"]) for row in templates}]
-    target = {"engine_type": cfg["engine_type"], "host": cfg["host"], "port": cfg["port"],
+    target = validate_target({"engine_type": cfg["engine_type"], "host": cfg["host"], "port": cfg["port"],
               "database": database, "schema_name": cfg["schema_name"], "config_identity": str(ROOT / filename),
-              "domain_code": "M", "owner_repo_name": "dewey"}
+              "domain_code": "M", "owner_repo_name": "dewey"}, cfg["schema_name"])
     result_path = args.receipt.with_name(args.receipt.stem + ".result.json")
     intent_path = args.receipt.with_name(args.receipt.stem + ".apply-started.json")
     if any(path.exists() or path.is_symlink() for path in (result_path, intent_path)):
