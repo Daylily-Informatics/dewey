@@ -1,0 +1,157 @@
+{
+  "fixture_keys": [
+    {
+      "euid": "M-DGX-NKDM",
+      "properties_type": "object",
+      "top_level_keys": [
+        "artifact_identity_key",
+        "artifact_type",
+        "availability_status",
+        "bucket",
+        "checksums",
+        "content_type",
+        "created_at",
+        "import_mode",
+        "is_terminal",
+        "key",
+        "metadata",
+        "node_kind",
+        "original_filename",
+        "producer_object_euid",
+        "producer_system",
+        "properties",
+        "retain_until",
+        "retention_mode",
+        "share_last_issued_at",
+        "share_status",
+        "size",
+        "source_uri",
+        "storage_backend",
+        "storage_class",
+        "storage_kind",
+        "storage_status",
+        "storage_uri",
+        "storage_verified_at",
+        "version_id"
+      ]
+    },
+    {
+      "euid": "M-DGX-NNSS",
+      "properties_type": null,
+      "top_level_keys": [
+        "artifact_set_type",
+        "created_at",
+        "label",
+        "metadata"
+      ]
+    }
+  ],
+  "forbidden_metadata_counts": [
+    {
+      "property_graph_rows": 109,
+      "root_graph_rows": 0
+    }
+  ],
+  "instance_shapes": [
+    {
+      "category": "access",
+      "payload_type": "object",
+      "properties_type": null,
+      "rows": 38,
+      "subtype": "generic",
+      "type": "share"
+    },
+    {
+      "category": "data",
+      "payload_type": "object",
+      "properties_type": "object",
+      "rows": 106,
+      "subtype": "generic",
+      "type": "artifact"
+    },
+    {
+      "category": "data",
+      "payload_type": "object",
+      "properties_type": null,
+      "rows": 5000,
+      "subtype": "generic",
+      "type": "artifact"
+    },
+    {
+      "category": "data",
+      "payload_type": "object",
+      "properties_type": "object",
+      "rows": 3,
+      "subtype": "generic",
+      "type": "artifact_set"
+    },
+    {
+      "category": "data",
+      "payload_type": "object",
+      "properties_type": null,
+      "rows": 6,
+      "subtype": "generic",
+      "type": "artifact_set"
+    },
+    {
+      "category": "integration",
+      "payload_type": "object",
+      "properties_type": null,
+      "rows": 396,
+      "subtype": "generic",
+      "type": "external_object"
+    },
+    {
+      "category": "integration",
+      "payload_type": "object",
+      "properties_type": null,
+      "rows": 440,
+      "subtype": "generic",
+      "type": "external_object_relation"
+    },
+    {
+      "category": "operational",
+      "payload_type": "object",
+      "properties_type": null,
+      "rows": 3,
+      "subtype": "generic",
+      "type": "anomaly"
+    },
+    {
+      "category": "system",
+      "payload_type": "object",
+      "properties_type": null,
+      "rows": 6194,
+      "subtype": "generic",
+      "type": "idempotency_request"
+    },
+    {
+      "category": "system",
+      "payload_type": "object",
+      "properties_type": null,
+      "rows": 7,
+      "subtype": "generic",
+      "type": "outbox_event"
+    },
+    {
+      "category": "system",
+      "payload_type": "object",
+      "properties_type": null,
+      "rows": 7,
+      "subtype": "generic",
+      "type": "registration_receipt"
+    }
+  ],
+  "lineage_shapes": [
+    {
+      "payload_type": "object",
+      "properties_type": "object",
+      "rows": 1
+    },
+    {
+      "payload_type": "object",
+      "properties_type": null,
+      "rows": 1014
+    }
+  ]
+}
