@@ -31,6 +31,8 @@ O's credential receipt. The wrapper seals these references and config/registry/
 CA/launcher hashes into review inputs. It does not refresh secret metadata or
 claim that a supplied version label proves AWSCURRENT. O retains the owning
 current-version/role-pairing receipt and prevents rotation during these stages.
+O subsequently verified operator AWSCURRENT
+`d663d111-fc8f-8f82-d6e4-d15ee1a4807b`; use its recorded exact master secret ARN.
 
 Example rehearsal binding in O's interactive shell:
 
@@ -117,9 +119,13 @@ alongside the new `status=verified` receipt.
 
 ## Local validation
 
-New focused wrapper tests: **16 passed**, no database/credentials/AWS. Coverage:
+New focused wrapper tests: **19 passed** (16 initial cases and 3 later fresh-session
+DDL cases), no database/credentials/AWS. Only the 3 new cases were run when added.
+Coverage:
 restricted overlay, wrong target/scope/secret/operator rejection, stale review
 refusal before apply, unchanged-plan apply, no overwrite, private receipt parent
-and digest tampering. Ruff check/format and script `--help` passed. Existing
+and digest tampering. The later cases prove setup failure is not counted as DDL
+denial, permitted DDL fails acceptance, and each successful denial uses a freshly
+disposed/recreated connection. Ruff check/format and script `--help` passed. Existing
 application/native suites were not rerun. No live principal stage or DDL probe
 was executed by D.
