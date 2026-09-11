@@ -85,23 +85,15 @@ def relation_fixture():
         ),
     ]
 
-    class Query:
-        def __init__(self, items):
-            self.items = items
+    from tests.support.service_fakes import _FakeReferenceQuery
 
-        def filter_by(self, **filters):
-            return Query(
-                [
-                    row
-                    for row in self.items
-                    if all(getattr(row, key) == value for key, value in filters.items())
-                ]
-            )
-
-        def all(self):
-            return self.items
-
-    session = SimpleNamespace(query=lambda model: Query(rows))
+    for row in rows:
+        row.parent_instance_uid = row.parent_instance.uid
+    session = SimpleNamespace(
+        query=lambda model: _FakeReferenceQuery(
+            rows if model is refs.generic_instance_lineage else [source, external], None
+        )
+    )
     return session, relation, source, external, rows
 
 
@@ -334,3 +326,22 @@ def test_native_dag_accepts_retained_properties_and_flat_business_values():
     )
     assert graph["elements"]["nodes"][0]["data"]["properties"] == {}
     assert obj.json_addl["label"] == "retained business label"
+
+
+def test_batch_endpoint_resolution_uses_two_queries_and_rejects_duplicate_lineage():
+    session, relation, source, external, rows = relation_fixture()
+    query = session.query
+    calls = []
+
+    def counted(model):
+        calls.append(model)
+        return query(model)
+
+    session.query = counted
+    result = refs.resolve_relation_endpoints_many(session, [relation])
+    assert result[relation.uid].source is source
+    assert result[relation.uid].external_object is external
+    assert len(calls) == 2
+    rows.append(rows[0])
+    with pytest.raises(ValueError, match="exactly one"):
+        refs.resolve_relation_endpoints_many(session, [relation])

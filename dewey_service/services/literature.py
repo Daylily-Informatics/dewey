@@ -726,6 +726,9 @@ class LiteratureServiceMixin:
             parent=artifact_instance,
             relationship_type="has_literature_save",
         )
+        return self._literature_save_summary(saves, viewer)
+
+    def _literature_save_summary(self, saves, viewer: ViewerContext) -> dict[str, Any]:
         saved_by_me = False
         visible_owners: list[str] = []
         for item in saves:

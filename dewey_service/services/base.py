@@ -309,12 +309,15 @@ class BaseDeweyService:
         }
 
     def _artifact_set_response(self, session, artifact_set_instance) -> dict[str, Any]:
-        payload = normalize_instance_payload(artifact_set_instance)
         members = self.backend.list_children(
             session,
             parent=artifact_set_instance,
             relationship_type="artifact_set_member",
         )
+        return self._artifact_set_response_with_members(artifact_set_instance, members)
+
+    def _artifact_set_response_with_members(self, artifact_set_instance, members) -> dict[str, Any]:
+        payload = normalize_instance_payload(artifact_set_instance)
         artifact_euids = [member.euid for member in members]
         return {
             "artifact_set_euid": artifact_set_instance.euid,

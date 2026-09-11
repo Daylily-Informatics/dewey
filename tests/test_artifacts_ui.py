@@ -46,6 +46,10 @@ def test_artifacts_page_requires_login_and_serves_bulk_template(monkeypatch, cli
     page = client.get("/artifacts")
     assert page.status_code == 200
     assert "Register, Search, Download, And Share" in page.text
+    assert 'href="/search?scope=artifact"' in page.text
+    assert 'href="/search?scope=artifact_set"' in page.text
+    assert 'action="/artifacts/search"' not in page.text
+    assert 'action="/artifacts/sets/search"' not in page.text
     assert "Artifact Sets" in page.text
     assert "Recent Artifacts" in page.text
     assert 'href="/artifacts"' in page.text
