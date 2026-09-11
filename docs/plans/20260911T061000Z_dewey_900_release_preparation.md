@@ -7,6 +7,11 @@ coordinator owns the controlling ledger and all live operations. The user's
 release/deployment authorization and no-additional-backup amendment remain in
 force. This note neither creates a backup nor changes the migration runbook.
 
+07:16Z correction from the coordinator's fresh stopped-container inspection:
+the actual existing HOME is `/home/ubuntu`, despite UID `0:0`. The override below
+now preserves that HOME and the same CA cache destination, superseding the
+initial `/root` preparation choice. The old broad `.config` mount is omitted.
+
 Companions:
 
 - [Dewey-only override](20260911T061000Z_dewey_900_runtime_override.yaml)
@@ -27,8 +32,8 @@ Companions:
 | New Dewey config | `/opt/dewey/day/releases/9.0.0/dewey-config.yaml` |
 | New TapDB runtime config | `/opt/dewey/day/releases/9.0.0/tapdb-runtime.yaml` |
 | Registry files | `/opt/dayhoff/deployments/day/tapdb-registry/domain_code_registry.json` and `prefix_ownership_registry.json`, retained at the same absolute container paths |
-| Runtime user | Explicit `0:0`, matching the coordinator's observed existing service; explicit `HOME=/root` |
-| CA mount | Existing host `/home/ubuntu/.config/tapdb/rds-ca-bundle.pem` to `/root/.config/tapdb/rds-ca-bundle.pem`, read-only |
+| Runtime user | Explicit `0:0`, matching the coordinator's observed existing service; explicit `HOME=/home/ubuntu` |
+| CA mount | Existing host `/home/ubuntu/.config/tapdb/rds-ca-bundle.pem` to the identical container path, read-only |
 
 The two new config paths were accepted by the coordinator and were **not yet
 created** when this preparation was written. Native configuration metadata and
@@ -90,13 +95,15 @@ template overwrite is part of this release.
 The exact RC Aurora public web runtime calls `ensure_ca_bundle()` at the fixed
 `Path.home()/.config/tapdb/rds-ca-bundle.pem` cache, even when the config includes a
 different `sslrootcert`. Verify the existing CA receipt before mounting it at
-the root path; an existing native cache is returned without rehashing. The native
+the exact HOME cache path; an existing native cache is returned without rehashing. The native
 download expectation is SHA256
 `e5bb2084ccf45087bda1c9bffdea0eb15ee67f0b91646106e466714f9de3c7e3`.
 This preparation does not download or change that file.
 
 Select the observed production AWS profile explicitly in the override and retain
-its existing private credential/config mounts. Native Secrets Manager password
+`/home/ubuntu/.aws` read-only at the same path, with explicit `AWS_CONFIG_FILE`
+and `AWS_SHARED_CREDENTIALS_FILE` pointing to its `config` and `credentials`.
+Native Secrets Manager password
 lookup uses the process boto3 credential chain, whereas IAM token generation
 can use the configured profile; config metadata alone does not establish process
 credentials. Retain explicit readable signing-key/QEO CA/NCBI paths and writable

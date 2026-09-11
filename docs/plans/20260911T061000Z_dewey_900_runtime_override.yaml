@@ -7,7 +7,7 @@ services:
     image: "${DEWEY_RELEASE_IMAGE:?Set the approved repository@sha256 image reference}"
     user: "0:0"
     environment:
-      HOME: /root
+      HOME: /home/ubuntu
       DEWEY_EXECUTION_BACKEND: dewey-container
       DEWEY_DEPLOYMENT_CODE: day
       DEWEY_ENVIRONMENT: production
@@ -23,6 +23,8 @@ services:
       AWS_PROFILE: "${DEWEY_RELEASE_AWS_PROFILE:?Set the observed production runtime profile}"
       AWS_REGION: us-west-2
       AWS_DEFAULT_REGION: us-west-2
+      AWS_CONFIG_FILE: /home/ubuntu/.aws/config
+      AWS_SHARED_CREDENTIALS_FILE: /home/ubuntu/.aws/credentials
     labels:
       org.opencontainers.image.version: 9.0.0
       org.opencontainers.image.revision: "${DEWEY_RELEASE_SHA:?Set the exact clean release commit}"
@@ -42,7 +44,7 @@ services:
           create_host_path: false
       - type: bind
         source: /home/ubuntu/.config/tapdb/rds-ca-bundle.pem
-        target: /root/.config/tapdb/rds-ca-bundle.pem
+        target: /home/ubuntu/.config/tapdb/rds-ca-bundle.pem
         read_only: true
         bind:
           create_host_path: false

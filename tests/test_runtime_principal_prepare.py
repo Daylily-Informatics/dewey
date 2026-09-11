@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -168,3 +169,98 @@ def test_no_overwrite_and_digest_tampering(tmp_path):
     path.write_text('{"operation":"tampered","sha256":"wrong"}')
     with pytest.raises(capsule.PreparationError, match="Invalid review"):
         capsule.read_sealed(path)
+
+
+@pytest.mark.parametrize("probe_mode", ["context_failure", "ddl_success", "ddl_denied"])
+def test_fresh_runtime_ddl_proof_requires_denial_after_session_setup(
+    probe_mode, monkeypatch, tmp_path
+):
+    import daylily_tapdb
+    import daylily_tapdb.cli.db_config as native_config
+    import daylily_tapdb.web.runtime as native_runtime
+    from sqlalchemy.exc import DBAPIError
+
+    runtime_path = tmp_path / "runtime.yaml"
+    runtime_path.write_text("private test config")
+    runtime_path.chmod(0o600)
+    cfg, _ = mappings()
+    cfg["config_path"] = str(runtime_path)
+    row = {
+        key: False
+        for key in (
+            "temp",
+            "db_create",
+            "schema_create",
+            "rolsuper",
+            "rolbypassrls",
+            "rolcreatedb",
+            "rolcreaterole",
+            "rolreplication",
+            "rolinherit",
+        )
+    }
+    row.update(
+        connect=True,
+        database=cfg["database"],
+        role=cfg["user"],
+        login=cfg["user"],
+        config_identity=str(runtime_path),
+        domain="M",
+        owner="dewey",
+        tenant="",
+        allow_global="true",
+        backend_pid=1,
+    )
+    monkeypatch.setattr(native_config, "get_db_config", lambda **kwargs: cfg)
+    monkeypatch.setattr(capsule, "validate_runtime", lambda *args: None)
+    monkeypatch.setattr(capsule.importlib.metadata, "version", lambda name: "9.0.0")
+    monkeypatch.setattr(
+        daylily_tapdb,
+        "TemplateManager",
+        lambda: SimpleNamespace(
+            get_template=lambda *args, **kwargs: SimpleNamespace(
+                instance_prefix="DGX", euid="template-reference"
+            )
+        ),
+    )
+    disposals, sessions = [], []
+    monkeypatch.setattr(
+        native_runtime, "dispose_all_runtime_engines", lambda: disposals.append(True)
+    )
+
+    class Denied(Exception):
+        pgcode = "42501"
+
+    class Session:
+        def __init__(self, index):
+            self.index = index
+
+        def execute(self, *args):
+            if self.index == 0:
+                return SimpleNamespace(mappings=lambda: SimpleNamespace(one=lambda: row))
+            if probe_mode == "ddl_denied":
+                raise DBAPIError("test DDL", {}, Denied(), False)
+
+    class DB:
+        @contextmanager
+        def session_scope(self, *, commit):
+            assert commit is False
+            index = len(sessions)
+            sessions.append(index)
+            if index > 0 and probe_mode == "context_failure":
+                raise DBAPIError("test context", {}, Denied(), False)
+            yield Session(index)
+
+    monkeypatch.setattr(native_runtime, "get_db", lambda path: DB())
+    args = SimpleNamespace(
+        runtime_config=str(runtime_path), lane="rehearsal", receipt=str(tmp_path / "verified.json")
+    )
+    if probe_mode == "ddl_denied":
+        result = capsule.verify_runtime(args)
+        assert capsule.read_sealed(result)["status"] == "verified"
+        assert len(disposals) == 4 and len(sessions) == 3
+    else:
+        expected = DBAPIError if probe_mode == "context_failure" else capsule.PreparationError
+        with pytest.raises(expected):
+            capsule.verify_runtime(args)
+        assert not Path(args.receipt).exists()
