@@ -1,0 +1,4 @@
+push_status=succeeded
+image_tag=108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey:9.0.0
+image_digest=108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:bce8846d42320467824ce9473dd2315922ea7575c92633e04ca0a159c25c613b
+pushed_at=2026-09-11T09:53:16Z
