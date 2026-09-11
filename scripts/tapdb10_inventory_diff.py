@@ -24,10 +24,13 @@ class EvidenceError(ValueError):
 
 
 def digest(value: Any) -> str:
-    encoded = json.dumps(
-        value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False
-    ).encode("utf-8")
-    return hashlib.sha256(encoded).hexdigest()
+    result = hashlib.sha256()
+    encoder = json.JSONEncoder(
+        sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False
+    )
+    for chunk in encoder.iterencode(value):
+        result.update(chunk.encode("utf-8"))
+    return result.hexdigest()
 
 
 def _object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -57,13 +60,19 @@ def _check_seal(payload: Any, version: str) -> dict[str, Any]:
     return payload
 
 
-def read_inventory(path: Path) -> tuple[dict[str, Any], dict[str, str]]:
+def read_inventory(
+    path: Path, *, max_input_bytes: int = MAX_INPUT_BYTES
+) -> tuple[dict[str, Any], dict[str, str]]:
+    if type(max_input_bytes) is not int or not 1 <= max_input_bytes <= 2**63 - 1:
+        raise EvidenceError("max_input_bytes must be an explicit positive 64-bit integer")
     if not path.is_absolute() or not path.is_file():
         raise EvidenceError("Inputs must be existing absolute files")
-    if path.stat().st_size > MAX_INPUT_BYTES:
-        raise EvidenceError("Input exceeds the 192 MiB offline review limit")
-    raw = path.read_bytes()
-    payload = json.loads(raw, object_pairs_hook=_object, parse_constant=_nonfinite)
+    with path.open("rb") as source:
+        if os.fstat(source.fileno()).st_size > max_input_bytes:
+            raise EvidenceError("Input exceeds the reviewed max_input_bytes limit")
+        file_sha256 = hashlib.file_digest(source, "sha256").hexdigest()
+        source.seek(0)
+        payload = json.load(source, object_pairs_hook=_object, parse_constant=_nonfinite)
     if not isinstance(payload, dict):
         raise EvidenceError("Expected a native JSON receipt object")
     if payload.get("schema_version") == SOURCE_VERSION:
@@ -109,7 +118,7 @@ def read_inventory(path: Path) -> tuple[dict[str, Any], dict[str, str]]:
             raise EvidenceError("Table content checksum mismatch")
     return inventory, {
         "path": str(path),
-        "file_sha256": hashlib.sha256(raw).hexdigest(),
+        "file_sha256": file_sha256,
         "receipt_sha256": payload["sha256"],
         "identity_inventory_sha256": inventory["sha256"],
     }
@@ -190,6 +199,7 @@ def compare(before: dict[str, Any], after: dict[str, Any]) -> dict[str, Any]:
                 "missing_source_row_keys": missing,
                 "changed_rows": changed_rows,
             }
+    separately_reported = {"schema_name", "target", "physical_target", "tables", "sha256"}
     return {
         "schema_version": "dewey-tapdb10-inventory-review/v1",
         "status": "review_required",
@@ -197,23 +207,38 @@ def compare(before: dict[str, Any], after: dict[str, Any]) -> dict[str, Any]:
         "schema_name_changed": before["schema_name"] != after["schema_name"],
         "target_changes": _changes(before["target"], after["target"]),
         "physical_target_changes": _changes(before["physical_target"], after["physical_target"]),
+        "inventory_metadata_changes": _changes(
+            {k: v for k, v in before.items() if k not in separately_reported},
+            {k: v for k, v in after.items() if k not in separately_reported},
+        ),
         "before_table_count": len(old_tables),
         "after_table_count": len(new_tables),
         "tables": tables,
     }
 
 
-def write_review(before_path: Path, after_path: Path, report_path: Path) -> None:
+def write_review(
+    before_path: Path,
+    after_path: Path,
+    report_path: Path,
+    *,
+    max_input_bytes: int = MAX_INPUT_BYTES,
+) -> None:
     if not report_path.is_absolute() or not report_path.parent.is_dir():
         raise EvidenceError("Report must name a new absolute file in an existing directory")
-    before, before_ref = read_inventory(before_path)
-    after, after_ref = read_inventory(after_path)
-    report = {**compare(before, after), "before": before_ref, "after": after_ref}
-    encoded = json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    before, before_ref = read_inventory(before_path, max_input_bytes=max_input_bytes)
+    after, after_ref = read_inventory(after_path, max_input_bytes=max_input_bytes)
+    report = {
+        **compare(before, after),
+        "before": before_ref,
+        "after": after_ref,
+        "max_input_bytes": max_input_bytes,
+    }
     # Exclusive creation also refuses existing symlinks and input-file collisions.
     descriptor = os.open(report_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
     with os.fdopen(descriptor, "w", encoding="utf-8") as output:
-        output.write(encoded)
+        json.dump(report, output, indent=2, sort_keys=True, allow_nan=False)
+        output.write("\n")
 
 
 def main() -> int:
@@ -227,10 +252,19 @@ def main() -> int:
     parser.add_argument(
         "--report", type=Path, required=True, help="Absolute new hash-only review file"
     )
+    parser.add_argument(
+        "--max-input-bytes",
+        type=int,
+        required=True,
+        help="Explicit reviewed finite limit for each complete input JSON file (not native evidence bytes)",
+    )
     args = parser.parse_args()
     try:
-        write_review(args.before, args.after, args.report)
-    except (EvidenceError, OSError, ValueError, KeyError, TypeError) as error:
+        write_review(args.before, args.after, args.report, max_input_bytes=args.max_input_bytes)
+    except EvidenceError as error:
+        print(f"Inventory review refused: {error}; no acceptance was performed.")
+        return 2
+    except (OSError, ValueError, KeyError, TypeError) as error:
         # Avoid printing untrusted receipt content, which can include identities.
         print(f"Inventory review refused ({type(error).__name__}); no acceptance was performed.")
         return 2

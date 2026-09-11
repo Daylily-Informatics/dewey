@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import importlib.util
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -219,3 +221,87 @@ def test_missing_or_relative_inputs_do_not_create_a_report(tmp_path):
         with pytest.raises(review.EvidenceError):
             review.write_review(before, missing, report)
     assert not report.exists()
+
+
+def test_rc_limits_and_usage_are_hash_bound_and_visible(tmp_path):
+    before = inventory()
+    before["limits"] = {"max_rows": 10, "max_row_bytes": 4096, "max_receipt_bytes": 8192}
+    before["usage"] = {"rows": 1, "evidence_bytes": 1024, "largest_source_row_bytes": 128}
+    before = sealed(before)
+    observed, _ = review.read_inventory(save(tmp_path / "configured.json", before))
+    assert observed == before
+    after = copy.deepcopy(before)
+    after["limits"]["max_rows"] = 20
+    after["usage"]["largest_source_row_bytes"] = 256
+    result = review.compare(before, sealed(after))
+    assert [change["field"] for change in result["inventory_metadata_changes"]] == [
+        "limits",
+        "usage",
+    ]
+    assert result["status"] == "review_required"
+    # Raw metadata editing still invalidates the sealed input.
+    with pytest.raises(review.EvidenceError, match="checksum"):
+        review.read_inventory(save(tmp_path / "changed.json", after))
+
+
+def test_rc_explicit_input_budget_uses_actual_file_bytes(tmp_path):
+    path = save(tmp_path / "source.json", inventory())
+    size = path.stat().st_size
+    with pytest.raises(review.EvidenceError, match="max_input_bytes"):
+        review.read_inventory(path, max_input_bytes=size - 1)
+    assert review.read_inventory(path, max_input_bytes=size)[0] == inventory()
+    assert review.read_inventory(path, max_input_bytes=review.MAX_INPUT_BYTES + 1)[0] == inventory()
+
+
+@pytest.mark.parametrize("budget", [0, -1, True, 2**63, "1024"])
+def test_rc_invalid_input_budget_is_refused(tmp_path, budget):
+    path = save(tmp_path / "source.json", inventory())
+    with pytest.raises(review.EvidenceError, match="positive 64-bit integer"):
+        review.read_inventory(path, max_input_bytes=budget)
+
+
+def test_rc_streamed_hash_matches_native_canonical_encoding():
+    value = {"plain_fixture_label": "Unicode β", "values": [None, True, 2**62, 1.25, [3, 2, 1]]}
+    canonical = json.dumps(
+        value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False
+    )
+    assert review.digest(value) == hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def test_rc_review_avoids_extra_full_json_copies(tmp_path, monkeypatch):
+    before = save(tmp_path / "before.json", inventory())
+    after = save(tmp_path / "after.json", inventory())
+    expected_file_sha256 = hashlib.sha256(before.read_bytes()).hexdigest()
+    report = tmp_path / "review.json"
+
+    def unexpected_copy(*args, **kwargs):
+        raise AssertionError("Unexpected complete bytes/JSON copy")
+
+    monkeypatch.setattr(review.json, "dumps", unexpected_copy)
+    monkeypatch.setattr(Path, "read_bytes", unexpected_copy)
+    review.write_review(before, after, report, max_input_bytes=8192)
+    result = json.loads(report.read_text())
+    assert result["before"]["file_sha256"] == expected_file_sha256
+    assert result["max_input_bytes"] == 8192
+    assert report.stat().st_mode & 0o777 == 0o600
+
+
+def test_rc_cli_requires_an_explicit_input_budget(tmp_path, monkeypatch, capsys):
+    before = save(tmp_path / "before.json", inventory())
+    args = [
+        str(SCRIPT),
+        "--before",
+        str(before),
+        "--after",
+        str(before),
+        "--report",
+        str(tmp_path / "review.json"),
+    ]
+    monkeypatch.setattr(sys, "argv", args)
+    with pytest.raises(SystemExit) as missing:
+        review.main()
+    assert missing.value.code == 2
+    assert "--max-input-bytes" in capsys.readouterr().err
+    monkeypatch.setattr(sys, "argv", [*args, "--max-input-bytes", "0"])
+    assert review.main() == 2
+    assert "positive 64-bit integer" in capsys.readouterr().out
