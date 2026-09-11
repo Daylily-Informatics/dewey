@@ -1,0 +1,12 @@
+{
+  "python": "3.13.13 | packaged by Anaconda, Inc. | (main, Apr 14 2026, 06:14:06) [Clang 20.1.8 ]",
+  "python_executable": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/tapdb1011rc1-dewey-qualification-20260911/.venv/bin/python",
+  "tapdb_version": "10.1.1rc1",
+  "meridian_version": "0.4.8",
+  "cli_core_version": "2.1.1",
+  "requires_python": ">=3.12",
+  "tapdb_import": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/tapdb1011rc1-dewey-qualification-20260911/.venv/lib/python3.13/site-packages/daylily_tapdb/__init__.py",
+  "direct_url": null,
+  "identity_signature": "(connection: 'Connection', *, schema_name: 'str', target: 'Mapping[str, Any]', limits: 'InventoryLimits | Mapping[str, Any] | None' = None) -> 'dict[str, Any]'",
+  "census_signature": "(cfg: 'Mapping[str, Any]', *, database_names: 'Sequence[str]' = (), statement_timeout_ms: 'int' = 10000, max_catalog_rows: 'int' = 100000) -> 'dict[str, Any]'"
+}

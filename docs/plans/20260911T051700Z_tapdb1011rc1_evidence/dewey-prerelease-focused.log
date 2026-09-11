@@ -1,0 +1,29 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /Users/jmajor/projects/mega_dayhoff/.codex-worktrees/tapdb-service-readiness-20260910
+configfile: pyproject.toml
+plugins: cov-7.1.0, anyio-4.15.1
+collected 123 items
+
+tests/test_inventory_limits.py .............                             [ 10%]
+tests/test_principal_census.py ....                                      [ 13%]
+tests/test_drift_json_output.py ........                                 [ 20%]
+tests/test_identity_inventory.py .............................           [ 43%]
+tests/test_identity_inventory_cli.py ...............                     [ 56%]
+tests/test_backup_source_contract.py ...................                 [ 71%]
+tests/test_migration_identity_contract.py .............................. [ 95%]
+....                                                                     [ 99%]
+tests/test_ops_cli_db_branch_campaign.py .                               [100%]
+
+=============================== warnings summary ===============================
+.venv/lib/python3.13/site-packages/typer/__init__.py:24
+  /Users/jmajor/projects/mega_dayhoff/.codex-worktrees/tapdb-service-readiness-20260910/.venv/lib/python3.13/site-packages/typer/__init__.py:24: DeprecationWarning: 'click.utils.get_binary_stream' is deprecated and will be removed in Click 9.0.
+    from click.utils import get_binary_stream as get_binary_stream
+
+.venv/lib/python3.13/site-packages/typer/__init__.py:25
+  /Users/jmajor/projects/mega_dayhoff/.codex-worktrees/tapdb-service-readiness-20260910/.venv/lib/python3.13/site-packages/typer/__init__.py:25: DeprecationWarning: 'click.utils.get_text_stream' is deprecated and will be removed in Click 9.0.
+    from click.utils import get_text_stream as get_text_stream
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /Users/jmajor/projects/mega_dayhoff/.codex-worktrees/tapdb-service-readiness-20260910/runtime/qualification/dewey-prerelease-focused.xml -
+======================= 123 passed, 2 warnings in 3.37s ========================

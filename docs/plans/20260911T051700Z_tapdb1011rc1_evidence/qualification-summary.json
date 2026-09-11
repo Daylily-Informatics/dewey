@@ -1,0 +1,43 @@
+{
+  "evidence_files": {
+    "dewey-prerelease-focused.log": "6cdc13b7ba5bd8e11284cf2442d5dc68cce7b1ec10ab2a52af7168b0f01f3b80",
+    "dewey-prerelease-focused.xml": "ba6b8a77fa39b0569297644caa36a6efb8314bebb84dced33ab771e3fb3cc377",
+    "dewey-review-summary.json": "c1d20ad87b3de76d01011aa6251c90b3014f4d39c3f5645fd613dc9dbbfb92da",
+    "github-release.json": "60332f278e3766b19f23c905197e4d594c78e3745360e89f95a5591118a858b7",
+    "installed-provenance.json": "9a03cffc5eca9605223fdf04169a985ec869d3afe4ea86b66ef5bdbeab28b8ba",
+    "native-limits-roundtrip-fixture-failure.log": "02173eef83326645188f6285a4f1bae6c90fb310ffabe4433a5b56ac36561f64",
+    "native-limits-roundtrip-fixture-failure.xml": "02010f7b3fc1a83e8a25ae4b8cdb32b4adc95ec06e777f36a48de3557727cb27",
+    "native-limits-roundtrip.log": "f7dec1d6a877d65623bc6873a5972c60311586fbeba4f17e9014248e53fb416d",
+    "native-limits-roundtrip.xml": "2acb7d35089715daf7d9525dcc9cab0c422629694b38527a004d2e837e93e676",
+    "pypi-provenance.json": "25aca7e37ff4144884251ecfbd50de6250f72d0c823116c0e82df6ee0771cc0d",
+    "reused-release-evidence.json": "9013769abafcf5084cf36a09dea85da2b8dbb0332e5ddf7e3b232e59baa91f21",
+    "sequence-mapping-review.json": "57596377d38c46ac03001cf44d87cbfae71f1a428833f3ab3498487abe2e284c",
+    "test_rc1_native_limits.py": "cdab73fef3e1d744898e2a596569fe4eb5a326bc4097b1978cc3cabba47a0d58"
+  },
+  "initial_attempt": "failed only at config preparation; old fixture lacked admin; preserved failure and native-init preparation fixed fixture",
+  "operation": "new explicit nondefault limit propagation qualification; not a rerun of prior suites",
+  "policy": {
+    "max_receipt_bytes": 536870912,
+    "max_row_bytes": 8388608,
+    "max_rows": 1000000
+  },
+  "postgresql_required": "16.13",
+  "release_commit": "02ab7c9d0325dfcbf9dc47a03be66b62e0a22f2c",
+  "release_tag_object": "1ac2f09a1787b9e747eda582c45a628ca60b7020",
+  "subject": "published daylily-tapdb==10.1.1rc1",
+  "suites": [
+    {
+      "errors": "0",
+      "failures": "0",
+      "hostname": "Mac",
+      "name": "pytest",
+      "skipped": "0",
+      "tests": "1",
+      "time": "3.664",
+      "timestamp": "2026-09-11T01:18:02.929048-04:00"
+    }
+  ],
+  "test_files_reused_from_release": true,
+  "test_port": 15449,
+  "upstream_source_modified": false
+}

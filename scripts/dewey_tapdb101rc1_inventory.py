@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import hashlib
 import importlib.metadata
 import json
 import os
@@ -23,7 +24,7 @@ CONFIG = ROOT / "source-operator.yaml"
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("operation", choices=("census", "inventory"))
+    parser.add_argument("operation", choices=("census", "inventory", "mapped-inventory"))
     args = parser.parse_args()
     os.umask(0o077)
     if pwd.getpwuid(os.geteuid()).pw_name != "ubuntu":
@@ -50,6 +51,13 @@ def main() -> None:
         ])
     else:
         command.extend(["identity", "inventory", "--source-version", "9.0.9"])
+        if args.operation == "mapped-inventory":
+            mappings = ROOT / "receipts/source-sequence-mappings-20260911T053316Z.json"
+            if hashlib.sha256(mappings.read_bytes()).hexdigest() != (
+                "5b69e68dea09d25bb18e0b3383e96c0250848c8c6eba5ccba8ec42658e862bf8"
+            ):
+                raise RuntimeError("Allocator mapping input differs from independent review")
+            command.extend(["--sequence-mappings", str(mappings)])
     command.extend(["--receipt", str(receipt)])
     started = dt.datetime.now(dt.timezone.utc).isoformat()
     clock = time.monotonic()

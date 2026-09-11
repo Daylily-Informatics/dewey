@@ -1,0 +1,12 @@
+{
+  "aws_profile": "lsmc",
+  "cluster_arn": "arn:aws:rds:us-west-2:108782052779:cluster:dayhoff-lsmcok1-tapdb",
+  "cluster_identifier": "dayhoff-lsmcok1-tapdb",
+  "cluster_resource_id": "cluster-AA24MJP2WJNSFOFGXGHAXWHVKU",
+  "engine": "aurora-postgresql",
+  "engine_version": "16.13",
+  "region": "us-west-2",
+  "schema_version": "tapdb-fence-provider/v1",
+  "sslmode": "verify-full",
+  "writer_endpoint": "dayhoff-lsmcok1-tapdb.cluster-ch4mq8a6wcdf.us-west-2.rds.amazonaws.com"
+}

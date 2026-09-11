@@ -1,0 +1,11 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VerifyExactAuroraProviderForNativeDeweyFencing",
+      "Effect": "Allow",
+      "Action": "rds:DescribeDBClusters",
+      "Resource": "arn:aws:rds:us-west-2:108782052779:cluster:dayhoff-lsmcok1-tapdb"
+    }
+  ]
+}
