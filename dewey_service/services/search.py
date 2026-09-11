@@ -160,7 +160,9 @@ class SearchServiceMixin:
         )
         rows: list[dict[str, Any]] = []
         for relation in relations:
-            relation_payload = self._external_object_relation_response_with_external(session, relation)
+            relation_payload = self._external_object_relation_response_with_external(
+                session, relation
+            )
             rows.append(
                 {
                     **relation_payload["external_object"],
