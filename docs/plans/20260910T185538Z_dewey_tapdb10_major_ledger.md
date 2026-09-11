@@ -2,21 +2,22 @@
 
 Controlling plan and execution ledger. Approved by the user in the implementation request on 2026-09-11. Execution began 2026-09-11T03:47:50Z.
 
-**Execution paused by the user at 2026-09-11T04:23:30Z.** Actual source capture is blocked by the immutable 10.1.0 identity-receipt limit. The user will have a separate agent make and publish TapDB changes; this task performs no upstream work or automatic resumption. See the [release handoff](20260911T042330Z_tapdb_release_handoff.md). The exact Dewey dependency remains 10.1.0 in the saved work until a published replacement is explicitly verified and recorded on resumption. Active role D was interrupted; its unfinished local edits are preserved.
+**Execution resumed by explicit user instruction on 2026-09-11; amendment recorded at 2026-09-11T05:17:31Z.** The user authorized `python -m pip install 'daylily-tapdb==10.1.1rc1'`. This exact prerelease supersedes the former 10.1.0 target. Its public wheel and annotated tag were independently verified, and the isolated EC2 operator environment now runs it. Production remains Dewey 8.0.2 / TapDB 9.0.9. The earlier pause at 2026-09-11T04:23:30Z and [release handoff](20260911T042330Z_tapdb_release_handoff.md) remain historical evidence; new source capture and Dewey acceptance must qualify the fix before the capacity blocker is closed.
 
 ## Objective and approved decisions
 
-Replace production `https://dewey.day.lsmc.bio` with Dewey **9.0.0**, released through **main**, pinned to **daylily-tapdb[aurora,gui]==10.1.0**. Use the verified live Dewey implementation as the controlling source boundary. Preserve all production data, UID/EUIDs, prefixes, domain/tenant/issuer identities, lineage, creation identity and strictly increasing sequence allocation. No runtime backward compatibility, shims, fallback paths, silent target discovery or reminting.
+Replace production `https://dewey.day.lsmc.bio` with Dewey **9.0.0**, released through **main**, pinned to **daylily-tapdb[aurora,gui]==10.1.1rc1**. Use the verified live Dewey implementation as the controlling source boundary. Preserve all production data, UID/EUIDs, prefixes, domain/tenant/issuer identities, lineage, creation identity and strictly increasing sequence allocation. No runtime backward compatibility, shims, fallback paths, silent target discovery or reminting.
 
-Use a **replacement Dewey database**, **planned outage sized by rehearsal**, and separate migration and independent acceptance agents. Preserve undeployed branch work for Phase 2. No new TapDB release is in scope; a missing or failing required capability in immutable 10.1.0 is a blocker, not permission to patch the package or change versions.
+Use a **replacement Dewey database**, **planned outage sized by rehearsal**, and separate migration and independent acceptance agents. Preserve undeployed branch work for Phase 2. No upstream TapDB development or release is in scope for this task; a missing or failing required capability in immutable 10.1.1rc1 is a blocker, not permission to patch the package or change versions. Do not automatically select a stable or newer release.
 
 | Release field | Approved value |
 |---|---|
 | Dewey release | 9.0.0 on main |
-| TapDB package | daylily-tapdb[aurora,gui]==10.1.0 |
-| TapDB commit | 9db1abb4525f2594ebdbf2a307eb8b49aa51883d |
-| TapDB annotated tag object | d8d36584a5338d7256aba0300d299d53a5c12217 |
-| Published wheel SHA-256 | f46cb2abfccb3000b9f9443ea00045e83fb96f6b320d2aeac0ad800ea47e8801 |
+| TapDB package | daylily-tapdb[aurora,gui]==10.1.1rc1 |
+| TapDB commit | 02ab7c9d0325dfcbf9dc47a03be66b62e0a22f2c |
+| TapDB annotated tag object | 1ac2f09a1787b9e747eda582c45a628ca60b7020 |
+| Published wheel SHA-256 | 26de691dd5f9c8fac596a18119c9220f4ea78826094753b47f9eb936b0677ce7 |
+| Published sdist SHA-256 | abf2e5b18184db736c8e54fb77cbc96e78c77921f0f65b7c8f026ebb20a8a5fb |
 | Python | >=3.12 |
 | Meridian EUID | 0.4.8 |
 | Source database | dewey_prod |
@@ -56,11 +57,12 @@ At most three subagents plus O run concurrently. Use separate worktrees and disj
 
 ## Native interfaces and data contracts
 
-All commands use `tapdb --config ABS`; global `--json` precedes command groups. Use the immutable10.1.0 `docs/service-readiness.md` and owning CLI help for exact arguments. Stale candidate-publication prose in tagged docs is superseded by release receipts.
+All commands use `tapdb --config ABS`; global `--json` precedes command groups unless the owning command explicitly requires command-local JSON. Use the immutable 10.1.1rc1 `docs/service-readiness.md` and owning CLI help for exact arguments. Stale candidate-publication prose in tagged docs is superseded by release receipts.
 
 | Purpose | Released CLI |
 |---|---|
 | Historical source/identity inventory | db identity inventory |
+| Read-only database, principal and session census | db census |
 | Preservation comparison | db identity verify |
 | Receipt-bound advancement | db sequences advance |
 | Strict floor verification | db sequences verify |
@@ -84,7 +86,7 @@ For every generator freeze initial source, final fenced source, assigned/reserve
 
 ## Dewey/runtime implementation
 
-- Pin and lock exact10.1.0; validate installed version. Port removed DAG interfaces to supported DAGv2 and current GUI APIs.
+- Pin and lock exact10.1.1rc1; validate installed version. Port removed DAG interfaces to supported DAGv2 and current GUI APIs.
 - Preserve live QEO resolver, complete package registration and container CLI.
 - Keep schema migration, seeding and principal preparation outside application startup. Deploy with `verify_existing` and a complete newly built image, not an overlay on TapDB9.
 - Bootstrap grants only the configured constrained runtime login and CONNECT. Final bind follows restoration, schema migration, service conversion and identity/floor verification.
@@ -98,16 +100,17 @@ Working states: OPEN, IN_PROGRESS, ATTEMPTING_BUGFIX. Terminal: SUCCESS, DUPLICA
 | ID | Area | Requirement | Status | Category | Approval gate | Owner | Evidence | Root cause | Terminal note |
 |---|---|---|---|---|---|---|---|---|---|
 | AM01 | Plan | Fix10.1.0 target; qualify released capabilities rather than develop/release TapDB | SUCCESS | plan_amendment | User implementation approval | O | Approved plan committed as 5c75e7b | | Exact target and released-capability qualification recorded; no upstream development/release authorized |
+| AM02 | Plan | Resume with exact 10.1.1rc1 after user-directed upstream release | SUCCESS | plan_amendment | Explicit user install/resume instruction | O | Public wheel hash, tag object and peeled commit independently match; isolated EC2 pip report matches approved wheel; pip check and CLI version pass | Former immutable 10.1.0 capacity failure | Exact prerelease authorized; no automatic newer release; original release evidence remains historical |
 | L00 | Inventory | Refresh source/image/config/database identity and release artifacts | IN_PROGRESS | legitimate_safety_handling | Gate0 | O/A | Fresh health, refs and SSM container inspection match the approved baseline | | |
 | L01 | Source | Reconcile verified live source onto release branch targeting main, exclude undeployed features | IN_PROGRESS | feature_implementation | L00 | A | A confirms main contributes five documentation/evidence files; normal merge preserves live application | | |
-| L02 | Native inventory | Capture old Dewey schema and mappings using published10.1.0 | BLOCKED | contract_test | L00 | B/O | [Actual-source failure](20260911T041429Z_dewey_native_inventory_blocker.md); native exit 2, no receipt produced | Immutable 128 MiB cumulative identity evidence limit; no supported override | Requires a separately released qualified capability and explicit target amendment; user paused while another agent handles TapDB |
-| L03 | Source evidence | Complete identities/prefixes/roles/writers/all generators; finish Gate0 | BLOCKED | legitimate_safety_handling | L02 | C/O | Native source capture stopped before sequence capture; no complete census exists | L02 capacity failure; separate native principal/writer census gap | Resume after upstream release and explicit plan amendment; no claimed floors or source manifest |
+| L02 | Native inventory | Capture old Dewey schema and mappings using published 10.1.1rc1 | IN_PROGRESS | contract_test | L00 | B/O | [Historical failure](20260911T041429Z_dewey_native_inventory_blocker.md); RC installed; new configured capture pending | Former immutable 128 MiB bound now has released explicit limit policy; actual capacity unqualified | |
+| L03 | Source evidence | Complete identities/prefixes/roles/writers/all generators; finish Gate0 | IN_PROGRESS | legitimate_safety_handling | L02 | C/O | RC native census and new source inventory preparation resumed | Actual source contract and census remain pending; census is observation, not a writer fence | |
 | L04 | Native lifecycle | Qualify strict advancement, fencing, bootstrap/bind and journal recovery | IN_PROGRESS | contract_test | L02 | B/E | B reports 301 focused tests passed on PostgreSQL 16.13 against the installed public package; actual Dewey qualification pending | | |
-| L05 | Historical recovery | Qualify published package and historical backup/restore/migration for Dewey | BLOCKED | contract_test | L04 | B/E | Existing 301 native tests include historical 9.0.9 fixtures; actual Dewey recovery reuses the failing capture | L02 capacity failure | Fixtures do not qualify actual Dewey capacity; preserve existing passing receipts |
-| L06 | Dewey runtime | Exact10.1.0 lock/public API adoption and mutation-free startup | IN_PROGRESS | feature_implementation | L01/L05 | D | Partial edits in dewey-implementation-20260911, exact package installed/lock updated; interrupted on user pause | Acceptance depends on L05; local work not yet integrated or independently accepted | |
+| L05 | Historical recovery | Qualify published package and historical backup/restore/migration for Dewey | IN_PROGRESS | contract_test | L04 | B/E | Reuse prior 301 tests and RC 123-test release receipts; one changed-policy native historical roundtrip assigned | Actual Dewey recovery and capacity remain unqualified | |
+| L06 | Dewey runtime | Exact 10.1.1rc1 lock/public API adoption and mutation-free startup | IN_PROGRESS | feature_implementation | L01/L05 | D | D reports implementation commit 492c0ffd; exact RC lock, public API adaptation and scoped passing validation | Acceptance depends on L05; local work not yet integrated or independently accepted | |
 | L07 | Compatibility | Remove owned compatibility/fallbacks; prove explicit failures | IN_PROGRESS | removable_compatibility_debt | L06 | D/E | Partial removals and affected-test updates preserved in D's worktree; no additional tests on pause | User pause; L06 not closed | |
-| L08 | Data conversion | Reviewed non-identity transformations and complete preservation manifest | BLOCKED | feature_implementation | L03/L05 | C | Preparation commit 7ff8bc7; offline review helper and native runbook; 16 focused tests passed | Complete actual source contract unavailable from L02 | No conversion manifest or source identities fabricated; preparation branch retained |
-| L09 | Rehearsal | Timed isolated full restoration, migration, floors and recovery | BLOCKED | contract_test | L08 | C/E | Runbook prepared; no restoration performed | L02/L08 capacity and source-evidence gate | Rehearsal and its exact-effect approval remain future work |
+| L08 | Data conversion | Reviewed non-identity transformations and complete preservation manifest | IN_PROGRESS | feature_implementation | L03/L05 | C | Preparation commit 7ff8bc7; review helper and runbook adapting to explicit RC limits | Actual source contract pending; no identities or transformations fabricated | |
+| L09 | Rehearsal | Timed isolated full restoration, migration, floors and recovery | OPEN | contract_test | L08 | C/E | Native runbook prepared; no restoration performed | Await L02/L08 source-evidence gate | Rehearsal and its exact-effect approval remain future work |
 | L10 | Independent acceptance | PostgreSQL/auth/concurrency/application/restored-data acceptance | OPEN | contract_test | L06-L09 | E | Pending | | |
 | L11 | Release | Merge main normally, annotated9.0.0 tag, full immutable image | OPEN | feature_implementation | L10 | F/O | Pending | | |
 | L12 | Production gate | Exact targets/control/config/image, timed outage, required destructive confirmation | OPEN | legitimate_safety_handling | Production | O/C/F | Pending | | |
@@ -117,7 +120,7 @@ Working states: OPEN, IN_PROGRESS, ATTEMPTING_BUGFIX. Terminal: SUCCESS, DUPLICA
 
 ## Qualification and production procedure
 
-Required tests: actual populated observed9.0.9 to10.1.0 on matching PostgreSQL/Aurora; full identity/prefix/relationship preservation; is_called true/false, nonunit increments, reserved/cache allocations, stale receipts, exhaustion/restart/concurrency; separate-session tenant/replay/conflict/privilege/TEMP denial; artifact/run/search/share/download/manifest/QEO workflows; authenticated Dewey and embedded TapDB GUI/DAG; explicit config/version/malformed/unavailable failures; complete project tests/lint/security/locked-install/build/image smoke; lost acknowledgement and recovery without reuse or loss of accepted writes. Native tests are prerequisites, not Dewey acceptance.
+Required qualification: actual populated observed 9.0.9 to 10.1.1rc1 on matching PostgreSQL/Aurora; full identity/prefix/relationship preservation; is_called true/false, nonunit increments, reserved/cache allocations, stale receipts, exhaustion/restart/concurrency; separate-session tenant/replay/conflict/privilege/TEMP denial; artifact/run/search/share/download/manifest/QEO workflows; authenticated Dewey and embedded TapDB GUI/DAG; explicit config/version/malformed/unavailable failures; project tests/lint/security/locked-install/build/image smoke; lost acknowledgement and recovery without reuse or loss of accepted writes. Native tests are prerequisites, not Dewey acceptance. Reuse recent passing results for unchanged surfaces; rerun only when changes, failures or unresolved concerns make the result informative, as explicitly directed by the user.
 
 1. Restore isolated production data with outbound mutations and dispatch disabled; measure migration and recovery time.
 2. Retain original database/image and complete protected recovery set; record maintenance window and exact commands.
@@ -150,4 +153,4 @@ Phase2 starts only after Phase1 acceptance: refresh prior Dewey PRs1-5 against t
 
 ## Final disposition
 
-All rows terminal: no. Objective complete: no. Execution: paused by user. Production data, allocators, privileges, running application and deployment configuration changed: none. A separate protected operator environment/config was created on EC2. D's partial local edits and C's committed preparation branch are preserved for resumption. No Dewey 9 tag/image/release/cutover or Phase 2 work has occurred.
+All rows terminal: no. Objective complete: no. Execution: resumed under AM02. Production data, allocators, privileges, running application and deployment configuration changed: none. The separate protected EC2 operator environment now runs exact 10.1.1rc1. D's completed local implementation and C's migration preparation remain subject to integration and independent acceptance. No Dewey 9 tag/image/release/cutover or Phase 2 work has occurred.
