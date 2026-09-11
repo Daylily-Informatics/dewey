@@ -118,7 +118,6 @@ docker run --detach --name "$D_CONTAINER" --restart=no --network=host --user=0:0
   --mount type=bind,src=/home/ubuntu/.aws,dst=/home/ubuntu/.aws,readonly \
   --mount type=bind,src=/home/ubuntu/.config/tapdb/rds-ca-bundle.pem,dst=/home/ubuntu/.config/tapdb/rds-ca-bundle.pem,readonly \
   --mount type=bind,src=/home/ubuntu/.config/dewey-day/cloudfront-private-key.pem,dst=/home/ubuntu/.config/dewey-day/cloudfront-private-key.pem,readonly \
-  --mount type=bind,src=/home/ubuntu/.config/ncbi/key.txt,dst=/home/ubuntu/.config/ncbi/key.txt,readonly \
   --mount type=bind,src=/opt/dayhoff/deployments/day/state/kahlo/ai-agent-grants.json,dst=/opt/dayhoff/deployments/day/state/kahlo/ai-agent-grants.json,readonly \
   --mount type=bind,src=/opt/dayhoff/deployments/day/tapdb-registry/domain_code_registry.json,dst=/opt/dayhoff/deployments/day/tapdb-registry/domain_code_registry.json,readonly \
   --mount type=bind,src=/opt/dayhoff/deployments/day/tapdb-registry/prefix_ownership_registry.json,dst=/opt/dayhoff/deployments/day/tapdb-registry/prefix_ownership_registry.json,readonly \
@@ -135,7 +134,11 @@ is needed. O retains the actual container ID, exact mounts/env and loopback-only
 listener receipt before proceeding. No source or TapDB package overlay is mounted.
 The production-like GUI settings remain true with approved Host `dewey.day.lsmc.bio`;
 do not weaken auth/Host checks to reach loopback. Auth/session values come from
-the new private Dewey YAML. The NCBI and CloudFront files remain read-only.
+the new private Dewey YAML. The CloudFront file remains read-only. The reviewed
+host and stopped old runtime have no NCBI key file or parent directory; Dewey's
+optional loader continues without `NCBI_API_KEY` when the configured path is
+absent. Preserve the existing `DEWEY_NCBI_API_KEY_FILE` environment value, but
+do not mount or create an empty credential.
 
 ## 3. Fresh principal verification, then HTTP reads
 
