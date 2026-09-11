@@ -1,0 +1,50 @@
+{
+  "apply_performed": false,
+  "backup_created": false,
+  "fingerprint": {
+    "config_sha256": {
+      "control-operator.yaml": "42491d0bf321d4d8027ef52918a1396e4e4c7f2c7bdecdabd82449b86b87686a",
+      "rehearsal-operator.yaml": "9208dde2d25577ff06679e2bd19a37870ddc1c5d3039edc11dd31f3da8f53520",
+      "source-operator.yaml": "d22c5ebd3a5fc83032ff5946a57545f49dd8e448b8a4f6c99580d8a926c2a617"
+    },
+    "container_id": "872434f0530335fd5a985a920f498fe39a36fd5eab40b9cb3934b185ceddeb36",
+    "control": "postgres",
+    "control_oid": 5,
+    "image": "sha256:4fe9907f2d3443f2360cad2463974a60f8158aea90cbf2aa7fbc56349d45a91f",
+    "script_sha256": "d7a316eb10e9788e8f5a0d7459845c31a52b2b813d7584c8f43323a0cc121733",
+    "source": "dewey_prod",
+    "source_oid": 16749,
+    "source_physical": {
+      "database": "dewey_prod",
+      "database_oid": 16749,
+      "server_address": "10.0.2.148/32",
+      "server_port": 5432
+    },
+    "sql": [
+      "ALTER DATABASE \"dewey_prod\" ALLOW_CONNECTIONS false",
+      "CREATE DATABASE \"dewey_tapdb10_rehearsal_20260911\" WITH TEMPLATE \"dewey_prod\" OWNER \"dayhoff\" ALLOW_CONNECTIONS false",
+      "REVOKE CONNECT, TEMPORARY ON DATABASE \"dewey_tapdb10_rehearsal_20260911\" FROM PUBLIC",
+      "ALTER DATABASE \"dewey_tapdb10_rehearsal_20260911\" ALLOW_CONNECTIONS true"
+    ],
+    "success_state": "source_closed_container_stopped_copy_operator_only",
+    "target": "dewey_tapdb10_rehearsal_20260911"
+  },
+  "observed_sessions": [
+    {
+      "client_addr": "10.0.0.222/32",
+      "pid": 27027,
+      "state": "idle",
+      "usename": "dayhoff"
+    }
+  ],
+  "planned_at": "2026-09-11T06:53:22.708943+00:00",
+  "steps": [
+    "Gracefully stop exact Dewey container",
+    "Require zero source sessions",
+    "Capture native source and native read-only next plan",
+    "Close source admission",
+    "Create closed exact copy",
+    "Restrict copy to owner access and open operator admission",
+    "Verify source remains closed and container stopped"
+  ]
+}
