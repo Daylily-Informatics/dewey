@@ -1,0 +1,6 @@
+{
+  "package-versions.json": "{\"daylily-tapdb\": \"10.1.1rc1\", \"deployment_code\": \"dewey900-image-smoke\", \"dewey-service\": \"9.0.0\", \"executable\": \"/app/.venv/bin/python\", \"meridian-euid\": \"0.4.8\", \"python\": \"3.12.14\"}\n",
+  "push-receipt.txt": "push_status=succeeded\nimage_tag=108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey:9.0.0-c484c95768a4\nimage_digest=108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:59a0cad2e005b5940dc3eeac1dd9a72691d23386c8dfc4d72c37cd85f880759f\npushed_image_id=sha256:59a0cad2e005b5940dc3eeac1dd9a72691d23386c8dfc4d72c37cd85f880759f\npushed_at=2026-09-11T07:03:13Z\n",
+  "resume-inputs.txt": "resume_mode=smoke-and-push-existing-image\nexpected_image_id=sha256:59a0cad2e005b5940dc3eeac1dd9a72691d23386c8dfc4d72c37cd85f880759f\nobserved_image_id=sha256:59a0cad2e005b5940dc3eeac1dd9a72691d23386c8dfc4d72c37cd85f880759f\nsource_commit=c484c95768a4147acdcabd12a2da0332c4c750dc\nsource_url=https://github.com/lsmc-bio/dewey.git\ntarget_platform=linux/amd64\nimage_ref=108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey:9.0.0-c484c95768a4\nsmoke_deployment_code=dewey900-image-smoke\nstarted_at=2026-09-11T07:02:53Z\n",
+  "runtime-filesystem.txt": "runtime_user=uid=100(lsmc) gid=101(lsmc) groups=101(lsmc)\n"
+}

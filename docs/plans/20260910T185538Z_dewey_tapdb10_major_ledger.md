@@ -105,6 +105,30 @@ For every generator freeze initial source, final fenced source, assigned/reserve
 
 ## Control ledger
 
+Execution update, 2026-09-11T07:10Z: the approved frozen-source copy completed
+at06:57:52Z in78.358seconds. Source dewey_prod/OID16749 remains closed; the exact
+old Dewey container is stopped with exit0. Rehearsal copy OID645854 is open only
+to owner dayhoff. Native copy preservation returned ok=true/no violations and
+all20 generators match the frozen source except declared physical/config
+relocation. The initial and final source receipt files are byte-identical.
+No new backup, schema migration, principal binding, or final deployment has yet
+been performed. Native rehearsal family preparation is underway.
+
+Candidate complete image c484c95768a4 was published at07:03:13Z as
+`108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:59a0cad2e005b5940dc3eeac1dd9a72691d23386c8dfc4d72c37cd85f880759f`.
+Its package/CLI smoke proves9.0.0/10.1.1rc1/0.4.8. L11's first smoke failed
+because the operator helper omitted required DEWEY_DEPLOYMENT_CODE; bugfix
+d826870 supplied an explicit smoke deployment and resumed against the same
+built image with fresh receipts. No image rebuild was necessary. The original
+failure remains retained. [Image evidence](evidence/20260911_dewey_rc_inventory/candidate-image-publish.json).
+
+[Draft release PR13](https://github.com/lsmc-bio/dewey/pull/13) has one completed
+CI run at head89255d2: lint/security/build pass,427tests passed,2skipped in34.79s.
+App, lock, Dockerfile and entrypoint inputs remain unchanged since that head;
+later operator scripts/docs are tracked separately. Reuse that evidence unless
+an informative application change warrants another run.
+[CI receipt](evidence/20260911_dewey_rc_inventory/pr13-ci-run.json).
+
 Working states: OPEN, IN_PROGRESS, ATTEMPTING_BUGFIX. Terminal: SUCCESS, DUPLICATE, NO_LONGER_NEEDED, FAIL, BLOCKED. FAIL requires a documented bugfix attempt; BLOCKED requires exact cause/unblock condition. All rows terminal is distinct from objective completion. Phase2 is a separate ledger.
 
 | ID | Area | Requirement | Status | Category | Approval gate | Owner | Evidence | Root cause | Terminal note |
