@@ -33,6 +33,7 @@ against the retained fixture after copying it from the stopped source container.
 The separate read-only mount below needs no second manifest copy.
 
 ```bash
+set -euo pipefail
 umask 077
 D_CONTAINER=dewey-tapdb10-rehearsal-20260911
 D_LANE=rehearsal
@@ -43,6 +44,7 @@ D_IMAGE_SHA=c484c95768a4147acdcabd12a2da0332c4c750dc
 : "${D_IMAGE_REPOSITORY:?Exact published repository from O/F image receipt}"
 : "${D_STATE_DIR:?New existing absolute private rehearsal state directory}"
 : "${D_OUTPUT_DIR:?New existing absolute private rehearsal receipt directory}"
+: "${D_LAUNCH_DIR:?New existing absolute private rehearsal environment directory}"
 D_IMAGE="${D_IMAGE_REPOSITORY}@${D_DIGEST}"
 test -z "$(ss -H -ltn 'sport = :18914')"
 test -z "$(docker ps -aq --filter 'name=^/dewey-tapdb10-rehearsal-20260911$')"
@@ -53,6 +55,47 @@ before launch. `--image-digest` below records the manifest digest, not Docker's
 different image config ID. The capsule compares the running health build SHA
 and package versions; it does not have Docker socket access to verify the
 externally supplied manifest digest itself.
+
+### Preserve the exact owning Compose environment before launch
+
+The original recipe omitted deployed auth/product variables and `extra_hosts`.
+This correction is mandatory. O prepares the reviewed host-only helper
+`scripts/dewey_launch_environment_prepare.py` at the exact path below. Keep it
+and its private output directory outside the mounted application capsule.
+
+```bash
+/home/ubuntu/dewey_ops/tapdb101-20260911/venv/bin/python /home/ubuntu/dewey_ops/tapdb101-20260911/dewey_launch_environment_prepare.py --compose /opt/dayhoff/deployments/day/compose/docker-compose.yml --dewey-config "$D_RUNTIME_DIR/dewey-config.yaml" --lane "$D_LANE" --output-dir "$D_LAUNCH_DIR"
+```
+
+Review the new `receipt.json` before proceeding. The helper pins owning Compose
+SHA256 `35a37f2c5df1cc84ebfd57ad19a9d56b14f88b3e6bc322aebadd3db081da8509`,
+requires the observed literal string environment mapping (no `env_file`,
+`extends`, dollar interpolation, merged/duplicate keys or multiline values),
+and writes exclusive mode-0600 `runtime.env`, `extra-hosts.args`, `receipt.json`.
+All existing environment values are preserved except the fixed runtime identity,
+private state/cache paths, disabled QEO dispatch and loopback overrides. No
+credential value enters a command argument, receipt or terminal. Do not source
+the env-file: Docker reads its literal `KEY=value` records directly.
+
+Preserved fields include all `LSMC_AUTH_*` broker credentials/URLs,
+`LSMC_AI_AGENT_*`, primary API/QEO resolver credentials, Atlas/Bloom URLs,
+managed storage and AWS/OTEL settings. The source-backed credential selector is
+explicitly the owning Compose **`DEWEY_API_BEARER_TOKEN`**. The helper privately
+compares it to the new YAML `application.api_bearer_token` and records only
+`yaml_primary_matches_deployed_environment`. A false result is retained for O's
+review; it does not substitute the YAML value or add an approval gate. The
+deployed nonempty environment primary remains unchanged. Dewey's
+`load_settings()` applies `DEWEY_*` over YAML and nonempty `LSMC_AUTH_*` over auth.
+
+```bash
+mapfile -t D_HOST_ARGS < "$D_LAUNCH_DIR/extra-hosts.args"
+test "${#D_HOST_ARGS[@]}" -eq 8
+```
+
+These are the exact `login`, `atlas`, `bloom`, `ursa`, `dewey`, `qeo`, `zebra-day`
+and `kahlo` `.day.lsmc.bio` hosts mapped to `127.0.0.1`. Preserve them for the
+existing authentication/product transport. No sibling mutation route is called
+by this HTTP capsule. There is no blanket outbound-network disable claim.
 
 ## 2. Start only the isolated fresh runtime
 
@@ -65,27 +108,7 @@ directories and the broad Dayhoff deployment mount are omitted.
 
 ```bash
 docker run --detach --name "$D_CONTAINER" --restart=no --network=host --user=0:0 \
-  --env HOME=/home/ubuntu \
-  --env LSMC_SERVICE_NAME=dewey --env LSMC_ENV=prod --env LSMC_RUNTIME_CLASS=aws-compose \
-  --env HOST=127.0.0.1 --env PORT=18914 \
-  --env OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318 \
-  --env DEWEY_EXECUTION_BACKEND=dewey-container --env DEWEY_DEPLOYMENT_CODE=day \
-  --env DEWEY_ENVIRONMENT=production \
-  --env "DEWEY_CONFIG=$D_RUNTIME_DIR/dewey-config.yaml" \
-  --env "TAPDB_CONFIG_PATH=$D_RUNTIME_DIR/tapdb-runtime.yaml" \
-  --env DEWEY_DATABASE_TARGET=aurora --env DEWEY_TAPDB_CLIENT_ID=dewey \
-  --env DEWEY_TAPDB_DATABASE_NAME=dewey-day --env DEWEY_TAPDB_DOMAIN_CODE=M \
-  --env DEWEY_TAPDB_OWNER_REPO_NAME=dewey \
-  --env "DEWEY_BUILD_SHA=$D_IMAGE_SHA" --env "LSMC_RELEASE_SHA=$D_IMAGE_SHA" \
-  --env AWS_PROFILE=lsmc --env AWS_REGION=us-west-2 --env AWS_DEFAULT_REGION=us-west-2 \
-  --env AWS_CONFIG_FILE=/home/ubuntu/.aws/config \
-  --env AWS_SHARED_CREDENTIALS_FILE=/home/ubuntu/.aws/credentials \
-  --env DEWEY_NCBI_API_KEY_FILE=/home/ubuntu/.config/ncbi/key.txt \
-  --env LSMC_AI_AGENT_GRANTS_PATH=/opt/dayhoff/deployments/day/state/kahlo/ai-agent-grants.json \
-  --env XDG_STATE_HOME=/run/dewey-acceptance-state/state \
-  --env XDG_CACHE_HOME=/run/dewey-acceptance-state/cache \
-  --env DEWEY_LITERATURE_METAPUB_CACHE_DIR=/run/dewey-acceptance-state/metapub \
-  --env DEWEY_QEO_INGEST_URL= --env DEWEY_QEO_API_TOKEN= --env DEWEY_QEO_CONSUMER_GROUP= \
+  --env-file "$D_LAUNCH_DIR/runtime.env" "${D_HOST_ARGS[@]}" \
   --mount "type=bind,src=$D_RUNTIME_DIR/dewey-config.yaml,dst=$D_RUNTIME_DIR/dewey-config.yaml,readonly" \
   --mount "type=bind,src=$D_RUNTIME_DIR/tapdb-runtime.yaml,dst=$D_RUNTIME_DIR/tapdb-runtime.yaml,readonly" \
   --mount type=bind,src=/home/ubuntu/.aws,dst=/home/ubuntu/.aws,readonly \
@@ -127,8 +150,9 @@ D_HTTP=(--lane "$D_LANE" --base-url http://127.0.0.1:18914 --dewey-config "$D_RU
 This checks readiness/version/SHA, actual persisted report `M-DGX-NKDM`, package
 `M-DGX-NNSS` and its 20 members, both QEO resolver inputs, resolver-only bearer
 rejection on general API, anonymous DAG rejection, native manifest/object/graph/
-exact search. The primary `application.api_bearer_token` is selected internally;
-two additional tokens are not selected by set order. The resolver token is
+exact search. The effective primary `DEWEY_API_BEARER_TOKEN` is selected internally
+and checked against the explicit preserved environment; two additional tokens
+are not selected by set order. The resolver token is
 checked against the retained hash and expiry. HTTP proxies and redirects are
 disabled; every connection goes only to the explicit loopback port. Each invocation
 also resolves the runtime YAML through released `get_db_config` and reuses the
@@ -174,11 +198,15 @@ a separate O/E evidence step; HTTP probes do not replace it.
 ## 5. Final copied target
 
 After O stops this rehearsal container and preserves its terminal allocator
-exposure evidence, repeat with new private state/output directories, unused
+exposure evidence, repeat with new private state/output/environment directories, unused
 18914, `D_CONTAINER=dewey-tapdb10-final-20260911`, `D_LANE=production`,
 `D_RUNTIME_DIR=/opt/dewey/day/releases/9.0.0`, and the final native principal
 results. Keep both copies' receipts; source remains stopped/closed. Only O's
 final promotion changes service publication to the approved production listener.
+F's final service renderer consumes the same reviewed environment projection and
+explicitly changes `HOST`/`DEWEY_HOST` to `0.0.0.0`, `PORT`/`DEWEY_PORT` to `8914`,
+and binds its selected final private state paths. The helper itself keeps both
+lanes isolated until that separately owned promotion.
 This capsule does not switch boot Compose, expose 8914, publish another image,
 restart source or execute an image-only rollback.
 
@@ -192,3 +220,17 @@ serialization, returned-ID persistence on partial failure/unexpected status,
 exact replay, changed-image rejection, no overwrite and no redirect following.
 Ruff, Bandit and script `--help` passed. The coordinator's 427-pass/2-skip app CI
 and prior native receipts are reused; no broad tests or image rebuild was run.
+
+The 2026-09-11 07:45Z environment correction adds **15 new passing cases**:
+12 launch projection cases plus 2 effective-primary cases in one focused run,
+then one new SafeLoader Python-tag rejection case. All use synthetic local
+inputs; no Docker/AWS/app endpoint was called. Existing tests were deselected.
+Ruff/format, helper `--help` and all 9 Bash block syntax checks passed.
+Bandit initially flagged the custom `yaml.SafeLoader` subclass and an explicitly
+empty dispatch setting. SafeLoader rejection is now tested; the two safe-loader
+call sites have documented `B506` annotations and the explicit empty dispatch
+setting has one `B105` annotation. No unsafe YAML constructor was enabled. The
+final scan passed with Bandit's redundant assignment-node annotation warning.
+Principal script and all
+application/image build inputs are unchanged; deployed behavior still requires
+O's actual environment preparation, launch and acceptance receipts.
