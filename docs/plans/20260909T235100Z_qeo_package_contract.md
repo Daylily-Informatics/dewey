@@ -1,5 +1,12 @@
 # Dewey → QEO MultiQC package contract v1
 
+Historical source checkpoint: the production-handoff status near the end of this
+document predates the Dewey deployment. The [resolver completion receipt](20260909T233800Z_qeo_resolver_ledger.md#2026-09-10-0051z-production-completion-supersedes-historical-blockers)
+records the later deployment and complete package registration. The
+[Dewey 9 source reconciliation](20260911T035319Z_dewey_source_reconciliation.md)
+defines the migration source boundary. This contract's retained operational
+instructions do not authorize another deployment or credential operation.
+
 ## Ownership
 
 Dewey owns artifact EUIDs and authoritative `artifact_set_member` lineage.

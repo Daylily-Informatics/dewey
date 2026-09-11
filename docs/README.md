@@ -12,7 +12,8 @@ For Cognito integration, the live 2.0 split is `daylily-auth-cognito.browser.ses
 - [apis.md](apis.md): current HTTP contract, auth modes, idempotency rules, and deprecated aliases
 - [gui.md](gui.md): screen-by-screen guide with current screenshots and role notes
 - [becoming_a_discoverable_service.md](becoming_a_discoverable_service.md): how Dewey fits the Dayhoff-managed service contract
-- [derived_features_and_capabilities.md](derived_features_and_capabilities.md): evidence-backed production, released-source, repository-only, and local-only capability reference plus Plan 2 intake
+- [plans/20260911T035319Z_dewey_source_reconciliation.md](plans/20260911T035319Z_dewey_source_reconciliation.md): exact deployed-source boundary and Git ancestry for the Dewey 9 migration; no deployment claim
+- [derived_features_and_capabilities.md](derived_features_and_capabilities.md): historical September 1 production, released-source, repository-only, and local-only capability reference plus Phase 2 intake
 
 ## Best Historical References
 

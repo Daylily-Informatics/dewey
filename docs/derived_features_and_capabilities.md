@@ -2,6 +2,15 @@
 
 Evidence cutoff: 2026-09-01
 
+**Historical snapshot.** The production source/image/version observations and
+repository state below apply to the September 1 audit, not the current migration.
+The approved Dewey 9 source baseline is subsequently deployed commit
+`556dfcf936ea11e25f6126931fe1f655482d00a6`, including the QEO package resolver
+and container CLI. The [September 11 source reconciliation](plans/20260911T035319Z_dewey_source_reconciliation.md)
+records that boundary and retained receipts. Labcore remains undeployed Phase 2
+work. Template examples and historical domain statements below are not a
+migration inventory or authority to change the preserved production domain `M`.
+
 ## Purpose And Claim Boundary
 
 This document is a source-derived reference for Dewey product planning. It
