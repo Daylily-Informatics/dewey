@@ -251,6 +251,7 @@ class DeweyObservabilityStore:
         capabilities: list[str] | None = None,
         external_ref_models: list[str] | None = None,
         contract_version: str = "",
+        dag_v2: dict[str, Any] | None = None,
     ) -> None:
         """Merge additional discoverable service metadata into `/obs_services`."""
 
@@ -297,6 +298,8 @@ class DeweyObservabilityStore:
         if normalized_contract_version:
             snapshot["tapdb_dag_contract_version"] = normalized_contract_version
 
+        if dag_v2 is not None:
+            snapshot["dag_v2"] = dict(dag_v2)
         snapshot["observed_at"] = _utcnow_iso()
 
     def record_http_request(
@@ -615,6 +618,8 @@ def build_obs_services_payload(
         payload["tapdb_dag_contract_version"] = str(
             snapshot.get("tapdb_dag_contract_version") or ""
         )
+    if snapshot.get("dag_v2"):
+        payload["dag_v2"] = dict(snapshot["dag_v2"])
     payload["projection"] = projection.model_dump()
     return payload
 

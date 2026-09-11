@@ -14,7 +14,8 @@ dependencies = [
     "cli-core-yo==2.1.1",
     "build>=1.2.0",
     "cryptography>=42.0.0",
-    "daylily-tapdb @ git+https://github.com/Daylily-Informatics/daylily-tapdb.git@9.0.9",
+    "daylily-tapdb[aurora,gui]==10.1.1rc1",
+    "meridian-euid==0.4.8",
     "daylily-auth-cognito==2.1.5",
     "djlint",
     "fastapi>=0.115.0",
@@ -83,7 +84,7 @@ show_missing = true
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W"]

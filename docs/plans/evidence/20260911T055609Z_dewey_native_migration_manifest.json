@@ -1,0 +1,39 @@
+{
+  "schema_version": "tapdb-identity-conversion/v1",
+  "tables": {
+    "_tapdb_migrations": {
+      "added_rows": true
+    },
+    "audit_log": {
+      "schema_changes": true
+    },
+    "generic_instance": {
+      "schema_changes": true,
+      "added_columns": [
+        "identity_key"
+      ]
+    },
+    "generic_instance_lineage": {
+      "schema_changes": true
+    },
+    "generic_template": {
+      "schema_changes": true
+    },
+    "inbox_message": {
+      "schema_changes": true
+    },
+    "outbox_event": {
+      "schema_changes": true
+    },
+    "outbox_event_attempt": {
+      "schema_changes": true
+    },
+    "tapdb_identity_prefix_config": {
+      "schema_changes": true
+    }
+  },
+  "added_tables": [
+    "tapdb_legacy_outbox_mapping",
+    "tapdb_runtime_principal_scope"
+  ]
+}

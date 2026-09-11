@@ -91,6 +91,7 @@ def test_base_service_anomaly_response_includes_canonical_and_legacy_fields(monk
         created_dt=datetime.now(UTC),
         modified_dt=datetime.now(UTC),
         json_addl={
+            "properties": {},
             "anomaly_identity_key": "dewey.readiness.bootstrap_gap",
             "category": "readiness",
             "severity": "medium",

@@ -1,0 +1,6 @@
+local_image_id=sha256:cdf64e75f23c2ee6cd9327e3a52432000b7aa08073f02b9237e125f5df9f54c1
+local_image_size_bytes=213517716
+local_platform=linux/amd64
+local_default_user=lsmc
+local_validation=passed
+built_at=2026-09-11T08:41:29Z

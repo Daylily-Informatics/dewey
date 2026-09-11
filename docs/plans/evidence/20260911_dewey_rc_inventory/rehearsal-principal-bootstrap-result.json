@@ -1,0 +1,71 @@
+{
+  "inputs": {
+    "lane": "rehearsal",
+    "launcher_sha256": "9921210bd5b3ee4fcc52f06184dd88a6efa986e23e608f3672ccffcd529372f2",
+    "operator_config": "/home/ubuntu/dewey_ops/tapdb101-20260911/rehearsal-operator.yaml",
+    "operator_config_sha256": "9208dde2d25577ff06679e2bd19a37870ddc1c5d3039edc11dd31f3da8f53520",
+    "operator_secret_arn": "arn:aws:secretsmanager:us-west-2:108782052779:secret:/dayhoff/lsmcok1/tapdb/master-t8O0ZX",
+    "operator_secret_version": "d663d111-fc8f-8f82-d6e4-d15ee1a4807b",
+    "operator_tls_ca_sha256": "e5bb2084ccf45087bda1c9bffdea0eb15ee67f0b91646106e466714f9de3c7e3",
+    "registry_sha256": {
+      "domain_registry_path": "95023b502d5340f12aefa1c343f38aa876abca99c3e2310b57b105eaf2d74c28",
+      "prefix_ownership_registry_path": "afacde40149dabb14e48b79fd392d5ebbd71929aba6a8ed1a08332acb73bc8b4"
+    },
+    "runtime_config": "/opt/dewey/day/releases/tapdb10-rehearsal-20260911/tapdb-runtime.yaml",
+    "runtime_config_sha256": "a5ee191de51ae3912c96878ac92a3f80429888638d578ccb191f6cf1b6025117",
+    "runtime_secret_arn": "arn:aws:secretsmanager:us-west-2:108782052779:secret:/dayhoff/day/dewey/9.0.0/rehearsal-runtime-20260911-uwqxtM",
+    "runtime_secret_record_sha256": "8bc774bd8ea78181a9deacf6a26189debcaa43615a3b8e584134b2f7e9e8721e",
+    "runtime_secret_version": "092f355d-e532-4efb-b7af-d8dcb475f0ab"
+  },
+  "native": {
+    "created": true,
+    "format": "tapdb-runtime-principal/v1",
+    "grants": [
+      {
+        "database": "dewey_tapdb10_rehearsal_20260911",
+        "privileges": [
+          "CONNECT"
+        ]
+      }
+    ],
+    "operation": "bootstrap",
+    "plan_sha256": "bba0522a8ae3e5f64a176928adbd10a43c4f6867bc235885d4e5bc67295b416b",
+    "principal": {
+      "bypassrls": false,
+      "createdb": false,
+      "createrole": false,
+      "inherit": false,
+      "login": true,
+      "memberships": [],
+      "name": "dewey_rehearsal_9",
+      "oid": 646337,
+      "replication": false,
+      "superuser": false
+    },
+    "sha256": "259ebed9eccbd1cc2c4f4b5fa81f4e570d80f99acf3022ee176a494118ebe6cb",
+    "status": "applied",
+    "target": {
+      "allow_global_claims": false,
+      "client_id": "dewey",
+      "cluster_identifier": "dayhoff-lsmcok1-tapdb",
+      "config_path": "/opt/dewey/day/releases/tapdb10-rehearsal-20260911/tapdb-runtime.yaml",
+      "database": "dewey_tapdb10_rehearsal_20260911",
+      "database_name": "dewey-day",
+      "domain_code": "M",
+      "engine_type": "aurora",
+      "host": "dayhoff-lsmcok1-tapdb.cluster-ch4mq8a6wcdf.us-west-2.rds.amazonaws.com",
+      "hostaddr": "",
+      "iam_auth": false,
+      "operator_iam_auth": false,
+      "operator_user": "dayhoff",
+      "owner_repo_name": "dewey",
+      "port": 5432,
+      "region": "us-west-2",
+      "schema_name": "tapdb_dewey_lsmcok1_local",
+      "sslrootcert": "/home/ubuntu/.config/tapdb/rds-ca-bundle.pem",
+      "tenant_id": "",
+      "user": "dewey_rehearsal_9"
+    }
+  },
+  "sha256": "494fe841eb7fd792757ef597b06bd6267b19191ad02a6ac0a74316283cc15371"
+}

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from dewey_service.literature import ViewerContext
 from dewey_service.service import DeweyService
 from tests.support.service_fakes import _FakeStorageClient
@@ -210,3 +212,26 @@ def test_literature_query_search_v2_enrichment(service: DeweyService) -> None:
     assert item["pmid"] == "789012"
     assert item["storage_mode"] == "external_reference"
     assert item["saved_by_me"] is True
+
+
+@pytest.mark.parametrize(
+    "query",
+    [
+        {"scopes": ["unknown"]},
+        {"scopes": ["", "artifact"]},
+        {"scopes": []},
+        {"property_filters": [{"path": "metadata.type", "op": "typo"}]},
+        {"property_filters": [{"path": ""}]},
+        {"property_filters": [{"path": "metadata..type"}]},
+        {"property_filters": ["not-an-object"]},
+        {"property_filters": {}},
+        {"sort_field": "unknown"},
+        {"sort_dir": "typo"},
+        {"sort_dir": ""},
+        {"sort_field": ""},
+        {"property_filters": [{"path": "metadata.type", "op": ""}]},
+    ],
+)
+def test_invalid_search_has_no_match_all_fallback_on_empty_database(service, query):
+    with pytest.raises(ValueError):
+        service.query_search_v2(query)

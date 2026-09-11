@@ -119,3 +119,39 @@ def test_literature_external_artifact_promotes_in_place(
     assert second["artifact"]["artifact_euid"] == first["artifact"]["artifact_euid"]
     assert second["artifact"]["metadata"]["storage_mode"] == "managed"
     assert second["artifact"]["storage_backend"] == "s3"
+
+
+@pytest.mark.parametrize("failure", ["bucket_missing", "fulltext_unavailable", "download_failed"])
+def test_managed_literature_failure_never_creates_external_reference(service, monkeypatch, failure):
+    if failure == "bucket_missing":
+        service.managed_storage_bucket = ""
+    elif failure == "fulltext_unavailable":
+        service.literature.records["123456"]["best_fulltext_url"] = None
+    else:
+
+        def fail_download(record):
+            raise ValueError("Download failed")
+
+        monkeypatch.setattr(service, "_download_managed_literature_pdf", fail_download)
+    monkeypatch.setattr(
+        service.backend,
+        "create_instance",
+        lambda *a, **k: pytest.fail("Must not persist on managed-copy failure"),
+    )
+    monkeypatch.setattr(
+        service,
+        "_literature_external_artifact_payload",
+        lambda **k: pytest.fail("Must not substitute an external reference"),
+    )
+    with pytest.raises(ValueError, match="Managed literature storage requires|Download failed"):
+        service.save_literature(
+            viewer=ViewerContext(
+                subject="test-subject", email="operator@example.test", groups=("dewey-readwrite",)
+            ),
+            pmid="123456",
+            save_mode="managed_artifact",
+            visibility_scope="private",
+            allowed_users=[],
+            allowed_groups=[],
+            idempotency_key="negative-managed-copy",
+        )

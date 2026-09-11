@@ -1,0 +1,52 @@
+{
+  "applicable_floor_count": 130,
+  "expected_inventory_sha256": "584a01f80984c14cd15a79cff007b4e260fafd97481ab8f80b03aaae7c56e170",
+  "expected_verification_sha256": "84c97198683d71494277cf05ccfb6df058481560d8c53a064b8855bb439c8eab",
+  "family_sha256": "a6defebdfce4fa923ba64e67f35a742c0859239ac90e2ee82664b26a521cfc9b",
+  "floors_file": {
+    "file_sha256": "d4d902717ade64e13c90d0cc5ae1d19fc28dab023accabd31169dc69e66ee548",
+    "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native/completed-transition-floors.json"
+  },
+  "future_floor_count": 150,
+  "inputs": [
+    {
+      "file_sha256": "7fbe0e00e5557bde7ffb2afaa50606ade8c391136a5ce77eb95fd7afd89f001d",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native/capsule.json"
+    },
+    {
+      "file_sha256": "9208dde2d25577ff06679e2bd19a37870ddc1c5d3039edc11dd31f3da8f53520",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/rehearsal-operator.yaml"
+    },
+    {
+      "file_sha256": "5b69e68dea09d25bb18e0b3383e96c0250848c8c6eba5ccba8ec42658e862bf8",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/source-sequence-mappings-20260911T053316Z.json"
+    },
+    {
+      "file_sha256": "3fcdef0f0d8a6965fadc4e22c5117535d0635b30719a966823f7675d5e4d3aef",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native/sequence-plan.json"
+    },
+    {
+      "file_sha256": "bcdd9a30ef0265aca481ea70b0b9750fd6dd09e0130c9dc56f86e98e4104dff1",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native/sequence-result.json"
+    },
+    {
+      "file_sha256": "77c44d7ced0f290145db5fce8cef442bf125a087dc70cdd5f364b0c01bace152",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native/sequence-apply.completed.json"
+    },
+    {
+      "file_sha256": "b93e4eee00793bfc03b1aa8849ded6a1423c9fe42d19955077a1a00d57f37bee",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native/recovery-family.json"
+    }
+  ],
+  "journal_heads": {
+    "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native-journal": {
+      "receipt_id": "000017-20260911T080231Z",
+      "sequence": 17,
+      "sha256": "6f0c8aec0aa52bc06c02d037077f5a659cc6db868a2130b9903246ef8a483835"
+    }
+  },
+  "pending": {},
+  "review_reference": "E-5bfe371-helper-0e2765067beb776dfe914a553d02ef8d2710723ff2582cc5fa56e43b2b6378a1",
+  "schema_version": "dewey-completed-transition-input/v1",
+  "scope": "completed operation only; future history retained unchanged"
+}

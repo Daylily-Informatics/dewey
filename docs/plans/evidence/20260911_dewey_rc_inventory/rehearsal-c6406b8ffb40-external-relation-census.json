@@ -1,0 +1,437 @@
+{
+  "authoritative_lineages": 880,
+  "captured_at": "2026-09-11T09:00:53.703415+00:00",
+  "duplicate_native_assertion_groups": 0,
+  "endpoint_issues": [],
+  "external_metadata_key_shapes": [
+    {
+      "count": 1,
+      "metadata_keys": [
+        "created_at",
+        "created_by_flow"
+      ],
+      "object_type": "patient",
+      "system": "atlas"
+    },
+    {
+      "count": 1,
+      "metadata_keys": [
+        "created_at",
+        "created_by_flow"
+      ],
+      "object_type": "sequencer",
+      "system": "bloom"
+    },
+    {
+      "count": 3,
+      "metadata_keys": [
+        "completion_authority",
+        "destination_uri",
+        "execution_id",
+        "ingest_flow",
+        "instrument_id",
+        "run_name",
+        "run_type",
+        "run_year",
+        "sentinel",
+        "source_fingerprint",
+        "source_kind",
+        "source_system",
+        "source_system_short",
+        "transfer_owner"
+      ],
+      "object_type": "sequencing_run",
+      "system": "bloom"
+    },
+    {
+      "count": 1,
+      "metadata_keys": [
+        "created_at",
+        "ingest_flow",
+        "owy_execution_id",
+        "platform",
+        "run_name",
+        "run_type",
+        "smoke_test",
+        "source_kind",
+        "source_system",
+        "storage_uri",
+        "test_kind"
+      ],
+      "object_type": "sequencing_run",
+      "system": "bloom"
+    },
+    {
+      "count": 9,
+      "metadata_keys": [
+        "dataset_revision",
+        "run_name",
+        "run_type",
+        "source_system",
+        "storage_uri"
+      ],
+      "object_type": "sequencing_run",
+      "system": "bloom"
+    },
+    {
+      "count": 67,
+      "metadata_keys": [
+        "execution_id",
+        "run_name",
+        "run_type",
+        "source_fingerprint",
+        "source_system",
+        "storage_uri"
+      ],
+      "object_type": "sequencing_run",
+      "system": "bloom"
+    },
+    {
+      "count": 13,
+      "metadata_keys": [
+        "run_folder_name",
+        "trigger_euid"
+      ],
+      "object_type": "sequencing_run",
+      "system": "bloom"
+    },
+    {
+      "count": 3,
+      "metadata_keys": [
+        "analysis_dir",
+        "cluster_name",
+        "dayoa_s3_root",
+        "destination_s3_uri",
+        "dewey_analysis_artifact_set_euid",
+        "region",
+        "run_artifact_euid",
+        "source",
+        "source_path",
+        "ursa_analysis_euid"
+      ],
+      "object_type": "dayoa_analysis_directory",
+      "system": "dyec"
+    },
+    {
+      "count": 1,
+      "metadata_keys": [
+        "created_at",
+        "created_by_flow"
+      ],
+      "object_type": "analysis",
+      "system": "ursa"
+    },
+    {
+      "count": 149,
+      "metadata_keys": [
+        "command_id",
+        "run_folder_name",
+        "trigger_euid"
+      ],
+      "object_type": "analysis_job",
+      "system": "ursa"
+    },
+    {
+      "count": 148,
+      "metadata_keys": [
+        "command_ids",
+        "run_folder_name"
+      ],
+      "object_type": "run_directory_analysis_trigger",
+      "system": "ursa"
+    }
+  ],
+  "external_objects": 396,
+  "external_type_counts": [
+    {
+      "count": 1,
+      "deleted": false,
+      "identifier_validates_as_euid": true,
+      "null_tenant": true,
+      "object_type": "patient",
+      "system": "atlas"
+    },
+    {
+      "count": 1,
+      "deleted": false,
+      "identifier_validates_as_euid": true,
+      "null_tenant": true,
+      "object_type": "sequencer",
+      "system": "bloom"
+    },
+    {
+      "count": 93,
+      "deleted": false,
+      "identifier_validates_as_euid": true,
+      "null_tenant": true,
+      "object_type": "sequencing_run",
+      "system": "bloom"
+    },
+    {
+      "count": 3,
+      "deleted": false,
+      "identifier_validates_as_euid": false,
+      "null_tenant": true,
+      "object_type": "dayoa_analysis_directory",
+      "system": "dyec"
+    },
+    {
+      "count": 1,
+      "deleted": false,
+      "identifier_validates_as_euid": true,
+      "null_tenant": true,
+      "object_type": "analysis",
+      "system": "ursa"
+    },
+    {
+      "count": 149,
+      "deleted": false,
+      "identifier_validates_as_euid": true,
+      "null_tenant": true,
+      "object_type": "analysis_job",
+      "system": "ursa"
+    },
+    {
+      "count": 34,
+      "deleted": false,
+      "identifier_validates_as_euid": false,
+      "null_tenant": true,
+      "object_type": "run_directory_analysis_trigger",
+      "system": "ursa"
+    },
+    {
+      "count": 114,
+      "deleted": false,
+      "identifier_validates_as_euid": true,
+      "null_tenant": true,
+      "object_type": "run_directory_analysis_trigger",
+      "system": "ursa"
+    }
+  ],
+  "graph_counts": [
+    {
+      "count": 109,
+      "deleted": false,
+      "measure": "rows"
+    },
+    {
+      "count": 440,
+      "deleted": false,
+      "measure": "entries"
+    }
+  ],
+  "graph_entry_key_shapes": [
+    {
+      "count": 1,
+      "keys": [
+        "external_object_euid",
+        "external_object_relation_euid",
+        "external_object_type",
+        "href",
+        "label",
+        "relationship_type",
+        "root_euid",
+        "source_field",
+        "system",
+        "target_euid"
+      ],
+      "source_field": "dewey.external_object_relation",
+      "system": "atlas"
+    },
+    {
+      "count": 1,
+      "keys": [
+        "external_object_euid",
+        "external_object_relation_euid",
+        "external_object_type",
+        "href",
+        "label",
+        "relationship_type",
+        "root_euid",
+        "source_field",
+        "system",
+        "target_euid"
+      ],
+      "source_field": "dewey.external_object_relation",
+      "system": "bloom"
+    },
+    {
+      "count": 131,
+      "keys": [
+        "external_object_euid",
+        "external_object_relation_euid",
+        "external_object_type",
+        "label",
+        "relationship_type",
+        "root_euid",
+        "source_field",
+        "system",
+        "target_euid"
+      ],
+      "source_field": "dewey.external_object_relation",
+      "system": "bloom"
+    },
+    {
+      "count": 6,
+      "keys": [
+        "external_object_euid",
+        "external_object_relation_euid",
+        "external_object_type",
+        "href",
+        "label",
+        "relationship_type",
+        "root_euid",
+        "source_field",
+        "system",
+        "target_euid"
+      ],
+      "source_field": "dewey.external_object_relation",
+      "system": "dyec"
+    },
+    {
+      "count": 1,
+      "keys": [
+        "external_object_euid",
+        "external_object_relation_euid",
+        "external_object_type",
+        "href",
+        "label",
+        "relationship_type",
+        "root_euid",
+        "source_field",
+        "system",
+        "target_euid"
+      ],
+      "source_field": "dewey.external_object_relation",
+      "system": "ursa"
+    },
+    {
+      "count": 300,
+      "keys": [
+        "external_object_euid",
+        "external_object_relation_euid",
+        "external_object_type",
+        "label",
+        "relationship_type",
+        "root_euid",
+        "source_field",
+        "system",
+        "target_euid"
+      ],
+      "source_field": "dewey.external_object_relation",
+      "system": "ursa"
+    }
+  ],
+  "graph_issues": [],
+  "kind": "dewey_historical_external_relation_census_v1",
+  "native_templates": [],
+  "physical": {
+    "database": "dewey_tapdb10_rehearsal_20260911",
+    "pid": 24221,
+    "role": "dewey_rehearsal_9"
+  },
+  "relation_objects": 440,
+  "relation_type_counts": [
+    {
+      "count": 1,
+      "external_deleted": false,
+      "object_type": "patient",
+      "relation_deleted": false,
+      "relationship": "atlas_patient",
+      "system": "atlas",
+      "target_deleted": false,
+      "target_type": "artifact"
+    },
+    {
+      "count": 1,
+      "external_deleted": false,
+      "object_type": "sequencer",
+      "relation_deleted": false,
+      "relationship": "bloom_sequencer",
+      "system": "bloom",
+      "target_deleted": false,
+      "target_type": "artifact"
+    },
+    {
+      "count": 51,
+      "external_deleted": false,
+      "object_type": "sequencing_run",
+      "relation_deleted": false,
+      "relationship": "bloom_run",
+      "system": "bloom",
+      "target_deleted": false,
+      "target_type": "artifact"
+    },
+    {
+      "count": 80,
+      "external_deleted": false,
+      "object_type": "sequencing_run",
+      "relation_deleted": false,
+      "relationship": "bloom_sequencing_run",
+      "system": "bloom",
+      "target_deleted": false,
+      "target_type": "artifact"
+    },
+    {
+      "count": 3,
+      "external_deleted": false,
+      "object_type": "dayoa_analysis_directory",
+      "relation_deleted": false,
+      "relationship": "dyec_analysis_directory_for_run",
+      "system": "dyec",
+      "target_deleted": false,
+      "target_type": "artifact"
+    },
+    {
+      "count": 3,
+      "external_deleted": false,
+      "object_type": "dayoa_analysis_directory",
+      "relation_deleted": false,
+      "relationship": "dyec_exported_analysis_directory",
+      "system": "dyec",
+      "target_deleted": false,
+      "target_type": "artifact_set"
+    },
+    {
+      "count": 1,
+      "external_deleted": false,
+      "object_type": "analysis",
+      "relation_deleted": false,
+      "relationship": "ursa_analysis",
+      "system": "ursa",
+      "target_deleted": false,
+      "target_type": "artifact"
+    },
+    {
+      "count": 149,
+      "external_deleted": false,
+      "object_type": "analysis_job",
+      "relation_deleted": false,
+      "relationship": "ursa_analysis_job",
+      "system": "ursa",
+      "target_deleted": false,
+      "target_type": "artifact"
+    },
+    {
+      "count": 3,
+      "external_deleted": false,
+      "object_type": "analysis_job",
+      "relation_deleted": false,
+      "relationship": "ursa_analysis_job",
+      "system": "ursa",
+      "target_deleted": false,
+      "target_type": "artifact_set"
+    },
+    {
+      "count": 148,
+      "external_deleted": false,
+      "object_type": "run_directory_analysis_trigger",
+      "relation_deleted": false,
+      "relationship": "ursa_run_directory_analysis_trigger",
+      "system": "ursa",
+      "target_deleted": false,
+      "target_type": "artifact"
+    }
+  ],
+  "visible_instances": 12200
+}

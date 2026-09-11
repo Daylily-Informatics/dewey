@@ -5,7 +5,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-from fastapi import APIRouter, FastAPI
+from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from fastapi.routing import APIRoute
 from starlette.routing import Mount, Route
@@ -56,52 +56,8 @@ def _build_dummy_tapdb_app() -> FastAPI:
     return app
 
 
-def _build_dummy_dag_router() -> APIRouter:
-    router = APIRouter()
-
-    @router.get("/api/dag/data")
-    async def dag_graph_data() -> dict[str, str]:
-        return {"kind": "native"}
-
-    @router.get("/api/dag/search")
-    async def dag_object_search() -> dict[str, str]:
-        return {"kind": "search"}
-
-    @router.get("/api/dag/external")
-    async def dag_external_graph() -> dict[str, str]:
-        return {"kind": "external"}
-
-    @router.get("/api/dag/external/object")
-    async def dag_external_object_detail() -> dict[str, str]:
-        return {"kind": "external-object"}
-
-    @router.get("/api/dag/object/{euid}")
-    async def dag_object_detail(euid: str) -> dict[str, str]:
-        return {"euid": euid, "system": "dewey"}
-
-    return router
-
-
 def _build_runtime_app(*, monkeypatch, embed_tapdb: bool) -> FastAPI:
-    if embed_tapdb:
-        monkeypatch.setattr(
-            "dewey_service.integrations.tapdb_ui.resolve_tapdb_config_path",
-            lambda settings: "/tmp/dewey-tapdb.yaml",
-        )
-        monkeypatch.setattr(
-            "dewey_service.integrations.tapdb_ui.create_tapdb_gui_app",
-            lambda **kwargs: _build_dummy_tapdb_app(),
-        )
-        monkeypatch.setattr(
-            "dewey_service.integrations.tapdb_ui.create_tapdb_dag_router",
-            lambda **kwargs: _build_dummy_dag_router(),
-        )
-    else:
-        monkeypatch.setattr(
-            "dewey_service.integrations.tapdb_ui.resolve_tapdb_config_path",
-            lambda settings: "",
-        )
-
+    # Both surfaces are required in Dewey 9; use the actual installed DAG v2 mount.
     return create_app(settings=_build_settings(), service=FakeDeweyService())
 
 
@@ -219,7 +175,7 @@ def test_runtime_route_inventory_covers_first_party_surfaces(monkeypatch) -> Non
             continue
         missing.append(f"{route.method} {route.path} [{route.surface}]")
 
-    assert missing == []
+    assert missing == [], missing
 
 
 def test_docs_and_static_runtime_routes_have_direct_request_coverage(client) -> None:

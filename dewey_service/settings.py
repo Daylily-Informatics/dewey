@@ -19,7 +19,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from dewey_service.defaults import (
     DEFAULT_APP_PORT,
     DEFAULT_COGNITO_ALLOWED_EMAIL_DOMAINS,
-    DEFAULT_TAPDB_CONFIG_DIR,
     DEFAULT_TAPDB_DOMAIN_REGISTRY_PATH,
     DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH,
     build_default_config_template,
@@ -440,6 +439,9 @@ class Settings(BaseSettings):
     environment: str = "development"
     api_bearer_token: str = "dewey-dev-token"
     api_bearer_tokens: str = ""
+    # Dedicated read-only QEO resolver. Never add this token to api_bearer_tokens.
+    qeo_resolver_token_sha256: str = ""
+    qeo_resolver_token_expires_at: str = ""
     session_secret_key: str = "dewey-session-secret-change-me"
     host: str = "127.0.0.1"
     port: int = DEFAULT_APP_PORT
@@ -495,7 +497,7 @@ class Settings(BaseSettings):
     tapdb_domain_code: str = "Z"
     tapdb_domain_registry_path: str = str(DEFAULT_TAPDB_DOMAIN_REGISTRY_PATH)
     tapdb_prefix_ownership_registry_path: str = str(DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH)
-    tapdb_config_path: str = str(DEFAULT_TAPDB_CONFIG_DIR / "dewey" / "dewey" / "tapdb-config.yaml")
+    tapdb_config_path: str = ""
     tapdb_strict_namespace: int = 1
 
     # AWS defaults for TapDB wrappers
@@ -806,7 +808,8 @@ class Settings(BaseSettings):
             cleaned = str(item).strip()
             if cleaned:
                 tokens.add(cleaned)
-        return {item for item in tokens if item}
+        # Resolver-only credentials cannot become write credentials by misconfiguration.
+        return {item for item in tokens if item and not item.startswith("dewey_qeo_resolver_")}
 
     @property
     def is_production(self) -> bool:

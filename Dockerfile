@@ -20,10 +20,12 @@ RUN unset SETUPTOOLS_SCM_PRETEND_VERSION && uv sync --frozen --no-dev --no-insta
 COPY config ./config
 COPY dewey_service ./dewey_service
 RUN unset SETUPTOOLS_SCM_PRETEND_VERSION && uv sync --frozen --no-dev
+RUN /app/.venv/bin/python -c "from dewey_service.integrations.tapdb_runtime import ensure_tapdb_version; ensure_tapdb_version()"
 
 FROM python:${PYTHON_VERSION}-slim-bookworm AS runtime
 
 ENV PATH="/app/.venv/bin:${PATH}" \
+    DEWEY_EXECUTION_BACKEND=dewey-container \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 

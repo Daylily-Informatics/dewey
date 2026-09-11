@@ -1,0 +1,5 @@
+5a738e33b049d1f408e3890b7b4382ed7bc084142fe615365349d1d8fa58a280  dewey-9.0.0-5f51f8137d7b-source-context.tar.gz
+99ff4efc3992f6826adf865b3e2184b304b60a8d3fe35cf6aae0a05dd4101665  build-inputs.git-ls-tree
+16b4ec188bde0070ce47610a1364d92942f9a2f8dc51a22b5bf0b93fd22ed93e  Dockerfile.release
+d8939f5995aea230ec1f299220fc6ff464ba44412b203ec2badd41760dd188c6  build-smoke-push-linux-amd64.sh
+70b953d4f25b1193edd4936e0ed9faa9cd3ff2dd683941aece7e49e726275aed  capsule-inputs.json

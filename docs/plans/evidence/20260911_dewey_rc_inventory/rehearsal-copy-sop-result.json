@@ -1,0 +1,100 @@
+{
+  "backup_created": false,
+  "completed_at": "2026-09-11T06:57:52.874001+00:00",
+  "copied_database": {
+    "datallowconn": true,
+    "datname": "dewey_tapdb10_rehearsal_20260911",
+    "oid": 645854,
+    "owner": "dayhoff"
+  },
+  "copied_database_at_creation": {
+    "datallowconn": false,
+    "datname": "dewey_tapdb10_rehearsal_20260911",
+    "oid": 645854,
+    "owner": "dayhoff"
+  },
+  "copy_acl": [
+    {
+      "grantee": 16409,
+      "is_grantable": false,
+      "owner_oid": 16409,
+      "privilege_type": "CONNECT"
+    },
+    {
+      "grantee": 16409,
+      "is_grantable": false,
+      "owner_oid": 16409,
+      "privilege_type": "CREATE"
+    },
+    {
+      "grantee": 16409,
+      "is_grantable": false,
+      "owner_oid": 16409,
+      "privilege_type": "TEMPORARY"
+    }
+  ],
+  "elapsed_seconds": 78.358,
+  "final_database_gates": {
+    "dewey_prod": {
+      "datallowconn": false,
+      "datname": "dewey_prod",
+      "oid": 16749,
+      "owner": "dayhoff"
+    },
+    "dewey_tapdb10_rehearsal_20260911": {
+      "datallowconn": true,
+      "datname": "dewey_tapdb10_rehearsal_20260911",
+      "oid": 645854,
+      "owner": "dayhoff"
+    },
+    "postgres": {
+      "datallowconn": true,
+      "datname": "postgres",
+      "oid": 5,
+      "owner": "dayhoff"
+    }
+  },
+  "fingerprint": {
+    "config_sha256": {
+      "control-operator.yaml": "42491d0bf321d4d8027ef52918a1396e4e4c7f2c7bdecdabd82449b86b87686a",
+      "rehearsal-operator.yaml": "9208dde2d25577ff06679e2bd19a37870ddc1c5d3039edc11dd31f3da8f53520",
+      "source-operator.yaml": "d22c5ebd3a5fc83032ff5946a57545f49dd8e448b8a4f6c99580d8a926c2a617"
+    },
+    "container_id": "872434f0530335fd5a985a920f498fe39a36fd5eab40b9cb3934b185ceddeb36",
+    "control": "postgres",
+    "control_oid": 5,
+    "image": "sha256:4fe9907f2d3443f2360cad2463974a60f8158aea90cbf2aa7fbc56349d45a91f",
+    "script_sha256": "d7a316eb10e9788e8f5a0d7459845c31a52b2b813d7584c8f43323a0cc121733",
+    "source": "dewey_prod",
+    "source_oid": 16749,
+    "source_physical": {
+      "database": "dewey_prod",
+      "database_oid": 16749,
+      "server_address": "10.0.2.148/32",
+      "server_port": 5432
+    },
+    "sql": [
+      "ALTER DATABASE \"dewey_prod\" ALLOW_CONNECTIONS false",
+      "CREATE DATABASE \"dewey_tapdb10_rehearsal_20260911\" WITH TEMPLATE \"dewey_prod\" OWNER \"dayhoff\" ALLOW_CONNECTIONS false",
+      "REVOKE CONNECT, TEMPORARY ON DATABASE \"dewey_tapdb10_rehearsal_20260911\" FROM PUBLIC",
+      "ALTER DATABASE \"dewey_tapdb10_rehearsal_20260911\" ALLOW_CONNECTIONS true"
+    ],
+    "success_state": "source_closed_container_stopped_copy_operator_only",
+    "target": "dewey_tapdb10_rehearsal_20260911"
+  },
+  "native_next_receipt": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json",
+  "schema_migration_performed": false,
+  "source_container": {
+    "exit_code": 0,
+    "id": "872434f0530335fd5a985a920f498fe39a36fd5eab40b9cb3934b185ceddeb36",
+    "image": "sha256:4fe9907f2d3443f2360cad2463974a60f8158aea90cbf2aa7fbc56349d45a91f",
+    "oom_killed": false,
+    "pid": 0,
+    "running": false
+  },
+  "source_contract_sha256": "b4fa8198d2c8082e551011f227497b4d17b379d79d4350ff15635e1c9a9f6e75",
+  "source_identity_sha256": "4a4d2df17d60f3caacd0b6decd3cee8ebc6263a9ad46b8908fb168b79cd2164f",
+  "source_sequence_sha256": "903928e63a8cd22f078f429d3aa55c125b48fc212925a29cbff91f0c41482cc0",
+  "status": "copy_created_source_remains_fenced",
+  "target_runtime_started": false
+}

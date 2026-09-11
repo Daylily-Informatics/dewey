@@ -104,10 +104,9 @@ class BaseDeweyService:
             salt="dewey-upload-session-v1",
         )
 
-    def bootstrap(self) -> None:
-        with self.backend.session_scope(commit=True) as session:
+    def verify_existing(self) -> None:
+        with self.backend.session_scope(commit=False) as session:
             self.backend.ensure_templates(session, BOOT_TEMPLATE_DEFINITIONS)
-            self._seed_default_anomalies(session)
 
     @staticmethod
     def _fingerprint(payload: dict[str, Any]) -> str:
@@ -154,87 +153,6 @@ class BaseDeweyService:
         if not cleaned:
             raise ValueError(f"artifact filename {value!r} has no safe characters")
         return cleaned
-
-    def _seed_default_anomalies(self, session) -> None:
-        for payload in self._default_anomaly_payloads():
-            existing = self.backend.find_by_json_field(
-                session,
-                template_code=ANOMALY_TEMPLATE,
-                field="anomaly_identity_key",
-                value=str(payload.get("anomaly_identity_key") or ""),
-            )
-            if existing is None:
-                self.backend.create_instance(
-                    session,
-                    template_code=ANOMALY_TEMPLATE,
-                    name=str(payload.get("title") or payload["anomaly_identity_key"]),
-                    json_addl=payload,
-                )
-
-    def _default_anomaly_payloads(self) -> list[dict[str, Any]]:
-        now_iso = utc_now_iso()
-        return [
-            {
-                "anomaly_identity_key": "dewey.readiness.bootstrap_gap",
-                "category": "readiness",
-                "severity": "medium",
-                "status": "open",
-                "title": "Readiness probe observed a bootstrap gap",
-                "summary": (
-                    "The local readiness surface recorded a brief backend-unavailable "
-                    "state during bootstrap."
-                ),
-                "source": "readyz",
-                "first_seen_at": now_iso,
-                "last_seen_at": now_iso,
-                "occurrence_count": 1,
-                "redacted_context": {"database_status": "unknown"},
-                "recommended_action": "Review readiness and database startup timing.",
-                "created_at": now_iso,
-                "updated_at": now_iso,
-            },
-            {
-                "anomaly_identity_key": "dewey.auth.session_activity_low",
-                "category": "auth",
-                "severity": "low",
-                "status": "monitoring",
-                "title": "Operator session activity is sparse",
-                "summary": (
-                    "No recent browser-session auth events are present in the local anomaly record."
-                ),
-                "source": "auth_health",
-                "first_seen_at": now_iso,
-                "last_seen_at": now_iso,
-                "occurrence_count": 1,
-                "redacted_context": {"recent_successes": 0},
-                "recommended_action": (
-                    "Confirm an operator can complete browser login during smoke testing."
-                ),
-                "created_at": now_iso,
-                "updated_at": now_iso,
-            },
-            {
-                "anomaly_identity_key": "dewey.storage.review_pending",
-                "category": "storage",
-                "severity": "high",
-                "status": "open",
-                "title": "Artifact storage review is pending",
-                "summary": (
-                    "This local anomaly record tracks artifacts that need a storage "
-                    "verification review."
-                ),
-                "source": "storage",
-                "first_seen_at": now_iso,
-                "last_seen_at": now_iso,
-                "occurrence_count": 1,
-                "redacted_context": {"scope": "local demo record"},
-                "recommended_action": (
-                    "Inspect storage verification and retention status for recent artifacts."
-                ),
-                "created_at": now_iso,
-                "updated_at": now_iso,
-            },
-        ]
 
     def list_anomalies(self, *, limit: int = 200) -> list[dict[str, Any]]:
         with self.backend.session_scope(commit=False) as session:
@@ -462,18 +380,6 @@ class BaseDeweyService:
             "external_object_type": payload.get("external_object_type"),
             "external_object_id": payload.get("external_object_id"),
             "external_uri": payload.get("external_uri"),
-            "metadata": dict(payload.get("metadata") or {}),
-            "created_at": payload.get("created_at"),
-        }
-
-    def _external_object_relation_response(self, instance) -> dict[str, Any]:
-        payload = normalize_instance_payload(instance)
-        return {
-            "external_object_relation_euid": instance.euid,
-            "target_type": payload.get("target_type"),
-            "target_euid": payload.get("target_euid"),
-            "external_object_euid": payload.get("external_object_euid"),
-            "relation_type": payload.get("relation_type"),
             "metadata": dict(payload.get("metadata") or {}),
             "created_at": payload.get("created_at"),
         }

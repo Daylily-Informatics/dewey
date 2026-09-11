@@ -1,0 +1,2279 @@
+{
+  "floors": [
+    {
+      "name": "adt_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+      "value": 76689
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+      "value": 76689
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 76689
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 76689
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+      "value": 76689
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+      "value": 76689
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "migration-preflight:allocated_floor",
+      "value": 76689
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "migration-preflight:assigned_floor",
+      "value": 76689
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 76689
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 76689
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 76690
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 76690
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+      "value": 66690
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+      "value": 66690
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 66690
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 66690
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+      "value": 66690
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+      "value": 66690
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "migration-preflight:allocated_floor",
+      "value": 66690
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "migration-preflight:assigned_floor",
+      "value": 66690
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 66690
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 66690
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 66691
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "sequence_advance_intent",
+      "value": 66691
+    },
+    {
+      "name": "ay_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 10000
+    },
+    {
+      "name": "ay_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 10000
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+      "value": 22202
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+      "value": 22202
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 22202
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 22202
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+      "value": 22202
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+      "value": 22202
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "migration-preflight:allocated_floor",
+      "value": 22202
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "migration-preflight:assigned_floor",
+      "value": 22202
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 22202
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 22202
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 22203
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 22203
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+      "value": 11014
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+      "value": 11014
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 11014
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 11014
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+      "value": 11014
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+      "value": 11014
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "migration-preflight:allocated_floor",
+      "value": 11014
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "migration-preflight:assigned_floor",
+      "value": 11014
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 11014
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 11014
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 11015
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 11015
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+      "value": 1015
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+      "value": 1015
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 1015
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 1015
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+      "value": 1015
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+      "value": 1015
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "migration-preflight:allocated_floor",
+      "value": 1015
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "migration-preflight:assigned_floor",
+      "value": 1015
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 1015
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 1015
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 1016
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "sequence_advance_intent",
+      "value": 1016
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+      "value": 12204
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+      "value": 12204
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 12204
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 12204
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+      "value": 12204
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+      "value": 12204
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "migration-preflight:allocated_floor",
+      "value": 12204
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "migration-preflight:assigned_floor",
+      "value": 12204
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 12204
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 12204
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 12205
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "sequence_advance_intent",
+      "value": 12205
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+      "value": 22
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+      "value": 22
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 22
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 22
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+      "value": 22
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+      "value": 22
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "migration-preflight:allocated_floor",
+      "value": 22
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "migration-preflight:assigned_floor",
+      "value": 22
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 22
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 22
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 23
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "sequence_advance_intent",
+      "value": 23
+    },
+    {
+      "name": "gse_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 1
+    },
+    {
+      "name": "gse_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 1
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+      "value": 4
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+      "value": 4
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 4
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 4
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+      "value": 4
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+      "value": 4
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "migration-preflight:allocated_floor",
+      "value": 4
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "migration-preflight:assigned_floor",
+      "value": 4
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 4
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 4
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 5
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 5
+    },
+    {
+      "name": "inbox_message_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 1
+    },
+    {
+      "name": "inbox_message_uid_seq",
+      "source": "sequence_advance_intent",
+      "value": 1
+    },
+    {
+      "name": "msg_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 10000
+    },
+    {
+      "name": "msg_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 10000
+    },
+    {
+      "name": "outbox_event_attempt_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 1
+    },
+    {
+      "name": "outbox_event_attempt_uid_seq",
+      "source": "sequence_advance_intent",
+      "value": 1
+    },
+    {
+      "name": "outbox_event_id_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 1
+    },
+    {
+      "name": "outbox_event_id_seq",
+      "source": "sequence_advance_intent",
+      "value": 1
+    },
+    {
+      "name": "sys_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 10000
+    },
+    {
+      "name": "sys_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 10000
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+      "value": 10010
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+      "value": 10010
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 10010
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 10010
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+      "value": 10010
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+      "value": 10010
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "migration-preflight:allocated_floor",
+      "value": 10010
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "migration-preflight:assigned_floor",
+      "value": 10010
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 10010
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 10010
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 10011
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 10011
+    },
+    {
+      "name": "wsx_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 10000
+    },
+    {
+      "name": "wsx_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 10000
+    },
+    {
+      "name": "wx_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 10000
+    },
+    {
+      "name": "wx_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 10000
+    },
+    {
+      "name": "xrf_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 1
+    },
+    {
+      "name": "xrf_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 1
+    },
+    {
+      "name": "xx_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 10000
+    },
+    {
+      "name": "xx_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 10000
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 76691
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "sequence_advance_intent",
+      "value": 66692
+    },
+    {
+      "name": "ay_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 10001
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 22204
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 11016
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "sequence_advance_intent",
+      "value": 1017
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "sequence_advance_intent",
+      "value": 12206
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "sequence_advance_intent",
+      "value": 24
+    },
+    {
+      "name": "gse_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 2
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 6
+    },
+    {
+      "name": "inbox_message_uid_seq",
+      "source": "sequence_advance_intent",
+      "value": 2
+    },
+    {
+      "name": "msg_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 10001
+    },
+    {
+      "name": "outbox_event_attempt_uid_seq",
+      "source": "sequence_advance_intent",
+      "value": 2
+    },
+    {
+      "name": "outbox_event_id_seq",
+      "source": "sequence_advance_intent",
+      "value": 2
+    },
+    {
+      "name": "sys_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 10001
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 10012
+    },
+    {
+      "name": "wsx_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 10001
+    },
+    {
+      "name": "wx_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 10001
+    },
+    {
+      "name": "xrf_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 2
+    },
+    {
+      "name": "xx_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 10001
+    }
+  ],
+  "intent_receipt_id": "000013-20260911T080228Z",
+  "inventory": {
+    "missing_generators": [],
+    "physical_target": {
+      "database": "dewey_tapdb10_rehearsal_20260911",
+      "database_oid": 645854,
+      "server_address": "10.0.2.148/32",
+      "server_port": 5432
+    },
+    "schema_name": "tapdb_dewey_lsmcok1_local",
+    "schema_version": "tapdb-sequence-inventory/v1",
+    "sequence_mappings": {
+      "ay_instance_seq": {
+        "evidence": "{\"catalog_definition\":{\"seqcache\":1,\"seqcycle\":false,\"seqincrement\":1,\"seqmax\":9223372036854775807,\"seqmin\":1,\"seqstart\":1},\"catalog_evidence\":{\"dependencies\":[{\"dependent\":\"sequence tapdb_dewey_lsmcok1_local.ay_instance_seq\",\"kind\":\"n\",\"referenced\":\"schema tapdb_dewey_lsmcok1_local\"}],\"observed_state\":{\"allocated_floor\":null,\"assigned_floor\":null,\"is_called\":false,\"last_value\":10000},\"owner\":\"dayhoff\",\"physical_target\":{\"database\":\"dewey_prod\",\"database_oid\":16749,\"server_address\":\"10.0.2.148/32\",\"server_port\":5432},\"schema_name\":\"tapdb_dewey_lsmcok1_local\",\"sequence_inventory_sha256\":\"7dc63a2ae200cb19aa027994ee9a354be8108fe40c1ea9d478216f287ab4e1fc\",\"source_contract_sha256\":\"645315ea89b62edf78f30bdb83d282ea2bf782d4a98912f23662baeef2eba1b3\",\"source_file_sha256\":\"45776ac58ee2e9889a5590490a8a75d59c9745bca5dcc40ca982f0d75364a937\"},\"declared_prefix\":\"AY\",\"source_asset\":\"schema/tapdb_schema.sql\",\"source_commit\":\"52d5f498dc4751b7e42d346bee2811a14080e5a5\",\"source_declaration\":\"CREATE SEQUENCE IF NOT EXISTS ay_instance_seq;   -- AY (assay)\",\"source_line\":13,\"source_sha256\":\"64362e2882a7b424f6bf3c6b3d9c21d1e859ec98d4ee61ca2a728cecfd134584\",\"source_tag\":\"9.0.9\",\"statement\":\"CREATE SEQUENCE IF NOT EXISTS ay_instance_seq;\"}",
+        "kind": "prefix",
+        "prefix": "AY"
+      },
+      "wsx_instance_seq": {
+        "evidence": "{\"catalog_definition\":{\"seqcache\":1,\"seqcycle\":false,\"seqincrement\":1,\"seqmax\":9223372036854775807,\"seqmin\":1,\"seqstart\":1},\"catalog_evidence\":{\"dependencies\":[{\"dependent\":\"sequence tapdb_dewey_lsmcok1_local.wsx_instance_seq\",\"kind\":\"n\",\"referenced\":\"schema tapdb_dewey_lsmcok1_local\"}],\"observed_state\":{\"allocated_floor\":null,\"assigned_floor\":null,\"is_called\":false,\"last_value\":10000},\"owner\":\"dayhoff\",\"physical_target\":{\"database\":\"dewey_prod\",\"database_oid\":16749,\"server_address\":\"10.0.2.148/32\",\"server_port\":5432},\"schema_name\":\"tapdb_dewey_lsmcok1_local\",\"sequence_inventory_sha256\":\"7dc63a2ae200cb19aa027994ee9a354be8108fe40c1ea9d478216f287ab4e1fc\",\"source_contract_sha256\":\"645315ea89b62edf78f30bdb83d282ea2bf782d4a98912f23662baeef2eba1b3\",\"source_file_sha256\":\"45776ac58ee2e9889a5590490a8a75d59c9745bca5dcc40ca982f0d75364a937\"},\"declared_prefix\":\"WSX\",\"source_asset\":\"schema/tapdb_schema.sql\",\"source_commit\":\"52d5f498dc4751b7e42d346bee2811a14080e5a5\",\"source_declaration\":\"CREATE SEQUENCE IF NOT EXISTS wsx_instance_seq;  -- WSX (workflow_step)\",\"source_line\":11,\"source_sha256\":\"64362e2882a7b424f6bf3c6b3d9c21d1e859ec98d4ee61ca2a728cecfd134584\",\"source_tag\":\"9.0.9\",\"statement\":\"CREATE SEQUENCE IF NOT EXISTS wsx_instance_seq;\"}",
+        "kind": "prefix",
+        "prefix": "WSX"
+      },
+      "wx_instance_seq": {
+        "evidence": "{\"catalog_definition\":{\"seqcache\":1,\"seqcycle\":false,\"seqincrement\":1,\"seqmax\":9223372036854775807,\"seqmin\":1,\"seqstart\":1},\"catalog_evidence\":{\"dependencies\":[{\"dependent\":\"sequence tapdb_dewey_lsmcok1_local.wx_instance_seq\",\"kind\":\"n\",\"referenced\":\"schema tapdb_dewey_lsmcok1_local\"}],\"observed_state\":{\"allocated_floor\":null,\"assigned_floor\":null,\"is_called\":false,\"last_value\":10000},\"owner\":\"dayhoff\",\"physical_target\":{\"database\":\"dewey_prod\",\"database_oid\":16749,\"server_address\":\"10.0.2.148/32\",\"server_port\":5432},\"schema_name\":\"tapdb_dewey_lsmcok1_local\",\"sequence_inventory_sha256\":\"7dc63a2ae200cb19aa027994ee9a354be8108fe40c1ea9d478216f287ab4e1fc\",\"source_contract_sha256\":\"645315ea89b62edf78f30bdb83d282ea2bf782d4a98912f23662baeef2eba1b3\",\"source_file_sha256\":\"45776ac58ee2e9889a5590490a8a75d59c9745bca5dcc40ca982f0d75364a937\"},\"declared_prefix\":\"WX\",\"source_asset\":\"schema/tapdb_schema.sql\",\"source_commit\":\"52d5f498dc4751b7e42d346bee2811a14080e5a5\",\"source_declaration\":\"CREATE SEQUENCE IF NOT EXISTS wx_instance_seq;   -- WX (workflow)\",\"source_line\":10,\"source_sha256\":\"64362e2882a7b424f6bf3c6b3d9c21d1e859ec98d4ee61ca2a728cecfd134584\",\"source_tag\":\"9.0.9\",\"statement\":\"CREATE SEQUENCE IF NOT EXISTS wx_instance_seq;\"}",
+        "kind": "prefix",
+        "prefix": "WX"
+      },
+      "xx_instance_seq": {
+        "evidence": "{\"catalog_definition\":{\"seqcache\":1,\"seqcycle\":false,\"seqincrement\":1,\"seqmax\":9223372036854775807,\"seqmin\":1,\"seqstart\":1},\"catalog_evidence\":{\"dependencies\":[{\"dependent\":\"sequence tapdb_dewey_lsmcok1_local.xx_instance_seq\",\"kind\":\"n\",\"referenced\":\"schema tapdb_dewey_lsmcok1_local\"}],\"observed_state\":{\"allocated_floor\":null,\"assigned_floor\":null,\"is_called\":false,\"last_value\":10000},\"owner\":\"dayhoff\",\"physical_target\":{\"database\":\"dewey_prod\",\"database_oid\":16749,\"server_address\":\"10.0.2.148/32\",\"server_port\":5432},\"schema_name\":\"tapdb_dewey_lsmcok1_local\",\"sequence_inventory_sha256\":\"7dc63a2ae200cb19aa027994ee9a354be8108fe40c1ea9d478216f287ab4e1fc\",\"source_contract_sha256\":\"645315ea89b62edf78f30bdb83d282ea2bf782d4a98912f23662baeef2eba1b3\",\"source_file_sha256\":\"45776ac58ee2e9889a5590490a8a75d59c9745bca5dcc40ca982f0d75364a937\"},\"declared_prefix\":\"XX\",\"source_asset\":\"schema/tapdb_schema.sql\",\"source_commit\":\"52d5f498dc4751b7e42d346bee2811a14080e5a5\",\"source_declaration\":\"CREATE SEQUENCE IF NOT EXISTS xx_instance_seq;   -- XX (action)\",\"source_line\":12,\"source_sha256\":\"64362e2882a7b424f6bf3c6b3d9c21d1e859ec98d4ee61ca2a728cecfd134584\",\"source_tag\":\"9.0.9\",\"statement\":\"CREATE SEQUENCE IF NOT EXISTS xx_instance_seq;\"}",
+        "kind": "prefix",
+        "prefix": "XX"
+      }
+    },
+    "sequences": [
+      {
+        "allocated_floor": null,
+        "assigned_floor": 76689,
+        "cache_size": 1,
+        "cycle": false,
+        "dependencies": [
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.adt_instance_seq",
+            "kind": "n",
+            "referenced": "schema tapdb_dewey_lsmcok1_local"
+          }
+        ],
+        "increment_by": 1,
+        "is_called": false,
+        "last_value": 76691,
+        "mapping": {
+          "evidence": [
+            {
+              "source": "stored_rows",
+              "table": "audit_log"
+            },
+            {
+              "source": "identity_binding",
+              "table": "tapdb_identity_prefix_config"
+            }
+          ],
+          "kind": "prefix",
+          "prefix": "ADT"
+        },
+        "max_value": 9223372036854775807,
+        "min_value": 1,
+        "name": "adt_instance_seq",
+        "owner": "dayhoff",
+        "start_value": 1
+      },
+      {
+        "allocated_floor": null,
+        "assigned_floor": 66690,
+        "cache_size": 1,
+        "cycle": false,
+        "dependencies": [
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.audit_log_uid_seq",
+            "kind": "i",
+            "referenced": "column uid of table tapdb_dewey_lsmcok1_local.audit_log"
+          },
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.audit_log_uid_seq",
+            "kind": "n",
+            "referenced": "schema tapdb_dewey_lsmcok1_local"
+          }
+        ],
+        "increment_by": 1,
+        "is_called": false,
+        "last_value": 66692,
+        "mapping": {
+          "columns": [
+            {
+              "column_name": "uid",
+              "dependency_type": "i",
+              "schema_name": "tapdb_dewey_lsmcok1_local",
+              "table_name": "audit_log"
+            }
+          ],
+          "kind": "owned_column"
+        },
+        "max_value": 9223372036854775807,
+        "min_value": 1,
+        "name": "audit_log_uid_seq",
+        "owner": "dayhoff",
+        "start_value": 1
+      },
+      {
+        "allocated_floor": null,
+        "assigned_floor": null,
+        "cache_size": 1,
+        "cycle": false,
+        "dependencies": [
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.ay_instance_seq",
+            "kind": "n",
+            "referenced": "schema tapdb_dewey_lsmcok1_local"
+          }
+        ],
+        "increment_by": 1,
+        "is_called": false,
+        "last_value": 10001,
+        "mapping": {
+          "evidence": [
+            {
+              "annotation": "tapdb-prefix-binding/v1:AY",
+              "source": "catalog_annotation"
+            },
+            {
+              "evidence": "{\"catalog_definition\":{\"seqcache\":1,\"seqcycle\":false,\"seqincrement\":1,\"seqmax\":9223372036854775807,\"seqmin\":1,\"seqstart\":1},\"catalog_evidence\":{\"dependencies\":[{\"dependent\":\"sequence tapdb_dewey_lsmcok1_local.ay_instance_seq\",\"kind\":\"n\",\"referenced\":\"schema tapdb_dewey_lsmcok1_local\"}],\"observed_state\":{\"allocated_floor\":null,\"assigned_floor\":null,\"is_called\":false,\"last_value\":10000},\"owner\":\"dayhoff\",\"physical_target\":{\"database\":\"dewey_prod\",\"database_oid\":16749,\"server_address\":\"10.0.2.148/32\",\"server_port\":5432},\"schema_name\":\"tapdb_dewey_lsmcok1_local\",\"sequence_inventory_sha256\":\"7dc63a2ae200cb19aa027994ee9a354be8108fe40c1ea9d478216f287ab4e1fc\",\"source_contract_sha256\":\"645315ea89b62edf78f30bdb83d282ea2bf782d4a98912f23662baeef2eba1b3\",\"source_file_sha256\":\"45776ac58ee2e9889a5590490a8a75d59c9745bca5dcc40ca982f0d75364a937\"},\"declared_prefix\":\"AY\",\"source_asset\":\"schema/tapdb_schema.sql\",\"source_commit\":\"52d5f498dc4751b7e42d346bee2811a14080e5a5\",\"source_declaration\":\"CREATE SEQUENCE IF NOT EXISTS ay_instance_seq;   -- AY (assay)\",\"source_line\":13,\"source_sha256\":\"64362e2882a7b424f6bf3c6b3d9c21d1e859ec98d4ee61ca2a728cecfd134584\",\"source_tag\":\"9.0.9\",\"statement\":\"CREATE SEQUENCE IF NOT EXISTS ay_instance_seq;\"}",
+              "source": "explicit_source_contract"
+            }
+          ],
+          "kind": "prefix",
+          "prefix": "AY"
+        },
+        "max_value": 9223372036854775807,
+        "min_value": 1,
+        "name": "ay_instance_seq",
+        "owner": "dayhoff",
+        "start_value": 1
+      },
+      {
+        "allocated_floor": null,
+        "assigned_floor": 22202,
+        "cache_size": 1,
+        "cycle": false,
+        "dependencies": [
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.dgx_instance_seq",
+            "kind": "n",
+            "referenced": "schema tapdb_dewey_lsmcok1_local"
+          }
+        ],
+        "increment_by": 1,
+        "is_called": false,
+        "last_value": 22204,
+        "mapping": {
+          "evidence": [
+            {
+              "source": "stored_rows",
+              "table": "generic_instance"
+            },
+            {
+              "source": "stored_rows",
+              "table": "generic_template"
+            },
+            {
+              "source": "template_binding",
+              "table": "generic_template"
+            },
+            {
+              "source": "identity_binding",
+              "table": "tapdb_identity_prefix_config"
+            }
+          ],
+          "kind": "prefix",
+          "prefix": "DGX"
+        },
+        "max_value": 9223372036854775807,
+        "min_value": 1,
+        "name": "dgx_instance_seq",
+        "owner": "dayhoff",
+        "start_value": 1
+      },
+      {
+        "allocated_floor": null,
+        "assigned_floor": 11014,
+        "cache_size": 1,
+        "cycle": false,
+        "dependencies": [
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.edg_instance_seq",
+            "kind": "n",
+            "referenced": "schema tapdb_dewey_lsmcok1_local"
+          }
+        ],
+        "increment_by": 1,
+        "is_called": false,
+        "last_value": 11016,
+        "mapping": {
+          "evidence": [
+            {
+              "source": "stored_rows",
+              "table": "generic_instance_lineage"
+            },
+            {
+              "source": "identity_binding",
+              "table": "tapdb_identity_prefix_config"
+            }
+          ],
+          "kind": "prefix",
+          "prefix": "EDG"
+        },
+        "max_value": 9223372036854775807,
+        "min_value": 1,
+        "name": "edg_instance_seq",
+        "owner": "dayhoff",
+        "start_value": 1
+      },
+      {
+        "allocated_floor": null,
+        "assigned_floor": 1015,
+        "cache_size": 1,
+        "cycle": false,
+        "dependencies": [
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.generic_instance_lineage_uid_seq",
+            "kind": "i",
+            "referenced": "column uid of table tapdb_dewey_lsmcok1_local.generic_instance_lineage"
+          },
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.generic_instance_lineage_uid_seq",
+            "kind": "n",
+            "referenced": "schema tapdb_dewey_lsmcok1_local"
+          }
+        ],
+        "increment_by": 1,
+        "is_called": false,
+        "last_value": 1017,
+        "mapping": {
+          "columns": [
+            {
+              "column_name": "uid",
+              "dependency_type": "i",
+              "schema_name": "tapdb_dewey_lsmcok1_local",
+              "table_name": "generic_instance_lineage"
+            }
+          ],
+          "kind": "owned_column"
+        },
+        "max_value": 9223372036854775807,
+        "min_value": 1,
+        "name": "generic_instance_lineage_uid_seq",
+        "owner": "dayhoff",
+        "start_value": 1
+      },
+      {
+        "allocated_floor": null,
+        "assigned_floor": 12204,
+        "cache_size": 1,
+        "cycle": false,
+        "dependencies": [
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.generic_instance_uid_seq",
+            "kind": "i",
+            "referenced": "column uid of table tapdb_dewey_lsmcok1_local.generic_instance"
+          },
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.generic_instance_uid_seq",
+            "kind": "n",
+            "referenced": "schema tapdb_dewey_lsmcok1_local"
+          }
+        ],
+        "increment_by": 1,
+        "is_called": false,
+        "last_value": 12206,
+        "mapping": {
+          "columns": [
+            {
+              "column_name": "uid",
+              "dependency_type": "i",
+              "schema_name": "tapdb_dewey_lsmcok1_local",
+              "table_name": "generic_instance"
+            }
+          ],
+          "kind": "owned_column"
+        },
+        "max_value": 9223372036854775807,
+        "min_value": 1,
+        "name": "generic_instance_uid_seq",
+        "owner": "dayhoff",
+        "start_value": 1
+      },
+      {
+        "allocated_floor": null,
+        "assigned_floor": 22,
+        "cache_size": 1,
+        "cycle": false,
+        "dependencies": [
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.generic_template_uid_seq",
+            "kind": "i",
+            "referenced": "column uid of table tapdb_dewey_lsmcok1_local.generic_template"
+          },
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.generic_template_uid_seq",
+            "kind": "n",
+            "referenced": "schema tapdb_dewey_lsmcok1_local"
+          }
+        ],
+        "increment_by": 1,
+        "is_called": false,
+        "last_value": 24,
+        "mapping": {
+          "columns": [
+            {
+              "column_name": "uid",
+              "dependency_type": "i",
+              "schema_name": "tapdb_dewey_lsmcok1_local",
+              "table_name": "generic_template"
+            }
+          ],
+          "kind": "owned_column"
+        },
+        "max_value": 9223372036854775807,
+        "min_value": 1,
+        "name": "generic_template_uid_seq",
+        "owner": "dayhoff",
+        "start_value": 1
+      },
+      {
+        "allocated_floor": null,
+        "assigned_floor": null,
+        "cache_size": 1,
+        "cycle": false,
+        "dependencies": [
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.gse_instance_seq",
+            "kind": "n",
+            "referenced": "schema tapdb_dewey_lsmcok1_local"
+          }
+        ],
+        "increment_by": 1,
+        "is_called": false,
+        "last_value": 2,
+        "mapping": {
+          "evidence": [
+            {
+              "source": "template_binding",
+              "table": "generic_template"
+            }
+          ],
+          "kind": "prefix",
+          "prefix": "GSE"
+        },
+        "max_value": 9223372036854775807,
+        "min_value": 1,
+        "name": "gse_instance_seq",
+        "owner": "dayhoff",
+        "start_value": 1
+      },
+      {
+        "allocated_floor": null,
+        "assigned_floor": 4,
+        "cache_size": 1,
+        "cycle": false,
+        "dependencies": [
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.gvr_instance_seq",
+            "kind": "n",
+            "referenced": "schema tapdb_dewey_lsmcok1_local"
+          }
+        ],
+        "increment_by": 1,
+        "is_called": false,
+        "last_value": 6,
+        "mapping": {
+          "evidence": [
+            {
+              "source": "stored_rows",
+              "table": "generic_instance"
+            },
+            {
+              "source": "template_binding",
+              "table": "generic_template"
+            }
+          ],
+          "kind": "prefix",
+          "prefix": "GVR"
+        },
+        "max_value": 9223372036854775807,
+        "min_value": 1,
+        "name": "gvr_instance_seq",
+        "owner": "dayhoff",
+        "start_value": 1
+      },
+      {
+        "allocated_floor": null,
+        "assigned_floor": null,
+        "cache_size": 1,
+        "cycle": false,
+        "dependencies": [
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.inbox_message_uid_seq",
+            "kind": "i",
+            "referenced": "column uid of table tapdb_dewey_lsmcok1_local.inbox_message"
+          },
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.inbox_message_uid_seq",
+            "kind": "n",
+            "referenced": "schema tapdb_dewey_lsmcok1_local"
+          }
+        ],
+        "increment_by": 1,
+        "is_called": false,
+        "last_value": 2,
+        "mapping": {
+          "columns": [
+            {
+              "column_name": "uid",
+              "dependency_type": "i",
+              "schema_name": "tapdb_dewey_lsmcok1_local",
+              "table_name": "inbox_message"
+            }
+          ],
+          "kind": "owned_column"
+        },
+        "max_value": 9223372036854775807,
+        "min_value": 1,
+        "name": "inbox_message_uid_seq",
+        "owner": "dayhoff",
+        "start_value": 1
+      },
+      {
+        "allocated_floor": null,
+        "assigned_floor": null,
+        "cache_size": 1,
+        "cycle": false,
+        "dependencies": [
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.msg_instance_seq",
+            "kind": "n",
+            "referenced": "schema tapdb_dewey_lsmcok1_local"
+          }
+        ],
+        "increment_by": 1,
+        "is_called": false,
+        "last_value": 10001,
+        "mapping": {
+          "evidence": [
+            {
+              "source": "template_binding",
+              "table": "generic_template"
+            },
+            {
+              "annotation": "tapdb-prefix-binding/v1:MSG",
+              "source": "catalog_annotation"
+            }
+          ],
+          "kind": "prefix",
+          "prefix": "MSG"
+        },
+        "max_value": 9223372036854775807,
+        "min_value": 1,
+        "name": "msg_instance_seq",
+        "owner": "dayhoff",
+        "start_value": 1
+      },
+      {
+        "allocated_floor": null,
+        "assigned_floor": null,
+        "cache_size": 1,
+        "cycle": false,
+        "dependencies": [
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.outbox_event_attempt_uid_seq",
+            "kind": "i",
+            "referenced": "column uid of table tapdb_dewey_lsmcok1_local.outbox_event_attempt"
+          },
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.outbox_event_attempt_uid_seq",
+            "kind": "n",
+            "referenced": "schema tapdb_dewey_lsmcok1_local"
+          }
+        ],
+        "increment_by": 1,
+        "is_called": false,
+        "last_value": 2,
+        "mapping": {
+          "columns": [
+            {
+              "column_name": "uid",
+              "dependency_type": "i",
+              "schema_name": "tapdb_dewey_lsmcok1_local",
+              "table_name": "outbox_event_attempt"
+            }
+          ],
+          "kind": "owned_column"
+        },
+        "max_value": 9223372036854775807,
+        "min_value": 1,
+        "name": "outbox_event_attempt_uid_seq",
+        "owner": "dayhoff",
+        "start_value": 1
+      },
+      {
+        "allocated_floor": null,
+        "assigned_floor": null,
+        "cache_size": 1,
+        "cycle": false,
+        "dependencies": [
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.outbox_event_id_seq",
+            "kind": "i",
+            "referenced": "column id of table tapdb_dewey_lsmcok1_local.outbox_event"
+          },
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.outbox_event_id_seq",
+            "kind": "n",
+            "referenced": "schema tapdb_dewey_lsmcok1_local"
+          }
+        ],
+        "increment_by": 1,
+        "is_called": false,
+        "last_value": 2,
+        "mapping": {
+          "columns": [
+            {
+              "column_name": "id",
+              "dependency_type": "i",
+              "schema_name": "tapdb_dewey_lsmcok1_local",
+              "table_name": "outbox_event"
+            }
+          ],
+          "kind": "owned_column"
+        },
+        "max_value": 9223372036854775807,
+        "min_value": 1,
+        "name": "outbox_event_id_seq",
+        "owner": "dayhoff",
+        "start_value": 1
+      },
+      {
+        "allocated_floor": null,
+        "assigned_floor": null,
+        "cache_size": 1,
+        "cycle": false,
+        "dependencies": [
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.sys_instance_seq",
+            "kind": "n",
+            "referenced": "schema tapdb_dewey_lsmcok1_local"
+          }
+        ],
+        "increment_by": 1,
+        "is_called": false,
+        "last_value": 10001,
+        "mapping": {
+          "evidence": [
+            {
+              "source": "template_binding",
+              "table": "generic_template"
+            }
+          ],
+          "kind": "prefix",
+          "prefix": "SYS"
+        },
+        "max_value": 9223372036854775807,
+        "min_value": 1,
+        "name": "sys_instance_seq",
+        "owner": "dayhoff",
+        "start_value": 1
+      },
+      {
+        "allocated_floor": null,
+        "assigned_floor": 10010,
+        "cache_size": 1,
+        "cycle": false,
+        "dependencies": [
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.tpx_instance_seq",
+            "kind": "n",
+            "referenced": "schema tapdb_dewey_lsmcok1_local"
+          }
+        ],
+        "increment_by": 1,
+        "is_called": false,
+        "last_value": 10012,
+        "mapping": {
+          "evidence": [
+            {
+              "source": "stored_rows",
+              "table": "generic_template"
+            },
+            {
+              "source": "identity_binding",
+              "table": "tapdb_identity_prefix_config"
+            }
+          ],
+          "kind": "prefix",
+          "prefix": "TPX"
+        },
+        "max_value": 9223372036854775807,
+        "min_value": 1,
+        "name": "tpx_instance_seq",
+        "owner": "dayhoff",
+        "start_value": 1
+      },
+      {
+        "allocated_floor": null,
+        "assigned_floor": null,
+        "cache_size": 1,
+        "cycle": false,
+        "dependencies": [
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.wsx_instance_seq",
+            "kind": "n",
+            "referenced": "schema tapdb_dewey_lsmcok1_local"
+          }
+        ],
+        "increment_by": 1,
+        "is_called": false,
+        "last_value": 10001,
+        "mapping": {
+          "evidence": [
+            {
+              "annotation": "tapdb-prefix-binding/v1:WSX",
+              "source": "catalog_annotation"
+            },
+            {
+              "evidence": "{\"catalog_definition\":{\"seqcache\":1,\"seqcycle\":false,\"seqincrement\":1,\"seqmax\":9223372036854775807,\"seqmin\":1,\"seqstart\":1},\"catalog_evidence\":{\"dependencies\":[{\"dependent\":\"sequence tapdb_dewey_lsmcok1_local.wsx_instance_seq\",\"kind\":\"n\",\"referenced\":\"schema tapdb_dewey_lsmcok1_local\"}],\"observed_state\":{\"allocated_floor\":null,\"assigned_floor\":null,\"is_called\":false,\"last_value\":10000},\"owner\":\"dayhoff\",\"physical_target\":{\"database\":\"dewey_prod\",\"database_oid\":16749,\"server_address\":\"10.0.2.148/32\",\"server_port\":5432},\"schema_name\":\"tapdb_dewey_lsmcok1_local\",\"sequence_inventory_sha256\":\"7dc63a2ae200cb19aa027994ee9a354be8108fe40c1ea9d478216f287ab4e1fc\",\"source_contract_sha256\":\"645315ea89b62edf78f30bdb83d282ea2bf782d4a98912f23662baeef2eba1b3\",\"source_file_sha256\":\"45776ac58ee2e9889a5590490a8a75d59c9745bca5dcc40ca982f0d75364a937\"},\"declared_prefix\":\"WSX\",\"source_asset\":\"schema/tapdb_schema.sql\",\"source_commit\":\"52d5f498dc4751b7e42d346bee2811a14080e5a5\",\"source_declaration\":\"CREATE SEQUENCE IF NOT EXISTS wsx_instance_seq;  -- WSX (workflow_step)\",\"source_line\":11,\"source_sha256\":\"64362e2882a7b424f6bf3c6b3d9c21d1e859ec98d4ee61ca2a728cecfd134584\",\"source_tag\":\"9.0.9\",\"statement\":\"CREATE SEQUENCE IF NOT EXISTS wsx_instance_seq;\"}",
+              "source": "explicit_source_contract"
+            }
+          ],
+          "kind": "prefix",
+          "prefix": "WSX"
+        },
+        "max_value": 9223372036854775807,
+        "min_value": 1,
+        "name": "wsx_instance_seq",
+        "owner": "dayhoff",
+        "start_value": 1
+      },
+      {
+        "allocated_floor": null,
+        "assigned_floor": null,
+        "cache_size": 1,
+        "cycle": false,
+        "dependencies": [
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.wx_instance_seq",
+            "kind": "n",
+            "referenced": "schema tapdb_dewey_lsmcok1_local"
+          }
+        ],
+        "increment_by": 1,
+        "is_called": false,
+        "last_value": 10001,
+        "mapping": {
+          "evidence": [
+            {
+              "annotation": "tapdb-prefix-binding/v1:WX",
+              "source": "catalog_annotation"
+            },
+            {
+              "evidence": "{\"catalog_definition\":{\"seqcache\":1,\"seqcycle\":false,\"seqincrement\":1,\"seqmax\":9223372036854775807,\"seqmin\":1,\"seqstart\":1},\"catalog_evidence\":{\"dependencies\":[{\"dependent\":\"sequence tapdb_dewey_lsmcok1_local.wx_instance_seq\",\"kind\":\"n\",\"referenced\":\"schema tapdb_dewey_lsmcok1_local\"}],\"observed_state\":{\"allocated_floor\":null,\"assigned_floor\":null,\"is_called\":false,\"last_value\":10000},\"owner\":\"dayhoff\",\"physical_target\":{\"database\":\"dewey_prod\",\"database_oid\":16749,\"server_address\":\"10.0.2.148/32\",\"server_port\":5432},\"schema_name\":\"tapdb_dewey_lsmcok1_local\",\"sequence_inventory_sha256\":\"7dc63a2ae200cb19aa027994ee9a354be8108fe40c1ea9d478216f287ab4e1fc\",\"source_contract_sha256\":\"645315ea89b62edf78f30bdb83d282ea2bf782d4a98912f23662baeef2eba1b3\",\"source_file_sha256\":\"45776ac58ee2e9889a5590490a8a75d59c9745bca5dcc40ca982f0d75364a937\"},\"declared_prefix\":\"WX\",\"source_asset\":\"schema/tapdb_schema.sql\",\"source_commit\":\"52d5f498dc4751b7e42d346bee2811a14080e5a5\",\"source_declaration\":\"CREATE SEQUENCE IF NOT EXISTS wx_instance_seq;   -- WX (workflow)\",\"source_line\":10,\"source_sha256\":\"64362e2882a7b424f6bf3c6b3d9c21d1e859ec98d4ee61ca2a728cecfd134584\",\"source_tag\":\"9.0.9\",\"statement\":\"CREATE SEQUENCE IF NOT EXISTS wx_instance_seq;\"}",
+              "source": "explicit_source_contract"
+            }
+          ],
+          "kind": "prefix",
+          "prefix": "WX"
+        },
+        "max_value": 9223372036854775807,
+        "min_value": 1,
+        "name": "wx_instance_seq",
+        "owner": "dayhoff",
+        "start_value": 1
+      },
+      {
+        "allocated_floor": null,
+        "assigned_floor": null,
+        "cache_size": 1,
+        "cycle": false,
+        "dependencies": [
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.xrf_instance_seq",
+            "kind": "n",
+            "referenced": "schema tapdb_dewey_lsmcok1_local"
+          }
+        ],
+        "increment_by": 1,
+        "is_called": false,
+        "last_value": 2,
+        "mapping": {
+          "evidence": [
+            {
+              "source": "template_binding",
+              "table": "generic_template"
+            }
+          ],
+          "kind": "prefix",
+          "prefix": "XRF"
+        },
+        "max_value": 9223372036854775807,
+        "min_value": 1,
+        "name": "xrf_instance_seq",
+        "owner": "dayhoff",
+        "start_value": 1
+      },
+      {
+        "allocated_floor": null,
+        "assigned_floor": null,
+        "cache_size": 1,
+        "cycle": false,
+        "dependencies": [
+          {
+            "dependent": "sequence tapdb_dewey_lsmcok1_local.xx_instance_seq",
+            "kind": "n",
+            "referenced": "schema tapdb_dewey_lsmcok1_local"
+          }
+        ],
+        "increment_by": 1,
+        "is_called": false,
+        "last_value": 10001,
+        "mapping": {
+          "evidence": [
+            {
+              "annotation": "tapdb-prefix-binding/v1:XX",
+              "source": "catalog_annotation"
+            },
+            {
+              "evidence": "{\"catalog_definition\":{\"seqcache\":1,\"seqcycle\":false,\"seqincrement\":1,\"seqmax\":9223372036854775807,\"seqmin\":1,\"seqstart\":1},\"catalog_evidence\":{\"dependencies\":[{\"dependent\":\"sequence tapdb_dewey_lsmcok1_local.xx_instance_seq\",\"kind\":\"n\",\"referenced\":\"schema tapdb_dewey_lsmcok1_local\"}],\"observed_state\":{\"allocated_floor\":null,\"assigned_floor\":null,\"is_called\":false,\"last_value\":10000},\"owner\":\"dayhoff\",\"physical_target\":{\"database\":\"dewey_prod\",\"database_oid\":16749,\"server_address\":\"10.0.2.148/32\",\"server_port\":5432},\"schema_name\":\"tapdb_dewey_lsmcok1_local\",\"sequence_inventory_sha256\":\"7dc63a2ae200cb19aa027994ee9a354be8108fe40c1ea9d478216f287ab4e1fc\",\"source_contract_sha256\":\"645315ea89b62edf78f30bdb83d282ea2bf782d4a98912f23662baeef2eba1b3\",\"source_file_sha256\":\"45776ac58ee2e9889a5590490a8a75d59c9745bca5dcc40ca982f0d75364a937\"},\"declared_prefix\":\"XX\",\"source_asset\":\"schema/tapdb_schema.sql\",\"source_commit\":\"52d5f498dc4751b7e42d346bee2811a14080e5a5\",\"source_declaration\":\"CREATE SEQUENCE IF NOT EXISTS xx_instance_seq;   -- XX (action)\",\"source_line\":12,\"source_sha256\":\"64362e2882a7b424f6bf3c6b3d9c21d1e859ec98d4ee61ca2a728cecfd134584\",\"source_tag\":\"9.0.9\",\"statement\":\"CREATE SEQUENCE IF NOT EXISTS xx_instance_seq;\"}",
+              "source": "explicit_source_contract"
+            }
+          ],
+          "kind": "prefix",
+          "prefix": "XX"
+        },
+        "max_value": 9223372036854775807,
+        "min_value": 1,
+        "name": "xx_instance_seq",
+        "owner": "dayhoff",
+        "start_value": 1
+      }
+    ],
+    "sha256": "584a01f80984c14cd15a79cff007b4e260fafd97481ab8f80b03aaae7c56e170",
+    "target": {
+      "config_identity": "/home/ubuntu/dewey_ops/tapdb101-20260911/rehearsal-operator.yaml",
+      "database": "dewey_tapdb10_rehearsal_20260911",
+      "domain_code": "M",
+      "engine_type": "aurora",
+      "host": "dayhoff-lsmcok1-tapdb.cluster-ch4mq8a6wcdf.us-west-2.rds.amazonaws.com",
+      "owner_repo_name": "dewey",
+      "port": 5432,
+      "schema_name": "tapdb_dewey_lsmcok1_local"
+    }
+  },
+  "phase": "committed",
+  "plan_sha256": "83f86ca0aae608b2de42147c68280534848029d057c7b60cec72eabeda7f2791",
+  "recovery_family": {
+    "family_id": "bfb30029-5dd1-42ec-8bf8-3094e78ae2f6",
+    "origin": {
+      "physical_target": {
+        "database": "dewey_tapdb10_rehearsal_20260911",
+        "database_oid": 645854,
+        "server_address": "10.0.2.148/32",
+        "server_port": 5432
+      },
+      "target": {
+        "config_identity": "/home/ubuntu/dewey_ops/tapdb101-20260911/rehearsal-operator.yaml",
+        "database": "dewey_tapdb10_rehearsal_20260911",
+        "domain_code": "M",
+        "engine_type": "aurora",
+        "host": "dayhoff-lsmcok1-tapdb.cluster-ch4mq8a6wcdf.us-west-2.rds.amazonaws.com",
+        "owner_repo_name": "dewey",
+        "port": 5432,
+        "schema_name": "tapdb_dewey_lsmcok1_local"
+      }
+    },
+    "receipts_dirs": [
+      "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native-journal"
+    ],
+    "schema_version": "tapdb-recovery-family/v1",
+    "sha256": "a6defebdfce4fa923ba64e67f35a742c0859239ac90e2ee82664b26a521cfc9b"
+  },
+  "schema_version": "tapdb-sequence-apply/v1",
+  "sha256": "8627fc06c629d2bc921e6f49370e1469e6db949ae9da086ff4aecf10d9c4217e",
+  "verification": {
+    "floors": [
+      {
+        "name": "adt_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+        "value": 76689
+      },
+      {
+        "name": "adt_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+        "value": 76689
+      },
+      {
+        "name": "adt_instance_seq",
+        "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+        "value": 76689
+      },
+      {
+        "name": "adt_instance_seq",
+        "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+        "value": 76689
+      },
+      {
+        "name": "adt_instance_seq",
+        "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+        "value": 76689
+      },
+      {
+        "name": "adt_instance_seq",
+        "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+        "value": 76689
+      },
+      {
+        "name": "adt_instance_seq",
+        "source": "migration-preflight:allocated_floor",
+        "value": 76689
+      },
+      {
+        "name": "adt_instance_seq",
+        "source": "migration-preflight:assigned_floor",
+        "value": 76689
+      },
+      {
+        "name": "adt_instance_seq",
+        "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+        "value": 76689
+      },
+      {
+        "name": "adt_instance_seq",
+        "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+        "value": 76689
+      },
+      {
+        "name": "adt_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+        "value": 76690
+      },
+      {
+        "name": "adt_instance_seq",
+        "source": "sequence_advance_intent",
+        "value": 76690
+      },
+      {
+        "name": "audit_log_uid_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+        "value": 66690
+      },
+      {
+        "name": "audit_log_uid_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+        "value": 66690
+      },
+      {
+        "name": "audit_log_uid_seq",
+        "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+        "value": 66690
+      },
+      {
+        "name": "audit_log_uid_seq",
+        "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+        "value": 66690
+      },
+      {
+        "name": "audit_log_uid_seq",
+        "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+        "value": 66690
+      },
+      {
+        "name": "audit_log_uid_seq",
+        "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+        "value": 66690
+      },
+      {
+        "name": "audit_log_uid_seq",
+        "source": "migration-preflight:allocated_floor",
+        "value": 66690
+      },
+      {
+        "name": "audit_log_uid_seq",
+        "source": "migration-preflight:assigned_floor",
+        "value": 66690
+      },
+      {
+        "name": "audit_log_uid_seq",
+        "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+        "value": 66690
+      },
+      {
+        "name": "audit_log_uid_seq",
+        "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+        "value": 66690
+      },
+      {
+        "name": "audit_log_uid_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+        "value": 66691
+      },
+      {
+        "name": "audit_log_uid_seq",
+        "source": "sequence_advance_intent",
+        "value": 66691
+      },
+      {
+        "name": "ay_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+        "value": 10000
+      },
+      {
+        "name": "ay_instance_seq",
+        "source": "sequence_advance_intent",
+        "value": 10000
+      },
+      {
+        "name": "dgx_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+        "value": 22202
+      },
+      {
+        "name": "dgx_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+        "value": 22202
+      },
+      {
+        "name": "dgx_instance_seq",
+        "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+        "value": 22202
+      },
+      {
+        "name": "dgx_instance_seq",
+        "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+        "value": 22202
+      },
+      {
+        "name": "dgx_instance_seq",
+        "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+        "value": 22202
+      },
+      {
+        "name": "dgx_instance_seq",
+        "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+        "value": 22202
+      },
+      {
+        "name": "dgx_instance_seq",
+        "source": "migration-preflight:allocated_floor",
+        "value": 22202
+      },
+      {
+        "name": "dgx_instance_seq",
+        "source": "migration-preflight:assigned_floor",
+        "value": 22202
+      },
+      {
+        "name": "dgx_instance_seq",
+        "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+        "value": 22202
+      },
+      {
+        "name": "dgx_instance_seq",
+        "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+        "value": 22202
+      },
+      {
+        "name": "dgx_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+        "value": 22203
+      },
+      {
+        "name": "dgx_instance_seq",
+        "source": "sequence_advance_intent",
+        "value": 22203
+      },
+      {
+        "name": "edg_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+        "value": 11014
+      },
+      {
+        "name": "edg_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+        "value": 11014
+      },
+      {
+        "name": "edg_instance_seq",
+        "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+        "value": 11014
+      },
+      {
+        "name": "edg_instance_seq",
+        "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+        "value": 11014
+      },
+      {
+        "name": "edg_instance_seq",
+        "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+        "value": 11014
+      },
+      {
+        "name": "edg_instance_seq",
+        "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+        "value": 11014
+      },
+      {
+        "name": "edg_instance_seq",
+        "source": "migration-preflight:allocated_floor",
+        "value": 11014
+      },
+      {
+        "name": "edg_instance_seq",
+        "source": "migration-preflight:assigned_floor",
+        "value": 11014
+      },
+      {
+        "name": "edg_instance_seq",
+        "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+        "value": 11014
+      },
+      {
+        "name": "edg_instance_seq",
+        "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+        "value": 11014
+      },
+      {
+        "name": "edg_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+        "value": 11015
+      },
+      {
+        "name": "edg_instance_seq",
+        "source": "sequence_advance_intent",
+        "value": 11015
+      },
+      {
+        "name": "generic_instance_lineage_uid_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+        "value": 1015
+      },
+      {
+        "name": "generic_instance_lineage_uid_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+        "value": 1015
+      },
+      {
+        "name": "generic_instance_lineage_uid_seq",
+        "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+        "value": 1015
+      },
+      {
+        "name": "generic_instance_lineage_uid_seq",
+        "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+        "value": 1015
+      },
+      {
+        "name": "generic_instance_lineage_uid_seq",
+        "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+        "value": 1015
+      },
+      {
+        "name": "generic_instance_lineage_uid_seq",
+        "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+        "value": 1015
+      },
+      {
+        "name": "generic_instance_lineage_uid_seq",
+        "source": "migration-preflight:allocated_floor",
+        "value": 1015
+      },
+      {
+        "name": "generic_instance_lineage_uid_seq",
+        "source": "migration-preflight:assigned_floor",
+        "value": 1015
+      },
+      {
+        "name": "generic_instance_lineage_uid_seq",
+        "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+        "value": 1015
+      },
+      {
+        "name": "generic_instance_lineage_uid_seq",
+        "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+        "value": 1015
+      },
+      {
+        "name": "generic_instance_lineage_uid_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+        "value": 1016
+      },
+      {
+        "name": "generic_instance_lineage_uid_seq",
+        "source": "sequence_advance_intent",
+        "value": 1016
+      },
+      {
+        "name": "generic_instance_uid_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+        "value": 12204
+      },
+      {
+        "name": "generic_instance_uid_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+        "value": 12204
+      },
+      {
+        "name": "generic_instance_uid_seq",
+        "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+        "value": 12204
+      },
+      {
+        "name": "generic_instance_uid_seq",
+        "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+        "value": 12204
+      },
+      {
+        "name": "generic_instance_uid_seq",
+        "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+        "value": 12204
+      },
+      {
+        "name": "generic_instance_uid_seq",
+        "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+        "value": 12204
+      },
+      {
+        "name": "generic_instance_uid_seq",
+        "source": "migration-preflight:allocated_floor",
+        "value": 12204
+      },
+      {
+        "name": "generic_instance_uid_seq",
+        "source": "migration-preflight:assigned_floor",
+        "value": 12204
+      },
+      {
+        "name": "generic_instance_uid_seq",
+        "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+        "value": 12204
+      },
+      {
+        "name": "generic_instance_uid_seq",
+        "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+        "value": 12204
+      },
+      {
+        "name": "generic_instance_uid_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+        "value": 12205
+      },
+      {
+        "name": "generic_instance_uid_seq",
+        "source": "sequence_advance_intent",
+        "value": 12205
+      },
+      {
+        "name": "generic_template_uid_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+        "value": 22
+      },
+      {
+        "name": "generic_template_uid_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+        "value": 22
+      },
+      {
+        "name": "generic_template_uid_seq",
+        "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+        "value": 22
+      },
+      {
+        "name": "generic_template_uid_seq",
+        "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+        "value": 22
+      },
+      {
+        "name": "generic_template_uid_seq",
+        "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+        "value": 22
+      },
+      {
+        "name": "generic_template_uid_seq",
+        "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+        "value": 22
+      },
+      {
+        "name": "generic_template_uid_seq",
+        "source": "migration-preflight:allocated_floor",
+        "value": 22
+      },
+      {
+        "name": "generic_template_uid_seq",
+        "source": "migration-preflight:assigned_floor",
+        "value": 22
+      },
+      {
+        "name": "generic_template_uid_seq",
+        "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+        "value": 22
+      },
+      {
+        "name": "generic_template_uid_seq",
+        "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+        "value": 22
+      },
+      {
+        "name": "generic_template_uid_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+        "value": 23
+      },
+      {
+        "name": "generic_template_uid_seq",
+        "source": "sequence_advance_intent",
+        "value": 23
+      },
+      {
+        "name": "gse_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+        "value": 1
+      },
+      {
+        "name": "gse_instance_seq",
+        "source": "sequence_advance_intent",
+        "value": 1
+      },
+      {
+        "name": "gvr_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+        "value": 4
+      },
+      {
+        "name": "gvr_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+        "value": 4
+      },
+      {
+        "name": "gvr_instance_seq",
+        "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+        "value": 4
+      },
+      {
+        "name": "gvr_instance_seq",
+        "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+        "value": 4
+      },
+      {
+        "name": "gvr_instance_seq",
+        "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+        "value": 4
+      },
+      {
+        "name": "gvr_instance_seq",
+        "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+        "value": 4
+      },
+      {
+        "name": "gvr_instance_seq",
+        "source": "migration-preflight:allocated_floor",
+        "value": 4
+      },
+      {
+        "name": "gvr_instance_seq",
+        "source": "migration-preflight:assigned_floor",
+        "value": 4
+      },
+      {
+        "name": "gvr_instance_seq",
+        "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+        "value": 4
+      },
+      {
+        "name": "gvr_instance_seq",
+        "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+        "value": 4
+      },
+      {
+        "name": "gvr_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+        "value": 5
+      },
+      {
+        "name": "gvr_instance_seq",
+        "source": "sequence_advance_intent",
+        "value": 5
+      },
+      {
+        "name": "inbox_message_uid_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+        "value": 1
+      },
+      {
+        "name": "inbox_message_uid_seq",
+        "source": "sequence_advance_intent",
+        "value": 1
+      },
+      {
+        "name": "msg_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+        "value": 10000
+      },
+      {
+        "name": "msg_instance_seq",
+        "source": "sequence_advance_intent",
+        "value": 10000
+      },
+      {
+        "name": "outbox_event_attempt_uid_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+        "value": 1
+      },
+      {
+        "name": "outbox_event_attempt_uid_seq",
+        "source": "sequence_advance_intent",
+        "value": 1
+      },
+      {
+        "name": "outbox_event_id_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+        "value": 1
+      },
+      {
+        "name": "outbox_event_id_seq",
+        "source": "sequence_advance_intent",
+        "value": 1
+      },
+      {
+        "name": "sys_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+        "value": 10000
+      },
+      {
+        "name": "sys_instance_seq",
+        "source": "sequence_advance_intent",
+        "value": 10000
+      },
+      {
+        "name": "tpx_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+        "value": 10010
+      },
+      {
+        "name": "tpx_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+        "value": 10010
+      },
+      {
+        "name": "tpx_instance_seq",
+        "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+        "value": 10010
+      },
+      {
+        "name": "tpx_instance_seq",
+        "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+        "value": 10010
+      },
+      {
+        "name": "tpx_instance_seq",
+        "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+        "value": 10010
+      },
+      {
+        "name": "tpx_instance_seq",
+        "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+        "value": 10010
+      },
+      {
+        "name": "tpx_instance_seq",
+        "source": "migration-preflight:allocated_floor",
+        "value": 10010
+      },
+      {
+        "name": "tpx_instance_seq",
+        "source": "migration-preflight:assigned_floor",
+        "value": 10010
+      },
+      {
+        "name": "tpx_instance_seq",
+        "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+        "value": 10010
+      },
+      {
+        "name": "tpx_instance_seq",
+        "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+        "value": 10010
+      },
+      {
+        "name": "tpx_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+        "value": 10011
+      },
+      {
+        "name": "tpx_instance_seq",
+        "source": "sequence_advance_intent",
+        "value": 10011
+      },
+      {
+        "name": "wsx_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+        "value": 10000
+      },
+      {
+        "name": "wsx_instance_seq",
+        "source": "sequence_advance_intent",
+        "value": 10000
+      },
+      {
+        "name": "wx_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+        "value": 10000
+      },
+      {
+        "name": "wx_instance_seq",
+        "source": "sequence_advance_intent",
+        "value": 10000
+      },
+      {
+        "name": "xrf_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+        "value": 1
+      },
+      {
+        "name": "xrf_instance_seq",
+        "source": "sequence_advance_intent",
+        "value": 1
+      },
+      {
+        "name": "xx_instance_seq",
+        "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+        "value": 10000
+      },
+      {
+        "name": "xx_instance_seq",
+        "source": "sequence_advance_intent",
+        "value": 10000
+      }
+    ],
+    "inventory_sha256": "584a01f80984c14cd15a79cff007b4e260fafd97481ab8f80b03aaae7c56e170",
+    "ok": true,
+    "schema_version": "tapdb-sequence-verification/v1",
+    "sha256": "84c97198683d71494277cf05ccfb6df058481560d8c53a064b8855bb439c8eab",
+    "violations": []
+  },
+  "writer_fence_release": {
+    "fence_sha256": "85ec0450a59f2822442f99c295c1b249ee912b25077fa3e2c2db86344ba693bd",
+    "intent_receipt_id": "000016-20260911T080230Z",
+    "phase": "released",
+    "physical_target": {
+      "database": "dewey_tapdb10_rehearsal_20260911",
+      "database_oid": 645854,
+      "server_address": "10.0.2.148/32",
+      "server_port": 5432
+    },
+    "recovery_family": {
+      "family_id": "bfb30029-5dd1-42ec-8bf8-3094e78ae2f6",
+      "origin": {
+        "physical_target": {
+          "database": "dewey_tapdb10_rehearsal_20260911",
+          "database_oid": 645854,
+          "server_address": "10.0.2.148/32",
+          "server_port": 5432
+        },
+        "target": {
+          "config_identity": "/home/ubuntu/dewey_ops/tapdb101-20260911/rehearsal-operator.yaml",
+          "database": "dewey_tapdb10_rehearsal_20260911",
+          "domain_code": "M",
+          "engine_type": "aurora",
+          "host": "dayhoff-lsmcok1-tapdb.cluster-ch4mq8a6wcdf.us-west-2.rds.amazonaws.com",
+          "owner_repo_name": "dewey",
+          "port": 5432,
+          "schema_name": "tapdb_dewey_lsmcok1_local"
+        }
+      },
+      "receipts_dirs": [
+        "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native-journal"
+      ],
+      "schema_version": "tapdb-recovery-family/v1",
+      "sha256": "a6defebdfce4fa923ba64e67f35a742c0859239ac90e2ee82664b26a521cfc9b"
+    },
+    "restored_acl": {
+      "entries": [
+        {
+          "grantee": 16409,
+          "grantee_name": "dayhoff",
+          "grantor": 16409,
+          "grantor_name": "dayhoff",
+          "is_grantable": false,
+          "privilege_type": "CONNECT"
+        },
+        {
+          "grantee": 16409,
+          "grantee_name": "dayhoff",
+          "grantor": 16409,
+          "grantor_name": "dayhoff",
+          "is_grantable": false,
+          "privilege_type": "CREATE"
+        },
+        {
+          "grantee": 16409,
+          "grantee_name": "dayhoff",
+          "grantor": 16409,
+          "grantor_name": "dayhoff",
+          "is_grantable": false,
+          "privilege_type": "TEMPORARY"
+        }
+      ],
+      "was_default": false
+    },
+    "result_sha256": "3fc0215035c8c865746d89f09bfa53cc41d763f51c4f3c87f12a9099d34f3c23",
+    "schema_version": "tapdb-writer-fence/v1",
+    "sha256": "ebb123f4b1463cba675224e0cc9e93c9d2ca7629b26d0f3de2af0c5634d8c72e",
+    "target": {
+      "config_identity": "/home/ubuntu/dewey_ops/tapdb101-20260911/rehearsal-operator.yaml",
+      "database": "dewey_tapdb10_rehearsal_20260911",
+      "domain_code": "M",
+      "engine_type": "aurora",
+      "host": "dayhoff-lsmcok1-tapdb.cluster-ch4mq8a6wcdf.us-west-2.rds.amazonaws.com",
+      "owner_repo_name": "dewey",
+      "port": 5432,
+      "schema_name": "tapdb_dewey_lsmcok1_local"
+    }
+  }
+}

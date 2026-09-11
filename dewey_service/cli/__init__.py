@@ -57,6 +57,9 @@ _YAML_ONLY_DEFAULTS = {
 
 
 def _build_spec() -> CliSpec:
+    backend = os.environ.get("DEWEY_EXECUTION_BACKEND", "dewey-conda")
+    if backend not in {"dewey-conda", "dewey-container"}:
+        raise ValueError("DEWEY_EXECUTION_BACKEND must be dewey-conda or dewey-container")
     return CliSpec(
         prog_name="dewey",
         app_display_name="Dewey",
@@ -84,9 +87,24 @@ def _build_spec() -> CliSpec:
                     entry_guidance="source ./activate <deploy-name>",
                     detect=BackendDetectSpec(env_vars=("CONDA_PREFIX",)),
                     validation=BackendValidationSpec(env_vars=("CONDA_PREFIX",)),
-                )
+                ),
+                ExecutionBackendSpec(
+                    name="dewey-container",
+                    kind="docker",
+                    entry_guidance="Use the approved immutable Dewey image.",
+                    detect=BackendDetectSpec(env_vars=("DEWEY_EXECUTION_BACKEND",)),
+                    validation=BackendValidationSpec(
+                        env_vars=("DEWEY_EXECUTION_BACKEND",),
+                        files=("/.dockerenv", "/app/dewey_service/cli/__init__.py"),
+                        command_probe=(
+                            sys.executable,
+                            "-c",
+                            "import os,sys; sys.exit(0 if os.environ.get('DEWEY_EXECUTION_BACKEND') == 'dewey-container' else 1)",
+                        ),
+                    ),
+                ),
             ],
-            default_backend="dewey-conda",
+            default_backend=backend,
             guard_mode="enforced",
             prereqs=[
                 PrereqSpec(
@@ -125,7 +143,7 @@ def _build_spec() -> CliSpec:
                     kind="python_import",
                     value="daylily_tapdb",
                     help="Install daylily-tapdb into the active Dewey environment.",
-                    applies_to_backends={"dewey-conda"},
+                    applies_to_backends={"dewey-conda", "dewey-container"},
                     tags={DEWEY_RUNTIME_TAG},
                     success_message="Dependency available: daylily-tapdb",
                     failure_message=(
@@ -138,7 +156,7 @@ def _build_spec() -> CliSpec:
                     kind="python_import",
                     value="daylily_auth_cognito",
                     help="Install daylily-auth-cognito into the active Dewey environment.",
-                    applies_to_backends={"dewey-conda"},
+                    applies_to_backends={"dewey-conda", "dewey-container"},
                     tags={DEWEY_RUNTIME_TAG},
                     success_message="Dependency available: daylily-auth-cognito",
                     failure_message=(

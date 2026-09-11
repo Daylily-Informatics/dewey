@@ -1,0 +1,279 @@
+{
+  "continuing_requirements": [
+    "Source remains ALLOW_CONNECTIONS=false and old container stopped.",
+    "Apply retains native fresh inventory, complete family-state and fence checks. Refusal preserves evidence; no automatic retry.",
+    "Actual committed sequence result, released writer fence and strict verification must pass before runtime binding.",
+    "Principal binding, authentication, concurrency, isolated application and final production acceptance remain separate.",
+    "No additional backups or queue preservation gates."
+  ],
+  "disposition": {
+    "exact_sequence_apply": "accepted",
+    "post_migration_preservation": "accepted",
+    "runtime_binding_or_activation": "not_accepted_by_this_review",
+    "sequence_apply_completion": "not_yet_reviewed"
+  },
+  "exact_apply": {
+    "advances": [
+      {
+        "floor": 76690,
+        "name": "adt_instance_seq",
+        "next_value": 76691
+      },
+      {
+        "floor": 66691,
+        "name": "audit_log_uid_seq",
+        "next_value": 66692
+      },
+      {
+        "floor": 10000,
+        "name": "ay_instance_seq",
+        "next_value": 10001
+      },
+      {
+        "floor": 22203,
+        "name": "dgx_instance_seq",
+        "next_value": 22204
+      },
+      {
+        "floor": 11015,
+        "name": "edg_instance_seq",
+        "next_value": 11016
+      },
+      {
+        "floor": 1016,
+        "name": "generic_instance_lineage_uid_seq",
+        "next_value": 1017
+      },
+      {
+        "floor": 12205,
+        "name": "generic_instance_uid_seq",
+        "next_value": 12206
+      },
+      {
+        "floor": 23,
+        "name": "generic_template_uid_seq",
+        "next_value": 24
+      },
+      {
+        "floor": 1,
+        "name": "gse_instance_seq",
+        "next_value": 2
+      },
+      {
+        "floor": 5,
+        "name": "gvr_instance_seq",
+        "next_value": 6
+      },
+      {
+        "floor": 1,
+        "name": "inbox_message_uid_seq",
+        "next_value": 2
+      },
+      {
+        "floor": 10000,
+        "name": "msg_instance_seq",
+        "next_value": 10001
+      },
+      {
+        "floor": 1,
+        "name": "outbox_event_attempt_uid_seq",
+        "next_value": 2
+      },
+      {
+        "floor": 1,
+        "name": "outbox_event_id_seq",
+        "next_value": 2
+      },
+      {
+        "floor": 10000,
+        "name": "sys_instance_seq",
+        "next_value": 10001
+      },
+      {
+        "floor": 10011,
+        "name": "tpx_instance_seq",
+        "next_value": 10012
+      },
+      {
+        "floor": 10000,
+        "name": "wsx_instance_seq",
+        "next_value": 10001
+      },
+      {
+        "floor": 10000,
+        "name": "wx_instance_seq",
+        "next_value": 10001
+      },
+      {
+        "floor": 1,
+        "name": "xrf_instance_seq",
+        "next_value": 2
+      },
+      {
+        "floor": 10000,
+        "name": "xx_instance_seq",
+        "next_value": 10001
+      }
+    ],
+    "capsule_file_sha256": "7fbe0e00e5557bde7ffb2afaa50606ade8c391136a5ce77eb95fd7afd89f001d",
+    "complete_floor_count": 130,
+    "external_floor_file_sha256": "b5faf66ce3955203c67cf6fc82f76d3ab815f4c5d69607ad58b186075055f99f",
+    "family_state_sha256": "bd4788c655ffa5f95c85b56d4385918bcba6dbacf69255f42d85361fc8399c7c",
+    "input_floor_count": 38,
+    "physical_target": {
+      "database": "dewey_tapdb10_rehearsal_20260911",
+      "database_oid": 645854,
+      "server_address": "10.0.2.148/32",
+      "server_port": 5432
+    },
+    "plan_native_sha256": "83f86ca0aae608b2de42147c68280534848029d057c7b60cec72eabeda7f2791",
+    "recovery_family": {
+      "family_id": "bfb30029-5dd1-42ec-8bf8-3094e78ae2f6",
+      "origin": {
+        "physical_target": {
+          "database": "dewey_tapdb10_rehearsal_20260911",
+          "database_oid": 645854,
+          "server_address": "10.0.2.148/32",
+          "server_port": 5432
+        },
+        "target": {
+          "config_identity": "/home/ubuntu/dewey_ops/tapdb101-20260911/rehearsal-operator.yaml",
+          "database": "dewey_tapdb10_rehearsal_20260911",
+          "domain_code": "M",
+          "engine_type": "aurora",
+          "host": "dayhoff-lsmcok1-tapdb.cluster-ch4mq8a6wcdf.us-west-2.rds.amazonaws.com",
+          "owner_repo_name": "dewey",
+          "port": 5432,
+          "schema_name": "tapdb_dewey_lsmcok1_local"
+        }
+      },
+      "receipts_dirs": [
+        "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native-journal"
+      ],
+      "schema_version": "tapdb-recovery-family/v1",
+      "sha256": "a6defebdfce4fa923ba64e67f35a742c0859239ac90e2ee82664b26a521cfc9b"
+    },
+    "reviewed_plan_file_sha256": "3fcdef0f0d8a6965fadc4e22c5117535d0635b30719a966823f7675d5e4d3aef",
+    "script_file_sha256": "e663fe49a9c8e27d8109b195d34b22d1d7f1414d5df6626d4a7fafe884c69407",
+    "target": {
+      "config_identity": "/home/ubuntu/dewey_ops/tapdb101-20260911/rehearsal-operator.yaml",
+      "database": "dewey_tapdb10_rehearsal_20260911",
+      "domain_code": "M",
+      "engine_type": "aurora",
+      "host": "dayhoff-lsmcok1-tapdb.cluster-ch4mq8a6wcdf.us-west-2.rds.amazonaws.com",
+      "owner_repo_name": "dewey",
+      "port": 5432,
+      "schema_name": "tapdb_dewey_lsmcok1_local"
+    }
+  },
+  "inputs": {
+    "mapped-source-summary.json": {
+      "bytes": 44441,
+      "file_sha256": "b91a09876d8f27411a45d7c2cf9f684ccc4d79b576b0425d8bb8ca07af450a90",
+      "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-tapdb10-major-20260910/docs/plans/evidence/20260911_dewey_rc_inventory/mapped-source-summary.json"
+    },
+    "rehearsal-external-floors.json": {
+      "bytes": 13122,
+      "file_sha256": "b5faf66ce3955203c67cf6fc82f76d3ab815f4c5d69607ad58b186075055f99f",
+      "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-tapdb10-major-20260910/docs/plans/evidence/20260911_dewey_rc_inventory/rehearsal-external-floors.json"
+    },
+    "rehearsal-post-migration-review.json": {
+      "bytes": 666371,
+      "file_sha256": "fb4d94a4e4c17555d54faaae769fdfabec9f0f492bc1f608e8d081ad8ce35090",
+      "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-tapdb10-major-20260910/docs/plans/evidence/20260911_dewey_rc_inventory/rehearsal-post-migration-review.json"
+    },
+    "rehearsal-prepare-floors.completed.json": {
+      "bytes": 654,
+      "file_sha256": "f54e3c86abcfc5d50f4ddbd644548b47778ab3cd1dda81ef905b217698d409a9",
+      "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-tapdb10-major-20260910/docs/plans/evidence/20260911_dewey_rc_inventory/rehearsal-prepare-floors.completed.json"
+    },
+    "rehearsal-sequence-plan.completed.json": {
+      "bytes": 2104,
+      "file_sha256": "c4693475f89d741f8f78c1528dad12a01dbd8984691c09dcf33712b6c440c03a",
+      "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-tapdb10-major-20260910/docs/plans/evidence/20260911_dewey_rc_inventory/rehearsal-sequence-plan.completed.json"
+    },
+    "rehearsal-sequence-plan.json": {
+      "bytes": 76375,
+      "file_sha256": "3fcdef0f0d8a6965fadc4e22c5117535d0635b30719a966823f7675d5e4d3aef",
+      "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-tapdb10-major-20260910/docs/plans/evidence/20260911_dewey_rc_inventory/rehearsal-sequence-plan.json"
+    }
+  },
+  "ledger_disposition": {
+    "L04": "IN_PROGRESS; native schema/fence proved; sequence result/bind/recovery acceptance remains.",
+    "L05": "IN_PROGRESS; actual historical copy migration/data acceptance proved; remaining accepted-state recovery acceptance separate.",
+    "L08": "Can advance to SUCCESS for actual preservation/accepted manifest; final-copy materialization remains final execution.",
+    "L09": "IN_PROGRESS; postdata accepted and exact next apply cleared; floors/bind/application acceptance remains.",
+    "L10": "Can advance to IN_PROGRESS with independent actual PostgreSQL/data acceptance; runtime/auth/concurrency/application acceptance remains."
+  },
+  "limits": {
+    "basis_for_private_artifacts": "Actual native successful completion and exact file/seal links in O retained safe projections; raw files remain protected on operator host.",
+    "database_calls": 0,
+    "family_history_replayed_locally": false,
+    "full_private_migration_receipt_rehashed_locally": false,
+    "private_row_receipts_downloaded": false,
+    "source_census_repeated": false,
+    "test_suites_run": 0
+  },
+  "local_receipt_checks": [
+    "All six local input file hashes recomputed.",
+    "Native complete sequence plan, current and historical sequence inventories and complete family seals validated by published public validate_receipt.",
+    "Exact native identity verification receipt seal validated; lossless projected fields reproduce original344-byte stdout file hash.",
+    "Before/after identity and sequence seals match accepted historical preflight, committed migration postflight and actual recapture.",
+    "Original row/cell/key/multiplicity preservation and exact added tracking filename keys checked from complete safe diff projection.",
+    "All20 catalog projection hashes independently recomputed; full actual catalog changes reviewed against immutable migration SQL and included assets.",
+    "Public build_sequence_advance_plan reproduced the original source plan seal56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3 from its complete retained inventory and empty retained floors.",
+    "Public inventory_floors plus unchanged native planned-next integers exactly reproduce all38 external floor records and their provenance.",
+    "Public build_sequence_advance_plan recomputed all20 advances using the complete130 native plan floors without accessing family journal paths; every next strictly exceeds original source planned next.",
+    "All20 generator state, definition, owner and dependency fields match accepted preflight; only five declared additive prefix annotations changed.",
+    "All five real command/projection completion records have RC0 and bind the immutable capsule."
+  ],
+  "package": "daylily-tapdb==10.1.1rc1",
+  "preservation": {
+    "after_rows": 79926,
+    "after_tables": 11,
+    "before_rows": 79918,
+    "before_tables": 9,
+    "catalog_changes_matched_to_immutable_assets": true,
+    "declared_additive_prefix_annotation_changes": [
+      "AY",
+      "MSG",
+      "WSX",
+      "WX",
+      "XX"
+    ],
+    "native_verification": {
+      "after_sha256": "0038875e5ee67cb572a7984219462a65730cdb6c70d16f128f83efa184c75eca",
+      "before_sha256": "676bee3e89b76dd4a0c2ac0b79b8e1580a5e92c8b31ffc01d9b772fcc6f5bbb2",
+      "ok": true,
+      "schema_version": "tapdb-identity-verification/v1",
+      "sha256": "ae181fed06cbf7eb10c630cf166437e4d9b867d661084d13ada87f1105855b3b",
+      "violations": [],
+      "violations_count": 0,
+      "violations_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "new_tables": {
+      "tapdb_legacy_outbox_mapping": 0,
+      "tapdb_runtime_principal_scope": 0
+    },
+    "original_column_cell_changes": 0,
+    "original_instance_identity_key_counts": {
+      "after_rows_at_original_keys": 12204,
+      "column_absent_rows": 0,
+      "native_null_value_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "nonnull_rows": 0,
+      "null_rows": 12204,
+      "original_distinct_key_count": 12204
+    },
+    "original_key_loss": 0,
+    "original_multiplicity_changes": 0,
+    "table_catalog_hashes_recomputed": 20,
+    "tracking_filename_key_hashes_match_exact_eight_assets": true,
+    "tracking_rows_added": 8,
+    "unchanged_generator_count": 20
+  },
+  "release_commit": "02ab7c9d0325dfcbf9dc47a03be66b62e0a22f2c",
+  "reviewed_at": "2026-09-11T08:03:09.178132+00:00",
+  "reviewer": "independent E",
+  "schema_version": "dewey-independent-acceptance/v1",
+  "scope": "Actual post-migration preservation and exact rehearsal sequence preflight only"
+}

@@ -1,0 +1,34 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /Users/jmajor/projects/mega_dayhoff/.codex-worktrees/tapdb101-dewey-qualification-20260911
+configfile: pyproject.toml
+plugins: cov-7.1.0, anyio-4.15.1
+collected 301 items
+
+tests/test_identity_inventory_pg.py ..........                           [  3%]
+tests/test_identity_inventory_cli.py ...............                     [  8%]
+tests/test_sequence_protection.py ...................................... [ 20%]
+................                                                         [ 26%]
+tests/test_sequence_protection_pg.py .......................             [ 33%]
+tests/test_sequence_protection_restart_pg.py ..........                  [ 37%]
+tests/test_sequence_protection_cli.py ............................       [ 46%]
+tests/test_runtime_principal_pg.py ..................................... [ 58%]
+.                                                                        [ 59%]
+tests/test_runtime_principal.py ........................................ [ 72%]
+........................................................                 [ 91%]
+tests/test_backup_source_contract.py ...................                 [ 97%]
+tests/test_recovery_floor_pg.py .....                                    [ 99%]
+tests/test_backup_historical_pg.py ...                                   [100%]
+
+=============================== warnings summary ===============================
+../../../.venv/lib/python3.13/site-packages/typer/__init__.py:24
+  /Users/jmajor/projects/mega_dayhoff/.codex-worktrees/tapdb101-dewey-qualification-20260911/.venv/lib/python3.13/site-packages/typer/__init__.py:24: DeprecationWarning: 'click.utils.get_binary_stream' is deprecated and will be removed in Click 9.0.
+    from click.utils import get_binary_stream as get_binary_stream
+
+../../../.venv/lib/python3.13/site-packages/typer/__init__.py:25
+  /Users/jmajor/projects/mega_dayhoff/.codex-worktrees/tapdb101-dewey-qualification-20260911/.venv/lib/python3.13/site-packages/typer/__init__.py:25: DeprecationWarning: 'click.utils.get_text_stream' is deprecated and will be removed in Click 9.0.
+    from click.utils import get_text_stream as get_text_stream
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /Users/jmajor/projects/mega_dayhoff/.codex-worktrees/tapdb101-dewey-qualification-20260911/runtime/qualification/published-pg1613.xml -
+======================= 301 passed, 2 warnings in 20.00s =======================
