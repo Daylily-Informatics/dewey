@@ -64,7 +64,7 @@ This correction is mandatory. O prepares the reviewed host-only helper
 and its private output directory outside the mounted application capsule.
 
 ```bash
-/home/ubuntu/dewey_ops/tapdb101-20260911/venv/bin/python /home/ubuntu/dewey_ops/tapdb101-20260911/dewey_launch_environment_prepare.py --compose /opt/dayhoff/deployments/day/compose/docker-compose.yml --dewey-config "$D_RUNTIME_DIR/dewey-config.yaml" --lane "$D_LANE" --output-dir "$D_LAUNCH_DIR"
+/home/ubuntu/dewey_ops/tapdb101-20260911/venv/bin/python /home/ubuntu/dewey_ops/tapdb101-20260911/dewey_launch_environment_prepare.py --compose /opt/dayhoff/deployments/day/compose/docker-compose.yml --dewey-config "$D_RUNTIME_DIR/dewey-config.yaml" --lane "$D_LANE" --image-sha "$D_IMAGE_SHA" --output-dir "$D_LAUNCH_DIR"
 ```
 
 Review the new `receipt.json` before proceeding. The helper pins owning Compose
@@ -76,6 +76,10 @@ All existing environment values are preserved except the fixed runtime identity,
 private state/cache paths, disabled QEO dispatch and loopback overrides. No
 credential value enters a command argument, receipt or terminal. Do not source
 the env-file: Docker reads its literal `KEY=value` records directly.
+`--image-sha` is required and must be exactly 40 lowercase hexadecimal characters.
+Rehearsal requires the candidate SHA above. Production uses the exact final
+source SHA supplied by O/F consistently in both environment labels and receipt;
+the helper does not select a revision or independently prove image provenance.
 
 Preserved fields include all `LSMC_AUTH_*` broker credentials/URLs,
 `LSMC_AI_AGENT_*`, primary API/QEO resolver credentials, Atlas/Bloom URLs,
@@ -201,7 +205,11 @@ After O stops this rehearsal container and preserves its terminal allocator
 exposure evidence, repeat with new private state/output/environment directories, unused
 18914, `D_CONTAINER=dewey-tapdb10-final-20260911`, `D_LANE=production`,
 `D_RUNTIME_DIR=/opt/dewey/day/releases/9.0.0`, and the final native principal
-results. Keep both copies' receipts; source remains stopped/closed. Only O's
+results. Set `D_IMAGE_SHA` and `D_DIGEST` from the final main/tag image's accepted
+source and manifest receipts, then rebuild `D_IMAGE` from that exact digest;
+do not retain the rehearsal candidate SHA/digest for the final image. Pass that
+same final SHA to both environment preparation and HTTP acceptance. Keep both
+copies' receipts; source remains stopped/closed. Only O's
 final promotion changes service publication to the approved production listener.
 F's final service renderer consumes the same reviewed environment projection and
 explicitly changes `HOST`/`DEWEY_HOST` to `0.0.0.0`, `PORT`/`DEWEY_PORT` to `8914`,
@@ -234,3 +242,11 @@ final scan passed with Bandit's redundant assignment-node annotation warning.
 Principal script and all
 application/image build inputs are unchanged; deployed behavior still requires
 O's actual environment preparation, launch and acceptance receipts.
+
+The subsequent final-image provenance correction makes `--image-sha` mandatory.
+**8 new cases passed** for malformed/missing arguments, the exact rehearsal pin,
+and propagation of a distinct explicit production SHA to both environment labels
+and receipt. The prior cases were not rerun. Ruff and the 9 Bash syntax checks
+passed; authentication selection and all application/image build inputs remain
+unchanged. O/F owns verification that the supplied production SHA belongs to
+the actual final image.

@@ -46,9 +46,13 @@ def test_complete_deployed_environment_preserved_with_explicit_primary_even_if_y
         yaml.safe_dump({"services": {"dewey": service}}).encode(),
         yaml.safe_dump(config).encode(),
         "rehearsal",
+        launch.REHEARSAL_IMAGE_SHA,
     )
     result = dict(line.split("=", 1) for line in env.decode().splitlines())
-    for key in service["environment"].keys() - launch.isolated_overrides("rehearsal").keys():
+    for key in (
+        service["environment"].keys()
+        - launch.isolated_overrides("rehearsal", launch.REHEARSAL_IMAGE_SHA).keys()
+    ):
         assert result[key] == service["environment"][key]
     assert result["HOST"] == result["DEWEY_HOST"] == "127.0.0.1"
     assert result["PORT"] == result["DEWEY_PORT"] == "18914"
@@ -107,3 +111,52 @@ def test_private_output_is_exclusive_and_not_overwritten(tmp_path):
 def test_unique_loader_retains_safe_loader_object_tag_rejection():
     with pytest.raises(yaml.constructor.ConstructorError):
         launch.extract_dewey(b"!!python/object/apply:builtins.str ['must not construct']")
+
+
+@pytest.mark.parametrize("image_sha", [None, "", "a" * 39, "g" * 40, "A" * 40])
+def test_image_sha_validation_rejects_missing_or_noncanonical_revision(image_sha):
+    with pytest.raises(launch.PreparationError, match="40-character"):
+        launch.validate_image_sha("production", image_sha)
+
+
+def test_image_sha_validation_pins_rehearsal_candidate():
+    launch.validate_image_sha("rehearsal", launch.REHEARSAL_IMAGE_SHA)
+    with pytest.raises(launch.PreparationError, match="Rehearsal image source SHA changed"):
+        launch.validate_image_sha("rehearsal", "a" * 40)
+
+
+def test_image_sha_validation_requires_cli_argument(monkeypatch, capsys):
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            str(SCRIPT),
+            "--compose",
+            str(launch.COMPOSE_PATH),
+            "--dewey-config",
+            launch.DIRECTORIES["production"] + "/dewey-config.yaml",
+            "--lane",
+            "production",
+            "--output-dir",
+            "/explicit/private/output",
+        ],
+    )
+    with pytest.raises(SystemExit) as error:
+        launch.main()
+    assert error.value.code == 2
+    assert "--image-sha" in capsys.readouterr().err
+
+
+def test_image_sha_production_input_propagates_to_environment_and_receipt():
+    final_test_sha = "a" * 40
+    config = {"application": {"api_bearer_token": "test-only-selected-primary"}}
+    env, _, receipt = launch.prepare_payloads(
+        yaml.safe_dump({"services": {"dewey": owning_service()}}).encode(),
+        yaml.safe_dump(config).encode(),
+        "production",
+        final_test_sha,
+    )
+    result = dict(line.split("=", 1) for line in env.decode().splitlines())
+    assert result["DEWEY_BUILD_SHA"] == result["LSMC_RELEASE_SHA"] == final_test_sha
+    assert receipt["image_sha"] == final_test_sha
+    assert result["DEWEY_API_BEARER_TOKEN"] == "test-only-selected-primary"
+    assert result["TAPDB_CONFIG_PATH"] == launch.DIRECTORIES["production"] + "/tapdb-runtime.yaml"
