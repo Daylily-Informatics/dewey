@@ -18,6 +18,12 @@ from daylily_tapdb.external_references import (
 
 ASSERTION_AUTHORITY = "dewey.external_object_relation"
 EXPLICIT_TARGET_TYPES = {
+    ("labcore", "sequencing_run"): {
+        "kind": "opaque",
+        "namespace": "labcore",
+        "identifier_kind": "sequencing_run",
+        "scope": "public_global",
+    },
     ("atlas", "patient"): {"kind": "tapdb_object"},
     ("bloom", "sequencer"): {"kind": "tapdb_object"},
     ("bloom", "sequencing_run"): {"kind": "tapdb_object"},

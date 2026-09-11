@@ -54,6 +54,12 @@ auth:
       lsmc:dewey:readwrite: READ_WRITE
       lsmc:dewey:readonly: READ_ONLY
 
+# Default-off Labcore owner registration. Routes remain absent unless enabled
+# and at least one tenant-bound principal is supplied.
+labcore_owner:
+  api_enabled: false
+  service_principals: []
+
 database:
   backend: tapdb
   target: local

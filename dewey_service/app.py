@@ -509,6 +509,9 @@ def create_app(
     if static_dir.exists():
         app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
+    from dewey_service.labcore_owner_api import attach_labcore_owner_api
+
+    attach_labcore_owner_api(app, settings=settings)
     tapdb_embedded = mount_tapdb_surfaces(app, settings=settings)
     if tapdb_embedded:
         fragment = dewey_tapdb_obs_services_fragment(app)

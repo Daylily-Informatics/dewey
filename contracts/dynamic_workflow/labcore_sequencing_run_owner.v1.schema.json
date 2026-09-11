@@ -1,0 +1,193 @@
+{
+  "$defs": {
+    "ExpectedDatasetFileV1": {
+      "additionalProperties": false,
+      "properties": {
+        "object_version_id": {
+          "minLength": 1,
+          "title": "Object Version Id",
+          "type": "string"
+        },
+        "relative_path": {
+          "minLength": 1,
+          "title": "Relative Path",
+          "type": "string"
+        },
+        "sha256": {
+          "maxLength": 64,
+          "minLength": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "relative_path",
+        "sha256",
+        "size_bytes",
+        "object_version_id"
+      ],
+      "title": "ExpectedDatasetFileV1",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "contract_type": {
+      "const": "dewey.labcore-sequencing-run-owner/v1",
+      "title": "Contract Type",
+      "type": "string"
+    },
+    "contract_version": {
+      "const": 1,
+      "title": "Contract Version",
+      "type": "integer"
+    },
+    "dataset_revision": {
+      "maxLength": 64,
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Dataset Revision",
+      "type": "string"
+    },
+    "dataset_root_uri": {
+      "minLength": 1,
+      "title": "Dataset Root Uri",
+      "type": "string"
+    },
+    "expected_files": {
+      "items": {
+        "$ref": "#/$defs/ExpectedDatasetFileV1"
+      },
+      "minItems": 1,
+      "title": "Expected Files",
+      "type": "array"
+    },
+    "external_object_id": {
+      "minLength": 1,
+      "title": "External Object Id",
+      "type": "string"
+    },
+    "external_object_type": {
+      "const": "sequencing_run",
+      "title": "External Object Type",
+      "type": "string"
+    },
+    "external_system": {
+      "const": "labcore",
+      "title": "External System",
+      "type": "string"
+    },
+    "hash_domain": {
+      "const": "dewey.labcore-sequencing-run-owner.request/v1",
+      "title": "Hash Domain",
+      "type": "string"
+    },
+    "idempotency_key": {
+      "maxLength": 64,
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Idempotency Key",
+      "type": "string"
+    },
+    "inventory_sha256": {
+      "maxLength": 64,
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Inventory Sha256",
+      "type": "string"
+    },
+    "labcore_binding_receipt_id": {
+      "minLength": 1,
+      "title": "Labcore Binding Receipt Id",
+      "type": "string"
+    },
+    "labcore_binding_receipt_sha256": {
+      "maxLength": 64,
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Labcore Binding Receipt Sha256",
+      "type": "string"
+    },
+    "labcore_sequencing_run_euid": {
+      "minLength": 1,
+      "title": "Labcore Sequencing Run Euid",
+      "type": "string"
+    },
+    "platform": {
+      "enum": [
+        "ILMN",
+        "ONT"
+      ],
+      "title": "Platform",
+      "type": "string"
+    },
+    "processing_site_euid": {
+      "minLength": 1,
+      "title": "Processing Site Euid",
+      "type": "string"
+    },
+    "relation_type": {
+      "const": "labcore_sequencing_run",
+      "title": "Relation Type",
+      "type": "string"
+    },
+    "request_sha256": {
+      "maxLength": 64,
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Request Sha256",
+      "type": "string"
+    },
+    "target_euid": {
+      "minLength": 1,
+      "title": "Target Euid",
+      "type": "string"
+    },
+    "target_type": {
+      "const": "artifact",
+      "title": "Target Type",
+      "type": "string"
+    },
+    "tenant_euid": {
+      "minLength": 1,
+      "title": "Tenant Euid",
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_type",
+    "contract_version",
+    "hash_domain",
+    "external_system",
+    "external_object_type",
+    "external_object_id",
+    "labcore_sequencing_run_euid",
+    "tenant_euid",
+    "processing_site_euid",
+    "platform",
+    "dataset_root_uri",
+    "dataset_revision",
+    "inventory_sha256",
+    "labcore_binding_receipt_id",
+    "labcore_binding_receipt_sha256",
+    "target_type",
+    "target_euid",
+    "relation_type",
+    "expected_files",
+    "request_sha256",
+    "idempotency_key"
+  ],
+  "title": "LabcoreSequencingRunOwnerContractV1",
+  "type": "object",
+  "x-dewey-equality-constraints": [
+    "external_object_id == labcore_sequencing_run_euid",
+    "idempotency_key == request_sha256 == sha256(canonical_request_bytes)"
+  ]
+}

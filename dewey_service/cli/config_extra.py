@@ -12,6 +12,11 @@ import typer
 from cli_core_yo import ccyo_out
 
 from dewey_service.cli._registry_v2 import REQUIRED, REQUIRED_MUTATING
+from dewey_service.labcore_owner_config import (
+    load_labcore_owner_config,
+    redacted_effective_config,
+)
+from dewey_service.labcore_owner_config_validation import install_config_validator
 from dewey_service.settings import (
     build_effective_config_rows,
     clear_settings_cache,
@@ -33,6 +38,14 @@ def _status() -> None:
     ccyo_out.print_text(f"Config path: [cyan]{get_config_file_path()}[/cyan]")
     for row in build_effective_config_rows(settings, config_path=get_config_file_path()):
         ccyo_out.print_text(f"{row['path']}={row['value']}")
+    owner_config = redacted_effective_config(load_labcore_owner_config())
+    if owner_config["api_enabled"] or owner_config["service_principals"]:
+        ccyo_out.print_text(f"labcore_owner.api_enabled={owner_config['api_enabled']}")
+        for principal in owner_config["service_principals"]:
+            ccyo_out.print_text(
+                "labcore_owner.service_principal="
+                f"{principal['principal_id']}:{principal['tenant_euid']}:{','.join(principal['scopes'])}"
+            )
 
 
 def _set_artifact_bucket(
@@ -54,7 +67,8 @@ def _set_artifact_bucket(
 
 def register(registry: CommandRegistry, spec: CliSpec) -> None:
     """Register Dewey-specific config subcommands."""
-    _ = spec
+    if hasattr(spec, "config"):
+        install_config_validator(spec)
     registry.add_command(
         "config",
         "status",

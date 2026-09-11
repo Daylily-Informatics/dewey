@@ -94,6 +94,7 @@ qeo:
     )
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
     monkeypatch.delenv("DEWEY_API_BEARER_TOKEN", raising=False)
+    monkeypatch.setenv("DEWEY_CONFIG", str(cfg))
     loaded = load_settings()
     assert loaded.api_bearer_token == "yaml-token"
     assert loaded.cognito_domain == "auth.example.com"
@@ -210,6 +211,7 @@ database:
         encoding="utf-8",
     )
 
+    monkeypatch.setenv("DEWEY_CONFIG", str(cfg))
     loaded = load_settings()
 
     assert loaded.auth_mode == "external_broker"

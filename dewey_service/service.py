@@ -7,6 +7,7 @@ from dewey_service.services.artifact_sets import ArtifactSetServiceMixin
 from dewey_service.services.artifacts import ArtifactServiceMixin
 from dewey_service.services.base import BaseDeweyService, DeweyConflictError, DeweyNotFoundError
 from dewey_service.services.external_objects import ExternalObjectServiceMixin
+from dewey_service.services.labcore_owner import LabcoreOwnerServiceMixin
 from dewey_service.services.literature import LiteratureServiceMixin
 from dewey_service.services.outbox import OutboxServiceMixin
 from dewey_service.services.search import SearchServiceMixin
@@ -15,6 +16,7 @@ from dewey_service.services.sharing import SharingServiceMixin
 
 
 class DeweyService(
+    LabcoreOwnerServiceMixin,
     SequencerRunRegistrationServiceMixin,
     ArtifactServiceMixin,
     LiteratureServiceMixin,

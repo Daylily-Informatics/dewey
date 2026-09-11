@@ -124,6 +124,11 @@ auth:
       lsmc:dewey:readwrite: READ_WRITE
       lsmc:dewey:readonly: READ_ONLY
 
+# Default-off; retain an empty allowlist until an approved service principal exists.
+labcore_owner:
+  api_enabled: false
+  service_principals: []
+
 qeo:
   ingest_url: ""
   api_token: ""
