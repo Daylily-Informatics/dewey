@@ -264,3 +264,66 @@ def test_fresh_runtime_ddl_proof_requires_denial_after_session_setup(
         with pytest.raises(expected):
             capsule.verify_runtime(args)
         assert not Path(args.receipt).exists()
+
+
+@pytest.mark.parametrize("invalid_input", [None, "config", "version", "output"])
+def test_runtime_verify_binds_native_context_only_after_input_validation(
+    invalid_input, monkeypatch, tmp_path, explicit_tapdb_test_config
+):
+    from cli_core_yo import runtime as cli_runtime
+    from daylily_tapdb.cli.context import active_config_path, clear_cli_context
+    from daylily_tapdb.cli.db_config import get_admin_settings
+    from daylily_tapdb.web import runtime as native_runtime
+
+    cli_runtime._reset()
+    clear_cli_context()
+    calls = []
+    native_get_db = native_runtime.get_db
+
+    class EngineCreated(Exception):
+        pass
+
+    def check_runtime(cfg, lane, path):
+        assert cfg["config_path"] == str(explicit_tapdb_test_config)
+        assert path == explicit_tapdb_test_config and lane == "rehearsal"
+        if invalid_input == "config":
+            raise capsule.PreparationError("rejected isolated fixture")
+
+    def get_db(path):
+        calls.append(path)
+        # Exercise the real engine/metrics construction, without opening a session.
+        native_get_db(path)
+        assert active_config_path() == explicit_tapdb_test_config
+        assert get_admin_settings()["config_path"] == str(explicit_tapdb_test_config)
+        raise EngineCreated
+
+    receipt = tmp_path / "verified.json"
+    if invalid_input == "output":
+        receipt.write_text("existing receipt")
+    monkeypatch.setattr(capsule, "validate_runtime", check_runtime)
+    monkeypatch.setattr(
+        capsule.importlib.metadata,
+        "version",
+        lambda name: "8.0.2" if invalid_input == "version" else "9.0.0",
+    )
+    monkeypatch.setattr(native_runtime, "get_db", get_db)
+    try:
+        expected = capsule.PreparationError if invalid_input else EngineCreated
+        with pytest.raises(expected):
+            capsule.verify_runtime(
+                SimpleNamespace(
+                    runtime_config=str(explicit_tapdb_test_config),
+                    lane="rehearsal",
+                    receipt=str(receipt),
+                )
+            )
+        if invalid_input:
+            assert calls == []
+            assert active_config_path() is None
+        else:
+            assert calls == [str(explicit_tapdb_test_config)]
+        assert receipt.exists() is (invalid_input == "output")
+    finally:
+        native_runtime.dispose_all_runtime_engines()
+        clear_cli_context()
+        cli_runtime._reset()
