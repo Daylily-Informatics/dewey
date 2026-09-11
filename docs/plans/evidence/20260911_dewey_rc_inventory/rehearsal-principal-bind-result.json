@@ -1,0 +1,297 @@
+{
+  "applied_at": "2026-09-11T08:23:22.234072+00:00",
+  "database_access": {
+    "acl": "{dayhoff=CTc/dayhoff,dewey_rehearsal_9=c/dayhoff}",
+    "operator_temp": true,
+    "operator_temp_after_revokes": true,
+    "runtime_connect": true,
+    "runtime_temp": false
+  },
+  "database_grants": [
+    {
+      "database": "dewey_tapdb10_rehearsal_20260911",
+      "privileges": [
+        "CONNECT"
+      ]
+    }
+  ],
+  "database_revokes": [
+    {
+      "database": "dewey_tapdb10_rehearsal_20260911",
+      "grantee": "PUBLIC",
+      "grantee_kind": "public",
+      "privileges": [
+        "TEMPORARY"
+      ]
+    },
+    {
+      "database": "dewey_tapdb10_rehearsal_20260911",
+      "grantee": "dewey_rehearsal_9",
+      "grantee_kind": "role",
+      "privileges": [
+        "TEMPORARY"
+      ]
+    }
+  ],
+  "default_privileges": {
+    "sequences": [],
+    "tables": []
+  },
+  "format": "tapdb-runtime-principal/v1",
+  "grants": [
+    {
+      "kind": "TABLE",
+      "name": "_tapdb_migrations",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "kind": "SEQUENCE",
+      "name": "adt_instance_seq",
+      "privileges": [
+        "USAGE",
+        "SELECT"
+      ]
+    },
+    {
+      "kind": "TABLE",
+      "name": "audit_log",
+      "privileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
+      "kind": "SEQUENCE",
+      "name": "audit_log_uid_seq",
+      "privileges": [
+        "USAGE",
+        "SELECT"
+      ]
+    },
+    {
+      "kind": "SEQUENCE",
+      "name": "ay_instance_seq",
+      "privileges": [
+        "USAGE",
+        "SELECT"
+      ]
+    },
+    {
+      "kind": "SEQUENCE",
+      "name": "dgx_instance_seq",
+      "privileges": [
+        "USAGE",
+        "SELECT"
+      ]
+    },
+    {
+      "kind": "SEQUENCE",
+      "name": "edg_instance_seq",
+      "privileges": [
+        "USAGE",
+        "SELECT"
+      ]
+    },
+    {
+      "kind": "TABLE",
+      "name": "generic_instance",
+      "privileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
+      "kind": "TABLE",
+      "name": "generic_instance_lineage",
+      "privileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
+      "kind": "SEQUENCE",
+      "name": "generic_instance_lineage_uid_seq",
+      "privileges": [
+        "USAGE",
+        "SELECT"
+      ]
+    },
+    {
+      "kind": "SEQUENCE",
+      "name": "generic_instance_uid_seq",
+      "privileges": [
+        "USAGE",
+        "SELECT"
+      ]
+    },
+    {
+      "kind": "TABLE",
+      "name": "generic_template",
+      "privileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
+      "kind": "SEQUENCE",
+      "name": "generic_template_uid_seq",
+      "privileges": [
+        "USAGE",
+        "SELECT"
+      ]
+    },
+    {
+      "kind": "TABLE",
+      "name": "inbox_message",
+      "privileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
+      "kind": "SEQUENCE",
+      "name": "inbox_message_uid_seq",
+      "privileges": [
+        "USAGE",
+        "SELECT"
+      ]
+    },
+    {
+      "kind": "SEQUENCE",
+      "name": "msg_instance_seq",
+      "privileges": [
+        "USAGE",
+        "SELECT"
+      ]
+    },
+    {
+      "kind": "TABLE",
+      "name": "outbox_event",
+      "privileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
+      "kind": "TABLE",
+      "name": "outbox_event_attempt",
+      "privileges": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
+      "kind": "SEQUENCE",
+      "name": "outbox_event_attempt_uid_seq",
+      "privileges": [
+        "USAGE",
+        "SELECT"
+      ]
+    },
+    {
+      "kind": "SEQUENCE",
+      "name": "outbox_event_id_seq",
+      "privileges": [
+        "USAGE",
+        "SELECT"
+      ]
+    },
+    {
+      "kind": "TABLE",
+      "name": "tapdb_identity_prefix_config",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "kind": "TABLE",
+      "name": "tapdb_legacy_outbox_mapping",
+      "privileges": [
+        "SELECT"
+      ]
+    },
+    {
+      "kind": "SEQUENCE",
+      "name": "wsx_instance_seq",
+      "privileges": [
+        "USAGE",
+        "SELECT"
+      ]
+    },
+    {
+      "kind": "SEQUENCE",
+      "name": "wx_instance_seq",
+      "privileges": [
+        "USAGE",
+        "SELECT"
+      ]
+    },
+    {
+      "kind": "SEQUENCE",
+      "name": "xx_instance_seq",
+      "privileges": [
+        "USAGE",
+        "SELECT"
+      ]
+    }
+  ],
+  "operation": "bind",
+  "operator_database_grants": [],
+  "plan_sha256": "e65fdff7d846d58730696f5e54cb34936d470d8073d25f0c04ac2606cc360f86",
+  "privileges_verified": true,
+  "runtime_session_requirement": {
+    "action": "close_and_recreate_pre_binding_runtime_sessions",
+    "performed_by_bind": false,
+    "reason": "Database TEMP revocation does not remove existing temporary objects or prove existing sessions cannot create more.",
+    "verified": false
+  },
+  "runtime_temp_denied": true,
+  "scope": {
+    "allow_global_rows": false,
+    "config_identity": "/opt/dewey/day/releases/tapdb10-rehearsal-20260911/tapdb-runtime.yaml",
+    "domain_code": "M",
+    "issuer_app_code": "dewey",
+    "schema_name": "tapdb_dewey_lsmcok1_local",
+    "tenant_id": null
+  },
+  "sha256": "87c5999fe15c27ccd6af5b06038b18085ad441dfc34b6e73b7ffb5120d4cd83b",
+  "status": "applied",
+  "target": {
+    "allow_global_claims": false,
+    "client_id": "dewey",
+    "cluster_identifier": "dayhoff-lsmcok1-tapdb",
+    "config_path": "/opt/dewey/day/releases/tapdb10-rehearsal-20260911/tapdb-runtime.yaml",
+    "database": "dewey_tapdb10_rehearsal_20260911",
+    "database_name": "dewey-day",
+    "domain_code": "M",
+    "engine_type": "aurora",
+    "host": "dayhoff-lsmcok1-tapdb.cluster-ch4mq8a6wcdf.us-west-2.rds.amazonaws.com",
+    "hostaddr": "",
+    "iam_auth": false,
+    "operator_iam_auth": false,
+    "operator_user": "dayhoff",
+    "owner_repo_name": "dewey",
+    "port": 5432,
+    "region": "us-west-2",
+    "schema_name": "tapdb_dewey_lsmcok1_local",
+    "sslrootcert": "/home/ubuntu/.config/tapdb/rds-ca-bundle.pem",
+    "tenant_id": "",
+    "user": "dewey_rehearsal_9"
+  }
+}
