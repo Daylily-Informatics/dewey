@@ -45,3 +45,19 @@ implement the sequencing trigger and durable retries, and persist receipts.
 Rollback: disable this feature in explicit configuration and recreate Dewey's
 process. Retain committed objects, receipts and allocator state. No database
 restore, identity reuse, or Labcore ECS deployment is involved.
+
+## Caller follow-up
+
+The existing Labcore ECS deployment has no Dewey caller credentials configured.
+Its sequencing persistence models a `SequencingRun` attempt beneath a branch,
+`SequencingRunMember` test membership, and `SequencingRunArtifactBinding` evidence.
+The current Dewey command binds one exact TestEUID into a global run claim; a
+second different TestEUID for the same run conflicts. Before adding an automatic
+caller, reconcile that contract with any Labcore run containing multiple tests.
+Do not silently pick a test or repurpose a Bloom/OWY identifier.
+
+The caller task must select the real trigger and tenant, supply a trusted existing
+artifact and binding evidence, issue the exact v2 canonical command, persist the
+returned receipt, and retry the same command after an ambiguous acknowledgement.
+Rotate/configure a real dedicated principal when that caller is ready. The
+synthetic acceptance principal is not a production Labcore integration token.

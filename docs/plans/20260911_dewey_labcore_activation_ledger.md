@@ -23,13 +23,13 @@ Rollback disables the feature and retains accepted writes and receipts.
 
 | ID | Area | Requirement | Status | Category | Approval gate | Owner | Evidence | Root cause | Terminal note |
 |---|---|---|---|---|---|---|---|---|---|
-| J00 | Baseline | Source, deployment, config and ownership inventory | SUCCESS | active_product_contract | Gate 0 | O | | | |
-| J01 | Port | Selectively integrate #6–#8 | SUCCESS | feature_implementation | Approved plan | O | | | |
-| J02 | Ownership/API | Atomic claims, lineage, auth and limits | SUCCESS | feature_implementation | Approved plan | O | | | |
-| J03 | Verification | Focused tests and PostgreSQL concurrency | OPEN | contract_test | Acceptance | O | | | |
-| J04 | Release | Main, annotated 9.1.0 tag and final image | OPEN | feature_implementation | Approved release | O | | | |
-| J05 | Production | Scoped configuration and controlled registration | OPEN | config_or_startup_contract | Verified identity required | O | | | |
-| J06 | Closeout | Terminal evidence and caller handoff | OPEN | historical_docs_only | Acceptance | O | | | |
+| J00 | Baseline | Source, deployment, config and ownership inventory | SUCCESS | active_product_contract | Gate 0 | O | Gate 0; source/live inventory |  | Main baseline, clean isolated worktree, zero existing Labcore ownership |
+| J01 | Port | Selectively integrate #6–#8 | SUCCESS | feature_implementation | Approved plan | O | PR #15; 87fd7cf3c56e |  | Selective port complete; current GUI/Search v2 retained |
+| J02 | Ownership/API | Atomic claims, lineage, auth and limits | SUCCESS | feature_implementation | Approved plan | O | services/labcore_owner.py; docs/labcore_owner_api.md |  | Native atomic ownership and bounded scoped API complete |
+| J03 | Verification | Focused tests and PostgreSQL concurrency | SUCCESS | contract_test | Acceptance | O | CI 34616603871; evidence/20260911_dewey_labcore_910/postgres-acceptance.json |  | 573 passed; nine Aurora case groups passed |
+| J04 | Release | Main, annotated 9.1.0 tag and final image | SUCCESS | feature_implementation | Approved release | O | Tag 9.1.0; final-image/capsule-inputs.json; package-versions.json |  | One final image built and published |
+| J05 | Production | Scoped configuration and controlled registration | SUCCESS | config_or_startup_contract | Verified identity required | O | candidate-acceptance.json; live-acceptance.json; promotion-result.json |  | Enabled with user-authorized synthetic principal; real identities and live checks passed |
+| J06 | Closeout | Terminal evidence and caller handoff | SUCCESS | historical_docs_only | Acceptance | O | docs/labcore_owner_api.md; this closeout |  | Evidence retained; Labcore caller and Dependabot remain separate |
 
 ## Gate 0
 
@@ -79,3 +79,53 @@ Implementation started; production unchanged.
   default fixture masked config paths intentionally selected by four CLI/settings
   tests. ATTEMPTING_BUGFIX: those tests now explicitly select their own files;
   no runtime behavior changed. Second CI pass is informative and authorized.
+
+- Second CI `34616603871` passed: **573 passed, 2 skipped**, package build,
+  Ruff, Bandit and CodeQL. Four targeted fixture regressions passed before push.
+  No further broad runs are needed for unchanged application code.
+- PR #15 merged normally; annotated tag `9.1.0`, release `main` and origin/main
+  identify `87fd7cf3c56e8dc283ed1dedea1232984825137d`. GitHub default and local
+  origin/HEAD point to main. The merge reused green PR CI with `[skip ci]`.
+- Final image capsule generated from that exact clean main/tag and qualified
+  source `2784c70b51cf75c8be6e83af680f7c11e3bf56a0`. Context SHA256
+  `70ee78b6f65fea678d323eba4a9f3972ff2111d2db4f54a15e28c94b67a33c70`.
+- New private config prepared at `/opt/dewey/day/releases/9.1.0/dewey-config.yaml`
+  through the supported `dewey --config ABS config edit` command. Only Labcore
+  owner settings change; DB config, broker auth, storage and sibling services do not.
+  The dedicated principal `labcore-synthetic-acceptance-910` is bound solely to
+  `synthetic-labcore-tenant-910`; its bearer remains in protected host config.
+  User explicitly authorized synthetic acceptance in lieu of a real Labcore record.
+
+## Production closeout
+
+All seven rows are SUCCESS; no working or blocked rows remain. The API is
+released and enabled. Actual Labcore automation is explicitly outside this phase.
+
+- Published image `sha256:7982b35d67ae54f12103d7bec8cf0e4f84de1eb730b0a1138041de1572b2b0a3`;
+  Dewey 9.1.0, TapDB 10.1.1rc1, Meridian 0.4.8, Python 3.12.14.
+- Live container `fee0f8d0076eb3af774e61d04ae05a116f98d5b25be957281723c36870afb943`,
+  started 2026-09-11T15:37:51.37338201Z, running with zero restarts at closeout.
+- HTTPS health/readiness on `dewey.day.lsmc.bio` return 9.1.0 / release SHA;
+  database ready. Unauthenticated canonical registration returns 401.
+- Synthetic fixture artifact `M-DGX-NP43`, external identity `M-DGX-NP6Z`,
+  relation `M-DGX-NP7X`, receipt `M-DGX-NP8V` were genuinely persisted by Dewey/TapDB.
+  Labcore tenant/run/test are labelled synthetic, not asserted real Labcore records.
+  No S3 objects were created or copied; prefix availability is marked unavailable.
+- Candidate: 201 creation, 200 identical replay, 409 mismatched header and
+  correctly hashed conflicting command. Live: 200 replay with identical receipt,
+  409 conflict, scoped token denied general API access, alternate routes absent,
+  three receipt lineages, native external reference and fresh-session TEMP=false.
+- Search v2 HTTP measured 0.761s candidate / 0.801s live. Existing GUI/login and
+  search implementation retained; recent GUI evidence reused because auth and
+  static configuration are value-equivalent aside from the explicit new API section.
+- Promotion verified all sibling container identities/start times unchanged.
+  Database configuration and original migration recovery database remain untouched.
+- Reproducible helper sources and nonsecret receipts are checked in under
+  `docs/plans/evidence/20260911_dewey_labcore_910/`. Protected credentials and
+  compose/config copies remain only on the host under the existing private paths.
+- Rollback: disable `labcore_owner.api_enabled` through `dewey config edit` on
+  the explicit 9.1.0 config and recreate only Dewey, or restore the captured
+  previous Dewey image/config. Retain accepted objects and receipts in either case.
+- Cost controls: one coordinating agent, two broad CI passes (second fixed four
+  configuration-fixture failures), focused informative checks, one final image,
+  no additional TapDB release or migration campaign. No background monitor created.

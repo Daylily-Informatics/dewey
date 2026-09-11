@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "mode": "create",
+  "synthetic": true,
+  "receipt": {
+    "registration_receipt_euid": "M-DGX-NP8V",
+    "request_sha256": "0a9d91b8d7ac8fc8aea7dbd60f577b542696c7ca7b18fcb5bb8ee68150c7cfb9",
+    "command_sha256": "03bc74a21b6e582ffe89d8d6189d9621b7689be39d756078c1e4371e49e10ecf",
+    "tenant_euid": "synthetic-labcore-tenant-910",
+    "external_object_euid": "M-DGX-NP6Z",
+    "external_object_relation_euid": "M-DGX-NP7X"
+  },
+  "artifact_euid": "M-DGX-NP43",
+  "search_seconds": 0.761136,
+  "codes": [
+    201,
+    200,
+    409
+  ],
+  "runtime_temp": false
+}

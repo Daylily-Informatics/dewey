@@ -1,0 +1,91 @@
+{
+  "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:7982b35d67ae54f12103d7bec8cf0e4f84de1eb730b0a1138041de1572b2b0a3",
+  "commit": "87fd7cf3c56e8dc283ed1dedea1232984825137d",
+  "compose_before": "e32eba2e6905db061dd155876dcf3ede031ae2d27bdb710884085c47bf6d0316",
+  "manifest_before": "5a4c515a110c14ea977bcdffc61792727580c88adaac1428bff7f77ae84977a8",
+  "compose_after": "8cc7f23fecb3eed1149de3f8dd6b1169b5a92137bd3e9d1a239bf07fc0aa4706",
+  "manifest_after": "9f5ea725d3f56c02776fb82b4b1f71a004f2000a08333ac3d72db93255e63da4",
+  "siblings": {
+    "ursa-cluster-sweeper": {
+      "id": "d102e4fe98e2253b5ca30802ff464b800cc686973b671295dea506756b84a936",
+      "image": "sha256:0fa3a6188d18c88ce51963b2fb049a231a6f001e4589ad8186cdc8d8394fe984",
+      "started": "2026-09-11T04:22:25.267506779Z",
+      "restarts": 0
+    },
+    "ursa-v2-run-monitor": {
+      "id": "e90535800568ec6e393b386ff533c7319f4d5652033eea458605481a25367da2",
+      "image": "sha256:0fa3a6188d18c88ce51963b2fb049a231a6f001e4589ad8186cdc8d8394fe984",
+      "started": "2026-09-11T04:22:20.332757805Z",
+      "restarts": 0
+    },
+    "ursa-v2-run-worker": {
+      "id": "5ed7ee8bb08c58345625d1e74c3187464b3a53582e71df76ea7eba41b2d9f9bd",
+      "image": "sha256:0fa3a6188d18c88ce51963b2fb049a231a6f001e4589ad8186cdc8d8394fe984",
+      "started": "2026-09-11T04:22:19.053719782Z",
+      "restarts": 0
+    },
+    "ursa-placement-scheduler": {
+      "id": "e24ad008bd7076d8f35acc51c4befe9ea3b996fb0a604a3401f94a515c1148ff",
+      "image": "sha256:0fa3a6188d18c88ce51963b2fb049a231a6f001e4589ad8186cdc8d8394fe984",
+      "started": "2026-09-11T04:22:17.48819447Z",
+      "restarts": 0
+    },
+    "ursa-cost-guardrail-scheduler": {
+      "id": "f692967857c55c545042369b550a1cf2d559b93c63588feb472cd292c0400db9",
+      "image": "sha256:0fa3a6188d18c88ce51963b2fb049a231a6f001e4589ad8186cdc8d8394fe984",
+      "started": "2026-09-11T04:15:15.294858817Z",
+      "restarts": 0
+    },
+    "ursa": {
+      "id": "d71e8336e2f7964dc5dc5803e9176c7f6cc77c0a3b1785ab41413386bc69698d",
+      "image": "sha256:0fa3a6188d18c88ce51963b2fb049a231a6f001e4589ad8186cdc8d8394fe984",
+      "started": "2026-09-11T04:14:52.931263047Z",
+      "restarts": 0
+    },
+    "qeo": {
+      "id": "0ecce1e5a0a5507f79eaeefa3050a878c9a3a87f418483038d5f83a81bfccf8c",
+      "image": "sha256:a3740ee733886c499b9bd6a281412e64a7da1d314de401679b691671cf1dd0f6",
+      "started": "2026-09-10T10:05:13.393088932Z",
+      "restarts": 0
+    },
+    "kahlo": {
+      "id": "64db44c8da467d2e9705b2ad0d4f648bbad00ac8efee3ef714249d10e5fd3868",
+      "image": "sha256:9372999972aa8a77d22de043bf4bf0dbbc9d8b10d0066ce43345bf83ac254bc5",
+      "started": "2026-09-03T11:32:28.467311137Z",
+      "restarts": 0
+    },
+    "atlas": {
+      "id": "9dc66ad2a1f7353132769bf10de83865ea83bac34e03145b50ee2f42ba0adf01",
+      "image": "sha256:cf1c0690ae277e4ef2d0621724575771e72856930a81d959a6d465de2ad94c7a",
+      "started": "2026-07-02T16:14:55.339267769Z",
+      "restarts": 0
+    },
+    "bloom": {
+      "id": "986deb9e6150f81b3e279e52d0ff4055a57146e7bf7d92a161b83fb5bdb19962",
+      "image": "sha256:e160422141c782400f7798b01f9157c2afc4431326629c8f6543d3785303f806",
+      "started": "2026-07-02T14:04:46.387154167Z",
+      "restarts": 0
+    },
+    "login": {
+      "id": "0c905a1041a6c6cd4db65c246aa593612109e2f02dbfa3116653f5c99f69a034",
+      "image": "sha256:d955b71ef2a1f69bf06018a61336c764af46969402433bbe6196280dd283c8ba",
+      "started": "2026-07-02T14:04:46.429097101Z",
+      "restarts": 0
+    },
+    "zebra-day": {
+      "id": "4f2b16fc88c28440d22ebd12f24a05849238663b7239bad9d4b89df1cf4256b2",
+      "image": "sha256:c3c93ed8d2a79381a22f1d2c3575b1e5cd7a9f166d683aa22217ce3e37185593",
+      "started": "2026-07-02T14:04:46.435451162Z",
+      "restarts": 0
+    }
+  },
+  "database_configuration_changed": false,
+  "application_config_sha256": "3cc2e61ee407ad630c8ea50a6e7498674501699e41dcf2662ef7d21cc9f98426",
+  "changed_service_fields": [
+    "image",
+    "environment.DEWEY_BUILD_SHA",
+    "environment.LSMC_RELEASE_SHA",
+    "environment.DEWEY_CONFIG",
+    "volumes.dewey_config"
+  ]
+}

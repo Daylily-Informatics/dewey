@@ -49,3 +49,13 @@ The application-build TapDB surface registry conditionally attaches these
 routes without eager package-import behavior. Its route class replaces FastAPI
 validation detail with a closed error payload, so invalid body data never
 reflects paths, file names, hashes, or other owner evidence to callers.
+
+
+## Dewey 9.1.0 implementation amendment (2026-09-11)
+
+The mainline implementation supersedes this branch-era packet's three aliases
+and advisory locking. See `docs/labcore_owner_api.md`: one registration endpoint,
+released TapDB natural claims, canonical XRF/receipt lineage, bounded requests,
+strict explicit config and principal attribution. The v1 contract and valid v2
+canonical command bytes remain unchanged. Production acceptance may use the
+explicitly authorized synthetic fixture; automatic Labcore calling is separate.
