@@ -150,13 +150,14 @@ Configured Dewey deployments now mount the reusable TapDB operator UI under
 GUI from `daylily-tapdb` directly instead of reimplementing EUID detail, search,
 stats, and DAG pages inside Dewey itself.
 
-Current live behavior:
+Dewey 9 candidate behavior (production acceptance remains pending):
 
 - Dewey browser auth gates the mounted TapDB UI
 - Dewey global console CSS is loaded into the mounted TapDB pages
 - the mounted UI keeps TapDB's native pages such as object detail, query, info,
   and graph
-- Dewey publishes the canonical root-level DAG API separately at `/api/dag/*`
+- Dewey publishes the canonical DAG v2 API at `/api/dag/v2/*` and its manifest at `/api/dag/manifest`
+- `/graph` embeds the native `/tapdb/graph` view; no Dewey-owned v1 graph client remains
 
 ## Admin
 

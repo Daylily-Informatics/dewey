@@ -134,7 +134,7 @@ class FakeDeweyService:
         lookup = f"{op}:{key}"
         self.idempotency[lookup] = (self._fp(payload), code, dict(body))
 
-    def bootstrap(self) -> None:
+    def verify_existing(self) -> None:
         return
 
     def _require_literature(self) -> None:
@@ -1798,6 +1798,46 @@ class FakeDeweyService:
     def collect_search_export_rows(self, request: dict[str, Any] | None, *, viewer_context=None):
         result = self.query_search_v2(request, viewer_context=viewer_context)
         return list(result["items"]), 1, False
+
+
+@pytest.fixture(autouse=True)
+def explicit_tapdb_test_config(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
+    """Declare an isolated, nonconnecting TapDB target for application route tests."""
+    root = Path(__file__).resolve().parents[1]
+    path = tmp_path / "tapdb-config.yaml"
+    path.write_text(
+        yaml.safe_dump(
+            {
+                "meta": {
+                    "config_version": 4,
+                    "client_id": "dewey",
+                    "database_name": "dewey",
+                    "owner_repo_name": "dewey",
+                    "domain_registry_path": str(
+                        root / "dewey_service/etc/domain_code_registry.json"
+                    ),
+                    "prefix_ownership_registry_path": str(
+                        root / "dewey_service/etc/prefix_ownership_registry.json"
+                    ),
+                },
+                "target": {
+                    "engine_type": "local",
+                    "host": "localhost",
+                    "port": 1,
+                    "ui_port": 8914,
+                    "user": "dewey_test_runtime",
+                    "password": "",
+                    "database": "dewey_test",
+                    "schema_name": "tapdb_dewey_test",
+                    "domain_code": "Z",
+                },
+                "safety": {"safety_tier": "local", "destructive_operations": "confirm_required"},
+            }
+        )
+    )
+    path.chmod(0o600)
+    monkeypatch.setenv("TAPDB_CONFIG_PATH", str(path))
+    return path
 
 
 @pytest.fixture

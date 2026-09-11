@@ -89,6 +89,7 @@ def test_load_schema_drift_payload_returns_copy(monkeypatch: pytest.MonkeyPatch)
         aws_profile="team-profile",
         aws_region="us-west-2",
         tapdb_database_name="dewey",
+        tapdb_config_path="/tmp/test-tapdb.yaml",
     )
     loaded = schema_drift.load_schema_drift_payload(settings)
     loaded["status"] = "changed"
@@ -111,6 +112,7 @@ def test_cached_schema_drift_payload_success_and_failure(monkeypatch: pytest.Mon
         "team-profile",
         "us-west-2",
         "dewey",
+        "/tmp/test-tapdb.yaml",
     )
 
     assert success == {"status": "clean", "summary": "ok"}
@@ -121,6 +123,7 @@ def test_cached_schema_drift_payload_success_and_failure(monkeypatch: pytest.Mon
             "profile": "team-profile",
             "region": "us-west-2",
             "namespace": "dewey",
+            "config_path": "/tmp/test-tapdb.yaml",
         }
     ]
 
@@ -150,6 +153,7 @@ def test_cached_schema_drift_payload_success_and_failure(monkeypatch: pytest.Mon
         "team-profile",
         "us-west-2",
         "dewey",
+        "/tmp/test-tapdb.yaml",
     )
 
     assert failure == {

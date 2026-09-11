@@ -19,7 +19,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from dewey_service.defaults import (
     DEFAULT_APP_PORT,
     DEFAULT_COGNITO_ALLOWED_EMAIL_DOMAINS,
-    DEFAULT_TAPDB_CONFIG_DIR,
     DEFAULT_TAPDB_DOMAIN_REGISTRY_PATH,
     DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH,
     build_default_config_template,
@@ -498,7 +497,7 @@ class Settings(BaseSettings):
     tapdb_domain_code: str = "Z"
     tapdb_domain_registry_path: str = str(DEFAULT_TAPDB_DOMAIN_REGISTRY_PATH)
     tapdb_prefix_ownership_registry_path: str = str(DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH)
-    tapdb_config_path: str = str(DEFAULT_TAPDB_CONFIG_DIR / "dewey" / "dewey" / "tapdb-config.yaml")
+    tapdb_config_path: str = ""
     tapdb_strict_namespace: int = 1
 
     # AWS defaults for TapDB wrappers

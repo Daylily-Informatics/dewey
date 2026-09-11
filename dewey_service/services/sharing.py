@@ -523,9 +523,7 @@ class SharingServiceMixin:
                     denial_reason="delivery_mode_not_allowed",
                 )
                 self._append_share_audit(session, share, event)
-                raise _DeniedShareAccess(
-                    ValueError("delivery mode is not allowed for this share")
-                )
+                raise _DeniedShareAccess(ValueError("delivery mode is not allowed for this share"))
             if not self._share_policy_allows(
                 payload=payload,
                 actor_email=actor_email,

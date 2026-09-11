@@ -97,7 +97,8 @@ def _build_spec() -> CliSpec:
                         env_vars=("DEWEY_EXECUTION_BACKEND",),
                         files=("/.dockerenv", "/app/dewey_service/cli/__init__.py"),
                         command_probe=(
-                            sys.executable, "-c",
+                            sys.executable,
+                            "-c",
                             "import os,sys; sys.exit(0 if os.environ.get('DEWEY_EXECUTION_BACKEND') == 'dewey-container' else 1)",
                         ),
                     ),

@@ -91,7 +91,7 @@ def test_create_app_accepts_shell_aws_profile_when_config_blank(monkeypatch) -> 
             self.backend = backend
             self.storage_client = kwargs["storage_client"]
 
-        def bootstrap(self) -> None:
+        def verify_existing(self) -> None:
             return
 
     class FakeStorageClient:

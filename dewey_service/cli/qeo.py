@@ -44,7 +44,7 @@ def _package_register(
         if not manifest.is_absolute() or not idempotency_key.strip():
             raise ValueError("An absolute manifest and nonempty idempotency key are required")
         request = PackageRegistration.model_validate_json(manifest.read_text())
-        _, result = build_cli_service(bootstrap=False).register_qeo_package(
+        _, result = build_cli_service().register_qeo_package(
             request, idempotency_key=idempotency_key
         )
     except Exception as exc:

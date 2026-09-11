@@ -56,9 +56,8 @@ Dewey already owns its own runtime lifecycle through the `dewey` CLI:
 - `dewey server stop`
 - `dewey server status`
 - `dewey server logs`
-- `dewey db build`
-- `dewey db reset`
-- `dewey db nuke`
+- `dewey db lifecycle`
+- `dewey db verify-templates`
 
 That is exactly the shape Dayhoff needs: service-owned lifecycle, not hidden shell glue.
 

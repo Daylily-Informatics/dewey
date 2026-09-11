@@ -11,17 +11,16 @@ from typing import Any, Generator, Optional, cast
 
 from daylily_tapdb import (
     InstanceFactory,
-    TAPDBConnection,
     TemplateManager,
     generic_instance,
     generic_instance_lineage,
 )
-from daylily_tapdb.cli.context import resolve_context
-from daylily_tapdb.cli.db_config import get_db_config
+from daylily_tapdb.web.runtime import get_db
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from dewey_service.audit import creation_audit_fields, update_audit_fields
+from dewey_service.integrations.tapdb_runtime import ensure_tapdb_version, load_runtime_config
 from dewey_service.settings import get_settings
 from dewey_service.ui_metadata import resolve_package_version
 
@@ -92,56 +91,11 @@ class TapDBBackend:
     def __init__(self, app_username: str = "dewey"):
         settings = get_settings()
 
-        try:
-            ctx = resolve_context(
-                require_keys=True,
-                client_id=settings.tapdb_client_id,
-                database_name=settings.tapdb_database_name,
-                config_path=settings.tapdb_config_path or None,
-            )
-            cfg = get_db_config(
-                config_path=settings.tapdb_config_path or None,
-                client_id=ctx.client_id,
-                database_name=ctx.database_name,
-            )
-        except Exception as exc:
-            raise RuntimeError(
-                "TapDB is not configured for Dewey.\n"
-                "Required settings: tapdb_client_id, tapdb_database_name, "
-                "tapdb_owner_repo_name, tapdb_domain_code, tapdb_domain_registry_path, "
-                "tapdb_prefix_ownership_registry_path"
-            ) from exc
-
-        db_hostname = f"{cfg['host']}:{cfg['port']}"
-        engine_type = (cfg.get("engine_type") or "").strip().lower()
-        if not engine_type:
-            raise RuntimeError("TapDB DB config is missing engine_type")
-        region = (cfg.get("region") or settings.aws_region or "").strip()
-        if not region:
-            raise RuntimeError("Dewey AWS region is required")
-        iam_auth_raw = str(cfg.get("iam_auth") or "").strip().lower()
-        iam_auth = iam_auth_raw in {"1", "true", "yes", "on"}
-        secret_arn = cfg.get("secret_arn") or cfg.get("master_secret_arn")
-
-        self.connection = TAPDBConnection(
-            db_hostname=db_hostname,
-            db_hostaddr=cfg.get("hostaddr") or None,
-            db_user=cfg["user"],
-            db_pass=cfg["password"],
-            db_name=cfg["database"],
-            schema_name=cfg["schema_name"],
-            app_username=app_username,
-            echo_sql=False,
-            engine_type=engine_type,
-            region=region,
-            iam_auth=iam_auth,
-            secret_arn=secret_arn,
-            domain_code=settings.tapdb_domain_code,
-            owner_repo_name=settings.tapdb_owner_repo_name,
-        )
-        self.domain_code = str(cfg.get("domain_code") or settings.tapdb_domain_code or "").strip()
-        if not self.domain_code:
-            raise RuntimeError("tapdb_domain_code is required in Dewey settings")
+        ensure_tapdb_version()
+        cfg = load_runtime_config(settings)
+        self.connection = get_db(settings.tapdb_config_path)
+        self.connection.app_username = app_username
+        self.domain_code = cfg["domain_code"]
         self.templates = TemplateManager()
         self.factory = InstanceFactory(self.templates, domain_code=self.domain_code)
         self.observability = None
@@ -178,17 +132,18 @@ class TapDBBackend:
         session: Session,
         template_codes: tuple[str, ...] = TEMPLATE_DEFINITIONS,
     ) -> None:
-        missing = [
-            template_code
-            for template_code in template_codes
-            if self.templates.get_template(session, template_code, domain_code=self.domain_code)
-            is None
-        ]
+        missing = []
+        for code in template_codes:
+            template = self.templates.get_template(session, code, domain_code=self.domain_code)
+            if template is None:
+                missing.append(code)
+            elif template.instance_prefix != DEWEY_TEMPLATE_EUID_PREFIX:
+                raise RuntimeError(f"Dewey template {code} must retain its DGX instance prefix")
         if missing:
             joined = ", ".join(missing)
             raise RuntimeError(
-                "Missing Dewey templates. Seed the Dewey TapDB JSON pack before "
-                f"running the service: {joined}"
+                "Missing Dewey templates. Complete the reviewed external TapDB lifecycle "
+                f"and preservation checks before starting Dewey: {joined}"
             )
 
     def create_instance(

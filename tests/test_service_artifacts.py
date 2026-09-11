@@ -10,7 +10,7 @@ from tests.support.service_fakes import _FakeStorageClient
 
 
 def test_register_artifact_replay_and_identity_reuse(service: DeweyService) -> None:
-    service.bootstrap()
+    service.verify_existing()
 
     status_code, created = service.register_artifact(
         artifact_type="FASTQ",
@@ -78,22 +78,9 @@ def test_register_artifact_replay_and_identity_reuse(service: DeweyService) -> N
     assert service.list_artifacts(artifact_type="fastq", producer_system="atlas") == [created]
 
 
-def test_bootstrap_seeds_and_reads_local_anomalies(
-    service: DeweyService,
-    explicit_config_file,
-) -> None:
-    _ = explicit_config_file
-    service.bootstrap()
-
-    anomalies = service.list_anomalies()
-    assert len(anomalies) == 3
-    assert anomalies[0]["anomaly_id"].startswith("ANM-")
-    assert anomalies[0]["source_view_url"].startswith("/ui/anomalies/")
-
-    anomaly = service.get_anomaly(anomalies[0]["anomaly_id"])
-    assert anomaly["anomaly_id"] == anomalies[0]["anomaly_id"]
-    assert anomaly["severity"] in {"high", "medium", "low"}
-
+def test_verify_existing_does_not_seed_anomalies(service: DeweyService) -> None:
+    service.verify_existing()
+    assert service.list_anomalies() == []
     with pytest.raises(DeweyNotFoundError):
         service.get_anomaly("ANM-999999")
 
@@ -168,7 +155,7 @@ def test_register_artifact_prefix_creates_single_prefix_without_s3_scan(
     storage: _FakeStorageClient,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    service.bootstrap()
+    service.verify_existing()
 
     def _fail_list_objects(*args, **kwargs):
         raise AssertionError("prefix-only registration must not list S3 objects")
@@ -316,7 +303,7 @@ def test_browse_storage_prefix_marks_registered_and_unregistered_entries(
     service: DeweyService,
     storage: _FakeStorageClient,
 ) -> None:
-    service.bootstrap()
+    service.verify_existing()
     run_root = "runs/RUN504352/2026/504352-20260404_1215/"
     sample = "504352-UGAv3-1527-CAACGATATGTGAT"
     for key in [
@@ -351,7 +338,7 @@ def test_get_artifact_graph_returns_nodes_and_edges_for_hierarchy(
     service: DeweyService,
     storage: _FakeStorageClient,
 ) -> None:
-    service.bootstrap()
+    service.verify_existing()
     storage.seed_object(
         bucket="bucket-10",
         key="runs/RUN504352/2026/504352-20260404_1215/504352-UGAv3-1527-CAACGATATGTGAT/504352-UGAv3-1527-CAACGATATGTGAT.cram",

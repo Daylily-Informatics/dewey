@@ -6,16 +6,14 @@ meta:
   domain_code: Z
   domain_registry_path: /absolute/path/to/domain_code_registry.json
   prefix_ownership_registry_path: /absolute/path/to/prefix_ownership_registry.json
-  # Explicit process contract for TapDB/Meridian subprocesses:
-  # MERIDIAN_DOMAIN_CODE=Z
-  # TAPDB_OWNER_REPO=dewey
 target:
   domain_code: Z
   engine_type: local
   host: localhost
   port: '5439'
   ui_port: '8914'
-  user: postgres
+  # This login must be prepared and bound by the reviewed native operator lifecycle.
+  user: dewey_runtime
   password: ''
   database: dewey
   schema_name: tapdb_dewey

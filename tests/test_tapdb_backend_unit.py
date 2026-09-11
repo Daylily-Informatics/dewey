@@ -119,91 +119,33 @@ def _backend() -> backend_mod.TapDBBackend:
     return backend
 
 
-def test_backend_init_wraps_config_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_backend_init_rejects_invalid_config_before_connect(monkeypatch, test_settings):
+    monkeypatch.setattr(backend_mod, "get_settings", lambda: test_settings)
     monkeypatch.setattr(
         backend_mod,
-        "get_settings",
-        lambda: SimpleNamespace(
-            tapdb_client_id="dewey",
-            tapdb_database_name="dewey",
-            tapdb_owner_repo_name="dewey",
-            tapdb_domain_code="Z",
-            tapdb_config_path="",
-            aws_region="us-west-2",
-        ),
+        "load_runtime_config",
+        lambda settings: (_ for _ in ()).throw(RuntimeError("bad config")),
     )
-    monkeypatch.setattr(
-        backend_mod,
-        "resolve_context",
-        lambda **_kwargs: (_ for _ in ()).throw(RuntimeError("bad config")),
-    )
-    with pytest.raises(RuntimeError, match="TapDB is not configured for Dewey"):
+    monkeypatch.setattr(backend_mod, "get_db", lambda path: pytest.fail("must not connect"))
+    with pytest.raises(RuntimeError, match="bad config"):
         backend_mod.TapDBBackend()
 
 
-def test_backend_init_builds_connection(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(
-        backend_mod,
-        "get_settings",
-        lambda: SimpleNamespace(
-            tapdb_client_id="dewey",
-            tapdb_database_name="dewey",
-            tapdb_owner_repo_name="dewey",
-            tapdb_domain_code="Z",
-            tapdb_config_path="",
-            aws_region="us-west-2",
-        ),
-    )
-    monkeypatch.setattr(
-        backend_mod,
-        "resolve_context",
-        lambda **_kwargs: SimpleNamespace(client_id="dewey", database_name="dewey"),
-    )
-    monkeypatch.setattr(
-        backend_mod,
-        "get_db_config",
-        lambda **_kwargs: {
-            "host": "localhost",
-            "port": "5432",
-            "user": "dewey",
-            "password": "secret",
-            "database": "dewey_dev",
-            "schema_name": "tapdb_dewey_dev",
-            "engine_type": "local",
-            "region": "us-west-2",
-            "iam_auth": "true",
-            "secret_arn": "arn:aws:secretsmanager:example",
-        },
-    )
+def test_backend_init_uses_public_scoped_runtime(monkeypatch, test_settings):
+    monkeypatch.setattr(backend_mod, "get_settings", lambda: test_settings)
+    connection = SimpleNamespace(app_username=None)
+    calls = []
 
-    seen: dict[str, object] = {}
+    def get_db(path):
+        calls.append(path)
+        return connection
 
-    class FakeConnection:
-        def __init__(self, **kwargs):
-            seen.update(kwargs)
-
-    monkeypatch.setattr(backend_mod, "TAPDBConnection", FakeConnection)
-    monkeypatch.setattr(backend_mod, "TemplateManager", lambda: "templates")
-    monkeypatch.setattr(
-        backend_mod,
-        "InstanceFactory",
-        lambda templates, *, domain_code=None: ("factory", templates, domain_code),
-    )
-
-    backend = backend_mod.TapDBBackend(app_username="svc")
-
-    assert seen["db_hostname"] == "localhost:5432"
-    assert seen["db_hostaddr"] is None
-    assert seen["db_user"] == "dewey"
-    assert seen["db_pass"] == "secret"
-    assert seen["db_name"] == "dewey_dev"
-    assert seen["schema_name"] == "tapdb_dewey_dev"
-    assert seen["app_username"] == "svc"
-    assert seen["engine_type"] == "local"
-    assert seen["iam_auth"] is True
+    monkeypatch.setattr(backend_mod, "get_db", get_db)
+    backend = backend_mod.TapDBBackend(app_username="test-actor")
+    assert backend.connection is connection
+    assert connection.app_username == "test-actor"
+    assert calls == [test_settings.tapdb_config_path]
     assert backend.domain_code == "Z"
-    assert backend.templates == "templates"
-    assert backend.factory == ("factory", "templates", "Z")
 
 
 def test_backend_helpers_cover_utility_functions() -> None:
@@ -300,7 +242,7 @@ def test_ensure_templates_passes_when_seeded() -> None:
     backend.templates = SimpleNamespace(
         get_template=lambda session, code, *, domain_code=None: (
             calls.append((code, domain_code)),
-            SimpleNamespace(uid=1),
+            SimpleNamespace(uid=1, instance_prefix="DGX"),
         )[1]
     )
 
@@ -317,7 +259,7 @@ def test_ensure_templates_can_verify_startup_subset() -> None:
     def get_template(_session, code, *, domain_code=None):
         calls.append(code)
         if code in backend_mod.BOOT_TEMPLATE_DEFINITIONS:
-            return SimpleNamespace(uid=1)
+            return SimpleNamespace(uid=1, instance_prefix="DGX")
         return None
 
     backend.templates = SimpleNamespace(get_template=get_template)
@@ -524,10 +466,10 @@ def test_find_lineage_instance_and_normalize_payload(monkeypatch: pytest.MonkeyP
         {_FakeGenericInstanceModel: [_FakeQuery(all_result=[candidate_a, candidate_b])]}
     )
     backend.list_parents = lambda session, child, relationship_type=None: (
-        [] if child is candidate_a else [SimpleNamespace(uid=1)]
+        [] if child is candidate_a else [SimpleNamespace(uid=1, instance_prefix="DGX")]
     )
 
-    source = SimpleNamespace(uid=1)
+    source = SimpleNamespace(uid=1, instance_prefix="DGX")
     assert (
         backend.find_lineage_instance(
             session,

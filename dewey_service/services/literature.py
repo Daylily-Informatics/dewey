@@ -318,19 +318,12 @@ class LiteratureServiceMixin:
         )
         desired = self._determine_literature_storage(record=record, save_mode=save_mode)
         if desired["storage_mode"] == "managed":
-            try:
-                managed = self._download_managed_literature_pdf(record)
-            except Exception:
-                payload = self._literature_external_artifact_payload(
-                    record=record,
-                    save_mode=save_mode,
-                )
-            else:
-                payload = self._literature_managed_artifact_payload(
-                    record=record,
-                    save_mode=save_mode,
-                    managed=managed,
-                )
+            managed = self._download_managed_literature_pdf(record)
+            payload = self._literature_managed_artifact_payload(
+                record=record,
+                save_mode=save_mode,
+                managed=managed,
+            )
         else:
             payload = self._literature_external_artifact_payload(record=record, save_mode=save_mode)
 
@@ -409,6 +402,11 @@ class LiteratureServiceMixin:
                 "storage_mode": "external_reference",
                 "fulltext_status": fulltext["fulltext_status"],
             }
+        if save_mode == "managed_artifact":
+            if not self.managed_storage_bucket:
+                raise ValueError("Managed literature storage requires managed_storage_bucket")
+            if not fulltext["downloadable"]:
+                raise ValueError("Managed literature storage requires downloadable full text")
         if fulltext["downloadable"] and self.managed_storage_bucket:
             return {"storage_mode": "managed", "fulltext_status": "downloadable"}
         return {

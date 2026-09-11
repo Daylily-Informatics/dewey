@@ -1,316 +1,62 @@
-"""TapDB lifecycle and Dewey overlay commands."""
+"""Read-only Dewey verification and explicit TapDB lifecycle delegation."""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import typer
+from cli_core_yo import ccyo_out
+
+from dewey_service.cli._registry_v2 import EXEMPT, REQUIRED, register_group_commands
+
 if TYPE_CHECKING:
     from cli_core_yo.registry import CommandRegistry
     from cli_core_yo.spec import CliSpec
 
-import subprocess
-import sys
 
-import typer
-from cli_core_yo import ccyo_out
-
-from dewey_service import db_seed
-from dewey_service.cli._registry_v2 import (
-    REQUIRED_MUTATING,
-    REQUIRED_MUTATING_INTERACTIVE,
-    register_group_commands,
-)
-from dewey_service.cli.common import PROJECT_ROOT
-from dewey_service.defaults import AWS_PROFILE_REQUIRED_MESSAGE, resolve_aws_profile
-from dewey_service.integrations.tapdb_runtime import (
-    TapDBRuntimeError,
-    ensure_tapdb_version,
-    export_database_url_for_target,
-    run_tapdb_cli,
-)
-from dewey_service.settings import get_settings, load_config_aws_profile
-
-db_app = typer.Typer(help="TapDB lifecycle and Dewey overlay commands")
-DEWEY_PROD_TEMPLATE_SEED_APPROVAL = "APPROVE DEWEY PROD TEMPLATE SEED FOR DAY"
-
-
-def _resolve_cli_aws_profile(profile: str) -> str:
-    explicit_profile = str(profile or "").strip()
-    if explicit_profile:
-        return explicit_profile
-    resolved_profile = resolve_aws_profile(
-        cli_profile="",
-        config_profile=load_config_aws_profile(),
-    )
-    if resolved_profile:
-        return resolved_profile
-    raise TapDBRuntimeError(AWS_PROFILE_REQUIRED_MESSAGE)
-
-
-def _confirm_db_delete(force: bool) -> bool:
-    if force:
-        return True
-    return typer.confirm("This will delete the current TapDB DB target. Continue?")
-
-
-def _confirm_target_label(*, namespace: str) -> str:
-    settings = get_settings()
-    from daylily_tapdb.cli.db_config import get_db_config
-
-    client_id = str(settings.tapdb_client_id or "").strip()
-    if not client_id:
-        raise TapDBRuntimeError("settings.tapdb_client_id is required")
-    cfg = get_db_config(
-        config_path=settings.tapdb_config_path,
-        client_id=client_id,
-        database_name=namespace,
-    )
-    schema_name = str(cfg.get("schema_name") or "").strip()
-    physical_database = str(cfg.get("database") or namespace).strip()
-    if not schema_name:
-        raise TapDBRuntimeError("TapDB config is missing schema_name for destructive confirmation")
-    return f"{client_id}/{namespace}/{schema_name}@{physical_database}"
-
-
-def _delete_db_target(
-    *,
-    force: bool,
-    target: str,
-    profile: str,
-    region: str,
-    namespace: str,
-    config_path: str,
-) -> None:
-    if not _confirm_db_delete(force):
-        raise typer.Exit(0)
-
-    try:
-        settings = get_settings()
-        client_id = str(settings.tapdb_client_id or "").strip()
-        if not client_id:
-            raise TapDBRuntimeError("settings.tapdb_client_id is required")
-        run_tapdb_cli(
-            ["db", "delete", "--confirm-target", _confirm_target_label(namespace=namespace)],
-            target=target,
-            client_id=client_id,
-            profile=profile,
-            region=region,
-            namespace=namespace,
-            config_path=config_path,
-            cwd=PROJECT_ROOT,
-        )
-    except TapDBRuntimeError as exc:
-        ccyo_out.error(f"Delete failed: {exc}")
-        raise typer.Exit(1) from exc
-
-
-def _verify_dewey_templates() -> None:
-    from dewey_service.tapdb_backend import TapDBBackend
-
-    backend = TapDBBackend(app_username="dewey")
-    with backend.session_scope(commit=False) as session:
-        backend.ensure_templates(session)
-
-
-def _seed_dewey_template_overlay() -> None:
-    db_seed.main()
-
-
-@db_app.command("build")
-def build(
-    target: str = typer.Option("local", "--target", help="TapDB target: local|aurora"),
-    cluster: str = typer.Option("", "--cluster", help="Aurora cluster ID for aurora target"),
-    profile: str = typer.Option("", "--profile", help="AWS profile"),
-    region: str = typer.Option("", "--region", help="AWS region"),
-    namespace: str = typer.Option("", "--namespace", help="TapDB namespace"),
-) -> None:
-    """Bootstrap TapDB runtime and apply the Dewey overlay."""
-    ensure_tapdb_version()
-    try:
-        settings = get_settings()
-        resolved_config_path = str(settings.tapdb_config_path or "").strip()
-        resolved_profile = _resolve_cli_aws_profile(profile)
-        resolved_region = str(region or settings.aws_region or "").strip()
-        if not resolved_region:
-            raise TapDBRuntimeError("--region or settings.aws_region is required")
-        resolved_namespace = str(namespace or settings.tapdb_database_name or "").strip()
-        if not resolved_namespace:
-            raise TapDBRuntimeError("--namespace or settings.tapdb_database_name is required")
-        resolved_client_id = str(settings.tapdb_client_id or "").strip()
-        if not resolved_client_id:
-            raise TapDBRuntimeError("settings.tapdb_client_id is required")
-        if target not in {"local", "aurora"}:
-            raise TapDBRuntimeError("Unsupported database target. Use local or aurora.")
-        if target == "local":
-            result = run_tapdb_cli(
-                ["bootstrap", "local", "--no-gui"],
-                target=target,
-                client_id=resolved_client_id,
-                profile=resolved_profile,
-                region=resolved_region,
-                namespace=resolved_namespace,
-                config_path=resolved_config_path,
-                cwd=PROJECT_ROOT,
-            )
-        else:
-            result = run_tapdb_cli(
-                ["db", "setup"],
-                target=target,
-                client_id=resolved_client_id,
-                profile=resolved_profile,
-                region=resolved_region,
-                namespace=resolved_namespace,
-                config_path=resolved_config_path,
-                cwd=PROJECT_ROOT,
-            )
-        if result.stdout:
-            ccyo_out.print_text(result.stdout.rstrip())
-
-        db_url = export_database_url_for_target(
-            target=target,
-            client_id=resolved_client_id,
-            profile=resolved_profile,
-            region=resolved_region,
-            namespace=resolved_namespace,
-            config_path=resolved_config_path,
-        )
-        ccyo_out.print_text(f"[green]DATABASE_URL[/green] resolved: [dim]{db_url}[/dim]")
-
-        subprocess.run(
-            [sys.executable, "-m", "dewey_service.db_seed"], cwd=PROJECT_ROOT, check=True
-        )
-        ccyo_out.success("Dewey TapDB overlay complete")
-    except (TapDBRuntimeError, subprocess.CalledProcessError) as exc:
-        ccyo_out.error(f"DB build failed: {exc}")
-        raise typer.Exit(1) from exc
-
-
-@db_app.command("seed")
-def seed() -> None:
-    """Apply the Dewey TapDB template overlay only."""
-    try:
-        subprocess.run(
-            [sys.executable, "-m", "dewey_service.db_seed"], cwd=PROJECT_ROOT, check=True
-        )
-    except subprocess.CalledProcessError as exc:
-        raise typer.Exit(exc.returncode) from exc
+db_app = typer.Typer(help="Verify existing Dewey data and review native TapDB lifecycle ownership")
 
 
 @db_app.command("verify-templates")
 def verify_templates() -> None:
-    """Verify that all Dewey-required TapDB templates are present."""
+    """Verify existing Dewey templates using SELECT-only runtime operations."""
+    from dewey_service.tapdb_backend import TapDBBackend
+
     try:
-        _verify_dewey_templates()
-        ccyo_out.success("Dewey required templates are present")
+        backend = TapDBBackend(app_username="dewey")
+        with backend.session_scope(commit=False) as session:
+            backend.ensure_templates(session)
+        ccyo_out.success("Dewey required templates are present; no data changed")
     except RuntimeError as exc:
         ccyo_out.error(str(exc))
         raise typer.Exit(1) from exc
 
 
-@db_app.command("repair-templates")
-def repair_templates(
-    confirm_dewey_template_repair: str = typer.Option(
-        "",
-        "--confirm-dewey-template-repair",
-        help=f"Required approval text: {DEWEY_PROD_TEMPLATE_SEED_APPROVAL}",
-    ),
-) -> None:
-    """Verify, seed Dewey-owned templates when missing, then verify again."""
-    if confirm_dewey_template_repair != DEWEY_PROD_TEMPLATE_SEED_APPROVAL:
-        ccyo_out.error(
-            "Dewey template repair is a TapDB template write. "
-            f"Re-run with --confirm-dewey-template-repair {DEWEY_PROD_TEMPLATE_SEED_APPROVAL!r}."
-        )
-        raise typer.Exit(1)
-    try:
-        try:
-            _verify_dewey_templates()
-        except RuntimeError as exc:
-            ccyo_out.print_text(f"Template verification before repair failed: {exc}")
-            _seed_dewey_template_overlay()
-            _verify_dewey_templates()
-            ccyo_out.success("Dewey template repair complete")
-            return
-        ccyo_out.success("Dewey templates already present; no repair needed")
-    except RuntimeError as exc:
-        ccyo_out.error(str(exc))
-        raise typer.Exit(1) from exc
-
-
-@db_app.command("reset")
-def reset(
-    force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
-    target: str = typer.Option("local", "--target", help="TapDB target: local|aurora"),
-    cluster: str = typer.Option("", "--cluster", help="Aurora cluster ID for aurora target"),
-    profile: str = typer.Option("", "--profile", help="AWS profile"),
-    region: str = typer.Option("", "--region", help="AWS region"),
-    namespace: str = typer.Option("", "--namespace", help="TapDB namespace"),
-) -> None:
-    """Delete and rebuild the TapDB target, then apply the Dewey overlay."""
-    settings = get_settings()
-    resolved_profile = _resolve_cli_aws_profile(profile)
-    resolved_region = str(region or settings.aws_region or "").strip()
-    if not resolved_region:
-        raise typer.BadParameter("--region or settings.aws_region is required")
-    resolved_namespace = str(namespace or settings.tapdb_database_name or "").strip()
-    if not resolved_namespace:
-        raise typer.BadParameter("--namespace or settings.tapdb_database_name is required")
-    _delete_db_target(
-        force=force,
-        target=target,
-        profile=resolved_profile,
-        region=resolved_region,
-        namespace=resolved_namespace,
-        config_path=str(settings.tapdb_config_path or "").strip(),
-    )
-
-    build(
-        target=target,
-        cluster=cluster,
-        profile=resolved_profile,
-        region=resolved_region,
-        namespace=resolved_namespace,
-    )
-
-
-@db_app.command("nuke")
-def nuke(
-    force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
-    target: str = typer.Option("local", "--target", help="TapDB target: local|aurora"),
-    profile: str = typer.Option("", "--profile", help="AWS profile"),
-    region: str = typer.Option("", "--region", help="AWS region"),
-    namespace: str = typer.Option("", "--namespace", help="TapDB namespace"),
-) -> None:
-    """Delete the TapDB target without rebuilding."""
-    settings = get_settings()
-    resolved_profile = _resolve_cli_aws_profile(profile)
-    resolved_region = str(region or settings.aws_region or "").strip()
-    if not resolved_region:
-        raise typer.BadParameter("--region or settings.aws_region is required")
-    resolved_namespace = str(namespace or settings.tapdb_database_name or "").strip()
-    if not resolved_namespace:
-        raise typer.BadParameter("--namespace or settings.tapdb_database_name is required")
-    _delete_db_target(
-        force=force,
-        target=target,
-        profile=resolved_profile,
-        region=resolved_region,
-        namespace=resolved_namespace,
-        config_path=str(settings.tapdb_config_path or "").strip(),
+@db_app.command("lifecycle")
+def lifecycle() -> None:
+    """Show the external native lifecycle required before starting Dewey."""
+    ccyo_out.print_text(
+        "Dewey startup only verifies existing templates and runtime access. "
+        "It never creates databases, migrates schemas, seeds templates or prepares principals.\n"
+        "Use the reviewed migration ledger with an explicit absolute operator config: "
+        "tapdb --config /absolute/operator-config.yaml --help.\n"
+        "TapDB 10.1.1rc1 owns backup plan/create/verify/restore-plan/restore, "
+        "db schema migrate, db identity inventory/verify, db sequences advance/verify/reconcile, "
+        "and db runtime-principal bootstrap/bind.\n"
+        "Application data preparation belongs in an explicitly reviewed native lifecycle, "
+        "never a startup overlay. Preserve existing identities, domain/prefix bindings and "
+        "allocator floors. Do not seed or overwrite historical Dewey templates.\n"
+        "After preservation and runtime-principal binding, close old sessions and start "
+        "Dewey with the exact bound runtime config."
     )
 
 
 def register(registry: CommandRegistry, spec: CliSpec) -> None:
-    """Register the db command group."""
+    """Register verification and lifecycle guidance, with no bootstrap aliases."""
     _ = spec
     register_group_commands(
         registry,
         "db",
-        "TapDB lifecycle and overlay commands",
-        [
-            ("build", build, REQUIRED_MUTATING),
-            ("seed", seed, REQUIRED_MUTATING),
-            ("reset", reset, REQUIRED_MUTATING_INTERACTIVE),
-            ("nuke", nuke, REQUIRED_MUTATING_INTERACTIVE),
-        ],
+        "Verify existing Dewey data and review native TapDB lifecycle ownership",
+        [("verify-templates", verify_templates, REQUIRED), ("lifecycle", lifecycle, EXEMPT)],
     )
