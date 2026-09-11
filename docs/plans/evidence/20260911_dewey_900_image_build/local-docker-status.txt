@@ -1,0 +1,8 @@
+{"Client":{"Platform":{"Name":"Docker Engine - Community"},"Version":"29.5.2","ApiVersion":"1.54","DefaultAPIVersion":"1.54","GitCommit":"79eb04c7d8","GoVersion":"go1.26.3","Os":"darwin","Arch":"arm64","BuildTime":"Wed May 20 14:33:30 2026","Context":"default"},"Server":null}
+failed to connect to the docker API at unix:///var/run/docker.sock; check if the path is correct and if the daemon is running: dial unix /var/run/docker.sock: connect: no such file or directory
+NAME/NODE   DRIVER/ENDPOINT   STATUS    BUILDKIT   PLATFORMS
+colima                        error
+default*                      error
+
+Cannot load builder colima: Cannot connect to the Docker daemon at unix:///Users/jmajor/.colima/default/docker.sock. Is the docker daemon running?
+Cannot load builder default: failed to connect to the docker API at unix:///var/run/docker.sock; check if the path is correct and if the daemon is running: dial unix /var/run/docker.sock: connect: no such file or directory
