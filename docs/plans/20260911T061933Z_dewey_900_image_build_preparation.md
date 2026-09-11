@@ -14,7 +14,9 @@ cutover, acceptance, a release tag, or a merge to `main`.
 | Exact source context | Prepared | `evidence/20260911_dewey_900_image_build/dewey-9.0.0-c484c95768a4-source-context.tar.gz`; SHA256 `78b70410759ab4abc08e17da962f77fbcda638a920a4b80b4fc88c1caf0cbefe`; 314,972 bytes; 79 tracked files |
 | Complete Dockerfile | Prepared | Source Dockerfile plus a release-only copy whose only changes are the two platform-specific base-image digest pins |
 | Local image build | Not run | Local Docker client `29.5.2` found; default and Colima engines were unavailable. No engine was started. |
-| Native build capsule | Prepared | `evidence/20260911_dewey_900_image_build/build-and-push-linux-amd64.sh`; SHA256 `254dda2cd40b915c3919dc4123b19d877307055b375514e82741afff5bd08b50` |
+| Native build capsule | Corrected | `evidence/20260911_dewey_900_image_build/build-and-push-linux-amd64.sh`; SHA256 `1bfb74e251f0c9bb1f17bbaf47e8b2062076ba10b329fa6247ea5110e1503376`; smoke now supplies explicit `DEWEY_DEPLOYMENT_CODE=dewey900-image-smoke` |
+| O's native image build | Build succeeded; smoke interrupted | Exact local image ID `sha256:59a0cad2e005b5940dc3eeac1dd9a72691d23386c8dfc4d72c37cd85f880759f`; revision label matched `c484c95768a4147acdcabd12a2da0332c4c750dc`; missing smoke deployment code caused the first import failure; ECR push was not reached |
+| Resume smoke/publish capsule | Prepared | `evidence/20260911_dewey_900_image_build/resume-smoke-and-push-linux-amd64.sh`; SHA256 `d3b2d8850c05cdd7a4e6307b158e001671905439d6c8363480bdfd9e1e919eb3`; hard-bound to the exact built image ID |
 | Candidate image publish | Pending O | Exact candidate tag below; build capsule refuses an existing tag and records the immutable ECR digest after push |
 | Production deployment/DB | Unchanged | No EC2, ECR, database, runtime config, Compose, release tag, or production operation was performed here |
 
@@ -91,9 +93,35 @@ Only after those checks should O place the immutable digest reference into
 Dewey-only override. Deployment and populated-data acceptance remain separate
 controlling-ledger gates.
 
+## Resume the completed build without rebuilding
+
+O reported that the full native build completed and produced local image ID
+`sha256:59a0cad2e005b5940dc3eeac1dd9a72691d23386c8dfc4d72c37cd85f880759f`.
+The first smoke stopped before ECR login or push because the helper did not pass
+the deployment identity required while importing the Dewey package. The original
+build logs and receipts remain coordinator-owned and must stay unchanged.
+
+Copy the refreshed capsule files to the same native build host, verify
+`SHA256SUMS`, choose an absent receipt path, and run:
+
+```bash
+sha256sum -c SHA256SUMS
+./resume-smoke-and-push-linux-amd64.sh \
+  --receipt-dir /absolute/private/path/dewey-9.0.0-c484c95768a4-resume-receipt
+```
+
+The resume capsule performs no build or retag. It requires the candidate tag to
+resolve locally to that exact image ID, then checks `linux/amd64`, default user,
+all OCI labels, source commit, `/app/.venv`, exact package versions, Python 3.12,
+CLI import/help and runtime files. Both import-bearing smoke commands receive
+the explicit isolated deployment code `dewey900-image-smoke`. Only after every
+check passes does it verify that the ECR candidate tag is absent, authenticate
+with a private temporary Docker config, push the existing image and record the
+immutable ECR digest in the new receipt directory.
+
 ## Validation performed here
 
-- `bash -n build-and-push-linux-amd64.sh` passed.
+- `bash -n` passed for both build and resume capsules.
 - Source and release Dockerfiles differ only at the two digest-pinned `FROM`
   lines.
 - `docker buildx imagetools inspect` resolved and recorded both base indexes and
@@ -102,4 +130,5 @@ controlling-ledger gates.
   SHA256.
 - Existing affected test, Ruff, Bandit and frozen-install receipts were reused;
   no suite was rerun because this lane changes packaging evidence only.
-- No complete image was built locally because no local engine was running.
+- No image command was run locally for this helper repair. O's already-built
+  image is retained for the resume path; no rebuild is required.

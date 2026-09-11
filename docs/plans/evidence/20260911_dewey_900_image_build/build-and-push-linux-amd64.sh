@@ -13,6 +13,7 @@ readonly IMAGE_TAG="9.0.0-c484c95768a4"
 readonly IMAGE_REF="${IMAGE_REPOSITORY}:${IMAGE_TAG}"
 readonly AWS_REGION="us-west-2"
 readonly TARGET_PLATFORM="linux/amd64"
+readonly SMOKE_DEPLOYMENT_CODE="dewey900-image-smoke"
 readonly BUILDER_BASE="ghcr.io/astral-sh/uv:0.5.30-python3.12-bookworm-slim@sha256:dae7f9060850980a52f1c629f2e94024c7d267f506dbc465c170553200e19d9f"
 readonly RUNTIME_BASE="python:3.12-slim-bookworm@sha256:9c47360a2a0355e2da18516d0b1c2126ec22c195d2185e97347c9d98398c5bef"
 readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
@@ -142,10 +143,12 @@ DOCKER_BUILDKIT=1 docker build \
 [[ "$(docker image inspect --format '{{index .Config.Labels "org.opencontainers.image.source"}}' "$IMAGE_REF")" == "$SOURCE_URL" ]]
 docker image inspect "$IMAGE_REF" > "$RECEIPT_DIR/local-image-inspect.json"
 
-docker run --rm --entrypoint /app/.venv/bin/python "$IMAGE_REF" -c \
+docker run --rm --env "DEWEY_DEPLOYMENT_CODE=${SMOKE_DEPLOYMENT_CODE}" \
+    --entrypoint /app/.venv/bin/python "$IMAGE_REF" -c \
     'import importlib.metadata as m, json, sys; from dewey_service.integrations.tapdb_runtime import ensure_tapdb_version; ensure_tapdb_version(); observed={"dewey-service":m.version("dewey-service"),"daylily-tapdb":m.version("daylily-tapdb"),"meridian-euid":m.version("meridian-euid"),"python":sys.version.split()[0],"executable":sys.executable}; expected={"dewey-service":"9.0.0","daylily-tapdb":"10.1.1rc1","meridian-euid":"0.4.8"}; assert all(observed[k] == v for k,v in expected.items()), observed; assert observed["python"].startswith("3.12."), observed; assert observed["executable"] == "/app/.venv/bin/python", observed; print(json.dumps(observed,sort_keys=True))' \
     | tee "$RECEIPT_DIR/package-versions.json"
-docker run --rm --entrypoint /app/.venv/bin/dewey "$IMAGE_REF" --help \
+docker run --rm --env "DEWEY_DEPLOYMENT_CODE=${SMOKE_DEPLOYMENT_CODE}" \
+    --entrypoint /app/.venv/bin/dewey "$IMAGE_REF" --help \
     > "$RECEIPT_DIR/dewey-help.txt"
 docker run --rm --entrypoint /bin/sh "$IMAGE_REF" -c \
     'set -eu; test "$(id -un)" = lsmc; test -x /app/.venv/bin/python; test ! -e /usr/bin/git; printf "runtime_user=%s\n" "$(id)"' \
