@@ -43,7 +43,8 @@ def ensure_tapdb_version() -> str:
 
 
 def load_runtime_config(settings) -> dict[str, object]:
-    """Resolve the explicit target with TapDB's documented config interface."""
+    """Validate and bind the single TapDB target for this Dewey process."""
+    from daylily_tapdb.cli.context import set_cli_context
     from daylily_tapdb.cli.db_config import get_db_config
 
     path = Path(str(settings.tapdb_config_path))
@@ -61,6 +62,13 @@ def load_runtime_config(settings) -> dict[str, object]:
     ):
         if cfg[field] != expected:
             raise TapDBRuntimeError(f"TapDB {field} disagrees with the explicit Dewey setting")
+    # Embedded metrics and GUI code also resolve TapDB settings without a path.
+    # Keep their process context explicit without replacing Dewey's CLI context.
+    set_cli_context(
+        config_path=path,
+        client_id=settings.tapdb_client_id,
+        database_name=settings.tapdb_database_name,
+    )
     return cfg
 
 
