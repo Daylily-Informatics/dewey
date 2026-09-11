@@ -1,0 +1,37 @@
+{
+  "release": "9.0.0",
+  "base_url": "https://dewey.day.lsmc.bio",
+  "target_database": "dewey_prod_tapdb10",
+  "target_schema": "tapdb_dewey_lsmcok1_local",
+  "existing_fixtures": {
+    "artifact_set_euid": "M-DGX-NNSS",
+    "report_artifact_euid": "M-DGX-NKDM",
+    "data_json_artifact_euid": "M-DGX-NKFG",
+    "package_members": 20,
+    "manifest_repo_path": "docs/plans/20260910T005100Z_complete_multiqc_package.json",
+    "manifest_sha256": "4ed7e3e6938edb309a277042a42125d2ac58e99579809973e369054e1a67f4e9",
+    "registration_receipt_repo_path": "docs/plans/evidence/20260910_dewey_container_cli/package-registration.json",
+    "registration_idempotency_key": "qeo-multiqc-illumina-20260815-full-package-v1"
+  },
+  "resolver_requests": [
+    {"kind": "artifact", "euid": "M-DGX-NKDM"},
+    {"kind": "artifact_set", "euid": "M-DGX-NNSS"}
+  ],
+  "controlled_artifact_set_create": {
+    "method": "POST",
+    "path": "/api/v1/artifact-sets",
+    "idempotency_key": "dewey-9.0.0-acceptance-artifact-set-v1",
+    "body": {
+      "artifact_set_type": "migration_acceptance",
+      "label": "Dewey 9.0.0 acceptance",
+      "description": "Retained acceptance record for the reviewed TapDB migration.",
+      "metadata": {"acceptance_release": "9.0.0"}
+    }
+  },
+  "controlled_membership_add": {
+    "method": "POST",
+    "path_template": "/api/v1/artifact-sets/{persisted_artifact_set_euid}/members",
+    "idempotency_key": "dewey-9.0.0-acceptance-membership-v1",
+    "body": {"artifact_euid": "M-DGX-NKDM"}
+  }
+}

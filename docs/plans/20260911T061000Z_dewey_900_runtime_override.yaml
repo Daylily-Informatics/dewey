@@ -1,0 +1,48 @@
+# Preparation fragment, not a complete deployment or evidence of deployment.
+# Apply only to the existing Dewey service. The coordinator must inspect the
+# fully rendered definition and remove superseded Dewey source/operator config
+# mounts; Compose merges volumes by destination and does not remove old ones.
+services:
+  dewey:
+    image: "${DEWEY_RELEASE_IMAGE:?Set the approved repository@sha256 image reference}"
+    user: "0:0"
+    environment:
+      HOME: /root
+      DEWEY_EXECUTION_BACKEND: dewey-container
+      DEWEY_DEPLOYMENT_CODE: day
+      DEWEY_ENVIRONMENT: production
+      DEWEY_CONFIG: /opt/dewey/day/releases/9.0.0/dewey-config.yaml
+      TAPDB_CONFIG_PATH: /opt/dewey/day/releases/9.0.0/tapdb-runtime.yaml
+      DEWEY_DATABASE_TARGET: aurora
+      DEWEY_TAPDB_CLIENT_ID: dewey
+      DEWEY_TAPDB_DATABASE_NAME: dewey-day
+      DEWEY_TAPDB_DOMAIN_CODE: M
+      DEWEY_TAPDB_OWNER_REPO_NAME: dewey
+      DEWEY_BUILD_SHA: "${DEWEY_RELEASE_SHA:?Set the exact clean release commit}"
+      LSMC_RELEASE_SHA: "${DEWEY_RELEASE_SHA:?Set the exact clean release commit}"
+      AWS_PROFILE: "${DEWEY_RELEASE_AWS_PROFILE:?Set the observed production runtime profile}"
+      AWS_REGION: us-west-2
+      AWS_DEFAULT_REGION: us-west-2
+    labels:
+      org.opencontainers.image.version: 9.0.0
+      org.opencontainers.image.revision: "${DEWEY_RELEASE_SHA:?Set the exact clean release commit}"
+      org.opencontainers.image.source: "${DEWEY_RELEASE_SOURCE_URL:?Set the verified Dewey repository URL}"
+    volumes:
+      - type: bind
+        source: /opt/dewey/day/releases/9.0.0/dewey-config.yaml
+        target: /opt/dewey/day/releases/9.0.0/dewey-config.yaml
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /opt/dewey/day/releases/9.0.0/tapdb-runtime.yaml
+        target: /opt/dewey/day/releases/9.0.0/tapdb-runtime.yaml
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /home/ubuntu/.config/tapdb/rds-ca-bundle.pem
+        target: /root/.config/tapdb/rds-ca-bundle.pem
+        read_only: true
+        bind:
+          create_host_path: false
