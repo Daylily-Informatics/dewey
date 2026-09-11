@@ -4,16 +4,16 @@ D preparation, 2026-09-11. O runs these only after the native copy/migration/
 floor and [principal stages](20260911T070836Z_dewey_principal_capsule.md) pass.
 Source stays stopped/closed throughout rehearsal and final. No additional backup
 or inbox/outbox replay/retention gate is introduced. These commands were not
-executed by D. This recipe now targets the complete rebuilt context-fix candidate;
+executed by D. This recipe now targets the complete accepted native-reference candidate;
 O/F's new published image receipt owns its final digest:
 
 - Manifest digest: required explicitly from the new O/F publication receipt.
-- Image source revision: `c6406b8ffb40e58feaba31e2163d77448d47698c`.
+- Image source revision: `5f51f8137d7bd2d4e2668593df5cc492b390a4b8`.
 - Dewey `9.0.0`, TapDB `10.1.1rc1`, Meridian `0.4.8`.
 
 ## 1. Prepare exact mounted capsule files and inputs
 
-In an existing private operator directory, prepare an `application-acceptance-c6406b8ffb40`
+In an existing private operator directory, prepare an `application-acceptance-5f51f8137d7b`
 subdirectory containing these exact reviewed, nonsecret repo files:
 
 | Host basename | Repository file |
@@ -44,19 +44,19 @@ The separate read-only mount below needs no second manifest copy.
 ```bash
 set -euo pipefail
 umask 077
-D_CONTAINER=dewey-tapdb10-rehearsal-c6406b8ffb40
+D_CONTAINER=dewey-tapdb10-rehearsal-5f51f8137d7b
 D_LANE=rehearsal
 D_RUNTIME_DIR=/opt/dewey/day/releases/tapdb10-rehearsal-20260911
-D_CAPSULE_DIR=/home/ubuntu/dewey_ops/tapdb101-20260911/application-acceptance-c6406b8ffb40
-D_IMAGE_SHA=c6406b8ffb40e58feaba31e2163d77448d47698c
-: "${D_DIGEST:?Exact new published c6406b8ffb40 manifest digest from O/F receipt}"
+D_CAPSULE_DIR=/home/ubuntu/dewey_ops/tapdb101-20260911/application-acceptance-5f51f8137d7b
+D_IMAGE_SHA=5f51f8137d7bd2d4e2668593df5cc492b390a4b8
+: "${D_DIGEST:?Exact new published 5f51f8137d7b manifest digest from O/F receipt}"
 : "${D_IMAGE_REPOSITORY:?Exact published repository from O/F image receipt}"
-D_STATE_DIR=/home/ubuntu/dewey_ops/tapdb101-20260911/rehearsal-application-state-c6406b8ffb40
-D_OUTPUT_DIR=/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-application-c6406b8ffb40
-D_LAUNCH_DIR=/home/ubuntu/dewey_ops/tapdb101-20260911/rehearsal-launch-c6406b8ffb40
+D_STATE_DIR=/home/ubuntu/dewey_ops/tapdb101-20260911/rehearsal-application-state-5f51f8137d7b
+D_OUTPUT_DIR=/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-application-5f51f8137d7b
+D_LAUNCH_DIR=/home/ubuntu/dewey_ops/tapdb101-20260911/rehearsal-launch-5f51f8137d7b
 D_IMAGE="${D_IMAGE_REPOSITORY}@${D_DIGEST}"
 test -z "$(ss -H -ltn 'sport = :18914')"
-test -z "$(docker ps -aq --filter 'name=^/dewey-tapdb10-rehearsal-c6406b8ffb40$')"
+test -z "$(docker ps -aq --filter 'name=^/dewey-tapdb10-rehearsal-5f51f8137d7b$')"
 ```
 
 The owning image inspection must match digest, source labels and package receipt
@@ -73,7 +73,7 @@ This correction is mandatory. O prepares the reviewed host-only helper
 and its private output directory outside the mounted application capsule.
 
 ```bash
-sudo /home/ubuntu/dewey_ops/tapdb101-20260911/venv/bin/python /home/ubuntu/dewey_ops/tapdb101-20260911/dewey_launch_environment_prepare_c6406b8ffb40.py --compose /opt/dayhoff/deployments/day/compose/docker-compose.yml --dewey-config "$D_RUNTIME_DIR/dewey-config.yaml" --lane "$D_LANE" --image-sha "$D_IMAGE_SHA" --output-dir "$D_LAUNCH_DIR"
+sudo /home/ubuntu/dewey_ops/tapdb101-20260911/venv/bin/python /home/ubuntu/dewey_ops/tapdb101-20260911/dewey_launch_environment_prepare_5f51f8137d7b.py --compose /opt/dayhoff/deployments/day/compose/docker-compose.yml --dewey-config "$D_RUNTIME_DIR/dewey-config.yaml" --lane "$D_LANE" --image-sha "$D_IMAGE_SHA" --output-dir "$D_LAUNCH_DIR"
 ```
 
 Review the new `receipt.json` before proceeding. The helper pins owning Compose
@@ -263,8 +263,8 @@ passed; authentication selection and all application/image build inputs remain
 unchanged. O/F owns verification that the supplied production SHA belongs to
 the actual final image.
 
-The 08:38Z runtime-context correction pins rehearsal to O's new source
-`c6406b8ffb40e58feaba31e2163d77448d47698c` and assigns new container, capsule,
+The current native-reference correction pins rehearsal to O's accepted source
+`5f51f8137d7bd2d4e2668593df5cc492b390a4b8` and assigns new container, capsule,
 state, output and environment paths. The previous candidate is now explicitly
 rejected by the pin test. The HTTP acceptance script, stored fixture identities,
 idempotency keys, resolved TapDB runtime path and principal binding are unchanged.

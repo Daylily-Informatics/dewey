@@ -15,7 +15,7 @@ import yaml
 
 COMPOSE_PATH = Path("/opt/dayhoff/deployments/day/compose/docker-compose.yml")
 COMPOSE_SHA256 = "35a37f2c5df1cc84ebfd57ad19a9d56b14f88b3e6bc322aebadd3db081da8509"
-REHEARSAL_IMAGE_SHA = "c6406b8ffb40e58feaba31e2163d77448d47698c"
+REHEARSAL_IMAGE_SHA = "5f51f8137d7bd2d4e2668593df5cc492b390a4b8"
 DIRECTORIES = {
     "rehearsal": "/opt/dewey/day/releases/tapdb10-rehearsal-20260911",
     "production": "/opt/dewey/day/releases/9.0.0",

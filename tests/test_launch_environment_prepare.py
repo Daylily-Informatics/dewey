@@ -122,7 +122,7 @@ def test_image_sha_validation_rejects_missing_or_noncanonical_revision(image_sha
 def test_image_sha_validation_pins_rehearsal_candidate():
     launch.validate_image_sha("rehearsal", launch.REHEARSAL_IMAGE_SHA)
     with pytest.raises(launch.PreparationError, match="Rehearsal image source SHA changed"):
-        launch.validate_image_sha("rehearsal", "c484c95768a4147acdcabd12a2da0332c4c750dc")
+        launch.validate_image_sha("rehearsal", "c6406b8ffb40e58feaba31e2163d77448d47698c")
 
 
 def test_image_sha_validation_requires_cli_argument(monkeypatch, capsys):
