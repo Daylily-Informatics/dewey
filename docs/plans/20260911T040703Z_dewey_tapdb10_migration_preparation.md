@@ -3,12 +3,20 @@
 **Status:** Preparation is amended for the explicitly approved published
 `10.1.1rc1` candidate. The earlier 10.1.0 capture failed with
 `Identity receipt exceeds the declared size bound` and wrote no receipt. The
-coordinator's RC capture succeeded. Four observed dormant generators still need
-verified mappings, the actual preservation crosswalk remains pending, and the
-fresh healthy-source fence lifecycle is blocked at L04. No migration, restore,
+coordinator's RC capture succeeded. The four dormant generators now have a
+source-backed mapping input independently reviewed by B; native recapture remains.
+The user selected an explicit source shutdown SOP for this migration; a new
+TapDB source-isolation feature is not required. The actual conversion crosswalk,
+target rehearsal, and recovery proof remain pending. No migration, copy,
 or production acceptance is claimed.
 Author: role C, `gpt-6-astra` / `max`.
 Independent acceptance belongs to role E, `gpt-6-astra` / `max`.
+
+**Backup boundary:** The user explicitly prohibited another backup. No new
+logical backup, snapshot, checkpoint backup, or renamed export is part of this
+runbook. Existing Aurora automated backups remain the recovery protection.
+The reviewed transfer design is a one-time database copy followed by native
+identity verification and migration; O alone owns its exact setup/approval.
 
 **Version boundary:** The user authorized exact `10.1.1rc1`; this is not stable
 10.1.1 or a merge to TapDB main. Role B owns artifact/provenance qualification.
@@ -33,8 +41,8 @@ still requires the later exact-effect second approval.
 | Original database | `dewey_prod` |
 | Production replacement | Exactly `dewey_prod_tapdb10`; an existing destination is a refusal |
 | Preserved schema/domain | `tapdb_dewey_lsmcok1_local` / `M` |
-| Historical template binding | Preserve the observed `DGX` binding and every stored prefix; no substitution with `TPX` |
-| Rehearsal destination | Separately approved explicit database/config/journal; never inferred from production names |
+| Historical template binding | Preserve all 11 original `DGX` and all 11 original `TPX` template identities and their exact bindings; no substitution between them |
+| Rehearsal destination | Exact isolated copy/config/journal chosen by O for rehearsal before promotion; any separate database needs explicit approval and native family continuity |
 
 The controlling ledger supplies these baseline facts. Fresh native source and
 provider receipts must establish the actual physical identity before operation.
@@ -57,7 +65,7 @@ for source version `9.0.9`. It contains 79,918 identity rows across 9 tables,
 173,423,825 row-evidence bytes, a largest serialized source row of 1,706,924 bytes,
 and 20 sequences. The selected policy was 1,000,000 rows / 8 MiB per row /
 512 MiB row evidence. `missing_generators` is empty, but four mappings remain
-`unmapped`; successful capture is not successful mapping or backup validation.
+`unmapped`; successful capture is not successful mapping or transfer validation.
 
 | Private native evidence | Retained reference / SHA256 |
 |---|---|
@@ -67,9 +75,35 @@ and 20 sequences. The selected policy was 1,000,000 rows / 8 MiB per row /
 | Sequence inventory SHA256 | `7dc63a2ae200cb19aa027994ee9a354be8108fe40c1ea9d478216f287ab4e1fc` |
 
 The four dormant names are `ay_instance_seq`, `wsx_instance_seq`,
-`wx_instance_seq`, and `xx_instance_seq`. Their names alone do not prove prefix
-ownership. Resolve them from exact historical/native registry and catalog
-evidence before backup, source-next planning, or advancement.
+`wx_instance_seq`, and `xx_instance_seq`. The
+[source-backed mapping review](20260911T053316Z_dewey_source_sequence_mapping_review.md)
+binds explicit TapDB 9.0.9 declarations to their sealed native catalog evidence.
+The [four-entry mapping input](evidence/20260911T053316Z_dewey_source_sequence_mappings.json)
+does not change counters, create generators, or grant prefix ownership.
+B independently reviewed this input; a fresh native capture with it remains
+required before transfer, source-next planning, or advancement.
+
+O's sanitized discovery index records the following original row counts. These
+are a discovery baseline, not final cutoff values or a table whitelist:
+
+| Original table | Rows | Observed identity prefixes |
+|---|---:|---|
+| `audit_log` | 66,666 | `ADT` |
+| `generic_instance` | 12,204 | 12,200 `DGX`, 4 `GVR` |
+| `generic_instance_lineage` | 1,015 | `EDG` |
+| `generic_template` | 22 | 11 `DGX`, 11 `TPX` |
+| `tapdb_identity_prefix_config` | 6 | Preserve every original keyed `prefix` value |
+| `_tapdb_migrations` | 5 | Preserve original migration records |
+| `inbox_message` | 0 | Empty at this capture |
+| `outbox_event` | 0 | Empty at this capture |
+| `outbox_event_attempt` | 0 | Empty at this capture |
+
+All observed identity-domain rows were `M`. No original `is_deleted` value was
+true in this discovery receipt; retain the ability to preserve deleted rows in
+later capture and verification. The 11 Dewey templates bind `DGX`; the 11 native
+templates have `TPX` identities and bind `MSG`, `SYS`, `GSE`, `XRF`, or `GVR`.
+Empty native messaging tables do not prove the absence of service-owned typed
+outbox objects, pending external requests, or an accepted remote outcome.
 
 ## 1. Required evidence before L08 can be completed
 
@@ -85,7 +119,7 @@ do not copy their full contents into Git or chat.
 | External recovery set | Exact source/control/target configs and checksums, registry versions, TLS paths, IAM identity/policies, secret references and recovery method, runtime files; O |
 | Original principal state | Native `db census` receipt: login attributes, memberships, ownership, ACLs, effective database `TEMP`, available runtime/operator scope and IAM mapping; no substitution with bootstrap/bind; O/B |
 | Writer inventory | Web/service pools, background workers, integrations, maintenance clients, other allocator sessions; O/B |
-| Immutable recovery family | Source and every planned replacement/rehearsal journal root, origin physical identity, canonical family UUID, retained journal heads; O/B |
+| Immutable recovery family | After the copy is verified, create the family on its actual physical identity only if no earlier family or mutation history exists; include every planned journal root and retain original-source floors separately; O/B |
 | Preservation crosswalk | Every original table/row/column, lineage, audit, share/membership/idempotency and integration state; source-derived, never the former nine-table/twenty-sequence counts as a whitelist; C |
 | Allocator crosswalk | All native generator names, prefix or owned-column proof, `last_value`, `is_called`, assigned/allocated floors, increment/start/bounds/cache/cycle/owner/dependencies and native plan next values; B/C |
 
@@ -110,10 +144,10 @@ full absolute paths. Do not infer one deployment's settings from another.
 | `SOURCE_CONFIG`, `CONTROL_CONFIG` | Source config and a different existing control database on the same verified server |
 | `CONTROL_DATABASE`, `REHEARSAL_DATABASE` | Exact reviewed names; presence/absence comes from authenticated native census, control login is independently proved |
 | `DESTINATION_CONFIG`, `DESTINATION_DATABASE` | The exact approved destination for this attempt; production uses `dewey_prod_tapdb10` |
-| `SOURCE_MAPPINGS`, `DESTINATION_MAPPINGS` | Explicit verified mapping files from catalog/owning-registry evidence; no copied guesses |
-| `SOURCE_JOURNAL`, `REHEARSAL_JOURNAL`, `REPLACEMENT_JOURNAL` | Existing canonical absolute roots, all included before sealing the family |
+| `SOURCE_MAPPINGS`, `DESTINATION_MAPPINGS` | Independently reviewed explicit mapping files from exact source declarations and native catalog/registry evidence; the destination must preserve the same source evidence and prove its own matching catalog |
+| `REHEARSAL_JOURNAL`, `REPLACEMENT_JOURNAL`, `RECOVERY_JOURNAL` | Explicit existing canonical absolute roots for every planned family operation, all included before sealing |
 | `FAMILY_ID`, `RECOVERY_FAMILY` | Operator-selected canonical UUID and new native family receipt file |
-| `SOURCE_INITIAL`, `SOURCE_FINAL`, `TARGET_HISTORICAL` | Distinct new native source-contract receipt files |
+| `SOURCE_INITIAL`, `SOURCE_FINAL`, `TARGET_COPY`, `TARGET_HISTORICAL` | Distinct new native contracts; the first untouched-copy contract precedes the copy-origin family contract |
 | `PROVIDER_CONTRACT` | Qualified Aurora provider evidence for the exact operation |
 | `INVENTORY_MAX_ROWS`, `INVENTORY_MAX_ROW_BYTES`, `INVENTORY_MAX_RECEIPT_BYTES` | Coordinator-selected positive finite native budgets; all three are recorded, with process memory/storage assessed separately |
 | Planned native budget for the resumed capture | O selected 1,000,000 rows, 8,388,608 bytes per source row, 536,870,912 row-evidence bytes; conservative operating policy, not measured source size |
@@ -136,7 +170,7 @@ tapdb --config "$SOURCE_CONFIG" db-config update \
 ```
 
 Apply the identical reviewed values through this same command to each explicit
-destination config used for identity/restore/migration captures. The RC's
+destination config used for identity/copy/migration captures. The RC's
 published example of a 512 MiB budget is not a measured Dewey requirement.
 `max_receipt_bytes` counts cumulative row-evidence bytes, not database size,
 indented JSON file size, or process memory. Complete evidence remains in memory.
@@ -144,8 +178,8 @@ indented JSON file size, or process memory. Complete evidence remains in memory.
 Configured captures retain the existing `tapdb-identity-inventory/v1` format and
 seal top-level `limits` and `usage`. Limits are resource policy, not physical
 target identity. Native verification rejects conflicting policies or recorded
-usage that violates them. Once captured, carry the same policy through backup,
-restore verification, migration, fence recovery and final verification. A policy
+usage that violates them. Once captured, carry the same policy through copy
+verification, migration, fence recovery and final verification. A policy
 change requires deliberately reviewed fresh capture; never edit sealed receipts.
 
 On another limit failure, retain the native `identity_inventory_limit` error and
@@ -176,134 +210,207 @@ coordinator changes the published defaults. Overflow is failure, never truncatio
 Drift-check exit 0 means clean, 1 means reported drift, and 2 means missing
 database/inspection failure; expected historical drift is evidence for migration.
 
-Create the family and initial historical source contract through the native CLI:
+Capture the initial historical source without creating a family on the database
+that will remain offline. Before selecting this path, O must confirm that no
+prior source-origin family or mutating journal history already exists; preserve
+and reconcile any such history instead of discarding it:
+
+O confirmed during this amendment that no family or mutating journal had been
+created. Recheck that fact before initial family creation if execution intervenes.
 
 ```bash
 tapdb --config "$SOURCE_CONFIG" --json db identity inventory \
   --source-version 9.0.9 --sequence-mappings "$SOURCE_MAPPINGS" \
-  --new-recovery-family-id "$FAMILY_ID" \
-  --family-receipts-dir "$SOURCE_JOURNAL" \
-  --family-receipts-dir "$REHEARSAL_JOURNAL" \
-  --family-receipts-dir "$REPLACEMENT_JOURNAL" \
-  --family-receipt "$RECOVERY_FAMILY" --receipt "$SOURCE_INITIAL"
+  --receipt "$SOURCE_INITIAL"
 ```
 
-Repeat `--family-receipts-dir` for every additional explicitly planned root.
-Never edit the sealed descriptor to add or omit a replacement. Retain each
-root's head anchor and all aborted or ambiguous intents throughout recovery.
+The copy receives its own native family only after exhaustive preservation is
+proved in section 4. Original source observations and native planned-next floors
+remain immutable evidence and are supplied explicitly to destination advancement.
 
 After the coordinator has stopped every source writer and established a
 qualified exclusion posture that permits the required read-only operator
 sessions, capture a new final source contract. A source still changing is not
-ready for the final backup:
+ready for the final transfer:
 
 ```bash
 tapdb --config "$SOURCE_CONFIG" --json db identity inventory \
   --source-version 9.0.9 --sequence-mappings "$SOURCE_MAPPINGS" \
-  --recovery-family "$RECOVERY_FAMILY" --receipt "$SOURCE_FINAL"
+  --receipt "$SOURCE_FINAL"
 ```
 
-The original and final contracts are both retained. Planned maintenance does not
-waive final source capture or sequence-session closure.
+The original and final contracts are both retained. The user approved the
+following operator-owned source exclusion SOP, which O must make concrete with
+the actual deployment and session-control commands before the maintenance gate:
 
-Native `--establish-writer-fence` closes `ALLOW_CONNECTIONS` while retaining its
-own session. A separate CLI process cannot then open another source connection.
-O/B must prove the capture posture and its connection lifecycle, for example an
-actual native-verified operator-only quarantine when applicable. Never reopen
-the hard gate, create a fake stalled intent, or treat census alone as writer
-exclusion to make these commands connect. The live fencing procedure remains an
-explicit O/B prerequisite.
+1. Inventory every Dewey HTTP process, worker, scheduler, integration dispatcher,
+   administrative CLI, and other holder of the source credentials. Bind the
+   reviewed stop/disable commands and exact service/container identities to the
+   evidence packet. Prevent automatic restarts or another operator starting a
+   source client throughout the window.
+2. Stop admission of **all** Dewey HTTP execution and new CLI/worker work. HTTP
+   method filtering is insufficient: the external-object-relations GET route
+   persists graph-reference synchronization. Drain the admitted requests and
+   allocator work before stopping the whole source container and external
+   workers. Retain container/process stop results and restarted-client refusal
+   evidence; the independent TapDB operator environment remains available.
+3. Drain the outbox dispatch acknowledgement window. A QEO request can be
+   accepted remotely before Dewey commits its local outcome. Record every
+   unresolved accepted/ambiguous outcome with existing request/idempotency
+   evidence and its recovery disposition before final capture. Do not invent a
+   successful local acknowledgement or blindly replay it. An earlier empty
+   native outbox table does not waive this drain.
+4. Close every previous non-operator database session and allocator pool,
+   including idle sessions. Establish exclusive operator access using the
+   reviewed deployment/network/credential controls, account for administrative
+   and provider access, and retain the exact effective controls and session
+   evidence. Census visibility supports this proof; a momentary census alone
+   is insufficient. No source write or `nextval` probe is permitted after the
+   cutoff. If O cannot prove exclusion, remain in maintenance and resolve that
+   specific control before capture.
+5. Keep those controls in place through final native identity/sequence capture,
+   source-next observation, database copy, target preparation, final advancement,
+   and cutover. After final capture, close the operator source sessions as well
+   before copying from the separate control database. The source application
+   and all other source writers remain stopped.
+6. Record the cutoff UTC, complete writer/session inventory, stop/drain results,
+   effective exclusive-access controls, observed native identities, and every
+   artifact reference/digest in a clearly labelled **operator SOP receipt**.
+   Keep it separate from sealed TapDB receipts. Any source write, new writer,
+   connection-control loss, or ambiguous outcome invalidates the cutoff and
+   requires O to review the change and obtain fresh controlling evidence.
 
-## 3. Backup and explicit isolated restore
+For the reviewed database copy, this SOP owns source exclusion. Do not invent a
+native `writer_fence` or quarantine receipt, use takeover on a healthy source,
+or require a new TapDB release solely to automate this infrequent procedure.
+Native migration, advancement, and reconciliation retain their connection gates
+and evidence requirements. The copy itself is explicitly operator-owned setup;
+it does not produce a native restore or family-join receipt. A native
+`--establish-writer-fence` holds its own sessions while `ALLOW_CONNECTIONS` is
+false; it is not a standalone
+source maintenance command into which subsequent CLI processes can reconnect.
+The source remains offline after cutover until a separately reviewed recovery
+or retention decision; no source restart is part of normal cutover.
 
-Use the same source contract and family for plan/create; a changed source forces
-a new capture and review:
+## 3. One-time Aurora database copy, without a new backup
 
-```bash
-tapdb --config "$SOURCE_CONFIG" --json backup plan --class full \
-  --source-contract "$SOURCE_FINAL" --recovery-family "$RECOVERY_FAMILY"
+The user stopped all new backup creation. Preserve the existing Aurora recovery
+configuration and evidence; do not invoke logical backup creation, take a new
+snapshot, or rename a backup operation as an export. O records the actual
+cluster identity, existing retention and earliest/latest restorable times, plus
+external config/registry/TLS/IAM and secret recovery references. Aurora manages
+continuous backups; the latest restorable point is separate evidence from the
+application cutoff. [AWS Aurora backup and recovery documentation](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Managing.Backups.html)
 
-tapdb --config "$SOURCE_CONFIG" --json backup create --class full \
-  --source-contract "$SOURCE_FINAL" --recovery-family "$RECOVERY_FAMILY"
+AWS documents same-cluster database copying with `CREATE DATABASE ... TEMPLATE`
+for Aurora PostgreSQL. This is the replacement database itself, not an extra
+backup artifact. Confirm the actual cluster is ordinary Aurora PostgreSQL;
+Aurora Limitless explicitly does not support this option.
+[AWS Aurora database copy guidance](https://docs.aws.amazon.com/dms/latest/oracle-to-aurora-postgresql-migration-playbook/chap-oracle-aurora-pg.special.multitenant.html),
+[AWS Limitless restriction](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/limitless-reference.DDL-limitations.html)
 
-tapdb --config "$SOURCE_CONFIG" --json backup verify \
-  --backup-id "$BACKUP_ID" --level deep
+Exact RC source exposes fresh database creation and native archive restoration,
+not a source-template copy option. The one-time copy therefore requires an
+explicitly reviewed operator SQL capsule, rather than a fabricated TapDB command
+or receipt. Its exact effect is to create absent `dewey_prod_tapdb10` from the
+unchanged `dewey_prod`, preserving schema `tapdb_dewey_lsmcok1_local` and owner
+`dayhoff`. O alone prepares and operates that capsule. Candidate statement for
+review, not a command executed by this author:
+
+```sql
+CREATE DATABASE "dewey_prod_tapdb10"
+  WITH TEMPLATE "dewey_prod" OWNER "dayhoff" ALLOW_CONNECTIONS false;
 ```
 
-`BACKUP_ID` must come from the successful native creation receipt. Preserve the
-manifest, verification result, source identity asset and immutable backup
-location, plus the external recovery set from section 1.
+The complete capsule must establish and record:
 
-Compose `RECOVERY_SOURCE` only from actual native outputs. Its exact purpose is:
+1. Exact source/control/target physical identities, sufficient database-creation
+   and source-owner authority, and target absence. Do not broaden source
+   `IS_TEMPLATE` permissions merely to allow copying.
+2. Final source contract and planned-next floors captured under section 2's
+   persistent outage, then **all** source sessions closed. Execute the copy
+   from the explicit different control database outside a transaction block.
+3. Destination admission closed on creation. Database-level privileges and
+   `ALTER DATABASE` settings are not copied: explicitly review their required
+   values and establish operator-only target access before opening its gate.
+   The inherited schema/data ACLs and ownership also require verification.
+   `CONNECTION LIMIT` alone does not prove exclusion. Reopening the target for
+   native operator commands must preserve exclusion of every runtime client.
+4. Copy result plus independent destination existence/identity evidence. A lost
+   acknowledgement requires inspection of this exact destination before any
+   retry; no automatic drop, overwrite, or recreated alternate name.
+5. Original source remains offline. Capture and verify the untouched destination
+   through section 4 before any migration, issuance, seeding, or runtime binding.
 
-| Attempt | Required recovery-source content |
-|---|---|
-| Isolated rehearsal | `purpose: isolated_rehearsal` and unchanged `recovery_family` from the backup contract |
-| Production/source recovery | `purpose: fenced_source_recovery`, fresh sealed `source_contract`, verified source `writer_fence` or separately qualified quarantine evidence, canonical `source_receipts_dir`, unchanged `recovery_family` |
-
-`fenced_migration` belongs to native migration receipts; it is not a restore
-purpose. Do not handwrite or alter sealed native receipts.
-
-Stage the exact destination and preserve the resulting plan fingerprint:
-
-```bash
-tapdb --config "$DESTINATION_CONFIG" --json backup restore-plan \
-  --backup-id "$BACKUP_ID" --mode isolated \
-  --target-database "$DESTINATION_DATABASE" \
-  --target-schema tapdb_dewey_lsmcok1_local \
-  --recovery-source "$RECOVERY_SOURCE" \
-  --control-config "$CONTROL_CONFIG" --provider-contract "$PROVIDER_CONTRACT"
-```
-
-If the qualified native lifecycle requires explicit writer-fence or quarantine
-input, add its exact `--writer-fence` or `--quarantine-receipt` argument to both
-plan and apply. Missing required evidence is a blocker; omitting it is not an
-alternate restore path. The plan must prove the actual database/OID/server/port,
-unchanged schema/domain/owner, absent destination, and complete family history.
-
-After the separate exact-target approval gate, the coordinator uses the unchanged
-arguments plus the reviewed fingerprint:
-
-```bash
-tapdb --config "$DESTINATION_CONFIG" --json backup restore \
-  --backup-id "$BACKUP_ID" --mode isolated \
-  --target-database "$DESTINATION_DATABASE" \
-  --target-schema tapdb_dewey_lsmcok1_local \
-  --plan-fingerprint "$RESTORE_PLAN_FINGERPRINT" \
-  --recovery-source "$RECOVERY_SOURCE" \
-  --control-config "$CONTROL_CONFIG" --provider-contract "$PROVIDER_CONTRACT"
-```
+The session, permission, and database-setting requirements follow
+[PostgreSQL 16 CREATE DATABASE](https://www.postgresql.org/docs/16/sql-createdatabase.html).
+The operator controls and resulting evidence must be reviewed independently;
+this author has not executed the copy or certified live Aurora behavior.
 
 No schema initialization, `db setup`, `db schema apply`, old Dewey bootstrap,
-overwrite seeding, `--allow-identity-mismatch`, `--allow-unknown-migrations`, or
-`--allow-unclaimable-prefixes` is part of this migration. Successful restore
-must still report `principal_binding_required: true`.
-
-Use the explicit isolated restore flow for the service rehearsal. The convenience
-`backup rehearse` command owns a disposable generated name and cleanup behavior;
-it does not replace this ledger's reviewed destination, retained journals,
-separate migration, failure exercises, or service acceptance.
+overwrite seeding, identity-mismatch allowance, or unclaimable-prefix waiver is
+part of this transfer. Any destructive action, overwrite, cleanup, or provider
+restore retains the separate exact-effect second-approval gate. A successful
+copy is not migration, runtime-principal, or production acceptance.
 
 ## 4. Target-local historical contract and migration
 
-The restored database still has historical schema/assets. Capture its own
+The untouched copied database still has historical schema/assets. Capture its own
 physical/config identity with the historical source version:
 
 ```bash
 tapdb --config "$DESTINATION_CONFIG" --json db identity inventory \
   --source-version 9.0.9 --sequence-mappings "$DESTINATION_MAPPINGS" \
-  --recovery-family "$RECOVERY_FAMILY" --receipt "$TARGET_HISTORICAL"
+  --receipt "$TARGET_COPY"
 ```
 
-Use this new target-local contract for migration preflight/apply. Native migration
-compares `--source-contract` against the current configured and physical database.
-The original `dewey_prod` contract cannot be passed unchanged as that target-local
-contract, and its sealed fields must never be edited to make it match.
+First verify original-to-copy preservation. The target-only native conversion
+manifest has the exact copied inventory `target`, empty `tables`, and empty
+`added_tables`. No row or column conversion is allowed at this stage. Preserve
+its reviewed file digest and the native verification output:
 
-First verify original-to-restored preservation using a reviewed target-only
-conversion manifest: its `target` is copied exactly from the restored inventory,
-`tables` is empty, and `added_tables` is empty. Native restore also records its
-own exhaustive preservation check. Both checks must pass before migration.
+```bash
+tapdb --config "$DESTINATION_CONFIG" --json db identity verify \
+  --before "$SOURCE_FINAL" --after "$TARGET_COPY" \
+  --conversion-manifest "$COPY_TARGET_MANIFEST" \
+  --sequence-mappings "$DESTINATION_MAPPINGS"
+```
+
+Identity verification does not substitute for allocator-copy equality. Compare
+the complete sealed source/copy sequence payloads: every generator name,
+definition, mapping/evidence, owner, dependency, `last_value`, `is_called`, and
+assigned/allocated floor must match, with no missing or extra generator. Their
+whole receipt hashes differ because physical/config identities differ; preserve
+both receipts and record exact field-level equality excluding only those
+expected relocation fields. No counter reduction or ignored unknown mapping is
+permitted.
+
+After that check passes, and only if O has established that there is no prior
+family or mutating journal to reconcile, create the immutable native family from
+the actual untouched copy. Do not pretend its new database OID belongs to a
+source-origin family or synthesize a native restore/join receipt:
+
+```bash
+tapdb --config "$DESTINATION_CONFIG" --json db identity inventory \
+  --source-version 9.0.9 --sequence-mappings "$DESTINATION_MAPPINGS" \
+  --new-recovery-family-id "$FAMILY_ID" \
+  --family-receipts-dir "$REHEARSAL_JOURNAL" \
+  --family-receipts-dir "$REPLACEMENT_JOURNAL" \
+  --family-receipts-dir "$RECOVERY_JOURNAL" \
+  --family-receipt "$RECOVERY_FAMILY" --receipt "$TARGET_HISTORICAL"
+```
+
+Repeat `--family-receipts-dir` for every additional explicitly planned existing
+root. Include the current destination journal. Retain all roots, head anchors,
+aborted values, and ambiguous intents; never replace or narrow this descriptor.
+Require the untouched-copy identity and sequence inventories to remain unchanged
+across family creation. Preserve original-source initial/final/native-next
+provenance separately and include those values in final retained floors.
+
+Use `TARGET_HISTORICAL` for native migration preflight/apply: its historical
+schema version is `9.0.9`, while physical/config identity belongs to this actual
+copy and its native family. The original `dewey_prod` contract cannot be passed
+unchanged as that target-local contract. Never edit sealed target fields.
 
 After the database exists, the coordinator can plan and apply CONNECT-only
 `db runtime-principal bootstrap`. Retain its JSON plan/result. It does not
@@ -378,7 +485,7 @@ source/destination receipts and reviewed native migration contracts:
 | Native field | Dewey review rule |
 |---|---|
 | `schema_version` | Exactly `tapdb-identity-conversion/v1` |
-| `target` | Exact destination inventory target; physical relocation is separately bound by restore/config/provider evidence |
+| `target` | Exact destination inventory target; physical copy is separately bound by source/copy/config/provider evidence |
 | `added_tables` | Only individually justified native/service tables; record each table's content hash and added-row keys in the review |
 | `tables.<name>.added_columns` | Exact newly introduced column names, tied to reviewed migration/conversion behavior |
 | `tables.<name>.schema_changes` | Enable only for individually reviewed tables; enumerate every catalog difference, including owner, RLS, policies, triggers, constraints, indexes and dependencies |
@@ -431,7 +538,7 @@ After any subsequent data/catalog mutation, capture again and renew the review.
 
 Preserve all generator definitions and mappings. At reopening, every supported
 generator's next value must exceed the maximum retained floor from initial
-source, final fenced source, every destination, assigned/reserved/aborted/probe/
+source, final isolated source, every destination, assigned/reserved/aborted/probe/
 migration values, and the entire recovery family. Include the previous source
 **next value**, not only its `last_value` or largest persisted row.
 
@@ -527,14 +634,14 @@ does not close sessions or remove pre-existing temporary objects.
 
 | L09 exercise | Required completion evidence |
 |---|---|
-| Historical restore | Exact backup ID/manifest, destination identity, deep verification, exhaustive original-row preservation, no runtime binding yet |
+| Historical copy | Exact operator copy capsule/result, source/target physical identities, target-only native exhaustive preservation verification, no runtime binding yet |
 | Native migration and conversion | Reviewed preflight/result, pending-migration checksums, exact difference crosswalk, native identity verification, preserved DGX/lineage/audit/integration state |
 | Allocator rehearsal | Initial/final/native-next floor provenance, all family roots/head anchors, exact advancement result, independent strict-floor and session/cache evidence |
 | Failed migration | Native aborted or authoritative ambiguous outcome; all consumed/reserved values retained; target stays operator-only |
 | Lost acknowledgement | Exact original journal root and intent ID; reconciliation evidence that distinguishes committed, rolled back, and observed-only outcomes |
 | Repeated recovery | No lost/rewritten journal root, no reused allocation, no undeclared table/row changes, destination/principal explicitly rebound |
 | Service acceptance | Independent role E API/GUI/auth and application-data tests using actual persisted objects, fresh sessions and exact new image/config |
-| Timing | UTC duration of backup, restore, migration, conversion, verification, bind and acceptance; measured maintenance window proposed from this run |
+| Timing | UTC duration of source isolation, copy, migration, conversion, verification, bind and acceptance; measured maintenance window proposed from this run |
 
 For a stalled native fence, plan reconciliation with the exact root and intent:
 
@@ -556,10 +663,36 @@ committed. Never retry past an unresolved intent or replace an existing journal.
 
 | Recovery point | Required action |
 |---|---|
-| Before accepted new production writes | Coordinator may review returning to the retained source only after native advancement beyond **all** exposed replacement/family values and new session verification |
-| A retained generator cannot be represented safely on the old source through the native path | Keep the source fenced; rollback is blocked pending a supported recovery decision |
-| After accepted writes on the replacement | Repair forward with all family evidence; image-only rollback would lose accepted state and is prohibited |
+| Before accepted new production writes | Keep the original source offline. A possible return requires separately qualified native family continuity, every retained generator, advancement beyond **all** exposed values, and fresh sessions; the old source is not a member of the copy-origin family |
+| Any family-retained generator is absent from the historical source/recovery point | Keep the old source offline; repair the current family member forward or use an existing Aurora recovery point that contains current schema and accepted state, with separately qualified family continuity |
+| After accepted writes on the replacement | Recover the current accepted-write state or repair forward with all family evidence; image-only or old-archive rollback would lose accepted state and is prohibited |
 | Cleanup | Retain old source, backups, failed targets and journals; no automatic deletion or cleanup command is authorized here |
+
+The generator condition can arise before the first new business write. Evaluate
+the actual before/after native inventories and journal heads; do not assume the
+RC creates a new generator merely because a migration name refers to prefixes.
+Native restore refuses an archive that omits a retained family generator, and
+native advance likewise refuses a retained floor whose generator is absent.
+Never remove those floors, omit a family root, or fabricate a generator to make
+an older archive pass. This is a recovery phase boundary for the SOP.
+
+The user prohibited additional checkpoint backups. Record post-migration and
+post-cutover native evidence and the existing Aurora earliest/latest restorable
+times instead. Confirm that the actual chosen recovery point includes the
+required schema, every retained generator, and the accepted application state.
+Do not call an older restore point current, or silently accept loss of writes
+between that point and the observed application cutoff.
+
+Repair-forward within the current family member preserves its physical
+membership. If existing Aurora backups are needed, the coordinator must prepare
+the exact provider restore, destination, accepted-state boundary, and native
+family-continuity procedure before the separate restore approval. A new database
+OID/server is not automatically a member of the old family. Do not fabricate a
+native join, discard existing family history, or create a new backup to avoid
+this review. The source remains offline; all original/current native receipts,
+source floors, family journals, and remote acknowledgement evidence remain
+retained. If accepted state or a native outcome is unresolved, remain in
+maintenance and resolve that exact issue before reopening.
 
 ## 8. Preparation evidence and handoff
 
@@ -599,23 +732,26 @@ were added by this author.
 
 | Area | Exact required evidence / owner |
 |---|---|
-| Source inventory | RC capture succeeded with the retained evidence above; four unmapped dormant generators require verified source/registry/catalog mappings and a new native contract capture using that reviewed mapping input; O/B/C |
+| Source inventory | RC capture succeeded and B independently accepted the four-entry mapping input. A new native contract with all 20 observed mappings resolved remains required; O/B/E |
 | Source next floors | Initial native safe-next plan; later final contract/plan inventory-hash equality under qualified exclusion, every generator and retained provenance; O/B/C |
 | Original principals | Native census summarized above; retain its private sealed reference/digest and address explicitly unavailable historical scope evidence. Control/rehearsal observations must be bound to their exact selected names; O/B |
 | Control | Explicit existing absolute config, different existing database on the exact server, successful authenticated control connection, operator/provider/TLS/IAM identity and required authority; O/B |
-| Healthy-source fencing entry | L04 BLOCKED: B confirmed no fresh healthy-source quarantine/fence entry through the public CLI. Native backup uses a single exported snapshot plus a separate dump connection, but supplies no fresh source-fence control. A supported explicit lifecycle is required; takeover needs a real existing stalled epoch and cannot be manufactured; O/B |
-| Service writers | HTTP/service/background/integration/scheduler/maintenance writer census and stopped/recreated pool/session evidence; database activity alone is incomplete; O |
-| Rehearsal destination | Exact separately approved database name, absent-destination proof, explicit config with preserved schema/domain/owner/registries and matching inventory limits; O |
-| Recovery family | Canonical family UUID; existing source/rehearsal/replacement journal roots; unchanged native descriptor and every root/head anchor; O/B |
-| Backup and external recovery set | Full native source backup/manifest/deep verification plus configs, registries, TLS/IAM, secret recovery references, image/runtime files and original principal evidence; O/B |
-| Conversion and acceptance | Actual per-attempt differences and manifest, separately approved restore effect, timed isolated migration/floor/recovery receipts, and independent role E acceptance; C/O/E |
+| Source maintenance SOP | User-approved operator exclusion: bind actual stop/drain/restart-prevention/access-control commands to complete writer inventory, close cached sessions, retain exclusive operator access and maintenance through cutoff/cutover. No new TapDB source-isolation feature is required; O/B |
+| Service writers | Stop all HTTP execution, including the GET synchronization writer; drain QEO dispatch acknowledgement windows and record unresolved accepted outcomes; include all CLI/background/scheduler clients, stopped source container and closed database pools/sessions; O/D |
+| Rehearsal destination | Exact approved isolated copy, absent-destination proof, explicit config with preserved schema/domain/owner/registries and matching inventory limits; any additional database requires explicit family continuity; O |
+| Recovery family | Prove no prior discarded family/journals; create the initial family on the verified untouched copy, with every planned existing root/head anchor and retained original-source floors; O/B |
+| Existing Aurora recovery and external set | Actual retained backup/recovery window and chosen restore-point coverage, configs, registries, TLS/IAM, secret recovery references, image/runtime files and original principal evidence; no new backup creation; O/B |
+| Conversion and acceptance | Actual per-attempt differences and manifest, reviewed copy/access-control capsule, timed isolated migration/floor/recovery receipts, and independent role E acceptance; C/O/E |
+| Current-schema recovery | Repair-forward on the current family member or separately reviewed use of existing Aurora recovery with proven accepted-state coverage and native family continuity; no new checkpoint backup or unconditional old-source restart; O/B/E |
 
-The old 128 MiB failure remains historical evidence. Configurability and a
-published candidate do not by themselves prove actual source capture, a usable
-healthy-source fence, or complete migration/recovery acceptance.
+The old 128 MiB failure remains historical evidence; actual RC capture succeeded.
+The fixed candidate plus supported native commands and the reviewed operator SOP
+remain the implementation platform. Mapping qualification, exact conversion
+review, complete source isolation, and measured rehearsal/recovery are remaining
+execution and acceptance evidence, not automatic requests for another release.
 
 **Next actions:** O/B capture and qualify the native evidence, C derives the
-actual per-attempt conversion crosswalk, O executes the approved isolated
+actual per-attempt conversion crosswalk, O executes the reviewed copy and isolated
 rehearsal, and E independently validates the results. L08/L09 remain open until
 their actual ledger completion evidence exists. Phase-two features and outstanding
 PRs begin only after the major replacement and its acceptance/closeout gates.
