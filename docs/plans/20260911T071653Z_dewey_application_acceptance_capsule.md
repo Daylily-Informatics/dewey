@@ -20,12 +20,17 @@ subdirectory containing these exact reviewed, nonsecret repo files:
 | `dewey_runtime_principal_prepare.py` | `scripts/dewey_runtime_principal_prepare.py` |
 | `application_acceptance.py` | `docs/plans/20260911T070000Z_dewey_application_acceptance.py` |
 | `fixture-inputs.json` | `docs/plans/20260911T061000Z_dewey_900_acceptance_inputs.json` |
-| `multiqc-package.json` | `docs/plans/20260910T005100Z_complete_multiqc_package.json` |
 
 Record file hashes. This capsule directory must contain no configs, operator
 references or credentials. Prepare distinct new private existing state/output
 directories, one per lane. Retain the resolver token at its existing protected
 file; it is mounted separately and is never printed/copied into a receipt.
+
+Use O's already preserved host manifest directly:
+`/home/ubuntu/dewey_ops/tapdb101-20260911/fixtures/qeo-complete-multiqc-package-20260910.json`.
+O verified SHA256 `4ed7e3e6938edb309a277042a42125d2ac58e99579809973e369054e1a67f4e9`
+against the retained fixture after copying it from the stopped source container.
+The separate read-only mount below needs no second manifest copy.
 
 ```bash
 umask 077
@@ -91,6 +96,7 @@ docker run --detach --name "$D_CONTAINER" --restart=no --network=host --user=0:0
   --mount type=bind,src=/opt/dayhoff/deployments/day/tapdb-registry/domain_code_registry.json,dst=/opt/dayhoff/deployments/day/tapdb-registry/domain_code_registry.json,readonly \
   --mount type=bind,src=/opt/dayhoff/deployments/day/tapdb-registry/prefix_ownership_registry.json,dst=/opt/dayhoff/deployments/day/tapdb-registry/prefix_ownership_registry.json,readonly \
   --mount "type=bind,src=$D_CAPSULE_DIR,dst=/run/dewey-acceptance,readonly" \
+  --mount type=bind,src=/home/ubuntu/dewey_ops/tapdb101-20260911/fixtures/qeo-complete-multiqc-package-20260910.json,dst=/run/dewey-acceptance-manifest.json,readonly \
   --mount type=bind,src=/opt/dewey/day/releases/qeo-resolver-7782aef47b86/resolver.token,dst=/run/dewey-acceptance-resolver.token,readonly \
   --mount "type=bind,src=$D_STATE_DIR,dst=/run/dewey-acceptance-state" \
   --mount "type=bind,src=$D_OUTPUT_DIR,dst=/run/dewey-acceptance-output" \
@@ -114,7 +120,7 @@ After reviewing that new successful receipt, bind the HTTP capsule arguments:
 
 ```bash
 D_APP=(docker exec "$D_CONTAINER" /app/.venv/bin/python /run/dewey-acceptance/application_acceptance.py)
-D_HTTP=(--lane "$D_LANE" --base-url http://127.0.0.1:18914 --dewey-config "$D_RUNTIME_DIR/dewey-config.yaml" --resolver-token-file /run/dewey-acceptance-resolver.token --fixture-inputs /run/dewey-acceptance/fixture-inputs.json --fixture-manifest /run/dewey-acceptance/multiqc-package.json --image-digest "$D_DIGEST" --image-sha "$D_IMAGE_SHA")
+D_HTTP=(--lane "$D_LANE" --base-url http://127.0.0.1:18914 --dewey-config "$D_RUNTIME_DIR/dewey-config.yaml" --resolver-token-file /run/dewey-acceptance-resolver.token --fixture-inputs /run/dewey-acceptance/fixture-inputs.json --fixture-manifest /run/dewey-acceptance-manifest.json --image-digest "$D_DIGEST" --image-sha "$D_IMAGE_SHA")
 "${D_APP[@]}" read "${D_HTTP[@]}" --receipt /run/dewey-acceptance-output/app-read.json
 ```
 
@@ -158,7 +164,7 @@ Optional separately reviewed **existing-package CLI replay**, when that acceptan
 row is selected by O; this is not inbox/outbox replay:
 
 ```bash
-docker exec "$D_CONTAINER" dewey --config "$D_RUNTIME_DIR/dewey-config.yaml" qeo package-register --manifest /run/dewey-acceptance/multiqc-package.json --idempotency-key qeo-multiqc-illumina-20260815-full-package-v1
+docker exec "$D_CONTAINER" dewey --config "$D_RUNTIME_DIR/dewey-config.yaml" qeo package-register --manifest /run/dewey-acceptance-manifest.json --idempotency-key qeo-multiqc-illumina-20260815-full-package-v1
 ```
 
 Retain its public receipt and require original `M-DGX-NNSS`; never retry against
