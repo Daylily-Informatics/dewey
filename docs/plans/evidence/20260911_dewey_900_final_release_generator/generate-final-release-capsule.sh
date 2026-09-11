@@ -2,39 +2,42 @@
 set -euo pipefail
 umask 077
 
-readonly QUALIFIED_SOURCE_COMMIT="c484c95768a4147acdcabd12a2da0332c4c750dc"
-readonly QUALIFIED_SOURCE_TREE="b765812bcd8d41222e373d8a16b028a4cbba6f06"
 readonly SOURCE_URL="https://github.com/lsmc-bio/dewey.git"
 readonly RELEASE_VERSION="9.0.0"
 readonly IMAGE_REPOSITORY="108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey"
-readonly QUALIFIED_CONTEXT_NAME="dewey-9.0.0-c484c95768a4-source-context.tar.gz"
-readonly QUALIFIED_CONTEXT_SHA256="78b70410759ab4abc08e17da962f77fbcda638a920a4b80b4fc88c1caf0cbefe"
-readonly QUALIFIED_IMAGE_TAG="9.0.0-c484c95768a4"
-readonly BUILD_TEMPLATE_SHA256="1bfb74e251f0c9bb1f17bbaf47e8b2062076ba10b329fa6247ea5110e1503376"
+readonly BUILD_TEMPLATE_SHA256="49338d9a6a349b2877c284f81930f330f0a2c617146d631afcf60fdce5249430"
 readonly RELEASE_DOCKERFILE_SHA256="16b4ec188bde0070ce47610a1364d92942f9a2f8dc51a22b5bf0b93fd22ed93e"
 readonly SOURCE_DOCKERFILE_SHA256="221fe0a763e07973c6b7b02f099ce96de7ab49d826bd0c84ec2fe5e5df1d3318"
 readonly PYPROJECT_SHA256="a2a67b3f5c47b9de0271c47527c0fa52514f4bd91b961f1dcb78a53d7cdb3d98"
 readonly UV_LOCK_SHA256="43c88b3d5ab9950bcdba2c7f0b3158900584424fbc21192dd0e695ffe899c094"
 readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-readonly QUALIFIED_CAPSULE_DIR="${SCRIPT_DIR}/../20260911_dewey_900_image_build"
-readonly BUILD_TEMPLATE="${QUALIFIED_CAPSULE_DIR}/build-and-push-linux-amd64.sh"
-readonly RELEASE_DOCKERFILE_TEMPLATE="${QUALIFIED_CAPSULE_DIR}/Dockerfile.release"
+readonly POSTFIX_GENERATOR_DIR="${SCRIPT_DIR}/../20260911_dewey_900_postfix_image_generator"
+readonly BUILD_TEMPLATE="${POSTFIX_GENERATOR_DIR}/build-smoke-push-linux-amd64.template.sh"
+readonly RELEASE_DOCKERFILE_TEMPLATE="${POSTFIX_GENERATOR_DIR}/Dockerfile.release"
 
 usage() {
     printf '%s\n' \
         "Usage: $0 --repo /absolute/clean/main --release-commit <40 hex>" \
-        "          --image-tag <9.0.0 or exact release commit> --output-dir /absolute/absent/path" >&2
+        "          --qualified-source-commit <40 hex> --qualified-source-tree <40 hex>" \
+        "          --qualified-build-inputs-sha256 <64 hex>" \
+        "          --image-tag <9.0.0 or exact release commit>" \
+        "          --output-dir /absolute/absent/path" >&2
 }
 
-if [[ $# -ne 8 || "$1" != "--repo" || "$3" != "--release-commit" || \
-    "$5" != "--image-tag" || "$7" != "--output-dir" ]]; then
+if [[ $# -ne 14 || "$1" != "--repo" || "$3" != "--release-commit" || \
+    "$5" != "--qualified-source-commit" || "$7" != "--qualified-source-tree" || \
+    "$9" != "--qualified-build-inputs-sha256" || "${11}" != "--image-tag" || \
+    "${13}" != "--output-dir" ]]; then
     usage
     exit 64
 fi
 readonly REPO="$2"
 readonly RELEASE_COMMIT="$4"
-readonly IMAGE_TAG="$6"
-readonly OUTPUT_DIR="$8"
+readonly QUALIFIED_SOURCE_COMMIT="$6"
+readonly QUALIFIED_SOURCE_TREE="$8"
+readonly QUALIFIED_BUILD_INPUTS_SHA256="${10}"
+readonly IMAGE_TAG="${12}"
+readonly OUTPUT_DIR="${14}"
 
 if [[ "$REPO" != /* || ! -d "$REPO" ]]; then
     printf 'Repository must be an existing absolute directory: %s\n' "$REPO" >&2
@@ -44,12 +47,25 @@ if [[ ! "$RELEASE_COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
     printf 'Release commit must be 40 lowercase hexadecimal characters\n' >&2
     exit 64
 fi
+if [[ ! "$QUALIFIED_SOURCE_COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
+    printf 'Qualified source commit must be 40 lowercase hexadecimal characters\n' >&2
+    exit 64
+fi
+if [[ ! "$QUALIFIED_SOURCE_TREE" =~ ^[0-9a-f]{40}$ ]]; then
+    printf 'Qualified source tree must be 40 lowercase hexadecimal characters\n' >&2
+    exit 64
+fi
+if [[ ! "$QUALIFIED_BUILD_INPUTS_SHA256" =~ ^[0-9a-f]{64}$ ]]; then
+    printf 'Qualified build-input SHA256 must be 64 lowercase hexadecimal characters\n' >&2
+    exit 64
+fi
 if [[ "$IMAGE_TAG" != "$RELEASE_VERSION" && "$IMAGE_TAG" != "$RELEASE_COMMIT" ]]; then
     printf 'Image tag must be exactly %s or the exact release commit %s\n' \
         "$RELEASE_VERSION" "$RELEASE_COMMIT" >&2
     exit 64
 fi
-if [[ "$OUTPUT_DIR" != /* || "$OUTPUT_DIR" == "/" || "$OUTPUT_DIR" == "${HOME}" ]]; then
+if [[ "$OUTPUT_DIR" != /* || "$OUTPUT_DIR" == "/" || \
+    ( -n "${HOME:-}" && "$OUTPUT_DIR" == "$HOME" ) ]]; then
     printf 'Output directory must be a safe absolute path: %s\n' "$OUTPUT_DIR" >&2
     exit 64
 fi
@@ -113,6 +129,15 @@ git -C "$REPO" merge-base --is-ancestor "$QUALIFIED_SOURCE_COMMIT" "$RELEASE_COM
     printf 'Qualified source commit is not an ancestor of the release commit\n' >&2
     exit 65
 }
+[[ "$(git -C "$REPO" cat-file -t "$QUALIFIED_SOURCE_COMMIT")" == "commit" ]] || {
+    printf 'Qualified source must identify a commit object\n' >&2
+    exit 65
+}
+[[ "$(git -C "$REPO" rev-parse "${QUALIFIED_SOURCE_COMMIT}^{tree}")" == \
+    "$QUALIFIED_SOURCE_TREE" ]] || {
+    printf 'Qualified source tree does not match its explicit commit\n' >&2
+    exit 65
+}
 
 readonly -a BUILD_PATHS=(
     .dockerignore
@@ -124,10 +149,18 @@ readonly -a BUILD_PATHS=(
     pyproject.toml
     uv.lock
 )
-git -C "$REPO" diff --quiet "$QUALIFIED_SOURCE_COMMIT" "$RELEASE_COMMIT" -- \
-    "${BUILD_PATHS[@]}" || {
-    printf 'Release build inputs differ from qualified source %s\n' \
-        "$QUALIFIED_SOURCE_COMMIT" >&2
+readonly QUALIFIED_BUILD_INPUTS_ACTUAL="$(git -C "$REPO" ls-tree -r --full-tree \
+    "$QUALIFIED_SOURCE_COMMIT" -- "${BUILD_PATHS[@]}" | sha256sum | \
+    sed 's/[[:space:]].*$//')"
+[[ "$QUALIFIED_BUILD_INPUTS_ACTUAL" == "$QUALIFIED_BUILD_INPUTS_SHA256" ]] || {
+    printf 'Qualified source build-input manifest does not match explicit SHA256\n' >&2
+    exit 66
+}
+readonly RELEASE_BUILD_INPUTS_SHA256="$(git -C "$REPO" ls-tree -r --full-tree \
+    "$RELEASE_COMMIT" -- "${BUILD_PATHS[@]}" | sha256sum | \
+    sed 's/[[:space:]].*$//')"
+[[ "$RELEASE_BUILD_INPUTS_SHA256" == "$QUALIFIED_BUILD_INPUTS_SHA256" ]] || {
+    printf 'Release build inputs differ from the accepted source capsule\n' >&2
     exit 66
 }
 
@@ -143,6 +176,8 @@ readonly RELEASE_TREE="$(git -C "$REPO" rev-parse "${RELEASE_COMMIT}^{tree}")"
 readonly RELEASE_SHORT="${RELEASE_COMMIT:0:12}"
 readonly CONTEXT_NAME="dewey-${RELEASE_VERSION}-${RELEASE_SHORT}-source-context.tar.gz"
 mkdir -- "$OUTPUT_DIR"
+git -C "$REPO" ls-tree -r --full-tree "$RELEASE_COMMIT" -- "${BUILD_PATHS[@]}" \
+    > "${OUTPUT_DIR}/build-inputs.git-ls-tree"
 git -C "$REPO" archive --format=tar "$RELEASE_COMMIT" "${BUILD_PATHS[@]}" \
     | gzip -n > "${OUTPUT_DIR}/${CONTEXT_NAME}"
 readonly CONTEXT_SHA256="$(sha256sum "${OUTPUT_DIR}/${CONTEXT_NAME}" | sed 's/[[:space:]].*$//')"
@@ -152,17 +187,15 @@ readonly CONTEXT_FILE_COUNT="$(git -C "$REPO" ls-tree -r --name-only "$RELEASE_C
 
 cp -- "$RELEASE_DOCKERFILE_TEMPLATE" "${OUTPUT_DIR}/Dockerfile.release"
 sed \
-    -e "s/${QUALIFIED_SOURCE_COMMIT}/${RELEASE_COMMIT}/g" \
-    -e "s/${QUALIFIED_SOURCE_TREE}/${RELEASE_TREE}/g" \
-    -e "s/${QUALIFIED_CONTEXT_NAME}/${CONTEXT_NAME}/g" \
-    -e "s/${QUALIFIED_CONTEXT_SHA256}/${CONTEXT_SHA256}/g" \
-    -e "s/${QUALIFIED_IMAGE_TAG}/${IMAGE_TAG}/g" \
+    -e "s|@@SOURCE_COMMIT@@|${RELEASE_COMMIT}|g" \
+    -e "s|@@SOURCE_TREE@@|${RELEASE_TREE}|g" \
+    -e "s|@@CONTEXT_NAME@@|${CONTEXT_NAME}|g" \
+    -e "s|@@CONTEXT_SHA256@@|${CONTEXT_SHA256}|g" \
+    -e "s|@@IMAGE_TAG@@|${IMAGE_TAG}|g" \
     "$BUILD_TEMPLATE" > "${OUTPUT_DIR}/build-smoke-push-linux-amd64.sh"
 chmod 0755 "${OUTPUT_DIR}/build-smoke-push-linux-amd64.sh"
-if grep -Fq "$QUALIFIED_SOURCE_COMMIT" "${OUTPUT_DIR}/build-smoke-push-linux-amd64.sh" || \
-    grep -Fq "$QUALIFIED_CONTEXT_SHA256" "${OUTPUT_DIR}/build-smoke-push-linux-amd64.sh" || \
-    grep -Fq "$QUALIFIED_IMAGE_TAG" "${OUTPUT_DIR}/build-smoke-push-linux-amd64.sh"; then
-    printf 'Generated build script retained qualified-candidate identity\n' >&2
+if grep -Eq '@@[A-Z_]+@@' "${OUTPUT_DIR}/build-smoke-push-linux-amd64.sh"; then
+    printf 'Generated build script retained a template placeholder\n' >&2
     exit 66
 fi
 
@@ -178,7 +211,12 @@ readonly GENERATED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     printf '  "annotated_tag": "%s",\n' "$RELEASE_VERSION"
     printf '  "source_url": "%s",\n' "$SOURCE_URL"
     printf '  "qualified_source_commit": "%s",\n' "$QUALIFIED_SOURCE_COMMIT"
+    printf '  "qualified_source_tree": "%s",\n' "$QUALIFIED_SOURCE_TREE"
+    printf '  "qualified_build_inputs_sha256": "%s",\n' \
+        "$QUALIFIED_BUILD_INPUTS_SHA256"
     printf '  "qualified_build_inputs_identical": true,\n'
+    printf '  "build_inputs_manifest": "build-inputs.git-ls-tree",\n'
+    printf '  "build_inputs_sha256": "%s",\n' "$RELEASE_BUILD_INPUTS_SHA256"
     printf '  "context_archive": "%s",\n' "$CONTEXT_NAME"
     printf '  "context_sha256": "%s",\n' "$CONTEXT_SHA256"
     printf '  "context_bytes": %s,\n' "$CONTEXT_BYTES"
@@ -199,6 +237,7 @@ readonly GENERATED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     cd "$OUTPUT_DIR"
     sha256sum \
         "$CONTEXT_NAME" \
+        build-inputs.git-ls-tree \
         Dockerfile.release \
         build-smoke-push-linux-amd64.sh \
         capsule-inputs.json \
