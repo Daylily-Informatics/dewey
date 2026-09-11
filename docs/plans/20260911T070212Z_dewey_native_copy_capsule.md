@@ -135,3 +135,11 @@ Source qualification: tagged `cli/identity.py:89–260`, `cli/sequences.py:38–
 `cli/db.py:1536–1840`, `backup/recovery.py:81–156,404–425`, and
 `sequences.py:454–571`. Local execution is limited to new helper guard tests,
 syntax/lint and diff checks; actual migration/allocator acceptance remains O/E.
+
+New local validation: `pytest --noconftest -q
+tests/test_dewey_copy_native_lifecycle.py` passes **10 tests**; Ruff, Python AST
+and `git diff --check` pass. The tests exercise only this helper's guards,
+single-command sequencing and lossless floor projection. Native validator calls
+are explicitly stubbed in the projection test; the existing local environment
+contains TapDB 10.1.0 and is not claimed as RC execution evidence. None of the
+earlier inventory-helper or application tests was rerun.
