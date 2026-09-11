@@ -1,0 +1,42 @@
+{
+  "capsule_file_sha256": "7fbe0e00e5557bde7ffb2afaa50606ade8c391136a5ce77eb95fd7afd89f001d",
+  "completed_at": "2026-09-11T08:03:35.084084+00:00",
+  "inputs": [
+    {
+      "file_sha256": "9208dde2d25577ff06679e2bd19a37870ddc1c5d3039edc11dd31f3da8f53520",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/rehearsal-operator.yaml"
+    },
+    {
+      "file_sha256": "b5faf66ce3955203c67cf6fc82f76d3ab815f4c5d69607ad58b186075055f99f",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native/external-floors.json"
+    },
+    {
+      "file_sha256": "5b69e68dea09d25bb18e0b3383e96c0250848c8c6eba5ccba8ec42658e862bf8",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/source-sequence-mappings-20260911T053316Z.json"
+    },
+    {
+      "file_sha256": "b93e4eee00793bfc03b1aa8849ded6a1423c9fe42d19955077a1a00d57f37bee",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native/recovery-family.json"
+    }
+  ],
+  "outputs": [
+    {
+      "file_sha256": "272ad5900add70ef65522b2f00b1e6d4f46c85a6e5a991bb1397ef66a6f6ca0c",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native/sequence-verify.started.json"
+    },
+    {
+      "file_sha256": "0f554cf52a9053e7046dccde5f64bfbb3fa51027fb24b3d6777559fec75e4fe3",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native/sequence-verify.stdout"
+    },
+    {
+      "file_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native/sequence-verify.stderr"
+    },
+    {
+      "file_sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native/sequence-verify.rc"
+    }
+  ],
+  "returncode": 1,
+  "schema_version": "dewey-native-command-completion/v1"
+}

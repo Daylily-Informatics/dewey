@@ -1,0 +1,654 @@
+{
+  "floors": [
+    {
+      "name": "adt_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+      "value": 76689
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+      "value": 76689
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 76689
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 76689
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+      "value": 76689
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+      "value": 76689
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "migration-preflight:allocated_floor",
+      "value": 76689
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "migration-preflight:assigned_floor",
+      "value": 76689
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 76689
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 76689
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 76690
+    },
+    {
+      "name": "adt_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 76690
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+      "value": 66690
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+      "value": 66690
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 66690
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 66690
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+      "value": 66690
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+      "value": 66690
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "migration-preflight:allocated_floor",
+      "value": 66690
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "migration-preflight:assigned_floor",
+      "value": 66690
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 66690
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 66690
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 66691
+    },
+    {
+      "name": "audit_log_uid_seq",
+      "source": "sequence_advance_intent",
+      "value": 66691
+    },
+    {
+      "name": "ay_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 10000
+    },
+    {
+      "name": "ay_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 10000
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+      "value": 22202
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+      "value": 22202
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 22202
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 22202
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+      "value": 22202
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+      "value": 22202
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "migration-preflight:allocated_floor",
+      "value": 22202
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "migration-preflight:assigned_floor",
+      "value": 22202
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 22202
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 22202
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 22203
+    },
+    {
+      "name": "dgx_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 22203
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+      "value": 11014
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+      "value": 11014
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 11014
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 11014
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+      "value": 11014
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+      "value": 11014
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "migration-preflight:allocated_floor",
+      "value": 11014
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "migration-preflight:assigned_floor",
+      "value": 11014
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 11014
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 11014
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 11015
+    },
+    {
+      "name": "edg_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 11015
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+      "value": 1015
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+      "value": 1015
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 1015
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 1015
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+      "value": 1015
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+      "value": 1015
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "migration-preflight:allocated_floor",
+      "value": 1015
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "migration-preflight:assigned_floor",
+      "value": 1015
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 1015
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 1015
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 1016
+    },
+    {
+      "name": "generic_instance_lineage_uid_seq",
+      "source": "sequence_advance_intent",
+      "value": 1016
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+      "value": 12204
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+      "value": 12204
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 12204
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 12204
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+      "value": 12204
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+      "value": 12204
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "migration-preflight:allocated_floor",
+      "value": 12204
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "migration-preflight:assigned_floor",
+      "value": 12204
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 12204
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 12204
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 12205
+    },
+    {
+      "name": "generic_instance_uid_seq",
+      "source": "sequence_advance_intent",
+      "value": 12205
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+      "value": 22
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+      "value": 22
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 22
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 22
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+      "value": 22
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+      "value": 22
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "migration-preflight:allocated_floor",
+      "value": 22
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "migration-preflight:assigned_floor",
+      "value": 22
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 22
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 22
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 23
+    },
+    {
+      "name": "generic_template_uid_seq",
+      "source": "sequence_advance_intent",
+      "value": 23
+    },
+    {
+      "name": "gse_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 1
+    },
+    {
+      "name": "gse_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 1
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+      "value": 4
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+      "value": 4
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 4
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 4
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+      "value": 4
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+      "value": 4
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "migration-preflight:allocated_floor",
+      "value": 4
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "migration-preflight:assigned_floor",
+      "value": 4
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 4
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 4
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 5
+    },
+    {
+      "name": "gvr_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 5
+    },
+    {
+      "name": "inbox_message_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 1
+    },
+    {
+      "name": "inbox_message_uid_seq",
+      "source": "sequence_advance_intent",
+      "value": 1
+    },
+    {
+      "name": "msg_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 10000
+    },
+    {
+      "name": "msg_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 10000
+    },
+    {
+      "name": "outbox_event_attempt_uid_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 1
+    },
+    {
+      "name": "outbox_event_attempt_uid_seq",
+      "source": "sequence_advance_intent",
+      "value": 1
+    },
+    {
+      "name": "outbox_event_id_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 1
+    },
+    {
+      "name": "outbox_event_id_seq",
+      "source": "sequence_advance_intent",
+      "value": 1
+    },
+    {
+      "name": "sys_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 10000
+    },
+    {
+      "name": "sys_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 10000
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:allocated_floor",
+      "value": 10010
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:assigned_floor",
+      "value": 10010
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 10010
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "capture:0:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 10010
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:allocated_floor",
+      "value": 10010
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "committed:ff70c88d6c5f2db82b53b7e74066b6f2452553fec562d3a236e411ea81db8b1b:assigned_floor",
+      "value": 10010
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "migration-preflight:allocated_floor",
+      "value": 10010
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "migration-preflight:assigned_floor",
+      "value": 10010
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:allocated_floor",
+      "value": 10010
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "observed:2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85:assigned_floor",
+      "value": 10010
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 10011
+    },
+    {
+      "name": "tpx_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 10011
+    },
+    {
+      "name": "wsx_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 10000
+    },
+    {
+      "name": "wsx_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 10000
+    },
+    {
+      "name": "wx_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 10000
+    },
+    {
+      "name": "wx_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 10000
+    },
+    {
+      "name": "xrf_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 1
+    },
+    {
+      "name": "xrf_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 1
+    },
+    {
+      "name": "xx_instance_seq",
+      "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json:file_sha256=019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f:native_sha256=56d3d1a081d130f91da3848526db5d1f9510359c4918d0efc75d4e58c3e746f3:native_planned_next",
+      "value": 10000
+    },
+    {
+      "name": "xx_instance_seq",
+      "source": "sequence_advance_intent",
+      "value": 10000
+    }
+  ]
+}

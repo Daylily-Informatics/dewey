@@ -1,0 +1,184 @@
+{
+  "actual": {
+    "apply_completed_at": "2026-09-11T08:02:31.500288+00:00",
+    "apply_returncode": 0,
+    "available_next_values_equal_reviewed_plan_count": 20,
+    "changed_sequence_fields_only": [
+      "allocated_floor",
+      "is_called",
+      "last_value"
+    ],
+    "committed_result_sha256": "8627fc06c629d2bc921e6f49370e1469e6db949ae9da086ff4aecf10d9c4217e",
+    "future_retained_floor_count": 150,
+    "intent_receipt_id": "000013-20260911T080228Z",
+    "inventory_sha256": "584a01f80984c14cd15a79cff007b4e260fafd97481ab8f80b03aaae7c56e170",
+    "physical_target": {
+      "database": "dewey_tapdb10_rehearsal_20260911",
+      "database_oid": 645854,
+      "server_address": "10.0.2.148/32",
+      "server_port": 5432
+    },
+    "plan_sha256": "83f86ca0aae608b2de42147c68280534848029d057c7b60cec72eabeda7f2791",
+    "prior_applicable_floor_count": 130,
+    "recovery_family": {
+      "family_id": "bfb30029-5dd1-42ec-8bf8-3094e78ae2f6",
+      "origin": {
+        "physical_target": {
+          "database": "dewey_tapdb10_rehearsal_20260911",
+          "database_oid": 645854,
+          "server_address": "10.0.2.148/32",
+          "server_port": 5432
+        },
+        "target": {
+          "config_identity": "/home/ubuntu/dewey_ops/tapdb101-20260911/rehearsal-operator.yaml",
+          "database": "dewey_tapdb10_rehearsal_20260911",
+          "domain_code": "M",
+          "engine_type": "aurora",
+          "host": "dayhoff-lsmcok1-tapdb.cluster-ch4mq8a6wcdf.us-west-2.rds.amazonaws.com",
+          "owner_repo_name": "dewey",
+          "port": 5432,
+          "schema_name": "tapdb_dewey_lsmcok1_local"
+        }
+      },
+      "receipts_dirs": [
+        "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native-journal"
+      ],
+      "schema_version": "tapdb-recovery-family/v1",
+      "sha256": "a6defebdfce4fa923ba64e67f35a742c0859239ac90e2ee82664b26a521cfc9b"
+    },
+    "release_linked_committed_payload_sha256": "3fc0215035c8c865746d89f09bfa53cc41d763f51c4f3c87f12a9099d34f3c23",
+    "released_fence_sha256": "ebb123f4b1463cba675224e0cc9e93c9d2ca7629b26d0f3de2af0c5634d8c72e",
+    "target": {
+      "config_identity": "/home/ubuntu/dewey_ops/tapdb101-20260911/rehearsal-operator.yaml",
+      "database": "dewey_tapdb10_rehearsal_20260911",
+      "domain_code": "M",
+      "engine_type": "aurora",
+      "host": "dayhoff-lsmcok1-tapdb.cluster-ch4mq8a6wcdf.us-west-2.rds.amazonaws.com",
+      "owner_repo_name": "dewey",
+      "port": 5432,
+      "schema_name": "tapdb_dewey_lsmcok1_local"
+    },
+    "verification_ok": true,
+    "verification_sha256": "84c97198683d71494277cf05ccfb6df058481560d8c53a064b8855bb439c8eab",
+    "verification_violations": []
+  },
+  "bounded_SOP": {
+    "expected_current_inventory_sha256": "584a01f80984c14cd15a79cff007b4e260fafd97481ab8f80b03aaae7c56e170",
+    "expected_native_verification_sha256": "84c97198683d71494277cf05ccfb6df058481560d8c53a064b8855bb439c8eab",
+    "expected_returncode": 0,
+    "expected_utf8_indent2_sorted_newline_file_bytes": 27336,
+    "expected_utf8_indent2_sorted_newline_file_sha256": "d4d902717ade64e13c90d0cc5ae1d19fc28dab023accabd31169dc69e66ee548",
+    "floor_content": {
+      "exact_source": "committed_result.verification.floors",
+      "integer_transformations": 0,
+      "must_equal": "reviewed_plan.floors",
+      "records": 130,
+      "sole_key": "floors"
+    },
+    "no_blind_advance": true,
+    "no_native_history_mutation": true,
+    "preserve_failed_receipt": true,
+    "read_only_public_command": "tapdb --config SAME_COPY_CONFIG --json db sequences verify --floors NEW_COMPLETE_PRIOR_FLOORS_FILE --sequence-mappings SAME_SOURCE_MAPPINGS",
+    "recovery_family_option_for_this_completed_transition_verification": false,
+    "retain_all150_result_floors_for_future_attempts_and_recovery": true,
+    "retain_complete_family_for_every_future_advance_and_exposure": true
+  },
+  "checks": [
+    "All six actual local file hashes independently recomputed.",
+    "Public validate_receipt accepted complete native plan/result/inventory/verification/family/release/failed-verification seals.",
+    "Committed result links exact reviewed plan and original physical/config/family identity.",
+    "Writer release links hash of exact committed payload before release envelope.",
+    "All20 available next values exactly equal accepted plan; all other sequence fields unchanged except native allocator state.",
+    "Result verification floors exactly equal all130 reviewed prior plan floors.",
+    "Public verify_sequence_floors on actual committed inventory and130 prior floors reproduces successful native verification84c97198 exactly.",
+    "Result floors exactly equal130 prior floors plus20 own next-value intent reservations.",
+    "Failed188-floor receipt exactly equals150 retained result floors plus original38 external floors.",
+    "Public verify_sequence_floors reproduces failed receipt3cd542a0 exactly from unchanged actual inventory; all20 maxima equal own new reservations."
+  ],
+  "correction_to_earlier_E_gate": "The earlier generic requirement for immediate family-aware strict verification was too broad. Released apply semantics distinguish already applicable verification floors from own newly reserved next values retained for future attempts/recovery. The original failed receipt is preserved.",
+  "disposition": {
+    "actual_committed_advance": "accepted",
+    "additional_advance_or_reconciliation": "not_indicated",
+    "fresh_corrected_native_verification_receipt": "pending_operator_execution",
+    "independent_verification_against_all_prior_applicable_floors": "accepted_read_only_SOP",
+    "released_target_fence": "accepted"
+  },
+  "failed_postverify": {
+    "completed_at": "2026-09-11T08:03:35.084084+00:00",
+    "exact_local_reproduction": true,
+    "floor_count": 188,
+    "floor_list_equals_sorted_committed_result_floors_plus_original_external_floors": true,
+    "inventory_sha256": "584a01f80984c14cd15a79cff007b4e260fafd97481ab8f80b03aaae7c56e170",
+    "inventory_unchanged_since_apply": true,
+    "per_generator_maximum_equals_this_operations_reserved_next": true,
+    "receipt_sha256": "3cd542a08a571676db9b589553789b4b02e5c4e7e1bc6f2d2e461d848be4c607",
+    "returncode": 1,
+    "violations": [
+      "adt_instance_seq",
+      "audit_log_uid_seq",
+      "ay_instance_seq",
+      "dgx_instance_seq",
+      "edg_instance_seq",
+      "generic_instance_lineage_uid_seq",
+      "generic_instance_uid_seq",
+      "generic_template_uid_seq",
+      "gse_instance_seq",
+      "gvr_instance_seq",
+      "inbox_message_uid_seq",
+      "msg_instance_seq",
+      "outbox_event_attempt_uid_seq",
+      "outbox_event_id_seq",
+      "sys_instance_seq",
+      "tpx_instance_seq",
+      "wsx_instance_seq",
+      "wx_instance_seq",
+      "xrf_instance_seq",
+      "xx_instance_seq"
+    ]
+  },
+  "inputs": {
+    "rehearsal-external-floors.json": {
+      "bytes": 13122,
+      "file_sha256": "b5faf66ce3955203c67cf6fc82f76d3ab815f4c5d69607ad58b186075055f99f",
+      "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-tapdb10-major-20260910/docs/plans/evidence/20260911_dewey_rc_inventory/rehearsal-external-floors.json"
+    },
+    "rehearsal-sequence-apply.completed.json": {
+      "bytes": 2702,
+      "file_sha256": "77c44d7ced0f290145db5fce8cef442bf125a087dc70cdd5f364b0c01bace152",
+      "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-tapdb10-major-20260910/docs/plans/evidence/20260911_dewey_rc_inventory/rehearsal-sequence-apply.completed.json"
+    },
+    "rehearsal-sequence-plan.json": {
+      "bytes": 76375,
+      "file_sha256": "3fcdef0f0d8a6965fadc4e22c5117535d0635b30719a966823f7675d5e4d3aef",
+      "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-tapdb10-major-20260910/docs/plans/evidence/20260911_dewey_rc_inventory/rehearsal-sequence-plan.json"
+    },
+    "rehearsal-sequence-result.json": {
+      "bytes": 94937,
+      "file_sha256": "bcdd9a30ef0265aca481ea70b0b9750fd6dd09e0130c9dc56f86e98e4104dff1",
+      "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-tapdb10-major-20260910/docs/plans/evidence/20260911_dewey_rc_inventory/rehearsal-sequence-result.json"
+    },
+    "rehearsal-sequence-verify.completed.json": {
+      "bytes": 1908,
+      "file_sha256": "9fcdc3b8ad9bc43f157665d7cefb9bb06e73cf59c5b463607fdb0cb2c6320881",
+      "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-tapdb10-major-20260910/docs/plans/evidence/20260911_dewey_rc_inventory/rehearsal-sequence-verify.completed.json"
+    },
+    "rehearsal-sequence-verify.stdout.json": {
+      "bytes": 43470,
+      "file_sha256": "0f554cf52a9053e7046dccde5f64bfbb3fa51027fb24b3d6777559fec75e4fe3",
+      "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-tapdb10-major-20260910/docs/plans/evidence/20260911_dewey_rc_inventory/rehearsal-sequence-verify.stdout.json"
+    }
+  },
+  "limits": {
+    "database_calls": 0,
+    "new_package_changes": 0,
+    "operator_floor_input_written_by_E": false,
+    "remote_family_history_replayed_locally": false,
+    "test_suites_run": 0
+  },
+  "package": "daylily-tapdb==10.1.1rc1",
+  "release_commit": "02ab7c9d0325dfcbf9dc47a03be66b62e0a22f2c",
+  "reviewed_at": "2026-09-11T08:12:10.594375+00:00",
+  "reviewer": "independent E",
+  "schema_version": "dewey-independent-acceptance/v1",
+  "scope": "Actual committed sequence advancement and completed-operation verification scope"
+}

@@ -1,0 +1,58 @@
+{
+  "capsule_file_sha256": "7fbe0e00e5557bde7ffb2afaa50606ade8c391136a5ce77eb95fd7afd89f001d",
+  "completed_at": "2026-09-11T08:02:31.500288+00:00",
+  "inputs": [
+    {
+      "file_sha256": "9208dde2d25577ff06679e2bd19a37870ddc1c5d3039edc11dd31f3da8f53520",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/rehearsal-operator.yaml"
+    },
+    {
+      "file_sha256": "b5faf66ce3955203c67cf6fc82f76d3ab815f4c5d69607ad58b186075055f99f",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native/external-floors.json"
+    },
+    {
+      "file_sha256": "3fcdef0f0d8a6965fadc4e22c5117535d0635b30719a966823f7675d5e4d3aef",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native/sequence-plan.json"
+    },
+    {
+      "file_sha256": "5b69e68dea09d25bb18e0b3383e96c0250848c8c6eba5ccba8ec42658e862bf8",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/source-sequence-mappings-20260911T053316Z.json"
+    },
+    {
+      "file_sha256": "b93e4eee00793bfc03b1aa8849ded6a1423c9fe42d19955077a1a00d57f37bee",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native/recovery-family.json"
+    },
+    {
+      "file_sha256": "42491d0bf321d4d8027ef52918a1396e4e4c7f2c7bdecdabd82449b86b87686a",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/control-operator.yaml"
+    },
+    {
+      "file_sha256": "0700678f55acd55a39f2563b4ec73c4dbfba9876611644279ab3ad1d04abaa84",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/aurora-provider-contract-20260911.json"
+    }
+  ],
+  "outputs": [
+    {
+      "file_sha256": "bcdd9a30ef0265aca481ea70b0b9750fd6dd09e0130c9dc56f86e98e4104dff1",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native/sequence-result.json"
+    },
+    {
+      "file_sha256": "9477b8fc5ced38804aa7835a8ea7a9bb1669f8908673a72e6c222385313eec53",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native/sequence-apply.started.json"
+    },
+    {
+      "file_sha256": "bcdd9a30ef0265aca481ea70b0b9750fd6dd09e0130c9dc56f86e98e4104dff1",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native/sequence-apply.stdout"
+    },
+    {
+      "file_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native/sequence-apply.stderr"
+    },
+    {
+      "file_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native/sequence-apply.rc"
+    }
+  ],
+  "returncode": 0,
+  "schema_version": "dewey-native-command-completion/v1"
+}
