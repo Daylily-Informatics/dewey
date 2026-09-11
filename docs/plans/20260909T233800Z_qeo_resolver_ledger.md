@@ -143,3 +143,38 @@ All five rows terminal: yes (4 SUCCESS, 1 BLOCKED).
 Local implementation objective complete: yes. Live resolver access objective
 complete: **no**. Next approval is a narrowly bounded Dewey image/deployment and
 its generated boot-entry amendment, not another approval of the same source work.
+
+## 2026-09-10 00:51Z production completion (supersedes historical blockers)
+
+- GitHub build 34422137760 succeeded at source
+  556dfcf936ea11e25f6126931fe1f655482d00a6. Exact published image:
+  dayhoff/day/dewey@sha256:4fe9907f2d3443f2360cad2463974a60f8158aea90cbf2aa7fbc56349d45a91f.
+  The actual image passed its public `dewey runtime check` container guard.
+- Container 872434f0530335fd5a985a920f498fe39a36fd5eab40b9cb3934b185ceddeb36
+  is healthy. Only services.dewey changed in generated boot Compose. All 11
+  live siblings unchanged. Dedicated resolver credential preserved, not rotated.
+  Boot SHA after promotion:
+  05c45f50c839fb06ec78f64d3025f37e2d174289631ba3abc386cef2fa047884.
+- Public container CLI `dewey --config /home/ubuntu/.config/dewey-day/dewey-config-day.yaml
+  qeo status` passed. Legacy dispatch remains unconfigured/default-off.
+- Existing authenticated LSMC Chrome session completed Dewey sign-in as
+  the authenticated operator. The earlier separate-profile password challenge is no longer
+  a blocker. No password/cookie/token was extracted or entered by the agent.
+- Read-only exact S3 inventory found 19 backing files, not just the JSON.
+  Authenticated Dewey S3 intake registered the 18 missing artifacts, retaining
+  existing report M-DGX-NKDM and JSON M-DGX-NKFG. No source S3 objects changed.
+- Public `dewey qeo package-register` succeeded with stable key
+  qeo-multiqc-illumina-20260815-full-package-v1 and the checked-in 20-file
+  manifest 20260910T005100Z_complete_multiqc_package.json. Actual persisted
+  artifact set: **M-DGX-NNSS**. Response preserved at
+  evidence/20260910_dewey_container_cli/package-registration.json.
+  Manifest SHA: 4ed7e3e6938edb309a277042a42125d2ac58e99579809973e369054e1a67f4e9.
+  Registration created typed membership through Dewey/TapDB; no raw SQL,
+  bootstrap rerun, fabricated identity or inferred package directory.
+- Focused checks: 15 container/package tests and 5 deployment-helper tests
+  passed. The source-hashing helper initially used an unsupported context-body
+  iterator; corrected to streaming read, then all 20 checksum/size checks passed.
+
+Dewey access/deployment/package registration complete. QEO ingestion of the
+real report link remains pending the separately approved QEO corrected image.
+No further Dewey image build is required by these operator/receipt changes.
