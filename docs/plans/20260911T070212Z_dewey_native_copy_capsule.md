@@ -143,3 +143,17 @@ single-command sequencing and lossless floor projection. Native validator calls
 are explicitly stubbed in the projection test; the existing local environment
 contains TapDB 10.1.0 and is not claimed as RC execution evidence. None of the
 earlier inventory-helper or application tests was rerun.
+
+Additional **new** offline qualification used E's existing noneditable RC
+interpreter at
+`/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/tapdb1011rc1-dewey-qualification-20260911/.venv/bin/python`.
+The actual mapped source sequence subreceipt
+`903928e63a8cd22f078f429d3aa55c125b48fc212925a29cbff91f0c41482cc0`
+passed native validation. A native read-only plan, this helper's projection,
+and a second native plan retained all **20** prior next boundaries in **38**
+floor records, and every second-plan next value was strictly greater than its
+original boundary. No database call, native plan file or receipt was produced;
+these were in-memory helper/API checks, not a production advancement or
+independent acceptance. This directly exercises the published
+`build_sequence_advance_plan`, `inventory_floors` and receipt validators instead
+of rerunning the earlier unit suites.
