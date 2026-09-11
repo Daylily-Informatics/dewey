@@ -36,6 +36,22 @@ def sha256_json(value: Any) -> str:
     return sha256(payload).hexdigest()
 
 
+def validate_instance_envelope(payload: Any) -> dict[str, Any]:
+    """Require TapDB's object properties while retaining Dewey's flat app fields."""
+    if not isinstance(payload, dict) or not isinstance(payload.get("properties"), dict):
+        raise ValueError("Dewey instances require json_addl.properties to be an object")
+    properties = payload["properties"]
+    if any(
+        key in {"object_euid", "target_object_euid"} or key.endswith("_object_euid")
+        for key in properties
+    ):
+        raise ValueError("External relationships require canonical TapDB XRF lineage")
+    external_payload = properties.get("external_payload")
+    if isinstance(external_payload, dict) and "tapdb_graph" in external_payload:
+        raise ValueError("Metadata tapdb_graph is unsupported; use canonical TapDB XRF lineage")
+    return dict(payload)
+
+
 def _parse_template_code(template_code: str) -> tuple[str, str, str, str]:
     parts = template_code.strip("/").split("/")
     if len(parts) != 4:
@@ -155,6 +171,14 @@ class TapDBBackend:
         json_addl: dict[str, Any],
         status: str = "active",
     ) -> generic_instance:
+        if not isinstance(json_addl, dict):
+            raise ValueError("Dewey instance payload must be an object")
+        supplied_properties = json_addl.get("properties", {})
+        if not isinstance(supplied_properties, dict):
+            raise ValueError("Dewey instances require json_addl.properties to be an object")
+        if {"action_groups", "audit_log"}.intersection(json_addl):
+            raise ValueError("TapDB owns instance action_groups and audit_log")
+        validate_instance_envelope({"properties": supplied_properties})
         template = self.templates.get_template(session, template_code, domain_code=self.domain_code)
         if template is None:
             raise RuntimeError(f"Missing template: {template_code}")
@@ -166,7 +190,13 @@ class TapDBBackend:
             properties={},
             create_children=False,
         )
-        instance.json_addl = {**dict(json_addl), **creation_audit_fields()}
+        envelope = validate_instance_envelope(instance.json_addl)
+        instance.json_addl = {
+            **envelope,
+            **json_addl,
+            **creation_audit_fields(),
+            "properties": {**envelope["properties"], **supplied_properties},
+        }
         instance.bstatus = status
         instance.is_singleton = False
         session.flush()
@@ -175,10 +205,10 @@ class TapDBBackend:
     def update_instance_json(
         self, session: Session, instance: generic_instance, updates: dict[str, Any]
     ) -> None:
-        payload = dict(instance.json_addl or {})
+        payload = validate_instance_envelope(instance.json_addl)
         payload.update(updates)
         payload.update(update_audit_fields())
-        instance.json_addl = payload
+        instance.json_addl = validate_instance_envelope(payload)
         session.flush()
 
     def _template_query(
@@ -272,7 +302,7 @@ class TapDBBackend:
             subtype="instance_lineage",
             version=SERVICE_VERSION,
             bstatus="active",
-            json_addl={},
+            json_addl={"properties": {}},
             is_singleton=False,
             parent_type=parent.polymorphic_discriminator,
             child_type=child.polymorphic_discriminator,
@@ -400,7 +430,7 @@ class TapDBBackend:
 
 
 def normalize_instance_payload(instance: generic_instance) -> dict[str, Any]:
-    payload = dict(instance.json_addl or {})
+    payload = validate_instance_envelope(instance.json_addl)
     if not payload.get("euid"):
         payload["euid"] = instance.euid
     if not payload.get("name"):

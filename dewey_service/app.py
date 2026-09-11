@@ -280,6 +280,7 @@ class ExternalObjectCreateRequest(BaseModel):
     external_object_id: str
     external_uri: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
+    reference_target: dict[str, Any] | None = None
 
 
 class ExternalObjectRelationCreateRequest(BaseModel):
@@ -2168,14 +2169,12 @@ def create_app(
                 external_object_type=candidate["external_object_type"],
                 external_object_id=candidate["euid"],
                 external_uri=candidate["external_uri"],
+                reference_target={"kind": "tapdb_object"},
                 metadata={
                     "validated_by": "dewey.artifact_detail",
                     "validated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
                     "label": candidate["label"],
                     "service_id": candidate["service_id"],
-                    "base_url": candidate.get("base_url"),
-                    "graph_data_path": candidate.get("graph_data_path"),
-                    "object_detail_path_template": candidate.get("object_detail_path_template"),
                 },
                 idempotency_key=_new_idempotency_key("ui-external-object"),
             )
@@ -2189,9 +2188,6 @@ def create_app(
                     "validated_euid": candidate["euid"],
                     "validated_label": candidate["label"],
                     "validated_uri": candidate["external_uri"],
-                    "base_url": candidate.get("base_url"),
-                    "graph_data_path": candidate.get("graph_data_path"),
-                    "object_detail_path_template": candidate.get("object_detail_path_template"),
                 },
                 idempotency_key=_new_idempotency_key("ui-external-object-relation"),
             )
@@ -4106,6 +4102,7 @@ def create_app(
                 external_object_id=body.external_object_id,
                 external_uri=body.external_uri,
                 metadata=body.metadata,
+                reference_target=body.reference_target,
                 idempotency_key=_require_idempotency_key(idempotency_key),
             )
             return {"status_code": status_code, **payload}

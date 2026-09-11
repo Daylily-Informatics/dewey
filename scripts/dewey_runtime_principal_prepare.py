@@ -247,6 +247,7 @@ def prepare(args) -> Path:
 
 def verify_runtime(args) -> Path:
     from daylily_tapdb import TemplateManager
+    from daylily_tapdb.cli.context import set_cli_context
     from daylily_tapdb.cli.db_config import get_db_config
     from daylily_tapdb.web.runtime import dispose_all_runtime_engines, get_db
     from sqlalchemy import text
@@ -261,6 +262,11 @@ def verify_runtime(args) -> Path:
     receipt = Path(args.receipt)
     require_new_output(receipt)
     result: dict[str, Any] = {"lane": args.lane, "runtime_config_sha256": file_sha(path)}
+    set_cli_context(
+        config_path=path,
+        client_id=cfg["client_id"],
+        database_name=cfg["database_name"],
+    )
     try:
         dispose_all_runtime_engines()
         db = get_db(str(path))

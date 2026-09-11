@@ -4,15 +4,16 @@ D preparation, 2026-09-11. O runs these only after the native copy/migration/
 floor and [principal stages](20260911T070836Z_dewey_principal_capsule.md) pass.
 Source stays stopped/closed throughout rehearsal and final. No additional backup
 or inbox/outbox replay/retention gate is introduced. These commands were not
-executed by D. O's published candidate receipt owns image provenance:
+executed by D. This recipe now targets the complete rebuilt context-fix candidate;
+O/F's new published image receipt owns its final digest:
 
-- Manifest digest: `sha256:59a0cad2e005b5940dc3eeac1dd9a72691d23386c8dfc4d72c37cd85f880759f`.
-- Image source revision: `c484c95768a4147acdcabd12a2da0332c4c750dc`.
+- Manifest digest: required explicitly from the new O/F publication receipt.
+- Image source revision: `c6406b8ffb40e58feaba31e2163d77448d47698c`.
 - Dewey `9.0.0`, TapDB `10.1.1rc1`, Meridian `0.4.8`.
 
 ## 1. Prepare exact mounted capsule files and inputs
 
-In an existing private operator directory, prepare an `application-acceptance`
+In an existing private operator directory, prepare an `application-acceptance-c6406b8ffb40`
 subdirectory containing these exact reviewed, nonsecret repo files:
 
 | Host basename | Repository file |
@@ -26,6 +27,14 @@ references or credentials. Prepare distinct new private existing state/output
 directories, one per lane. Retain the resolver token at its existing protected
 file; it is mounted separately and is never printed/copied into a receipt.
 
+Retain the failed candidate container, old capsule directories and their receipts.
+The new container/capsule/state/output/environment paths below must be absent before
+O creates them with private permissions. Keep the original principal helper SHA256
+`9921210bd5b3ee4fcc52f06184dd88a6efa986e23e608f3672ccffcd529372f2` for its prior
+bootstrap/bind operations; only the new acceptance capsule uses the reviewed runtime
+verification helper SHA256
+`ed71f502750e4041c7b6cabe6b03e1c4e5134eb92f9cc06a8f017849d8961680`.
+
 Use O's already preserved host manifest directly:
 `/home/ubuntu/dewey_ops/tapdb101-20260911/fixtures/qeo-complete-multiqc-package-20260910.json`.
 O verified SHA256 `4ed7e3e6938edb309a277042a42125d2ac58e99579809973e369054e1a67f4e9`
@@ -35,19 +44,19 @@ The separate read-only mount below needs no second manifest copy.
 ```bash
 set -euo pipefail
 umask 077
-D_CONTAINER=dewey-tapdb10-rehearsal-20260911
+D_CONTAINER=dewey-tapdb10-rehearsal-c6406b8ffb40
 D_LANE=rehearsal
 D_RUNTIME_DIR=/opt/dewey/day/releases/tapdb10-rehearsal-20260911
-D_CAPSULE_DIR=/home/ubuntu/dewey_ops/tapdb101-20260911/application-acceptance
-D_DIGEST=sha256:59a0cad2e005b5940dc3eeac1dd9a72691d23386c8dfc4d72c37cd85f880759f
-D_IMAGE_SHA=c484c95768a4147acdcabd12a2da0332c4c750dc
+D_CAPSULE_DIR=/home/ubuntu/dewey_ops/tapdb101-20260911/application-acceptance-c6406b8ffb40
+D_IMAGE_SHA=c6406b8ffb40e58feaba31e2163d77448d47698c
+: "${D_DIGEST:?Exact new published c6406b8ffb40 manifest digest from O/F receipt}"
 : "${D_IMAGE_REPOSITORY:?Exact published repository from O/F image receipt}"
-: "${D_STATE_DIR:?New existing absolute private rehearsal state directory}"
-: "${D_OUTPUT_DIR:?New existing absolute private rehearsal receipt directory}"
-: "${D_LAUNCH_DIR:?New existing absolute private rehearsal environment directory}"
+D_STATE_DIR=/home/ubuntu/dewey_ops/tapdb101-20260911/rehearsal-application-state-c6406b8ffb40
+D_OUTPUT_DIR=/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-application-c6406b8ffb40
+D_LAUNCH_DIR=/home/ubuntu/dewey_ops/tapdb101-20260911/rehearsal-launch-c6406b8ffb40
 D_IMAGE="${D_IMAGE_REPOSITORY}@${D_DIGEST}"
 test -z "$(ss -H -ltn 'sport = :18914')"
-test -z "$(docker ps -aq --filter 'name=^/dewey-tapdb10-rehearsal-20260911$')"
+test -z "$(docker ps -aq --filter 'name=^/dewey-tapdb10-rehearsal-c6406b8ffb40$')"
 ```
 
 The owning image inspection must match digest, source labels and package receipt
@@ -64,7 +73,7 @@ This correction is mandatory. O prepares the reviewed host-only helper
 and its private output directory outside the mounted application capsule.
 
 ```bash
-/home/ubuntu/dewey_ops/tapdb101-20260911/venv/bin/python /home/ubuntu/dewey_ops/tapdb101-20260911/dewey_launch_environment_prepare.py --compose /opt/dayhoff/deployments/day/compose/docker-compose.yml --dewey-config "$D_RUNTIME_DIR/dewey-config.yaml" --lane "$D_LANE" --image-sha "$D_IMAGE_SHA" --output-dir "$D_LAUNCH_DIR"
+sudo /home/ubuntu/dewey_ops/tapdb101-20260911/venv/bin/python /home/ubuntu/dewey_ops/tapdb101-20260911/dewey_launch_environment_prepare_c6406b8ffb40.py --compose /opt/dayhoff/deployments/day/compose/docker-compose.yml --dewey-config "$D_RUNTIME_DIR/dewey-config.yaml" --lane "$D_LANE" --image-sha "$D_IMAGE_SHA" --output-dir "$D_LAUNCH_DIR"
 ```
 
 Review the new `receipt.json` before proceeding. The helper pins owning Compose
@@ -92,7 +101,7 @@ deployed nonempty environment primary remains unchanged. Dewey's
 `load_settings()` applies `DEWEY_*` over YAML and nonempty `LSMC_AUTH_*` over auth.
 
 ```bash
-mapfile -t D_HOST_ARGS < "$D_LAUNCH_DIR/extra-hosts.args"
+mapfile -t D_HOST_ARGS < <(sudo cat "$D_LAUNCH_DIR/extra-hosts.args")
 test "${#D_HOST_ARGS[@]}" -eq 8
 ```
 
@@ -111,7 +120,7 @@ HOME is `/home/ubuntu`, preserved below. All source/operator configuration
 directories and the broad Dayhoff deployment mount are omitted.
 
 ```bash
-docker run --detach --name "$D_CONTAINER" --restart=no --network=host --user=0:0 \
+sudo docker run --detach --name "$D_CONTAINER" --restart=no --network=host --user=0:0 \
   --env-file "$D_LAUNCH_DIR/runtime.env" "${D_HOST_ARGS[@]}" \
   --mount "type=bind,src=$D_RUNTIME_DIR/dewey-config.yaml,dst=$D_RUNTIME_DIR/dewey-config.yaml,readonly" \
   --mount "type=bind,src=$D_RUNTIME_DIR/tapdb-runtime.yaml,dst=$D_RUNTIME_DIR/tapdb-runtime.yaml,readonly" \
@@ -253,3 +262,12 @@ and receipt. The prior cases were not rerun. Ruff and the 9 Bash syntax checks
 passed; authentication selection and all application/image build inputs remain
 unchanged. O/F owns verification that the supplied production SHA belongs to
 the actual final image.
+
+The 08:38Z runtime-context correction pins rehearsal to O's new source
+`c6406b8ffb40e58feaba31e2163d77448d47698c` and assigns new container, capsule,
+state, output and environment paths. The previous candidate is now explicitly
+rejected by the pin test. The HTTP acceptance script, stored fixture identities,
+idempotency keys, resolved TapDB runtime path and principal binding are unchanged.
+Use targeted `sudo` to create/read the protected launch environment and start Docker;
+do not relax the existing credentials' permissions. The rebuilt image digest remains
+an explicit required O/F receipt input until publication succeeds.
