@@ -26,7 +26,7 @@ def test_exclusive_private_output_preserves_existing_file(tmp_path):
     assert json.loads(output.read_text())["value"] == 9007199254740993
 
 
-@pytest.mark.parametrize("text", ['{"a": 1, "a": 2}', '{"a": NaN}', '[]'])
+@pytest.mark.parametrize("text", ['{"a": 1, "a": 2}', '{"a": NaN}', "[]"])
 def test_malformed_operator_input_fails_closed(tmp_path, text):
     path = tmp_path / "input.json"
     path.write_text(text)
@@ -35,11 +35,20 @@ def test_malformed_operator_input_fails_closed(tmp_path, text):
 
 
 def test_copy_comparison_preserves_every_nonphysical_field():
-    original = {"target": {"database": "source"}, "physical_target": {"database_oid": 1},
-                "sha256": "old", "sequences": [{"name": "ordinary_counter", "last_value": 8}],
-                "sequence_mappings": {}, "future_catalog_evidence": {"owner": "operator"}}
-    copied = {**original, "target": {"database": "copy"},
-              "physical_target": {"database_oid": 2}, "sha256": "new"}
+    original = {
+        "target": {"database": "source"},
+        "physical_target": {"database_oid": 1},
+        "sha256": "old",
+        "sequences": [{"name": "ordinary_counter", "last_value": 8}],
+        "sequence_mappings": {},
+        "future_catalog_evidence": {"owner": "operator"},
+    }
+    copied = {
+        **original,
+        "target": {"database": "copy"},
+        "physical_target": {"database_oid": 2},
+        "sha256": "new",
+    }
     assert lifecycle.sequence_content(original) == lifecycle.sequence_content(copied)
     copied["future_catalog_evidence"] = {"owner": "changed"}
     assert lifecycle.sequence_content(original) != lifecycle.sequence_content(copied)
@@ -77,7 +86,9 @@ def test_reviewed_apply_runs_only_one_explicit_native_operation(tmp_path):
     capsule = CommandRecorder(tmp_path)
     plan = capsule.out("migration-plan.json")
     plan.write_text('{"actual": "plan"}')
-    lifecycle.execute(capsule, "migration-apply", lifecycle.file_hash(plan), "independent-review-record")
+    lifecycle.execute(
+        capsule, "migration-apply", lifecycle.file_hash(plan), "independent-review-record"
+    )
     calls = [item for item in capsule.calls if item[0] == "native"]
     assert len(calls) == 1
     args = calls[0][2]
@@ -96,11 +107,15 @@ def test_floor_projection_keeps_large_next_values_and_lower_duplicate_evidence(m
     sequences = types.ModuleType("daylily_tapdb.sequences")
     counter = "ordinary_counter"
     retained = {"name": counter, "value": 2, "source": "earlier_observation"}
-    plan = {"inventory": {}, "floors": [retained, dict(retained)],
-            "advances": [{"name": counter, "next_value": 9007199254740993}]}
+    plan = {
+        "inventory": {},
+        "floors": [retained, dict(retained)],
+        "advances": [{"name": counter, "next_value": 9007199254740993}],
+    }
     identity.validate_receipt = lambda value, version: None
     recovery.inventory_floors = lambda value, source: [
-        {"name": counter, "value": 8, "source": source + ":assigned_floor"}]
+        {"name": counter, "value": 8, "source": source + ":assigned_floor"}
+    ]
     recovery.recovery_family_state = lambda *args, **kwargs: None
     sequences.build_sequence_advance_plan = lambda *args, **kwargs: plan
     for module in (recovery, identity, sequences):
