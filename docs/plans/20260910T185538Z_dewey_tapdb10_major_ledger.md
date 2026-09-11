@@ -221,6 +221,11 @@ Phase2 starts only after Phase1 acceptance: refresh prior Dewey PRs1-5 against t
 
 ## Final disposition
 
+Follow-on migration entry point: [Bloom/Ursa handoff and cost controls](20260911T121905Z_bloom_ursa_tapdb_migration_handoff.md).
+Written after completion from final evidence; includes corrected SOP pitfalls,
+one-final-image and bounded-test instructions. Documentation only; no further
+migration, build, tests or production changes were performed for this handoff.
+
 All Phase1 rows terminal: yes,27/27 SUCCESS. Objective complete: yes. Dewey9.0.0 with TapDB10.1.1rc1 is released through main and live at dewey.day.lsmc.bio after successful data preservation, strict allocator and runtime/application acceptance, followed by60-minute observation. Original database retained closed. Phase2 has a separate deferred ledger and does not affect these counts.
 
 ### 2026-09-11T08:29Z actual runtime binding and image startup
