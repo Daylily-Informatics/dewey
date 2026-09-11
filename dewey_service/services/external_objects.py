@@ -20,8 +20,37 @@ from dewey_service.tapdb_backend import (
     utc_now_iso,
 )
 
+LABCORE_OWNER_EXTERNAL_SYSTEM = "labcore"
+LABCORE_OWNER_EXTERNAL_OBJECT_TYPE = "sequencing_run"
+LABCORE_OWNER_RELATION_TYPE = "labcore_sequencing_run"
+
 
 class ExternalObjectServiceMixin:
+    @staticmethod
+    def _assert_generic_external_identity_available(
+        *, external_system: object, external_object_type: object
+    ) -> None:
+        system = str(external_system or "").strip().lower()
+        object_type = str(external_object_type or "").strip().lower()
+        if (
+            system == LABCORE_OWNER_EXTERNAL_SYSTEM
+            and object_type == LABCORE_OWNER_EXTERNAL_OBJECT_TYPE
+        ):
+            raise DeweyConflictError(
+                "Labcore sequencing-run ownership must use the v2 Labcore owner API"
+            )
+
+    def _assert_generic_relation_available(self, *, external_object, relation_type: object) -> None:
+        if str(relation_type or "").strip().lower() == LABCORE_OWNER_RELATION_TYPE:
+            raise DeweyConflictError(
+                "Labcore sequencing-run ownership must use the v2 Labcore owner API"
+            )
+        payload = self._external_object_response(external_object)
+        self._assert_generic_external_identity_available(
+            external_system=payload.get("external_system"),
+            external_object_type=payload.get("external_object_type"),
+        )
+
     @staticmethod
     def _require_external_relation_pair(session, relation, source, external_object) -> None:
         endpoints = resolve_relation_endpoints(session, relation)
@@ -66,6 +95,9 @@ class ExternalObjectServiceMixin:
                 "external_object_id": external_object_id,
             }
         )
+        self._assert_generic_external_identity_available(
+            external_system=external_system, external_object_type=external_object_type
+        )
         identity_key = f"{external_system}:{external_object_type}:{external_object_id}"
         existing = self.backend.find_by_json_field(
             session,
@@ -99,6 +131,9 @@ class ExternalObjectServiceMixin:
         relation_type: str,
     ) -> None:
         artifact_instance = lock_external_relation_source(session, artifact_instance)
+        self._assert_generic_relation_available(
+            external_object=external_object, relation_type=relation_type
+        )
         relation_identity = (
             f"artifact:{artifact_instance.euid}:{external_object.euid}:{relation_type}"
         )
@@ -197,6 +232,10 @@ class ExternalObjectServiceMixin:
             raise ValueError("external_object_id is required")
         requested_target = build_external_target(payload)
 
+        self._assert_generic_external_identity_available(
+            external_system=payload["external_system"],
+            external_object_type=payload["external_object_type"],
+        )
         fingerprint = self._fingerprint(payload)
         identity_key = (
             f"{payload['external_system']}:"
@@ -284,6 +323,16 @@ class ExternalObjectServiceMixin:
         fingerprint = self._fingerprint(payload)
 
         with self.backend.session_scope(commit=True) as session:
+            external_object = self.backend.find_by_euid(
+                session,
+                template_code=EXTERNAL_OBJECT_TEMPLATE,
+                euid=payload["external_object_euid"],
+            )
+            if external_object is None:
+                raise DeweyNotFoundError("External object not found")
+            self._assert_generic_relation_available(
+                external_object=external_object, relation_type=payload["relation_type"]
+            )
             replay = self._idempotency_replay(
                 session,
                 operation="external_object_relation.attach",

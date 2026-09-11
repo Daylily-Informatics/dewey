@@ -14,16 +14,18 @@ Template preparation stays offline. No advisory fallback or compatibility aliase
 
 One focused verification pass, one broad CI run (repeat only after informative
 fixes), one final image. Verify real separate-session PostgreSQL concurrency and
-rollback; enable only with verified tenant/principal and persisted canary inputs.
+rollback; enable only with verified tenant/principal and persisted canary inputs. The user subsequently
+authorized explicitly synthetic acceptance data when no Labcore record is available;
+never invent Meridian-shaped IDs or substitute nulls for required contract fields.
 Rollback disables the feature and retains accepted writes and receipts.
 
 ## Ledger
 
 | ID | Area | Requirement | Status | Category | Approval gate | Owner | Evidence | Root cause | Terminal note |
 |---|---|---|---|---|---|---|---|---|---|
-| J00 | Baseline | Source, deployment, config and ownership inventory | OPEN | active_product_contract | Gate 0 | O | | | |
-| J01 | Port | Selectively integrate #6–#8 | OPEN | feature_implementation | Approved plan | O | | | |
-| J02 | Ownership/API | Atomic claims, lineage, auth and limits | OPEN | feature_implementation | Approved plan | O | | | |
+| J00 | Baseline | Source, deployment, config and ownership inventory | SUCCESS | active_product_contract | Gate 0 | O | | | |
+| J01 | Port | Selectively integrate #6–#8 | SUCCESS | feature_implementation | Approved plan | O | | | |
+| J02 | Ownership/API | Atomic claims, lineage, auth and limits | SUCCESS | feature_implementation | Approved plan | O | | | |
 | J03 | Verification | Focused tests and PostgreSQL concurrency | OPEN | contract_test | Acceptance | O | | | |
 | J04 | Release | Main, annotated 9.1.0 tag and final image | OPEN | feature_implementation | Approved release | O | | | |
 | J05 | Production | Scoped configuration and controlled registration | OPEN | config_or_startup_contract | Verified identity required | O | | | |
@@ -45,3 +47,30 @@ Rollback disables the feature and retains accepted writes and receipts.
 ## Execution evidence
 
 Implementation started; production unchanged.
+
++- GitHub default branch was `jemdev10`; user requested `main`. Updated with
++  `gh repo edit --default-branch main`; verified returned `main`.
++- Live original container `55bce3940b4c`, image `382bc96a15e7`, unchanged during
++  implementation. Read-only source inventory found zero active Labcore-produced
++  artifacts or Labcore external objects. No legacy Labcore identity adoption needed.
++- Port preserves current TapDB GUI/DAG and Search v2. Removed the obsolete
++  registry introduced by #7; mounted the feature independently in app startup.
++- Labcore is a Go/PostgreSQL owner, not a TapDB object service: its run is a
++  native opaque XRF (`labcore`, `sequencing_run`, global identity), with local
++  typed DGX policy objects and authoritative lineage. Global identity scope is
++  not public access permission; API authorization remains tenant scoped.
++- Focused verification: 30 tests passed, then 5 API tests passed after adding
++  request-boundary/alias/credential-isolation coverage. First collection lacked
++  the required deployment environment; corrected it without a broad rerun.
++- Aurora acceptance: `/home/ubuntu/dewey_ops/labcore-910/postgres-acceptance.json`.
++  Nine case groups passed against `dewey_tapdb10_rehearsal_20260911`, as runtime
++  `dewey_rehearsal_9`, TEMP=false. Distinct PostgreSQL sessions and observed lock
++  waits proved 201/200 replay, 201/409 conflicts, cross-tenant global uniqueness,
++  commit/rollback waiters, independent keys, receipt failure rollback, native XRF
++  plus three receipt lineages, and soft-deletion reservation.
++- Test harness fixes: used the complete existing image's dependencies and corrected
++  the XRF type assertion to native `external_identifier`. Metrics background writes
++  were denied by the rehearsal's read-only mount; ownership checks completed.
++  No intermediate image build and no production data writes.
++- CI concurrency cancels duplicate push/PR runs for the same branch. The final
++  broad suite runs in the PR; a skip-CI merge message will reuse that result.

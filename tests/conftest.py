@@ -1841,7 +1841,7 @@ def explicit_tapdb_test_config(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) 
     return path
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def explicit_config_file(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
     config_path = tmp_path / "dewey-config-test.yaml"
     config_path.write_bytes(build_default_config_template(session_secret_key="test-session-secret"))

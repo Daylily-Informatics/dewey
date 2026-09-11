@@ -1,0 +1,77 @@
+{
+  "canonical_utf8_base64": "eyJjb250cmFjdF90eXBlIjoiZGV3ZXkubGFiY29yZS1zZXF1ZW5jaW5nLXJ1bi1vd25lci92MSIsImNvbnRyYWN0X3ZlcnNpb24iOjEsImRhdGFzZXRfcmV2aXNpb24iOiIxMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExIiwiZGF0YXNldF9yb290X3VyaSI6InMzOi8vbHNtYy1pbnRlcm5hbC10ZXN0L3J1bnMvTS1TUlVOLTAwMDEvIiwiZXhwZWN0ZWRfZmlsZXMiOlt7Im9iamVjdF92ZXJzaW9uX2lkIjoidmVyc2lvbi1pbnRlcm5hbC10ZXN0LTAwMDEiLCJyZWxhdGl2ZV9wYXRoIjoiUnVuSW5mby54bWwiLCJzaGEyNTYiOiI0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0Iiwic2l6ZV9ieXRlcyI6NTEyfSx7Im9iamVjdF92ZXJzaW9uX2lkIjoidmVyc2lvbi1pbnRlcm5hbC10ZXN0LTAwMDIiLCJyZWxhdGl2ZV9wYXRoIjoiZmFzdHEvcmVhZC0xLmZhc3RxLmd6Iiwic2hhMjU2IjoiNTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NTU1NSIsInNpemVfYnl0ZXMiOjQwOTZ9XSwiZXh0ZXJuYWxfb2JqZWN0X2lkIjoiTS1TUlVOLTAwMDEiLCJleHRlcm5hbF9vYmplY3RfdHlwZSI6InNlcXVlbmNpbmdfcnVuIiwiZXh0ZXJuYWxfc3lzdGVtIjoibGFiY29yZSIsImhhc2hfZG9tYWluIjoiZGV3ZXkubGFiY29yZS1zZXF1ZW5jaW5nLXJ1bi1vd25lci5yZXF1ZXN0L3YxIiwiaW52ZW50b3J5X3NoYTI1NiI6IjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIiLCJsYWJjb3JlX2JpbmRpbmdfcmVjZWlwdF9pZCI6Ik0tU1JVTi1CSU5ESU5HLVJFQ0VJUFQtMDAwMSIsImxhYmNvcmVfYmluZGluZ19yZWNlaXB0X3NoYTI1NiI6IjMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMiLCJsYWJjb3JlX3NlcXVlbmNpbmdfcnVuX2V1aWQiOiJNLVNSVU4tMDAwMSIsInBsYXRmb3JtIjoiSUxNTiIsInByb2Nlc3Npbmdfc2l0ZV9ldWlkIjoiU0lURS1MU01DLTAxIiwicmVsYXRpb25fdHlwZSI6ImxhYmNvcmVfc2VxdWVuY2luZ19ydW4iLCJ0YXJnZXRfZXVpZCI6IkFSVElGQUNULUlOVEVSTkFMLVRFU1QtMDAwMSIsInRhcmdldF90eXBlIjoiYXJ0aWZhY3QiLCJ0ZW5hbnRfZXVpZCI6IlRFTkFOVC1JTlRFUk5BTC1URVNUIn0=",
+  "contract_type": "dewey.labcore-sequencing-run-owner/v1",
+  "hash_domain": "dewey.labcore-sequencing-run-owner.request/v1",
+  "normalized": {
+    "contract_type": "dewey.labcore-sequencing-run-owner/v1",
+    "contract_version": 1,
+    "dataset_revision": "1111111111111111111111111111111111111111111111111111111111111111",
+    "dataset_root_uri": "s3://lsmc-internal-test/runs/M-SRUN-0001/",
+    "expected_files": [
+      {
+        "object_version_id": "version-internal-test-0001",
+        "relative_path": "RunInfo.xml",
+        "sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+        "size_bytes": 512
+      },
+      {
+        "object_version_id": "version-internal-test-0002",
+        "relative_path": "fastq/read-1.fastq.gz",
+        "sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+        "size_bytes": 4096
+      }
+    ],
+    "external_object_id": "M-SRUN-0001",
+    "external_object_type": "sequencing_run",
+    "external_system": "labcore",
+    "hash_domain": "dewey.labcore-sequencing-run-owner.request/v1",
+    "idempotency_key": "f1f089b299dfd7b53e7ed6476ebc09649aea2dba08e22c2c75d9331b14e51c0d",
+    "inventory_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+    "labcore_binding_receipt_id": "M-SRUN-BINDING-RECEIPT-0001",
+    "labcore_binding_receipt_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+    "labcore_sequencing_run_euid": "M-SRUN-0001",
+    "platform": "ILMN",
+    "processing_site_euid": "SITE-LSMC-01",
+    "relation_type": "labcore_sequencing_run",
+    "request_sha256": "f1f089b299dfd7b53e7ed6476ebc09649aea2dba08e22c2c75d9331b14e51c0d",
+    "target_euid": "ARTIFACT-INTERNAL-TEST-0001",
+    "target_type": "artifact",
+    "tenant_euid": "TENANT-INTERNAL-TEST"
+  },
+  "raw": {
+    "contract_type": "dewey.labcore-sequencing-run-owner/v1",
+    "contract_version": 1,
+    "dataset_revision": "1111111111111111111111111111111111111111111111111111111111111111",
+    "dataset_root_uri": "s3://lsmc-internal-test/runs/M-SRUN-0001",
+    "expected_files": [
+      {
+        "object_version_id": "version-internal-test-0001",
+        "relative_path": "RunInfo.xml",
+        "sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+        "size_bytes": 512
+      },
+      {
+        "object_version_id": "version-internal-test-0002",
+        "relative_path": "fastq/read-1.fastq.gz",
+        "sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+        "size_bytes": 4096
+      }
+    ],
+    "external_object_id": "M-SRUN-0001",
+    "external_object_type": "sequencing_run",
+    "external_system": "labcore",
+    "hash_domain": "dewey.labcore-sequencing-run-owner.request/v1",
+    "inventory_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+    "labcore_binding_receipt_id": "M-SRUN-BINDING-RECEIPT-0001",
+    "labcore_binding_receipt_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+    "labcore_sequencing_run_euid": "M-SRUN-0001",
+    "platform": "ILMN",
+    "processing_site_euid": "SITE-LSMC-01",
+    "relation_type": "labcore_sequencing_run",
+    "target_euid": "ARTIFACT-INTERNAL-TEST-0001",
+    "target_type": "artifact",
+    "tenant_euid": "TENANT-INTERNAL-TEST"
+  },
+  "sha256": "f1f089b299dfd7b53e7ed6476ebc09649aea2dba08e22c2c75d9331b14e51c0d",
+  "version": 1
+}

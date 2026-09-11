@@ -202,6 +202,37 @@ class TapDBBackend:
         session.flush()
         return instance
 
+    def claim_global_instance(
+        self, session, *, template_code, identity_key, name, json_addl, command_evidence
+    ):
+        """Claim through TapDB without committing the caller's transaction."""
+        from daylily_tapdb import IdentityScope
+        from daylily_tapdb.factory.instance import IdentityClaimOutcome
+
+        claim = self.factory.claim_instance_by_identity(
+            session,
+            template_code=template_code,
+            identity_key=identity_key,
+            name=name,
+            scope=IdentityScope.GLOBAL,
+            properties={},
+            command_evidence=command_evidence,
+            create_children=False,
+        )
+        created = claim.outcome is IdentityClaimOutcome.CREATED
+        if created:
+            self.update_instance_json(
+                session,
+                claim.instance,
+                {
+                    **json_addl,
+                    **creation_audit_fields(),
+                },
+            )
+            claim.instance.bstatus = "active"
+            session.flush()
+        return claim.instance, created
+
     def update_instance_json(
         self, session: Session, instance: generic_instance, updates: dict[str, Any]
     ) -> None:

@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 
 from dewey_service.service import DeweyConflictError, DeweyNotFoundError, DeweyService
+from dewey_service.tapdb_backend import EXTERNAL_OBJECT_TEMPLATE
 
 
 def test_artifact_set_member_lifecycle(service: DeweyService) -> None:
@@ -270,3 +271,72 @@ def test_external_object_relation_lifecycle(service: DeweyService) -> None:
             metadata={"source": "changed"},
             idempotency_key="idem-external-relation",
         )
+
+
+def test_generic_external_object_lane_reserves_labcore_owner_authority(
+    service: DeweyService,
+) -> None:
+    with pytest.raises(DeweyConflictError, match="v2 Labcore owner API"):
+        service.create_external_object(
+            external_system="Labcore",
+            external_object_type="Sequencing_Run",
+            external_object_id="labcore-run-test",
+            external_uri=None,
+            metadata=None,
+            idempotency_key="idem-reserved-labcore-object",
+        )
+
+    _, artifact = service.register_artifact(
+        artifact_type="report",
+        storage_backend="s3",
+        bucket="bucket-5",
+        key="reports/labcore-owner-test.json",
+        version_id=None,
+        size=None,
+        checksums=None,
+        content_type=None,
+        original_filename=None,
+        producer_system=None,
+        producer_object_euid=None,
+        storage_class=None,
+        availability_status=None,
+        metadata=None,
+        idempotency_key="idem-reserved-labcore-artifact",
+    )
+    with service.backend.session_scope(commit=True) as session:
+        labcore_external = service.backend.create_instance(
+            session,
+            template_code=EXTERNAL_OBJECT_TEMPLATE,
+            name="labcore:sequencing_run:labcore-run-test",
+            json_addl={
+                "external_system": "labcore",
+                "external_object_type": "sequencing_run",
+                "external_object_id": "labcore-run-test",
+                "external_identity_key": "labcore:sequencing_run:labcore-run-test",
+            },
+        )
+        ordinary_external = service.backend.create_instance(
+            session,
+            template_code=EXTERNAL_OBJECT_TEMPLATE,
+            name="atlas:document:doc-test",
+            json_addl={
+                "external_system": "atlas",
+                "external_object_type": "document",
+                "external_object_id": "doc-test",
+                "external_identity_key": "atlas:document:doc-test",
+            },
+        )
+
+    for external_object_euid, relation_type in (
+        (labcore_external.euid, "linked"),
+        (ordinary_external.euid, "labcore_sequencing_run"),
+    ):
+        with pytest.raises(DeweyConflictError, match="v2 Labcore owner API"):
+            service.attach_external_object_relation(
+                target_type="artifact",
+                target_euid=artifact["artifact_euid"],
+                external_object_euid=external_object_euid,
+                relation_type=relation_type,
+                metadata=None,
+                idempotency_key=f"idem-reserved-labcore-relation-{external_object_euid}",
+            )
