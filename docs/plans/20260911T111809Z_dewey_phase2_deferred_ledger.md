@@ -1,6 +1,6 @@
 # Dewey Phase 2 deferred ledger
 
-Phase 1 deployment is live; its60-minute observation is still in progress.
+Phase 1 deployment and its60-minute observation completed successfully at2026-09-11T12:07:45Z.
 No Phase 2 implementation or PR disposition has started. This ledger is separate
 from Phase 1 completion counts. Planned owner G: gpt-5.6-sol, effort high;
 start after Phase 1 acceptance and within the user's feature scope and credit budget.

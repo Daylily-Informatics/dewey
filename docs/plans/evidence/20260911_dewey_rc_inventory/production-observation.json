@@ -1,0 +1,17 @@
+{
+  "all_ready": true,
+  "build": {
+    "sha": "1f634ef66082eee32c788e0d8c386a20c2b8563e",
+    "version": "9.0.0"
+  },
+  "completed_at": "2026-09-11T12:07:45.523374+00:00",
+  "container_id": "8ef3589605c69072c5e6a5b89e98a4edf12ca2d85a8150c056ed06f2c8ac8e73",
+  "deployment_started_at": "2026-09-11T11:07:45.461224+00:00",
+  "http_5xx_log_lines": 0,
+  "log_sha256": "477709ad9d5de95ee1d4ae4b31f3af751d32279a08b9800c9831f76ff117dfba",
+  "required_minutes": 60,
+  "restart_count": 0,
+  "samples": 12,
+  "status": "observed",
+  "tracebacks": 0
+}
