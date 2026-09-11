@@ -215,7 +215,10 @@ class Capsule:
         for path in [*paths, *outputs]:
             if path.exists() or path.is_symlink():
                 raise ValueError("An operation output exists; inspect it instead of replaying")
-        command = [str(TAPDB), "--config", self.data["copy_config"], "--json", *map(str, arguments)]
+        # Schema migration emits its authoritative receipt file and explicitly
+        # rejects global JSON mode. Identity and sequence commands support it.
+        mode = [] if list(arguments[:3]) == ["db", "schema", "migrate"] else ["--json"]
+        command = [str(TAPDB), "--config", self.data["copy_config"], *mode, *map(str, arguments)]
         inputs = [{"path": arg, "file_sha256": file_hash(arg)} for arg in command[1:]
                   if arg.startswith("/") and Path(arg).is_file()]
         write_new(paths[0], {"schema_version": "dewey-native-command/v1", "started_at": utc(),
