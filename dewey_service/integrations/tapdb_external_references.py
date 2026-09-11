@@ -151,6 +151,47 @@ class RelationEndpoints:
 
 def resolve_relation_endpoints(session, relation) -> RelationEndpoints:
     """Resolve exact active endpoints from their two authoritative local lineages."""
+    return resolve_relation_endpoints_many(session, [relation])[relation.uid]
+
+
+def resolve_relation_endpoints_many(session, relations) -> dict[Any, RelationEndpoints]:
+    """Batch authoritative endpoints; apply the same strict checks to every relation."""
+    if not relations:
+        return {}
+    grouped = {relation.uid: {} for relation in relations}
+    rows = (
+        session.query(generic_instance_lineage)
+        .filter(
+            generic_instance_lineage.child_instance_uid.in_(list(grouped)),
+            generic_instance_lineage.relationship_type.in_(
+                ["has_external_relation", "is_external_relation_for"]
+            ),
+            generic_instance_lineage.is_deleted.is_(False),
+        )
+        .all()
+    )
+    parent_uids = {lineage.parent_instance_uid for lineage in rows}
+    parents = (
+        {
+            node.uid: node
+            for node in session.query(generic_instance)
+            .filter(generic_instance.uid.in_(parent_uids))
+            .all()
+        }
+        if parent_uids
+        else {}
+    )
+    for lineage in rows:
+        grouped[lineage.child_instance_uid].setdefault(lineage.relationship_type, []).append(
+            lineage
+        )
+    return {
+        relation.uid: _validated_relation_endpoints(relation, grouped[relation.uid], parents)
+        for relation in relations
+    }
+
+
+def _validated_relation_endpoints(relation, grouped, parents) -> RelationEndpoints:
     _require(
         _coordinates(relation) == ("integration", "external_object_relation", "generic", "1.0"),
         "Expected a Dewey external-object relation",
@@ -162,13 +203,7 @@ def resolve_relation_endpoints(session, relation) -> RelationEndpoints:
     _require(relation.issuer_app_code == "dewey", "Dewey must own the external relation")
     endpoints = []
     for relationship in ("has_external_relation", "is_external_relation_for"):
-        rows = (
-            session.query(generic_instance_lineage)
-            .filter_by(
-                child_instance_uid=relation.uid, relationship_type=relationship, is_deleted=False
-            )
-            .all()
-        )
+        rows = grouped.get(relationship, [])
         _require(len(rows) == 1, f"Expected exactly one active {relationship} lineage")
         lineage = rows[0]
         _require(
@@ -177,7 +212,7 @@ def resolve_relation_endpoints(session, relation) -> RelationEndpoints:
             and lineage.tenant_id == relation.tenant_id,
             "Dewey relation lineage scope mismatch",
         )
-        node = lineage.parent_instance
+        node = parents.get(lineage.parent_instance_uid)
         _require(
             node is not None and not node.is_deleted, "Relation endpoint is not visible and active"
         )

@@ -362,6 +362,33 @@ class TapDBBackend:
             query = query.filter(generic_instance_lineage.relationship_type == relationship_type)
         return cast(list[generic_instance], query.all())
 
+    def list_children_many(
+        self, session: Session, *, parents, relationship_type: str
+    ) -> dict[Any, list[generic_instance]]:
+        """Load children for a result set in one scoped, read-only query."""
+        grouped = {parent.uid: [] for parent in parents}
+        if not grouped:
+            return grouped
+        rows = (
+            session.query(generic_instance_lineage.parent_instance_uid, generic_instance)
+            .join(
+                generic_instance,
+                generic_instance_lineage.child_instance_uid == generic_instance.uid,
+            )
+            .filter(
+                generic_instance_lineage.parent_instance_uid.in_(list(grouped)),
+                generic_instance_lineage.relationship_type == relationship_type,
+                generic_instance_lineage.is_deleted.is_(False),
+                generic_instance.is_deleted.is_(False),
+            )
+            .all()
+        )
+        for parent_uid, child in rows:
+            # Match ORM entity-query deduplication when duplicate edges exist.
+            if all(existing.uid != child.uid for existing in grouped[parent_uid]):
+                grouped[parent_uid].append(child)
+        return grouped
+
     def list_parents(
         self,
         session: Session,

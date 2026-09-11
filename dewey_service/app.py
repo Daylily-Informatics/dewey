@@ -1980,7 +1980,7 @@ def create_app(
         )
 
     @app.get("/search", include_in_schema=False)
-    async def search_page(
+    def search_page(
         request: Request, profile: dict[str, Any] = Depends(require_ui_session)
     ) -> HTMLResponse:
         form = _search_form_payload(request)
@@ -1998,7 +1998,7 @@ def create_app(
         )
 
     @app.get("/search/export", include_in_schema=False)
-    async def search_export_page(
+    def search_export_page(
         request: Request, profile: dict[str, Any] = Depends(require_ui_session)
     ) -> Response:
         payload = _search_form_payload(request)
@@ -4052,7 +4052,7 @@ def create_app(
         "/api/search/v2/query",
         dependencies=[Depends(api_auth_dep)],
     )
-    async def search_v2_query(body: SearchQueryRequest) -> dict[str, Any]:
+    def search_v2_query(body: SearchQueryRequest) -> dict[str, Any]:
         try:
             return service.query_search_v2(body.model_dump())
         except ValueError as exc:
@@ -4062,7 +4062,7 @@ def create_app(
         "/api/search/v2/export",
         dependencies=[Depends(api_auth_dep)],
     )
-    async def search_v2_export(body: SearchExportRequest) -> Response:
+    def search_v2_export(body: SearchExportRequest) -> Response:
         try:
             items, timing_ms, truncated = service.collect_search_export_rows(body.model_dump())
         except ValueError as exc:

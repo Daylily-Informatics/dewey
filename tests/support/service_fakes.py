@@ -73,6 +73,10 @@ class _FakeLineage:
     tenant_id: None = None
 
     @property
+    def parent_instance_uid(self):
+        return self.parent_uid
+
+    @property
     def child_instance_uid(self):
         return self.child_uid
 
@@ -88,6 +92,25 @@ class _FakeReferenceQuery:
             [row for row in self.rows if all(getattr(row, k) == v for k, v in filters.items())],
             self.backend,
         )
+
+    def filter(self, *expressions):
+        from sqlalchemy.sql import operators
+        from sqlalchemy.sql.elements import False_
+
+        rows = self.rows
+        for expression in expressions:
+            key = expression.left.key
+            value = False if isinstance(expression.right, False_) else expression.right.value
+            if expression.operator is operators.in_op:
+                rows = [row for row in rows if getattr(row, key) in value]
+            elif expression.operator in (operators.eq, operators.is_):
+                rows = [row for row in rows if getattr(row, key) == value]
+            else:
+                raise AssertionError(f"Unsupported fake expression: {expression}")
+        return _FakeReferenceQuery(rows, self.backend)
+
+    def options(self, *options):
+        return self
 
     def with_for_update(self):
         self.backend.source_locks.extend(row.uid for row in self.rows)
@@ -287,6 +310,14 @@ class _InMemoryBackend:
                 if row.uid in child_uids and not row.is_deleted:
                     rows.append(row)
         return rows
+
+    def list_children_many(self, session, *, parents, relationship_type):
+        return {
+            parent.uid: self.list_children(
+                session, parent=parent, relationship_type=relationship_type
+            )
+            for parent in parents
+        }
 
     def list_parents(self, session, *, child: _FakeInstance, relationship_type: str | None = None):
         _ = session

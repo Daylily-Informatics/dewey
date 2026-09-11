@@ -6,11 +6,13 @@ import json
 from time import perf_counter
 from typing import Any
 
+from dewey_service.integrations.tapdb_external_references import resolve_relation_endpoints_many
 from dewey_service.literature import ViewerContext
 from dewey_service.tapdb_backend import (
     ARTIFACT_SET_TEMPLATE,
     ARTIFACT_TEMPLATE,
     SHARE_TEMPLATE,
+    normalize_instance_payload,
 )
 
 
@@ -103,10 +105,35 @@ class SearchServiceMixin:
         viewer_context: ViewerContext | None = None,
     ) -> list[dict[str, Any]]:
         rows = self.backend.list_by_template(session, template_code=ARTIFACT_TEMPLATE, limit=5000)
+        relations = self.backend.list_children_many(
+            session, parents=rows, relationship_type="has_external_relation"
+        )
+        endpoints = resolve_relation_endpoints_many(
+            session, [relation for children in relations.values() for relation in children]
+        )
+        literature_saves = (
+            self.backend.list_children_many(
+                session,
+                parents=[
+                    row
+                    for row in rows
+                    if normalize_instance_payload(row).get("artifact_type") == "literature"
+                ],
+                relationship_type="has_literature_save",
+            )
+            if viewer_context is not None
+            else {}
+        )
         items: list[dict[str, Any]] = []
         for row in rows:
             payload = self._artifact_response(row)
-            payload["external_objects"] = self._artifact_external_objects(session, row)
+            payload["external_objects"] = [
+                {
+                    **self._external_object_response(endpoints[relation.uid].external_object),
+                    "relation_type": normalize_instance_payload(relation).get("relation_type"),
+                }
+                for relation in relations[row.uid]
+            ]
             metadata = dict(payload.get("metadata") or {})
             if str(payload.get("artifact_type") or "") == "literature":
                 payload.update(
@@ -125,7 +152,7 @@ class SearchServiceMixin:
                 )
                 if viewer_context is not None:
                     payload.update(
-                        self._visible_literature_save_summary(session, row, viewer_context)
+                        self._literature_save_summary(literature_saves[row.uid], viewer_context)
                     )
                 else:
                     payload.update(
@@ -199,9 +226,12 @@ class SearchServiceMixin:
             template_code=ARTIFACT_SET_TEMPLATE,
             limit=5000,
         )
+        members = self.backend.list_children_many(
+            session, parents=rows, relationship_type="artifact_set_member"
+        )
         items: list[dict[str, Any]] = []
         for row in rows:
-            payload = self._artifact_set_response(session, row)
+            payload = self._artifact_set_response_with_members(row, members[row.uid])
             items.append(
                 {
                     "record_type": "artifact_set",

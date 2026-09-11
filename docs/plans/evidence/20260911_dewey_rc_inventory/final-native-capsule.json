@@ -1,0 +1,24 @@
+{
+  "control_config_sha256": "42491d0bf321d4d8027ef52918a1396e4e4c7f2c7bdecdabd82449b86b87686a",
+  "copy_config": "/home/ubuntu/dewey_ops/tapdb101-20260911/replacement-operator.yaml",
+  "copy_config_sha256": "c7bb450c5f24575d6c2ea4593f82083883ed0ba0e09e3a498412875121996607",
+  "copy_receipt": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/final-copy-sop-result.json",
+  "copy_receipt_sha256": "6cdc21cc0fd23fee47e4684a419d32518b80526c27e39686989e7770259d0904",
+  "database": "dewey_prod_tapdb10",
+  "extra_next_plans": [
+    {
+      "file_sha256": "a80108644cb181038f798143a95e66a6ed2847982789e124ebb6122d71da03b9",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native/exposure-after-completed-transition-plan.json"
+    }
+  ],
+  "family_id": "24e51781-01a0-424e-8ab7-445267f76530",
+  "journal_dir": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/final-native-journal",
+  "migration_manifest": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/native-migration-manifest-20260911.json",
+  "output_dir": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/final-native",
+  "provider_contract_sha256": "0700678f55acd55a39f2563b4ec73c4dbfba9876611644279ab3ad1d04abaa84",
+  "schema_version": "dewey-native-copy-capsule/v1",
+  "source_contract": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-cutoff.json",
+  "source_next_plan": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json",
+  "source_next_plan_sha256": "019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f",
+  "target_oid": 646741
+}

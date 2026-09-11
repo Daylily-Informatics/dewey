@@ -128,7 +128,9 @@ def main():
     if args.operation == "prepare":
         if floors_path.exists() or preparation_path.exists():
             raise FileExistsError("Preserve the existing prepared transition inputs")
-        if floor_records(state["floors"]) != floor_records(result["floors"]):
+        # The native family deduplicates identical (name, value, source) floors.
+        # Retain every original record below; multiplicity adds no constraint.
+        if set(floor_records(state["floors"])) != set(floor_records(result["floors"])):
             raise ValueError("Family history differs from this completed operation; review the actual changed history")
         write_new(floors_path, {"floors": plan["floors"]})
         write_new(preparation_path, {
