@@ -1,0 +1,18 @@
+{
+  "capsule_file_sha256": "7fbe0e00e5557bde7ffb2afaa50606ade8c391136a5ce77eb95fd7afd89f001d",
+  "inputs": [
+    {
+      "file_sha256": "019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json"
+    }
+  ],
+  "outputs": [
+    {
+      "file_sha256": "b5faf66ce3955203c67cf6fc82f76d3ab815f4c5d69607ad58b186075055f99f",
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native/external-floors.json"
+    }
+  ],
+  "returncode": 0,
+  "schema_version": "dewey-floor-projection/v1",
+  "status": "prepared_for_independent_review"
+}

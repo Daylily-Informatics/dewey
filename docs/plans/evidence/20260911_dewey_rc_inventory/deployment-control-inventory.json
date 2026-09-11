@@ -1,0 +1,282 @@
+{
+  "compose": [
+    {
+      "dewey": {
+        "environment": {
+          "ATLAS_BASE_URL": "[value retained privately]",
+          "AWS_CONFIG_FILE": "/home/ubuntu/.aws/config",
+          "AWS_DEFAULT_REGION": "us-west-2",
+          "AWS_PROFILE": "lsmc",
+          "AWS_REGION": "us-west-2",
+          "AWS_SDK_LOAD_CONFIG": "[value retained privately]",
+          "AWS_SHARED_CREDENTIALS_FILE": "/home/ubuntu/.aws/credentials",
+          "BLOOM_BASE_URL": "[value retained privately]",
+          "DATABASE_BACKEND": "[value retained privately]",
+          "DATABASE_TARGET": "[value retained privately]",
+          "DAYHOFF_DEPLOYMENT_CODE": "[value retained privately]",
+          "DEPLOYMENT_CODE": "[value retained privately]",
+          "DEWEY_API_BEARER_TOKEN": "[value retained privately]",
+          "DEWEY_AWS_REGION": "[value retained privately]",
+          "DEWEY_CONFIG": "/home/ubuntu/.config/dewey-day/dewey-config-day.yaml",
+          "DEWEY_ENVIRONMENT": "production",
+          "DEWEY_MANAGED_STORAGE_BUCKET": "[value retained privately]",
+          "DEWEY_MANAGED_STORAGE_PREFIX": "[value retained privately]",
+          "DEWEY_NCBI_API_KEY_FILE": "/home/ubuntu/.config/ncbi/key.txt",
+          "DEWEY_QEO_RESOLVER_TOKEN_EXPIRES_AT": "[value retained privately]",
+          "DEWEY_QEO_RESOLVER_TOKEN_SHA256": "[value retained privately]",
+          "HOME": "/home/ubuntu",
+          "HOST": "0.0.0.0",
+          "LSMC_AI_AGENT_ACCESS_ENABLED": "[value retained privately]",
+          "LSMC_AI_AGENT_GRANTS_PATH": "/opt/dayhoff/deployments/day/state/kahlo/ai-agent-grants.json",
+          "LSMC_AI_AGENT_SERVICE_ID": "[value retained privately]",
+          "LSMC_AUTH_BROKER_CALLBACK_URL": "[value retained privately]",
+          "LSMC_AUTH_BROKER_HANDOFF_EXCHANGE_URL": "[value retained privately]",
+          "LSMC_AUTH_BROKER_LOGIN_URL": "[value retained privately]",
+          "LSMC_AUTH_BROKER_LOGOUT_URL": "[value retained privately]",
+          "LSMC_AUTH_BROKER_SERVICE_ID": "[value retained privately]",
+          "LSMC_AUTH_BROKER_SERVICE_TOKEN": "[value retained privately]",
+          "LSMC_AUTH_BROKER_SHARE_RECIPIENT_PREPARE_URL": "[value retained privately]",
+          "LSMC_AUTH_BROKER_USER_PREFERENCES_URL": "[value retained privately]",
+          "LSMC_AUTH_MODE": "[value retained privately]",
+          "LSMC_DEPLOYMENT_CODE": "[value retained privately]",
+          "LSMC_ENV": "prod",
+          "LSMC_RELEASE_SHA": "556dfcf936ea11e25f6126931fe1f655482d00a6",
+          "LSMC_RUNTIME_CLASS": "aws-compose",
+          "LSMC_SERVICE_NAME": "dewey",
+          "MERIDIAN_DOMAIN_CODE": "[value retained privately]",
+          "MERIDIAN_ENVIRONMENT": "[value retained privately]",
+          "MERIDIAN_SANDBOX_PREFIX": "[value retained privately]",
+          "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4318",
+          "OTEL_SERVICE_NAME": "[value retained privately]",
+          "PORT": "8914",
+          "TAPDB_CONFIG_PATH": "/home/ubuntu/.config/tapdb/dewey/dewey-day/tapdb-config.yaml",
+          "XDG_CACHE_HOME": "[value retained privately]",
+          "XDG_CONFIG_HOME": "[value retained privately]",
+          "XDG_DATA_HOME": "[value retained privately]",
+          "XDG_STATE_HOME": "[value retained privately]"
+        },
+        "extra_hosts": [
+          "login.day.lsmc.bio:127.0.0.1",
+          "atlas.day.lsmc.bio:127.0.0.1",
+          "bloom.day.lsmc.bio:127.0.0.1",
+          "ursa.day.lsmc.bio:127.0.0.1",
+          "dewey.day.lsmc.bio:127.0.0.1",
+          "qeo.day.lsmc.bio:127.0.0.1",
+          "zebra-day.day.lsmc.bio:127.0.0.1",
+          "kahlo.day.lsmc.bio:127.0.0.1"
+        ],
+        "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:4fe9907f2d3443f2360cad2463974a60f8158aea90cbf2aa7fbc56349d45a91f",
+        "network_mode": "host",
+        "restart": "unless-stopped",
+        "user": "0:0",
+        "volumes": [
+          "/home/ubuntu/.config:/home/ubuntu/.config:ro",
+          "/opt/dayhoff/deployments/day:/opt/dayhoff/deployments/day:rw",
+          "/home/ubuntu/.aws:/home/ubuntu/.aws:ro"
+        ]
+      },
+      "file": {
+        "bytes": 46184,
+        "gid": 0,
+        "mode": "0o600",
+        "path": "/opt/dewey/day/releases/qeo-resolver-556dfcf936ea/docker-compose.yml",
+        "realpath": "/opt/dewey/day/releases/qeo-resolver-556dfcf936ea/docker-compose.yml",
+        "sha256": "05c45f50c839fb06ec78f64d3025f37e2d174289631ba3abc386cef2fa047884",
+        "uid": 0
+      },
+      "service_keys": [
+        "login",
+        "atlas",
+        "bloom",
+        "ursa",
+        "dewey",
+        "qeo",
+        "zebra-day",
+        "kahlo",
+        "ursa-placement-scheduler",
+        "ursa-cost-guardrail-scheduler",
+        "ursa-v2-run-worker",
+        "ursa-v2-run-monitor"
+      ],
+      "top_level_keys": [
+        "name",
+        "services"
+      ]
+    },
+    {
+      "dewey": {
+        "environment": {
+          "ATLAS_BASE_URL": "[value retained privately]",
+          "AWS_CONFIG_FILE": "/home/ubuntu/.aws/config",
+          "AWS_DEFAULT_REGION": "us-west-2",
+          "AWS_PROFILE": "lsmc",
+          "AWS_REGION": "us-west-2",
+          "AWS_SDK_LOAD_CONFIG": "[value retained privately]",
+          "AWS_SHARED_CREDENTIALS_FILE": "/home/ubuntu/.aws/credentials",
+          "BLOOM_BASE_URL": "[value retained privately]",
+          "DATABASE_BACKEND": "[value retained privately]",
+          "DATABASE_TARGET": "[value retained privately]",
+          "DAYHOFF_DEPLOYMENT_CODE": "[value retained privately]",
+          "DEPLOYMENT_CODE": "[value retained privately]",
+          "DEWEY_API_BEARER_TOKEN": "[value retained privately]",
+          "DEWEY_AWS_REGION": "[value retained privately]",
+          "DEWEY_CONFIG": "/home/ubuntu/.config/dewey-day/dewey-config-day.yaml",
+          "DEWEY_ENVIRONMENT": "production",
+          "DEWEY_MANAGED_STORAGE_BUCKET": "[value retained privately]",
+          "DEWEY_MANAGED_STORAGE_PREFIX": "[value retained privately]",
+          "DEWEY_NCBI_API_KEY_FILE": "/home/ubuntu/.config/ncbi/key.txt",
+          "DEWEY_QEO_RESOLVER_TOKEN_EXPIRES_AT": "[value retained privately]",
+          "DEWEY_QEO_RESOLVER_TOKEN_SHA256": "[value retained privately]",
+          "HOME": "/home/ubuntu",
+          "HOST": "0.0.0.0",
+          "LSMC_AI_AGENT_ACCESS_ENABLED": "[value retained privately]",
+          "LSMC_AI_AGENT_GRANTS_PATH": "/opt/dayhoff/deployments/day/state/kahlo/ai-agent-grants.json",
+          "LSMC_AI_AGENT_SERVICE_ID": "[value retained privately]",
+          "LSMC_AUTH_BROKER_CALLBACK_URL": "[value retained privately]",
+          "LSMC_AUTH_BROKER_HANDOFF_EXCHANGE_URL": "[value retained privately]",
+          "LSMC_AUTH_BROKER_LOGIN_URL": "[value retained privately]",
+          "LSMC_AUTH_BROKER_LOGOUT_URL": "[value retained privately]",
+          "LSMC_AUTH_BROKER_SERVICE_ID": "[value retained privately]",
+          "LSMC_AUTH_BROKER_SERVICE_TOKEN": "[value retained privately]",
+          "LSMC_AUTH_BROKER_SHARE_RECIPIENT_PREPARE_URL": "[value retained privately]",
+          "LSMC_AUTH_BROKER_USER_PREFERENCES_URL": "[value retained privately]",
+          "LSMC_AUTH_MODE": "[value retained privately]",
+          "LSMC_DEPLOYMENT_CODE": "[value retained privately]",
+          "LSMC_ENV": "prod",
+          "LSMC_RELEASE_SHA": "556dfcf936ea11e25f6126931fe1f655482d00a6",
+          "LSMC_RUNTIME_CLASS": "aws-compose",
+          "LSMC_SERVICE_NAME": "dewey",
+          "MERIDIAN_DOMAIN_CODE": "[value retained privately]",
+          "MERIDIAN_ENVIRONMENT": "[value retained privately]",
+          "MERIDIAN_SANDBOX_PREFIX": "[value retained privately]",
+          "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4318",
+          "OTEL_SERVICE_NAME": "[value retained privately]",
+          "PORT": "8914",
+          "TAPDB_CONFIG_PATH": "/home/ubuntu/.config/tapdb/dewey/dewey-day/tapdb-config.yaml",
+          "XDG_CACHE_HOME": "[value retained privately]",
+          "XDG_CONFIG_HOME": "[value retained privately]",
+          "XDG_DATA_HOME": "[value retained privately]",
+          "XDG_STATE_HOME": "[value retained privately]"
+        },
+        "extra_hosts": [
+          "login.day.lsmc.bio:127.0.0.1",
+          "atlas.day.lsmc.bio:127.0.0.1",
+          "bloom.day.lsmc.bio:127.0.0.1",
+          "ursa.day.lsmc.bio:127.0.0.1",
+          "dewey.day.lsmc.bio:127.0.0.1",
+          "qeo.day.lsmc.bio:127.0.0.1",
+          "zebra-day.day.lsmc.bio:127.0.0.1",
+          "kahlo.day.lsmc.bio:127.0.0.1"
+        ],
+        "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:4fe9907f2d3443f2360cad2463974a60f8158aea90cbf2aa7fbc56349d45a91f",
+        "network_mode": "host",
+        "restart": "unless-stopped",
+        "user": "0:0",
+        "volumes": [
+          "/home/ubuntu/.config:/home/ubuntu/.config:ro",
+          "/opt/dayhoff/deployments/day:/opt/dayhoff/deployments/day:rw",
+          "/home/ubuntu/.aws:/home/ubuntu/.aws:ro"
+        ]
+      },
+      "file": {
+        "bytes": 63792,
+        "gid": 0,
+        "mode": "0o640",
+        "path": "/opt/dayhoff/deployments/day/compose/docker-compose.yml",
+        "realpath": "/opt/dayhoff/deployments/day/compose/docker-compose.yml",
+        "sha256": "35a37f2c5df1cc84ebfd57ad19a9d56b14f88b3e6bc322aebadd3db081da8509",
+        "uid": 0
+      },
+      "service_keys": [
+        "login",
+        "atlas",
+        "bloom",
+        "ursa",
+        "dewey",
+        "qeo",
+        "zebra-day",
+        "kahlo",
+        "ursa-placement-scheduler",
+        "ursa-cost-guardrail-scheduler",
+        "ursa-v2-run-worker",
+        "ursa-v2-run-monitor",
+        "ursa-cluster-sweeper"
+      ],
+      "top_level_keys": [
+        "name",
+        "services"
+      ]
+    }
+  ],
+  "container": {
+    "compose_labels": {
+      "com.docker.compose.config-hash": "aa93d7a668c50e2911ca85cc7064fbe9bc1bceff6c230b29ad841350e436300b",
+      "com.docker.compose.container-number": "1",
+      "com.docker.compose.depends_on": "",
+      "com.docker.compose.image": "sha256:4fe9907f2d3443f2360cad2463974a60f8158aea90cbf2aa7fbc56349d45a91f",
+      "com.docker.compose.oneoff": "False",
+      "com.docker.compose.project": "dayhoff-day",
+      "com.docker.compose.project.config_files": "/opt/dewey/day/releases/qeo-resolver-556dfcf936ea/docker-compose.yml",
+      "com.docker.compose.project.working_dir": "/opt/dewey/day/releases/qeo-resolver-556dfcf936ea",
+      "com.docker.compose.replace": "dewey-1",
+      "com.docker.compose.service": "dewey",
+      "com.docker.compose.version": "2.40.3"
+    },
+    "id": "872434f0530335fd5a985a920f498fe39a36fd5eab40b9cb3934b185ceddeb36"
+  },
+  "manifest": {
+    "deploy_name": "day",
+    "dewey": {
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:0780a42dd2b3d5620de2c538cada32acd661f5be5a0f0b60a08c9f941ea3af42",
+      "repository": "dayhoff/day/dewey",
+      "source_commit": "dea0009b743ad5b627177acdf21c87dd5c1d67c1",
+      "source_tag": "8.0.2"
+    },
+    "file": {
+      "bytes": 2588,
+      "gid": 0,
+      "mode": "0o640",
+      "path": "/opt/dayhoff/deployments/day/container-release-manifest.json",
+      "realpath": "/opt/dayhoff/deployments/day/container-release-manifest.json",
+      "sha256": "b958136a7b15492042cb6b7e06023b63cb164daf5ff8532950b3ebe8c6bc3cd2",
+      "uid": 0
+    },
+    "image_keys": [
+      "atlas",
+      "bloom",
+      "dewey",
+      "kahlo",
+      "lsmc-oauth-login",
+      "qeo",
+      "ursa",
+      "zebra_day"
+    ],
+    "images_type": "dict",
+    "keys": [
+      "deploy_name",
+      "images",
+      "version"
+    ],
+    "non_dewey_sha256": "c788b60baa92c05b2daa99ce7abd3303017e63c0434c70f6eaadd88bd200d31e",
+    "version": 1
+  },
+  "proxy": [
+    {
+      "directives": [
+        "ServerName dewey.day.lsmc.bio",
+        "ProxyPreserveHost On",
+        "ProxyPass / http://localhost:8914/",
+        "ProxyPassReverse / http://localhost:8914/"
+      ],
+      "file": {
+        "bytes": 553,
+        "gid": 0,
+        "mode": "0o644",
+        "path": "/etc/apache2/sites-enabled/dewey-day.conf",
+        "realpath": "/etc/apache2/sites-available/dewey-day.conf",
+        "sha256": "0fab11a8293b060f926bf54fd36bbe029ee8cf6039246a2bfa11cfcd7dc929a5",
+        "uid": 0
+      }
+    }
+  ]
+}
