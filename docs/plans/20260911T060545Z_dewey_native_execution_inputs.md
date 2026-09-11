@@ -13,6 +13,14 @@ config field that has no CLI flag. These are explicit setup steps, not changes
 to the published package. Preserve the original source config and all previous
 receipts. Do not print either passwords or full application inventories.
 
+Latest user steering permits Dewey to remain offline throughout rehearsal and
+final cutover, and waives inbox/outbox message preservation and replay gates.
+The source remains closed after its initial reviewed cutoff/copy. Retain that
+cutoff and continuous freeze evidence for the later final provider copy; do not
+try a new native source connection while admission is closed. The
+[revised copy review](20260911T063007Z_dewey_rehearsal_copy_review.md) records
+this disposition. All other identity and allocator preservation remains required.
+
 ## 1. Bind exact inputs before any operation
 
 | Input | Required value or source |
@@ -70,14 +78,16 @@ O's sanitized `mapped-source-summary.json`, not the private row file.
 1. For rehearsal, stop every source writer/pool, prevent automatic restart,
    review source sessions, capture the complete source and its next values,
    close source connections, and perform O's separately reviewed database copy.
-   Keep the copy's HTTP, workers and outbound integrations isolated. O may then
-   restore old-source service while isolated rehearsal proceeds. Those later
-   source writes require a fresh final outage/copy; rehearsal evidence is not a
-   final-source snapshot.
-2. For final replacement, repeat the approved brief outage/capture/copy using
-   new receipt paths and the fixed final destination. Keep source writers off
-   through final acceptance and promotion. Census observes sessions; it is not
-   a fence or evidence that disconnected clients cannot reconnect.
+   Keep the copy's HTTP, workers and outbound integrations isolated. Leave old
+   source admission closed and its original container stopped throughout
+   rehearsal, as authorized by the latest user instruction.
+2. For final replacement, verify the continuous source freeze and copy that
+   unchanged closed source into the fixed final destination using new provider
+   receipt paths. Native capture of the new copy must compare to the retained
+   original cutoff. Do not reconnect to or reopen the old source merely to
+   capture it again. Any breach of the source freeze stops this reviewed
+   capsule. Census observes sessions; it is not a fence or evidence that
+   disconnected clients cannot reconnect.
 3. Capture source and untouched copy using identical mapping and limit policy:
 
 ```bash
