@@ -45,7 +45,7 @@ At most three subagents plus O run concurrently. Use separate worktrees and disj
 
 - Controlling worktree: `/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-tapdb10-major-20260910`.
 - Branch: `codex/dewey-tapdb101-major-20260910`, created from deployed `556dfcf936ea11e25f6126931fe1f655482d00a6`.
-- Source worktree `/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-qeo-resolver-20260909` is clean at `598be4d5f31525e982de01b36a284704fa603042`; source matches deployed commit and adds a later receipt commit.
+- Source worktree `/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-qeo-resolver-20260909` is clean at `598be4d5f31525e982de01b36a284704fa603042`. Its application matches deployed commit `556dfcf`; the later commit also changes a deployment helper, so it is not receipt-only. A preserves its documentation separately and excludes that later helper change from the live-source baseline.
 - Live remote main: `ef7f5412b5c7a4d3a8c47fb55500fa66f165b0ca`; live resolver ref `598be4d5f31525e982de01b36a284704fa603042`; no remote `9.0.0` tag on execution start.
 - Fresh HTTPS health 2026-09-11T03:47:17Z: Dewey 8.0.2, process started 2026-09-10T00:41:05Z, status ok, build SHA blank. SSM Online for the expected host.
 - Prior planning inspection (to refresh): image `sha256:4fe9907f2d3443f2360cad2463974a60f8158aea90cbf2aa7fbc56349d45a91f`, OCI revision `556dfcf936ea11e25f6126931fe1f655482d00a6`; all 73 application/lock blobs matched Git; no application writable-layer changes; TapDB9.0.9/Meridian0.4.7; strict schema drift clean with9 tables/20 sequences.
@@ -95,16 +95,16 @@ Working states: OPEN, IN_PROGRESS, ATTEMPTING_BUGFIX. Terminal: SUCCESS, DUPLICA
 
 | ID | Area | Requirement | Status | Category | Approval gate | Owner | Evidence | Root cause | Terminal note |
 |---|---|---|---|---|---|---|---|---|---|
-| AM01 | Plan | Fix10.1.0 target; qualify released capabilities rather than develop/release TapDB | OPEN | plan_amendment | User implementation approval | O | Approved user plan | | |
-| L00 | Inventory | Refresh source/image/config/database identity and release artifacts | OPEN | legitimate_safety_handling | Gate0 | O/A | Baseline above | | |
-| L01 | Source | Reconcile verified live source onto release branch targeting main, exclude undeployed features | OPEN | feature_implementation | L00 | A | Pending | | |
-| L02 | Native inventory | Capture old Dewey schema and mappings using published10.1.0 | OPEN | contract_test | L00 | B | Pending | | |
+| AM01 | Plan | Fix10.1.0 target; qualify released capabilities rather than develop/release TapDB | SUCCESS | plan_amendment | User implementation approval | O | Approved plan committed as 5c75e7b | | Exact target and released-capability qualification recorded; no upstream development/release authorized |
+| L00 | Inventory | Refresh source/image/config/database identity and release artifacts | IN_PROGRESS | legitimate_safety_handling | Gate0 | O/A | Fresh health, refs and SSM container inspection match the approved baseline | | |
+| L01 | Source | Reconcile verified live source onto release branch targeting main, exclude undeployed features | IN_PROGRESS | feature_implementation | L00 | A | A confirms main contributes five documentation/evidence files; normal merge preserves live application | | |
+| L02 | Native inventory | Capture old Dewey schema and mappings using published10.1.0 | IN_PROGRESS | contract_test | L00 | B/O | Verified public wheel installed in B's isolated environment; root preparing separate production operator installation | | |
 | L03 | Source evidence | Complete identities/prefixes/roles/writers/all generators; finish Gate0 | OPEN | legitimate_safety_handling | L02 | C/O | Pending | | |
-| L04 | Native lifecycle | Qualify strict advancement, fencing, bootstrap/bind and journal recovery | OPEN | contract_test | L02 | B/E | Pending | | |
-| L05 | Historical recovery | Qualify published package and historical backup/restore/migration for Dewey | OPEN | contract_test | L04 | B/E | Pending | | |
+| L04 | Native lifecycle | Qualify strict advancement, fencing, bootstrap/bind and journal recovery | IN_PROGRESS | contract_test | L02 | B/E | B reports 301 focused tests passed on PostgreSQL 16.13 against the installed public package; actual Dewey qualification pending | | |
+| L05 | Historical recovery | Qualify published package and historical backup/restore/migration for Dewey | IN_PROGRESS | contract_test | L04 | B/E | Focused tests include original 9.0.9 fixture recovery and failed-migration floor retention; populated Dewey restoration pending | | |
 | L06 | Dewey runtime | Exact10.1.0 lock/public API adoption and mutation-free startup | OPEN | feature_implementation | L01/L05 | D | Pending | | |
 | L07 | Compatibility | Remove owned compatibility/fallbacks; prove explicit failures | OPEN | removable_compatibility_debt | L06 | D/E | Pending | | |
-| L08 | Data conversion | Reviewed non-identity transformations and complete preservation manifest | OPEN | feature_implementation | L03/L05 | C | Pending | | |
+| L08 | Data conversion | Reviewed non-identity transformations and complete preservation manifest | IN_PROGRESS | feature_implementation | L03/L05 | C | Preparing manifest validation and runbook; actual source inventory required before manifest approval | | |
 | L09 | Rehearsal | Timed isolated full restoration, migration, floors and recovery | OPEN | contract_test | L08 | C/E | Pending | | |
 | L10 | Independent acceptance | PostgreSQL/auth/concurrency/application/restored-data acceptance | OPEN | contract_test | L06-L09 | E | Pending | | |
 | L11 | Release | Merge main normally, annotated9.0.0 tag, full immutable image | OPEN | feature_implementation | L10 | F/O | Pending | | |
@@ -138,6 +138,9 @@ Phase2 starts only after Phase1 acceptance: refresh prior Dewey PRs1-5 against t
 | UTC | Action | Evidence/result |
 |---|---|---|
 | 2026-09-11T03:47:50Z | Created isolated worktree and exact-source branch | git worktree add from556dfcf; existing clean resolver checkout preserved |
+| 2026-09-11 | Committed controlling plan and dispatched A/B/C | Commit 5c75e7b; disjoint source, native qualification, and migration preparation scopes; O owns production and ledger |
+| 2026-09-11 | Refreshed live container identity over interactive SSM as ubuntu | Container 872434f05303; image sha256:4fe9907f2d3443f2360cad2463974a60f8158aea90cbf2aa7fbc56349d45a91f; OCI revision 556dfcf; three expected mounts; no production mutation |
+| 2026-09-11 | Received B's focused native qualification result | 301 passed, zero failures/errors/skips, PostgreSQL 16.13; actual source and Aurora acceptance remain open |
 
 ## Final disposition
 
