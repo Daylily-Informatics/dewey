@@ -400,3 +400,15 @@ when its stated evidence exists; parent rows retain their own completion status.
   Non-admin and external-user behavior is source-reviewed, not live role-tested.
 - User acceptance D20/C07 remains required by the approved plan before Ursa/Kahlo
   cutover. D21/D22/C08 and all-terminal closure remain open; no completion claim.
+
+### Final list presentation closure — 10.0.4
+
+- Deployed observation of Sets exposed object/prefix filters and selection controls
+  that cannot operate on sets. Sharing used the same generic list controls.
+- 10.0.4 removes those inapplicable controls, displays permission-filtered member
+  counts already supplied by the API, and gives Sharing audience/recipient,
+  status/expiry, owner and last-access columns. The public share response now
+  includes its stored audience; existing recipient redaction remains enforced.
+- 10.0.3 remains immutable and its published image is retained, but is not promoted.
+  The final presentation promotion uses 10.0.4 directly from deployed 10.0.2.
+  No database conversion is repeated; no additional test campaign is authorized.

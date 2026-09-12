@@ -336,6 +336,7 @@ class BaseDeweyService:
         payload = normalize_instance_payload(instance)
         result = {
             "share_euid": instance.euid,
+            "audience": payload.get("audience"),
             "target_kind": payload.get("target_kind"),
             "target_euid": payload.get("target_euid"),
             "targets": list(payload.get("targets") or []),
