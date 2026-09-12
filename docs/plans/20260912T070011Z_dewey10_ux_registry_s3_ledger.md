@@ -339,3 +339,18 @@ when its stated evidence exists; parent rows retain their own completion status.
   failed because sudo did not retain the explicit AWS files, then because the old
   replacement operator config's runtime role is not bound to this target. No writes.
   Operator authentication remains separate; no role binding is changed.
+
+### Production preparation — 10.0.1
+
+- Annotated tag 10.0.1: `afe13e1b466ca6a0f625c4401790299f9322d7d1`.
+  Published image `sha256:287ad87fb21f6c3eaea5ae56bddeb1f4b39d2b4299d085acb4449250f2a5b672`.
+- Full read-only manifest succeeds: 5,107 artifacts and 10 sets; 5,117 policy
+  initializations, all internal under the approved default; zero ambiguous rows.
+  Manifest SHA256 `8f31132a9544b25209c4a18b5a5d20151de545614102d91f7b13e1a437312c6f`.
+  Database `dewey_prod_tapdb10`, OID646741, schema `tapdb_dewey_lsmcok1_local`.
+  155 presentation changes: 87 declared OWY objects become prefixes; 65 prefix and
+  3 directory node labels become folder. EUIDs, coordinates and receipts unchanged.
+- First scoped template-creation attempt rolled back: TapDB requires REPEATABLE READ
+  for its identity capture. The owned operator now selects that isolation before the
+  transaction, matching native `tapdb db data seed`. No conversion or promotion ran.
+  Advance immutable patch tag to 10.0.2; retain 10.0.0 and 10.0.1 unchanged.

@@ -111,6 +111,7 @@ def registry_templates(
         domain_code=cfg["domain_code"], owner_repo_name=cfg["owner_repo_name"], schema_name=cfg["schema_name"],
         config_identity=str(operator_config), connection_role="operator", aws_profile=cfg.get("aws_profile"),
         sslrootcert=cfg.get("sslrootcert"), echo_sql=False) as connection:
+        connection.engine.update_execution_options(isolation_level="REPEATABLE READ")
         with connection.session_scope(commit=True) as session:
             existing = {template_key(serialize_template(t)): serialize_template(t) for t in session.query(generic_template).filter(
                 generic_template.domain_code == cfg["domain_code"], generic_template.issuer_app_code == cfg["owner_repo_name"]).all()}
