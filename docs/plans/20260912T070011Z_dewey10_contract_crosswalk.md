@@ -41,8 +41,14 @@ unchanged; replay is gated by the target's current authorization.
 
 1. Capture current immutable image, Dewey-only compose fields, private configuration
    and database target. Keep protected configuration copies on the operator host.
-2. Import only the three new templates through the native TapDB repository-pack
-   lifecycle, using `config/tapdb_templates/dewey/registry10.repository-pack.json`.
+2. Create only the three new templates with `dewey db registry-templates` using
+   explicit `--operator-config`, `--repository-pack`, `--receipt-pack` and `--actor`.
+   This owned CLI delegates to TapDB's governed loader with overwrite disabled and
+   requires the operator and runtime database identities to agree. The new definitions
+   are `config/tapdb_templates/dewey/registry10.repository-pack.json`.
+   Native `tapdb templates import` is reserved for previously exported packs and
+   requires a real export receipt; this new-template command creates that receipt
+   after persistence. It never seeds unrelated core or existing service templates.
    Do not reseed existing templates or change DGX/M identity bindings.
 3. Quiesce the Dewey writer during the final conversion/deployment interval.
 4. Run `dewey db registry-conversion plan --actor ACTOR --manifest ABS` with

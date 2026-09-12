@@ -102,9 +102,11 @@ def plan(service, actor):
                     "record_json_sha256": digest(record.json_addl),
                     "before": projection(data), "changes": changes, "initialize_policy": None if policies else policy,
                     "reason": "Declared producer contract / authoritative storage_kind; explicit access initialization"})
+        record_count = len(records)
+        inventory_sha256 = digest([record.euid for record in records])
     return {"format": "dewey.registry-conversion/v1", "created_at": utc_now_iso(), "actor": actor,
-        "target": target, "rows": rows, "ambiguous": ambiguous, "record_count": len(records),
-        "inventory_sha256": digest([record.euid for record in records]),
+        "target": target, "rows": rows, "ambiguous": ambiguous, "record_count": record_count,
+        "inventory_sha256": inventory_sha256,
         "preserved": ["EUIDs", "storage coordinates", "artifact identity keys", "existing lineage", "external references", "idempotency records", "historical receipts"]}
 
 

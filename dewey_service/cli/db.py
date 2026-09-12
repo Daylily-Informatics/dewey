@@ -75,6 +75,59 @@ def registry_conversion(
     main(args)
 
 
+def registry_templates(
+    operator_config: Path = typer.Option(..., exists=True, dir_okay=False),
+    repository_pack: Path = typer.Option(..., exists=True, dir_okay=False),
+    receipt_pack: Path = typer.Option(...),
+    actor: str = typer.Option(...),
+) -> None:
+    """Create only the three new Dewey templates through TapDB's governed loader."""
+    from dataclasses import asdict
+    from daylily_tapdb import TAPDBConnection, generic_template
+    from daylily_tapdb.cli.db_config import get_db_config
+    from daylily_tapdb.templates.loader import find_tapdb_core_config_dir, seed_templates
+    from daylily_tapdb.templates.repository import read_repository_pack, export_repository_pack, serialize_template, template_key
+    from dewey_service.settings import get_settings
+    from dewey_service.integrations.tapdb_runtime import load_runtime_config
+    import json
+    if any(not p.is_absolute() for p in (operator_config, repository_pack, receipt_pack)) or receipt_pack.exists():
+        raise typer.BadParameter("Use absolute paths and a new export receipt pack")
+    runtime = load_runtime_config(get_settings())
+    cfg = get_db_config(config_path=str(operator_config))
+    for key in ("database", "host", "port", "schema_name", "domain_code", "owner_repo_name"):
+        if cfg[key] != runtime[key]:
+            raise typer.BadParameter("Operator and running service targets differ: " + key)
+    if not cfg.get("operator_configured") or not cfg.get("operator_user") or cfg["operator_user"] == cfg["user"]:
+        raise typer.BadParameter("Explicit separately authenticated operator credentials are required")
+    _, pack, _ = read_repository_pack(repository_pack)
+    expected = {("access", "registry_policy", "generic", "1.0"),
+        ("access", "api_client", "generic", "1.0"), ("operational", "storage_operation", "generic", "1.0")}
+    if {template_key(t) for t in pack["templates"]} != expected or len(pack["templates"]) != 3:
+        raise typer.BadParameter("This operation accepts only the three Dewey 10 templates")
+    with TAPDBConnection(db_hostname=f"{cfg['host']}:{cfg['port']}", db_hostaddr=cfg.get("hostaddr"),
+        db_user=cfg["operator_user"], db_pass=cfg.get("operator_password"),
+        secret_arn=cfg.get("operator_secret_arn"), db_name=cfg["database"], engine_type=cfg["engine_type"],
+        region=cfg["region"], iam_auth=cfg.get("operator_iam_auth", False), app_username=actor,
+        domain_code=cfg["domain_code"], owner_repo_name=cfg["owner_repo_name"], schema_name=cfg["schema_name"],
+        config_identity=str(operator_config), connection_role="operator", aws_profile=cfg.get("aws_profile"),
+        sslrootcert=cfg.get("sslrootcert"), echo_sql=False) as connection:
+        with connection.session_scope(commit=True) as session:
+            existing = {template_key(serialize_template(t)): serialize_template(t) for t in session.query(generic_template).filter(
+                generic_template.domain_code == cfg["domain_code"], generic_template.issuer_app_code == cfg["owner_repo_name"]).all()}
+            for item in pack["templates"]:
+                if template_key(item) in existing and existing[template_key(item)] != item:
+                    raise ValueError("An existing template conflicts with the release pack")
+            result = seed_templates(session, pack["templates"], overwrite=False,
+                core_config_dir=find_tapdb_core_config_dir(), domain_code=cfg["domain_code"],
+                owner_repo_name=cfg["owner_repo_name"], domain_registry_path=Path(cfg["domain_registry_path"]),
+                prefix_registry_path=Path(cfg["prefix_ownership_registry_path"]))
+        with connection.session_scope(commit=False) as session:
+            receipt = export_repository_pack(session, receipt_pack, domain_code=cfg["domain_code"],
+                issuer_app_code=cfg["owner_repo_name"], prefix_registry_path=cfg["prefix_ownership_registry_path"], actor=actor)
+    ccyo_out.print_text(json.dumps({"status": "created", "summary": asdict(result),
+        "export_sha256": receipt["content_sha256"], "export_pack": str(receipt_pack)}))
+
+
 def register(registry: CommandRegistry, spec: CliSpec) -> None:
     """Register verification and lifecycle guidance, with no bootstrap aliases."""
     _ = spec
@@ -83,5 +136,6 @@ def register(registry: CommandRegistry, spec: CliSpec) -> None:
         "db",
         "Verify existing Dewey data and review native TapDB lifecycle ownership",
         [("verify-templates", verify_templates, REQUIRED), ("lifecycle", lifecycle, EXEMPT),
-         ("registry-conversion", registry_conversion, REQUIRED_MUTATING)],
+         ("registry-conversion", registry_conversion, REQUIRED_MUTATING),
+         ("registry-templates", registry_templates, REQUIRED_MUTATING)],
     )

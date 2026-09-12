@@ -312,3 +312,30 @@ when its stated evidence exists; parent rows retain their own completion status.
   records still require source-backed resolution; image rollback alone is insufficient.
 - No real invitations, shares, uploads, replacements or deletions have been invoked
   for validation. User acceptance and Ursa/Kahlo cutovers remain open.
+
+
+### Release 10.0.0 operator finding and immutable patch
+
+- Published annotated tag 10.0.0 at `a69da97d8eafd78734815d7dc73a5daa2c793c3c`;
+  image `sha256:e5a54e5452d2303490f936371377cd1bfeabf501e9b1e75754bb912f8cc53e38`,
+  pushed 2026-09-12T09:32:45Z. Exact-tag build succeeded; no tests or CI ran.
+- Owned config preparation succeeded: three explicit service principals, new private
+  config SHA256 `6cb6f6efa2cccca14e05b4eddc666a137be020bd2bdd7b5df0d42a187f4cd6f3`.
+- Actual conversion inventory failed with SQLAlchemy DetachedInstanceError when
+  calculating inventory EUIDs after closing its read-only session. No manifest,
+  database write or production promotion occurred. Fixed by collecting the inventory
+  count/hash inside the transaction. Published tag 10.0.0 remains immutable;
+  final release target advances to 10.0.1.
+- Native template import requires a real prior export receipt; the new three-template
+  definitions cannot legitimately have one before creation. Added owned
+  `dewey db registry-templates`, delegating to TapDB's governed loader for exactly
+  those three keys, with separately authenticated operator credentials, matching
+  runtime target, no overwrite and a native persisted-template export receipt.
+  This avoids broad core seeding and fabricated import receipts.
+- Prior native export succeeded using the actual bound runtime configuration:
+  13 Dewey-owned templates, SHA256
+  `12497b41c2074e7bd058013fc78ceea9851ea724fadcf7bc4397f134348a4baa`,
+  private `10.0.0/prior-templates.json` and native receipt. Earlier export attempts
+  failed because sudo did not retain the explicit AWS files, then because the old
+  replacement operator config's runtime role is not bound to this target. No writes.
+  Operator authentication remains separate; no role binding is changed.
