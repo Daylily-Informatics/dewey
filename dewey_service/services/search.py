@@ -23,45 +23,7 @@ class SearchServiceMixin:
         *,
         viewer_context: ViewerContext | None = None,
     ) -> dict[str, Any]:
-        started = perf_counter()
-        query = dict(request or {})
-        scopes = self._normalize_search_scopes(query.get("scopes"))
-        self._validate_property_filters(query.get("property_filters"))
-        page = max(1, int(query.get("page") or 1))
-        page_size = max(1, min(int(query.get("page_size") or 25), self.search_export_max_rows))
-        sort_field = str(query.get("sort_field", "created_at")).strip()
-        sort_dir = str(query.get("sort_dir", "desc")).strip().lower()
-
-        with self.backend.session_scope(commit=False) as session:
-            rows: list[dict[str, Any]] = []
-            if "artifact" in scopes:
-                rows.extend(self._search_artifact_items(session, viewer_context=viewer_context))
-            if "artifact_set" in scopes:
-                rows.extend(self._search_artifact_set_items(session))
-            if "share" in scopes:
-                rows.extend(self._search_share_items(session))
-
-        filtered = self._apply_search_filters(rows, query)
-        filtered = self._sort_search_rows(filtered, sort_field=sort_field, sort_dir=sort_dir)
-        total = len(filtered)
-        start = (page - 1) * page_size
-        end = start + page_size
-        items = filtered[start:end]
-        timing_ms = int((perf_counter() - started) * 1000)
-        facets = {
-            "artifact": sum(1 for row in filtered if row["record_type"] == "artifact"),
-            "artifact_set": sum(1 for row in filtered if row["record_type"] == "artifact_set"),
-            "share": sum(1 for row in filtered if row["record_type"] == "share"),
-        }
-        return {
-            "items": items,
-            "facets": facets,
-            "total": total,
-            "page": page,
-            "page_size": page_size,
-            "has_more": end < total,
-            "timing_ms": timing_ms,
-        }
+        return self.search_registry(request)
 
     def collect_search_export_rows(
         self,

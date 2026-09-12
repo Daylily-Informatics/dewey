@@ -315,6 +315,8 @@ def _service_entitlement_roles(user: dict[str, Any], *, service_id: str) -> list
                 out.append("dewey-readwrite")
             elif normalized in {"read_only", "readonly", "read", "viewer", "auditor"}:
                 out.append("dewey-readonly")
+            elif normalized == "external_share":
+                out.append("lsmc:external-share-user")
     return out
 
 
@@ -332,9 +334,14 @@ def resolve_external_broker_principal(user: dict[str, Any], request: Request) ->
             status_code=status.HTTP_401_UNAUTHORIZED,
             redirect_to_error=True,
         )
-    _require_allowed_cognito_email_domain(settings, email)
     groups = [str(item).strip() for item in user.get("groups") or [] if str(item).strip()]
     groups.extend(_service_entitlement_roles(user, service_id=settings.external_broker_service_id))
+    # This callback consumes a verified broker handoff, not user-supplied claims.
+    # Invited external share recipients are deliberately outside internal domains.
+    if "lsmc:external-share-user" not in groups:
+        _require_allowed_cognito_email_domain(settings, email)
+    else:
+        groups.append("dewey-readonly")
     profile = normalize_session_profile(
         email=email,
         sub=subject,
@@ -459,6 +466,7 @@ def require_api_auth(settings: Settings):
     bearer = HTTPBearer(auto_error=False)
 
     def _require_api_auth(
+        request: Request,
         credentials: HTTPAuthorizationCredentials | None = Depends(bearer),
     ) -> str:
         if credentials is None:
@@ -469,14 +477,21 @@ def require_api_auth(settings: Settings):
                 headers={"WWW-Authenticate": "Bearer"},
             )
         token = str(credentials.credentials or "").strip()
-        if token not in settings.api_tokens():
+        registry_actor = getattr(request.state, "registry_principal", None)
+        if token not in settings.api_tokens() and not (registry_actor and token.startswith("dewey_user_")):
             set_current_authenticated_user_email(None)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid bearer token",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        set_current_authenticated_user_email(None)
+        read_post = request.method == "POST" and request.url.path in {
+            "/api/v1/resolve/artifact", "/api/v1/resolve/artifact-set",
+            "/api/search/v2/query", "/api/search/v2/export",
+        }
+        if registry_actor is not None and not registry_actor.writable and request.method not in {"GET", "HEAD"} and not read_post:
+            raise HTTPException(403, "Dewey write permission is required")
+        set_current_authenticated_user_email(registry_actor.email if registry_actor else None)
         return token
 
     return _require_api_auth
@@ -659,6 +674,12 @@ def require_session_or_api_auth(settings: Settings):
         request: Request,
         credentials: HTTPAuthorizationCredentials | None = Depends(bearer),
     ) -> dict[str, Any]:
+        registry_actor = getattr(request.state, "registry_principal", None)
+        if registry_actor is not None and not registry_actor.service:
+            return {"auth_mode": "registry", "service_principal": False, "profile": {
+                "email": registry_actor.email, "sub": registry_actor.subject,
+                "roles": list(registry_actor.roles), "groups": list(registry_actor.groups),
+            }}
         profile = _load_ui_profile(request)
         if isinstance(profile, dict):
             auth_mode = str(getattr(request.state, "auth_mode", "cognito") or "cognito")

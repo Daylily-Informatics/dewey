@@ -1,0 +1,44 @@
+{
+  "format": "tapdb.repository-template-pack/v1",
+  "templates": [
+    {
+      "name": "Dewey Registry Policy",
+      "polymorphic_discriminator": "data_template",
+      "category": "access",
+      "type": "registry_policy",
+      "subtype": "generic",
+      "version": "1.0",
+      "instance_prefix": "DGX",
+      "instance_polymorphic_identity": "data_instance",
+      "bstatus": "active",
+      "is_singleton": false,
+      "json_addl": {}
+    },
+    {
+      "name": "Dewey API Client",
+      "polymorphic_discriminator": "data_template",
+      "category": "access",
+      "type": "api_client",
+      "subtype": "generic",
+      "version": "1.0",
+      "instance_prefix": "DGX",
+      "instance_polymorphic_identity": "data_instance",
+      "bstatus": "active",
+      "is_singleton": false,
+      "json_addl": {}
+    },
+    {
+      "name": "Dewey Storage Operation",
+      "polymorphic_discriminator": "data_template",
+      "category": "operational",
+      "type": "storage_operation",
+      "subtype": "generic",
+      "version": "1.0",
+      "instance_prefix": "DGX",
+      "instance_polymorphic_identity": "data_instance",
+      "bstatus": "active",
+      "is_singleton": false,
+      "json_addl": {}
+    }
+  ]
+}

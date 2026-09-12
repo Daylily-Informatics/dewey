@@ -9,7 +9,7 @@ description = "LSMC Dewey canonical artifact registry service"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "boto3>=1.35.0",
+    "boto3>=1.43.92",
     "bandit[toml]>=1.8.0",
     "cli-core-yo==2.1.1",
     "build>=1.2.0",

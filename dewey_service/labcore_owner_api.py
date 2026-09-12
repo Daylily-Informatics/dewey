@@ -126,9 +126,11 @@ def attach_labcore_owner_api(app, *, settings) -> None:
         if idempotency_key != body.command_sha256:
             raise HTTPException(status_code=409, detail="Idempotency-Key must equal command_sha256")
         try:
-            code, payload = app.state.service.register_labcore_sequencing_run_owner(
-                request_body=body, principal_id=principal.principal_id
-            )
+            from dewey_service.registry_access import Principal, principal_context
+            with principal_context(Principal(subject=principal.principal_id, roles=("READ_WRITE",), internal=True, service=True)):
+                code, payload = app.state.service.register_labcore_sequencing_run_owner(
+                    request_body=body, principal_id=principal.principal_id
+                )
             response = LabcoreOwnerRegistrationResponse.model_validate(payload)
             return JSONResponse(status_code=code, content=response.model_dump(mode="json"))
         except DeweyNotFoundError as exc:

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ section }} · Dewey</title>
+  <link rel="stylesheet" href="{{ static_url('registry.css') }}">
+  <script src="{{ static_url('registry.js') }}" defer></script>
+</head>
+<body data-section="{{ section }}" data-euid="{{ euid }}" data-admin="{{ 'true' if actor.admin else 'false' }}" data-writable="{{ 'true' if actor.writable else 'false' }}" data-internal="{{ 'true' if actor.internal else 'false' }}">
+<header class="topbar">
+  <a class="brand" href="/ui">dewey<span>ARTIFACT LIBRARY</span></a>
+  <nav aria-label="Primary">
+  {% for label,path in [('Library','/ui'),('S3 Browser','/storage'),('Sets','/sets'),('Sharing','/shares'),('Literature','/literature')] %}
+    <a href="{{ path }}" {% if section == label %}aria-current="page"{% endif %}>{{ label }}</a>
+  {% endfor %}
+  </nav>
+  <div class="account-nav">{% if actor.writable %}<a class="button primary" href="/add">+ Add</a>{% endif %}{% if actor.admin %}<a href="/admin">Admin</a>{% endif %}<a href="/account" title="{{ actor.email }}">Account</a></div>
+</header>
+<main>
+  <div class="page-heading"><div><p class="eyebrow">DEWEY / {{ section|upper }}</p><h1 id="title">{{ section }}</h1></div><form id="euid-lookup" class="inline"><label class="sr-only" for="lookup">Open an EUID</label><input id="lookup" placeholder="Open a Dewey EUID" required><button>Open</button></form></div>
+  <div id="notice" role="status" aria-live="polite" hidden></div>
+  <div id="content" aria-busy="true"><p class="muted">Loading…</p></div>
+</main>
+<dialog id="editor"><form method="dialog" class="dialog-close"><button aria-label="Close dialog">×</button></form><div id="editor-body"></div></dialog>
+<footer><span>Dewey {{ version }} · One EUID per object, prefix, or set</span><a href="/docs">API reference</a><a href="/account">CLI access</a><a href="/auth/logout">Sign out</a></footer>
+</body></html>

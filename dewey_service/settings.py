@@ -217,7 +217,7 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
     def _write(prefix: str, payload: dict[str, Any]) -> None:
         for key, value in payload.items():
             merged = f"{prefix}_{key}" if prefix else str(key)
-            if merged == "auth_cognito_group_role_map" and isinstance(value, dict):
+            if merged in {"auth_cognito_group_role_map", "registry_service_principals"} and isinstance(value, dict):
                 out[merged] = value
             elif isinstance(value, dict):
                 _write(merged, value)
@@ -328,6 +328,19 @@ def _require_absolute_path(value: str, *, field_name: str) -> str:
     return str(resolved.resolve())
 
 
+def redact_config(value: Any, path: str = "") -> Any:
+    """Redact secrets recursively before formatting, including nested lists."""
+    if _is_sensitive_config_path(path):
+        return "<redacted>"
+    if isinstance(value, dict):
+        return {key: redact_config(item, f"{path}.{key}") for key, item in value.items()}
+    if isinstance(value, (list, tuple, set)):
+        return [redact_config(item, path) for item in value]
+    if isinstance(value, str) and value.lower().startswith(("bearer ", "basic ")):
+        return "<redacted>"
+    return value
+
+
 def _display_config_path(path: str) -> str:
     mapping = {
         "show_environment_chrome": "ui.show_environment_chrome",
@@ -418,7 +431,7 @@ def build_effective_config_rows(settings: "Settings", *, config_path: Path) -> l
                 "path": display_path,
                 "value": "<redacted>"
                 if _is_sensitive_config_path(display_path)
-                else _display_config_value(value),
+                else _display_config_value(redact_config(value, display_path)),
             }
         )
 
@@ -439,6 +452,9 @@ class Settings(BaseSettings):
     environment: str = "development"
     api_bearer_token: str = "dewey-dev-token"
     api_bearer_tokens: str = ""
+    registry_internal_domains: list[str] = Field(default_factory=lambda: ["lsmc.com"])
+    registry_service_principals: dict[str, dict[str, Any]] = Field(default_factory=dict)
+    registry_default_share_lifetime_days: int = 30
     # Dedicated read-only QEO resolver. Never add this token to api_bearer_tokens.
     qeo_resolver_token_sha256: str = ""
     qeo_resolver_token_expires_at: str = ""
@@ -698,6 +714,12 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_cognito_contract(self) -> "Settings":
+        for fingerprint, identity in self.registry_service_principals.items():
+            if not re.fullmatch(r"[0-9a-f]{64}", fingerprint) or not str(identity.get("subject", "")).strip():
+                raise ValueError("Registry service principals require a SHA256 fingerprint and explicit subject")
+            roles = identity.get("roles")
+            if not isinstance(roles, list) or not roles or set(roles) - {"ADMIN", "READ_WRITE", "READ_ONLY"}:
+                raise ValueError("Registry service principals require explicit valid roles")
         if self.auth_mode == "external_broker":
             missing = [
                 field_name

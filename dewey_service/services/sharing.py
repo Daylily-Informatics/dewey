@@ -7,6 +7,8 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from dewey_service.services.base import DeweyNotFoundError
+from dewey_service.registry_access import principal, require_record, domain_suffixes
+from fastapi import HTTPException
 from dewey_service.tapdb_backend import (
     ARTIFACT_SET_TEMPLATE,
     ARTIFACT_TEMPLATE,
@@ -77,7 +79,7 @@ class SharingServiceMixin:
     def _normalize_share_expiry(
         self, expires_at: str | None, ttl_seconds: int | None = None
     ) -> str:
-        expiry = self._normalize_expiry(expires_at, ttl_seconds=ttl_seconds)
+        expiry = self._normalize_expiry(expires_at, ttl_seconds=None if expires_at else self.registry_defaults()["share_lifetime_days"] * 86400)
         parsed = datetime.fromisoformat(expiry.replace("Z", "+00:00"))
         max_expiry = datetime.now(timezone.utc) + timedelta(days=int(self.share_max_lifetime_days))
         if parsed > max_expiry:
@@ -91,7 +93,12 @@ class SharingServiceMixin:
         actor_email: str | None,
         actor_groups: list[str] | tuple[str, ...] | set[str] | None,
     ) -> bool:
-        email = str(actor_email or "").strip().lower()
+        actor = principal()
+        if actor.admin or payload.get("owner_subject") == actor.subject:
+            return True
+        if payload.get("audience") == "authenticated" or (payload.get("audience") == "internal" and actor.internal):
+            return True
+        email = actor.email
         if not email:
             return False
         owner = str(payload.get("owner_email") or "").strip().lower()
@@ -104,7 +111,7 @@ class SharingServiceMixin:
         allowed_domains = {
             item.lower().lstrip("@") for item in _clean_list(payload.get("allowed_domains"))
         }
-        if domain and domain in allowed_domains:
+        if allowed_domains.intersection(domain_suffixes(email)):
             return True
         groups = {
             str(item or "").strip() for item in (actor_groups or []) if str(item or "").strip()
@@ -178,15 +185,15 @@ class SharingServiceMixin:
         if str(payload.get("storage_backend") or "").strip().lower() != "s3":
             raise ValueError("share targets must be s3-backed")
         bucket = str(payload.get("bucket") or "").strip()
-        key = str(payload.get("key") or "").strip().lstrip("/")
-        if not bucket or not key:
+        key = str(payload.get("key") or "")
+        if not bucket or not key and storage_kind != "prefix":
             raise ValueError("share target artifact is missing bucket/key")
         target_kind = "artifact_prefix" if storage_kind == "prefix" else "artifact_object"
         return {
             "target_kind": target_kind,
             "artifact_euid": artifact_instance.euid,
             "bucket": bucket,
-            "key": key.rstrip("/") + "/" if target_kind == "artifact_prefix" else key,
+            "key": key + "/" if target_kind == "artifact_prefix" and key and not key.endswith("/") else key,
             "version_id": str(payload.get("version_id") or "").strip() or None,
             "filename": str(payload.get("original_filename") or artifact_instance.euid),
             "storage_uri": str(payload.get("storage_uri") or f"s3://{bucket}/{key}"),
@@ -289,6 +296,10 @@ class SharingServiceMixin:
         ttl_seconds: int | None,
         idempotency_key: str,
     ) -> tuple[int, dict[str, Any]]:
+        actor = principal()
+        if not actor.writable:
+            raise HTTPException(403, "Sharing requires write access")
+        owner_email = actor.email or None
         clean_kind = str(target_kind or "").strip().lower()
         if clean_kind not in SHARE_TARGET_KINDS:
             raise ValueError(
@@ -310,12 +321,13 @@ class SharingServiceMixin:
             "name": str(name or "").strip() or None,
             "purpose": str(purpose or "").strip() or None,
             "owner_email": str(owner_email or "").strip().lower() or None,
+            "owner_subject": actor.subject,
             "allowed_users": [item.lower() for item in _clean_list(allowed_users)],
             "allowed_domains": [item.lower().lstrip("@") for item in _clean_list(allowed_domains)],
             "allowed_groups": _clean_list(allowed_groups),
             "delivery_modes": clean_modes,
             "expires_at": expiry,
-            "default_signed_ttl_seconds": int(ttl_seconds or self.share_default_signed_ttl_seconds),
+            "default_signed_ttl_seconds": int(ttl_seconds or self.registry_defaults()["delivery_lifetime_seconds"]),
         }
         fingerprint = self._fingerprint(payload)
         with self.backend.session_scope(commit=True) as session:
@@ -333,10 +345,14 @@ class SharingServiceMixin:
                 target_euid=payload["target_euid"],
                 targets=clean_targets,
             )
+            for member in members:
+                self._registry_record(session, member["artifact_euid"], action="share")
+            if payload["target_euid"] and clean_kind != "mixed_set":
+                self._registry_record(session, payload["target_euid"], action="share")
             if not members:
                 raise ValueError("share target expansion produced no members")
             if any(
-                mode.startswith("cloudfront") or mode == "dewey_html_browser"
+                mode.startswith("cloudfront")
                 for mode in clean_modes
             ):
                 self._require_cloudfront_signer()
@@ -370,7 +386,7 @@ class SharingServiceMixin:
                         )
                     }
                     if any(
-                        mode.startswith("cloudfront") or mode == "dewey_html_browser"
+                        mode.startswith("cloudfront")
                         for mode in clean_modes
                     )
                     else {},
@@ -400,6 +416,12 @@ class SharingServiceMixin:
                         child=share,
                         relationship_type="has_share",
                     )
+            # A set grant explicitly covers only the reviewed current members.
+            # New set membership does not silently expand their permissions.
+            if clean_kind in {"artifact_set", "mixed_set"}:
+                for member in members:
+                    target = self._registry_record(session, member["artifact_euid"], action="share")
+                    self.backend.create_lineage(session, parent=target, child=share, relationship_type="has_share")
             body = self._share_response(share)
             self._store_idempotency(
                 session,
@@ -468,6 +490,8 @@ class SharingServiceMixin:
         user_agent: str | None = None,
         signed_ttl_seconds: int | None = None,
     ) -> dict[str, Any]:
+        actor = principal()
+        actor_email, actor_groups = actor.email, list(actor.groups)
         clean_mode = str(delivery_mode or "").strip().lower() or "presigned_s3_manifest"
         if clean_mode not in SHARE_DELIVERY_MODES:
             raise ValueError("unsupported delivery mode")
@@ -542,19 +566,25 @@ class SharingServiceMixin:
                 self._append_share_audit(session, share, event)
                 raise _DeniedShareAccess(PermissionError("share access denied"))
             ttl_limit = max(
-                60,
+                1,
                 int(
                     signed_ttl_seconds
                     or payload.get("default_signed_ttl_seconds")
                     or self.share_default_signed_ttl_seconds
                 ),
             )
+            ttl_limit = min(ttl_limit, 3600, int((datetime.fromisoformat(expires_at.replace("Z", "+00:00")) - datetime.now(timezone.utc)).total_seconds()))
+            if ttl_limit < 1:
+                raise _DeniedShareAccess(ValueError("Share has expired"))
             members = self._expand_share_targets(
                 session,
                 target_kind=str(payload.get("target_kind") or ""),
                 target_euid=str(payload.get("target_euid") or "").strip() or None,
                 targets=list(payload.get("targets") or []),
             )
+            for member in members:
+                self._registry_record(session, member["artifact_euid"], action="download")
+                self.require_storage_access(member["bucket"], member["key"], action="download", session=session)
             package: dict[str, Any] = {
                 "share_euid": share.euid,
                 "delivery_mode": clean_mode,
@@ -617,7 +647,10 @@ class SharingServiceMixin:
                 package["manifest"] = manifest
                 if len(manifest) == 1:
                     package["signed_url"] = manifest[0]["signed_url"]
-            elif clean_mode in {"cloudfront_signed_cookie", "dewey_html_browser"}:
+            elif clean_mode == "dewey_html_browser":
+                package["browser_path"] = f"/shares/{share.euid}"
+                package["manifest"] = [{**member, "web_path": f"/records/{member['artifact_euid']}"} for member in members]
+            elif clean_mode == "cloudfront_signed_cookie":
                 signer = self._require_cloudfront_signer()
                 prefixes = []
                 for member in members:
@@ -672,6 +705,11 @@ class SharingServiceMixin:
             )
             if share is None:
                 raise DeweyNotFoundError(f"Share not found: {share_euid}")
+            actor = principal()
+            payload = normalize_instance_payload(share)
+            if not self._registry_share_manager(session, share):
+                raise HTTPException(403, "Only the share owner or an admin may revoke it")
+            revoked_by = actor.email or actor.subject
             self.backend.update_instance_json(
                 session,
                 share,

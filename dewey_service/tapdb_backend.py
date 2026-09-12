@@ -23,6 +23,10 @@ from dewey_service.audit import creation_audit_fields, update_audit_fields
 from dewey_service.integrations.tapdb_runtime import ensure_tapdb_version, load_runtime_config
 from dewey_service.settings import get_settings
 from dewey_service.ui_metadata import resolve_package_version
+from dewey_service.registry_access import (
+    POLICY_TEMPLATE, TOKEN_TEMPLATE, OPERATION_TEMPLATE, default_policy,
+    maintenance_mode, principal, require_record, visibility_clause,
+)
 
 SERVICE_VERSION = resolve_package_version()
 
@@ -74,6 +78,7 @@ OUTBOX_EVENT_TEMPLATE = "system/outbox_event/generic/1.0/"
 
 
 TEMPLATE_DEFINITIONS: tuple[str, ...] = (
+    POLICY_TEMPLATE, TOKEN_TEMPLATE, OPERATION_TEMPLATE,
     ARTIFACT_TEMPLATE,
     ARTIFACT_SET_TEMPLATE,
     SHARE_TEMPLATE,
@@ -87,6 +92,7 @@ TEMPLATE_DEFINITIONS: tuple[str, ...] = (
     OUTBOX_EVENT_TEMPLATE,
 )
 BOOT_TEMPLATE_DEFINITIONS: tuple[str, ...] = (
+    POLICY_TEMPLATE, TOKEN_TEMPLATE, OPERATION_TEMPLATE,
     ARTIFACT_TEMPLATE,
     ARTIFACT_SET_TEMPLATE,
     SHARE_TEMPLATE,
@@ -200,6 +206,15 @@ class TapDBBackend:
         instance.bstatus = status
         instance.is_singleton = False
         session.flush()
+        if template_code in {ARTIFACT_TEMPLATE, ARTIFACT_SET_TEMPLATE} and not maintenance_mode():
+            actor = principal()
+            if not actor.writable:
+                raise PermissionError("Registry write permission is required")
+            policy = self.create_instance(
+                session, template_code=POLICY_TEMPLATE,
+                name=f"Access for {instance.euid}", json_addl=default_policy(actor),
+            )
+            self.create_lineage(session, parent=instance, child=policy, relationship_type="registry_policy")
         return instance
 
     def claim_global_instance(
@@ -236,6 +251,9 @@ class TapDBBackend:
     def update_instance_json(
         self, session: Session, instance: generic_instance, updates: dict[str, Any]
     ) -> None:
+        if instance.type in {"artifact", "artifact_set"} and not maintenance_mode():
+            derived = {"share_status", "share_last_issued_at"}
+            require_record(self, session, instance, "metadata" if set(updates) <= derived else "edit")
         payload = validate_instance_envelope(instance.json_addl)
         payload.update(updates)
         payload.update(update_audit_fields())
@@ -255,6 +273,7 @@ class TapDBBackend:
         query = session.query(generic_instance).filter(
             generic_instance.template_uid == template.uid,
             generic_instance.is_deleted.is_(False),
+            visibility_clause(session, generic_instance),
         )
         if for_update:
             query = query.with_for_update()
@@ -312,6 +331,11 @@ class TapDBBackend:
         relationship_type: str,
         name: str | None = None,
     ) -> generic_instance_lineage:
+        if relationship_type == "artifact_set_member" and not maintenance_mode():
+            require_record(self, session, parent, "edit")
+            if child.type != "artifact":
+                raise ValueError("Sets may contain Object and Prefix artifacts only")
+            require_record(self, session, child, "metadata")
         existing = (
             session.query(generic_instance_lineage)
             .filter(
@@ -353,6 +377,8 @@ class TapDBBackend:
         child: generic_instance,
         relationship_type: str,
     ) -> bool:
+        if relationship_type == "artifact_set_member" and not maintenance_mode():
+            require_record(self, session, parent, "edit")
         lineage = (
             session.query(generic_instance_lineage)
             .filter(
@@ -387,6 +413,7 @@ class TapDBBackend:
                 generic_instance_lineage.parent_instance_uid == parent.uid,
                 generic_instance_lineage.is_deleted.is_(False),
                 generic_instance.is_deleted.is_(False),
+                visibility_clause(session, generic_instance),
             )
         )
         if relationship_type:
@@ -411,6 +438,7 @@ class TapDBBackend:
                 generic_instance_lineage.relationship_type == relationship_type,
                 generic_instance_lineage.is_deleted.is_(False),
                 generic_instance.is_deleted.is_(False),
+                visibility_clause(session, generic_instance),
             )
             .all()
         )
@@ -437,6 +465,7 @@ class TapDBBackend:
                 generic_instance_lineage.child_instance_uid == child.uid,
                 generic_instance_lineage.is_deleted.is_(False),
                 generic_instance.is_deleted.is_(False),
+                visibility_clause(session, generic_instance),
             )
         )
         if relationship_type:

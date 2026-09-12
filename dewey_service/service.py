@@ -13,9 +13,13 @@ from dewey_service.services.outbox import OutboxServiceMixin
 from dewey_service.services.search import SearchServiceMixin
 from dewey_service.services.sequencer_runs import SequencerRunRegistrationServiceMixin
 from dewey_service.services.sharing import SharingServiceMixin
+from dewey_service.services.registry import RegistryServiceMixin
+from dewey_service.services.registry_storage import RegistryStorageServiceMixin
 
 
 class DeweyService(
+    RegistryServiceMixin,
+    RegistryStorageServiceMixin,
     LabcoreOwnerServiceMixin,
     SequencerRunRegistrationServiceMixin,
     ArtifactServiceMixin,

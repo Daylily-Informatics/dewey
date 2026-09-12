@@ -14,7 +14,9 @@
 
 Dewey is the LSMC artifact and reference registry. It tracks durable artifacts such as sequencing run directories, VCFs, reports, external objects, external-object relations, managed shares, and access routes. It is the registry layer for data products and referenceable outputs, not the laboratory material graph.
 
-Current Dayhoff pins are maintained in `/Users/jmajor/projects/mega_dayhoff/dayhoff/services/pins.toml`. Current TapDB dependency: `daylily-tapdb[aurora,gui]==10.1.1rc1` with `meridian-euid==0.4.8` (Python >=3.12). This is the unreleased Dewey 9 candidate; production remains Dewey 8.0.2 on TapDB 9.0.9. Populated-data migration and production acceptance remain separate uncompleted gates.
+Current Dayhoff pins are maintained in `/Users/jmajor/projects/mega_dayhoff/dayhoff/services/pins.toml`. Current TapDB dependency: `daylily-tapdb[aurora,gui]==10.1.1rc1` with `meridian-euid==0.4.8` (Python >=3.12). Dewey 10 retains the Artifact and Set templates: each object, prefix or set has one EUID. Other services can persist that EUID alone and resolve metadata, contents and delivery access when needed.
+
+The GUI centers on Library, S3 Browser, Sets, Sharing and Literature. Metadata and download permissions are independent; every share requires authentication. Prefix browsing is bounded and does not register descendants. Physical S3 deletion is a separate admin operation with a reviewed target manifest. See the [API/GUI/CLI crosswalk](docs/plans/20260912T070011Z_dewey10_contract_crosswalk.md) and [release ledger](docs/plans/20260912T070011Z_dewey10_ux_registry_s3_ledger.md) for implementation scope and actual deployment evidence.
 
 Dewey is an approved-network customer/collaborator service in Dayhoff exposure policy.
 

@@ -363,6 +363,7 @@ def _access_log_payload(
     duration_ms: float,
     route_template: str,
 ) -> dict[str, object]:
+    from dewey_service.report_preview import redacted_path
     actor = (
         getattr(request.state, "authorized_by_email", None)
         or getattr(request.state, "authorizing_human", None)
@@ -382,9 +383,9 @@ def _access_log_payload(
         or getattr(request.state, "authorized_by_email", None),
         "ip": request.client.host if request.client else None,
         "method": request.method,
-        "path": request.url.path,
-        "route": route_template or request.url.path,
-        "route_template": route_template or request.url.path,
+        "path": redacted_path(request.url.path),
+        "route": redacted_path(route_template or request.url.path),
+        "route_template": redacted_path(route_template or request.url.path),
         "status": status_code,
         "duration_ms": round(duration_ms, 2),
         "denial_reason": getattr(request.state, "denial_reason", None)
@@ -495,6 +496,8 @@ def create_app(
     web_session_config = build_web_session_config(settings=settings)
     app.state.web_session_config = web_session_config
     app.state.server_instance_id = web_session_config.server_instance_id
+    from dewey_service.registry_access import RegistryPrincipalMiddleware
+    app.add_middleware(RegistryPrincipalMiddleware)
     configure_session_middleware(app, web_session_config)
 
     templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent / "templates"))
@@ -505,6 +508,8 @@ def create_app(
         return f"/static/{clean}{separator}v={time_ns()}"
 
     templates.env.globals["static_url"] = _static_url
+    from dewey_service.registry_api import attach_registry_api
+    attach_registry_api(app, templates=templates)
     static_dir = Path(__file__).resolve().parent / "static"
     if static_dir.exists():
         app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
@@ -1322,6 +1327,10 @@ def create_app(
     @app.middleware("http")
     async def _enforce_origin_allowlist(request: Request, call_next):
         origin = request.headers.get("origin")
+        if origin == "null" and request.method == "GET" and request.url.path.startswith("/previews/"):
+            # Opaque report frames authenticate each asset using their issued,
+            # short-lived preview capability. This exception grants no API access.
+            return await call_next(request)
         if origin and not is_allowed_origin(
             origin,
             allow_local=allow_local_domain_access,
@@ -1332,6 +1341,7 @@ def create_app(
 
     @app.middleware("http")
     async def _capture_observability(request: Request, call_next):
+        from dewey_service.report_preview import redacted_path
         request_id = str(request.headers.get("x-request-id") or "").strip() or generate_state()
         correlation_source = (
             str(request.headers.get("x-correlation-id") or "").strip()
@@ -1352,10 +1362,10 @@ def create_app(
         finally:
             app.state.observability.record_http_request(
                 method=request.method,
-                route_template=route_template_from_request(request),
+                route_template=redacted_path(route_template_from_request(request)),
                 status_code=status_code,
                 duration_ms=(monotonic() - started) * 1000,
-                path=request.url.path,
+                path=redacted_path(request.url.path),
             )
             duration_ms = (monotonic() - started) * 1000
             _emit_access_log(
@@ -3852,7 +3862,9 @@ def create_app(
     )
     async def resolve_multiqc(body: ResolveMultiqcRequest) -> dict[str, Any]:
         try:
-            return service.resolve_qeo_package(kind=body.kind, euid=body.euid)
+            from dewey_service.registry_access import Principal, principal_context
+            with principal_context(Principal(subject="qeo", roles=("READ_ONLY",), internal=True, service=True)):
+                return service.resolve_qeo_package(kind=body.kind, euid=body.euid)
         except DeweyNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         except (DeweyConflictError, ValueError) as exc:

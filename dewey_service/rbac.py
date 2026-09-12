@@ -22,6 +22,7 @@ DEFAULT_COGNITO_GROUP_ROLE_MAP: dict[str, str] = {
     "lsmc:dewey:admin": Role.ADMIN.value,
     "lsmc:dewey:readwrite": Role.READ_WRITE.value,
     "lsmc:dewey:readonly": Role.READ_ONLY.value,
+    "lsmc:external-share-user": Role.READ_ONLY.value,
 }
 
 
@@ -68,7 +69,8 @@ def normalize_group_list(groups: Any) -> list[str]:
 
 
 def roles_from_groups(groups: Any, group_role_map: dict[str, str] | None = None) -> tuple[str, ...]:
-    mapping = group_role_map or DEFAULT_COGNITO_GROUP_ROLE_MAP
+    mapping = {**(group_role_map or DEFAULT_COGNITO_GROUP_ROLE_MAP),
+        "lsmc:external-share-user": "READ_ONLY"}
     roles: list[str] = []
     seen: set[str] = set()
     for group in normalize_group_list(groups):

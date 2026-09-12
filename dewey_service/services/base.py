@@ -123,7 +123,7 @@ class BaseDeweyService:
     ) -> tuple[str, str, str, str | None, str]:
         backend = str(storage_backend or "s3").strip().lower() or "s3"
         bucket_value = str(bucket or "").strip()
-        key_value = str(key or "").strip().lstrip("/")
+        key_value = str(key or "")
         version_value = str(version_id or "").strip() or None
         if not bucket_value:
             raise ValueError("bucket is required")
@@ -135,6 +135,7 @@ class BaseDeweyService:
     def _require_storage(self) -> S3StorageClient:
         if self.storage is None:
             raise RuntimeError("Storage operations are not configured for Dewey")
+        self.storage.authorization = self.require_storage_access
         return self.storage
 
     def _require_literature(self):
@@ -239,7 +240,7 @@ class BaseDeweyService:
     def _artifact_response(self, artifact_instance) -> dict[str, Any]:
         payload = normalize_instance_payload(artifact_instance)
         storage_kind = str(payload.get("storage_kind") or "object").strip().lower() or "object"
-        node_kind = str(payload.get("node_kind") or "file").strip().lower() or "file"
+        node_kind = "folder" if storage_kind == "prefix" else "file"
         is_terminal_raw = payload.get("is_terminal")
         is_terminal = bool(is_terminal_raw) if storage_kind == "prefix" else True
         return {
@@ -333,7 +334,7 @@ class BaseDeweyService:
 
     def _share_response(self, instance) -> dict[str, Any]:
         payload = normalize_instance_payload(instance)
-        return {
+        result = {
             "share_euid": instance.euid,
             "target_kind": payload.get("target_kind"),
             "target_euid": payload.get("target_euid"),
@@ -359,6 +360,19 @@ class BaseDeweyService:
             "last_accessed_by": payload.get("last_accessed_by"),
             "access_count": int(payload.get("access_count") or 0),
         }
+        from dewey_service.registry_access import principal
+        actor = principal()
+        manager = actor.admin or payload.get("owner_subject") == actor.subject or bool(actor.email and payload.get("owner_email") == actor.email)
+        if not manager:
+            with self.backend.session_scope(commit=False) as session:
+                manager = self._registry_share_manager(session, instance)
+        if not manager:
+            for field in ("allowed_users", "allowed_domains", "allowed_groups"):
+                result[field] = []
+            for field in ("last_accessed_by", "revoked_by", "revocation_reason"):
+                result[field] = None
+            result["cloudfront"] = {}
+        return result
 
     def _share_root_response(self, instance) -> dict[str, Any]:
         payload = normalize_instance_payload(instance)
@@ -395,6 +409,7 @@ class BaseDeweyService:
         idempotency_key: str,
         fingerprint: str,
     ) -> IdempotencyReplay | None:
+        from dewey_service.tapdb_backend import SHARE_TEMPLATE, EXTERNAL_OBJECT_TEMPLATE, EXTERNAL_OBJECT_RELATION_TEMPLATE
         clean_key = str(idempotency_key or "").strip()
         if not clean_key:
             raise ValueError("Idempotency-Key is required")
@@ -415,6 +430,25 @@ class BaseDeweyService:
         response = payload.get("response")
         if not isinstance(response, dict):
             raise DeweyConflictError("Invalid stored idempotent response payload")
+        # Cached receipts keep their historical bytes but never bypass current access.
+        def authorize_receipt(value):
+            if isinstance(value, dict):
+                for key, item in value.items():
+                    if key in {"artifact_euid", "artifact_set_euid"} and isinstance(item, str):
+                        self._registry_record(session, item)
+                    elif key == "share_euid" and isinstance(item, str):
+                        if self.backend.find_by_euid(session, template_code=SHARE_TEMPLATE, euid=item) is None:
+                            raise DeweyNotFoundError("Receipt target is not visible")
+                    elif key in {"external_object_euid", "external_object_relation_euid"} and isinstance(item, str):
+                        code = EXTERNAL_OBJECT_TEMPLATE if key == "external_object_euid" else EXTERNAL_OBJECT_RELATION_TEMPLATE
+                        if self.backend.find_by_euid(session, template_code=code, euid=item) is None:
+                            raise DeweyNotFoundError("Receipt external reference is not visible")
+                    elif isinstance(item, (dict, list)):
+                        authorize_receipt(item)
+            elif isinstance(value, list):
+                for item in value:
+                    authorize_receipt(item)
+        authorize_receipt(response)
         return IdempotencyReplay(status_code=status_code, response=dict(response))
 
     def _store_idempotency(

@@ -37,11 +37,8 @@ _RUN_ID_RE = re.compile(r"^RUN[0-9]+$", re.IGNORECASE)
 class ArtifactServiceMixin:
     @staticmethod
     def _parse_s3_uri(uri: str) -> tuple[str, str]:
-        parsed = urlparse(str(uri or "").strip())
-        if parsed.scheme.lower() != "s3":
-            raise ValueError("source_uri must use s3:// for S3 import flows")
-        bucket = str(parsed.netloc or "").strip()
-        key = str(parsed.path or "").strip().lstrip("/")
+        from dewey_service.services.registry_storage import parse_s3_uri
+        bucket, key, _ = parse_s3_uri(uri)
         if not bucket or not key:
             raise ValueError("source_uri must include bucket and key")
         return bucket, key
@@ -110,6 +107,10 @@ class ArtifactServiceMixin:
         return self._safe_filename(f"{artifact['artifact_euid']}.{original_name}")
 
     def _download_artifact_bytes(self, artifact: dict[str, Any]) -> bytes:
+        with self.backend.session_scope(commit=False) as session:
+            self._registry_record(session, artifact["artifact_euid"], action="download")
+        if artifact["storage_backend"] == "s3":
+            self.require_storage_access(artifact["bucket"], artifact["key"], action="download")
         if not self._artifact_is_object(artifact):
             raise ValueError("download requires an object-backed artifact")
         backend = str(artifact.get("storage_backend") or "").strip().lower()
@@ -183,24 +184,13 @@ class ArtifactServiceMixin:
             bucket, key = ArtifactServiceMixin._parse_s3_uri(uri)
         except ValueError as exc:
             raise ValueError(str(exc).replace("source_uri", "root_uri")) from exc
-        prefix = key.rstrip("/") + "/"
+        prefix = key if key.endswith("/") else key + "/"
         return bucket, prefix, f"s3://{bucket}/{prefix}"
 
     @staticmethod
     def _normalize_s3_browse_uri(uri: str) -> tuple[str, str, str]:
-        parsed = urlparse(str(uri or "").strip())
-        if parsed.scheme.lower() != "s3":
-            raise ValueError("root_uri must use s3:// for S3 browse flows")
-        bucket = str(parsed.netloc or "").strip()
-        if not bucket:
-            raise ValueError("root_uri must include a bucket")
-        raw_key = str(parsed.path or "").strip().lstrip("/")
-        prefix = raw_key.rstrip("/")
-        normalized_prefix = f"{prefix}/" if prefix else ""
-        normalized_uri = (
-            f"s3://{bucket}/{normalized_prefix}" if normalized_prefix else f"s3://{bucket}/"
-        )
-        return bucket, normalized_prefix, normalized_uri
+        from dewey_service.services.registry_storage import parse_s3_uri
+        return parse_s3_uri(uri, prefix=True)
 
     @staticmethod
     def _normalize_owner_email(owner_email: str) -> str:
@@ -377,13 +367,23 @@ class ArtifactServiceMixin:
         created_at: str | None = None,
         refresh_existing: bool = False,
     ) -> tuple[int, dict[str, Any]]:
-        existing = self.backend.find_by_json_field(
-            session,
-            template_code=ARTIFACT_TEMPLATE,
-            field="artifact_identity_key",
-            value=str(payload.get("artifact_identity_key") or ""),
-        )
+        from daylily_tapdb import generic_instance
+        from dewey_service.registry_access import require_record
+        if payload["storage_kind"] not in {"object", "prefix"}:
+            raise ValueError("storage_kind must be object or prefix")
+        if payload["storage_kind"] == "prefix" and payload["storage_backend"] != "s3":
+            raise ValueError("Prefixes require explicit S3 storage")
+        if payload["storage_kind"] == "object" and payload.get("node_kind") in {"folder", "prefix", "directory", "run_folder", "sample_folder", "analysis_result_folder"}:
+            raise ValueError("Object storage_kind contradicts a directory declaration")
+        payload = {**payload, "node_kind": "folder" if payload["storage_kind"] == "prefix" else "file",
+            "is_terminal": payload["storage_kind"] == "object"}
+        if payload["storage_backend"] == "s3":
+            self.require_storage_access(payload["bucket"], payload["key"], action="metadata")
+        existing = self._registry_query(session, scopes=("artifact",), authorize=False).filter(
+            generic_instance.json_addl["artifact_identity_key"].astext == payload["artifact_identity_key"]
+        ).first()
         if existing is not None:
+            require_record(self.backend, session, existing, "metadata")
             if refresh_existing:
                 updates = dict(payload)
                 updates["created_at"] = str(
@@ -532,7 +532,7 @@ class ArtifactServiceMixin:
             session,
             template_code=ARTIFACT_TEMPLATE,
             field="storage_uri",
-            value=str(storage_uri or "").strip(),
+            value=str(storage_uri or ""),
         )
         if row is None:
             return None
@@ -605,35 +605,12 @@ class ArtifactServiceMixin:
         limit: int = 200,
         continuation_token: str | None = None,
     ) -> dict[str, Any]:
-        bucket, prefix, normalized_uri = self._normalize_s3_browse_uri(root_uri)
-        browse_result = self._require_storage().browse_prefix(
-            bucket=bucket,
-            prefix=prefix,
-            limit=limit,
-            continuation_token=continuation_token,
-        )
+        result = self.registry_browse(root_uri, limit=limit, continuation_token=continuation_token)
         with self.backend.session_scope(commit=False) as session:
-            current_artifact = self._artifact_for_storage_uri(session, storage_uri=normalized_uri)
-            prefixes = [
-                self._browse_prefix_row(session, bucket=bucket, prefix=item)
-                for item in browse_result.get("prefixes", [])
-            ]
-            objects = [
-                self._browse_object_row(session, storage_object=item)
-                for item in browse_result.get("objects", [])
-            ]
-        return {
-            "bucket": bucket,
-            "prefix": prefix,
-            "root_uri": normalized_uri,
-            "parent_uri": self._parent_prefix_uri(bucket, prefix),
-            "breadcrumbs": self._prefix_breadcrumbs(bucket, prefix),
-            "current_artifact": current_artifact,
-            "prefixes": prefixes,
-            "objects": objects,
-            "is_truncated": bool(browse_result.get("is_truncated")),
-            "next_continuation_token": browse_result.get("next_continuation_token"),
-        }
+            result["current_artifact"] = self._artifact_for_storage_uri(session, storage_uri=result["root_uri"])
+        result["prefixes"] = [{**item, "storage_uri": item["uri"], "prefix": item["key"], "artifact_euid": item["euid"]} for item in result["items"] if item["kind"] == "prefix"]
+        result["objects"] = [{**item, "storage_uri": item["uri"], "artifact_euid": item["euid"]} for item in result["items"] if item["kind"] == "object"]
+        return result
 
     @staticmethod
     def _artifact_browse_root_uri(artifact: dict[str, Any]) -> str | None:
@@ -1608,7 +1585,7 @@ class ArtifactServiceMixin:
             source_uri=self._storage_uri(
                 str(storage_backend or "s3").strip().lower() or "s3",
                 str(bucket or "").strip(),
-                str(key or "").strip().lstrip("/"),
+                str(key or ""),
             ),
             import_mode="register",
             storage_status="registered",
@@ -1626,6 +1603,10 @@ class ArtifactServiceMixin:
             if replay is not None:
                 return replay.status_code, replay.response
 
+            # Preserve the established request fingerprint and historical receipt.
+            # The declared OWY sequencing-directory contract owns this classification.
+            if payload["artifact_type"] == "sequencing_run_dir" and payload["producer_system"] in {"offwithyou", "owy"}:
+                payload.update(storage_kind="prefix", node_kind="folder", is_terminal=False)
             status_code, body = self._upsert_artifact_record(
                 session,
                 payload=payload,

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
+from dewey_service.registry_access import require_record
 
 from dewey_service.integrations.tapdb_external_references import (
     attach_external_relation,
@@ -131,6 +132,7 @@ class ExternalObjectServiceMixin:
         relation_type: str,
     ) -> None:
         artifact_instance = lock_external_relation_source(session, artifact_instance)
+        require_record(self.backend, session, artifact_instance, "edit")
         self._assert_generic_relation_available(
             external_object=external_object, relation_type=relation_type
         )
@@ -357,6 +359,7 @@ class ExternalObjectServiceMixin:
             if target is None:
                 raise DeweyNotFoundError(f"Target not found: {payload['target_euid']}")
             target = lock_external_relation_source(session, target)
+            require_record(self.backend, session, target, "edit")
             replay = self._idempotency_replay(
                 session,
                 operation="external_object_relation.attach",

@@ -45,8 +45,8 @@ class LiteratureServiceMixin:
             raise
         except Exception as exc:
             raise LiteratureUnavailableError(
-                "Literature search is unavailable. Verify the Dewey container can read its "
-                "metapub/NCBI configuration, including the staged NCBI API key."
+                "PubMed search could not complete. NCBI may be unavailable or limiting requests. "
+                "Try again later; an administrator can inspect the upstream failure and NCBI configuration."
             ) from exc
         with self.backend.session_scope(commit=False) as session:
             items = [

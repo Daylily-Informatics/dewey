@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from pathlib import Path
 
 import typer
 from cli_core_yo import ccyo_out
 
-from dewey_service.cli._registry_v2 import EXEMPT, REQUIRED, register_group_commands
+from dewey_service.cli._registry_v2 import EXEMPT, REQUIRED, REQUIRED_MUTATING, register_group_commands
 
 if TYPE_CHECKING:
     from cli_core_yo.registry import CommandRegistry
@@ -51,6 +52,29 @@ def lifecycle() -> None:
     )
 
 
+def registry_conversion(
+    mode: str = typer.Argument(..., help="plan, apply, or reverse; never runs at startup."),
+    actor: str = typer.Option(...),
+    manifest: Path = typer.Option(...),
+    receipt: Path | None = typer.Option(None),
+    expected_sha256: str | None = typer.Option(None),
+) -> None:
+    """Plan or execute the explicit Dewey 10 data conversion with private receipts."""
+    from dewey_service.registry_conversion import main
+    import os
+    config = os.environ.get("DEWEY_CONFIG", "")
+    if not config or not Path(config).is_absolute():
+        raise typer.BadParameter("Set DEWEY_CONFIG to the explicit absolute service configuration")
+    if mode not in {"plan", "apply", "reverse"} or not manifest.is_absolute() or receipt is not None and not receipt.is_absolute():
+        raise typer.BadParameter("Choose plan/apply/reverse and absolute manifest/receipt paths")
+    args = [mode, "--actor", actor, "--manifest", str(manifest)]
+    if receipt is not None:
+        args += ["--receipt", str(receipt)]
+    if expected_sha256:
+        args += ["--expected-sha256", expected_sha256]
+    main(args)
+
+
 def register(registry: CommandRegistry, spec: CliSpec) -> None:
     """Register verification and lifecycle guidance, with no bootstrap aliases."""
     _ = spec
@@ -58,5 +82,6 @@ def register(registry: CommandRegistry, spec: CliSpec) -> None:
         registry,
         "db",
         "Verify existing Dewey data and review native TapDB lifecycle ownership",
-        [("verify-templates", verify_templates, REQUIRED), ("lifecycle", lifecycle, EXEMPT)],
+        [("verify-templates", verify_templates, REQUIRED), ("lifecycle", lifecycle, EXEMPT),
+         ("registry-conversion", registry_conversion, REQUIRED_MUTATING)],
     )
