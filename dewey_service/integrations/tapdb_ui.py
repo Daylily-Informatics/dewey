@@ -78,7 +78,7 @@ def build_tapdb_host_bridge(settings: Settings) -> TapdbHostBridge:
             TapdbHostNavLink(label="Sharing", href="/shares"),
             TapdbHostNavLink(label="Admin", href="/admin"),
         ),
-        extra_stylesheets=(),
+        extra_stylesheets=("/static/tapdb-embedded.css",),
         extra_context=lambda _request: {"dewey_embedded": True, "deployment": settings.deployment},
     )
 

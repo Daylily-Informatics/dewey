@@ -1,7 +1,7 @@
 # Dewey 10 registry, sharing and S3 browser execution ledger
 
 Approved implementation: 2026-09-12, current task. Owner: primary agent.
-Controlling record: this file. Target release: 10.0.0, subject to tag inventory.
+Controlling record: this file. Deployed: 10.0.2; final presentation patch: 10.0.3.
 
 ## Contract and release boundaries
 
@@ -63,27 +63,27 @@ Controlling record: this file. Target release: 10.0.0, subject to tag inventory.
 
 | ID | Area | Requirement | Status | Category | Gate | Owner | Evidence | Root cause | Terminal note |
 |---|---|---|---|---|---|---|---|---|---|
-| D00 | Baseline | Freeze source, runtime, dirty work, caller contracts | IN_PROGRESS | active_product_contract | G0 | primary | Baseline above | | |
+| D00 | Baseline | Freeze source, runtime, dirty work, caller contracts | SUCCESS | active_product_contract | G0 | primary | Source/runtime baseline and private prior image/config captured | | Unrelated AGENTS.md retained |
 | D01 | Plan | Persist approved scope and every page disposition | SUCCESS | historical_docs_only | G1 | primary | This ledger | | Approved assessment and boundaries recorded |
-| D02 | Registry | Enforce object/prefix kind and preserve active registration contracts | IN_PROGRESS | feature_implementation | G2 | primary | | | |
-| D03 | Registry | Metadata edits, archive, sets and lineage membership | IN_PROGRESS | feature_implementation | G2 | primary | | | |
-| D04 | Access | Shared principal context and object/path authorization | IN_PROGRESS | feature_implementation | G2 | primary | | | |
-| D05 | Conversion | Explicit audited policy/kind initialization and reversal manifest | IN_PROGRESS | feature_implementation | G2 | primary | | | |
-| D06 | Search | Database filtering, permissions, sorting, counts, pagination/export | IN_PROGRESS | feature_implementation | G2 | primary | | | |
-| D07 | Sharing | Recipient policies, delegated grants, separate lifetimes/revocation/audit | IN_PROGRESS | feature_implementation | G3 | primary | | | |
-| D08 | Sharing | Authenticated stable recipient URLs and live folder navigation | IN_PROGRESS | feature_implementation | G3 | primary | | | |
-| D09 | Storage | Bucket/explicit-location listing, exact-key navigation and inspection | IN_PROGRESS | feature_implementation | G3 | primary | | | |
-| D10 | Storage | Authorized downloads, uploads, multipart progress and collision handling | IN_PROGRESS | feature_implementation | G3 | primary | | | |
-| D11 | Storage | Admin reviewed deletion/replacement and partial-operation receipts | IN_PROGRESS | feature_implementation | G3 | primary | | | |
-| D12 | GUI | Unified Library/Add/S3/Sets/Sharing/Literature shell and page dispositions | IN_PROGRESS | feature_implementation | G3 | primary | | | |
-| D13 | CLI/API | Public API and authenticated artifacts/sets/shares/storage CLI parity | IN_PROGRESS | feature_implementation | G3 | primary | | | |
-| D24 | EUID | First-class EUID-only resolution, browse, download and share in GUI/API/CLI | IN_PROGRESS | active_product_contract | G3 | primary | User amendment 2026-09-12 | | |
+| D02 | Registry | Enforce object/prefix kind and preserve active registration contracts | SUCCESS | feature_implementation | G2 | primary | Released source and contract crosswalk; selected deployed observations below | | Implemented; destructive/write and alternate-role acceptance not exercised |
+| D03 | Registry | Metadata edits, archive, sets and lineage membership | SUCCESS | feature_implementation | G2 | primary | Released source and contract crosswalk; selected deployed observations below | | Implemented; destructive/write and alternate-role acceptance not exercised |
+| D04 | Access | Shared principal context and object/path authorization | SUCCESS | feature_implementation | G2 | primary | Released source and contract crosswalk; selected deployed observations below | | Implemented; destructive/write and alternate-role acceptance not exercised |
+| D05 | Conversion | Explicit audited policy/kind initialization and reversal manifest | SUCCESS | feature_implementation | G2 | primary | 10.0.2 committed conversion receipt; 5117 rows, zero ambiguities | | EUIDs and coordinates preserved; explicit reversal required for rollback |
+| D06 | Search | Database filtering, permissions, sorting, counts, pagination/export | SUCCESS | feature_implementation | G2 | primary | Released source and contract crosswalk; selected deployed observations below | | Implemented; destructive/write and alternate-role acceptance not exercised |
+| D07 | Sharing | Recipient policies, delegated grants, separate lifetimes/revocation/audit | SUCCESS | feature_implementation | G3 | primary | Released source and contract crosswalk; selected deployed observations below | | Implemented; destructive/write and alternate-role acceptance not exercised |
+| D08 | Sharing | Authenticated stable recipient URLs and live folder navigation | SUCCESS | feature_implementation | G3 | primary | Released source and contract crosswalk; selected deployed observations below | | Implemented; destructive/write and alternate-role acceptance not exercised |
+| D09 | Storage | Bucket/explicit-location listing, exact-key navigation and inspection | SUCCESS | feature_implementation | G3 | primary | Released source and contract crosswalk; selected deployed observations below | | Implemented; destructive/write and alternate-role acceptance not exercised |
+| D10 | Storage | Authorized downloads, uploads, multipart progress and collision handling | SUCCESS | feature_implementation | G3 | primary | Released source and contract crosswalk; selected deployed observations below | | Implemented; destructive/write and alternate-role acceptance not exercised |
+| D11 | Storage | Admin reviewed deletion/replacement and partial-operation receipts | SUCCESS | feature_implementation | G3 | primary | Released source and contract crosswalk; selected deployed observations below | | Implemented; destructive/write and alternate-role acceptance not exercised |
+| D12 | GUI | Unified Library/Add/S3/Sets/Sharing/Literature shell and page dispositions | SUCCESS | feature_implementation | G3 | primary | Released source and contract crosswalk; selected deployed observations below | | Implemented; destructive/write and alternate-role acceptance not exercised |
+| D13 | CLI/API | Public API and authenticated artifacts/sets/shares/storage CLI parity | SUCCESS | feature_implementation | G3 | primary | Released source and contract crosswalk; selected deployed observations below | | Implemented; destructive/write and alternate-role acceptance not exercised |
+| D24 | EUID | First-class EUID-only resolution, browse, download and share in GUI/API/CLI | SUCCESS | active_product_contract | G3 | primary | Released source and contract crosswalk; selected deployed observations below | | Implemented; destructive/write and alternate-role acceptance not exercised |
 | D14 | Admin | Recursive redaction, enforced embedded admin, shared-login ownership | IN_PROGRESS | feature_implementation | G4 | primary | | | |
-| D15 | Admin | Access/client management and truthful runtime/provenance | IN_PROGRESS | feature_implementation | G4 | primary | | | |
-| D16 | PubMed | Stage key, initialize before adapter, graceful usable search errors | IN_PROGRESS | config_or_startup_contract | G4 | primary | | | |
-| D17 | Integrations | Preserve OWY/Ursa/Labcore receipts and correct display semantics | IN_PROGRESS | active_product_contract | G4 | primary | | | |
-| D18 | Release | Intended commit, annotated tag, one final image | OPEN | feature_implementation | G5 | primary | | | |
-| D19 | Production | Scoped Dewey deployment and runtime/GUI observations | OPEN | config_or_startup_contract | G6 | primary | | | |
+| D15 | Admin | Access/client management and truthful runtime/provenance | SUCCESS | feature_implementation | G4 | primary | Released source and contract crosswalk; selected deployed observations below | | Implemented; destructive/write and alternate-role acceptance not exercised |
+| D16 | PubMed | Stage key, initialize before adapter, graceful usable search errors | SUCCESS | config_or_startup_contract | G4 | primary | Read-only NCBI mount; authenticated BRCA1 query returned 20 papers and API 200 | | PubMed search available; no paper registration performed |
+| D17 | Integrations | Preserve OWY/Ursa/Labcore receipts and correct display semantics | SUCCESS | active_product_contract | G4 | primary | Released source and contract crosswalk; selected deployed observations below | | Implemented; destructive/write and alternate-role acceptance not exercised |
+| D18 | Release | Intended commit, annotated tag, one final image | IN_PROGRESS | feature_implementation | G5 | primary | 10.0.2 annotated tag and immutable image deployed; 10.0.3 presentation patch pending | |  |
+| D19 | Production | Scoped Dewey deployment and runtime/GUI observations | IN_PROGRESS | config_or_startup_contract | G6 | primary | 10.0.2 health 200, exact SHA/image, zero restarts; authenticated Library/S3/OWY/PubMed/Admin observed | | Final patch observation pending; no write or alternate-role campaign |
 | D20 | Acceptance | User accepts deployed Dewey experience | OPEN | active_product_contract | G6 | user | | | |
 | D21 | Ursa | Replace browser controls with configured Dewey links; retain mounts/exports | OPEN | feature_implementation | G7 after D20 | primary | | | |
 | D22 | Kahlo | Replace navigation with Dewey links; retain inventory/observability | OPEN | feature_implementation | G7 after D20 | primary | | | |
@@ -183,9 +183,9 @@ when its stated evidence exists; parent rows retain their own completion status.
 | C01 | Reconciliation | Record current worktree/tag state and single assigned writer; retain all existing changes | SUCCESS | plan_amendment | G0; D00 | primary | Fresh Git inventory and user report recorded above | Competing agent reported by user; file authorship is not assumed | Source baseline refreshed; no reset, merge or competing agent started |
 | C02 | Access and EUID contracts | Finish authorization, identity, ownership, sharing and receipt consistency across new and retained routes | SUCCESS | active_product_contract | G2–G3; D02–D08,D13,D17,D24 | primary | Contract crosswalk; registry_access.py, services/registry.py, auth.py and retained caller entry points | Inconsistent identity and object/path access | Source implementation complete; runtime acceptance remains D19–D20; tests intentionally off |
 | C03 | Product completion | Finish the existing GUI/CLI, isolated report access, administration and PubMed wiring | SUCCESS | feature_implementation | G3–G4; D09–D16,D24 | primary | Contract crosswalk; registry_api.py, cli/registry.py, static/registry.js, report_preview.py, ncbi_config.py | Incomplete UI controls, defaults wiring and report preview | Source implementation complete; production observations remain D19; tests intentionally off |
-| C04 | Operator readiness | Expose conversion through the owned Dewey CLI; prepare explicit config, reviewed conversion inventory and rollback inputs | IN_PROGRESS | config_or_startup_contract | G2,G4; D00,D05,D15,D16 | primary | Required: native CLI command paths, redacted config delta, manifest digest, ambiguity disposition and reversal procedure | Conversion not yet inspected against actual records; service principals/mount/build identity pending | |
-| C05 | Release | Review final source against requirements, commit intended files, publish immutable annotated numeric tag, build/publish exact tagged Dewey image | IN_PROGRESS | feature_implementation | G5; D18; after C02–C04 | primary | Required: intended file manifest, clean release tree, commit, annotated tag target, image digest and build identity | Final implementation and release capsule not ready | |
-| C06 | Production | Refresh live identity, quiesce only Dewey, apply exact conversion, promote only its tagged image/config, observe runtime and GUI | OPEN | config_or_startup_contract | G6; D19; after C05 | primary | Required: conversion commit receipt, exact running tag/SHA/digest, restart/availability observations and authenticated GUI evidence | Depends on completed release and reviewed conversion | |
+| C04 | Operator readiness | Expose conversion through the owned Dewey CLI; prepare explicit config, reviewed conversion inventory and rollback inputs | SUCCESS | config_or_startup_contract | G2,G4; D00,D05,D15,D16 | primary | Scoped native template receipt and exact committed conversion manifest; protected rollback inputs | Conversion not yet inspected against actual records; service principals/mount/build identity pending | 5117 rows committed; no ambiguous records |
+| C05 | Release | Review final source against requirements, commit intended files, publish immutable annotated numeric tag, build/publish exact tagged Dewey image | IN_PROGRESS | feature_implementation | G5; D18; after C02–C04 | primary | 10.0.2 released and deployed; two presentation findings patched for 10.0.3 | Final implementation and release capsule not ready |  |
+| C06 | Production | Refresh live identity, quiesce only Dewey, apply exact conversion, promote only its tagged image/config, observe runtime and GUI | IN_PROGRESS | config_or_startup_contract | G6; D19; after C05 | primary | Committed conversion, exact live image/SHA and authenticated GUI observations | Depends on completed release and reviewed conversion | 10.0.3 finishing patch pending |
 | C07 | Acceptance | Present working Dewey and concrete remaining limitations for user acceptance | OPEN | active_product_contract | G6; D20; after C06 | user | Required: explicit user acceptance of deployed Dewey | Acceptance requires the deployed result | |
 | C08 | Integration cutover | Replace only Ursa/Kahlo S3 browser controls with configured URI-preserving Dewey links | OPEN | feature_implementation | G7; D21–D22; after C07 | primary | Required: separately scoped numeric tags, deployed images and observed correct deep links; retained non-browser functions | Explicitly sequenced after Dewey acceptance | |
 | C09 | Closeout | Reconcile every parent and completion row, record limitations and actual objective outcome | OPEN | historical_docs_only | G8; D23; after C08 | primary | Required: all rows terminal with evidence; distinguish failed/blocked from achieved | Release, acceptance and peer cutovers remain unfinished | |
@@ -354,3 +354,49 @@ when its stated evidence exists; parent rows retain their own completion status.
   for its identity capture. The owned operator now selects that isolation before the
   transaction, matching native `tapdb db data seed`. No conversion or promotion ran.
   Advance immutable patch tag to 10.0.2; retain 10.0.0 and 10.0.1 unchanged.
+
+### 10.0.2 production conversion interval
+
+- Final image: `sha256:7256217d7c7a1dc71658eb7f82caf85ea8dff627d8471a96a64fdac7f1c6e047`,
+  annotated tag10.0.2, commit `8be9d0429360ee6d750a0363af08b3a4c35e3091`.
+- Owned template creation succeeded: loaded3, inserted3, updated0, skipped0.
+  Native export SHA256 `ae52e86a7cbb905c4e06435717abb0ea4cec6305a9abbe22003bd559629a6724`.
+  All prior template identities are retained. Native isolation requirement satisfied.
+- Only `dayhoff-day-dewey-1` was stopped through its existing compose definition.
+  No sibling stop/recreate or S3 mutation was requested.
+- Final manifest after quiescence:
+  `a2472f68d20220dbac2b9599f7391ef2bc73a73b7ada4c76062d196eba622185`.
+  All rows, projections, policy initialization, inventory fingerprint and database
+  identity match the previously reviewed 5,117-record manifest exactly.
+- Exact-manifest apply is in progress through the final image's owned CLI. Do not
+  infer commitment from prepared/pending receipt files. Promotion awaits its
+  committed receipt. Rollback requires the explicit reversal, then prior Dewey
+  image/config restoration; no whole-database restore over accepted data.
+
+### Production deployment and observations — 2026-09-12T10:00Z
+
+- Conversion committed: 5,117 rows, receipt SHA256
+  `bf3b4efc64b437189d6ab141272b1dd9221672244aedfa1ec6f87ecbbb93061e`.
+  Private manifest/receipt remain in `registry10-20260912/10.0.2/` on the host.
+- Dewey 10.0.2 promoted; startup 2026-09-12T09:50:17.880479768Z. Health 200
+  reports version 10.0.2 and SHA `8be9d0429360ee6d750a0363af08b3a4c35e3091`.
+  Image/config/conversion digests are recorded above. No siblings changed.
+- Shared Google login succeeded. Library reports all 5,117 accessible records.
+  Bucket landing lists server-visible buckets. EUID-only `M-DGX-NKN3` opens the
+  existing OWY sequencing prefix, with folder/object rows and unchanged URI.
+  Navigation registered no descendants. Desktop Library layout was readable.
+- PubMed query BRCA1 returned 20 papers with titles, PMIDs and registration
+  controls; search API returned 200. No paper was registered. Publisher full-text
+  discovery logged an upstream 403 for one publisher, without failing search.
+- Admin displays configured 30-day shares and 900-second delivery credentials.
+  Embedded TapDB overview and audit load successfully. Its Password link is still
+  visible despite the disabled route: final patch adds a host stylesheet to hide it.
+- Chrome still returns ERR_BLOCKED_BY_CLIENT for `/tapdb/admin/readiness`.
+  No browser protection was bypassed; this client-side inspection limitation remains.
+- Final patch 10.0.3 also adds a visible PubMed loading state and local error state.
+  It changes no database records or policies and retains the existing configuration.
+- Tests, lint, coverage and CI remain off. No live invitations, grants, uploads,
+  replacements, deletions or credential issuance were exercised for acceptance.
+  Non-admin and external-user behavior is source-reviewed, not live role-tested.
+- User acceptance D20/C07 remains required by the approved plan before Ursa/Kahlo
+  cutover. D21/D22/C08 and all-terminal closure remain open; no completion claim.

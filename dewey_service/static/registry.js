@@ -98,7 +98,10 @@
     content.innerHTML='<section class="panel"><h2>Search PubMed</h2><form id="literature-form" class="toolbar"><input type="search" name="q" class="storage-uri" aria-label="PubMed query" placeholder="Gene, author, topic, PMID, or PubMed query" value="'+esc(q)+'"><button class="primary">Search</button></form><p class="muted">Register papers as ordinary Dewey artifacts with a PMID and rich metadata.</p></section><div id="literature-results"></div>';
     $("#literature-form").onsubmit=event=>{event.preventDefault();safe(()=>navigate({q:values(event.target).q,page:1}));};
     if(!q)return;
-    const result=await api("/api/v1/literature/search","POST",{query:q,page,page_size:20});
+    $("#literature-results").innerHTML='<p role="status">Searching PubMed and retrieving paper metadata…</p>';
+    let result;
+    try { result=await api("/api/v1/literature/search","POST",{query:q,page,page_size:20}); }
+    catch(error) { $("#literature-results").innerHTML='<p role="alert">'+esc(error.message)+'</p>'; return; }
     $("#literature-results").innerHTML=table(result.items.map(item=>'<tr><td><span class="name">'+esc(item.title)+'</span><span class="sub">'+esc(item.journal||"")+' · '+esc(item.year||item.publication_year||"")+'</span><span class="sub">'+esc(Array.isArray(item.authors)?item.authors.join(", "):item.authors||"")+'</span></td><td class="mono">'+esc(item.pmid)+'</td><td>'+(item.artifact_euid?'<a href="/records/'+enc(item.artifact_euid)+'">Open in Dewey</a>':writable?action("Register paper","save-paper",item.pmid):"")+'</td></tr>').join(""),["Paper","PMID","Dewey"])+(result.has_more?action("Next page","page",page+1):"");
   }
   async function administration() {

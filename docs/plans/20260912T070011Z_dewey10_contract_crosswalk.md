@@ -90,7 +90,7 @@ rollback; removing historical identity-bearing rows is not part of reversal.
   general API credential fingerprints. It never rewrites the active configuration.
 - Administration can change share/delivery defaults through `/api/v1/registry/defaults`.
   Personal API clients select a role bounded by their issuer's role; issued credentials
-  are displayed once and can be revoked through Account/API/CLI.
+  are displayed once and can be revoked through Account and the public API. The four user CLI groups transact registry records, shares and storage; token lifecycle remains in Account/API.
 
 Report previews use short-lived delivery capabilities, an opaque sandbox origin,
 per-asset authorization and no application cookies. Delivery issuance is audited
@@ -99,6 +99,6 @@ creating a share does not send a message.
 
 ## Release boundaries
 
-Target 10.0.0 remains subject to a final remote tag refresh. No PR, merge or broad
+10.0.2 is deployed; 10.0.3 completes two presentation findings from the deployed review. No PR, merge or broad
 Dayhoff rollout is included. Ursa/Kahlo browser removal follows the user's
 acceptance of deployed Dewey, with separate scoped releases.
