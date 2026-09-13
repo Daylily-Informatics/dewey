@@ -16,7 +16,7 @@ from daylily_tapdb import (
     generic_instance_lineage,
 )
 from daylily_tapdb.web.runtime import get_db
-from sqlalchemy import and_
+from sqlalchemy import and_, text
 from sqlalchemy.orm import Session
 
 from dewey_service.audit import creation_audit_fields, update_audit_fields
@@ -137,6 +137,11 @@ class TapDBBackend:
                     duration_ms=(monotonic() - started) * 1000,
                     success=success,
                 )
+
+    def lock_external_key(self, session: Session, *, operation: str, key: str) -> None:
+        """Serialize one canonical operation key across service processes."""
+        value = int.from_bytes(sha256(f"{operation}:{key}".encode()).digest()[:8], "big", signed=True)
+        session.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": value})
 
     def _operation_label(self) -> str:
         for frame_info in inspect.stack(context=0):

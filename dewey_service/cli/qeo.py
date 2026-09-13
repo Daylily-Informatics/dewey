@@ -37,12 +37,15 @@ def _resolver_credential_create(
 
 def _package_register(
     manifest: Path = typer.Option(..., help="Absolute JSON manifest of existing artifact EUIDs."),
-    idempotency_key: str = typer.Option(..., help="Stable operator-selected registration key."),
+    idempotency_key: str | None = typer.Option(
+        None,
+        help="Optional exact owner-computed registration key; normally omit.",
+    ),
 ) -> None:
     """Atomically register an explicit complete MultiQC package and member lineage."""
     try:
-        if not manifest.is_absolute() or not idempotency_key.strip():
-            raise ValueError("An absolute manifest and nonempty idempotency key are required")
+        if not manifest.is_absolute():
+            raise ValueError("An absolute manifest is required")
         request = PackageRegistration.model_validate_json(manifest.read_text())
         _, result = build_cli_service().register_qeo_package(
             request, idempotency_key=idempotency_key

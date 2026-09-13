@@ -298,3 +298,36 @@ def attach_external_relation(session, relation):
     if spec is None:
         return NonFederatedOutcome()
     return ExternalReferenceService(session).attach(endpoints.source, spec)
+
+
+def attach_analysis_result_owner_reference(
+    session,
+    *,
+    source,
+    owner_system: str,
+    owner_object_type: str,
+    owner_object_euid: str,
+    relationship_type: str,
+    assertion_provenance: str,
+):
+    """Attach one explicit owner-issued target inside the caller's transaction."""
+    locked_source = lock_external_relation_source(session, source)
+    asserted_at = locked_source.created_dt
+    _require(
+        isinstance(asserted_at, datetime)
+        and asserted_at.tzinfo is not None
+        and asserted_at.utcoffset() is not None,
+        "Analysis-result owner assertion requires a timezone-aware source creation time",
+    )
+    spec = ExternalLinkSpec(
+        target=TapDBObjectTarget(
+            target_service_id=owner_system,
+            target_object_euid=owner_object_euid,
+            target_object_kind=owner_object_type,
+        ),
+        relationship_type=relationship_type,
+        assertion_authority="dewey.analysis_results.register",
+        asserted_at=asserted_at,
+        assertion_provenance=assertion_provenance,
+    )
+    return ExternalReferenceService(session).attach(locked_source, spec)

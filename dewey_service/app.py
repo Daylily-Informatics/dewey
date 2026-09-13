@@ -85,12 +85,11 @@ from dewey_service.observability import (
     probe_database,
     route_template_from_request,
 )
-from dewey_service.qeo_package_contract import ResolveMultiqcRequest
+from dewey_service.qeo_package_contract import PackageRegistration, ResolveMultiqcRequest
 from dewey_service.qeo_resolver_auth import require_qeo_resolver_auth
 from dewey_service.rbac import Role, profile_has_role
 from dewey_service.registration_contracts import (
     AnalysisArtifactSetRegistrationRequest,
-    MultiQCArtifactSetRegistrationRequest,
 )
 from dewey_service.sequencer_run_contracts import (
     AnalysisResultsRegistrationRequest,
@@ -3770,11 +3769,11 @@ def create_app(
         dependencies=[Depends(api_auth_dep)],
     )
     async def register_multiqc_artifact_set(
-        body: MultiQCArtifactSetRegistrationRequest,
+        body: PackageRegistration,
         idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
     ) -> dict[str, Any]:
         try:
-            status_code, payload = service.register_multiqc_artifact_set(
+            status_code, payload = service.register_qeo_package(
                 body,
                 idempotency_key=idempotency_key,
             )
