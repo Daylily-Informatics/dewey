@@ -1,0 +1,947 @@
+[
+  {
+    "id": "LOGIN-LOGIN",
+    "name": "Existing Google sign-in and return",
+    "url": "https://dewey.day.lsmc.bio/login"
+  },
+  {
+    "id": "LOGIN-LOGOUT",
+    "name": "Sign out and protected-page redirect",
+    "url": "https://dewey.day.lsmc.bio/login"
+  },
+  {
+    "id": "LOGIN-SIGNUP",
+    "name": "Signup form and approved email entry",
+    "url": "https://dewey.day.lsmc.bio/login"
+  },
+  {
+    "id": "LOGIN-SIGNUP-COMPLETE",
+    "name": "New account signup and email verification",
+    "url": "https://dewey.day.lsmc.bio/login"
+  },
+  {
+    "id": "LIB-PAGE",
+    "name": "Library loads",
+    "url": "https://dewey.day.lsmc.bio/ui"
+  },
+  {
+    "id": "LIB-SEARCH",
+    "name": "Search names/EUID/metadata",
+    "url": "https://dewey.day.lsmc.bio/ui"
+  },
+  {
+    "id": "LIB-EMPTY",
+    "name": "Empty search result",
+    "url": "https://dewey.day.lsmc.bio/ui"
+  },
+  {
+    "id": "LIB-KIND",
+    "name": "Object and prefix filtering",
+    "url": "https://dewey.day.lsmc.bio/ui"
+  },
+  {
+    "id": "LIB-SORT",
+    "name": "Sort order",
+    "url": "https://dewey.day.lsmc.bio/ui"
+  },
+  {
+    "id": "LIB-PAGE-NEXT",
+    "name": "Pagination next/previous",
+    "url": "https://dewey.day.lsmc.bio/ui"
+  },
+  {
+    "id": "LIB-FILTERS",
+    "name": "Advanced JSON filters valid/invalid",
+    "url": "https://dewey.day.lsmc.bio/ui"
+  },
+  {
+    "id": "LIB-SELECT",
+    "name": "Selection and create-set navigation",
+    "url": "https://dewey.day.lsmc.bio/ui"
+  },
+  {
+    "id": "LIB-LOOKUP",
+    "name": "Open EUID",
+    "url": "https://dewey.day.lsmc.bio/ui"
+  },
+  {
+    "id": "LIB-BACK",
+    "name": "Browser back/forward restores results",
+    "url": "https://dewey.day.lsmc.bio/ui"
+  },
+  {
+    "id": "ADD-PAGE",
+    "name": "Registration form",
+    "url": "https://dewey.day.lsmc.bio/add"
+  },
+  {
+    "id": "ADD-OBJECT",
+    "name": "Register S3 object",
+    "url": "https://dewey.day.lsmc.bio/add"
+  },
+  {
+    "id": "ADD-URL",
+    "name": "Register HTTP URL",
+    "url": "https://dewey.day.lsmc.bio/add"
+  },
+  {
+    "id": "ADD-PREFIX",
+    "name": "Register prefix",
+    "url": "https://dewey.day.lsmc.bio/add"
+  },
+  {
+    "id": "ADD-SET",
+    "name": "Register set",
+    "url": "https://dewey.day.lsmc.bio/add"
+  },
+  {
+    "id": "ADD-METADATA",
+    "name": "JSON and key/value metadata",
+    "url": "https://dewey.day.lsmc.bio/add"
+  },
+  {
+    "id": "ADD-VALIDATION",
+    "name": "Required and invalid input handling",
+    "url": "https://dewey.day.lsmc.bio/add"
+  },
+  {
+    "id": "ADD-DUPLICATE",
+    "name": "Duplicate registration behavior",
+    "url": "https://dewey.day.lsmc.bio/add"
+  },
+  {
+    "id": "ADD-UPLOAD-MODE",
+    "name": "Add form upload mode",
+    "url": "https://dewey.day.lsmc.bio/add"
+  },
+  {
+    "id": "STORE-BUCKETS",
+    "name": "Bucket list",
+    "url": "https://dewey.day.lsmc.bio/storage"
+  },
+  {
+    "id": "STORE-BUCKET-LINKS",
+    "name": "Browse listed buckets",
+    "url": "https://dewey.day.lsmc.bio/storage"
+  },
+  {
+    "id": "STORE-URI",
+    "name": "Exact URI and Go",
+    "url": "https://dewey.day.lsmc.bio/storage"
+  },
+  {
+    "id": "STORE-BREADCRUMBS",
+    "name": "Breadcrumb and folder navigation",
+    "url": "https://dewey.day.lsmc.bio/storage"
+  },
+  {
+    "id": "STORE-FILTER",
+    "name": "Filter names on current page",
+    "url": "https://dewey.day.lsmc.bio/storage"
+  },
+  {
+    "id": "STORE-PAGE-NEXT",
+    "name": "Storage pagination",
+    "url": "https://dewey.day.lsmc.bio/storage"
+  },
+  {
+    "id": "STORE-OBJECT",
+    "name": "Object detail modal",
+    "url": "https://dewey.day.lsmc.bio/storage"
+  },
+  {
+    "id": "STORE-REGISTER",
+    "name": "Register selected object/folder links",
+    "url": "https://dewey.day.lsmc.bio/storage"
+  },
+  {
+    "id": "STORE-SET",
+    "name": "Register storage selection as set",
+    "url": "https://dewey.day.lsmc.bio/storage"
+  },
+  {
+    "id": "STORE-UPLOAD",
+    "name": "New small files upload",
+    "url": "https://dewey.day.lsmc.bio/storage"
+  },
+  {
+    "id": "STORE-UPLOAD-MULTIPART",
+    "name": "Bounded multipart upload",
+    "url": "https://dewey.day.lsmc.bio/storage"
+  },
+  {
+    "id": "STORE-DOWNLOAD",
+    "name": "Browser download and byte verification",
+    "url": "https://dewey.day.lsmc.bio/storage"
+  },
+  {
+    "id": "STORE-EMPTY",
+    "name": "Empty prefix",
+    "url": "https://dewey.day.lsmc.bio/storage"
+  },
+  {
+    "id": "STORE-ERROR",
+    "name": "Invalid location/error feedback",
+    "url": "https://dewey.day.lsmc.bio/storage"
+  },
+  {
+    "id": "STORE-DELETE",
+    "name": "Deletion interfaces only",
+    "url": "https://dewey.day.lsmc.bio/storage"
+  },
+  {
+    "id": "STORE-REPLACE",
+    "name": "Replacement interface only",
+    "url": "https://dewey.day.lsmc.bio/storage"
+  },
+  {
+    "id": "STORE-ABORT",
+    "name": "Upload-abort control only",
+    "url": "https://dewey.day.lsmc.bio/storage"
+  },
+  {
+    "id": "RECORD-OBJECT",
+    "name": "Object detail",
+    "url": "https://dewey.day.lsmc.bio/records/{euid}"
+  },
+  {
+    "id": "RECORD-PREFIX",
+    "name": "Prefix contents",
+    "url": "https://dewey.day.lsmc.bio/records/{euid}"
+  },
+  {
+    "id": "RECORD-SET",
+    "name": "Set detail and member links",
+    "url": "https://dewey.day.lsmc.bio/records/{euid}"
+  },
+  {
+    "id": "RECORD-EDIT",
+    "name": "Fixture metadata edit",
+    "url": "https://dewey.day.lsmc.bio/records/{euid}"
+  },
+  {
+    "id": "RECORD-PREVIEW",
+    "name": "HTML report preview and assets",
+    "url": "https://dewey.day.lsmc.bio/records/{euid}"
+  },
+  {
+    "id": "RECORD-DOWNLOAD",
+    "name": "Record download",
+    "url": "https://dewey.day.lsmc.bio/records/{euid}"
+  },
+  {
+    "id": "RECORD-MANIFEST",
+    "name": "Prefix/set access manifest",
+    "url": "https://dewey.day.lsmc.bio/records/{euid}"
+  },
+  {
+    "id": "RECORD-MEMBER-ADD",
+    "name": "Add existing member",
+    "url": "https://dewey.day.lsmc.bio/records/{euid}"
+  },
+  {
+    "id": "RECORD-OWNER",
+    "name": "Fixture ownership transfer",
+    "url": "https://dewey.day.lsmc.bio/records/{euid}"
+  },
+  {
+    "id": "RECORD-PERMISSIONS",
+    "name": "Fixture metadata/download permissions",
+    "url": "https://dewey.day.lsmc.bio/records/{euid}"
+  },
+  {
+    "id": "RECORD-ACTIVITY",
+    "name": "Activity and technical detail",
+    "url": "https://dewey.day.lsmc.bio/records/{euid}"
+  },
+  {
+    "id": "RECORD-ARCHIVE",
+    "name": "Archive interface only",
+    "url": "https://dewey.day.lsmc.bio/records/{euid}"
+  },
+  {
+    "id": "RECORD-MEMBER-REMOVE",
+    "name": "Member removal interface only",
+    "url": "https://dewey.day.lsmc.bio/records/{euid}"
+  },
+  {
+    "id": "SET-PAGE",
+    "name": "Sets page",
+    "url": "https://dewey.day.lsmc.bio/sets"
+  },
+  {
+    "id": "SET-SEARCH",
+    "name": "Sets search/filter/sort",
+    "url": "https://dewey.day.lsmc.bio/sets"
+  },
+  {
+    "id": "SET-CREATE-SELECTION",
+    "name": "Create set from library selection",
+    "url": "https://dewey.day.lsmc.bio/sets"
+  },
+  {
+    "id": "SHARE-PAGE",
+    "name": "Sharing list",
+    "url": "https://dewey.day.lsmc.bio/shares"
+  },
+  {
+    "id": "SHARE-SEARCH",
+    "name": "Sharing search/filter/sort",
+    "url": "https://dewey.day.lsmc.bio/shares"
+  },
+  {
+    "id": "SHARE-CREATE",
+    "name": "Create private/approved-recipient fixture share",
+    "url": "https://dewey.day.lsmc.bio/shares"
+  },
+  {
+    "id": "SHARE-DETAIL",
+    "name": "Share detail and activity",
+    "url": "https://dewey.day.lsmc.bio/shares"
+  },
+  {
+    "id": "SHARE-COPY",
+    "name": "Copy link",
+    "url": "https://dewey.day.lsmc.bio/shares"
+  },
+  {
+    "id": "SHARE-OPEN",
+    "name": "Open shared record",
+    "url": "https://dewey.day.lsmc.bio/shares"
+  },
+  {
+    "id": "SHARE-EDIT",
+    "name": "Fixture share edit",
+    "url": "https://dewey.day.lsmc.bio/shares"
+  },
+  {
+    "id": "SHARE-INVITE",
+    "name": "Send invitation to approved alias",
+    "url": "https://dewey.day.lsmc.bio/shares"
+  },
+  {
+    "id": "SHARE-RECIPIENT",
+    "name": "Test account recipient access",
+    "url": "https://dewey.day.lsmc.bio/shares"
+  },
+  {
+    "id": "SHARE-REVOKE",
+    "name": "Revocation interface only",
+    "url": "https://dewey.day.lsmc.bio/shares"
+  },
+  {
+    "id": "LIT-PAGE",
+    "name": "Literature page",
+    "url": "https://dewey.day.lsmc.bio/literature"
+  },
+  {
+    "id": "LIT-SEARCH",
+    "name": "PubMed search",
+    "url": "https://dewey.day.lsmc.bio/literature"
+  },
+  {
+    "id": "LIT-PAGE-NEXT",
+    "name": "Literature pagination",
+    "url": "https://dewey.day.lsmc.bio/literature"
+  },
+  {
+    "id": "LIT-EMPTY",
+    "name": "No matches/error states",
+    "url": "https://dewey.day.lsmc.bio/literature"
+  },
+  {
+    "id": "LIT-REGISTER",
+    "name": "Register paper and open artifact",
+    "url": "https://dewey.day.lsmc.bio/literature"
+  },
+  {
+    "id": "ACCOUNT-PAGE",
+    "name": "Account and CLI instructions",
+    "url": "https://dewey.day.lsmc.bio/account"
+  },
+  {
+    "id": "ACCOUNT-TOKEN-FORM",
+    "name": "Personal token form",
+    "url": "https://dewey.day.lsmc.bio/account"
+  },
+  {
+    "id": "ACCOUNT-TOKEN-CREATE",
+    "name": "Credential issuance gate",
+    "url": "https://dewey.day.lsmc.bio/account"
+  },
+  {
+    "id": "ACCOUNT-TOKEN-REVOKE",
+    "name": "Revocation interface only",
+    "url": "https://dewey.day.lsmc.bio/account"
+  },
+  {
+    "id": "ADMIN-PAGE",
+    "name": "Administration page",
+    "url": "https://dewey.day.lsmc.bio/admin"
+  },
+  {
+    "id": "ADMIN-CONFIG",
+    "name": "Redacted configuration",
+    "url": "https://dewey.day.lsmc.bio/admin"
+  },
+  {
+    "id": "ADMIN-RELEASE",
+    "name": "Release identity",
+    "url": "https://dewey.day.lsmc.bio/admin"
+  },
+  {
+    "id": "ADMIN-DEFAULTS",
+    "name": "Defaults form inspection",
+    "url": "https://dewey.day.lsmc.bio/admin"
+  },
+  {
+    "id": "ADMIN-HEALTH",
+    "name": "Health page",
+    "url": "https://dewey.day.lsmc.bio/admin"
+  },
+  {
+    "id": "ADMIN-OBS",
+    "name": "Observability",
+    "url": "https://dewey.day.lsmc.bio/admin"
+  },
+  {
+    "id": "ADMIN-ANOMALIES",
+    "name": "Anomalies and detail",
+    "url": "https://dewey.day.lsmc.bio/admin"
+  },
+  {
+    "id": "TAP-OVERVIEW",
+    "name": "Overview/count links",
+    "url": "https://dewey.day.lsmc.bio/tapdb/"
+  },
+  {
+    "id": "TAP-SEARCH",
+    "name": "Search instances/templates/lineage",
+    "url": "https://dewey.day.lsmc.bio/tapdb/"
+  },
+  {
+    "id": "TAP-OBJECT",
+    "name": "Object detail and links",
+    "url": "https://dewey.day.lsmc.bio/tapdb/"
+  },
+  {
+    "id": "TAP-GRAPH",
+    "name": "Graph controls",
+    "url": "https://dewey.day.lsmc.bio/tapdb/"
+  },
+  {
+    "id": "TAP-TEMPLATES",
+    "name": "Templates and create/edit forms inspection",
+    "url": "https://dewey.day.lsmc.bio/tapdb/"
+  },
+  {
+    "id": "TAP-AUDIT",
+    "name": "Audit explorer filters",
+    "url": "https://dewey.day.lsmc.bio/tapdb/"
+  },
+  {
+    "id": "TAP-HELP",
+    "name": "Help",
+    "url": "https://dewey.day.lsmc.bio/tapdb/"
+  },
+  {
+    "id": "TAP-READINESS",
+    "name": "Readiness",
+    "url": "https://dewey.day.lsmc.bio/tapdb/"
+  },
+  {
+    "id": "TAP-INVENTORY",
+    "name": "Inventory",
+    "url": "https://dewey.day.lsmc.bio/tapdb/"
+  },
+  {
+    "id": "TAP-MERIDIAN",
+    "name": "Meridian",
+    "url": "https://dewey.day.lsmc.bio/tapdb/"
+  },
+  {
+    "id": "TAP-METRICS",
+    "name": "Metrics",
+    "url": "https://dewey.day.lsmc.bio/tapdb/"
+  },
+  {
+    "id": "TAP-RUNTIME",
+    "name": "Runtime",
+    "url": "https://dewey.day.lsmc.bio/tapdb/"
+  },
+  {
+    "id": "TAP-BACKUPS",
+    "name": "Backup/recovery interfaces inspection",
+    "url": "https://dewey.day.lsmc.bio/tapdb/"
+  },
+  {
+    "id": "TAP-THEME",
+    "name": "Theme/help controls",
+    "url": "https://dewey.day.lsmc.bio/tapdb/"
+  },
+  {
+    "id": "ROUTES-ROOT",
+    "name": "Root redirect",
+    "url": "https://dewey.day.lsmc.bio/"
+  },
+  {
+    "id": "ROUTES-SEARCH",
+    "name": "Search alternate route",
+    "url": "https://dewey.day.lsmc.bio/"
+  },
+  {
+    "id": "ROUTES-ARTIFACTS",
+    "name": "Artifacts alternate route",
+    "url": "https://dewey.day.lsmc.bio/"
+  },
+  {
+    "id": "ROUTES-DAG",
+    "name": "Artifact DAG alternate route",
+    "url": "https://dewey.day.lsmc.bio/"
+  },
+  {
+    "id": "ROUTES-DETAIL",
+    "name": "Artifact detail alternate route",
+    "url": "https://dewey.day.lsmc.bio/"
+  },
+  {
+    "id": "ROUTES-GRAPH",
+    "name": "Standalone graph",
+    "url": "https://dewey.day.lsmc.bio/"
+  },
+  {
+    "id": "ROUTES-ADMIN-SHARES",
+    "name": "Admin shares alternate route",
+    "url": "https://dewey.day.lsmc.bio/"
+  },
+  {
+    "id": "ROUTES-DOCS",
+    "name": "API reference",
+    "url": "https://dewey.day.lsmc.bio/"
+  },
+  {
+    "id": "ADD-UPLOAD-EXEC",
+    "name": "Upload from Add without automatic registration",
+    "url": "https://dewey.day.lsmc.bio/add"
+  },
+  {
+    "id": "LIB-FILTERS-INVALID",
+    "name": "Reject invalid advanced filter JSON",
+    "url": "https://dewey.day.lsmc.bio/ui?page=2"
+  },
+  {
+    "id": "SET-PAGINATION",
+    "name": "Sets pagination availability",
+    "url": "https://dewey.day.lsmc.bio/sets?q=20260916+I1-A&sort=name&page=1"
+  },
+  {
+    "id": "BUCKET-aquarium-tfstate-dev",
+    "name": "Bucket root aquarium-tfstate-dev",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Faquarium-tfstate-dev%2F"
+  },
+  {
+    "id": "BUCKET-aquarium-tfstate-prod",
+    "name": "Bucket root aquarium-tfstate-prod",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Faquarium-tfstate-prod%2F"
+  },
+  {
+    "id": "BUCKET-asterism-note-screenshots-dev",
+    "name": "Bucket root asterism-note-screenshots-dev",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fasterism-note-screenshots-dev%2F"
+  },
+  {
+    "id": "BUCKET-aws-sam-cli-managed-default-samclisourcebucket-nr7kmk76fofd",
+    "name": "Bucket root aws-sam-cli-managed-default-samclisourcebucket-nr7kmk76fofd",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Faws-sam-cli-managed-default-samclisourcebucket-nr7kmk76fofd%2F"
+  },
+  {
+    "id": "BUCKET-aws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp",
+    "name": "Bucket root aws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Faws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp%2F"
+  },
+  {
+    "id": "BUCKET-cdk-dayhoff-assets-108782052779-us-east-1",
+    "name": "Bucket root cdk-dayhoff-assets-108782052779-us-east-1",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fcdk-dayhoff-assets-108782052779-us-east-1%2F"
+  },
+  {
+    "id": "BUCKET-cdk-dayhoff-assets-108782052779-us-west-2",
+    "name": "Bucket root cdk-dayhoff-assets-108782052779-us-west-2",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fcdk-dayhoff-assets-108782052779-us-west-2%2F"
+  },
+  {
+    "id": "BUCKET-cdk-hnb659fds-assets-108782052779-us-east-1",
+    "name": "Bucket root cdk-hnb659fds-assets-108782052779-us-east-1",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-east-1%2F"
+  },
+  {
+    "id": "BUCKET-cdk-hnb659fds-assets-108782052779-us-west-2",
+    "name": "Bucket root cdk-hnb659fds-assets-108782052779-us-west-2",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2F"
+  },
+  {
+    "id": "BUCKET-cf-templates-pfrobpqqun1c-us-east-2",
+    "name": "Bucket root cf-templates-pfrobpqqun1c-us-east-2",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fcf-templates-pfrobpqqun1c-us-east-2%2F"
+  },
+  {
+    "id": "BUCKET-dayec-cur-108782052779-us-east-1",
+    "name": "Bucket root dayec-cur-108782052779-us-east-1",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fdayec-cur-108782052779-us-east-1%2F"
+  },
+  {
+    "id": "BUCKET-daylily-customer-lsmc-a0477268",
+    "name": "Bucket root daylily-customer-lsmc-a0477268",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fdaylily-customer-lsmc-a0477268%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-atlas-demo",
+    "name": "Bucket root lsmc-atlas-demo",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-atlas-demo%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-atlas-dev",
+    "name": "Bucket root lsmc-atlas-dev",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-aws-config-108782052779",
+    "name": "Bucket root lsmc-aws-config-108782052779",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-aws-config-108782052779%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-bio-oauth-static-site-108782052779-us-east-1",
+    "name": "Bucket root lsmc-bio-oauth-static-site-108782052779-us-east-1",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-bio-oauth-static-site-108782052779-us-east-1%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-copy-ultimagen-lsmc-cro-316",
+    "name": "Bucket root lsmc-copy-ultimagen-lsmc-cro-316",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-copy-ultimagen-lsmc-cro-316%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-datalake-raw-dev",
+    "name": "Bucket root lsmc-datalake-raw-dev",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-datalake-raw-dev%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-dayoa-analysis-results-usw2",
+    "name": "Bucket root lsmc-dayoa-analysis-results-usw2",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-dayoa-analysis-results-usw2%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-dayoa-control-data-use1",
+    "name": "Bucket root lsmc-dayoa-control-data-use1",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-dayoa-control-data-use1%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-dayoa-control-data-usw2",
+    "name": "Bucket root lsmc-dayoa-control-data-usw2",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-dayoa-control-data-usw2%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-dayoa-omics-analysis-us-west-2",
+    "name": "Bucket root lsmc-dayoa-omics-analysis-us-west-2",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-dayoa-references-use1",
+    "name": "Bucket root lsmc-dayoa-references-use1",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-dayoa-references-use1%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-dayoa-references-usw2",
+    "name": "Bucket root lsmc-dayoa-references-usw2",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-dayoa-runtime-assets-usw2",
+    "name": "Bucket root lsmc-dayoa-runtime-assets-usw2",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-dayoa-staging-usw2",
+    "name": "Bucket root lsmc-dayoa-staging-usw2",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-dewey-0",
+    "name": "Bucket root lsmc-dewey-0",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-dewey-0%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-docs-public-108782052779-us-west-2",
+    "name": "Bucket root lsmc-docs-public-108782052779-us-west-2",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-docs-public-108782052779-us-west-2%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-healthomics-failiover",
+    "name": "Bucket root lsmc-healthomics-failiover",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-healthomics-failiover%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-healthomics-results",
+    "name": "Bucket root lsmc-healthomics-results",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-healthomics-results%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-ifx-bjuice-pkgd-data",
+    "name": "Bucket root lsmc-ifx-bjuice-pkgd-data",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-ifx-bjuice-pkgd-data%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-illumina-public-data",
+    "name": "Bucket root lsmc-illumina-public-data",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-illumina-public-data%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-meridian-governance-registry",
+    "name": "Bucket root lsmc-meridian-governance-registry",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-meridian-governance-registry%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-mvp-v1-event-sink-raw-108782052779-us-west-2",
+    "name": "Bucket root lsmc-mvp-v1-event-sink-raw-108782052779-us-west-2",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-mvp-v1-event-sink-raw-108782052779-us-west-2%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-mvp-v1-labcore-accessioning-docs-108782052779-us-west-2",
+    "name": "Bucket root lsmc-mvp-v1-labcore-accessioning-docs-108782052779-us-west-2",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-mvp-v1-labcore-accessioning-docs-108782052779-us-west-2%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-mvp-v1-labcore-ui-108782052779-us-west-2",
+    "name": "Bucket root lsmc-mvp-v1-labcore-ui-108782052779-us-west-2",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-mvp-v1-labcore-ui-108782052779-us-west-2%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-mvp-v1-status-alb-logs-108782052779",
+    "name": "Bucket root lsmc-mvp-v1-status-alb-logs-108782052779",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-mvp-v1-status-alb-logs-108782052779%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-public-ont-data",
+    "name": "Bucket root lsmc-public-ont-data",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-public-ont-data%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-qeo-day-analytical-108782052779-us-west-2",
+    "name": "Bucket root lsmc-qeo-day-analytical-108782052779-us-west-2",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-qeo-day-analytical-108782052779-us-west-2%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-ssf-sequencing-data",
+    "name": "Bucket root lsmc-ssf-sequencing-data",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-terraform-state",
+    "name": "Bucket root lsmc-terraform-state",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-terraform-state%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-twenty-prod-storage",
+    "name": "Bucket root lsmc-twenty-prod-storage",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-twenty-prod-storage%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-ursa-cost-reports-108782052779-us-west-2",
+    "name": "Bucket root lsmc-ursa-cost-reports-108782052779-us-west-2",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-ursa-cost-reports-108782052779-us-west-2%2F"
+  },
+  {
+    "id": "BUCKET-lsmc-ursa-customers-usw2",
+    "name": "Bucket root lsmc-ursa-customers-usw2",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Flsmc-ursa-customers-usw2%2F"
+  },
+  {
+    "id": "BUCKET-marvain-cleanroom-20260712t103857z-artifactbucket-mecojkek5eps",
+    "name": "Bucket root marvain-cleanroom-20260712t103857z-artifactbucket-mecojkek5eps",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t103857z-artifactbucket-mecojkek5eps%2F"
+  },
+  {
+    "id": "BUCKET-marvain-cleanroom-20260712t103857z-auditbucket-yl3kufkgfdie",
+    "name": "Bucket root marvain-cleanroom-20260712t103857z-auditbucket-yl3kufkgfdie",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t103857z-auditbucket-yl3kufkgfdie%2F"
+  },
+  {
+    "id": "BUCKET-marvain-cleanroom-20260712t111914z-artifactbucket-qkwenuto9bbo",
+    "name": "Bucket root marvain-cleanroom-20260712t111914z-artifactbucket-qkwenuto9bbo",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-artifactbucket-qkwenuto9bbo%2F"
+  },
+  {
+    "id": "BUCKET-marvain-cleanroom-20260712t111914z-auditbucket-wvcw5pjxz1kj",
+    "name": "Bucket root marvain-cleanroom-20260712t111914z-auditbucket-wvcw5pjxz1kj",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-auditbucket-wvcw5pjxz1kj%2F"
+  },
+  {
+    "id": "BUCKET-marvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl",
+    "name": "Bucket root marvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2F"
+  },
+  {
+    "id": "BUCKET-parallelcluster-4da281c1dc024f1c-v1-do-not-delete",
+    "name": "Bucket root parallelcluster-4da281c1dc024f1c-v1-do-not-delete",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fparallelcluster-4da281c1dc024f1c-v1-do-not-delete%2F"
+  },
+  {
+    "id": "BUCKET-parallelcluster-730cb6d53cf2deec-v1-do-not-delete",
+    "name": "Bucket root parallelcluster-730cb6d53cf2deec-v1-do-not-delete",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fparallelcluster-730cb6d53cf2deec-v1-do-not-delete%2F"
+  },
+  {
+    "id": "BUCKET-parallelcluster-e781c59d26140bab-v1-do-not-delete",
+    "name": "Bucket root parallelcluster-e781c59d26140bab-v1-do-not-delete",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fparallelcluster-e781c59d26140bab-v1-do-not-delete%2F"
+  },
+  {
+    "id": "BUCKET-terrarium-dev-media",
+    "name": "Bucket root terrarium-dev-media",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fterrarium-dev-media%2F"
+  },
+  {
+    "id": "BUCKET-terrarium-dev-web",
+    "name": "Bucket root terrarium-dev-web",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fterrarium-dev-web%2F"
+  },
+  {
+    "id": "BUCKET-terrarium-prod-media",
+    "name": "Bucket root terrarium-prod-media",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fterrarium-prod-media%2F"
+  },
+  {
+    "id": "BUCKET-terrarium-prod-web",
+    "name": "Bucket root terrarium-prod-web",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fterrarium-prod-web%2F"
+  },
+  {
+    "id": "BUCKET-terrarium-tfstate-dev",
+    "name": "Bucket root terrarium-tfstate-dev",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fterrarium-tfstate-dev%2F"
+  },
+  {
+    "id": "BUCKET-terrarium-tfstate-prod",
+    "name": "Bucket root terrarium-tfstate-prod",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fterrarium-tfstate-prod%2F"
+  },
+  {
+    "id": "BUCKET-ursa-us-west-2-052779-default-customer-1d8c14",
+    "name": "Bucket root ursa-us-west-2-052779-default-customer-1d8c14",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fursa-us-west-2-052779-default-customer-1d8c14%2F"
+  },
+  {
+    "id": "BUCKET-zebra-day-cfg-us-west-2",
+    "name": "Bucket root zebra-day-cfg-us-west-2",
+    "url": "https://dewey.day.lsmc.bio/storage?uri=s3%3A%2F%2Fzebra-day-cfg-us-west-2%2F"
+  },
+  {
+    "id": "TAP-OBJECT-JSON",
+    "name": "Object JSON editor formatting without persistence",
+    "url": "https://dewey.day.lsmc.bio/tapdb/object/M-DGX-TR3S"
+  },
+  {
+    "id": "TAP-OBJECT-MUTATIONS",
+    "name": "Raw admin object/lineage/repair interfaces",
+    "url": "https://dewey.day.lsmc.bio/tapdb/object/M-DGX-TR3S"
+  },
+  {
+    "id": "TAP-SEARCH-TEMPLATE",
+    "name": "Template-kind search",
+    "url": "https://dewey.day.lsmc.bio/tapdb/search?q=M-DGX-1A&record_type=template&name_like=&euid_like=&category=&type=&subtype="
+  },
+  {
+    "id": "TAP-SEARCH-LINEAGE",
+    "name": "Lineage-kind search",
+    "url": "https://dewey.day.lsmc.bio/tapdb/search?q=M-EDG-G28C&record_type=lineage&name_like=&euid_like=&category=&type=&subtype="
+  },
+  {
+    "id": "TAP-CONTEXT-HELP",
+    "name": "Context help and clipboard",
+    "url": "https://dewey.day.lsmc.bio/tapdb/admin/meridian?euid=M-DGX-TR3S&prefix="
+  },
+  {
+    "id": "TAP-TEMPLATE-DOWNLOAD",
+    "name": "Canonical template JSON browser download",
+    "url": "https://dewey.day.lsmc.bio/tapdb/templates?category=data"
+  },
+  {
+    "id": "TAP-INSTANCE-CREATE",
+    "name": "Raw instance creation interface",
+    "url": "https://dewey.day.lsmc.bio/tapdb/create/M-DGX-1A"
+  },
+  {
+    "id": "TAP-TEMPLATE-VALIDATE",
+    "name": "Template builder read-only validation",
+    "url": "https://dewey.day.lsmc.bio/tapdb/templates/validate"
+  },
+  {
+    "id": "TAP-TEMPLATE-BUILDER",
+    "name": "Template schema builder interface",
+    "url": "https://dewey.day.lsmc.bio/tapdb/templates/validate"
+  },
+  {
+    "id": "TAP-SEARCH-PAGINATION",
+    "name": "Search continuation paging",
+    "url": "https://dewey.day.lsmc.bio/tapdb/search?record_type=all&limit=25&cursor=eyJraW5kIjoiaW5zdGFuY2UiLCJ1aWQiOjl9"
+  },
+  {
+    "id": "TAP-OBJECT-GRAPH",
+    "name": "Object graph with persisted lineage",
+    "url": "https://dewey.day.lsmc.bio/tapdb/object/M-DGX-TR3S/graph"
+  },
+  {
+    "id": "TAP-GRAPH-CONTROLS",
+    "name": "Graph search/find/filter/layout/centering controls",
+    "url": "https://dewey.day.lsmc.bio/tapdb/graph?depth=4&max_nodes=1000&max_edges=500&start_euid=M-DGX-TR3S"
+  },
+  {
+    "id": "TAP-GRAPH-EXPORT",
+    "name": "Graph JSON browser download",
+    "url": "https://dewey.day.lsmc.bio/tapdb/graph?depth=4&max_nodes=1000&max_edges=500&start_euid=M-DGX-TR3S"
+  },
+  {
+    "id": "TAP-GRAPH-MUTATIONS",
+    "name": "Graph mutation gestures inspection",
+    "url": "https://dewey.day.lsmc.bio/tapdb/graph?depth=4&max_nodes=1000&max_edges=500&start_euid=M-DGX-TR3S"
+  },
+  {
+    "id": "ADMIN-ANOMALY-DETAIL",
+    "name": "Persisted anomaly detail",
+    "url": "https://dewey.day.lsmc.bio/ui/anomalies/M-DGX-9RJX"
+  },
+  {
+    "id": "LOGIN-RETURN",
+    "name": "Preserve requested record through login",
+    "url": "https://dewey.day.lsmc.bio/ui"
+  },
+  {
+    "id": "TAP-PACK-INVENTORY",
+    "name": "Explicit repository pack inventory",
+    "url": "https://dewey.day.lsmc.bio/tapdb/templates"
+  },
+  {
+    "id": "TAP-PACK-EXPORT",
+    "name": "Repository pack export interface only",
+    "url": "https://dewey.day.lsmc.bio/tapdb/templates"
+  },
+  {
+    "id": "TAP-BACKUP-MUTATIONS",
+    "name": "Backup creation and recovery interfaces only",
+    "url": "https://dewey.day.lsmc.bio/tapdb/admin/backups"
+  },
+  {
+    "id": "SET-FILTER",
+    "name": "Set metadata filters",
+    "url": "https://dewey.day.lsmc.bio/sets?filters=%5B%7B%22path%22%3A%22metadata.gui_audit.attempt%22%2C%22op%22%3A%22eq%22%2C%22value%22%3A%22I1-A%22%7D%5D&page=1"
+  },
+  {
+    "id": "SHARE-PAGINATION",
+    "name": "Share continuation pages",
+    "url": "https://dewey.day.lsmc.bio/shares?page=2"
+  },
+  {
+    "id": "SHARE-FILTER",
+    "name": "Share property filters",
+    "url": "https://dewey.day.lsmc.bio/shares?page=1&filters=%5B%7B%22path%22%3A%22audience%22%2C%22op%22%3A%22eq%22%2C%22value%22%3A%22recipients%22%7D%5D"
+  }
+]

@@ -1,0 +1,337 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / LIBRARY
+  - heading "Library" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - searchbox "Search library"
+  - combobox "Kind":
+    - option "All kinds" [selected]
+    - option "Objects"
+    - option "Prefixes"
+  - combobox "Sort":
+    - option "Newest first" [selected]
+    - option "Name"
+  - button "Search"
+  - button "Filters"
+  - generic: 5,134 accessible records
+  - button "Create set from selection"
+  - link "New set":
+    - /url: /add?kind=set
+  - table:
+    - rowgroup:
+      - row "Name / EUID Kind Producer Created":
+        - columnheader
+        - columnheader "Name / EUID"
+        - columnheader "Kind"
+        - columnheader "Producer"
+        - columnheader "Created"
+    - rowgroup:
+      - row "Select M-DGX-TS4P asset.svg M-DGX-TS4P object dewey 9/16/2026":
+        - cell "Select M-DGX-TS4P":
+          - checkbox "Select M-DGX-TS4P"
+        - cell "asset.svg M-DGX-TS4P":
+          - link "asset.svg":
+            - /url: /records/M-DGX-TS4P
+          - generic: M-DGX-TS4P
+        - cell "object":
+          - generic: object
+        - cell "dewey"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TS0Y index.html M-DGX-TS0Y object dewey 9/16/2026":
+        - cell "Select M-DGX-TS0Y":
+          - checkbox "Select M-DGX-TS0Y"
+        - cell "index.html M-DGX-TS0Y":
+          - link "index.html":
+            - /url: /records/M-DGX-TS0Y
+          - generic: M-DGX-TS0Y
+        - cell "object":
+          - generic: object
+        - cell "dewey"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TRW6 fixture.json M-DGX-TRW6 object dewey 9/16/2026":
+        - cell "Select M-DGX-TRW6":
+          - checkbox "Select M-DGX-TRW6"
+        - cell "fixture.json M-DGX-TRW6":
+          - link "fixture.json":
+            - /url: /records/M-DGX-TRW6
+          - generic: M-DGX-TRW6
+        - cell "object":
+          - generic: object
+        - cell "dewey"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TRRE hello world ü.txt M-DGX-TRRE object dewey 9/16/2026":
+        - cell "Select M-DGX-TRRE":
+          - checkbox "Select M-DGX-TRRE"
+        - cell "hello world ü.txt M-DGX-TRRE":
+          - link "hello world ü.txt":
+            - /url: /records/M-DGX-TRRE
+          - generic: M-DGX-TRRE
+        - cell "object":
+          - generic: object
+        - cell "dewey"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TRF1 literature:35750315 M-DGX-TRF1 object pubmed 9/16/2026":
+        - cell "Select M-DGX-TRF1":
+          - checkbox "Select M-DGX-TRF1"
+        - cell "literature:35750315 M-DGX-TRF1":
+          - link "literature:35750315":
+            - /url: /records/M-DGX-TRF1
+          - generic: M-DGX-TRF1
+        - cell "object":
+          - generic: object
+        - cell "pubmed"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TRC7 Dewey GUI audit 20260916 I1-A library set M-DGX-TRC7 set — 9/16/2026":
+        - cell "Select M-DGX-TRC7":
+          - checkbox "Select M-DGX-TRC7" [disabled]
+        - cell "Dewey GUI audit 20260916 I1-A library set M-DGX-TRC7":
+          - link "Dewey GUI audit 20260916 I1-A library set":
+            - /url: /records/M-DGX-TRC7
+          - generic: M-DGX-TRC7
+        - cell "set":
+          - generic: set
+        - cell "—"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TR8F Dewey GUI audit 20260916 I1-A URL M-DGX-TR8F object dewey 9/16/2026":
+        - cell "Select M-DGX-TR8F":
+          - checkbox "Select M-DGX-TR8F"
+        - cell "Dewey GUI audit 20260916 I1-A URL M-DGX-TR8F":
+          - link "Dewey GUI audit 20260916 I1-A URL":
+            - /url: /records/M-DGX-TR8F
+          - generic: M-DGX-TR8F
+        - cell "object":
+          - generic: object
+        - cell "dewey"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TR3S Dewey GUI audit 20260916 I1-A prefix M-DGX-TR3S prefix dewey 9/16/2026":
+        - cell "Select M-DGX-TR3S":
+          - checkbox "Select M-DGX-TR3S"
+        - cell "Dewey GUI audit 20260916 I1-A prefix M-DGX-TR3S":
+          - link "Dewey GUI audit 20260916 I1-A prefix":
+            - /url: /records/M-DGX-TR3S
+          - generic: M-DGX-TR3S
+        - cell "prefix":
+          - generic: prefix
+        - cell "dewey"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TQRF Dewey GUI audit 20260916 I1-A storage set M-DGX-TQRF set — 9/16/2026":
+        - cell "Select M-DGX-TQRF":
+          - checkbox "Select M-DGX-TQRF" [disabled]
+        - cell "Dewey GUI audit 20260916 I1-A storage set M-DGX-TQRF":
+          - link "Dewey GUI audit 20260916 I1-A storage set":
+            - /url: /records/M-DGX-TQRF
+          - generic: M-DGX-TQRF
+        - cell "set":
+          - generic: set
+        - cell "—"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TQKS multipart-17MiB.txt M-DGX-TQKS object dewey 9/16/2026":
+        - cell "Select M-DGX-TQKS":
+          - checkbox "Select M-DGX-TQKS"
+        - cell "multipart-17MiB.txt M-DGX-TQKS":
+          - link "multipart-17MiB.txt":
+            - /url: /records/M-DGX-TQKS
+          - generic: M-DGX-TQKS
+        - cell "object":
+          - generic: object
+        - cell "dewey"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TQE4 asset.svg M-DGX-TQE4 object dewey 9/16/2026":
+        - cell "Select M-DGX-TQE4":
+          - checkbox "Select M-DGX-TQE4"
+        - cell "asset.svg M-DGX-TQE4":
+          - link "asset.svg":
+            - /url: /records/M-DGX-TQE4
+          - generic: M-DGX-TQE4
+        - cell "object":
+          - generic: object
+        - cell "dewey"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TQAC index.html M-DGX-TQAC object dewey 9/16/2026":
+        - cell "Select M-DGX-TQAC":
+          - checkbox "Select M-DGX-TQAC"
+        - cell "index.html M-DGX-TQAC":
+          - link "index.html":
+            - /url: /records/M-DGX-TQAC
+          - generic: M-DGX-TQAC
+        - cell "object":
+          - generic: object
+        - cell "dewey"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TQ6M fixture.json M-DGX-TQ6M object dewey 9/16/2026":
+        - cell "Select M-DGX-TQ6M":
+          - checkbox "Select M-DGX-TQ6M"
+        - cell "fixture.json M-DGX-TQ6M":
+          - link "fixture.json":
+            - /url: /records/M-DGX-TQ6M
+          - generic: M-DGX-TQ6M
+        - cell "object":
+          - generic: object
+        - cell "dewey"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TQ2W hello world ü.txt M-DGX-TQ2W object dewey 9/16/2026":
+        - cell "Select M-DGX-TQ2W":
+          - checkbox "Select M-DGX-TQ2W"
+        - cell "hello world ü.txt M-DGX-TQ2W":
+          - link "hello world ü.txt":
+            - /url: /records/M-DGX-TQ2W
+          - generic: M-DGX-TQ2W
+        - cell "object":
+          - generic: object
+        - cell "dewey"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TPSE 20260604_LH01121_0005_A23TVVFLT4 M-DGX-TPSE prefix offwithyou 9/16/2026":
+        - cell "Select M-DGX-TPSE":
+          - checkbox "Select M-DGX-TPSE"
+        - cell "20260604_LH01121_0005_A23TVVFLT4 M-DGX-TPSE":
+          - link "20260604_LH01121_0005_A23TVVFLT4":
+            - /url: /records/M-DGX-TPSE
+          - generic: M-DGX-TPSE
+        - cell "prefix":
+          - generic: prefix
+        - cell "offwithyou"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TPJW 20260911_LH01106_0019_A23NFCMLT3 M-DGX-TPJW prefix offwithyou 9/16/2026":
+        - cell "Select M-DGX-TPJW":
+          - checkbox "Select M-DGX-TPJW"
+        - cell "20260911_LH01106_0019_A23NFCMLT3 M-DGX-TPJW":
+          - link "20260911_LH01106_0019_A23NFCMLT3":
+            - /url: /records/M-DGX-TPJW
+          - generic: M-DGX-TPJW
+        - cell "prefix":
+          - generic: prefix
+        - cell "offwithyou"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TPF3 20260911_LH01106_0019_A23NFCMLT3 M-DGX-TPF3 prefix offwithyou 9/12/2026":
+        - cell "Select M-DGX-TPF3":
+          - checkbox "Select M-DGX-TPF3"
+        - cell "20260911_LH01106_0019_A23NFCMLT3 M-DGX-TPF3":
+          - link "20260911_LH01106_0019_A23NFCMLT3":
+            - /url: /records/M-DGX-TPF3
+          - generic: M-DGX-TPF3
+        - cell "prefix":
+          - generic: prefix
+        - cell "offwithyou"
+        - cell "9/12/2026"
+      - row "Select M-DGX-NP43 synthetic-labcore-run-2675d532089744db8e098480068caaa7 M-DGX-NP43 prefix labcore 9/11/2026":
+        - cell "Select M-DGX-NP43":
+          - checkbox "Select M-DGX-NP43"
+        - cell "synthetic-labcore-run-2675d532089744db8e098480068caaa7 M-DGX-NP43":
+          - link "synthetic-labcore-run-2675d532089744db8e098480068caaa7":
+            - /url: /records/M-DGX-NP43
+          - generic: M-DGX-NP43
+        - cell "prefix":
+          - generic: prefix
+        - cell "labcore"
+        - cell "9/11/2026"
+      - row "Select M-DGX-NP19 Dewey 9.0.0 production acceptance M-DGX-NP19 set — 9/11/2026":
+        - cell "Select M-DGX-NP19":
+          - checkbox "Select M-DGX-NP19" [disabled]
+        - cell "Dewey 9.0.0 production acceptance M-DGX-NP19":
+          - link "Dewey 9.0.0 production acceptance":
+            - /url: /records/M-DGX-NP19
+          - generic: M-DGX-NP19
+        - cell "set":
+          - generic: set
+        - cell "—"
+        - cell "9/11/2026"
+      - row "Select M-DGX-NNSS Illumina run QC 20260815 LH01121 full MultiQC package M-DGX-NNSS set — 9/9/2026":
+        - cell "Select M-DGX-NNSS":
+          - checkbox "Select M-DGX-NNSS" [disabled]
+        - cell "Illumina run QC 20260815 LH01121 full MultiQC package M-DGX-NNSS":
+          - link "Illumina run QC 20260815 LH01121 full MultiQC package":
+            - /url: /records/M-DGX-NNSS
+          - generic: M-DGX-NNSS
+        - cell "set":
+          - generic: set
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NNQX multiqc_sources.txt M-DGX-NNQX object — 9/9/2026":
+        - cell "Select M-DGX-NNQX":
+          - checkbox "Select M-DGX-NNQX"
+        - cell "multiqc_sources.txt M-DGX-NNQX":
+          - link "multiqc_sources.txt":
+            - /url: /records/M-DGX-NNQX
+          - generic: M-DGX-NNQX
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NNN1 multiqc_software_versions.txt M-DGX-NNN1 object — 9/9/2026":
+        - cell "Select M-DGX-NNN1":
+          - checkbox "Select M-DGX-NNN1"
+        - cell "multiqc_software_versions.txt M-DGX-NNN1":
+          - link "multiqc_software_versions.txt":
+            - /url: /records/M-DGX-NNN1
+          - generic: M-DGX-NNN1
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NNK5 multiqc_illumina_run_qc_summary.txt M-DGX-NNK5 object — 9/9/2026":
+        - cell "Select M-DGX-NNK5":
+          - checkbox "Select M-DGX-NNK5"
+        - cell "multiqc_illumina_run_qc_summary.txt M-DGX-NNK5":
+          - link "multiqc_illumina_run_qc_summary.txt":
+            - /url: /records/M-DGX-NNK5
+          - generic: M-DGX-NNK5
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NNH9 multiqc_citations.txt M-DGX-NNH9 object — 9/9/2026":
+        - cell "Select M-DGX-NNH9":
+          - checkbox "Select M-DGX-NNH9"
+        - cell "multiqc_citations.txt M-DGX-NNH9":
+          - link "multiqc_citations.txt":
+            - /url: /records/M-DGX-NNH9
+          - generic: M-DGX-NNH9
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NNFE multiqc_bclconvert_bysample.txt M-DGX-NNFE object — 9/9/2026":
+        - cell "Select M-DGX-NNFE":
+          - checkbox "Select M-DGX-NNFE"
+        - cell "multiqc_bclconvert_bysample.txt M-DGX-NNFE":
+          - link "multiqc_bclconvert_bysample.txt":
+            - /url: /records/M-DGX-NNFE
+          - generic: M-DGX-NNFE
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+  - generic: Page 1 · 25 per page
+  - button "Next"
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

@@ -1,0 +1,161 @@
+- banner:
+  - link "Dewey / TapDB":
+    - /url: /tapdb/
+  - navigation:
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Admin":
+      - /url: /admin
+    - link "Overview":
+      - /url: /tapdb/admin/overview
+    - link "Search":
+      - /url: /tapdb/search
+    - link "Graph":
+      - /url: /tapdb/graph
+    - link "Templates":
+      - /url: /tapdb/templates
+    - link "Audit":
+      - /url: /tapdb/audit
+    - link "Help":
+      - /url: /tapdb/help
+    - link "Readiness":
+      - /url: /tapdb/admin/readiness
+    - link "Inventory":
+      - /url: /tapdb/admin/inventory
+    - link "Meridian":
+      - /url: /tapdb/admin/meridian
+    - link "Metrics":
+      - /url: /tapdb/admin/metrics
+    - link "Runtime":
+      - /url: /tapdb/admin/runtime
+    - link "Backups":
+      - /url: /tapdb/admin/backups
+    - link "Sign out":
+      - /url: /auth/logout
+  - generic: johnm@lsmc.com · admin
+- main:
+  - heading "Overview" [level=1]
+  - paragraph: Canonical TapDB object, lineage, audit, recovery, and discovery console.
+  - link "16 active templates":
+    - /url: /tapdb/search?record_type=template
+    - strong: "16"
+    - generic: active templates
+  - link "17592 active instances":
+    - /url: /tapdb/search?record_type=instance
+    - strong: "17592"
+    - generic: active instances
+  - link "6434 active lineage edges":
+    - /url: /tapdb/search?record_type=lineage
+    - strong: "6434"
+    - generic: active lineage edges
+  - heading "Recent audit activity" [level=2]
+  - link "Open audit explorer":
+    - /url: /tapdb/audit
+  - table:
+    - rowgroup:
+      - row "Time Object Operation Actor Name":
+        - columnheader "Time"
+        - columnheader "Object"
+        - columnheader "Operation"
+        - columnheader "Actor"
+        - columnheader "Name"
+    - rowgroup:
+      - row "2026-09-16 17:40:02.493319+00:00 M-DGX-TQ00 UPDATE dewey Download credential issued":
+        - cell "2026-09-16 17:40:02.493319+00:00"
+        - cell "M-DGX-TQ00":
+          - link "M-DGX-TQ00":
+            - /url: /tapdb/object/M-DGX-TQ00
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "Download credential issued"
+      - row "2026-09-16 17:40:02.493319+00:00 M-DGX-TQ00 UPDATE dewey Download credential issued":
+        - cell "2026-09-16 17:40:02.493319+00:00"
+        - cell "M-DGX-TQ00":
+          - link "M-DGX-TQ00":
+            - /url: /tapdb/object/M-DGX-TQ00
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "Download credential issued"
+      - row "2026-09-16 17:40:02.493319+00:00 M-DGX-TQ00 UPDATE dewey Download credential issued":
+        - cell "2026-09-16 17:40:02.493319+00:00"
+        - cell "M-DGX-TQ00":
+          - link "M-DGX-TQ00":
+            - /url: /tapdb/object/M-DGX-TQ00
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "Download credential issued"
+      - row "2026-09-16 17:40:02.493319+00:00 M-DGX-TQ00 INSERT dewey Download credential issued":
+        - cell "2026-09-16 17:40:02.493319+00:00"
+        - cell "M-DGX-TQ00":
+          - link "M-DGX-TQ00":
+            - /url: /tapdb/object/M-DGX-TQ00
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "Download credential issued"
+      - row "2026-09-16 17:40:02.493319+00:00 M-DGX-TQ00 UPDATE dewey Download credential issued":
+        - cell "2026-09-16 17:40:02.493319+00:00"
+        - cell "M-DGX-TQ00":
+          - link "M-DGX-TQ00":
+            - /url: /tapdb/object/M-DGX-TQ00
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "Download credential issued"
+      - row "2026-09-16 14:49:41.035794+00:00 M-DGX-TPY4 INSERT dewey artifact:M-DGX-TPSE:M-DGX-TPW8:bloom_sequencing_run":
+        - cell "2026-09-16 14:49:41.035794+00:00"
+        - cell "M-DGX-TPY4":
+          - link "M-DGX-TPY4":
+            - /url: /tapdb/object/M-DGX-TPY4
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "artifact:M-DGX-TPSE:M-DGX-TPW8:bloom_sequencing_run"
+      - row "2026-09-16 14:49:41.035794+00:00 M-DGX-TPY4 UPDATE dewey artifact:M-DGX-TPSE:M-DGX-TPW8:bloom_sequencing_run":
+        - cell "2026-09-16 14:49:41.035794+00:00"
+        - cell "M-DGX-TPY4":
+          - link "M-DGX-TPY4":
+            - /url: /tapdb/object/M-DGX-TPY4
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "artifact:M-DGX-TPSE:M-DGX-TPW8:bloom_sequencing_run"
+      - row "2026-09-16 14:49:41.035794+00:00 M-DGX-TPY4 UPDATE dewey artifact:M-DGX-TPSE:M-DGX-TPW8:bloom_sequencing_run":
+        - cell "2026-09-16 14:49:41.035794+00:00"
+        - cell "M-DGX-TPY4":
+          - link "M-DGX-TPY4":
+            - /url: /tapdb/object/M-DGX-TPY4
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "artifact:M-DGX-TPSE:M-DGX-TPW8:bloom_sequencing_run"
+      - row "2026-09-16 14:49:41.035794+00:00 M-DGX-TPY4 UPDATE dewey artifact:M-DGX-TPSE:M-DGX-TPW8:bloom_sequencing_run":
+        - cell "2026-09-16 14:49:41.035794+00:00"
+        - cell "M-DGX-TPY4":
+          - link "M-DGX-TPY4":
+            - /url: /tapdb/object/M-DGX-TPY4
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "artifact:M-DGX-TPSE:M-DGX-TPW8:bloom_sequencing_run"
+      - row "2026-09-16 14:49:41.035794+00:00 M-DGX-TPY4 UPDATE dewey artifact:M-DGX-TPSE:M-DGX-TPW8:bloom_sequencing_run":
+        - cell "2026-09-16 14:49:41.035794+00:00"
+        - cell "M-DGX-TPY4":
+          - link "M-DGX-TPY4":
+            - /url: /tapdb/object/M-DGX-TPY4
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "artifact:M-DGX-TPSE:M-DGX-TPW8:bloom_sequencing_run"
+- contentinfo: TapDB 10.1.1rc1
+- text: Theme
+- combobox "Theme":
+  - option "original"
+  - option "light"
+  - option "dark" [selected]
+  - option "CBF"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

@@ -1,0 +1,88 @@
+- banner:
+  - link "Dewey / TapDB":
+    - /url: /tapdb/
+  - navigation:
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Admin":
+      - /url: /admin
+    - link "Overview":
+      - /url: /tapdb/admin/overview
+    - link "Search":
+      - /url: /tapdb/search
+    - link "Graph":
+      - /url: /tapdb/graph
+    - link "Templates":
+      - /url: /tapdb/templates
+    - link "Audit":
+      - /url: /tapdb/audit
+    - link "Help":
+      - /url: /tapdb/help
+    - link "Readiness":
+      - /url: /tapdb/admin/readiness
+    - link "Inventory":
+      - /url: /tapdb/admin/inventory
+    - link "Meridian":
+      - /url: /tapdb/admin/meridian
+    - link "Metrics":
+      - /url: /tapdb/admin/metrics
+    - link "Runtime":
+      - /url: /tapdb/admin/runtime
+    - link "Backups":
+      - /url: /tapdb/admin/backups
+    - link "Sign out":
+      - /url: /auth/logout
+  - generic: johnm@lsmc.com · admin
+- main:
+  - heading "Audit explorer" [level=1]
+  - textbox "exact object EUID": M-DGX-TR3S
+  - textbox "exact actor": dewey
+  - combobox:
+    - option "ALL"
+    - option "INSERT" [selected]
+    - option "UPDATE"
+    - option "DELETE"
+  - spinbutton: "2"
+  - button "Query"
+  - table:
+    - rowgroup:
+      - row "Time EUID Operation Actor Kind Name Change":
+        - columnheader "Time"
+        - columnheader "EUID"
+        - columnheader "Operation"
+        - columnheader "Actor"
+        - columnheader "Kind"
+        - columnheader "Name"
+        - columnheader "Change"
+    - rowgroup:
+      - row "2026-09-16 19:22:56.089561+00:00 M-DGX-TR3S INSERT dewey data/artifact/generic Dewey GUI audit 20260916 I1-A prefix":
+        - cell "2026-09-16 19:22:56.089561+00:00"
+        - cell "M-DGX-TR3S":
+          - link "M-DGX-TR3S":
+            - /url: /tapdb/object/M-DGX-TR3S
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "data/artifact/generic"
+        - cell "Dewey GUI audit 20260916 I1-A prefix"
+        - cell:
+          - generic "values" [active]
+          - generic: "{ \"new\": null, \"old\": null }"
+- contentinfo: TapDB 10.1.1rc1
+- text: Theme
+- combobox "Theme":
+  - option "original" [selected]
+  - option "light"
+  - option "dark"
+  - option "CBF"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

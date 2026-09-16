@@ -1,0 +1,77 @@
+- banner:
+  - link "Dewey / TapDB":
+    - /url: /tapdb/
+  - navigation:
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Admin":
+      - /url: /admin
+    - link "Overview":
+      - /url: /tapdb/admin/overview
+    - link "Search":
+      - /url: /tapdb/search
+    - link "Graph":
+      - /url: /tapdb/graph
+    - link "Templates":
+      - /url: /tapdb/templates
+    - link "Audit":
+      - /url: /tapdb/audit
+    - link "Help":
+      - /url: /tapdb/help
+    - link "Readiness":
+      - /url: /tapdb/admin/readiness
+    - link "Inventory":
+      - /url: /tapdb/admin/inventory
+    - link "Meridian":
+      - /url: /tapdb/admin/meridian
+    - link "Metrics":
+      - /url: /tapdb/admin/metrics
+    - link "Runtime":
+      - /url: /tapdb/admin/runtime
+    - link "Backups":
+      - /url: /tapdb/admin/backups
+    - link "Sign out":
+      - /url: /auth/logout
+  - generic: johnm@lsmc.com · admin
+- main:
+  - heading "Sanitized Runtime Information" [level=1]
+  - paragraph: This is the same payload exposed by the CLI and authenticated API.
+  - heading "package" [level=2]
+  - generic: "{ \"name\": \"daylily-tapdb\", \"version\": \"10.1.1rc1\" }"
+  - heading "python" [level=2]
+  - generic: "{ \"implementation\": \"cpython\", \"version\": \"3.12.14\" }"
+  - heading "meridian" [level=2]
+  - generic: "{ \"package\": \"meridian-euid\", \"version\": \"0.4.8\" }"
+  - heading "git" [level=2]
+  - generic: "{ \"branch\": null, \"commit\": null, \"dirty\": null, \"tag\": null }"
+  - heading "config" [level=2]
+  - generic: "{ \"config_version\": 4, \"exists\": true, \"path\": \"/opt/dewey/day/releases/9.0.0/tapdb-runtime.yaml\", \"sha256\": \"987b25f1659a1e72593bd4231307b1f7f6c7122d5cb20193c3681ba41a2fe353\", \"target\": \"explicit\" }"
+  - heading "database" [level=2]
+  - generic: "{ \"database\": \"dewey_prod_tapdb10\", \"engine_type\": \"aurora\", \"host\": \"dayhoff-lsmcok1-tapdb.cluster-ch4mq8a6wcdf.us-west-2.rds.amazonaws.com\", \"port\": \"5432\", \"schema_name\": \"tapdb_dewey_lsmcok1_local\", \"server_version\": \"psql exit 2\", \"status\": \"error\" }"
+  - heading "scope" [level=2]
+  - generic: "{ \"client_id\": \"dewey\", \"database_name\": \"dewey-day\", \"domain_code\": \"M\", \"owner_repo_name\": \"dewey\" }"
+  - heading "storage" [level=2]
+  - generic: "{ \"aws_profile\": \"lsmc\", \"region\": \"us-west-2\", \"s3_buckets\": [], \"uris\": [] }"
+  - heading "ui" [level=2]
+  - generic: "{ \"pid\": null, \"port\": \"8910\", \"running\": false, \"status\": \"stopped\" }"
+  - heading "dag" [level=2]
+  - generic: "{ \"eligible\": false, \"service_id\": null, \"status\": \"not_configured\" }"
+- contentinfo: TapDB 10.1.1rc1
+- text: Theme
+- combobox "Theme":
+  - option "original" [selected]
+  - option "light"
+  - option "dark"
+  - option "CBF"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

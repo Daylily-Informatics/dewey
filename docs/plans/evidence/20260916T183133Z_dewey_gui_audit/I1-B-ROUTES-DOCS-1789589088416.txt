@@ -1,0 +1,1641 @@
+- heading "Dewey Artifact Service 10.0.5 OAS 3.1" [level=1]:
+  - text: Dewey Artifact Service
+  - generic: 10.0.5
+  - generic: OAS 3.1
+- link "/openapi.json":
+  - /url: /openapi.json
+  - generic: /openapi.json
+- paragraph: Canonical artifact registry and resolver for LSMC
+- button "Authorize":
+  - generic: Authorize
+- main:
+  - heading "EUID registry Collapse operation" [level=3]:
+    - link "EUID registry":
+      - /url: "#/EUID%20registry"
+    - button "Collapse operation" [expanded]:
+  - 'button "POST /api/v1/records/{euid}/preview Create Preview"':
+    - generic: POST
+    - 'link "/api/v1/records/{euid}/preview"':
+      - /url: "#/EUID%20registry/create_preview_api_v1_records__euid__preview_post"
+      - text: /api
+      - text: /v1
+      - text: /records
+      - text: "/{euid}"
+      - text: /preview
+    - generic: Create Preview
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "post /api/v1/records/{euid}/preview"':
+  - 'button "PATCH /api/v1/records/{euid}/owner Owner"':
+    - generic: PATCH
+    - 'link "/api/v1/records/{euid}/owner"':
+      - /url: "#/EUID%20registry/owner_api_v1_records__euid__owner_patch"
+      - text: /api
+      - text: /v1
+      - text: /records
+      - text: "/{euid}"
+      - text: /owner
+    - generic: Owner
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "patch /api/v1/records/{euid}/owner"':
+  - button "POST /api/v1/records Register":
+    - generic: POST
+    - link "/api/v1/records":
+      - /url: "#/EUID%20registry/register_api_v1_records_post"
+      - text: /api
+      - text: /v1
+      - text: /records
+    - generic: Register
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "post /api/v1/records":
+  - 'button "GET /api/v1/records/{euid} Resolve" [expanded] [active]':
+    - generic: GET
+    - 'link "/api/v1/records/{euid}"':
+      - /url: "#/EUID%20registry/resolve_api_v1_records__euid__get"
+      - text: /api
+      - text: /v1
+      - text: /records
+      - text: "/{euid}"
+    - generic: Resolve
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "get /api/v1/records/{euid}" [expanded]':
+  - heading "Parameters" [level=4]
+  - button "Try it out"
+  - table:
+    - rowgroup:
+      - row "Name Description":
+        - columnheader "Name"
+        - columnheader "Description"
+    - rowgroup:
+      - row "euid *required string (path)":
+        - cell "euid *required string (path)":
+          - generic: euid *required
+          - generic: string
+          - generic: (path)
+        - cell:
+          - textbox "euid" [disabled]
+  - heading "Responses" [level=4]
+  - region:
+    - rowgroup:
+      - row "Code Description Links":
+        - cell "Code"
+        - cell "Description"
+        - cell "Links"
+    - rowgroup:
+      - row "200 Successful Response Media type application/json Controls Accept header. Example Value No links":
+        - cell "200"
+        - cell "Successful Response Media type application/json Controls Accept header. Example Value":
+          - paragraph: Successful Response
+          - generic: Media type
+          - combobox "Media Type":
+            - option "application/json" [selected]
+          - text: Controls
+          - code: Accept
+          - text: header.
+          - tablist:
+            - tab "Example Value" [selected]
+            - tab "Schema"
+          - tabpanel "Example Value":
+            - code: "\"string\""
+        - cell "No links"
+      - row "422 Validation Error Media type application/json Example Value No links":
+        - cell "422"
+        - cell "Validation Error Media type application/json Example Value":
+          - paragraph: Validation Error
+          - generic: Media type
+          - combobox "Media Type":
+            - option "application/json" [selected]
+          - tablist:
+            - tab "Example Value" [selected]
+            - tab "Schema"
+          - tabpanel "Example Value":
+            - code: "{ \"detail\": [ { \"loc\": [ \"string\", 0 ], \"msg\": \"string\", \"type\": \"string\", \"input\": \"string\", \"ctx\": {} } ] }"
+        - cell "No links"
+  - 'button "PATCH /api/v1/records/{euid} Edit"':
+    - generic: PATCH
+    - 'link "/api/v1/records/{euid}"':
+      - /url: "#/EUID%20registry/edit_api_v1_records__euid__patch"
+      - text: /api
+      - text: /v1
+      - text: /records
+      - text: "/{euid}"
+    - generic: Edit
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "patch /api/v1/records/{euid}"':
+  - 'button "POST /api/v1/records/{euid}/archive Archive"':
+    - generic: POST
+    - 'link "/api/v1/records/{euid}/archive"':
+      - /url: "#/EUID%20registry/archive_api_v1_records__euid__archive_post"
+      - text: /api
+      - text: /v1
+      - text: /records
+      - text: "/{euid}"
+      - text: /archive
+    - generic: Archive
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "post /api/v1/records/{euid}/archive"':
+  - 'button "PATCH /api/v1/records/{euid}/permissions Permissions"':
+    - generic: PATCH
+    - 'link "/api/v1/records/{euid}/permissions"':
+      - /url: "#/EUID%20registry/permissions_api_v1_records__euid__permissions_patch"
+      - text: /api
+      - text: /v1
+      - text: /records
+      - text: "/{euid}"
+      - text: /permissions
+    - generic: Permissions
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "patch /api/v1/records/{euid}/permissions"':
+  - 'button "GET /api/v1/records/{euid}/contents Contents"':
+    - generic: GET
+    - 'link "/api/v1/records/{euid}/contents"':
+      - /url: "#/EUID%20registry/contents_api_v1_records__euid__contents_get"
+      - text: /api
+      - text: /v1
+      - text: /records
+      - text: "/{euid}"
+      - text: /contents
+    - generic: Contents
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "get /api/v1/records/{euid}/contents"':
+  - 'button "POST /api/v1/records/{euid}/members Add Member"':
+    - generic: POST
+    - 'link "/api/v1/records/{euid}/members"':
+      - /url: "#/EUID%20registry/add_member_api_v1_records__euid__members_post"
+      - text: /api
+      - text: /v1
+      - text: /records
+      - text: "/{euid}"
+      - text: /members
+    - generic: Add Member
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "post /api/v1/records/{euid}/members"':
+  - 'button "DELETE /api/v1/records/{euid}/members/{member_euid} Remove Member"':
+    - generic: DELETE
+    - 'link "/api/v1/records/{euid}/members/{member_euid}"':
+      - /url: "#/EUID%20registry/remove_member_api_v1_records__euid__members__member_euid__delete"
+      - text: /api
+      - text: /v1
+      - text: /records
+      - text: "/{euid}"
+      - text: /members
+      - text: "/{member_euid}"
+    - generic: Remove Member
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "delete /api/v1/records/{euid}/members/{member_euid}"':
+  - 'button "POST /api/v1/records/{euid}/access Access"':
+    - generic: POST
+    - 'link "/api/v1/records/{euid}/access"':
+      - /url: "#/EUID%20registry/access_api_v1_records__euid__access_post"
+      - text: /api
+      - text: /v1
+      - text: /records
+      - text: "/{euid}"
+      - text: /access
+    - generic: Access
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "post /api/v1/records/{euid}/access"':
+  - 'button "POST /api/v1/records/{euid}/shares Share"':
+    - generic: POST
+    - 'link "/api/v1/records/{euid}/shares"':
+      - /url: "#/EUID%20registry/share_api_v1_records__euid__shares_post"
+      - text: /api
+      - text: /v1
+      - text: /records
+      - text: "/{euid}"
+      - text: /shares
+    - generic: Share
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "post /api/v1/records/{euid}/shares"':
+  - button "POST /api/v1/registry/search Search":
+    - generic: POST
+    - link "/api/v1/registry/search":
+      - /url: "#/EUID%20registry/search_api_v1_registry_search_post"
+      - text: /api
+      - text: /v1
+      - text: /registry
+      - text: /search
+    - generic: Search
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "post /api/v1/registry/search":
+  - 'button "GET /api/v1/registry/shares/{euid} Share Detail"':
+    - generic: GET
+    - 'link "/api/v1/registry/shares/{euid}"':
+      - /url: "#/EUID%20registry/share_detail_api_v1_registry_shares__euid__get"
+      - text: /api
+      - text: /v1
+      - text: /registry
+      - text: /shares
+      - text: "/{euid}"
+    - generic: Share Detail
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "get /api/v1/registry/shares/{euid}"':
+  - 'button "PATCH /api/v1/registry/shares/{euid} Share Edit"':
+    - generic: PATCH
+    - 'link "/api/v1/registry/shares/{euid}"':
+      - /url: "#/EUID%20registry/share_edit_api_v1_registry_shares__euid__patch"
+      - text: /api
+      - text: /v1
+      - text: /registry
+      - text: /shares
+      - text: "/{euid}"
+    - generic: Share Edit
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "patch /api/v1/registry/shares/{euid}"':
+  - 'button "POST /api/v1/registry/shares/{euid}/revoke Share Revoke"':
+    - generic: POST
+    - 'link "/api/v1/registry/shares/{euid}/revoke"':
+      - /url: "#/EUID%20registry/share_revoke_api_v1_registry_shares__euid__revoke_post"
+      - text: /api
+      - text: /v1
+      - text: /registry
+      - text: /shares
+      - text: "/{euid}"
+      - text: /revoke
+    - generic: Share Revoke
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "post /api/v1/registry/shares/{euid}/revoke"':
+  - 'button "POST /api/v1/registry/shares/{euid}/invite Invite"':
+    - generic: POST
+    - 'link "/api/v1/registry/shares/{euid}/invite"':
+      - /url: "#/EUID%20registry/invite_api_v1_registry_shares__euid__invite_post"
+      - text: /api
+      - text: /v1
+      - text: /registry
+      - text: /shares
+      - text: "/{euid}"
+      - text: /invite
+    - generic: Invite
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "post /api/v1/registry/shares/{euid}/invite"':
+  - button "GET /api/v1/storage/buckets Buckets":
+    - generic: GET
+    - link "/api/v1/storage/buckets":
+      - /url: "#/EUID%20registry/buckets_api_v1_storage_buckets_get"
+      - text: /api
+      - text: /v1
+      - text: /storage
+      - text: /buckets
+    - generic: Buckets
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "get /api/v1/storage/buckets":
+  - button "GET /api/v1/storage/object Object Detail":
+    - generic: GET
+    - link "/api/v1/storage/object":
+      - /url: "#/EUID%20registry/object_detail_api_v1_storage_object_get"
+      - text: /api
+      - text: /v1
+      - text: /storage
+      - text: /object
+    - generic: Object Detail
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "get /api/v1/storage/object":
+  - button "POST /api/v1/storage/access Storage Access":
+    - generic: POST
+    - link "/api/v1/storage/access":
+      - /url: "#/EUID%20registry/storage_access_api_v1_storage_access_post"
+      - text: /api
+      - text: /v1
+      - text: /storage
+      - text: /access
+    - generic: Storage Access
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "post /api/v1/storage/access":
+  - button "POST /api/v1/storage/uploads Upload":
+    - generic: POST
+    - link "/api/v1/storage/uploads":
+      - /url: "#/EUID%20registry/upload_api_v1_storage_uploads_post"
+      - text: /api
+      - text: /v1
+      - text: /storage
+      - text: /uploads
+    - generic: Upload
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "post /api/v1/storage/uploads":
+  - 'button "PUT /api/v1/storage/uploads/{euid}/parts/{number} Part"':
+    - generic: PUT
+    - 'link "/api/v1/storage/uploads/{euid}/parts/{number}"':
+      - /url: "#/EUID%20registry/part_api_v1_storage_uploads__euid__parts__number__put"
+      - text: /api
+      - text: /v1
+      - text: /storage
+      - text: /uploads
+      - text: "/{euid}"
+      - text: /parts
+      - text: "/{number}"
+    - generic: Part
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "put /api/v1/storage/uploads/{euid}/parts/{number}"':
+  - 'button "POST /api/v1/storage/uploads/{euid}/complete Complete"':
+    - generic: POST
+    - 'link "/api/v1/storage/uploads/{euid}/complete"':
+      - /url: "#/EUID%20registry/complete_api_v1_storage_uploads__euid__complete_post"
+      - text: /api
+      - text: /v1
+      - text: /storage
+      - text: /uploads
+      - text: "/{euid}"
+      - text: /complete
+    - generic: Complete
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "post /api/v1/storage/uploads/{euid}/complete"':
+  - 'button "POST /api/v1/storage/uploads/{euid}/abort Abort"':
+    - generic: POST
+    - 'link "/api/v1/storage/uploads/{euid}/abort"':
+      - /url: "#/EUID%20registry/abort_api_v1_storage_uploads__euid__abort_post"
+      - text: /api
+      - text: /v1
+      - text: /storage
+      - text: /uploads
+      - text: "/{euid}"
+      - text: /abort
+    - generic: Abort
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "post /api/v1/storage/uploads/{euid}/abort"':
+  - button "POST /api/v1/storage/deletions/preview Deletion Preview":
+    - generic: POST
+    - link "/api/v1/storage/deletions/preview":
+      - /url: "#/EUID%20registry/deletion_preview_api_v1_storage_deletions_preview_post"
+      - text: /api
+      - text: /v1
+      - text: /storage
+      - text: /deletions
+      - text: /preview
+    - generic: Deletion Preview
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "post /api/v1/storage/deletions/preview":
+  - 'button "POST /api/v1/storage/deletions/{euid}/execute Deletion Execute"':
+    - generic: POST
+    - 'link "/api/v1/storage/deletions/{euid}/execute"':
+      - /url: "#/EUID%20registry/deletion_execute_api_v1_storage_deletions__euid__execute_post"
+      - text: /api
+      - text: /v1
+      - text: /storage
+      - text: /deletions
+      - text: "/{euid}"
+      - text: /execute
+    - generic: Deletion Execute
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "post /api/v1/storage/deletions/{euid}/execute"':
+  - 'button "GET /api/v1/storage/operations/{euid} Operation"':
+    - generic: GET
+    - 'link "/api/v1/storage/operations/{euid}"':
+      - /url: "#/EUID%20registry/operation_api_v1_storage_operations__euid__get"
+      - text: /api
+      - text: /v1
+      - text: /storage
+      - text: /operations
+      - text: "/{euid}"
+    - generic: Operation
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "get /api/v1/storage/operations/{euid}"':
+  - button "GET /api/v1/account/tokens Tokens":
+    - generic: GET
+    - link "/api/v1/account/tokens":
+      - /url: "#/EUID%20registry/tokens_api_v1_account_tokens_get"
+      - text: /api
+      - text: /v1
+      - text: /account
+      - text: /tokens
+    - generic: Tokens
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "get /api/v1/account/tokens":
+  - button "POST /api/v1/account/tokens Token Create":
+    - generic: POST
+    - link "/api/v1/account/tokens":
+      - /url: "#/EUID%20registry/token_create_api_v1_account_tokens_post"
+      - text: /api
+      - text: /v1
+      - text: /account
+      - text: /tokens
+    - generic: Token Create
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "post /api/v1/account/tokens":
+  - button "GET /api/v1/registry/admin Administration":
+    - generic: GET
+    - link "/api/v1/registry/admin":
+      - /url: "#/EUID%20registry/administration_api_v1_registry_admin_get"
+      - text: /api
+      - text: /v1
+      - text: /registry
+      - text: /admin
+    - generic: Administration
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "get /api/v1/registry/admin":
+  - button "GET /api/v1/registry/defaults Defaults":
+    - generic: GET
+    - link "/api/v1/registry/defaults":
+      - /url: "#/EUID%20registry/defaults_api_v1_registry_defaults_get"
+      - text: /api
+      - text: /v1
+      - text: /registry
+      - text: /defaults
+    - generic: Defaults
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "get /api/v1/registry/defaults":
+  - button "PATCH /api/v1/registry/defaults Change Defaults":
+    - generic: PATCH
+    - link "/api/v1/registry/defaults":
+      - /url: "#/EUID%20registry/change_defaults_api_v1_registry_defaults_patch"
+      - text: /api
+      - text: /v1
+      - text: /registry
+      - text: /defaults
+    - generic: Change Defaults
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "patch /api/v1/registry/defaults":
+  - 'button "POST /api/v1/account/tokens/{euid}/revoke Token Revoke"':
+    - generic: POST
+    - 'link "/api/v1/account/tokens/{euid}/revoke"':
+      - /url: "#/EUID%20registry/token_revoke_api_v1_account_tokens__euid__revoke_post"
+      - text: /api
+      - text: /v1
+      - text: /account
+      - text: /tokens
+      - text: "/{euid}"
+      - text: /revoke
+    - generic: Token Revoke
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "post /api/v1/account/tokens/{euid}/revoke"':
+  - heading "S3 storage Collapse operation" [level=3]:
+    - link "S3 storage":
+      - /url: "#/S3%20storage"
+    - button "Collapse operation" [expanded]:
+  - button "GET /api/v1/storage/buckets Buckets":
+    - generic: GET
+    - link "/api/v1/storage/buckets":
+      - /url: "#/S3%20storage/buckets_api_v1_storage_buckets_get"
+      - text: /api
+      - text: /v1
+      - text: /storage
+      - text: /buckets
+    - generic: Buckets
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "get /api/v1/storage/buckets":
+  - button "GET /api/v1/storage/object Object Detail":
+    - generic: GET
+    - link "/api/v1/storage/object":
+      - /url: "#/S3%20storage/object_detail_api_v1_storage_object_get"
+      - text: /api
+      - text: /v1
+      - text: /storage
+      - text: /object
+    - generic: Object Detail
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "get /api/v1/storage/object":
+  - button "POST /api/v1/storage/access Storage Access":
+    - generic: POST
+    - link "/api/v1/storage/access":
+      - /url: "#/S3%20storage/storage_access_api_v1_storage_access_post"
+      - text: /api
+      - text: /v1
+      - text: /storage
+      - text: /access
+    - generic: Storage Access
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "post /api/v1/storage/access":
+  - button "POST /api/v1/storage/uploads Upload":
+    - generic: POST
+    - link "/api/v1/storage/uploads":
+      - /url: "#/S3%20storage/upload_api_v1_storage_uploads_post"
+      - text: /api
+      - text: /v1
+      - text: /storage
+      - text: /uploads
+    - generic: Upload
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "post /api/v1/storage/uploads":
+  - 'button "PUT /api/v1/storage/uploads/{euid}/parts/{number} Part"':
+    - generic: PUT
+    - 'link "/api/v1/storage/uploads/{euid}/parts/{number}"':
+      - /url: "#/S3%20storage/part_api_v1_storage_uploads__euid__parts__number__put"
+      - text: /api
+      - text: /v1
+      - text: /storage
+      - text: /uploads
+      - text: "/{euid}"
+      - text: /parts
+      - text: "/{number}"
+    - generic: Part
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "put /api/v1/storage/uploads/{euid}/parts/{number}"':
+  - 'button "POST /api/v1/storage/uploads/{euid}/complete Complete"':
+    - generic: POST
+    - 'link "/api/v1/storage/uploads/{euid}/complete"':
+      - /url: "#/S3%20storage/complete_api_v1_storage_uploads__euid__complete_post"
+      - text: /api
+      - text: /v1
+      - text: /storage
+      - text: /uploads
+      - text: "/{euid}"
+      - text: /complete
+    - generic: Complete
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "post /api/v1/storage/uploads/{euid}/complete"':
+  - 'button "POST /api/v1/storage/uploads/{euid}/abort Abort"':
+    - generic: POST
+    - 'link "/api/v1/storage/uploads/{euid}/abort"':
+      - /url: "#/S3%20storage/abort_api_v1_storage_uploads__euid__abort_post"
+      - text: /api
+      - text: /v1
+      - text: /storage
+      - text: /uploads
+      - text: "/{euid}"
+      - text: /abort
+    - generic: Abort
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "post /api/v1/storage/uploads/{euid}/abort"':
+  - button "POST /api/v1/storage/deletions/preview Deletion Preview":
+    - generic: POST
+    - link "/api/v1/storage/deletions/preview":
+      - /url: "#/S3%20storage/deletion_preview_api_v1_storage_deletions_preview_post"
+      - text: /api
+      - text: /v1
+      - text: /storage
+      - text: /deletions
+      - text: /preview
+    - generic: Deletion Preview
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "post /api/v1/storage/deletions/preview":
+  - 'button "POST /api/v1/storage/deletions/{euid}/execute Deletion Execute"':
+    - generic: POST
+    - 'link "/api/v1/storage/deletions/{euid}/execute"':
+      - /url: "#/S3%20storage/deletion_execute_api_v1_storage_deletions__euid__execute_post"
+      - text: /api
+      - text: /v1
+      - text: /storage
+      - text: /deletions
+      - text: "/{euid}"
+      - text: /execute
+    - generic: Deletion Execute
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "post /api/v1/storage/deletions/{euid}/execute"':
+  - 'button "GET /api/v1/storage/operations/{euid} Operation"':
+    - generic: GET
+    - 'link "/api/v1/storage/operations/{euid}"':
+      - /url: "#/S3%20storage/operation_api_v1_storage_operations__euid__get"
+      - text: /api
+      - text: /v1
+      - text: /storage
+      - text: /operations
+      - text: "/{euid}"
+    - generic: Operation
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "get /api/v1/storage/operations/{euid}"':
+  - heading "default Collapse operation" [level=3]:
+    - link "default":
+      - /url: "#/default"
+    - button "Collapse operation" [expanded]:
+  - button "POST /api/v2/sequencer-runs/register Register":
+    - generic: POST
+    - link "/api/v2/sequencer-runs/register":
+      - /url: "#/default/register_api_v2_sequencer_runs_register_post"
+      - text: /api
+      - text: /v2
+      - text: /sequencer-runs
+      - text: /register
+    - generic: Register
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "post /api/v2/sequencer-runs/register":
+  - button "GET /api/dag/manifest Dag V2 Manifest":
+    - generic: GET
+    - link "/api/dag/manifest":
+      - /url: "#/default/dag_v2_manifest_api_dag_manifest_get"
+      - text: /api
+      - text: /dag
+      - text: /manifest
+    - generic: Dag V2 Manifest
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "get /api/dag/manifest":
+  - 'button "GET /api/dag/v2/object/{euid} Dag V2 Object"':
+    - generic: GET
+    - 'link "/api/dag/v2/object/{euid}"':
+      - /url: "#/default/dag_v2_object_api_dag_v2_object__euid__get"
+      - text: /api
+      - text: /dag
+      - text: /v2
+      - text: /object
+      - text: "/{euid}"
+    - generic: Dag V2 Object
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - 'button "get /api/dag/v2/object/{euid}"':
+  - button "GET /api/dag/v2/data Dag V2 Data":
+    - generic: GET
+    - link "/api/dag/v2/data":
+      - /url: "#/default/dag_v2_data_api_dag_v2_data_get"
+      - text: /api
+      - text: /dag
+      - text: /v2
+      - text: /data
+    - generic: Dag V2 Data
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "get /api/dag/v2/data":
+  - button "GET /api/dag/v2/search Dag V2 Search":
+    - generic: GET
+    - link "/api/dag/v2/search":
+      - /url: "#/default/dag_v2_search_api_dag_v2_search_get"
+      - text: /api
+      - text: /dag
+      - text: /v2
+      - text: /search
+    - generic: Dag V2 Search
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "get /api/dag/v2/search":
+  - button "GET /healthz Healthz":
+    - generic: GET
+    - link "/healthz":
+      - /url: "#/default/healthz_healthz_get"
+    - generic: Healthz
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "get /healthz":
+  - button "GET /readyz Readyz":
+    - generic: GET
+    - link "/readyz":
+      - /url: "#/default/readyz_readyz_get"
+    - generic: Readyz
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "get /readyz":
+  - button "GET /health Health":
+    - generic: GET
+    - link "/health":
+      - /url: "#/default/health_health_get"
+    - generic: Health
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "get /health":
+  - button "GET /obs_services Obs Services":
+    - generic: GET
+    - link "/obs_services":
+      - /url: "#/default/obs_services_obs_services_get"
+    - generic: Obs Services
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "get /obs_services":
+  - button "GET /api_health Api Health":
+    - generic: GET
+    - link "/api_health":
+      - /url: "#/default/api_health_api_health_get"
+    - generic: Api Health
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "get /api_health":
+  - button "GET /endpoint_health Endpoint Health":
+    - generic: GET
+    - link "/endpoint_health":
+      - /url: "#/default/endpoint_health_endpoint_health_get"
+    - generic: Endpoint Health
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "get /endpoint_health":
+  - button "GET /db_health Db Health":
+    - generic: GET
+    - link "/db_health":
+      - /url: "#/default/db_health_db_health_get"
+    - generic: Db Health
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "get /db_health":
+  - button "GET /my_health My Health":
+    - generic: GET
+    - link "/my_health":
+      - /url: "#/default/my_health_my_health_get"
+    - generic: My Health
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "get /my_health":
+  - button "GET /api/v1/me/preferences Current User Preferences":
+    - generic: GET
+    - link "/api/v1/me/preferences":
+      - /url: "#/default/current_user_preferences_api_v1_me_preferences_get"
+      - text: /api
+      - text: /v1
+      - text: /me
+      - text: /preferences
+    - generic: Current User Preferences
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "get /api/v1/me/preferences":
+  - button "PUT /api/v1/me/preferences Update Current User Preferences":
+    - generic: PUT
+    - link "/api/v1/me/preferences":
+      - /url: "#/default/update_current_user_preferences_api_v1_me_preferences_put"
+      - text: /api
+      - text: /v1
+      - text: /me
+      - text: /preferences
+    - generic: Update Current User Preferences
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "put /api/v1/me/preferences":
+  - button "GET /auth_health Auth Health":
+    - generic: GET
+    - link "/auth_health":
+      - /url: "#/default/auth_health_auth_health_get"
+    - generic: Auth Health
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "get /auth_health":
+  - button "GET /api/anomalies List Anomalies":
+    - generic: GET
+    - link "/api/anomalies":
+      - /url: "#/default/list_anomalies_api_anomalies_get"
+      - text: /api
+      - text: /anomalies
+    - generic: List Anomalies
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "get /api/anomalies":
+  - 'button "GET /api/anomalies/{anomaly_id} Get Anomaly"':
+    - generic: GET
+    - 'link "/api/anomalies/{anomaly_id}"':
+      - /url: "#/default/get_anomaly_api_anomalies__anomaly_id__get"
+      - text: /api
+      - text: /anomalies
+      - text: "/{anomaly_id}"
+    - generic: Get Anomaly
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - 'button "get /api/anomalies/{anomaly_id}"':
+  - button "POST /api/v1/literature/search Literature Search":
+    - generic: POST
+    - link "/api/v1/literature/search":
+      - /url: "#/default/literature_search_api_v1_literature_search_post"
+      - text: /api
+      - text: /v1
+      - text: /literature
+      - text: /search
+    - generic: Literature Search
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "post /api/v1/literature/search":
+  - button "POST /api/v1/literature/save Literature Save":
+    - generic: POST
+    - link "/api/v1/literature/save":
+      - /url: "#/default/literature_save_api_v1_literature_save_post"
+      - text: /api
+      - text: /v1
+      - text: /literature
+      - text: /save
+    - generic: Literature Save
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "post /api/v1/literature/save":
+  - 'button "PATCH /api/v1/literature/saves/{literature_save_euid} Literature Save Visibility"':
+    - generic: PATCH
+    - 'link "/api/v1/literature/saves/{literature_save_euid}"':
+      - /url: "#/default/literature_save_visibility_api_v1_literature_saves__literature_save_euid__patch"
+      - text: /api
+      - text: /v1
+      - text: /literature
+      - text: /saves
+      - text: "/{literature_save_euid}"
+    - generic: Literature Save Visibility
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - 'button "patch /api/v1/literature/saves/{literature_save_euid}"':
+  - button "GET /api/v1/literature/saves/mine My Literature Saves":
+    - generic: GET
+    - link "/api/v1/literature/saves/mine":
+      - /url: "#/default/my_literature_saves_api_v1_literature_saves_mine_get"
+      - text: /api
+      - text: /v1
+      - text: /literature
+      - text: /saves
+      - text: /mine
+    - generic: My Literature Saves
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "get /api/v1/literature/saves/mine":
+  - 'button "GET /api/v1/artifacts/{artifact_euid} Get Artifact"':
+    - generic: GET
+    - 'link "/api/v1/artifacts/{artifact_euid}"':
+      - /url: "#/default/get_artifact_api_v1_artifacts__artifact_euid__get"
+      - text: /api
+      - text: /v1
+      - text: /artifacts
+      - text: "/{artifact_euid}"
+    - generic: Get Artifact
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - 'button "get /api/v1/artifacts/{artifact_euid}"':
+  - 'button "GET /api/v1/artifacts/{artifact_euid}/children Get Artifact Children"':
+    - generic: GET
+    - 'link "/api/v1/artifacts/{artifact_euid}/children"':
+      - /url: "#/default/get_artifact_children_api_v1_artifacts__artifact_euid__children_get"
+      - text: /api
+      - text: /v1
+      - text: /artifacts
+      - text: "/{artifact_euid}"
+      - text: /children
+    - generic: Get Artifact Children
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - 'button "get /api/v1/artifacts/{artifact_euid}/children"':
+  - 'button "GET /api/v1/artifacts/{artifact_euid}/parents Get Artifact Parents"':
+    - generic: GET
+    - 'link "/api/v1/artifacts/{artifact_euid}/parents"':
+      - /url: "#/default/get_artifact_parents_api_v1_artifacts__artifact_euid__parents_get"
+      - text: /api
+      - text: /v1
+      - text: /artifacts
+      - text: "/{artifact_euid}"
+      - text: /parents
+    - generic: Get Artifact Parents
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - 'button "get /api/v1/artifacts/{artifact_euid}/parents"':
+  - 'button "GET /api/v1/artifacts/{artifact_euid}/graph Get Artifact Graph"':
+    - generic: GET
+    - 'link "/api/v1/artifacts/{artifact_euid}/graph"':
+      - /url: "#/default/get_artifact_graph_api_v1_artifacts__artifact_euid__graph_get"
+      - text: /api
+      - text: /v1
+      - text: /artifacts
+      - text: "/{artifact_euid}"
+      - text: /graph
+    - generic: Get Artifact Graph
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - 'button "get /api/v1/artifacts/{artifact_euid}/graph"':
+  - button "GET /api/v1/storage/browse Browse Storage Prefix":
+    - generic: GET
+    - link "/api/v1/storage/browse":
+      - /url: "#/default/browse_storage_prefix_api_v1_storage_browse_get"
+      - text: /api
+      - text: /v1
+      - text: /storage
+      - text: /browse
+    - generic: Browse Storage Prefix
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "get /api/v1/storage/browse":
+  - 'button "POST /api/v1/artifacts/{artifact_euid}/storage/verify Verify Artifact Storage"':
+    - generic: POST
+    - 'link "/api/v1/artifacts/{artifact_euid}/storage/verify"':
+      - /url: "#/default/verify_artifact_storage_api_v1_artifacts__artifact_euid__storage_verify_post"
+      - text: /api
+      - text: /v1
+      - text: /artifacts
+      - text: "/{artifact_euid}"
+      - text: /storage
+      - text: /verify
+    - generic: Verify Artifact Storage
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - 'button "post /api/v1/artifacts/{artifact_euid}/storage/verify"':
+  - 'button "POST /api/v1/artifacts/{artifact_euid}/storage/lock Lock Artifact Storage"':
+    - generic: POST
+    - 'link "/api/v1/artifacts/{artifact_euid}/storage/lock"':
+      - /url: "#/default/lock_artifact_storage_api_v1_artifacts__artifact_euid__storage_lock_post"
+      - text: /api
+      - text: /v1
+      - text: /artifacts
+      - text: "/{artifact_euid}"
+      - text: /storage
+      - text: /lock
+    - generic: Lock Artifact Storage
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - 'button "post /api/v1/artifacts/{artifact_euid}/storage/lock"':
+  - button "GET /api/v1/artifacts List Artifacts":
+    - generic: GET
+    - link "/api/v1/artifacts":
+      - /url: "#/default/list_artifacts_api_v1_artifacts_get"
+      - text: /api
+      - text: /v1
+      - text: /artifacts
+    - generic: List Artifacts
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "get /api/v1/artifacts":
+  - button "POST /api/v1/artifacts Register Artifact":
+    - generic: POST
+    - link "/api/v1/artifacts":
+      - /url: "#/default/register_artifact_api_v1_artifacts_post"
+      - text: /api
+      - text: /v1
+      - text: /artifacts
+    - generic: Register Artifact
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "post /api/v1/artifacts":
+  - button "POST /api/v1/artifacts/import Import Artifact":
+    - generic: POST
+    - link "/api/v1/artifacts/import":
+      - /url: "#/default/import_artifact_api_v1_artifacts_import_post"
+      - text: /api
+      - text: /v1
+      - text: /artifacts
+      - text: /import
+    - generic: Import Artifact
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "post /api/v1/artifacts/import":
+  - button "POST /api/v1/artifact-prefixes Register Artifact Prefix":
+    - generic: POST
+    - link "/api/v1/artifact-prefixes":
+      - /url: "#/default/register_artifact_prefix_api_v1_artifact_prefixes_post"
+      - text: /api
+      - text: /v1
+      - text: /artifact-prefixes
+    - generic: Register Artifact Prefix
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "post /api/v1/artifact-prefixes":
+  - button "POST /api/v1/artifacts/import-run-prefix Import Run Prefix":
+    - generic: POST
+    - link "/api/v1/artifacts/import-run-prefix":
+      - /url: "#/default/import_run_prefix_api_v1_artifacts_import_run_prefix_post"
+      - text: /api
+      - text: /v1
+      - text: /artifacts
+      - text: /import-run-prefix
+    - generic: Import Run Prefix
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "post /api/v1/artifacts/import-run-prefix":
+  - button "POST /api/v1/sequencer-runs/register Register Sequencer Run":
+    - generic: POST
+    - link "/api/v1/sequencer-runs/register":
+      - /url: "#/default/register_sequencer_run_api_v1_sequencer_runs_register_post"
+      - text: /api
+      - text: /v1
+      - text: /sequencer-runs
+      - text: /register
+    - generic: Register Sequencer Run
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "post /api/v1/sequencer-runs/register":
+  - button "POST /api/v1/analysis-results/register Register Analysis Results":
+    - generic: POST
+    - link "/api/v1/analysis-results/register":
+      - /url: "#/default/register_analysis_results_api_v1_analysis_results_register_post"
+      - text: /api
+      - text: /v1
+      - text: /analysis-results
+      - text: /register
+    - generic: Register Analysis Results
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "post /api/v1/analysis-results/register":
+  - button "POST /api/v1/artifacts/upload-sessions Create Upload Session":
+    - generic: POST
+    - link "/api/v1/artifacts/upload-sessions":
+      - /url: "#/default/create_upload_session_api_v1_artifacts_upload_sessions_post"
+      - text: /api
+      - text: /v1
+      - text: /artifacts
+      - text: /upload-sessions
+    - generic: Create Upload Session
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "post /api/v1/artifacts/upload-sessions":
+  - 'button "POST /api/v1/artifacts/upload-sessions/{upload_token}/complete Complete Upload Session"':
+    - generic: POST
+    - 'link "/api/v1/artifacts/upload-sessions/{upload_token}/complete"':
+      - /url: "#/default/complete_upload_session_api_v1_artifacts_upload_sessions__upload_token__complete_post"
+      - text: /api
+      - text: /v1
+      - text: /artifacts
+      - text: /upload-sessions
+      - text: "/{upload_token}"
+      - text: /complete
+    - generic: Complete Upload Session
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - 'button "post /api/v1/artifacts/upload-sessions/{upload_token}/complete"':
+  - 'button "GET /api/v1/artifact-sets/{artifact_set_euid} Get Artifact Set"':
+    - generic: GET
+    - 'link "/api/v1/artifact-sets/{artifact_set_euid}"':
+      - /url: "#/default/get_artifact_set_api_v1_artifact_sets__artifact_set_euid__get"
+      - text: /api
+      - text: /v1
+      - text: /artifact-sets
+      - text: "/{artifact_set_euid}"
+    - generic: Get Artifact Set
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - 'button "get /api/v1/artifact-sets/{artifact_set_euid}"':
+  - button "GET /api/v1/artifact-sets List Artifact Sets":
+    - generic: GET
+    - link "/api/v1/artifact-sets":
+      - /url: "#/default/list_artifact_sets_api_v1_artifact_sets_get"
+      - text: /api
+      - text: /v1
+      - text: /artifact-sets
+    - generic: List Artifact Sets
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "get /api/v1/artifact-sets":
+  - button "POST /api/v1/artifact-sets Create Artifact Set":
+    - generic: POST
+    - link "/api/v1/artifact-sets":
+      - /url: "#/default/create_artifact_set_api_v1_artifact_sets_post"
+      - text: /api
+      - text: /v1
+      - text: /artifact-sets
+    - generic: Create Artifact Set
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "post /api/v1/artifact-sets":
+  - button "POST /api/v1/artifact-sets/analysis/register Register Analysis Artifact Set":
+    - generic: POST
+    - link "/api/v1/artifact-sets/analysis/register":
+      - /url: "#/default/register_analysis_artifact_set_api_v1_artifact_sets_analysis_register_post"
+      - text: /api
+      - text: /v1
+      - text: /artifact-sets
+      - text: /analysis
+      - text: /register
+    - generic: Register Analysis Artifact Set
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "post /api/v1/artifact-sets/analysis/register":
+  - button "POST /api/v1/artifact-sets/multiqc/register Register Multiqc Artifact Set":
+    - generic: POST
+    - link "/api/v1/artifact-sets/multiqc/register":
+      - /url: "#/default/register_multiqc_artifact_set_api_v1_artifact_sets_multiqc_register_post"
+      - text: /api
+      - text: /v1
+      - text: /artifact-sets
+      - text: /multiqc
+      - text: /register
+    - generic: Register Multiqc Artifact Set
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "post /api/v1/artifact-sets/multiqc/register":
+  - 'button "POST /api/v1/artifact-sets/{artifact_set_euid}/members Add Artifact Set Member"':
+    - generic: POST
+    - 'link "/api/v1/artifact-sets/{artifact_set_euid}/members"':
+      - /url: "#/default/add_artifact_set_member_api_v1_artifact_sets__artifact_set_euid__members_post"
+      - text: /api
+      - text: /v1
+      - text: /artifact-sets
+      - text: "/{artifact_set_euid}"
+      - text: /members
+    - generic: Add Artifact Set Member
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - 'button "post /api/v1/artifact-sets/{artifact_set_euid}/members"':
+  - 'button "DELETE /api/v1/artifact-sets/{artifact_set_euid}/members/{artifact_euid} Remove Artifact Set Member"':
+    - generic: DELETE
+    - 'link "/api/v1/artifact-sets/{artifact_set_euid}/members/{artifact_euid}"':
+      - /url: "#/default/remove_artifact_set_member_api_v1_artifact_sets__artifact_set_euid__members__artifact_euid__delete"
+      - text: /api
+      - text: /v1
+      - text: /artifact-sets
+      - text: "/{artifact_set_euid}"
+      - text: /members
+      - text: "/{artifact_euid}"
+    - generic: Remove Artifact Set Member
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - 'button "delete /api/v1/artifact-sets/{artifact_set_euid}/members/{artifact_euid}"':
+  - button "POST /api/v1/resolve/multiqc Resolve Multiqc":
+    - generic: POST
+    - link "/api/v1/resolve/multiqc":
+      - /url: "#/default/resolve_multiqc_api_v1_resolve_multiqc_post"
+      - text: /api
+      - text: /v1
+      - text: /resolve
+      - text: /multiqc
+    - generic: Resolve Multiqc
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "post /api/v1/resolve/multiqc":
+  - button "POST /api/v1/resolve/artifact Resolve Artifact":
+    - generic: POST
+    - link "/api/v1/resolve/artifact":
+      - /url: "#/default/resolve_artifact_api_v1_resolve_artifact_post"
+      - text: /api
+      - text: /v1
+      - text: /resolve
+      - text: /artifact
+    - generic: Resolve Artifact
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "post /api/v1/resolve/artifact":
+  - button "POST /api/v1/resolve/artifact-set Resolve Artifact Set":
+    - generic: POST
+    - link "/api/v1/resolve/artifact-set":
+      - /url: "#/default/resolve_artifact_set_api_v1_resolve_artifact_set_post"
+      - text: /api
+      - text: /v1
+      - text: /resolve
+      - text: /artifact-set
+    - generic: Resolve Artifact Set
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "post /api/v1/resolve/artifact-set":
+  - button "POST /api/v1/shares Create Share":
+    - generic: POST
+    - link "/api/v1/shares":
+      - /url: "#/default/create_share_api_v1_shares_post"
+      - text: /api
+      - text: /v1
+      - text: /shares
+    - generic: Create Share
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "post /api/v1/shares":
+  - 'button "GET /api/v1/shares/{share_euid} Get Share"':
+    - generic: GET
+    - 'link "/api/v1/shares/{share_euid}"':
+      - /url: "#/default/get_share_api_v1_shares__share_euid__get"
+      - text: /api
+      - text: /v1
+      - text: /shares
+      - text: "/{share_euid}"
+    - generic: Get Share
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - 'button "get /api/v1/shares/{share_euid}"':
+  - 'button "POST /api/v1/shares/{share_euid}/access-package Create Share Access Package"':
+    - generic: POST
+    - 'link "/api/v1/shares/{share_euid}/access-package"':
+      - /url: "#/default/create_share_access_package_api_v1_shares__share_euid__access_package_post"
+      - text: /api
+      - text: /v1
+      - text: /shares
+      - text: "/{share_euid}"
+      - text: /access-package
+    - generic: Create Share Access Package
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - 'button "post /api/v1/shares/{share_euid}/access-package"':
+  - 'button "POST /api/v1/shares/{share_euid}/revoke Revoke Share"':
+    - generic: POST
+    - 'link "/api/v1/shares/{share_euid}/revoke"':
+      - /url: "#/default/revoke_share_api_v1_shares__share_euid__revoke_post"
+      - text: /api
+      - text: /v1
+      - text: /shares
+      - text: "/{share_euid}"
+      - text: /revoke
+    - generic: Revoke Share
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - 'button "post /api/v1/shares/{share_euid}/revoke"':
+  - 'button "GET /api/v1/shares/{share_euid}/audit List Share Audit"':
+    - generic: GET
+    - 'link "/api/v1/shares/{share_euid}/audit"':
+      - /url: "#/default/list_share_audit_api_v1_shares__share_euid__audit_get"
+      - text: /api
+      - text: /v1
+      - text: /shares
+      - text: "/{share_euid}"
+      - text: /audit
+    - generic: List Share Audit
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - 'button "get /api/v1/shares/{share_euid}/audit"':
+  - button "POST /api/v1/share-roots Create Share Root":
+    - generic: POST
+    - link "/api/v1/share-roots":
+      - /url: "#/default/create_share_root_api_v1_share_roots_post"
+      - text: /api
+      - text: /v1
+      - text: /share-roots
+    - generic: Create Share Root
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "post /api/v1/share-roots":
+  - 'button "POST /api/v1/share-roots/{share_root_euid}/subsets Create Share Root Subset"':
+    - generic: POST
+    - 'link "/api/v1/share-roots/{share_root_euid}/subsets"':
+      - /url: "#/default/create_share_root_subset_api_v1_share_roots__share_root_euid__subsets_post"
+      - text: /api
+      - text: /v1
+      - text: /share-roots
+      - text: "/{share_root_euid}"
+      - text: /subsets
+    - generic: Create Share Root Subset
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - 'button "post /api/v1/share-roots/{share_root_euid}/subsets"':
+  - 'button "GET /api/v1/artifacts/{artifact_euid}/shares List Artifact Shares"':
+    - generic: GET
+    - 'link "/api/v1/artifacts/{artifact_euid}/shares"':
+      - /url: "#/default/list_artifact_shares_api_v1_artifacts__artifact_euid__shares_get"
+      - text: /api
+      - text: /v1
+      - text: /artifacts
+      - text: "/{artifact_euid}"
+      - text: /shares
+    - generic: List Artifact Shares
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - 'button "get /api/v1/artifacts/{artifact_euid}/shares"':
+  - button "POST /api/search/v2/query Search V2 Query":
+    - generic: POST
+    - link "/api/search/v2/query":
+      - /url: "#/default/search_v2_query_api_search_v2_query_post"
+      - text: /api
+      - text: /search
+      - text: /v2
+      - text: /query
+    - generic: Search V2 Query
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "post /api/search/v2/query":
+  - button "POST /api/search/v2/export Search V2 Export":
+    - generic: POST
+    - link "/api/search/v2/export":
+      - /url: "#/default/search_v2_export_api_search_v2_export_post"
+      - text: /api
+      - text: /search
+      - text: /v2
+      - text: /export
+    - generic: Search V2 Export
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "post /api/search/v2/export":
+  - button "POST /api/v1/external-objects Create External Object":
+    - generic: POST
+    - link "/api/v1/external-objects":
+      - /url: "#/default/create_external_object_api_v1_external_objects_post"
+      - text: /api
+      - text: /v1
+      - text: /external-objects
+    - generic: Create External Object
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "post /api/v1/external-objects":
+  - button "POST /api/v1/external-object-relations Attach External Object Relation":
+    - generic: POST
+    - link "/api/v1/external-object-relations":
+      - /url: "#/default/attach_external_object_relation_api_v1_external_object_relations_post"
+      - text: /api
+      - text: /v1
+      - text: /external-object-relations
+    - generic: Attach External Object Relation
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - button "post /api/v1/external-object-relations":
+  - 'button "GET /api/v1/{target_type}/{target_euid}/external-object-relations List External Object Relations"':
+    - generic: GET
+    - 'link "/api/v1/{target_type}/{target_euid}/external-object-relations"':
+      - /url: "#/default/list_external_object_relations_api_v1__target_type___target_euid__external_object_relations_get"
+      - text: /api
+      - text: /v1
+      - text: "/{target_type}"
+      - text: "/{target_euid}"
+      - text: /external-object-relations
+    - generic: List External Object Relations
+  - generic "Copy path to clipboard":
+    - button "Copy path to clipboard":
+  - button "authorization button unlocked":
+  - 'button "get /api/v1/{target_type}/{target_euid}/external-object-relations"':
+  - heading "Schemas" [level=4]:
+    - button "Schemas" [expanded]:
+      - generic: Schemas
+  - article:
+    - button "AccessRequest":
+      - strong: AccessRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "AnalysisArtifactSetRegistrationRequest":
+      - strong: AnalysisArtifactSetRegistrationRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "AnalysisResultArtifact":
+      - strong: AnalysisResultArtifact
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "AnalysisResultsRegistrationRequest":
+      - strong: AnalysisResultsRegistrationRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "ArtifactImportRequest":
+      - strong: ArtifactImportRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "ArtifactPrefixRegisterRequest":
+      - strong: ArtifactPrefixRegisterRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "ArtifactRegisterRequest":
+      - strong: ArtifactRegisterRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "ArtifactRunPrefixImportRequest":
+      - strong: ArtifactRunPrefixImportRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "ArtifactSetCreateRequest":
+      - strong: ArtifactSetCreateRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "ArtifactSetMemberRequest":
+      - strong: ArtifactSetMemberRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "ArtifactStorageLockRequest":
+      - strong: ArtifactStorageLockRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "DeleteExecution":
+      - strong: DeleteExecution
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "DeletePreview":
+      - strong: DeletePreview
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "ExpectedDatasetFileV1":
+      - strong: ExpectedDatasetFileV1
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "ExternalObjectCreateRequest":
+      - strong: ExternalObjectCreateRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "ExternalObjectRelationCreateRequest":
+      - strong: ExternalObjectRelationCreateRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "FileArtifact":
+      - strong: FileArtifact
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "FileEvidence":
+      - strong: FileEvidence
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "HTTPValidationError":
+      - strong: HTTPValidationError
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "LabcoreOwnerErrorResponse":
+      - strong: LabcoreOwnerErrorResponse
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "LabcoreOwnerRegistrationResponse":
+      - strong: LabcoreOwnerRegistrationResponse
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "LabcoreSequencingRunOwnerContractV1":
+      - strong: LabcoreSequencingRunOwnerContractV1
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "LabcoreSequencingRunRegistrationCommandV2":
+      - strong: LabcoreSequencingRunRegistrationCommandV2
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "LineageRef":
+      - strong: LineageRef
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "LiteratureSaveRequest":
+      - strong: LiteratureSaveRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "LiteratureSaveVisibilityRequest":
+      - strong: LiteratureSaveVisibilityRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "LiteratureSearchRequest":
+      - strong: LiteratureSearchRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "MetadataUpdate":
+      - strong: MetadataUpdate
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "PackageFile":
+      - strong: PackageFile
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "PackageRegistration":
+      - strong: PackageRegistration
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "Registration":
+      - strong: Registration
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "ResolveArtifactRequest":
+      - strong: ResolveArtifactRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "ResolveArtifactSetRequest":
+      - strong: ResolveArtifactSetRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "ResolveMultiqcRequest":
+      - strong: ResolveMultiqcRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "SampleIdentifier":
+      - strong: SampleIdentifier
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "SearchExportRequest":
+      - strong: SearchExportRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "SearchPropertyFilterRequest":
+      - strong: SearchPropertyFilterRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "SearchQueryRequest":
+      - strong: SearchQueryRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "SequencerRunRegistrationRequest":
+      - strong: SequencerRunRegistrationRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "ShareAccessPackageRequest":
+      - strong: ShareAccessPackageRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "ShareCreateRequest":
+      - strong: ShareCreateRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "ShareRequest":
+      - strong: ShareRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "ShareRevokeRequest":
+      - strong: ShareRevokeRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "ShareRootCreateRequest":
+      - strong: ShareRootCreateRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "ShareRootSubsetCreateRequest":
+      - strong: ShareRootSubsetCreateRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "ShareTargetRequest":
+      - strong: ShareTargetRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "UploadRequest":
+      - strong: UploadRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "UploadSessionCompleteRequest":
+      - strong: UploadSessionCompleteRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "UploadSessionCreateRequest":
+      - strong: UploadSessionCreateRequest
+    - button "Expand all"
+    - strong: object
+  - article:
+    - button "ValidationError":
+      - strong: ValidationError
+    - button "Expand all"
+    - strong: object

@@ -1,0 +1,150 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / S3 BROWSER
+  - heading "S3 Browser" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - textbox "S3 URI":
+    - /placeholder: s3://bucket/exact/prefix/
+    - text: s3://lsmc-bio-oauth-static-site-108782052779-us-east-1/
+  - button "Go"
+  - link "All buckets":
+    - /url: /storage
+  - generic: s3://lsmc-bio-oauth-static-site-108782052779-us-east-1/
+  - button "Upload files"
+  - link "Register this folder":
+    - /url: /add?kind=prefix&uri=s3%3A%2F%2Flsmc-bio-oauth-static-site-108782052779-us-east-1%2F
+  - link "lsmc-bio-oauth-static-site-108782052779-us-east-1":
+    - /url: /storage?uri=s3%3A%2F%2Flsmc-bio-oauth-static-site-108782052779-us-east-1%2F
+  - searchbox "Filter names on this page"
+  - button "Register selection as a set"
+  - table:
+    - rowgroup:
+      - row "Kind Name Size Registration":
+        - columnheader "Kind"
+        - columnheader "Name"
+        - columnheader "Size"
+        - columnheader "Registration"
+    - rowgroup:
+      - row "Select assets/ prefix assets/ — Register":
+        - cell "Select assets/ prefix":
+          - checkbox "Select assets/"
+          - generic: prefix
+        - cell "assets/":
+          - link "assets/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-bio-oauth-static-site-108782052779-us-east-1%2Fassets%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-bio-oauth-static-site-108782052779-us-east-1%2Fassets%2F&kind=prefix
+      - row "Select _headers object _headers 392 B Register":
+        - cell "Select _headers object":
+          - checkbox "Select _headers"
+          - generic: object
+        - cell "_headers":
+          - button "_headers"
+        - cell "392 B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-bio-oauth-static-site-108782052779-us-east-1%2F_headers&kind=object
+      - row "Select _redirects object _redirects 46 B Register":
+        - cell "Select _redirects object":
+          - checkbox "Select _redirects"
+          - generic: object
+        - cell "_redirects":
+          - button "_redirects"
+        - cell "46 B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-bio-oauth-static-site-108782052779-us-east-1%2F_redirects&kind=object
+      - row "Select index.html object index.html 3.5K B Register":
+        - cell "Select index.html object":
+          - checkbox "Select index.html"
+          - generic: object
+        - cell "index.html":
+          - button "index.html"
+        - cell "3.5K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-bio-oauth-static-site-108782052779-us-east-1%2Findex.html&kind=object
+      - row "Select privacy.html object privacy.html 5.7K B Register":
+        - cell "Select privacy.html object":
+          - checkbox "Select privacy.html"
+          - generic: object
+        - cell "privacy.html":
+          - button "privacy.html"
+        - cell "5.7K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-bio-oauth-static-site-108782052779-us-east-1%2Fprivacy.html&kind=object
+      - row "Select robots.txt object robots.txt 66 B Register":
+        - cell "Select robots.txt object":
+          - checkbox "Select robots.txt"
+          - generic: object
+        - cell "robots.txt":
+          - button "robots.txt"
+        - cell "66 B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-bio-oauth-static-site-108782052779-us-east-1%2Frobots.txt&kind=object
+      - row "Select site.webmanifest object site.webmanifest 337 B Register":
+        - cell "Select site.webmanifest object":
+          - checkbox "Select site.webmanifest"
+          - generic: object
+        - cell "site.webmanifest":
+          - button "site.webmanifest"
+        - cell "337 B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-bio-oauth-static-site-108782052779-us-east-1%2Fsite.webmanifest&kind=object
+      - row "Select sitemap.xml object sitemap.xml 258 B Register":
+        - cell "Select sitemap.xml object":
+          - checkbox "Select sitemap.xml"
+          - generic: object
+        - cell "sitemap.xml":
+          - button "sitemap.xml"
+        - cell "258 B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-bio-oauth-static-site-108782052779-us-east-1%2Fsitemap.xml&kind=object
+      - row "Select tos.html object tos.html 6.5K B Register":
+        - cell "Select tos.html object":
+          - checkbox "Select tos.html"
+          - generic: object
+        - cell "tos.html":
+          - button "tos.html"
+        - cell "6.5K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-bio-oauth-static-site-108782052779-us-east-1%2Ftos.html&kind=object
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

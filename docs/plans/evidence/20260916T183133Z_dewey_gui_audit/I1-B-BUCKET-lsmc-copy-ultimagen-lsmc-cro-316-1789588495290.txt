@@ -1,0 +1,81 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / S3 BROWSER
+  - heading "S3 Browser" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - textbox "S3 URI":
+    - /placeholder: s3://bucket/exact/prefix/
+    - text: s3://lsmc-copy-ultimagen-lsmc-cro-316/
+  - button "Go"
+  - link "All buckets":
+    - /url: /storage
+  - generic: s3://lsmc-copy-ultimagen-lsmc-cro-316/
+  - button "Upload files"
+  - link "Register this folder":
+    - /url: /add?kind=prefix&uri=s3%3A%2F%2Flsmc-copy-ultimagen-lsmc-cro-316%2F
+  - link "lsmc-copy-ultimagen-lsmc-cro-316":
+    - /url: /storage?uri=s3%3A%2F%2Flsmc-copy-ultimagen-lsmc-cro-316%2F
+  - searchbox "Filter names on this page"
+  - button "Register selection as a set"
+  - table:
+    - rowgroup:
+      - row "Kind Name Size Registration":
+        - columnheader "Kind"
+        - columnheader "Name"
+        - columnheader "Size"
+        - columnheader "Registration"
+    - rowgroup:
+      - row "Select 2025-07-25/ prefix 2025-07-25/ — Register":
+        - cell "Select 2025-07-25/ prefix":
+          - checkbox "Select 2025-07-25/"
+          - generic: prefix
+        - cell "2025-07-25/":
+          - link "2025-07-25/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-copy-ultimagen-lsmc-cro-316%2F2025-07-25%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-copy-ultimagen-lsmc-cro-316%2F2025-07-25%2F&kind=prefix
+      - row "Select Feb27_2025_ugsb4_data/ prefix Feb27_2025_ugsb4_data/ — Register":
+        - cell "Select Feb27_2025_ugsb4_data/ prefix":
+          - checkbox "Select Feb27_2025_ugsb4_data/"
+          - generic: prefix
+        - cell "Feb27_2025_ugsb4_data/":
+          - link "Feb27_2025_ugsb4_data/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-copy-ultimagen-lsmc-cro-316%2FFeb27_2025_ugsb4_data%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-copy-ultimagen-lsmc-cro-316%2FFeb27_2025_ugsb4_data%2F&kind=prefix
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

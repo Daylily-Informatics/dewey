@@ -1,0 +1,56 @@
+[
+  {
+    "id": "D01",
+    "severity": "P3",
+    "description": "Release surfaces show a stale build branch despite correct deployed version/SHA.",
+    "status": "ATTEMPTING_BUGFIX",
+    "owner": "Dewey",
+    "evidence": "I1-A-ADMIN-RELEASE; production-baseline.json; independently reproduced in I1-B",
+    "root_cause": "Deployment operator updates only exact Dewey image and source SHA/branch environment fields. Post-deploy GUI verification pending."
+  },
+  {
+    "id": "D02",
+    "severity": "P1",
+    "description": "S3 object download, registered object access and set manifests return HTTP500.",
+    "status": "ATTEMPTING_BUGFIX",
+    "owner": "Dewey",
+    "evidence": "I1-A-STORE-DOWNLOAD; I1-A-RECORD-DOWNLOAD; I1-A-RECORD-MANIFEST; I1-A-download-manifest-trace.txt; independently reproduced in I1-B",
+    "root_cause": "Keep set member query and serialization in the authorization session; capture the persisted receipt EUID before commit expires the ORM instance. APIs, lineage, and permissions are unchanged."
+  },
+  {
+    "id": "D03",
+    "severity": "none",
+    "description": "Apparent filter clearing failure withdrawn after normal keyboard clearing succeeded.",
+    "status": "WITHDRAWN",
+    "owner": "Browser automation",
+    "evidence": "All I1-A-STORE-FILTER observations retained",
+    "root_cause": "Empty-string locator fill did not clear the input; Select All/Backspace worked. No Dewey change warranted."
+  },
+  {
+    "id": "D04",
+    "severity": "P2",
+    "description": "Add upload destination is unnamed because modal and background form reuse DOM id uri.",
+    "status": "ATTEMPTING_BUGFIX",
+    "owner": "Dewey",
+    "evidence": "I1-A-ADD-UPLOAD-MODE; independently reproduced in I1-B",
+    "root_cause": "Field and textarea helpers assign unique DOM IDs; API form names remain unchanged. Prevents background/modal label collisions."
+  },
+  {
+    "id": "D05",
+    "severity": "P2",
+    "description": "Embedded template validation rejects same-site form with Origin not allowed.",
+    "status": "ATTEMPTING_BUGFIX",
+    "owner": "Dewey",
+    "evidence": "I1-A-TAP-TEMPLATE-VALIDATE; independently reproduced in I1-B",
+    "root_cause": "Dewey globally forced Referrer-Policy no-referrer, which gives native POST navigations Origin null under Fetch. Default same-origin now preserves a same-site form Origin and suppresses cross-site referrers; explicit preview no-referrer is retained. Origin enforcement remains intact. Inference from reproduced form rejection, actual form action, deployed header, source, and https://fetch.spec.whatwg.org/#append-a-request-origin-header; verify after deploy."
+  },
+  {
+    "id": "D06",
+    "severity": "P2",
+    "description": "Protected record destination is lost after successful shared login.",
+    "status": "ATTEMPTING_BUGFIX",
+    "owner": "Dewey",
+    "evidence": "I1-A-LOGIN-RETURN; I1-B-LOGIN-RETURN; independently reproduced in I1-B",
+    "root_cause": "Registry pages now carry their exact path/query into the existing /login?next= flow."
+  }
+]

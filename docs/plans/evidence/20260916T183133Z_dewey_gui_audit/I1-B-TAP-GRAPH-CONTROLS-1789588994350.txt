@@ -1,0 +1,169 @@
+- banner:
+  - link "Dewey / TapDB":
+    - /url: /tapdb/
+  - navigation:
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Admin":
+      - /url: /admin
+    - link "Overview":
+      - /url: /tapdb/admin/overview
+    - link "Search":
+      - /url: /tapdb/search
+    - link "Graph":
+      - /url: /tapdb/graph
+    - link "Templates":
+      - /url: /tapdb/templates
+    - link "Audit":
+      - /url: /tapdb/audit
+    - link "Help":
+      - /url: /tapdb/help
+    - link "Readiness":
+      - /url: /tapdb/admin/readiness
+    - link "Inventory":
+      - /url: /tapdb/admin/inventory
+    - link "Meridian":
+      - /url: /tapdb/admin/meridian
+    - link "Metrics":
+      - /url: /tapdb/admin/metrics
+    - link "Runtime":
+      - /url: /tapdb/admin/runtime
+    - link "Backups":
+      - /url: /tapdb/admin/backups
+    - link "Sign out":
+      - /url: /auth/logout
+  - generic: johnm@lsmc.com · admin
+- main:
+  - 'heading "Graph: M-DGX-TST9" [level=1]':
+    - text: "Graph:"
+    - link "M-DGX-TST9":
+      - /url: /tapdb/object/M-DGX-TST9
+  - paragraph: "Canonical DAG v2: persisted lineage only. Leave Start EUID blank to inspect the bounded graph visible to your database role."
+  - generic "Object graph"
+  - heading "🔍 Navigation" [level=3]
+  - generic: Start EUID
+  - textbox "Start EUID":
+    - /placeholder: blank shows visible graph
+    - text: M-DGX-TST9
+  - generic: Depth
+  - spinbutton "Depth": "4"
+  - generic: Maximum Nodes
+  - spinbutton "Maximum Nodes": "1000"
+  - generic: Maximum Edges
+  - spinbutton "Maximum Edges": "500"
+  - button "Load Graph"
+  - button "Fit" [active]
+  - heading "🔎 Search & Find" [level=3]
+  - generic: Fuzzy Search
+  - textbox "Fuzzy Search":
+    - /placeholder: Match id, name, type, subtype
+    - text: I1-B
+  - generic: Find Exact EUID
+  - textbox "Find Exact EUID":
+    - /placeholder: Exact EUID in current graph
+    - text: M-DGX-TST9
+  - button "Apply Search"
+  - button "Find"
+  - heading "🧰 Filters" [level=3]
+  - generic: Connected Edge Count ≤
+  - slider "Connected Edge Count ≤": "1"
+  - generic: "1"
+  - generic: Relative Distance (0 = all)
+  - slider "Relative Distance (0 = all)": "0"
+  - generic: "0"
+  - generic: Type Visibility
+  - checkbox "artifact" [checked]
+  - text: artifact
+  - checkbox "artifact_set" [checked]
+  - text: artifact_set
+  - checkbox "registry_policy" [checked]
+  - text: registry_policy
+  - generic: Subtype Muting
+  - button "generic"
+  - heading "⚙️ Layout" [level=3]
+  - generic: Layout Type
+  - combobox "Layout Type":
+    - option "Dagre (Hierarchical)"
+    - option "CoSE (Force-directed)"
+    - option "Breadth First"
+    - option "Circle" [selected]
+    - option "Grid"
+  - heading "⌨️ Graph Gestures" [level=3]
+  - strong: D + right click
+  - text: ": delete node or edge"
+  - strong: 3x left click node
+  - text: ": child-wave glow (pink)"
+  - strong: 3x right click node
+  - text: ": parent-wave glow (aqua)"
+  - strong: L + left click node
+  - text: ": pick child, then click parent to create edge"
+  - strong: N + left click node
+  - text: ": neighborhood highlight"
+  - generic: Centered on M-DGX-TST9.
+  - heading "🎨 Legend" [level=3]
+  - generic: access
+  - generic: data
+  - heading "💾 Export" [level=3]
+  - button "Save DAG"
+  - generic: Mermaid
+  - generic: flowchart TD N1["M-DGX-TST9 | Dewey GUI audit 20260916 I1-B prefix"] N2["M-DGX-TSV7 | Access for M-DGX-TST9"] N3["M-DGX-TSY1 | Dewey GUI audit 20260916 I1-B URL"] N4["M-DGX-TSZZ | Access for M-DGX-TSY1"] N5["M-DGX-TT2S | Dewey GUI audit 20260916 I1-B library set"] N6["M-DGX-TT3Q | Access for M-DGX-TT2S"] N1 -->|registry_policy| N2 N3 -->|registry_policy| N4 N5 -->|registry_policy| N6 N5 -->|artifact_set_member| N1 N5 -->|artifact_set_member| N3
+  - heading "📋 Details" [level=3]
+  - link "View Details":
+    - /url: /tapdb/object/M-DGX-TST9
+  - button "Center on Node"
+  - generic: Top-Level Properties
+  - generic: euid
+  - generic: M-DGX-TST9
+  - generic: type
+  - generic: artifact
+  - generic: category
+  - generic: data
+  - generic: subtype
+  - generic: generic
+  - generic: version
+  - generic: "1.0"
+  - generic: created_dt
+  - generic: 2026-09-16T19:50:29.644814+00:00
+  - generic: display_label
+  - generic: Dewey GUI audit 20260916 I1-B prefix
+  - generic: id
+  - generic: M-DGX-TST9
+  - generic: modified_dt
+  - generic: 2026-09-16T19:50:29.644814+00:00
+  - generic: presentation
+  - code: "{}"
+  - generic: properties
+  - code: "{}"
+  - generic: record_type
+  - generic: instance
+  - generic: service_id
+  - generic: dewey
+  - generic: tenant_id
+  - generic: "-"
+  - generic: Raw Object JSON
+  - generic: "{ \"id\": \"M-DGX-TST9\", \"euid\": \"M-DGX-TST9\", \"display_label\": \"Dewey GUI audit 20260916 I1-B prefix\", \"service_id\": \"dewey\", \"record_type\": \"instance\", \"category\": \"data\", \"type\": \"artifact\", \"subtype\": \"generic\", \"version\": \"1.0\", \"tenant_id\": null, \"created_dt\": \"2026-09-16T19:50:29.644814+00:00\", \"modified_dt\": \"2026-09-16T19:50:29.644814+00:00\", \"properties\": {}, \"external_refs\": [], \"external_identifiers\": [], \"presentation\": {} }"
+  - generic: Canonical Properties
+  - generic: "{}"
+  - generic: Graph Payload
+  - generic: "{ \"id\": \"M-DGX-TST9\", \"euid\": \"M-DGX-TST9\", \"display_label\": \"Dewey GUI audit 20260916 I1-B prefix\", \"service_id\": \"dewey\", \"record_type\": \"instance\", \"category\": \"data\", \"type\": \"artifact\", \"subtype\": \"generic\", \"version\": \"1.0\", \"tenant_id\": null, \"created_dt\": \"2026-09-16T19:50:29.644814+00:00\", \"modified_dt\": \"2026-09-16T19:50:29.644814+00:00\", \"properties\": {}, \"external_refs\": [], \"external_identifiers\": [], \"presentation\": {}, \"color\": \"#2563eb\" }"
+  - generic "Nodes and edges"
+  - generic "Payload JSON"
+- contentinfo: TapDB 10.1.1rc1
+- text: Theme
+- combobox "Theme":
+  - option "original" [selected]
+  - option "light"
+  - option "dark"
+  - option "CBF"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

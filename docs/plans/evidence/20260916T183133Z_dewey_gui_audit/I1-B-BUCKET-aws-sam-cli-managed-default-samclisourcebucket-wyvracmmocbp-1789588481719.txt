@@ -1,0 +1,149 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / S3 BROWSER
+  - heading "S3 Browser" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - textbox "S3 URI":
+    - /placeholder: s3://bucket/exact/prefix/
+    - text: s3://aws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp/
+  - button "Go"
+  - link "All buckets":
+    - /url: /storage
+  - generic: s3://aws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp/
+  - button "Upload files"
+  - link "Register this folder":
+    - /url: /add?kind=prefix&uri=s3%3A%2F%2Faws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp%2F
+  - link "aws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp":
+    - /url: /storage?uri=s3%3A%2F%2Faws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp%2F
+  - searchbox "Filter names on this page"
+  - button "Register selection as a set"
+  - table:
+    - rowgroup:
+      - row "Kind Name Size Registration":
+        - columnheader "Kind"
+        - columnheader "Name"
+        - columnheader "Size"
+        - columnheader "Registration"
+    - rowgroup:
+      - row "Select 033daea522c8f5b4aca7a62b80219807 object 033daea522c8f5b4aca7a62b80219807 899 B Register":
+        - cell "Select 033daea522c8f5b4aca7a62b80219807 object":
+          - checkbox "Select 033daea522c8f5b4aca7a62b80219807"
+          - generic: object
+        - cell "033daea522c8f5b4aca7a62b80219807":
+          - button "033daea522c8f5b4aca7a62b80219807"
+        - cell "899 B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Faws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp%2F033daea522c8f5b4aca7a62b80219807&kind=object
+      - row "Select 2a9f21b7b6142bb66d0133d89b35caef object 2a9f21b7b6142bb66d0133d89b35caef 28.8M B Register":
+        - cell "Select 2a9f21b7b6142bb66d0133d89b35caef object":
+          - checkbox "Select 2a9f21b7b6142bb66d0133d89b35caef"
+          - generic: object
+        - cell "2a9f21b7b6142bb66d0133d89b35caef":
+          - button "2a9f21b7b6142bb66d0133d89b35caef"
+        - cell "28.8M B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Faws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp%2F2a9f21b7b6142bb66d0133d89b35caef&kind=object
+      - row "Select 35190b21439be6a9db0f371261e5937f object 35190b21439be6a9db0f371261e5937f 2.6M B Register":
+        - cell "Select 35190b21439be6a9db0f371261e5937f object":
+          - checkbox "Select 35190b21439be6a9db0f371261e5937f"
+          - generic: object
+        - cell "35190b21439be6a9db0f371261e5937f":
+          - button "35190b21439be6a9db0f371261e5937f"
+        - cell "2.6M B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Faws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp%2F35190b21439be6a9db0f371261e5937f&kind=object
+      - row "Select 41940a299025e94acd049388f0f821a7 object 41940a299025e94acd049388f0f821a7 757 B Register":
+        - cell "Select 41940a299025e94acd049388f0f821a7 object":
+          - checkbox "Select 41940a299025e94acd049388f0f821a7"
+          - generic: object
+        - cell "41940a299025e94acd049388f0f821a7":
+          - button "41940a299025e94acd049388f0f821a7"
+        - cell "757 B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Faws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp%2F41940a299025e94acd049388f0f821a7&kind=object
+      - row "Select 4753dd73205b41d6206d8fee710eaabb object 4753dd73205b41d6206d8fee710eaabb 2.6M B Register":
+        - cell "Select 4753dd73205b41d6206d8fee710eaabb object":
+          - checkbox "Select 4753dd73205b41d6206d8fee710eaabb"
+          - generic: object
+        - cell "4753dd73205b41d6206d8fee710eaabb":
+          - button "4753dd73205b41d6206d8fee710eaabb"
+        - cell "2.6M B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Faws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp%2F4753dd73205b41d6206d8fee710eaabb&kind=object
+      - row "Select 5729682a35864d86a61ef536f2202235 object 5729682a35864d86a61ef536f2202235 149K B Register":
+        - cell "Select 5729682a35864d86a61ef536f2202235 object":
+          - checkbox "Select 5729682a35864d86a61ef536f2202235"
+          - generic: object
+        - cell "5729682a35864d86a61ef536f2202235":
+          - button "5729682a35864d86a61ef536f2202235"
+        - cell "149K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Faws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp%2F5729682a35864d86a61ef536f2202235&kind=object
+      - row "Select 6cee33cb01dfea2f15c39b110ea0f258 object 6cee33cb01dfea2f15c39b110ea0f258 2.6M B Register":
+        - cell "Select 6cee33cb01dfea2f15c39b110ea0f258 object":
+          - checkbox "Select 6cee33cb01dfea2f15c39b110ea0f258"
+          - generic: object
+        - cell "6cee33cb01dfea2f15c39b110ea0f258":
+          - button "6cee33cb01dfea2f15c39b110ea0f258"
+        - cell "2.6M B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Faws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp%2F6cee33cb01dfea2f15c39b110ea0f258&kind=object
+      - row "Select 8eddd4fe4211c82df0dba27b419f973c.template object 8eddd4fe4211c82df0dba27b419f973c.template 43K B Register":
+        - cell "Select 8eddd4fe4211c82df0dba27b419f973c.template object":
+          - checkbox "Select 8eddd4fe4211c82df0dba27b419f973c.template"
+          - generic: object
+        - cell "8eddd4fe4211c82df0dba27b419f973c.template":
+          - button "8eddd4fe4211c82df0dba27b419f973c.template"
+        - cell "43K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Faws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp%2F8eddd4fe4211c82df0dba27b419f973c.template&kind=object
+      - row "Select ef3a4230ce6d6095f06e66e48a3b1b6f object ef3a4230ce6d6095f06e66e48a3b1b6f 2.6M B Register":
+        - cell "Select ef3a4230ce6d6095f06e66e48a3b1b6f object":
+          - checkbox "Select ef3a4230ce6d6095f06e66e48a3b1b6f"
+          - generic: object
+        - cell "ef3a4230ce6d6095f06e66e48a3b1b6f":
+          - button "ef3a4230ce6d6095f06e66e48a3b1b6f"
+        - cell "2.6M B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Faws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp%2Fef3a4230ce6d6095f06e66e48a3b1b6f&kind=object
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

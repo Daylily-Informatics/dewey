@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from typing import Any, Literal
+from urllib.parse import urlencode
 
 from fastapi import APIRouter, Body, Depends, Header, HTTPException, Query, Request
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -78,7 +79,9 @@ def attach_registry_api(app, *, templates):
     async def private_registry_responses(request, call_next):
         response = await call_next(request)
         response.headers["Cache-Control"] = "no-store"
-        response.headers["Referrer-Policy"] = "no-referrer"
+        # Native same-origin forms need their Origin for the allowlist check.
+        # Preserve the stricter policy set by isolated preview responses.
+        response.headers.setdefault("Referrer-Policy", "same-origin")
         return response
 
     @router.patch("/records/{euid}/owner")
@@ -272,7 +275,10 @@ def attach_registry_api(app, *, templates):
     def page(request: Request, section: str, *, euid=""):
         actor = getattr(request.state, "registry_principal", None)
         if actor is None:
-            return RedirectResponse("/login", status_code=303)
+            next_path = request.url.path
+            if request.url.query:
+                next_path += "?" + request.url.query
+            return RedirectResponse("/login?" + urlencode({"next": next_path}), status_code=303)
         return templates.TemplateResponse(request=request, name="registry.html", context={
             "section": section, "euid": euid, "actor": actor, "version": app.version})
 

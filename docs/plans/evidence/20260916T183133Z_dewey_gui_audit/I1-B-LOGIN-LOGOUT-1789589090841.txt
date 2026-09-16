@@ -1,0 +1,27 @@
+- generic: DAY
+- main:
+  - generic: Authentication Required
+  - paragraph: Dewey
+  - heading "Dewey Access Login" [level=1]
+  - paragraph: Canonical artifact intake, lifecycle, sharing, and search for Dewey users and admins.
+  - generic: Access
+  - heading "Sign In" [level=2]
+  - paragraph: Continue through the shared LSMC login to access the Dewey console.
+  - link "Continue with LSMC Login":
+    - /url: /auth/login
+  - generic: Control Room UI
+  - generic: Version 10.0.5
+  - generic: Branch codex/dewey-labcore-910
+  - generic: Tag 10.0.5
+  - generic: Commit df6d4d0646fc1385c35ff2b6353478a46b4587ac
+- text: Theme
+- combobox "Theme":
+  - option "original" [selected]
+  - option "light"
+  - option "dark"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

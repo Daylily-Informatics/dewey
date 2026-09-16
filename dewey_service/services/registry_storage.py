@@ -158,17 +158,16 @@ class RegistryStorageServiceMixin:
             with self.backend.session_scope(commit=False) as session:
                 record = self._registry_record(session, euid, action="download")
                 value = self._registry_payload(session, record)
-            if value["kind"] == "set":
-                with self.backend.session_scope(commit=False) as session:
+                if value["kind"] == "set":
                     members = self._registry_query(session, scopes=("artifact",), authorize=False).join(
                         generic_instance_lineage, generic_instance_lineage.child_instance_uid == generic_instance.uid).filter(
                         generic_instance_lineage.parent_instance_uid == record.uid,
                         generic_instance_lineage.relationship_type == "artifact_set_member",
                         generic_instance_lineage.is_deleted.is_(False), generic_instance.bstatus != "archived",
                         record_clause(session, generic_instance, "download")).all()
-                return {"euid": euid, "kind": "set", "items": [
-                    {"euid": item.euid, "access_path": f"/api/v1/records/{item.euid}/access"}
-                    for item in members], "delivery": "member_manifest"}
+                    return {"euid": euid, "kind": "set", "items": [
+                        {"euid": item.euid, "access_path": f"/api/v1/records/{item.euid}/access"}
+                        for item in members], "delivery": "member_manifest"}
             if value["kind"] == "prefix":
                 if not relative_key:
                     return {"euid": euid, "kind": "prefix", "browser_path": f"/records/{euid}",
@@ -223,8 +222,9 @@ class RegistryStorageServiceMixin:
                 self.backend.create_lineage(session, parent=target, child=receipt, relationship_type="has_storage_operation")
             for share in shares:
                 self.backend.create_lineage(session, parent=share, child=receipt, relationship_type="has_storage_operation")
+            receipt_euid = receipt.euid
         return {"euid": euid, "url": url, "delivery": "presigned_s3", "expires_in": ttl,
-                "receipt_euid": receipt.euid, "download_completion_observed": False}
+                "receipt_euid": receipt_euid, "download_completion_observed": False}
 
     def begin_registry_upload(self, *, uri: str, size: int, content_type: str, replace_etag=None):
         actor = principal()

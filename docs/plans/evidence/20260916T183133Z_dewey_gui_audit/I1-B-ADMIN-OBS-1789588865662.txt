@@ -1,0 +1,478 @@
+- generic: DAY
+- banner:
+  - generic: Dewey Operator Console
+  - heading "Observability" [level=1]
+  - generic: johnm@lsmc.com
+  - link "Home":
+    - /url: /ui
+  - link "Artifacts":
+    - /url: /artifacts
+  - link "Literature Search":
+    - /url: /literature
+  - link "Search v2":
+    - /url: /search
+  - link "Anomalies":
+    - /url: /ui/anomalies
+  - button "Logout"
+- main:
+  - generic: Service-local telemetry
+  - heading "API, endpoint, DB, and auth health for this Dewey instance." [level=2]
+  - paragraph: These summaries are generated from Dewey-local request and backend activity.
+  - generic: OK
+  - article:
+    - generic: API Families
+    - generic: "15"
+    - generic: Tracked request families
+  - article:
+    - generic: Endpoints
+    - generic: "96"
+    - generic: Route templates in the current window
+  - article:
+    - generic: DB Status
+    - generic: ok
+    - generic: Latest readiness probe result
+  - article:
+    - generic: Auth Events
+    - generic: "25"
+    - generic: Recent auth checks
+  - heading "Published Capability Surface" [level=3]
+  - generic: "The endpoints Dewey advertises through `/obs_services`."
+  - generic: "Configured deps: 0"
+  - generic: "Observed deps: 0"
+  - table:
+    - rowgroup:
+      - row "Path Auth Kind":
+        - columnheader "Path"
+        - columnheader "Auth"
+        - columnheader "Kind"
+    - rowgroup:
+      - row "/healthz none liveness":
+        - cell "/healthz"
+        - cell "none"
+        - cell "liveness"
+      - row "/readyz none readiness":
+        - cell "/readyz"
+        - cell "none"
+        - cell "readiness"
+      - row "/health operator_or_service_token summary":
+        - cell "/health"
+        - cell "operator_or_service_token"
+        - cell "summary"
+      - row "/obs_services operator_or_service_token discovery":
+        - cell "/obs_services"
+        - cell "operator_or_service_token"
+        - cell "discovery"
+      - row "/api_health operator_or_service_token api_rollup":
+        - cell "/api_health"
+        - cell "operator_or_service_token"
+        - cell "api_rollup"
+      - row "/endpoint_health operator_or_service_token endpoint_rollup":
+        - cell "/endpoint_health"
+        - cell "operator_or_service_token"
+        - cell "endpoint_rollup"
+      - row "/db_health operator_or_service_token database":
+        - cell "/db_health"
+        - cell "operator_or_service_token"
+        - cell "database"
+      - row "/my_health authenticated_self self":
+        - cell "/my_health"
+        - cell "authenticated_self"
+        - cell "self"
+      - row "/auth_health operator_or_service_token auth":
+        - cell "/auth_health"
+        - cell "operator_or_service_token"
+        - cell "auth"
+      - row "/api/anomalies operator_or_service_token anomaly_list":
+        - cell "/api/anomalies"
+        - cell "operator_or_service_token"
+        - cell "anomaly_list"
+      - 'row "/api/anomalies/{anomaly_id} operator_or_service_token anomaly_detail"':
+        - 'cell "/api/anomalies/{anomaly_id}"'
+        - cell "operator_or_service_token"
+        - cell "anomaly_detail"
+      - 'row "/api/dag/v2/object/{euid} session_or_bearer dag_exact_lookup"':
+        - 'cell "/api/dag/v2/object/{euid}"'
+        - cell "session_or_bearer"
+        - cell "dag_exact_lookup"
+      - row "/api/dag/v2/data session_or_bearer dag_native_graph":
+        - cell "/api/dag/v2/data"
+        - cell "session_or_bearer"
+        - cell "dag_native_graph"
+      - row "/api/dag/v2/search session_or_bearer dag_object_search":
+        - cell "/api/dag/v2/search"
+        - cell "session_or_bearer"
+        - cell "dag_object_search"
+  - heading "API Rollups" [level=3]
+  - generic: Most active request families.
+  - table:
+    - rowgroup:
+      - row "Family Requests Errors p95 ms":
+        - columnheader "Family"
+        - columnheader "Requests"
+        - columnheader "Errors"
+        - columnheader "p95 ms"
+    - rowgroup:
+      - row "web 915 1 11.369":
+        - cell "web"
+        - cell "915"
+        - cell "1"
+        - cell "11.369"
+      - row "storage 201 5 1689.774":
+        - cell "storage"
+        - cell "201"
+        - cell "5"
+        - cell "1689.774"
+      - row "observability 168 0 158.999":
+        - cell "observability"
+        - cell "168"
+        - cell "0"
+        - cell "158.999"
+      - row "records 76 4 155.676":
+        - cell "records"
+        - cell "76"
+        - cell "4"
+        - cell "155.676"
+      - row "registry 68 0 669.13":
+        - cell "registry"
+        - cell "68"
+        - cell "0"
+        - cell "669.13"
+      - row "ui 22 0 23.959":
+        - cell "ui"
+        - cell "22"
+        - cell "0"
+        - cell "23.959"
+      - row "auth 12 0 146.783":
+        - cell "auth"
+        - cell "12"
+        - cell "0"
+        - cell "146.783"
+      - row "me 11 0 65.393":
+        - cell "me"
+        - cell "11"
+        - cell "0"
+        - cell "65.393"
+      - row "artifacts 10 0 286.931":
+        - cell "artifacts"
+        - cell "10"
+        - cell "0"
+        - cell "286.931"
+      - row "literature 10 0 29706.521":
+        - cell "literature"
+        - cell "10"
+        - cell "0"
+        - cell "29706.521"
+      - 'row "{target_type} 5 0 149.253"':
+        - 'cell "{target_type}"'
+        - cell "5"
+        - cell "0"
+        - cell "149.253"
+      - row "account 2 0 14.192":
+        - cell "account"
+        - cell "2"
+        - cell "0"
+        - cell "14.192"
+      - row "external-object-relations 2 0 153.849":
+        - cell "external-object-relations"
+        - cell "2"
+        - cell "0"
+        - cell "153.849"
+      - row "external-objects 2 0 81.925":
+        - cell "external-objects"
+        - cell "2"
+        - cell "0"
+        - cell "81.925"
+      - row "artifact-sets 1 0 18.679":
+        - cell "artifact-sets"
+        - cell "1"
+        - cell "0"
+        - cell "18.679"
+  - heading "Endpoint Rollups" [level=3]
+  - generic: Normalized route-template performance and status counts.
+  - table:
+    - rowgroup:
+      - row "Method Route Requests p95 ms 5xx":
+        - columnheader "Method"
+        - columnheader "Route"
+        - columnheader "Requests"
+        - columnheader "p95 ms"
+        - columnheader "5xx"
+    - rowgroup:
+      - row "GET /static/registry.css 231 5.425 0":
+        - cell "GET"
+        - cell "/static/registry.css"
+        - cell "231"
+        - cell "5.425"
+        - cell "0"
+      - row "GET /static/registry.js 231 5.175 0":
+        - cell "GET"
+        - cell "/static/registry.js"
+        - cell "231"
+        - cell "5.175"
+        - cell "0"
+      - row "GET /readyz 159 159.139 0":
+        - cell "GET"
+        - cell "/readyz"
+        - cell "159"
+        - cell "159.139"
+        - cell "0"
+      - row "GET /storage 151 2.491 0":
+        - cell "GET"
+        - cell "/storage"
+        - cell "151"
+        - cell "2.491"
+        - cell "0"
+      - row "GET /api/v1/storage/browse 149 1689.774 2":
+        - cell "GET"
+        - cell "/api/v1/storage/browse"
+        - cell "149"
+        - cell "1689.774"
+        - cell "2"
+      - row "POST /api/v1/registry/search 52 532867.035 0":
+        - cell "POST"
+        - cell "/api/v1/registry/search"
+        - cell "52"
+        - cell "532867.035"
+        - cell "0"
+      - 'row "GET /api/v1/records/{euid} 32 37.03 0"':
+        - cell "GET"
+        - 'cell "/api/v1/records/{euid}"'
+        - cell "32"
+        - cell "37.03"
+        - cell "0"
+      - row "GET /static/tapdb-embedded.css 30 10.798 0":
+        - cell "GET"
+        - cell "/static/tapdb-embedded.css"
+        - cell "30"
+        - cell "10.798"
+        - cell "0"
+      - row "GET /tapdb/static/lsmc-ui.js 30 9.715 0":
+        - cell "GET"
+        - cell "/tapdb/static/lsmc-ui.js"
+        - cell "30"
+        - cell "9.715"
+        - cell "0"
+      - row "GET /tapdb/static/tapdb-gui.css 30 9.909 0":
+        - cell "GET"
+        - cell "/tapdb/static/tapdb-gui.css"
+        - cell "30"
+        - cell "9.909"
+        - cell "0"
+      - row "GET /tapdb/static/tapdb-json-editor.js 30 11.026 0":
+        - cell "GET"
+        - cell "/tapdb/static/tapdb-json-editor.js"
+        - cell "30"
+        - cell "11.026"
+        - cell "0"
+      - 'row "GET /records/{euid} 27 2.732 0"':
+        - cell "GET"
+        - 'cell "/records/{euid}"'
+        - cell "27"
+        - cell "2.732"
+        - cell "0"
+      - row "POST /api/v1/records 25 155.676 0":
+        - cell "POST"
+        - cell "/api/v1/records"
+        - cell "25"
+        - cell "155.676"
+        - cell "0"
+      - row "GET /static/favicon.svg 19 53.715 0":
+        - cell "GET"
+        - cell "/static/favicon.svg"
+        - cell "19"
+        - cell "53.715"
+        - cell "0"
+      - row "GET /ui 19 11.719 0":
+        - cell "GET"
+        - cell "/ui"
+        - cell "19"
+        - cell "11.719"
+        - cell "0"
+      - 'row "PUT /api/v1/storage/uploads/{euid}/parts/{number} 14 10413.615 0"':
+        - cell "PUT"
+        - 'cell "/api/v1/storage/uploads/{euid}/parts/{number}"'
+        - cell "14"
+        - cell "10413.615"
+        - cell "0"
+      - row "POST /api/v1/storage/uploads 12 159.754 0":
+        - cell "POST"
+        - cell "/api/v1/storage/uploads"
+        - cell "12"
+        - cell "159.754"
+        - cell "0"
+      - 'row "POST /api/v1/storage/uploads/{euid}/complete 12 156.063 0"':
+        - cell "POST"
+        - 'cell "/api/v1/storage/uploads/{euid}/complete"'
+        - cell "12"
+        - cell "156.063"
+        - cell "0"
+      - row "GET /static/console.css 12 5.953 0":
+        - cell "GET"
+        - cell "/static/console.css"
+        - cell "12"
+        - cell "5.953"
+        - cell "0"
+      - row "GET /add 11 2.249 0":
+        - cell "GET"
+        - cell "/add"
+        - cell "11"
+        - cell "2.249"
+        - cell "0"
+      - row "GET /api/v1/me/preferences 11 65.393 0":
+        - cell "GET"
+        - cell "/api/v1/me/preferences"
+        - cell "11"
+        - cell "65.393"
+        - cell "0"
+      - row "GET /static/lsmc_ui.js 11 4.638 0":
+        - cell "GET"
+        - cell "/static/lsmc_ui.js"
+        - cell "11"
+        - cell "4.638"
+        - cell "0"
+      - row "POST /api/v1/literature/search 8 29706.521 0":
+        - cell "POST"
+        - cell "/api/v1/literature/search"
+        - cell "8"
+        - cell "29706.521"
+        - cell "0"
+      - row "GET /api/v1/storage/buckets 8 8742.211 0":
+        - cell "GET"
+        - cell "/api/v1/storage/buckets"
+        - cell "8"
+        - cell "8742.211"
+        - cell "0"
+      - row "GET /favicon.ico 8 5.544 0":
+        - cell "GET"
+        - cell "/favicon.ico"
+        - cell "8"
+        - cell "5.544"
+        - cell "0"
+  - heading "Database" [level=3]
+  - generic: Probe status plus hot and slow operation families.
+  - generic: ok
+  - generic: "Latest: 2689367b205c16ce"
+  - generic: "Schema drift: check_failed"
+  - generic: This operation requires explicit target.operator credentials
+  - article:
+    - generic: service:search_registry
+    - generic: p95 532854.654 ms
+    - generic: 52 calls
+  - article:
+    - generic: service:registry_browse
+    - generic: p95 1350.429 ms
+    - generic: 149 calls
+  - article:
+    - generic: service:save_literature
+    - generic: p95 1115.142 ms
+    - generic: 2 calls
+  - article:
+    - generic: service:search_literature
+    - generic: p95 531.527 ms
+    - generic: 8 calls
+  - article:
+    - generic: service:registry_buckets
+    - generic: p95 486.571 ms
+    - generic: 8 calls
+  - heading "Auth" [level=3]
+  - generic: Recent auth events for session and bearer access.
+  - generic: "Configured: True"
+  - generic: "Sessions supported: False"
+  - article:
+    - generic: ok via external_broker
+    - generic: 0cd497666af84629
+  - article:
+    - generic: ok via external_broker
+    - generic: 3f3af1ecebbd1410
+  - article:
+    - generic: ok via external_broker
+    - generic: 0cd497666af84629
+  - article:
+    - generic: ok via external_broker
+    - generic: 0cd497666af84629
+  - article:
+    - generic: ok via external_broker
+    - generic: 0cd497666af84629
+  - article:
+    - generic: ok via external_broker
+    - generic: 0cd497666af84629
+  - article:
+    - generic: ok via external_broker
+    - generic: 0cd497666af84629
+  - article:
+    - generic: ok via external_broker
+    - generic: 0cd497666af84629
+  - article:
+    - generic: ok via external_broker
+    - generic: 0cd497666af84629
+  - article:
+    - generic: ok via external_broker
+    - generic: 0cd497666af84629
+  - article:
+    - generic: ok via external_broker
+    - generic: 0cd497666af84629
+  - article:
+    - generic: ok via external_broker
+    - generic: 0cd497666af84629
+  - article:
+    - generic: ok via external_broker
+    - generic: 0cd497666af84629
+  - article:
+    - generic: ok via external_broker
+    - generic: 0cd497666af84629
+  - article:
+    - generic: denied via anonymous
+    - generic: 0cd497666af84629
+  - article:
+    - generic: denied via anonymous
+    - generic: 0cd497666af84629
+  - article:
+    - generic: ok via external_broker
+    - generic: 0cd497666af84629
+  - article:
+    - generic: ok via external_broker
+    - generic: 0cd497666af84629
+  - article:
+    - generic: ok via external_broker
+    - generic: 0cd497666af84629
+  - article:
+    - generic: ok via external_broker
+    - generic: 0cd497666af84629
+  - article:
+    - generic: ok via external_broker
+    - generic: 0cd497666af84629
+  - article:
+    - generic: ok via external_broker
+    - generic: 0cd497666af84629
+  - article:
+    - generic: ok via external_broker
+    - generic: 0cd497666af84629
+  - article:
+    - generic: ok via external_broker
+    - generic: 0cd497666af84629
+  - article:
+    - generic: ok via external_broker
+    - generic: 0cd497666af84629
+  - heading "Local Anomalies" [level=3]
+  - generic: Read-only local anomaly records persisted in TapDB.
+  - link "Open anomaly view":
+    - /url: /ui/anomalies
+  - generic: "high: Artifact storage review is pending"
+  - generic: "medium: Readiness probe observed a bootstrap gap"
+  - generic: "low: Operator session activity is sparse"
+- contentinfo:
+  - generic: Version 10.0.5
+  - generic: Branch codex/dewey-labcore-910
+  - generic: Tag 10.0.5
+  - generic: Commit df6d4d0646fc1385c35ff2b6353478a46b4587ac
+- text: Theme
+- combobox "Theme":
+  - option "original" [selected]
+  - option "light"
+  - option "dark"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

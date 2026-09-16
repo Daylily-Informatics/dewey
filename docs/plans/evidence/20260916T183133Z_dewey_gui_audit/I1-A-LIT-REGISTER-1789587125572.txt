@@ -1,0 +1,65 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / RECORD
+  - heading "literature:35750315" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - generic: object
+  - code: M-DGX-TRF1
+  - button "Download / open"
+  - button "Share"
+  - button "Edit metadata"
+  - heading "Object" [level=2]
+  - paragraph: — · literature
+  - heading "Metadata" [level=2]
+  - generic: "{ \"doi\": \"10.1016/j.jgg.2022.06.004\", \"pmid\": \"35750315\", \"year\": \"2022\", \"pmcid\": null, \"title\": \"Plant pan-genomics: recent advances, new challenges, and roads ahead.\", \"authors\": [ \"Li W\", \"Liu J\", \"Zhang H\", \"Liu Z\", \"Wang Y\", \"Xing L\", \"He Q\", \"Du H\" ], \"journal\": \"J Genet Genomics\", \"abstract\": \"Pan-genomics can encompass most of the genetic diversity of a species or population and has proved to be a powerful tool for studying genomic evolution and the origin and domestication of species, and for providing information for plant improvement. Plant genomics has greatly progressed because of improvements in sequencing technologies and the rapid reduction of sequencing costs. Nevertheless, pan-genomics still presents many challenges, including computationally intensive assembly methods, high costs with large numbers of samples, ineffective integration of big data, and difficulty in applying it to downstream multi-omics analysis and breeding research. In this review, we summarize the definition and recent achievements of plant pan-genomics, computational technologies used for pan-genome construction, and the applications of pan-genomes in plant genomics and molecular breeding. We also discuss challenges and perspectives for future pan-genomics studies and provide a detailed pipeline for sample selection, genome assembly and annotation, structural variation identification, and construction and application of graph-based pan-genomes. The aim is to provide important guidance for plant pan-genome research and a better understanding of the genetic basis of genome evolution, crop domestication, and phenotypic diversity for future studies.\", \"source_urls\": [ \"https://ncbi.nlm.nih.gov/pubmed/35750315\", \"https://doi.org/10.1016/j.jgg.2022.06.004\" ], \"storage_mode\": \"external_reference\", \"findit_reason\": \"DENIED: url (https://www.sciencedirect.com/science/article/pii/S167385272200162X/pdfft?isDTMRedir=true&download=true) access forbidden.\", \"record_family\": \"literature\", \"fulltext_status\": \"unavailable\", \"abstract_snippet\": \"Pan-genomics can encompass most of the genetic diversity of a species or population and has proved to be a powerful tool for studying genomic evolution and the origin and domestication of species, and for providing information for plant improvement. Plant genomics has greatly progressed because of improvements in sequ…\", \"acquisition_mode\": \"external_reference\", \"best_fulltext_url\": null }"
+  - complementary:
+    - heading "Details" [level=2]
+    - term: EUID
+    - definition: M-DGX-TRF1
+    - term: Owner
+    - definition: johnm@lsmc.com
+    - term: Created
+    - definition: 9/16/2026
+    - term: Producer
+    - definition: pubmed
+    - term: Location
+    - definition: https://ncbi.nlm.nih.gov/pubmed/35750315
+    - heading "Access" [level=2]
+    - paragraph: Metadata visibility and download access are managed independently.
+    - button "Manage permissions"
+    - button "Transfer ownership"
+    - generic "Registration lifecycle"
+    - generic "Recent activity"
+    - generic "Technical details"
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

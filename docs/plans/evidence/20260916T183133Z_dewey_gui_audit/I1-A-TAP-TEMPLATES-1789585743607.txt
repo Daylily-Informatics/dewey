@@ -1,0 +1,335 @@
+- banner:
+  - link "Dewey / TapDB":
+    - /url: /tapdb/
+  - navigation:
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Admin":
+      - /url: /admin
+    - link "Overview":
+      - /url: /tapdb/admin/overview
+    - link "Search":
+      - /url: /tapdb/search
+    - link "Graph":
+      - /url: /tapdb/graph
+    - link "Templates":
+      - /url: /tapdb/templates
+    - link "Audit":
+      - /url: /tapdb/audit
+    - link "Help":
+      - /url: /tapdb/help
+    - link "Readiness":
+      - /url: /tapdb/admin/readiness
+    - link "Inventory":
+      - /url: /tapdb/admin/inventory
+    - link "Meridian":
+      - /url: /tapdb/admin/meridian
+    - link "Metrics":
+      - /url: /tapdb/admin/metrics
+    - link "Runtime":
+      - /url: /tapdb/admin/runtime
+    - link "Backups":
+      - /url: /tapdb/admin/backups
+    - link "Sign out":
+      - /url: /auth/logout
+  - generic: johnm@lsmc.com · admin
+- main:
+  - heading "Templates" [level=1]
+  - paragraph: Loaded templates are read-only.
+  - textbox "category"
+  - button "Filter"
+  - textbox "Optional exact stored template EUID"
+  - button "Download Canonical Pack"
+  - paragraph: The download returns an identity-free canonical JSON pack as an attachment and creates no server-side files.
+  - textbox "/absolute/path/to/template-pack.json"
+  - button "Inventory Repository Pack"
+  - textbox "/absolute/path/to/template-pack.json"
+  - button "Export New Repository Pack"
+  - paragraph: Server-side repository export requires an explicit absolute path and writes both the pack and its immutable provenance receipt. Existing files are never overwritten.
+  - table:
+    - rowgroup:
+      - row "EUID Name Code Instance Prefix Validator Repository":
+        - columnheader "EUID"
+        - columnheader "Name"
+        - columnheader "Code"
+        - columnheader "Instance Prefix"
+        - columnheader "Validator"
+        - columnheader "Repository"
+        - columnheader
+        - columnheader
+    - rowgroup:
+      - row "M-DGX-NPGA Dewey API Client access/api_client/generic/1.0 DGX UNIVERSAL_PASS@1 pending Create Build New Template":
+        - cell "M-DGX-NPGA":
+          - link "M-DGX-NPGA":
+            - /url: /tapdb/object/M-DGX-NPGA
+        - cell "Dewey API Client"
+        - cell "access/api_client/generic/1.0"
+        - cell "DGX"
+        - cell "UNIVERSAL_PASS@1":
+          - code: UNIVERSAL_PASS@1
+        - cell "pending"
+        - cell "Create":
+          - link "Create":
+            - /url: /tapdb/create/M-DGX-NPGA
+        - cell "Build New Template":
+          - link "Build New Template":
+            - /url: /tapdb/templates/new?seed_euid=M-DGX-NPGA
+      - row "M-DGX-60 Dewey Literature Save access/literature_save/generic/1.0 DGX UNIVERSAL_PASS@1 pending Create Build New Template":
+        - cell "M-DGX-60":
+          - link "M-DGX-60":
+            - /url: /tapdb/object/M-DGX-60
+        - cell "Dewey Literature Save"
+        - cell "access/literature_save/generic/1.0"
+        - cell "DGX"
+        - cell "UNIVERSAL_PASS@1":
+          - code: UNIVERSAL_PASS@1
+        - cell "pending"
+        - cell "Create":
+          - link "Create":
+            - /url: /tapdb/create/M-DGX-60
+        - cell "Build New Template":
+          - link "Build New Template":
+            - /url: /tapdb/templates/new?seed_euid=M-DGX-60
+      - row "M-DGX-NPFD Dewey Registry Policy access/registry_policy/generic/1.0 DGX UNIVERSAL_PASS@1 pending Create Build New Template":
+        - cell "M-DGX-NPFD":
+          - link "M-DGX-NPFD":
+            - /url: /tapdb/object/M-DGX-NPFD
+        - cell "Dewey Registry Policy"
+        - cell "access/registry_policy/generic/1.0"
+        - cell "DGX"
+        - cell "UNIVERSAL_PASS@1":
+          - code: UNIVERSAL_PASS@1
+        - cell "pending"
+        - cell "Create":
+          - link "Create":
+            - /url: /tapdb/create/M-DGX-NPFD
+        - cell "Build New Template":
+          - link "Build New Template":
+            - /url: /tapdb/templates/new?seed_euid=M-DGX-NPFD
+      - row "M-DGX-36 Dewey Share access/share/generic/1.0 DGX UNIVERSAL_PASS@1 pending Create Build New Template":
+        - cell "M-DGX-36":
+          - link "M-DGX-36":
+            - /url: /tapdb/object/M-DGX-36
+        - cell "Dewey Share"
+        - cell "access/share/generic/1.0"
+        - cell "DGX"
+        - cell "UNIVERSAL_PASS@1":
+          - code: UNIVERSAL_PASS@1
+        - cell "pending"
+        - cell "Create":
+          - link "Create":
+            - /url: /tapdb/create/M-DGX-36
+        - cell "Build New Template":
+          - link "Build New Template":
+            - /url: /tapdb/templates/new?seed_euid=M-DGX-36
+      - row "M-DGX-AAM5 Dewey Share Root access/share_root/generic/1.0 DGX UNIVERSAL_PASS@1 pending Create Build New Template":
+        - cell "M-DGX-AAM5":
+          - link "M-DGX-AAM5":
+            - /url: /tapdb/object/M-DGX-AAM5
+        - cell "Dewey Share Root"
+        - cell "access/share_root/generic/1.0"
+        - cell "DGX"
+        - cell "UNIVERSAL_PASS@1":
+          - code: UNIVERSAL_PASS@1
+        - cell "pending"
+        - cell "Create":
+          - link "Create":
+            - /url: /tapdb/create/M-DGX-AAM5
+        - cell "Build New Template":
+          - link "Build New Template":
+            - /url: /tapdb/templates/new?seed_euid=M-DGX-AAM5
+      - row "M-DGX-1A Dewey Artifact data/artifact/generic/1.0 DGX UNIVERSAL_PASS@1 pending Create Build New Template":
+        - cell "M-DGX-1A":
+          - link "M-DGX-1A":
+            - /url: /tapdb/object/M-DGX-1A
+        - cell "Dewey Artifact"
+        - cell "data/artifact/generic/1.0"
+        - cell "DGX"
+        - cell "UNIVERSAL_PASS@1":
+          - code: UNIVERSAL_PASS@1
+        - cell "pending"
+        - cell "Create":
+          - link "Create":
+            - /url: /tapdb/create/M-DGX-1A
+        - cell "Build New Template":
+          - link "Build New Template":
+            - /url: /tapdb/templates/new?seed_euid=M-DGX-1A
+      - row "M-DGX-28 Dewey Artifact Set data/artifact_set/generic/1.0 DGX UNIVERSAL_PASS@1 pending Create Build New Template":
+        - cell "M-DGX-28":
+          - link "M-DGX-28":
+            - /url: /tapdb/object/M-DGX-28
+        - cell "Dewey Artifact Set"
+        - cell "data/artifact_set/generic/1.0"
+        - cell "DGX"
+        - cell "UNIVERSAL_PASS@1":
+          - code: UNIVERSAL_PASS@1
+        - cell "pending"
+        - cell "Create":
+          - link "Create":
+            - /url: /tapdb/create/M-DGX-28
+        - cell "Build New Template":
+          - link "Build New Template":
+            - /url: /tapdb/templates/new?seed_euid=M-DGX-28
+      - row "M-DGX-44 Dewey External Object integration/external_object/generic/1.0 DGX UNIVERSAL_PASS@1 pending Create Build New Template":
+        - cell "M-DGX-44":
+          - link "M-DGX-44":
+            - /url: /tapdb/object/M-DGX-44
+        - cell "Dewey External Object"
+        - cell "integration/external_object/generic/1.0"
+        - cell "DGX"
+        - cell "UNIVERSAL_PASS@1":
+          - code: UNIVERSAL_PASS@1
+        - cell "pending"
+        - cell "Create":
+          - link "Create":
+            - /url: /tapdb/create/M-DGX-44
+        - cell "Build New Template":
+          - link "Build New Template":
+            - /url: /tapdb/templates/new?seed_euid=M-DGX-44
+      - row "M-DGX-52 Dewey External Object Relation integration/external_object_relation/generic/1.0 DGX UNIVERSAL_PASS@1 pending Create Build New Template":
+        - cell "M-DGX-52":
+          - link "M-DGX-52":
+            - /url: /tapdb/object/M-DGX-52
+        - cell "Dewey External Object Relation"
+        - cell "integration/external_object_relation/generic/1.0"
+        - cell "DGX"
+        - cell "UNIVERSAL_PASS@1":
+          - code: UNIVERSAL_PASS@1
+        - cell "pending"
+        - cell "Create":
+          - link "Create":
+            - /url: /tapdb/create/M-DGX-52
+        - cell "Build New Template":
+          - link "Build New Template":
+            - /url: /tapdb/templates/new?seed_euid=M-DGX-52
+      - row "M-DGX-7Y Dewey Anomaly operational/anomaly/generic/1.0 DGX UNIVERSAL_PASS@1 pending Create Build New Template":
+        - cell "M-DGX-7Y":
+          - link "M-DGX-7Y":
+            - /url: /tapdb/object/M-DGX-7Y
+        - cell "Dewey Anomaly"
+        - cell "operational/anomaly/generic/1.0"
+        - cell "DGX"
+        - cell "UNIVERSAL_PASS@1":
+          - code: UNIVERSAL_PASS@1
+        - cell "pending"
+        - cell "Create":
+          - link "Create":
+            - /url: /tapdb/create/M-DGX-7Y
+        - cell "Build New Template":
+          - link "Build New Template":
+            - /url: /tapdb/templates/new?seed_euid=M-DGX-7Y
+      - row "M-DGX-NPH8 Dewey Storage Operation operational/storage_operation/generic/1.0 DGX UNIVERSAL_PASS@1 pending Create Build New Template":
+        - cell "M-DGX-NPH8":
+          - link "M-DGX-NPH8":
+            - /url: /tapdb/object/M-DGX-NPH8
+        - cell "Dewey Storage Operation"
+        - cell "operational/storage_operation/generic/1.0"
+        - cell "DGX"
+        - cell "UNIVERSAL_PASS@1":
+          - code: UNIVERSAL_PASS@1
+        - cell "pending"
+        - cell "Create":
+          - link "Create":
+            - /url: /tapdb/create/M-DGX-NPH8
+        - cell "Build New Template":
+          - link "Build New Template":
+            - /url: /tapdb/templates/new?seed_euid=M-DGX-NPH8
+      - row "M-DGX-NNZD Opaque External Identifier reference/external_identifier/opaque/1.0 XRF UNIVERSAL_PASS@1 pending Create Build New Template":
+        - cell "M-DGX-NNZD":
+          - link "M-DGX-NNZD":
+            - /url: /tapdb/object/M-DGX-NNZD
+        - cell "Opaque External Identifier"
+        - cell "reference/external_identifier/opaque/1.0"
+        - cell "XRF"
+        - cell "UNIVERSAL_PASS@1":
+          - code: UNIVERSAL_PASS@1
+        - cell "pending"
+        - cell "Create":
+          - link "Create":
+            - /url: /tapdb/create/M-DGX-NNZD
+        - cell "Build New Template":
+          - link "Build New Template":
+            - /url: /tapdb/templates/new?seed_euid=M-DGX-NNZD
+      - row "M-DGX-NP0B TapDB Object Reference reference/external_identifier/tapdb_object/1.0 XRF UNIVERSAL_PASS@1 pending Create Build New Template":
+        - cell "M-DGX-NP0B":
+          - link "M-DGX-NP0B":
+            - /url: /tapdb/object/M-DGX-NP0B
+        - cell "TapDB Object Reference"
+        - cell "reference/external_identifier/tapdb_object/1.0"
+        - cell "XRF"
+        - cell "UNIVERSAL_PASS@1":
+          - code: UNIVERSAL_PASS@1
+        - cell "pending"
+        - cell "Create":
+          - link "Create":
+            - /url: /tapdb/create/M-DGX-NP0B
+        - cell "Build New Template":
+          - link "Build New Template":
+            - /url: /tapdb/templates/new?seed_euid=M-DGX-NP0B
+      - row "M-DGX-8W Dewey Idempotency system/idempotency_request/generic/1.0 DGX UNIVERSAL_PASS@1 pending Create Build New Template":
+        - cell "M-DGX-8W":
+          - link "M-DGX-8W":
+            - /url: /tapdb/object/M-DGX-8W
+        - cell "Dewey Idempotency"
+        - cell "system/idempotency_request/generic/1.0"
+        - cell "DGX"
+        - cell "UNIVERSAL_PASS@1":
+          - code: UNIVERSAL_PASS@1
+        - cell "pending"
+        - cell "Create":
+          - link "Create":
+            - /url: /tapdb/create/M-DGX-8W
+        - cell "Build New Template":
+          - link "Build New Template":
+            - /url: /tapdb/templates/new?seed_euid=M-DGX-8W
+      - row "M-DGX-9YPF Dewey Outbox Event system/outbox_event/generic/1.0 DGX UNIVERSAL_PASS@1 pending Create Build New Template":
+        - cell "M-DGX-9YPF":
+          - link "M-DGX-9YPF":
+            - /url: /tapdb/object/M-DGX-9YPF
+        - cell "Dewey Outbox Event"
+        - cell "system/outbox_event/generic/1.0"
+        - cell "DGX"
+        - cell "UNIVERSAL_PASS@1":
+          - code: UNIVERSAL_PASS@1
+        - cell "pending"
+        - cell "Create":
+          - link "Create":
+            - /url: /tapdb/create/M-DGX-9YPF
+        - cell "Build New Template":
+          - link "Build New Template":
+            - /url: /tapdb/templates/new?seed_euid=M-DGX-9YPF
+      - row "M-DGX-9YNH Dewey Registration Receipt system/registration_receipt/generic/1.0 DGX UNIVERSAL_PASS@1 pending Create Build New Template":
+        - cell "M-DGX-9YNH":
+          - link "M-DGX-9YNH":
+            - /url: /tapdb/object/M-DGX-9YNH
+        - cell "Dewey Registration Receipt"
+        - cell "system/registration_receipt/generic/1.0"
+        - cell "DGX"
+        - cell "UNIVERSAL_PASS@1":
+          - code: UNIVERSAL_PASS@1
+        - cell "pending"
+        - cell "Create":
+          - link "Create":
+            - /url: /tapdb/create/M-DGX-9YNH
+        - cell "Build New Template":
+          - link "Build New Template":
+            - /url: /tapdb/templates/new?seed_euid=M-DGX-9YNH
+- contentinfo: TapDB 10.1.1rc1
+- text: Theme
+- combobox "Theme":
+  - option "original" [selected]
+  - option "light"
+  - option "dark"
+  - option "CBF"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

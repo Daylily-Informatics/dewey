@@ -1,0 +1,128 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / S3 BROWSER
+  - heading "S3 Browser" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - status: An explicit s3:// URI is required
+  - textbox "S3 URI":
+    - /placeholder: s3://bucket/exact/prefix/
+    - text: https://example.com/
+  - button "Go" [active]
+  - link "All buckets":
+    - /url: /storage
+  - generic: s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-B/
+  - button "Upload files"
+  - link "Register this folder":
+    - /url: /add?kind=prefix&uri=s3%3A%2F%2Flsmc-dewey-0%2Fgui-audit%2F20260916T183133Z%2FI1-B%2F
+  - button "Delete folder…"
+  - link "lsmc-dewey-0":
+    - /url: /storage?uri=s3%3A%2F%2Flsmc-dewey-0%2F
+  - link "/gui-audit":
+    - /url: /storage?uri=s3%3A%2F%2Flsmc-dewey-0%2Fgui-audit%2F
+  - link "/20260916T183133Z":
+    - /url: /storage?uri=s3%3A%2F%2Flsmc-dewey-0%2Fgui-audit%2F20260916T183133Z%2F
+  - link "/I1-B":
+    - /url: /storage?uri=s3%3A%2F%2Flsmc-dewey-0%2Fgui-audit%2F20260916T183133Z%2FI1-B%2F
+  - searchbox "Filter names on this page"
+  - button "Register selection as a set"
+  - table:
+    - rowgroup:
+      - row "Kind Name Size Registration":
+        - columnheader "Kind"
+        - columnheader "Name"
+        - columnheader "Size"
+        - columnheader "Registration"
+    - rowgroup:
+      - row "Select nested/ prefix nested/ — Register":
+        - cell "Select nested/ prefix":
+          - checkbox "Select nested/"
+          - generic: prefix
+        - cell "nested/":
+          - link "nested/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dewey-0%2Fgui-audit%2F20260916T183133Z%2FI1-B%2Fnested%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dewey-0%2Fgui-audit%2F20260916T183133Z%2FI1-B%2Fnested%2F&kind=prefix
+      - row "Select asset.svg object asset.svg 111 B M-DGX-TS4P":
+        - cell "Select asset.svg object":
+          - checkbox "Select asset.svg"
+          - generic: object
+        - cell "asset.svg":
+          - button "asset.svg"
+        - cell "111 B"
+        - cell "M-DGX-TS4P":
+          - link "M-DGX-TS4P":
+            - /url: /records/M-DGX-TS4P
+      - row "Select fixture.json object fixture.json 64 B M-DGX-TRW6":
+        - cell "Select fixture.json object":
+          - checkbox "Select fixture.json"
+          - generic: object
+        - cell "fixture.json":
+          - button "fixture.json"
+        - cell "64 B"
+        - cell "M-DGX-TRW6":
+          - link "M-DGX-TRW6":
+            - /url: /records/M-DGX-TRW6
+      - row "Select hello world ü.txt object hello world ü.txt 80 B M-DGX-TRRE":
+        - cell "Select hello world ü.txt object":
+          - checkbox "Select hello world ü.txt"
+          - generic: object
+        - cell "hello world ü.txt":
+          - button "hello world ü.txt"
+        - cell "80 B"
+        - cell "M-DGX-TRRE":
+          - link "M-DGX-TRRE":
+            - /url: /records/M-DGX-TRRE
+      - row "Select index.html object index.html 176 B M-DGX-TS0Y":
+        - cell "Select index.html object":
+          - checkbox "Select index.html"
+          - generic: object
+        - cell "index.html":
+          - button "index.html"
+        - cell "176 B"
+        - cell "M-DGX-TS0Y":
+          - link "M-DGX-TS0Y":
+            - /url: /records/M-DGX-TS0Y
+      - row "Select multipart-17MiB.txt object multipart-17MiB.txt 17.8M B M-DGX-TS8E":
+        - cell "Select multipart-17MiB.txt object":
+          - checkbox "Select multipart-17MiB.txt"
+          - generic: object
+        - cell "multipart-17MiB.txt":
+          - button "multipart-17MiB.txt"
+        - cell "17.8M B"
+        - cell "M-DGX-TS8E":
+          - link "M-DGX-TS8E":
+            - /url: /records/M-DGX-TS8E
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

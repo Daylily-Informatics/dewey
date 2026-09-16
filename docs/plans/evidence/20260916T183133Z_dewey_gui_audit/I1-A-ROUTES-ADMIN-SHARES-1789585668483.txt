@@ -1,0 +1,926 @@
+- generic: DAY
+- banner:
+  - generic: Dewey Share Manager
+  - heading "S3 and CloudFront Shares" [level=1]
+  - generic: johnm@lsmc.com
+  - link "Dashboard":
+    - /url: /ui
+  - link "Artifacts":
+    - /url: /artifacts
+  - link "Search":
+    - /url: /search
+  - link "Admin":
+    - /url: /admin
+  - button "Logout"
+- main:
+  - generic: Hard Cutover
+  - heading "Durable Dewey share records with short-lived delivery packages." [level=2]
+  - paragraph: Shares target registered Dewey artifacts, prefixes, artifact sets, or explicit mixed sets. Delivery credentials are minted only after broker/session authorization and every decision is audited.
+  - generic: 38 shares
+  - generic: 0 tracked roots
+  - heading "Create Share" [level=3]
+  - generic: Use registered Dewey artifact, prefix, artifact-set, or mixed-set EUIDs.
+  - generic: Target Kind
+  - combobox "Target Kind":
+    - option "artifact_object" [selected]
+    - option "artifact_prefix"
+    - option "artifact_set"
+    - option "mixed_set"
+  - generic: Target EUID
+  - textbox "Target EUID":
+    - /placeholder: DGX-...
+  - generic: Name
+  - textbox "Name":
+    - /placeholder: Collaborator report share
+  - generic: Purpose
+  - textbox "Purpose":
+    - /placeholder: review, delivery, customer data room
+  - generic: Owner Email
+  - textbox "Owner Email"
+  - generic: Signed TTL Seconds
+  - spinbutton "Signed TTL Seconds": "900"
+  - generic: Allowed Users
+  - textbox "Allowed Users":
+    - /placeholder: person@example.com, collaborator@example.com
+  - generic: Allowed Domains
+  - textbox "Allowed Domains":
+    - /placeholder: lsmc.com, customer.org
+  - generic: Allowed Groups
+  - textbox "Allowed Groups":
+    - /placeholder: collaborators, customer-a
+  - generic: Delivery Modes
+  - checkbox "presigned_s3"
+  - text: presigned_s3
+  - checkbox "presigned_s3_manifest" [checked]
+  - text: presigned_s3_manifest
+  - checkbox "cloudfront_signed_url"
+  - text: cloudfront_signed_url
+  - checkbox "cloudfront_signed_cookie"
+  - text: cloudfront_signed_cookie
+  - checkbox "dewey_html_browser"
+  - text: dewey_html_browser
+  - generic: Mixed-Set Targets JSON
+  - textbox "Mixed-Set Targets JSON":
+    - /placeholder: "[{\"target_kind\":\"artifact_object\",\"target_euid\":\"DGX-...\"}]"
+  - generic: Required only for mixed sets without an existing mixed-set share EUID.
+  - button "Create Share"
+  - heading "Tracked Share Root" [level=3]
+  - generic: Register a bucket/prefix as a share root without scanning or auto-registering children.
+  - generic: Root URI
+  - textbox "Root URI":
+    - /placeholder: s3://bucket/customer-prefix/
+  - generic: Name
+  - textbox "Name"
+  - generic: Purpose
+  - textbox "Purpose"
+  - generic: Allowed Delivery Modes
+  - textbox "Allowed Delivery Modes": presigned_s3_manifest, cloudfront_signed_cookie
+  - button "Register Root"
+  - heading "Active Shares" [level=3]
+  - generic: New share-control records. Access packages are short-lived and audited.
+  - table:
+    - rowgroup:
+      - row "Share Target Policy Modes Status Access Action":
+        - columnheader "Share"
+        - columnheader "Target"
+        - columnheader "Policy"
+        - columnheader "Modes"
+        - columnheader "Status"
+        - columnheader "Access"
+        - columnheader "Action"
+    - rowgroup:
+      - 'row "M-DGX-NJK8 Direct download M-DGX-NG57 artifact_object M-DGX-NG57 Users: john@daylilyinformatics.com Domains: none Groups: none presigned_s3 Active 1 2026-09-04T15:53:31.713186Z Details Revoke"':
+        - cell "M-DGX-NJK8 Direct download M-DGX-NG57":
+          - link "M-DGX-NJK8":
+            - /url: /shares/M-DGX-NJK8
+          - generic: Direct download M-DGX-NG57
+        - cell "artifact_object M-DGX-NG57":
+          - generic: artifact_object
+          - generic: M-DGX-NG57
+        - 'cell "Users: john@daylilyinformatics.com Domains: none Groups: none"':
+          - generic: "Users: john@daylilyinformatics.com"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell "presigned_s3"
+        - cell "Active":
+          - generic: Active
+        - cell "1 2026-09-04T15:53:31.713186Z":
+          - text: "1"
+          - generic: 2026-09-04T15:53:31.713186Z
+        - cell "Details Revoke":
+          - link "Details":
+            - /url: /shares/M-DGX-NJK8
+          - button "Revoke"
+      - 'row "M-DGX-NJHC Direct download M-DGX-NG57 artifact_object M-DGX-NG57 Users: johnm@lsmc.com Domains: none Groups: none presigned_s3 Active 1 2026-09-04T00:08:06.153827Z Details Revoke"':
+        - cell "M-DGX-NJHC Direct download M-DGX-NG57":
+          - link "M-DGX-NJHC":
+            - /url: /shares/M-DGX-NJHC
+          - generic: Direct download M-DGX-NG57
+        - cell "artifact_object M-DGX-NG57":
+          - generic: artifact_object
+          - generic: M-DGX-NG57
+        - 'cell "Users: johnm@lsmc.com Domains: none Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell "presigned_s3"
+        - cell "Active":
+          - generic: Active
+        - cell "1 2026-09-04T00:08:06.153827Z":
+          - text: "1"
+          - generic: 2026-09-04T00:08:06.153827Z
+        - cell "Details Revoke":
+          - link "Details":
+            - /url: /shares/M-DGX-NJHC
+          - button "Revoke"
+      - 'row "M-DGX-NJFH Direct download M-DGX-ND1J artifact_object M-DGX-ND1J Users: johnm@lsmc.com Domains: none Groups: none presigned_s3 Active 1 2026-09-03T22:23:50.928569Z Details Revoke"':
+        - cell "M-DGX-NJFH Direct download M-DGX-ND1J":
+          - link "M-DGX-NJFH":
+            - /url: /shares/M-DGX-NJFH
+          - generic: Direct download M-DGX-ND1J
+        - cell "artifact_object M-DGX-ND1J":
+          - generic: artifact_object
+          - generic: M-DGX-ND1J
+        - 'cell "Users: johnm@lsmc.com Domains: none Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell "presigned_s3"
+        - cell "Active":
+          - generic: Active
+        - cell "1 2026-09-03T22:23:50.928569Z":
+          - text: "1"
+          - generic: 2026-09-03T22:23:50.928569Z
+        - cell "Details Revoke":
+          - link "Details":
+            - /url: /shares/M-DGX-NJFH
+          - button "Revoke"
+      - 'row "M-DGX-NJDN Direct download M-DGX-ND1J artifact_object M-DGX-ND1J Users: johnm@lsmc.com Domains: none Groups: none presigned_s3 Active 1 2026-09-03T10:20:22.693156Z Details Revoke"':
+        - cell "M-DGX-NJDN Direct download M-DGX-ND1J":
+          - link "M-DGX-NJDN":
+            - /url: /shares/M-DGX-NJDN
+          - generic: Direct download M-DGX-ND1J
+        - cell "artifact_object M-DGX-ND1J":
+          - generic: artifact_object
+          - generic: M-DGX-ND1J
+        - 'cell "Users: johnm@lsmc.com Domains: none Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell "presigned_s3"
+        - cell "Active":
+          - generic: Active
+        - cell "1 2026-09-03T10:20:22.693156Z":
+          - text: "1"
+          - generic: 2026-09-03T10:20:22.693156Z
+        - cell "Details Revoke":
+          - link "Details":
+            - /url: /shares/M-DGX-NJDN
+          - button "Revoke"
+      - 'row "M-DGX-N8DZ Direct download M-DGX-N87B artifact_object M-DGX-N87B Users: johnm@lsmc.com Domains: none Groups: none presigned_s3 Active 1 2026-07-26T22:26:17.391743Z Details Revoke"':
+        - cell "M-DGX-N8DZ Direct download M-DGX-N87B":
+          - link "M-DGX-N8DZ":
+            - /url: /shares/M-DGX-N8DZ
+          - generic: Direct download M-DGX-N87B
+        - cell "artifact_object M-DGX-N87B":
+          - generic: artifact_object
+          - generic: M-DGX-N87B
+        - 'cell "Users: johnm@lsmc.com Domains: none Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell "presigned_s3"
+        - cell "Active":
+          - generic: Active
+        - cell "1 2026-07-26T22:26:17.391743Z":
+          - text: "1"
+          - generic: 2026-07-26T22:26:17.391743Z
+        - cell "Details Revoke":
+          - link "Details":
+            - /url: /shares/M-DGX-N8DZ
+          - button "Revoke"
+      - 'row "M-DGX-MWQR Direct download M-DGX-MVFA artifact_object M-DGX-MVFA Users: johnm@lsmc.com Domains: none Groups: none presigned_s3 Active 1 2026-07-22T21:05:24.663297Z Details Revoke"':
+        - cell "M-DGX-MWQR Direct download M-DGX-MVFA":
+          - link "M-DGX-MWQR":
+            - /url: /shares/M-DGX-MWQR
+          - generic: Direct download M-DGX-MVFA
+        - cell "artifact_object M-DGX-MVFA":
+          - generic: artifact_object
+          - generic: M-DGX-MVFA
+        - 'cell "Users: johnm@lsmc.com Domains: none Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell "presigned_s3"
+        - cell "Active":
+          - generic: Active
+        - cell "1 2026-07-22T21:05:24.663297Z":
+          - text: "1"
+          - generic: 2026-07-22T21:05:24.663297Z
+        - cell "Details Revoke":
+          - link "Details":
+            - /url: /shares/M-DGX-MWQR
+          - button "Revoke"
+      - 'row "M-DGX-MWNW Direct download M-DGX-MVFA artifact_object M-DGX-MVFA Users: johnm@lsmc.com Domains: none Groups: none presigned_s3 Active 1 2026-07-22T19:45:54.593514Z Details Revoke"':
+        - cell "M-DGX-MWNW Direct download M-DGX-MVFA":
+          - link "M-DGX-MWNW":
+            - /url: /shares/M-DGX-MWNW
+          - generic: Direct download M-DGX-MVFA
+        - cell "artifact_object M-DGX-MVFA":
+          - generic: artifact_object
+          - generic: M-DGX-MVFA
+        - 'cell "Users: johnm@lsmc.com Domains: none Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell "presigned_s3"
+        - cell "Active":
+          - generic: Active
+        - cell "1 2026-07-22T19:45:54.593514Z":
+          - text: "1"
+          - generic: 2026-07-22T19:45:54.593514Z
+        - cell "Details Revoke":
+          - link "Details":
+            - /url: /shares/M-DGX-MWNW
+          - button "Revoke"
+      - 'row "M-DGX-ME1K Bjuice HIOMRS Set 2 DAY final MultiQC 3 artifact_object M-DGX-MDZQ Users: johnm@lsmc.com Domains: lsmc.com Groups: none cloudfront_signed_url Active 1 2026-07-17T21:26:00.259304Z Details Revoke"':
+        - cell "M-DGX-ME1K Bjuice HIOMRS Set 2 DAY final MultiQC 3":
+          - link "M-DGX-ME1K":
+            - /url: /shares/M-DGX-ME1K
+          - generic: Bjuice HIOMRS Set 2 DAY final MultiQC 3
+        - cell "artifact_object M-DGX-MDZQ":
+          - generic: artifact_object
+          - generic: M-DGX-MDZQ
+        - 'cell "Users: johnm@lsmc.com Domains: lsmc.com Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: lsmc.com"
+          - generic: "Groups: none"
+        - cell "cloudfront_signed_url"
+        - cell "Active":
+          - generic: Active
+        - cell "1 2026-07-17T21:26:00.259304Z":
+          - text: "1"
+          - generic: 2026-07-17T21:26:00.259304Z
+        - cell "Details Revoke":
+          - link "Details":
+            - /url: /shares/M-DGX-ME1K
+          - button "Revoke"
+      - 'row "M-DGX-MDWX Bjuice HIOMRS Set 1 DAY final MultiQC 3 artifact_object M-DGX-MDT1 Users: johnm@lsmc.com Domains: lsmc.com Groups: none cloudfront_signed_url Active 1 2026-07-17T21:25:59.384760Z Details Revoke"':
+        - cell "M-DGX-MDWX Bjuice HIOMRS Set 1 DAY final MultiQC 3":
+          - link "M-DGX-MDWX":
+            - /url: /shares/M-DGX-MDWX
+          - generic: Bjuice HIOMRS Set 1 DAY final MultiQC 3
+        - cell "artifact_object M-DGX-MDT1":
+          - generic: artifact_object
+          - generic: M-DGX-MDT1
+        - 'cell "Users: johnm@lsmc.com Domains: lsmc.com Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: lsmc.com"
+          - generic: "Groups: none"
+        - cell "cloudfront_signed_url"
+        - cell "Active":
+          - generic: Active
+        - cell "1 2026-07-17T21:25:59.384760Z":
+          - text: "1"
+          - generic: 2026-07-17T21:25:59.384760Z
+        - cell "Details Revoke":
+          - link "Details":
+            - /url: /shares/M-DGX-MDWX
+          - button "Revoke"
+      - 'row "M-DGX-MDQ7 Bjuice10 Set 1 LSMC MultiQC report 20260717 artifact_object M-DGX-MDNB Users: johnm@lsmc.com Domains: lsmc.com Groups: none cloudfront_signed_url Active 0 Details Revoke"':
+        - cell "M-DGX-MDQ7 Bjuice10 Set 1 LSMC MultiQC report 20260717":
+          - link "M-DGX-MDQ7":
+            - /url: /shares/M-DGX-MDQ7
+          - generic: Bjuice10 Set 1 LSMC MultiQC report 20260717
+        - cell "artifact_object M-DGX-MDNB":
+          - generic: artifact_object
+          - generic: M-DGX-MDNB
+        - 'cell "Users: johnm@lsmc.com Domains: lsmc.com Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: lsmc.com"
+          - generic: "Groups: none"
+        - cell "cloudfront_signed_url"
+        - cell "Active":
+          - generic: Active
+        - cell "0"
+        - cell "Details Revoke":
+          - link "Details":
+            - /url: /shares/M-DGX-MDQ7
+          - button "Revoke"
+      - 'row "M-DGX-M63Q Bjuice10 full-coverage HIOMRS process DAG artifact_object M-DGX-M5ZZ Users: johnm@lsmc.com Domains: lsmc.com Groups: none cloudfront_signed_url Active 1 2026-07-16T21:08:45.962811Z Details Revoke"':
+        - cell "M-DGX-M63Q Bjuice10 full-coverage HIOMRS process DAG":
+          - link "M-DGX-M63Q":
+            - /url: /shares/M-DGX-M63Q
+          - generic: Bjuice10 full-coverage HIOMRS process DAG
+        - cell "artifact_object M-DGX-M5ZZ":
+          - generic: artifact_object
+          - generic: M-DGX-M5ZZ
+        - 'cell "Users: johnm@lsmc.com Domains: lsmc.com Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: lsmc.com"
+          - generic: "Groups: none"
+        - cell "cloudfront_signed_url"
+        - cell "Active":
+          - generic: Active
+        - cell "1 2026-07-16T21:08:45.962811Z":
+          - text: "1"
+          - generic: 2026-07-16T21:08:45.962811Z
+        - cell "Details Revoke":
+          - link "Details":
+            - /url: /shares/M-DGX-M63Q
+          - button "Revoke"
+      - 'row "M-DGX-M61V Bjuice10 corrected full-coverage HIOMRS final MultiQC artifact_object M-DGX-M5W5 Users: johnm@lsmc.com Domains: lsmc.com Groups: none cloudfront_signed_url Active 1 2026-07-16T21:08:45.736400Z Details Revoke"':
+        - cell "M-DGX-M61V Bjuice10 corrected full-coverage HIOMRS final MultiQC":
+          - link "M-DGX-M61V":
+            - /url: /shares/M-DGX-M61V
+          - generic: Bjuice10 corrected full-coverage HIOMRS final MultiQC
+        - cell "artifact_object M-DGX-M5W5":
+          - generic: artifact_object
+          - generic: M-DGX-M5W5
+        - 'cell "Users: johnm@lsmc.com Domains: lsmc.com Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: lsmc.com"
+          - generic: "Groups: none"
+        - cell "cloudfront_signed_url"
+        - cell "Active":
+          - generic: Active
+        - cell "1 2026-07-16T21:08:45.736400Z":
+          - text: "1"
+          - generic: 2026-07-16T21:08:45.736400Z
+        - cell "Details Revoke":
+          - link "Details":
+            - /url: /shares/M-DGX-M61V
+          - button "Revoke"
+      - 'row "M-DGX-K91T Bjuice10 full-coverage HIOMRS process DAG artifact_object M-DGX-K8X2 Users: johnm@lsmc.com Domains: lsmc.com Groups: none cloudfront_signed_url Active 1 2026-07-16T15:21:41.147135Z Details Revoke"':
+        - cell "M-DGX-K91T Bjuice10 full-coverage HIOMRS process DAG":
+          - link "M-DGX-K91T":
+            - /url: /shares/M-DGX-K91T
+          - generic: Bjuice10 full-coverage HIOMRS process DAG
+        - cell "artifact_object M-DGX-K8X2":
+          - generic: artifact_object
+          - generic: M-DGX-K8X2
+        - 'cell "Users: johnm@lsmc.com Domains: lsmc.com Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: lsmc.com"
+          - generic: "Groups: none"
+        - cell "cloudfront_signed_url"
+        - cell "Active":
+          - generic: Active
+        - cell "1 2026-07-16T15:21:41.147135Z":
+          - text: "1"
+          - generic: 2026-07-16T15:21:41.147135Z
+        - cell "Details Revoke":
+          - link "Details":
+            - /url: /shares/M-DGX-K91T
+          - button "Revoke"
+      - 'row "M-DGX-K8ZY Bjuice10 full-coverage HIOMRS final MultiQC artifact_object M-DGX-K8T8 Users: johnm@lsmc.com Domains: lsmc.com Groups: none cloudfront_signed_url Active 1 2026-07-16T15:21:40.895148Z Details Revoke"':
+        - cell "M-DGX-K8ZY Bjuice10 full-coverage HIOMRS final MultiQC":
+          - link "M-DGX-K8ZY":
+            - /url: /shares/M-DGX-K8ZY
+          - generic: Bjuice10 full-coverage HIOMRS final MultiQC
+        - cell "artifact_object M-DGX-K8T8":
+          - generic: artifact_object
+          - generic: M-DGX-K8T8
+        - 'cell "Users: johnm@lsmc.com Domains: lsmc.com Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: lsmc.com"
+          - generic: "Groups: none"
+        - cell "cloudfront_signed_url"
+        - cell "Active":
+          - generic: Active
+        - cell "1 2026-07-16T15:21:40.895148Z":
+          - text: "1"
+          - generic: 2026-07-16T15:21:40.895148Z
+        - cell "Details Revoke":
+          - link "Details":
+            - /url: /shares/M-DGX-K8ZY
+          - button "Revoke"
+      - 'row "M-DGX-K4F3 Dewey production delivery acceptance dewey-prod-share-20260714T230600Z artifact_object M-DGX-K2BD Users: johnm@lsmc.com Domains: none Groups: none presigned_s3 expired 1 2026-07-14T23:06:05.373293Z Details"':
+        - cell "M-DGX-K4F3 Dewey production delivery acceptance dewey-prod-share-20260714T230600Z":
+          - link "M-DGX-K4F3":
+            - /url: /shares/M-DGX-K4F3
+          - generic: Dewey production delivery acceptance dewey-prod-share-20260714T230600Z
+        - cell "artifact_object M-DGX-K2BD":
+          - generic: artifact_object
+          - generic: M-DGX-K2BD
+        - 'cell "Users: johnm@lsmc.com Domains: none Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell "presigned_s3"
+        - cell "expired":
+          - generic: expired
+        - cell "1 2026-07-14T23:06:05.373293Z":
+          - text: "1"
+          - generic: 2026-07-14T23:06:05.373293Z
+        - cell "Details":
+          - link "Details":
+            - /url: /shares/M-DGX-K4F3
+      - 'row "M-DGX-K4D7 Dewey production delivery acceptance dewey-prod-share-20260714T230600Z mixed_set explicit mixed targets Users: johnm@lsmc.com Domains: none Groups: none presigned_s3, presigned_s3_manifest, cloudfront_signed_url, cloudfront_signed_cookie, dewey_html_browser revoked revoked 2026-07-14T23:06:11.741474Z 5 2026-07-14T23:06:05.111560Z Details"':
+        - cell "M-DGX-K4D7 Dewey production delivery acceptance dewey-prod-share-20260714T230600Z":
+          - link "M-DGX-K4D7":
+            - /url: /shares/M-DGX-K4D7
+          - generic: Dewey production delivery acceptance dewey-prod-share-20260714T230600Z
+        - cell "mixed_set explicit mixed targets":
+          - generic: mixed_set
+          - generic: explicit mixed targets
+        - 'cell "Users: johnm@lsmc.com Domains: none Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell "presigned_s3, presigned_s3_manifest, cloudfront_signed_url, cloudfront_signed_cookie, dewey_html_browser"
+        - cell "revoked revoked 2026-07-14T23:06:11.741474Z":
+          - generic: revoked
+          - generic: revoked 2026-07-14T23:06:11.741474Z
+        - cell "5 2026-07-14T23:06:05.111560Z":
+          - text: "5"
+          - generic: 2026-07-14T23:06:05.111560Z
+        - cell "Details":
+          - link "Details":
+            - /url: /shares/M-DGX-K4D7
+      - 'row "M-DGX-K4BB Dewey production delivery acceptance dewey-prod-share-20260714T230600Z artifact_prefix M-DGX-K3KV Users: johnm@lsmc.com Domains: none Groups: none presigned_s3_manifest, cloudfront_signed_cookie, dewey_html_browser revoked revoked 2026-07-14T23:06:11.676921Z 3 2026-07-14T23:06:04.018812Z Details"':
+        - cell "M-DGX-K4BB Dewey production delivery acceptance dewey-prod-share-20260714T230600Z":
+          - link "M-DGX-K4BB":
+            - /url: /shares/M-DGX-K4BB
+          - generic: Dewey production delivery acceptance dewey-prod-share-20260714T230600Z
+        - cell "artifact_prefix M-DGX-K3KV":
+          - generic: artifact_prefix
+          - generic: M-DGX-K3KV
+        - 'cell "Users: johnm@lsmc.com Domains: none Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell "presigned_s3_manifest, cloudfront_signed_cookie, dewey_html_browser"
+        - cell "revoked revoked 2026-07-14T23:06:11.676921Z":
+          - generic: revoked
+          - generic: revoked 2026-07-14T23:06:11.676921Z
+        - cell "3 2026-07-14T23:06:04.018812Z":
+          - text: "3"
+          - generic: 2026-07-14T23:06:04.018812Z
+        - cell "Details":
+          - link "Details":
+            - /url: /shares/M-DGX-K4BB
+      - 'row "M-DGX-K49F Dewey production delivery acceptance dewey-prod-share-20260714T230600Z artifact_set M-DGX-K2G2 Users: johnm@lsmc.com Domains: none Groups: none presigned_s3, presigned_s3_manifest, cloudfront_signed_url, cloudfront_signed_cookie, dewey_html_browser revoked revoked 2026-07-14T23:06:11.612179Z 5 2026-07-14T23:06:03.632726Z Details"':
+        - cell "M-DGX-K49F Dewey production delivery acceptance dewey-prod-share-20260714T230600Z":
+          - link "M-DGX-K49F":
+            - /url: /shares/M-DGX-K49F
+          - generic: Dewey production delivery acceptance dewey-prod-share-20260714T230600Z
+        - cell "artifact_set M-DGX-K2G2":
+          - generic: artifact_set
+          - generic: M-DGX-K2G2
+        - 'cell "Users: johnm@lsmc.com Domains: none Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell "presigned_s3, presigned_s3_manifest, cloudfront_signed_url, cloudfront_signed_cookie, dewey_html_browser"
+        - cell "revoked revoked 2026-07-14T23:06:11.612179Z":
+          - generic: revoked
+          - generic: revoked 2026-07-14T23:06:11.612179Z
+        - cell "5 2026-07-14T23:06:03.632726Z":
+          - text: "5"
+          - generic: 2026-07-14T23:06:03.632726Z
+        - cell "Details":
+          - link "Details":
+            - /url: /shares/M-DGX-K49F
+      - 'row "M-DGX-K47K Dewey production delivery acceptance dewey-prod-share-20260714T230600Z artifact_object M-DGX-K2BD Users: johnm@lsmc.com Domains: none Groups: none presigned_s3, presigned_s3_manifest, cloudfront_signed_url, cloudfront_signed_cookie, dewey_html_browser revoked revoked 2026-07-14T23:06:11.545329Z 5 2026-07-14T23:06:02.327404Z Details"':
+        - cell "M-DGX-K47K Dewey production delivery acceptance dewey-prod-share-20260714T230600Z":
+          - link "M-DGX-K47K":
+            - /url: /shares/M-DGX-K47K
+          - generic: Dewey production delivery acceptance dewey-prod-share-20260714T230600Z
+        - cell "artifact_object M-DGX-K2BD":
+          - generic: artifact_object
+          - generic: M-DGX-K2BD
+        - 'cell "Users: johnm@lsmc.com Domains: none Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell "presigned_s3, presigned_s3_manifest, cloudfront_signed_url, cloudfront_signed_cookie, dewey_html_browser"
+        - cell "revoked revoked 2026-07-14T23:06:11.545329Z":
+          - generic: revoked
+          - generic: revoked 2026-07-14T23:06:11.545329Z
+        - cell "5 2026-07-14T23:06:02.327404Z":
+          - text: "5"
+          - generic: 2026-07-14T23:06:02.327404Z
+        - cell "Details":
+          - link "Details":
+            - /url: /shares/M-DGX-K47K
+      - 'row "M-DGX-K45Q Dewey production delivery acceptance dewey-prod-share-20260714T225631Z mixed_set explicit mixed targets Users: johnm@lsmc.com Domains: none Groups: none presigned_s3, presigned_s3_manifest, cloudfront_signed_url, cloudfront_signed_cookie, dewey_html_browser revoked revoked 2026-07-14T22:56:32.475812Z 0 Details"':
+        - cell "M-DGX-K45Q Dewey production delivery acceptance dewey-prod-share-20260714T225631Z":
+          - link "M-DGX-K45Q":
+            - /url: /shares/M-DGX-K45Q
+          - generic: Dewey production delivery acceptance dewey-prod-share-20260714T225631Z
+        - cell "mixed_set explicit mixed targets":
+          - generic: mixed_set
+          - generic: explicit mixed targets
+        - 'cell "Users: johnm@lsmc.com Domains: none Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell "presigned_s3, presigned_s3_manifest, cloudfront_signed_url, cloudfront_signed_cookie, dewey_html_browser"
+        - cell "revoked revoked 2026-07-14T22:56:32.475812Z":
+          - generic: revoked
+          - generic: revoked 2026-07-14T22:56:32.475812Z
+        - cell "0"
+        - cell "Details":
+          - link "Details":
+            - /url: /shares/M-DGX-K45Q
+      - 'row "M-DGX-K43V Dewey production delivery acceptance dewey-prod-share-20260714T225631Z artifact_prefix M-DGX-K3KV Users: johnm@lsmc.com Domains: none Groups: none presigned_s3_manifest, cloudfront_signed_cookie, dewey_html_browser revoked revoked 2026-07-14T22:56:32.396238Z 0 Details"':
+        - cell "M-DGX-K43V Dewey production delivery acceptance dewey-prod-share-20260714T225631Z":
+          - link "M-DGX-K43V":
+            - /url: /shares/M-DGX-K43V
+          - generic: Dewey production delivery acceptance dewey-prod-share-20260714T225631Z
+        - cell "artifact_prefix M-DGX-K3KV":
+          - generic: artifact_prefix
+          - generic: M-DGX-K3KV
+        - 'cell "Users: johnm@lsmc.com Domains: none Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell "presigned_s3_manifest, cloudfront_signed_cookie, dewey_html_browser"
+        - cell "revoked revoked 2026-07-14T22:56:32.396238Z":
+          - generic: revoked
+          - generic: revoked 2026-07-14T22:56:32.396238Z
+        - cell "0"
+        - cell "Details":
+          - link "Details":
+            - /url: /shares/M-DGX-K43V
+      - 'row "M-DGX-K41Z Dewey production delivery acceptance dewey-prod-share-20260714T225631Z artifact_set M-DGX-K2G2 Users: johnm@lsmc.com Domains: none Groups: none presigned_s3, presigned_s3_manifest, cloudfront_signed_url, cloudfront_signed_cookie, dewey_html_browser revoked revoked 2026-07-14T22:56:32.318883Z 0 Details"':
+        - cell "M-DGX-K41Z Dewey production delivery acceptance dewey-prod-share-20260714T225631Z":
+          - link "M-DGX-K41Z":
+            - /url: /shares/M-DGX-K41Z
+          - generic: Dewey production delivery acceptance dewey-prod-share-20260714T225631Z
+        - cell "artifact_set M-DGX-K2G2":
+          - generic: artifact_set
+          - generic: M-DGX-K2G2
+        - 'cell "Users: johnm@lsmc.com Domains: none Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell "presigned_s3, presigned_s3_manifest, cloudfront_signed_url, cloudfront_signed_cookie, dewey_html_browser"
+        - cell "revoked revoked 2026-07-14T22:56:32.318883Z":
+          - generic: revoked
+          - generic: revoked 2026-07-14T22:56:32.318883Z
+        - cell "0"
+        - cell "Details":
+          - link "Details":
+            - /url: /shares/M-DGX-K41Z
+      - 'row "M-DGX-K3Z3 Dewey production delivery acceptance dewey-prod-share-20260714T225631Z artifact_object M-DGX-K2BD Users: johnm@lsmc.com Domains: none Groups: none presigned_s3, presigned_s3_manifest, cloudfront_signed_url, cloudfront_signed_cookie, dewey_html_browser revoked revoked 2026-07-14T22:56:32.241691Z 0 Details"':
+        - cell "M-DGX-K3Z3 Dewey production delivery acceptance dewey-prod-share-20260714T225631Z":
+          - link "M-DGX-K3Z3":
+            - /url: /shares/M-DGX-K3Z3
+          - generic: Dewey production delivery acceptance dewey-prod-share-20260714T225631Z
+        - cell "artifact_object M-DGX-K2BD":
+          - generic: artifact_object
+          - generic: M-DGX-K2BD
+        - 'cell "Users: johnm@lsmc.com Domains: none Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell "presigned_s3, presigned_s3_manifest, cloudfront_signed_url, cloudfront_signed_cookie, dewey_html_browser"
+        - cell "revoked revoked 2026-07-14T22:56:32.241691Z":
+          - generic: revoked
+          - generic: revoked 2026-07-14T22:56:32.241691Z
+        - cell "0"
+        - cell "Details":
+          - link "Details":
+            - /url: /shares/M-DGX-K3Z3
+      - 'row "M-DGX-K3X7 Dewey production delivery acceptance dewey-prod-share-20260714T223433Z artifact_object M-DGX-K2BD Users: johnm@lsmc.com Domains: none Groups: none presigned_s3 revoked revoked 2026-07-14T22:34:45.479529Z 1 2026-07-14T22:34:38.928994Z Details"':
+        - cell "M-DGX-K3X7 Dewey production delivery acceptance dewey-prod-share-20260714T223433Z":
+          - link "M-DGX-K3X7":
+            - /url: /shares/M-DGX-K3X7
+          - generic: Dewey production delivery acceptance dewey-prod-share-20260714T223433Z
+        - cell "artifact_object M-DGX-K2BD":
+          - generic: artifact_object
+          - generic: M-DGX-K2BD
+        - 'cell "Users: johnm@lsmc.com Domains: none Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell "presigned_s3"
+        - cell "revoked revoked 2026-07-14T22:34:45.479529Z":
+          - generic: revoked
+          - generic: revoked 2026-07-14T22:34:45.479529Z
+        - cell "1 2026-07-14T22:34:38.928994Z":
+          - text: "1"
+          - generic: 2026-07-14T22:34:38.928994Z
+        - cell "Details":
+          - link "Details":
+            - /url: /shares/M-DGX-K3X7
+      - 'row "M-DGX-K3VB Dewey production delivery acceptance dewey-prod-share-20260714T223433Z mixed_set explicit mixed targets Users: johnm@lsmc.com Domains: none Groups: none presigned_s3, presigned_s3_manifest, cloudfront_signed_url, cloudfront_signed_cookie, dewey_html_browser revoked revoked 2026-07-14T22:34:45.416342Z 5 2026-07-14T22:34:38.630570Z Details"':
+        - cell "M-DGX-K3VB Dewey production delivery acceptance dewey-prod-share-20260714T223433Z":
+          - link "M-DGX-K3VB":
+            - /url: /shares/M-DGX-K3VB
+          - generic: Dewey production delivery acceptance dewey-prod-share-20260714T223433Z
+        - cell "mixed_set explicit mixed targets":
+          - generic: mixed_set
+          - generic: explicit mixed targets
+        - 'cell "Users: johnm@lsmc.com Domains: none Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell "presigned_s3, presigned_s3_manifest, cloudfront_signed_url, cloudfront_signed_cookie, dewey_html_browser"
+        - cell "revoked revoked 2026-07-14T22:34:45.416342Z":
+          - generic: revoked
+          - generic: revoked 2026-07-14T22:34:45.416342Z
+        - cell "5 2026-07-14T22:34:38.630570Z":
+          - text: "5"
+          - generic: 2026-07-14T22:34:38.630570Z
+        - cell "Details":
+          - link "Details":
+            - /url: /shares/M-DGX-K3VB
+      - 'row "M-DGX-K3SF Dewey production delivery acceptance dewey-prod-share-20260714T223433Z artifact_prefix M-DGX-K3KV Users: johnm@lsmc.com Domains: none Groups: none presigned_s3_manifest, cloudfront_signed_cookie, dewey_html_browser revoked revoked 2026-07-14T22:34:45.351355Z 3 2026-07-14T22:34:37.410256Z Details"':
+        - cell "M-DGX-K3SF Dewey production delivery acceptance dewey-prod-share-20260714T223433Z":
+          - link "M-DGX-K3SF":
+            - /url: /shares/M-DGX-K3SF
+          - generic: Dewey production delivery acceptance dewey-prod-share-20260714T223433Z
+        - cell "artifact_prefix M-DGX-K3KV":
+          - generic: artifact_prefix
+          - generic: M-DGX-K3KV
+        - 'cell "Users: johnm@lsmc.com Domains: none Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell "presigned_s3_manifest, cloudfront_signed_cookie, dewey_html_browser"
+        - cell "revoked revoked 2026-07-14T22:34:45.351355Z":
+          - generic: revoked
+          - generic: revoked 2026-07-14T22:34:45.351355Z
+        - cell "3 2026-07-14T22:34:37.410256Z":
+          - text: "3"
+          - generic: 2026-07-14T22:34:37.410256Z
+        - cell "Details":
+          - link "Details":
+            - /url: /shares/M-DGX-K3SF
+      - 'row "M-DGX-K3QK Dewey production delivery acceptance dewey-prod-share-20260714T223433Z artifact_set M-DGX-K2G2 Users: johnm@lsmc.com Domains: none Groups: none presigned_s3, presigned_s3_manifest, cloudfront_signed_url, cloudfront_signed_cookie, dewey_html_browser revoked revoked 2026-07-14T22:34:45.279315Z 5 2026-07-14T22:34:36.930125Z Details"':
+        - cell "M-DGX-K3QK Dewey production delivery acceptance dewey-prod-share-20260714T223433Z":
+          - link "M-DGX-K3QK":
+            - /url: /shares/M-DGX-K3QK
+          - generic: Dewey production delivery acceptance dewey-prod-share-20260714T223433Z
+        - cell "artifact_set M-DGX-K2G2":
+          - generic: artifact_set
+          - generic: M-DGX-K2G2
+        - 'cell "Users: johnm@lsmc.com Domains: none Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell "presigned_s3, presigned_s3_manifest, cloudfront_signed_url, cloudfront_signed_cookie, dewey_html_browser"
+        - cell "revoked revoked 2026-07-14T22:34:45.279315Z":
+          - generic: revoked
+          - generic: revoked 2026-07-14T22:34:45.279315Z
+        - cell "5 2026-07-14T22:34:36.930125Z":
+          - text: "5"
+          - generic: 2026-07-14T22:34:36.930125Z
+        - cell "Details":
+          - link "Details":
+            - /url: /shares/M-DGX-K3QK
+      - 'row "M-DGX-K3NQ Dewey production delivery acceptance dewey-prod-share-20260714T223433Z artifact_object M-DGX-K2BD Users: johnm@lsmc.com Domains: none Groups: none presigned_s3, presigned_s3_manifest, cloudfront_signed_url, cloudfront_signed_cookie, dewey_html_browser revoked revoked 2026-07-14T22:34:45.205956Z 5 2026-07-14T22:34:35.669191Z Details"':
+        - cell "M-DGX-K3NQ Dewey production delivery acceptance dewey-prod-share-20260714T223433Z":
+          - link "M-DGX-K3NQ":
+            - /url: /shares/M-DGX-K3NQ
+          - generic: Dewey production delivery acceptance dewey-prod-share-20260714T223433Z
+        - cell "artifact_object M-DGX-K2BD":
+          - generic: artifact_object
+          - generic: M-DGX-K2BD
+        - 'cell "Users: johnm@lsmc.com Domains: none Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell "presigned_s3, presigned_s3_manifest, cloudfront_signed_url, cloudfront_signed_cookie, dewey_html_browser"
+        - cell "revoked revoked 2026-07-14T22:34:45.205956Z":
+          - generic: revoked
+          - generic: revoked 2026-07-14T22:34:45.205956Z
+        - cell "5 2026-07-14T22:34:35.669191Z":
+          - text: "5"
+          - generic: 2026-07-14T22:34:35.669191Z
+        - cell "Details":
+          - link "Details":
+            - /url: /shares/M-DGX-K3NQ
+      - 'row "M-DGX-K3HZ JEM artifact_object M-DGX-K2BD Users: none Domains: daylilyinformatics.com Groups: none presigned_s3 Active 0 Details Revoke"':
+        - cell "M-DGX-K3HZ JEM":
+          - link "M-DGX-K3HZ":
+            - /url: /shares/M-DGX-K3HZ
+          - generic: JEM
+        - cell "artifact_object M-DGX-K2BD":
+          - generic: artifact_object
+          - generic: M-DGX-K2BD
+        - 'cell "Users: none Domains: daylilyinformatics.com Groups: none"':
+          - generic: "Users: none"
+          - generic: "Domains: daylilyinformatics.com"
+          - generic: "Groups: none"
+        - cell "presigned_s3"
+        - cell "Active":
+          - generic: Active
+        - cell "0"
+        - cell "Details Revoke":
+          - link "Details":
+            - /url: /shares/M-DGX-K3HZ
+          - button "Revoke"
+      - 'row "M-DGX-K3F4 JEM artifact_object M-DGX-K2BD Users: none Domains: daylilyinformatics.com Groups: none presigned_s3 Active 0 Details Revoke"':
+        - cell "M-DGX-K3F4 JEM":
+          - link "M-DGX-K3F4":
+            - /url: /shares/M-DGX-K3F4
+          - generic: JEM
+        - cell "artifact_object M-DGX-K2BD":
+          - generic: artifact_object
+          - generic: M-DGX-K2BD
+        - 'cell "Users: none Domains: daylilyinformatics.com Groups: none"':
+          - generic: "Users: none"
+          - generic: "Domains: daylilyinformatics.com"
+          - generic: "Groups: none"
+        - cell "presigned_s3"
+        - cell "Active":
+          - generic: Active
+        - cell "0"
+        - cell "Details Revoke":
+          - link "Details":
+            - /url: /shares/M-DGX-K3F4
+          - button "Revoke"
+      - 'row "M-DGX-K3D8 Direct download M-DGX-K2BD artifact_object M-DGX-K2BD Users: johnm@lsmc.com Domains: none Groups: none presigned_s3 Active 1 2026-07-14T16:39:52.741925Z Details Revoke"':
+        - cell "M-DGX-K3D8 Direct download M-DGX-K2BD":
+          - link "M-DGX-K3D8":
+            - /url: /shares/M-DGX-K3D8
+          - generic: Direct download M-DGX-K2BD
+        - cell "artifact_object M-DGX-K2BD":
+          - generic: artifact_object
+          - generic: M-DGX-K2BD
+        - 'cell "Users: johnm@lsmc.com Domains: none Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell "presigned_s3"
+        - cell "Active":
+          - generic: Active
+        - cell "1 2026-07-14T16:39:52.741925Z":
+          - text: "1"
+          - generic: 2026-07-14T16:39:52.741925Z
+        - cell "Details Revoke":
+          - link "Details":
+            - /url: /shares/M-DGX-K3D8
+          - button "Revoke"
+      - 'row "M-DGX-K3BC Mike artifact_object M-DGX-K2BD Users: mike@lsmc.com Domains: lsmc.com Groups: none presigned_s3 Active 1 2026-07-14T16:21:32.719480Z Details Revoke"':
+        - cell "M-DGX-K3BC Mike":
+          - link "M-DGX-K3BC":
+            - /url: /shares/M-DGX-K3BC
+          - generic: Mike
+        - cell "artifact_object M-DGX-K2BD":
+          - generic: artifact_object
+          - generic: M-DGX-K2BD
+        - 'cell "Users: mike@lsmc.com Domains: lsmc.com Groups: none"':
+          - generic: "Users: mike@lsmc.com"
+          - generic: "Domains: lsmc.com"
+          - generic: "Groups: none"
+        - cell "presigned_s3"
+        - cell "Active":
+          - generic: Active
+        - cell "1 2026-07-14T16:21:32.719480Z":
+          - text: "1"
+          - generic: 2026-07-14T16:21:32.719480Z
+        - cell "Details Revoke":
+          - link "Details":
+            - /url: /shares/M-DGX-K3BC
+          - button "Revoke"
+      - 'row "M-DGX-K39G Michael Kennemer artifact_object M-DGX-K2BD Users: mike@lsmc.com Domains: lsmc.com Groups: none presigned_s3_manifest Active 0 Details Revoke"':
+        - cell "M-DGX-K39G Michael Kennemer":
+          - link "M-DGX-K39G":
+            - /url: /shares/M-DGX-K39G
+          - generic: Michael Kennemer
+        - cell "artifact_object M-DGX-K2BD":
+          - generic: artifact_object
+          - generic: M-DGX-K2BD
+        - 'cell "Users: mike@lsmc.com Domains: lsmc.com Groups: none"':
+          - generic: "Users: mike@lsmc.com"
+          - generic: "Domains: lsmc.com"
+          - generic: "Groups: none"
+        - cell "presigned_s3_manifest"
+        - cell "Active":
+          - generic: Active
+        - cell "0"
+        - cell "Details Revoke":
+          - link "Details":
+            - /url: /shares/M-DGX-K39G
+          - button "Revoke"
+      - 'row "M-DGX-K2PP HG003 1x HIOMRS kitchen-sink MultiQC report artifact_set M-DGX-K2G2 Users: johnm@lsmc.com Domains: lsmc.com Groups: none presigned_s3_manifest Active 2 2026-07-14T16:19:24.612127Z Details Revoke"':
+        - cell "M-DGX-K2PP HG003 1x HIOMRS kitchen-sink MultiQC report":
+          - link "M-DGX-K2PP":
+            - /url: /shares/M-DGX-K2PP
+          - generic: HG003 1x HIOMRS kitchen-sink MultiQC report
+        - cell "artifact_set M-DGX-K2G2":
+          - generic: artifact_set
+          - generic: M-DGX-K2G2
+        - 'cell "Users: johnm@lsmc.com Domains: lsmc.com Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: lsmc.com"
+          - generic: "Groups: none"
+        - cell "presigned_s3_manifest"
+        - cell "Active":
+          - generic: Active
+        - cell "2 2026-07-14T16:19:24.612127Z":
+          - text: "2"
+          - generic: 2026-07-14T16:19:24.612127Z
+        - cell "Details Revoke":
+          - link "Details":
+            - /url: /shares/M-DGX-K2PP
+          - button "Revoke"
+      - 'row "M-DGX-K2MT HG003 1x HIOMRS kitchen-sink MultiQC HTML report artifact_object M-DGX-K2BD Users: johnm@lsmc.com Domains: lsmc.com Groups: none presigned_s3 Active 1 2026-07-13T21:00:39.423561Z Details Revoke"':
+        - cell "M-DGX-K2MT HG003 1x HIOMRS kitchen-sink MultiQC HTML report":
+          - link "M-DGX-K2MT":
+            - /url: /shares/M-DGX-K2MT
+          - generic: HG003 1x HIOMRS kitchen-sink MultiQC HTML report
+        - cell "artifact_object M-DGX-K2BD":
+          - generic: artifact_object
+          - generic: M-DGX-K2BD
+        - 'cell "Users: johnm@lsmc.com Domains: lsmc.com Groups: none"':
+          - generic: "Users: johnm@lsmc.com"
+          - generic: "Domains: lsmc.com"
+          - generic: "Groups: none"
+        - cell "presigned_s3"
+        - cell "Active":
+          - generic: Active
+        - cell "1 2026-07-13T21:00:39.423561Z":
+          - text: "1"
+          - generic: 2026-07-13T21:00:39.423561Z
+        - cell "Details Revoke":
+          - link "Details":
+            - /url: /shares/M-DGX-K2MT
+          - button "Revoke"
+      - 'row "M-DGX-A1PA share:artifact:M-DGX-9S3V None M-DGX-9S3V Users: none Domains: none Groups: none Active 1 2026-06-08T18:38:40.701558Z Details Revoke"':
+        - cell "M-DGX-A1PA share:artifact:M-DGX-9S3V":
+          - link "M-DGX-A1PA":
+            - /url: /shares/M-DGX-A1PA
+          - generic: share:artifact:M-DGX-9S3V
+        - cell "None M-DGX-9S3V":
+          - generic: None
+          - generic: M-DGX-9S3V
+        - 'cell "Users: none Domains: none Groups: none"':
+          - generic: "Users: none"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell
+        - cell "Active":
+          - generic: Active
+        - cell "1 2026-06-08T18:38:40.701558Z":
+          - text: "1"
+          - generic: 2026-06-08T18:38:40.701558Z
+        - cell "Details Revoke":
+          - link "Details":
+            - /url: /shares/M-DGX-A1PA
+          - button "Revoke"
+      - 'row "M-DGX-9YKN share:artifact:M-DGX-9XKP None M-DGX-9XKP Users: none Domains: none Groups: none error 0 Details"':
+        - cell "M-DGX-9YKN share:artifact:M-DGX-9XKP":
+          - link "M-DGX-9YKN":
+            - /url: /shares/M-DGX-9YKN
+          - generic: share:artifact:M-DGX-9XKP
+        - cell "None M-DGX-9XKP":
+          - generic: None
+          - generic: M-DGX-9XKP
+        - 'cell "Users: none Domains: none Groups: none"':
+          - generic: "Users: none"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell
+        - cell "error":
+          - generic: error
+        - cell "0"
+        - cell "Details":
+          - link "Details":
+            - /url: /shares/M-DGX-9YKN
+      - 'row "M-DGX-9YHS share:artifact:M-DGX-9XX2 None M-DGX-9XX2 Users: none Domains: none Groups: none error 0 Details"':
+        - cell "M-DGX-9YHS share:artifact:M-DGX-9XX2":
+          - link "M-DGX-9YHS":
+            - /url: /shares/M-DGX-9YHS
+          - generic: share:artifact:M-DGX-9XX2
+        - cell "None M-DGX-9XX2":
+          - generic: None
+          - generic: M-DGX-9XX2
+        - 'cell "Users: none Domains: none Groups: none"':
+          - generic: "Users: none"
+          - generic: "Domains: none"
+          - generic: "Groups: none"
+        - cell
+        - cell "error":
+          - generic: error
+        - cell "0"
+        - cell "Details":
+          - link "Details":
+            - /url: /shares/M-DGX-9YHS
+  - heading "Tracked Roots" [level=3]
+  - generic: Registered customer/collaborator roots. Registration does not scan S3 children.
+  - generic: No tracked share roots are registered.
+  - heading "Share Detail" [level=3]
+  - generic: Open a share to inspect policy, mint an access package, or review audit decisions.
+  - generic: Select a share to inspect policy and access history.
+- contentinfo:
+  - generic: Version 10.0.5
+  - generic: Branch codex/dewey-labcore-910
+  - generic: Tag 10.0.5
+  - generic: Commit df6d4d0646fc1385c35ff2b6353478a46b4587ac
+- text: Theme
+- combobox "Theme":
+  - option "original" [selected]
+  - option "light"
+  - option "dark"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

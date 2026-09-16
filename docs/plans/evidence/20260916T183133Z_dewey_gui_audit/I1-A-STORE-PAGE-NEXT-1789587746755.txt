@@ -1,0 +1,376 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / S3 BROWSER
+  - heading "S3 Browser" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - textbox "S3 URI":
+    - /placeholder: s3://bucket/exact/prefix/
+    - text: s3://cdk-hnb659fds-assets-108782052779-us-west-2/
+  - button "Go"
+  - link "All buckets":
+    - /url: /storage
+  - generic: s3://cdk-hnb659fds-assets-108782052779-us-west-2/
+  - button "Upload files"
+  - link "Register this folder":
+    - /url: /add?kind=prefix&uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2F
+  - link "cdk-hnb659fds-assets-108782052779-us-west-2":
+    - /url: /storage?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2F
+  - searchbox "Filter names on this page"
+  - button "Register selection as a set"
+  - table:
+    - rowgroup:
+      - row "Kind Name Size Registration":
+        - columnheader "Kind"
+        - columnheader "Name"
+        - columnheader "Size"
+        - columnheader "Registration"
+    - rowgroup:
+      - row "Select dayhoff-refresh-4.0.140/ prefix dayhoff-refresh-4.0.140/ — Register":
+        - cell "Select dayhoff-refresh-4.0.140/ prefix":
+          - checkbox "Select dayhoff-refresh-4.0.140/"
+          - generic: prefix
+        - cell "dayhoff-refresh-4.0.140/":
+          - link "dayhoff-refresh-4.0.140/":
+            - /url: /storage?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fdayhoff-refresh-4.0.140%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fdayhoff-refresh-4.0.140%2F&kind=prefix
+      - row "Select dayhoff-refresh-4.0.142/ prefix dayhoff-refresh-4.0.142/ — Register":
+        - cell "Select dayhoff-refresh-4.0.142/ prefix":
+          - checkbox "Select dayhoff-refresh-4.0.142/"
+          - generic: prefix
+        - cell "dayhoff-refresh-4.0.142/":
+          - link "dayhoff-refresh-4.0.142/":
+            - /url: /storage?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fdayhoff-refresh-4.0.142%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fdayhoff-refresh-4.0.142%2F&kind=prefix
+      - row "Select dayhoff-refresh-4.0.144/ prefix dayhoff-refresh-4.0.144/ — Register":
+        - cell "Select dayhoff-refresh-4.0.144/ prefix":
+          - checkbox "Select dayhoff-refresh-4.0.144/"
+          - generic: prefix
+        - cell "dayhoff-refresh-4.0.144/":
+          - link "dayhoff-refresh-4.0.144/":
+            - /url: /storage?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fdayhoff-refresh-4.0.144%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fdayhoff-refresh-4.0.144%2F&kind=prefix
+      - row "Select dayhoff-refresh-4.0.146/ prefix dayhoff-refresh-4.0.146/ — Register":
+        - cell "Select dayhoff-refresh-4.0.146/ prefix":
+          - checkbox "Select dayhoff-refresh-4.0.146/"
+          - generic: prefix
+        - cell "dayhoff-refresh-4.0.146/":
+          - link "dayhoff-refresh-4.0.146/":
+            - /url: /storage?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fdayhoff-refresh-4.0.146%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fdayhoff-refresh-4.0.146%2F&kind=prefix
+      - row "Select dayhoff-temp/ prefix dayhoff-temp/ — Register":
+        - cell "Select dayhoff-temp/ prefix":
+          - checkbox "Select dayhoff-temp/"
+          - generic: prefix
+        - cell "dayhoff-temp/":
+          - link "dayhoff-temp/":
+            - /url: /storage?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fdayhoff-temp%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fdayhoff-temp%2F&kind=prefix
+      - row "Select dayhoff/ prefix dayhoff/ — Register":
+        - cell "Select dayhoff/ prefix":
+          - checkbox "Select dayhoff/"
+          - generic: prefix
+        - cell "dayhoff/":
+          - link "dayhoff/":
+            - /url: /storage?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fdayhoff%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fdayhoff%2F&kind=prefix
+      - row "Select manual/ prefix manual/ — Register":
+        - cell "Select manual/ prefix":
+          - checkbox "Select manual/"
+          - generic: prefix
+        - cell "manual/":
+          - link "manual/":
+            - /url: /storage?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fmanual%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fmanual%2F&kind=prefix
+      - row "Select d6e0bb08521175fde841f130468cfcddd0012aff3bf4e0700ac9b8c050e1085d.json object d6e0bb08521175fde841f130468cfcddd0012aff3bf4e0700ac9b8c050e1085d.json 10.1K B Register":
+        - cell "Select d6e0bb08521175fde841f130468cfcddd0012aff3bf4e0700ac9b8c050e1085d.json object":
+          - checkbox "Select d6e0bb08521175fde841f130468cfcddd0012aff3bf4e0700ac9b8c050e1085d.json"
+          - generic: object
+        - cell "d6e0bb08521175fde841f130468cfcddd0012aff3bf4e0700ac9b8c050e1085d.json":
+          - button "d6e0bb08521175fde841f130468cfcddd0012aff3bf4e0700ac9b8c050e1085d.json"
+        - cell "10.1K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fd6e0bb08521175fde841f130468cfcddd0012aff3bf4e0700ac9b8c050e1085d.json&kind=object
+      - row "Select d7492569bad7676f7505d72986f318d47617df2bd711f2f63a0ed0cb7a351f4c.json object d7492569bad7676f7505d72986f318d47617df2bd711f2f63a0ed0cb7a351f4c.json 9.2K B Register":
+        - cell "Select d7492569bad7676f7505d72986f318d47617df2bd711f2f63a0ed0cb7a351f4c.json object":
+          - checkbox "Select d7492569bad7676f7505d72986f318d47617df2bd711f2f63a0ed0cb7a351f4c.json"
+          - generic: object
+        - cell "d7492569bad7676f7505d72986f318d47617df2bd711f2f63a0ed0cb7a351f4c.json":
+          - button "d7492569bad7676f7505d72986f318d47617df2bd711f2f63a0ed0cb7a351f4c.json"
+        - cell "9.2K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fd7492569bad7676f7505d72986f318d47617df2bd711f2f63a0ed0cb7a351f4c.json&kind=object
+      - row "Select dbdef12a65be43e34fa146737c631b6f526b3a68e8f5056efe89dc255893e085.json object dbdef12a65be43e34fa146737c631b6f526b3a68e8f5056efe89dc255893e085.json 41.6K B Register":
+        - cell "Select dbdef12a65be43e34fa146737c631b6f526b3a68e8f5056efe89dc255893e085.json object":
+          - checkbox "Select dbdef12a65be43e34fa146737c631b6f526b3a68e8f5056efe89dc255893e085.json"
+          - generic: object
+        - cell "dbdef12a65be43e34fa146737c631b6f526b3a68e8f5056efe89dc255893e085.json":
+          - button "dbdef12a65be43e34fa146737c631b6f526b3a68e8f5056efe89dc255893e085.json"
+        - cell "41.6K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fdbdef12a65be43e34fa146737c631b6f526b3a68e8f5056efe89dc255893e085.json&kind=object
+      - row "Select dc9be8c12df30752aadff44d82009a7878831cae321e41e40b6266d13f66f4c1.json object dc9be8c12df30752aadff44d82009a7878831cae321e41e40b6266d13f66f4c1.json 29.7K B Register":
+        - cell "Select dc9be8c12df30752aadff44d82009a7878831cae321e41e40b6266d13f66f4c1.json object":
+          - checkbox "Select dc9be8c12df30752aadff44d82009a7878831cae321e41e40b6266d13f66f4c1.json"
+          - generic: object
+        - cell "dc9be8c12df30752aadff44d82009a7878831cae321e41e40b6266d13f66f4c1.json":
+          - button "dc9be8c12df30752aadff44d82009a7878831cae321e41e40b6266d13f66f4c1.json"
+        - cell "29.7K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fdc9be8c12df30752aadff44d82009a7878831cae321e41e40b6266d13f66f4c1.json&kind=object
+      - row "Select dd2d5a88a2a5983418a446bb5c9dc3ee44bbbf33fb7f0c493dd6202248aa5ccb.json object dd2d5a88a2a5983418a446bb5c9dc3ee44bbbf33fb7f0c493dd6202248aa5ccb.json 32.7K B Register":
+        - cell "Select dd2d5a88a2a5983418a446bb5c9dc3ee44bbbf33fb7f0c493dd6202248aa5ccb.json object":
+          - checkbox "Select dd2d5a88a2a5983418a446bb5c9dc3ee44bbbf33fb7f0c493dd6202248aa5ccb.json"
+          - generic: object
+        - cell "dd2d5a88a2a5983418a446bb5c9dc3ee44bbbf33fb7f0c493dd6202248aa5ccb.json":
+          - button "dd2d5a88a2a5983418a446bb5c9dc3ee44bbbf33fb7f0c493dd6202248aa5ccb.json"
+        - cell "32.7K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fdd2d5a88a2a5983418a446bb5c9dc3ee44bbbf33fb7f0c493dd6202248aa5ccb.json&kind=object
+      - row "Select e01a042ad44544c9c53fe24e5c685d965bd1676587aef6630f901e7662b4a90d.json object e01a042ad44544c9c53fe24e5c685d965bd1676587aef6630f901e7662b4a90d.json 2.6K B Register":
+        - cell "Select e01a042ad44544c9c53fe24e5c685d965bd1676587aef6630f901e7662b4a90d.json object":
+          - checkbox "Select e01a042ad44544c9c53fe24e5c685d965bd1676587aef6630f901e7662b4a90d.json"
+          - generic: object
+        - cell "e01a042ad44544c9c53fe24e5c685d965bd1676587aef6630f901e7662b4a90d.json":
+          - button "e01a042ad44544c9c53fe24e5c685d965bd1676587aef6630f901e7662b4a90d.json"
+        - cell "2.6K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fe01a042ad44544c9c53fe24e5c685d965bd1676587aef6630f901e7662b4a90d.json&kind=object
+      - row "Select e1ffed0323797221f7397dc9effa32e419d734b5e9592de09fa893eff3776efc.json object e1ffed0323797221f7397dc9effa32e419d734b5e9592de09fa893eff3776efc.json 26.7K B Register":
+        - cell "Select e1ffed0323797221f7397dc9effa32e419d734b5e9592de09fa893eff3776efc.json object":
+          - checkbox "Select e1ffed0323797221f7397dc9effa32e419d734b5e9592de09fa893eff3776efc.json"
+          - generic: object
+        - cell "e1ffed0323797221f7397dc9effa32e419d734b5e9592de09fa893eff3776efc.json":
+          - button "e1ffed0323797221f7397dc9effa32e419d734b5e9592de09fa893eff3776efc.json"
+        - cell "26.7K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fe1ffed0323797221f7397dc9effa32e419d734b5e9592de09fa893eff3776efc.json&kind=object
+      - row "Select e5f1c5a7660970c356c2683a25345e890c5cbad575009444cea11c51931cf816.json object e5f1c5a7660970c356c2683a25345e890c5cbad575009444cea11c51931cf816.json 5.4K B Register":
+        - cell "Select e5f1c5a7660970c356c2683a25345e890c5cbad575009444cea11c51931cf816.json object":
+          - checkbox "Select e5f1c5a7660970c356c2683a25345e890c5cbad575009444cea11c51931cf816.json"
+          - generic: object
+        - cell "e5f1c5a7660970c356c2683a25345e890c5cbad575009444cea11c51931cf816.json":
+          - button "e5f1c5a7660970c356c2683a25345e890c5cbad575009444cea11c51931cf816.json"
+        - cell "5.4K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fe5f1c5a7660970c356c2683a25345e890c5cbad575009444cea11c51931cf816.json&kind=object
+      - row "Select e6b3fed86dab705e4948c127829d9cba367888999e055bf0e22c6d72832f62c1.json object e6b3fed86dab705e4948c127829d9cba367888999e055bf0e22c6d72832f62c1.json 28.9K B Register":
+        - cell "Select e6b3fed86dab705e4948c127829d9cba367888999e055bf0e22c6d72832f62c1.json object":
+          - checkbox "Select e6b3fed86dab705e4948c127829d9cba367888999e055bf0e22c6d72832f62c1.json"
+          - generic: object
+        - cell "e6b3fed86dab705e4948c127829d9cba367888999e055bf0e22c6d72832f62c1.json":
+          - button "e6b3fed86dab705e4948c127829d9cba367888999e055bf0e22c6d72832f62c1.json"
+        - cell "28.9K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fe6b3fed86dab705e4948c127829d9cba367888999e055bf0e22c6d72832f62c1.json&kind=object
+      - row "Select eb2c89fe2f30f8e6044ee7bf1f1ffb4d65a7e8f2c141af297e116f85570074af.json object eb2c89fe2f30f8e6044ee7bf1f1ffb4d65a7e8f2c141af297e116f85570074af.json 16.2K B Register":
+        - cell "Select eb2c89fe2f30f8e6044ee7bf1f1ffb4d65a7e8f2c141af297e116f85570074af.json object":
+          - checkbox "Select eb2c89fe2f30f8e6044ee7bf1f1ffb4d65a7e8f2c141af297e116f85570074af.json"
+          - generic: object
+        - cell "eb2c89fe2f30f8e6044ee7bf1f1ffb4d65a7e8f2c141af297e116f85570074af.json":
+          - button "eb2c89fe2f30f8e6044ee7bf1f1ffb4d65a7e8f2c141af297e116f85570074af.json"
+        - cell "16.2K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Feb2c89fe2f30f8e6044ee7bf1f1ffb4d65a7e8f2c141af297e116f85570074af.json&kind=object
+      - row "Select ed9446a413ec7e96f887f3509067753fb8732c5cf0a3fa4327733e3f9d160862.json object ed9446a413ec7e96f887f3509067753fb8732c5cf0a3fa4327733e3f9d160862.json 6K B Register":
+        - cell "Select ed9446a413ec7e96f887f3509067753fb8732c5cf0a3fa4327733e3f9d160862.json object":
+          - checkbox "Select ed9446a413ec7e96f887f3509067753fb8732c5cf0a3fa4327733e3f9d160862.json"
+          - generic: object
+        - cell "ed9446a413ec7e96f887f3509067753fb8732c5cf0a3fa4327733e3f9d160862.json":
+          - button "ed9446a413ec7e96f887f3509067753fb8732c5cf0a3fa4327733e3f9d160862.json"
+        - cell "6K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fed9446a413ec7e96f887f3509067753fb8732c5cf0a3fa4327733e3f9d160862.json&kind=object
+      - row "Select ee6dc874e1c92d90b435a7a140eb31ba1e76a14ce890ad6d77fa7bf3a34df3da.json object ee6dc874e1c92d90b435a7a140eb31ba1e76a14ce890ad6d77fa7bf3a34df3da.json 32.8K B Register":
+        - cell "Select ee6dc874e1c92d90b435a7a140eb31ba1e76a14ce890ad6d77fa7bf3a34df3da.json object":
+          - checkbox "Select ee6dc874e1c92d90b435a7a140eb31ba1e76a14ce890ad6d77fa7bf3a34df3da.json"
+          - generic: object
+        - cell "ee6dc874e1c92d90b435a7a140eb31ba1e76a14ce890ad6d77fa7bf3a34df3da.json":
+          - button "ee6dc874e1c92d90b435a7a140eb31ba1e76a14ce890ad6d77fa7bf3a34df3da.json"
+        - cell "32.8K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Fee6dc874e1c92d90b435a7a140eb31ba1e76a14ce890ad6d77fa7bf3a34df3da.json&kind=object
+      - row "Select f3a84fe05f622451365ab26fcc94c58aa58195f2e343e6fcd2d1e81b337cd7b3.json object f3a84fe05f622451365ab26fcc94c58aa58195f2e343e6fcd2d1e81b337cd7b3.json 34K B Register":
+        - cell "Select f3a84fe05f622451365ab26fcc94c58aa58195f2e343e6fcd2d1e81b337cd7b3.json object":
+          - checkbox "Select f3a84fe05f622451365ab26fcc94c58aa58195f2e343e6fcd2d1e81b337cd7b3.json"
+          - generic: object
+        - cell "f3a84fe05f622451365ab26fcc94c58aa58195f2e343e6fcd2d1e81b337cd7b3.json":
+          - button "f3a84fe05f622451365ab26fcc94c58aa58195f2e343e6fcd2d1e81b337cd7b3.json"
+        - cell "34K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Ff3a84fe05f622451365ab26fcc94c58aa58195f2e343e6fcd2d1e81b337cd7b3.json&kind=object
+      - row "Select f539270b441018a493492239705404e9566f86820e1bcf44cfddd28c48889eb2.json object f539270b441018a493492239705404e9566f86820e1bcf44cfddd28c48889eb2.json 32.4K B Register":
+        - cell "Select f539270b441018a493492239705404e9566f86820e1bcf44cfddd28c48889eb2.json object":
+          - checkbox "Select f539270b441018a493492239705404e9566f86820e1bcf44cfddd28c48889eb2.json"
+          - generic: object
+        - cell "f539270b441018a493492239705404e9566f86820e1bcf44cfddd28c48889eb2.json":
+          - button "f539270b441018a493492239705404e9566f86820e1bcf44cfddd28c48889eb2.json"
+        - cell "32.4K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Ff539270b441018a493492239705404e9566f86820e1bcf44cfddd28c48889eb2.json&kind=object
+      - row "Select f5646f585fa22aa5763a83b00c47f4ae51ec78f7f819918239a217b0e6ff24ee.json object f5646f585fa22aa5763a83b00c47f4ae51ec78f7f819918239a217b0e6ff24ee.json 6.2K B Register":
+        - cell "Select f5646f585fa22aa5763a83b00c47f4ae51ec78f7f819918239a217b0e6ff24ee.json object":
+          - checkbox "Select f5646f585fa22aa5763a83b00c47f4ae51ec78f7f819918239a217b0e6ff24ee.json"
+          - generic: object
+        - cell "f5646f585fa22aa5763a83b00c47f4ae51ec78f7f819918239a217b0e6ff24ee.json":
+          - button "f5646f585fa22aa5763a83b00c47f4ae51ec78f7f819918239a217b0e6ff24ee.json"
+        - cell "6.2K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Ff5646f585fa22aa5763a83b00c47f4ae51ec78f7f819918239a217b0e6ff24ee.json&kind=object
+      - row "Select f580c61b8513633c67b510b9f932a447cb0088a3c17d689227e2fb5d1d4e7b1a.json object f580c61b8513633c67b510b9f932a447cb0088a3c17d689227e2fb5d1d4e7b1a.json 33.7K B Register":
+        - cell "Select f580c61b8513633c67b510b9f932a447cb0088a3c17d689227e2fb5d1d4e7b1a.json object":
+          - checkbox "Select f580c61b8513633c67b510b9f932a447cb0088a3c17d689227e2fb5d1d4e7b1a.json"
+          - generic: object
+        - cell "f580c61b8513633c67b510b9f932a447cb0088a3c17d689227e2fb5d1d4e7b1a.json":
+          - button "f580c61b8513633c67b510b9f932a447cb0088a3c17d689227e2fb5d1d4e7b1a.json"
+        - cell "33.7K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Ff580c61b8513633c67b510b9f932a447cb0088a3c17d689227e2fb5d1d4e7b1a.json&kind=object
+      - row "Select f5d270ed31e8a731089bf319a233a5bc87ffe0988e49337a901d0514d7f4f43d.json object f5d270ed31e8a731089bf319a233a5bc87ffe0988e49337a901d0514d7f4f43d.json 29.2K B Register":
+        - cell "Select f5d270ed31e8a731089bf319a233a5bc87ffe0988e49337a901d0514d7f4f43d.json object":
+          - checkbox "Select f5d270ed31e8a731089bf319a233a5bc87ffe0988e49337a901d0514d7f4f43d.json"
+          - generic: object
+        - cell "f5d270ed31e8a731089bf319a233a5bc87ffe0988e49337a901d0514d7f4f43d.json":
+          - button "f5d270ed31e8a731089bf319a233a5bc87ffe0988e49337a901d0514d7f4f43d.json"
+        - cell "29.2K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Ff5d270ed31e8a731089bf319a233a5bc87ffe0988e49337a901d0514d7f4f43d.json&kind=object
+      - row "Select f8278a058de5754c03c648d7b5f1a04c47c581b01815caa6f0a8599f6c25a90c.json object f8278a058de5754c03c648d7b5f1a04c47c581b01815caa6f0a8599f6c25a90c.json 40.8K B Register":
+        - cell "Select f8278a058de5754c03c648d7b5f1a04c47c581b01815caa6f0a8599f6c25a90c.json object":
+          - checkbox "Select f8278a058de5754c03c648d7b5f1a04c47c581b01815caa6f0a8599f6c25a90c.json"
+          - generic: object
+        - cell "f8278a058de5754c03c648d7b5f1a04c47c581b01815caa6f0a8599f6c25a90c.json":
+          - button "f8278a058de5754c03c648d7b5f1a04c47c581b01815caa6f0a8599f6c25a90c.json"
+        - cell "40.8K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Ff8278a058de5754c03c648d7b5f1a04c47c581b01815caa6f0a8599f6c25a90c.json&kind=object
+      - row "Select f8da4f6cce390a5982060ec5212bfab6436dc7726f3ab842e4056e0752856ef6.json object f8da4f6cce390a5982060ec5212bfab6436dc7726f3ab842e4056e0752856ef6.json 8.8K B Register":
+        - cell "Select f8da4f6cce390a5982060ec5212bfab6436dc7726f3ab842e4056e0752856ef6.json object":
+          - checkbox "Select f8da4f6cce390a5982060ec5212bfab6436dc7726f3ab842e4056e0752856ef6.json"
+          - generic: object
+        - cell "f8da4f6cce390a5982060ec5212bfab6436dc7726f3ab842e4056e0752856ef6.json":
+          - button "f8da4f6cce390a5982060ec5212bfab6436dc7726f3ab842e4056e0752856ef6.json"
+        - cell "8.8K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Ff8da4f6cce390a5982060ec5212bfab6436dc7726f3ab842e4056e0752856ef6.json&kind=object
+      - row "Select f9bae825618475ecbc2eba81fa67d8b656220a30445cd36ce5466a5f4abbe227.json object f9bae825618475ecbc2eba81fa67d8b656220a30445cd36ce5466a5f4abbe227.json 2.9K B Register":
+        - cell "Select f9bae825618475ecbc2eba81fa67d8b656220a30445cd36ce5466a5f4abbe227.json object":
+          - checkbox "Select f9bae825618475ecbc2eba81fa67d8b656220a30445cd36ce5466a5f4abbe227.json"
+          - generic: object
+        - cell "f9bae825618475ecbc2eba81fa67d8b656220a30445cd36ce5466a5f4abbe227.json":
+          - button "f9bae825618475ecbc2eba81fa67d8b656220a30445cd36ce5466a5f4abbe227.json"
+        - cell "2.9K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Ff9bae825618475ecbc2eba81fa67d8b656220a30445cd36ce5466a5f4abbe227.json&kind=object
+      - row "Select faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip object faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip 2.3K B Register":
+        - cell "Select faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip object":
+          - checkbox "Select faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip"
+          - generic: object
+        - cell "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip":
+          - button "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip"
+        - cell "2.3K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Ffaa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip&kind=object
+      - row "Select fb7015a290fd3ac76ad64fcd2cb8d351e09c8f6283b45a057965b35a1f3f602f.json object fb7015a290fd3ac76ad64fcd2cb8d351e09c8f6283b45a057965b35a1f3f602f.json 34K B Register":
+        - cell "Select fb7015a290fd3ac76ad64fcd2cb8d351e09c8f6283b45a057965b35a1f3f602f.json object":
+          - checkbox "Select fb7015a290fd3ac76ad64fcd2cb8d351e09c8f6283b45a057965b35a1f3f602f.json"
+          - generic: object
+        - cell "fb7015a290fd3ac76ad64fcd2cb8d351e09c8f6283b45a057965b35a1f3f602f.json":
+          - button "fb7015a290fd3ac76ad64fcd2cb8d351e09c8f6283b45a057965b35a1f3f602f.json"
+        - cell "34K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Ffb7015a290fd3ac76ad64fcd2cb8d351e09c8f6283b45a057965b35a1f3f602f.json&kind=object
+      - row "Select fb80c695b1933cf9989716c0a61774a1530e4e072371b2c9d0a5ffd54360f841.json object fb80c695b1933cf9989716c0a61774a1530e4e072371b2c9d0a5ffd54360f841.json 14.5K B Register":
+        - cell "Select fb80c695b1933cf9989716c0a61774a1530e4e072371b2c9d0a5ffd54360f841.json object":
+          - checkbox "Select fb80c695b1933cf9989716c0a61774a1530e4e072371b2c9d0a5ffd54360f841.json"
+          - generic: object
+        - cell "fb80c695b1933cf9989716c0a61774a1530e4e072371b2c9d0a5ffd54360f841.json":
+          - button "fb80c695b1933cf9989716c0a61774a1530e4e072371b2c9d0a5ffd54360f841.json"
+        - cell "14.5K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Ffb80c695b1933cf9989716c0a61774a1530e4e072371b2c9d0a5ffd54360f841.json&kind=object
+      - row "Select fffb9d04177a657b1b9636e5d705c72ba101d3d86689a84d37bff8209ab3f399.json object fffb9d04177a657b1b9636e5d705c72ba101d3d86689a84d37bff8209ab3f399.json 9.1K B Register":
+        - cell "Select fffb9d04177a657b1b9636e5d705c72ba101d3d86689a84d37bff8209ab3f399.json object":
+          - checkbox "Select fffb9d04177a657b1b9636e5d705c72ba101d3d86689a84d37bff8209ab3f399.json"
+          - generic: object
+        - cell "fffb9d04177a657b1b9636e5d705c72ba101d3d86689a84d37bff8209ab3f399.json":
+          - button "fffb9d04177a657b1b9636e5d705c72ba101d3d86689a84d37bff8209ab3f399.json"
+        - cell "9.1K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2Ffffb9d04177a657b1b9636e5d705c72ba101d3d86689a84d37bff8209ab3f399.json&kind=object
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

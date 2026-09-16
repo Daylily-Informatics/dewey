@@ -1,0 +1,2 @@
+Dewey GUI audit fixture 20260916T183133Z
+No customer data. Retain this fixture.

@@ -1,0 +1,80 @@
+- banner:
+  - link "Dewey / TapDB":
+    - /url: /tapdb/
+  - navigation:
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Admin":
+      - /url: /admin
+    - link "Overview":
+      - /url: /tapdb/admin/overview
+    - link "Search":
+      - /url: /tapdb/search
+    - link "Graph":
+      - /url: /tapdb/graph
+    - link "Templates":
+      - /url: /tapdb/templates
+    - link "Audit":
+      - /url: /tapdb/audit
+    - link "Help":
+      - /url: /tapdb/help
+    - link "Readiness":
+      - /url: /tapdb/admin/readiness
+    - link "Inventory":
+      - /url: /tapdb/admin/inventory
+    - link "Meridian":
+      - /url: /tapdb/admin/meridian
+    - link "Metrics":
+      - /url: /tapdb/admin/metrics
+    - link "Runtime":
+      - /url: /tapdb/admin/runtime
+    - link "Backups":
+      - /url: /tapdb/admin/backups
+    - link "Sign out":
+      - /url: /auth/logout
+  - generic: johnm@lsmc.com · admin
+- main:
+  - heading "Meridian" [level=1]
+  - table:
+    - rowgroup:
+      - row "Domain M":
+        - rowheader "Domain"
+        - cell "M"
+      - row "Owner Repo dewey":
+        - rowheader "Owner Repo"
+        - cell "dewey"
+      - row "Domain Registry /opt/dayhoff/deployments/day/tapdb-registry/domain_code_registry.json":
+        - rowheader "Domain Registry"
+        - cell "/opt/dayhoff/deployments/day/tapdb-registry/domain_code_registry.json"
+      - row "Prefix Registry /opt/dayhoff/deployments/day/tapdb-registry/prefix_ownership_registry.json":
+        - rowheader "Prefix Registry"
+        - cell "/opt/dayhoff/deployments/day/tapdb-registry/prefix_ownership_registry.json"
+      - row "Public Registry https://github.com/lsmc-bio/meridian-registry":
+        - rowheader "Public Registry"
+        - cell "https://github.com/lsmc-bio/meridian-registry"
+      - row "Public Registry Version 0.1.1":
+        - rowheader "Public Registry Version"
+        - cell "0.1.1"
+  - textbox "EUID": M-DGX-TST9
+  - textbox "prefix"
+  - button "Validate"
+  - generic: "EUID valid for M: True"
+- contentinfo: TapDB 10.1.1rc1
+- text: Theme
+- combobox "Theme":
+  - option "original"
+  - option "light"
+  - option "dark" [selected]
+  - option "CBF"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

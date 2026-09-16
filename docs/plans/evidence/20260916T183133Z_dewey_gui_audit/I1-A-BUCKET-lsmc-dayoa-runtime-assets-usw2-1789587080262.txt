@@ -1,0 +1,180 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / S3 BROWSER
+  - heading "S3 Browser" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - textbox "S3 URI":
+    - /placeholder: s3://bucket/exact/prefix/
+    - text: s3://lsmc-dayoa-runtime-assets-usw2/
+  - button "Go"
+  - link "All buckets":
+    - /url: /storage
+  - generic: s3://lsmc-dayoa-runtime-assets-usw2/
+  - button "Upload files"
+  - link "Register this folder":
+    - /url: /add?kind=prefix&uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2F
+  - link "lsmc-dayoa-runtime-assets-usw2":
+    - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2F
+  - searchbox "Filter names on this page"
+  - button "Register selection as a set"
+  - table:
+    - rowgroup:
+      - row "Kind Name Size Registration":
+        - columnheader "Kind"
+        - columnheader "Name"
+        - columnheader "Size"
+        - columnheader "Registration"
+    - rowgroup:
+      - row "Select budget_tags/ prefix budget_tags/ — Register":
+        - cell "Select budget_tags/ prefix":
+          - checkbox "Select budget_tags/"
+          - generic: prefix
+        - cell "budget_tags/":
+          - link "budget_tags/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2Fbudget_tags%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2Fbudget_tags%2F&kind=prefix
+      - row "Select cached_envs/ prefix cached_envs/ — Register":
+        - cell "Select cached_envs/ prefix":
+          - checkbox "Select cached_envs/"
+          - generic: prefix
+        - cell "cached_envs/":
+          - link "cached_envs/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2Fcached_envs%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2Fcached_envs%2F&kind=prefix
+      - row "Select cluster_boot_config/ prefix cluster_boot_config/ — Register":
+        - cell "Select cluster_boot_config/ prefix":
+          - checkbox "Select cluster_boot_config/"
+          - generic: prefix
+        - cell "cluster_boot_config/":
+          - link "cluster_boot_config/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2Fcluster_boot_config%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2Fcluster_boot_config%2F&kind=prefix
+      - row "Select codex/ prefix codex/ — Register":
+        - cell "Select codex/ prefix":
+          - checkbox "Select codex/"
+          - generic: prefix
+        - cell "codex/":
+          - link "codex/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2Fcodex%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2Fcodex%2F&kind=prefix
+      - row "Select dayhoff-build-inputs/ prefix dayhoff-build-inputs/ — Register":
+        - cell "Select dayhoff-build-inputs/ prefix":
+          - checkbox "Select dayhoff-build-inputs/"
+          - generic: prefix
+        - cell "dayhoff-build-inputs/":
+          - link "dayhoff-build-inputs/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2Fdayhoff-build-inputs%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2Fdayhoff-build-inputs%2F&kind=prefix
+      - row "Select dayhoff-build-sources/ prefix dayhoff-build-sources/ — Register":
+        - cell "Select dayhoff-build-sources/ prefix":
+          - checkbox "Select dayhoff-build-sources/"
+          - generic: prefix
+        - cell "dayhoff-build-sources/":
+          - link "dayhoff-build-sources/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2Fdayhoff-build-sources%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2Fdayhoff-build-sources%2F&kind=prefix
+      - row "Select dayhoff/ prefix dayhoff/ — Register":
+        - cell "Select dayhoff/ prefix":
+          - checkbox "Select dayhoff/"
+          - generic: prefix
+        - cell "dayhoff/":
+          - link "dayhoff/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2Fdayhoff%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2Fdayhoff%2F&kind=prefix
+      - row "Select tool_specific_resources/ prefix tool_specific_resources/ — Register":
+        - cell "Select tool_specific_resources/ prefix":
+          - checkbox "Select tool_specific_resources/"
+          - generic: prefix
+        - cell "tool_specific_resources/":
+          - link "tool_specific_resources/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2Ftool_specific_resources%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2Ftool_specific_resources%2F&kind=prefix
+      - row "Select ursa-evidence/ prefix ursa-evidence/ — Register":
+        - cell "Select ursa-evidence/ prefix":
+          - checkbox "Select ursa-evidence/"
+          - generic: prefix
+        - cell "ursa-evidence/":
+          - link "ursa-evidence/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2Fursa-evidence%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2Fursa-evidence%2F&kind=prefix
+      - row "Select ursa-hotpatches/ prefix ursa-hotpatches/ — Register":
+        - cell "Select ursa-hotpatches/ prefix":
+          - checkbox "Select ursa-hotpatches/"
+          - generic: prefix
+        - cell "ursa-hotpatches/":
+          - link "ursa-hotpatches/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2Fursa-hotpatches%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2Fursa-hotpatches%2F&kind=prefix
+      - row "Select ursa/ prefix ursa/ — Register":
+        - cell "Select ursa/ prefix":
+          - checkbox "Select ursa/"
+          - generic: prefix
+        - cell "ursa/":
+          - link "ursa/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2Fursa%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2Fursa%2F&kind=prefix
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

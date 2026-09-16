@@ -1,0 +1,99 @@
+{
+  "compose": "/opt/dayhoff/deployments/day/compose/docker-compose.yml",
+  "compose_sha256": "aef0b6b96b3ad1aadf008062a765271b97f6d5307776cf33ca1293a941dccf78",
+  "non_dewey_compose_sha256": "80071d98b8a9cc2962c41250ad51c9b1833e96771cd055bc541185684c95cc80",
+  "dewey_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:91bce850ad777244f443e933e9ced92664a1d70dc092f632881810e3a0860687",
+  "containers": [
+    {
+      "name": "/dayhoff-day-ursa-v2-run-worker-1",
+      "id": "0e689807c272e18b309cde0bee7730f6d7cd5aedf95047231c011df61e89e15d",
+      "image": "sha256:387518ac3aacf65eac5b5b09908afc5c3c1b5a01d6e0c3aeb03da788238ba96a",
+      "status": "running",
+      "restart_count": 0
+    },
+    {
+      "name": "/dayhoff-day-ursa-v2-run-monitor-1",
+      "id": "c365c6649a9c39a950d8fe2b0702cae44c36c72dd3c7a2a2e26215a0c91ab622",
+      "image": "sha256:387518ac3aacf65eac5b5b09908afc5c3c1b5a01d6e0c3aeb03da788238ba96a",
+      "status": "running",
+      "restart_count": 0
+    },
+    {
+      "name": "/dayhoff-day-ursa-cluster-sweeper-1",
+      "id": "5249b887fdeb7ed3267e647d994b8dbe307e33756282552b6e177f492b112dc6",
+      "image": "sha256:387518ac3aacf65eac5b5b09908afc5c3c1b5a01d6e0c3aeb03da788238ba96a",
+      "status": "running",
+      "restart_count": 0
+    },
+    {
+      "name": "/dayhoff-day-ursa-placement-scheduler-1",
+      "id": "1bd63e53d8aa72246c5b22aed3794707c79df77cb90f9cb48b04542d61978d40",
+      "image": "sha256:387518ac3aacf65eac5b5b09908afc5c3c1b5a01d6e0c3aeb03da788238ba96a",
+      "status": "running",
+      "restart_count": 0
+    },
+    {
+      "name": "/dayhoff-day-ursa-cost-guardrail-scheduler-1",
+      "id": "02e367ed88821de125aa67190cb604cd08e5d42120566202a076d6f03f784859",
+      "image": "sha256:387518ac3aacf65eac5b5b09908afc5c3c1b5a01d6e0c3aeb03da788238ba96a",
+      "status": "running",
+      "restart_count": 0
+    },
+    {
+      "name": "/dayhoff-day-ursa-1",
+      "id": "15fc22816575cb74d82611433c0590b351c1c7798149d7f2fd96920d350b8fdb",
+      "image": "sha256:387518ac3aacf65eac5b5b09908afc5c3c1b5a01d6e0c3aeb03da788238ba96a",
+      "status": "running",
+      "restart_count": 0
+    },
+    {
+      "name": "/dayhoff-day-bloom-1",
+      "id": "3de32bc9b8b3c98c0f719847a60c2d2bc45648e4c6b6a7136787c6e8fefc5cbf",
+      "image": "sha256:590a8af40c0412c5e8d24c390597be253f12ac20642429ec4e338cd0b8ff2df2",
+      "status": "running",
+      "restart_count": 0
+    },
+    {
+      "name": "/dayhoff-day-qeo-1",
+      "id": "56bf2291980850596b03864a3399ccb708217600ee0cf7c24e9fae04f6dc4ea2",
+      "image": "sha256:82810a338b93489ffce125d206bd30556d9f6e7f3236940bbdc930ffc8b5f312",
+      "status": "running",
+      "restart_count": 0
+    },
+    {
+      "name": "/dayhoff-day-dewey-1",
+      "id": "8b2b887d7f8db4fdaa69d15f27b2d9c19576747cd9cdc1a5c3238289c2df3915",
+      "image": "sha256:91bce850ad777244f443e933e9ced92664a1d70dc092f632881810e3a0860687",
+      "status": "running",
+      "restart_count": 0
+    },
+    {
+      "name": "/dayhoff-day-kahlo-1",
+      "id": "53f225f0693d71164b43611ec8319a82e02f2c22111a7c7b2be4a6228ad02c50",
+      "image": "sha256:0a27b543474cfab49873014940b5f2b7b16300f2f59f97639f22c0494aa2ffa3",
+      "status": "running",
+      "restart_count": 0
+    },
+    {
+      "name": "/dayhoff-day-atlas-1",
+      "id": "9dc66ad2a1f7353132769bf10de83865ea83bac34e03145b50ee2f42ba0adf01",
+      "image": "sha256:cf1c0690ae277e4ef2d0621724575771e72856930a81d959a6d465de2ad94c7a",
+      "status": "running",
+      "restart_count": 0
+    },
+    {
+      "name": "/dayhoff-day-login-1",
+      "id": "0c905a1041a6c6cd4db65c246aa593612109e2f02dbfa3116653f5c99f69a034",
+      "image": "sha256:d955b71ef2a1f69bf06018a61336c764af46969402433bbe6196280dd283c8ba",
+      "status": "running",
+      "restart_count": 0
+    },
+    {
+      "name": "/dayhoff-day-zebra-day-1",
+      "id": "4f2b16fc88c28440d22ebd12f24a05849238663b7239bad9d4b89df1cf4256b2",
+      "image": "sha256:c3c93ed8d2a79381a22f1d2c3575b1e5cd7a9f166d683aa22217ce3e37185593",
+      "status": "running",
+      "restart_count": 0
+    }
+  ]
+}

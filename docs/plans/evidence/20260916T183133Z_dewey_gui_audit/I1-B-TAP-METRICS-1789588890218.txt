@@ -1,0 +1,90 @@
+- banner:
+  - link "Dewey / TapDB":
+    - /url: /tapdb/
+  - navigation:
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Admin":
+      - /url: /admin
+    - link "Overview":
+      - /url: /tapdb/admin/overview
+    - link "Search":
+      - /url: /tapdb/search
+    - link "Graph":
+      - /url: /tapdb/graph
+    - link "Templates":
+      - /url: /tapdb/templates
+    - link "Audit":
+      - /url: /tapdb/audit
+    - link "Help":
+      - /url: /tapdb/help
+    - link "Readiness":
+      - /url: /tapdb/admin/readiness
+    - link "Inventory":
+      - /url: /tapdb/admin/inventory
+    - link "Meridian":
+      - /url: /tapdb/admin/meridian
+    - link "Metrics":
+      - /url: /tapdb/admin/metrics
+    - link "Runtime":
+      - /url: /tapdb/admin/runtime
+    - link "Backups":
+      - /url: /tapdb/admin/backups
+    - link "Sign out":
+      - /url: /auth/logout
+  - generic: johnm@lsmc.com · admin
+- main:
+  - heading "DB Metrics" [level=1]
+  - table:
+    - rowgroup:
+      - row "Enabled True":
+        - rowheader "Enabled"
+        - cell "True"
+      - row "File /run/dewey-production-state/state/tapdb/dewey/dewey-day/runtime/metrics/db_metrics_20260907.tsv":
+        - rowheader "File"
+        - cell "/run/dewey-production-state/state/tapdb/dewey/dewey-day/runtime/metrics/db_metrics_20260907.tsv"
+      - row "Dropped 0":
+        - rowheader "Dropped"
+        - cell "0"
+  - table:
+    - rowgroup:
+      - row "Path Method Count Total Seconds":
+        - columnheader "Path"
+        - columnheader "Method"
+        - columnheader "Count"
+        - columnheader "Total Seconds"
+    - rowgroup:
+      - row "4691":
+        - cell
+        - cell
+        - cell "4691"
+        - cell
+      - row "/tapdb/ 22":
+        - cell /tapdb/
+        - cell
+        - cell "22"
+        - cell
+      - row "/tapdb/graph 288":
+        - cell "/tapdb/graph"
+        - cell
+        - cell "288"
+        - cell
+- contentinfo: TapDB 10.1.1rc1
+- text: Theme
+- combobox "Theme":
+  - option "original" [selected]
+  - option "light"
+  - option "dark"
+  - option "CBF"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

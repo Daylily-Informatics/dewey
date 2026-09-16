@@ -1,0 +1,40 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / S3 BROWSER
+  - heading "S3 Browser" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - status: "User: arn:aws:sts::108782052779:assumed-role/Dayhoff-day-Compute-InstanceRole3CCE2F1D-Nt0s1SL3rfbr/i-07df3a933e4839f52 is not authorized to perform: s3:ListBucket on resource: \"arn:aws:s3:::lsmc-qeo-day-analytical-108782052779-us-west-2\" with an explicit deny in a resource-based policy"
+  - heading "Unable to load this view" [level=2]
+  - paragraph: See the error above. You can use the navigation to return to the Library.
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

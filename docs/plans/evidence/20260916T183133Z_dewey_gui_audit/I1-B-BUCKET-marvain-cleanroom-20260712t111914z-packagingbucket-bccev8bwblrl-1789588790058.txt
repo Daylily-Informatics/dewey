@@ -1,0 +1,239 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / S3 BROWSER
+  - heading "S3 Browser" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - textbox "S3 URI":
+    - /placeholder: s3://bucket/exact/prefix/
+    - text: s3://marvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl/
+  - button "Go"
+  - link "All buckets":
+    - /url: /storage
+  - generic: s3://marvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl/
+  - button "Upload files"
+  - link "Register this folder":
+    - /url: /add?kind=prefix&uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2F
+  - link "marvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl":
+    - /url: /storage?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2F
+  - searchbox "Filter names on this page"
+  - button "Register selection as a set"
+  - table:
+    - rowgroup:
+      - row "Kind Name Size Registration":
+        - columnheader "Kind"
+        - columnheader "Name"
+        - columnheader "Size"
+        - columnheader "Registration"
+    - rowgroup:
+      - row "Select 045466c876703bb7e7230fb7aac93410 object 045466c876703bb7e7230fb7aac93410 27M B Register":
+        - cell "Select 045466c876703bb7e7230fb7aac93410 object":
+          - checkbox "Select 045466c876703bb7e7230fb7aac93410"
+          - generic: object
+        - cell "045466c876703bb7e7230fb7aac93410":
+          - button "045466c876703bb7e7230fb7aac93410"
+        - cell "27M B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2F045466c876703bb7e7230fb7aac93410&kind=object
+      - row "Select 266cede9737993506a4f2142952777ac object 266cede9737993506a4f2142952777ac 707.2K B Register":
+        - cell "Select 266cede9737993506a4f2142952777ac object":
+          - checkbox "Select 266cede9737993506a4f2142952777ac"
+          - generic: object
+        - cell "266cede9737993506a4f2142952777ac":
+          - button "266cede9737993506a4f2142952777ac"
+        - cell "707.2K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2F266cede9737993506a4f2142952777ac&kind=object
+      - row "Select 2715fbc895274c6ed592553dda0980ce.template object 2715fbc895274c6ed592553dda0980ce.template 71K B Register":
+        - cell "Select 2715fbc895274c6ed592553dda0980ce.template object":
+          - checkbox "Select 2715fbc895274c6ed592553dda0980ce.template"
+          - generic: object
+        - cell "2715fbc895274c6ed592553dda0980ce.template":
+          - button "2715fbc895274c6ed592553dda0980ce.template"
+        - cell "71K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2F2715fbc895274c6ed592553dda0980ce.template&kind=object
+      - row "Select 2c52a621c5af1d480f5c38a21b23788e object 2c52a621c5af1d480f5c38a21b23788e 30.7M B Register":
+        - cell "Select 2c52a621c5af1d480f5c38a21b23788e object":
+          - checkbox "Select 2c52a621c5af1d480f5c38a21b23788e"
+          - generic: object
+        - cell "2c52a621c5af1d480f5c38a21b23788e":
+          - button "2c52a621c5af1d480f5c38a21b23788e"
+        - cell "30.7M B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2F2c52a621c5af1d480f5c38a21b23788e&kind=object
+      - row "Select 32ba255323b3b4d6128e383081cb71cc object 32ba255323b3b4d6128e383081cb71cc 2.6M B Register":
+        - cell "Select 32ba255323b3b4d6128e383081cb71cc object":
+          - checkbox "Select 32ba255323b3b4d6128e383081cb71cc"
+          - generic: object
+        - cell "32ba255323b3b4d6128e383081cb71cc":
+          - button "32ba255323b3b4d6128e383081cb71cc"
+        - cell "2.6M B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2F32ba255323b3b4d6128e383081cb71cc&kind=object
+      - row "Select 403eec69d002ba60052ae63efc939d32 object 403eec69d002ba60052ae63efc939d32 27M B Register":
+        - cell "Select 403eec69d002ba60052ae63efc939d32 object":
+          - checkbox "Select 403eec69d002ba60052ae63efc939d32"
+          - generic: object
+        - cell "403eec69d002ba60052ae63efc939d32":
+          - button "403eec69d002ba60052ae63efc939d32"
+        - cell "27M B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2F403eec69d002ba60052ae63efc939d32&kind=object
+      - row "Select 41940a299025e94acd049388f0f821a7 object 41940a299025e94acd049388f0f821a7 757 B Register":
+        - cell "Select 41940a299025e94acd049388f0f821a7 object":
+          - checkbox "Select 41940a299025e94acd049388f0f821a7"
+          - generic: object
+        - cell "41940a299025e94acd049388f0f821a7":
+          - button "41940a299025e94acd049388f0f821a7"
+        - cell "757 B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2F41940a299025e94acd049388f0f821a7&kind=object
+      - row "Select 4b0d65ee7a7cd872be190ca4c8d2ed30 object 4b0d65ee7a7cd872be190ca4c8d2ed30 4.9K B Register":
+        - cell "Select 4b0d65ee7a7cd872be190ca4c8d2ed30 object":
+          - checkbox "Select 4b0d65ee7a7cd872be190ca4c8d2ed30"
+          - generic: object
+        - cell "4b0d65ee7a7cd872be190ca4c8d2ed30":
+          - button "4b0d65ee7a7cd872be190ca4c8d2ed30"
+        - cell "4.9K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2F4b0d65ee7a7cd872be190ca4c8d2ed30&kind=object
+      - row "Select 4f2833b463b3e53aadedbf917e16ab38 object 4f2833b463b3e53aadedbf917e16ab38 2.6M B Register":
+        - cell "Select 4f2833b463b3e53aadedbf917e16ab38 object":
+          - checkbox "Select 4f2833b463b3e53aadedbf917e16ab38"
+          - generic: object
+        - cell "4f2833b463b3e53aadedbf917e16ab38":
+          - button "4f2833b463b3e53aadedbf917e16ab38"
+        - cell "2.6M B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2F4f2833b463b3e53aadedbf917e16ab38&kind=object
+      - row "Select 5121d77d1a613516fcb303c7a3b459d5 object 5121d77d1a613516fcb303c7a3b459d5 2.1K B Register":
+        - cell "Select 5121d77d1a613516fcb303c7a3b459d5 object":
+          - checkbox "Select 5121d77d1a613516fcb303c7a3b459d5"
+          - generic: object
+        - cell "5121d77d1a613516fcb303c7a3b459d5":
+          - button "5121d77d1a613516fcb303c7a3b459d5"
+        - cell "2.1K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2F5121d77d1a613516fcb303c7a3b459d5&kind=object
+      - row "Select 55e88c8b085a15f9e1d08ce0ff022aba object 55e88c8b085a15f9e1d08ce0ff022aba 16M B Register":
+        - cell "Select 55e88c8b085a15f9e1d08ce0ff022aba object":
+          - checkbox "Select 55e88c8b085a15f9e1d08ce0ff022aba"
+          - generic: object
+        - cell "55e88c8b085a15f9e1d08ce0ff022aba":
+          - button "55e88c8b085a15f9e1d08ce0ff022aba"
+        - cell "16M B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2F55e88c8b085a15f9e1d08ce0ff022aba&kind=object
+      - row "Select 5cbd42e3fb1fc9544faa77fb78978a6e object 5cbd42e3fb1fc9544faa77fb78978a6e 36.4M B Register":
+        - cell "Select 5cbd42e3fb1fc9544faa77fb78978a6e object":
+          - checkbox "Select 5cbd42e3fb1fc9544faa77fb78978a6e"
+          - generic: object
+        - cell "5cbd42e3fb1fc9544faa77fb78978a6e":
+          - button "5cbd42e3fb1fc9544faa77fb78978a6e"
+        - cell "36.4M B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2F5cbd42e3fb1fc9544faa77fb78978a6e&kind=object
+      - row "Select 7dd32744d3ef9196115bcc7ae8c1f3b8 object 7dd32744d3ef9196115bcc7ae8c1f3b8 2.6M B Register":
+        - cell "Select 7dd32744d3ef9196115bcc7ae8c1f3b8 object":
+          - checkbox "Select 7dd32744d3ef9196115bcc7ae8c1f3b8"
+          - generic: object
+        - cell "7dd32744d3ef9196115bcc7ae8c1f3b8":
+          - button "7dd32744d3ef9196115bcc7ae8c1f3b8"
+        - cell "2.6M B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2F7dd32744d3ef9196115bcc7ae8c1f3b8&kind=object
+      - row "Select 8efd1317cee2fadc175612785c606a45 object 8efd1317cee2fadc175612785c606a45 1.5K B Register":
+        - cell "Select 8efd1317cee2fadc175612785c606a45 object":
+          - checkbox "Select 8efd1317cee2fadc175612785c606a45"
+          - generic: object
+        - cell "8efd1317cee2fadc175612785c606a45":
+          - button "8efd1317cee2fadc175612785c606a45"
+        - cell "1.5K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2F8efd1317cee2fadc175612785c606a45&kind=object
+      - row "Select a90ebf33932ad96c7f95045f39ca4273.template object a90ebf33932ad96c7f95045f39ca4273.template 70.9K B Register":
+        - cell "Select a90ebf33932ad96c7f95045f39ca4273.template object":
+          - checkbox "Select a90ebf33932ad96c7f95045f39ca4273.template"
+          - generic: object
+        - cell "a90ebf33932ad96c7f95045f39ca4273.template":
+          - button "a90ebf33932ad96c7f95045f39ca4273.template"
+        - cell "70.9K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2Fa90ebf33932ad96c7f95045f39ca4273.template&kind=object
+      - row "Select bd9b5df9ed21415aabf9be3dd0bf872b object bd9b5df9ed21415aabf9be3dd0bf872b 30.7M B Register":
+        - cell "Select bd9b5df9ed21415aabf9be3dd0bf872b object":
+          - checkbox "Select bd9b5df9ed21415aabf9be3dd0bf872b"
+          - generic: object
+        - cell "bd9b5df9ed21415aabf9be3dd0bf872b":
+          - button "bd9b5df9ed21415aabf9be3dd0bf872b"
+        - cell "30.7M B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2Fbd9b5df9ed21415aabf9be3dd0bf872b&kind=object
+      - row "Select c0eae6ac1f8491e980ecfdc9888864f0 object c0eae6ac1f8491e980ecfdc9888864f0 36.4M B Register":
+        - cell "Select c0eae6ac1f8491e980ecfdc9888864f0 object":
+          - checkbox "Select c0eae6ac1f8491e980ecfdc9888864f0"
+          - generic: object
+        - cell "c0eae6ac1f8491e980ecfdc9888864f0":
+          - button "c0eae6ac1f8491e980ecfdc9888864f0"
+        - cell "36.4M B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2Fc0eae6ac1f8491e980ecfdc9888864f0&kind=object
+      - row "Select f8fabfa3d78a1f43ef40b3d4efc31df9.template object f8fabfa3d78a1f43ef40b3d4efc31df9.template 70.7K B Register":
+        - cell "Select f8fabfa3d78a1f43ef40b3d4efc31df9.template object":
+          - checkbox "Select f8fabfa3d78a1f43ef40b3d4efc31df9.template"
+          - generic: object
+        - cell "f8fabfa3d78a1f43ef40b3d4efc31df9.template":
+          - button "f8fabfa3d78a1f43ef40b3d4efc31df9.template"
+        - cell "70.7K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2Ff8fabfa3d78a1f43ef40b3d4efc31df9.template&kind=object
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

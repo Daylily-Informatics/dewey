@@ -1,0 +1,43 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / ACCOUNT
+  - heading "Account" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - heading "CLI and API access" [level=2]
+  - paragraph: Create a personal token to use the same authorized EUID operations from your terminal.
+  - generic: export DEWEY_API_URL="https://dewey.day.lsmc.bio" export DEWEY_API_TOKEN_FILE="/absolute/private/token-file" dewey artifacts get <EUID> dewey artifacts contents <PREFIX_EUID> dewey artifacts access <EUID>
+  - button "Create token"
+  - heading "Your tokens" [level=2]
+  - paragraph: No personal tokens.
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

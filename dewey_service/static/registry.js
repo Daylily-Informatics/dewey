@@ -25,8 +25,9 @@
   const badge = value => `<span class="badge">${esc(value)}</span>`;
   const bytes = value => value == null ? "—" : new Intl.NumberFormat(undefined, {notation:"compact",maximumFractionDigits:1}).format(value) + " B";
   const date = value => value ? new Date(value).toLocaleDateString() : "—";
-  function field(name, label, value = "", type = "text", hint = "") { return `<div class="field"><label for="f-${name}">${label}</label><input id="f-${name}" name="${name}" type="${type}" value="${esc(value)}">${hint ? `<small>${hint}</small>` : ""}</div>`; }
-  function area(name, label, value = "", hint = "") { return `<div class="field"><label for="f-${name}">${label}</label><textarea id="f-${name}" name="${name}">${esc(value)}</textarea>${hint ? `<small>${hint}</small>` : ""}</div>`; }
+  let fieldSequence = 0;
+  function field(name, label, value = "", type = "text", hint = "") { const id = `f-${name}-${++fieldSequence}`; return `<div class="field"><label for="${id}">${label}</label><input id="${id}" name="${name}" type="${type}" value="${esc(value)}">${hint ? `<small>${hint}</small>` : ""}</div>`; }
+  function area(name, label, value = "", hint = "") { const id = `f-${name}-${++fieldSequence}`; return `<div class="field"><label for="${id}">${label}</label><textarea id="${id}" name="${name}">${esc(value)}</textarea>${hint ? `<small>${hint}</small>` : ""}</div>`; }
   const values = form => Object.fromEntries(new FormData(form));
   function modal(html) { editor.innerHTML = html; if (!dialog.open) dialog.showModal(); }
   function navigate(changes) { const p = params(); for (const [key, value] of Object.entries(changes)) { if (value == null || value === "") p.delete(key); else p.set(key, value); } history.pushState({}, "", `${location.pathname}?${p}`); return render(); }

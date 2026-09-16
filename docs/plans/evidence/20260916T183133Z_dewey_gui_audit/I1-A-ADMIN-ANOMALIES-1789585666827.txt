@@ -1,0 +1,74 @@
+- generic: DAY
+- banner:
+  - generic: Dewey Operator Console
+  - heading "Anomalies" [level=1]
+  - generic: johnm@lsmc.com
+  - link "Dashboard":
+    - /url: /ui
+  - link "Artifacts":
+    - /url: /artifacts
+  - link "Observability":
+    - /url: /ui/observability
+  - link "Admin":
+    - /url: /admin
+  - button "Logout"
+- main:
+  - generic: Read-only local records
+  - heading "Persisted anomaly records for this Dewey instance." [level=2]
+  - paragraph: These are local operational summaries only. They are not release authority and they do not mutate backend state.
+  - generic: 3 records
+  - table:
+    - rowgroup:
+      - row "Anomaly Severity Status Source Action":
+        - columnheader "Anomaly"
+        - columnheader "Severity"
+        - columnheader "Status"
+        - columnheader "Source"
+        - columnheader "Action"
+    - rowgroup:
+      - row "M-DGX-9RJX Artifact storage review is pending high open storage Open":
+        - cell "M-DGX-9RJX Artifact storage review is pending":
+          - generic: M-DGX-9RJX
+          - generic: Artifact storage review is pending
+        - cell "high"
+        - cell "open"
+        - cell "storage"
+        - cell "Open":
+          - link "Open":
+            - /url: /ui/anomalies/M-DGX-9RJX
+      - row "M-DGX-9RG1 Readiness probe observed a bootstrap gap medium open readyz Open":
+        - cell "M-DGX-9RG1 Readiness probe observed a bootstrap gap":
+          - generic: M-DGX-9RG1
+          - generic: Readiness probe observed a bootstrap gap
+        - cell "medium"
+        - cell "open"
+        - cell "readyz"
+        - cell "Open":
+          - link "Open":
+            - /url: /ui/anomalies/M-DGX-9RG1
+      - row "M-DGX-9RHZ Operator session activity is sparse low monitoring auth_health Open":
+        - cell "M-DGX-9RHZ Operator session activity is sparse":
+          - generic: M-DGX-9RHZ
+          - generic: Operator session activity is sparse
+        - cell "low"
+        - cell "monitoring"
+        - cell "auth_health"
+        - cell "Open":
+          - link "Open":
+            - /url: /ui/anomalies/M-DGX-9RHZ
+- contentinfo:
+  - generic: Version 10.0.5
+  - generic: Branch codex/dewey-labcore-910
+  - generic: Tag 10.0.5
+  - generic: Commit df6d4d0646fc1385c35ff2b6353478a46b4587ac
+- text: Theme
+- combobox "Theme":
+  - option "original" [selected]
+  - option "light"
+  - option "dark"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

@@ -1,0 +1,65 @@
+- banner:
+  - link "Dewey / TapDB":
+    - /url: /tapdb/
+  - navigation:
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Admin":
+      - /url: /admin
+    - link "Overview":
+      - /url: /tapdb/admin/overview
+    - link "Search":
+      - /url: /tapdb/search
+    - link "Graph":
+      - /url: /tapdb/graph
+    - link "Templates":
+      - /url: /tapdb/templates
+    - link "Audit":
+      - /url: /tapdb/audit
+    - link "Help":
+      - /url: /tapdb/help
+    - link "Readiness":
+      - /url: /tapdb/admin/readiness
+    - link "Inventory":
+      - /url: /tapdb/admin/inventory
+    - link "Meridian":
+      - /url: /tapdb/admin/meridian
+    - link "Metrics":
+      - /url: /tapdb/admin/metrics
+    - link "Runtime":
+      - /url: /tapdb/admin/runtime
+    - link "Backups":
+      - /url: /tapdb/admin/backups
+    - link "Sign out":
+      - /url: /auth/logout
+  - generic: johnm@lsmc.com · admin
+- main:
+  - heading "TapDB GUI guide" [level=1]
+  - paragraph: This is TapDB's single supported standalone and embedded web interface.
+  - heading "Objects and lineage" [level=2]
+  - paragraph: Use Search to find templates, instances, and lineage. Object pages show canonical relationships, validation evidence, and audit history. Administrators may create ordinary instances, repair governed JSON, change status, and create lineage. Core external-reference templates cannot be written through the generic forms.
+  - heading "External references and discovery" [level=2]
+  - paragraph: Federated TapDB references and opaque external identifiers are displayed separately. TapDB-object references can be followed by DAG-v2 federation clients; opaque identifiers are visible and exactly searchable but are never fetched or expanded.
+  - heading "Operator tools" [level=2]
+  - paragraph: Administrators can inspect readiness, schema inventory, Meridian governance, sanitized runtime information, query metrics, backups, restore reviews, and durable receipts. Mutation forms are explicit and fail closed.
+  - heading "API" [level=2]
+  - paragraph: The authenticated JSON surfaces mirror GUI operations. DAG v2 is the only graph protocol; DAG v1 and outbound proxy routes are not supported.
+- contentinfo: TapDB 10.1.1rc1
+- text: Theme
+- combobox "Theme":
+  - option "original" [selected]
+  - option "light"
+  - option "dark"
+  - option "CBF"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

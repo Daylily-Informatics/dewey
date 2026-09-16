@@ -1,0 +1,117 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / S3 BROWSER
+  - heading "S3 Browser" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - status: 4 file(s) uploaded and registered.
+  - textbox "S3 URI":
+    - /placeholder: s3://bucket/exact/prefix/
+    - text: s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-A/
+  - button "Go"
+  - link "All buckets":
+    - /url: /storage
+  - generic: s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-A/
+  - button "Upload files"
+  - link "Register this folder":
+    - /url: /add?kind=prefix&uri=s3%3A%2F%2Flsmc-dewey-0%2Fgui-audit%2F20260916T183133Z%2FI1-A%2F
+  - button "Delete folder…"
+  - link "lsmc-dewey-0":
+    - /url: /storage?uri=s3%3A%2F%2Flsmc-dewey-0%2F
+  - link "/gui-audit":
+    - /url: /storage?uri=s3%3A%2F%2Flsmc-dewey-0%2Fgui-audit%2F
+  - link "/20260916T183133Z":
+    - /url: /storage?uri=s3%3A%2F%2Flsmc-dewey-0%2Fgui-audit%2F20260916T183133Z%2F
+  - link "/I1-A":
+    - /url: /storage?uri=s3%3A%2F%2Flsmc-dewey-0%2Fgui-audit%2F20260916T183133Z%2FI1-A%2F
+  - searchbox "Filter names on this page"
+  - button "Register selection as a set"
+  - table:
+    - rowgroup:
+      - row "Kind Name Size Registration":
+        - columnheader "Kind"
+        - columnheader "Name"
+        - columnheader "Size"
+        - columnheader "Registration"
+    - rowgroup:
+      - row "Select asset.svg object asset.svg 111 B M-DGX-TQE4":
+        - cell "Select asset.svg object":
+          - checkbox "Select asset.svg"
+          - generic: object
+        - cell "asset.svg":
+          - button "asset.svg"
+        - cell "111 B"
+        - cell "M-DGX-TQE4":
+          - link "M-DGX-TQE4":
+            - /url: /records/M-DGX-TQE4
+      - row "Select fixture.json object fixture.json 64 B M-DGX-TQ6M":
+        - cell "Select fixture.json object":
+          - checkbox "Select fixture.json"
+          - generic: object
+        - cell "fixture.json":
+          - button "fixture.json"
+        - cell "64 B"
+        - cell "M-DGX-TQ6M":
+          - link "M-DGX-TQ6M":
+            - /url: /records/M-DGX-TQ6M
+      - row "Select hello world ü.txt object hello world ü.txt 80 B M-DGX-TQ2W":
+        - cell "Select hello world ü.txt object":
+          - checkbox "Select hello world ü.txt"
+          - generic: object
+        - cell "hello world ü.txt":
+          - button "hello world ü.txt"
+        - cell "80 B"
+        - cell "M-DGX-TQ2W":
+          - link "M-DGX-TQ2W":
+            - /url: /records/M-DGX-TQ2W
+      - row "Select index.html object index.html 176 B M-DGX-TQAC":
+        - cell "Select index.html object":
+          - checkbox "Select index.html"
+          - generic: object
+        - cell "index.html":
+          - button "index.html"
+        - cell "176 B"
+        - cell "M-DGX-TQAC":
+          - link "M-DGX-TQAC":
+            - /url: /records/M-DGX-TQAC
+- dialog:
+  - button "Close dialog" [active]: ×
+  - heading "hello world ü.txt" [level=2]
+  - paragraph: s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-A/hello world ü.txt
+  - button "Download"
+  - link "Register":
+    - /url: /add?uri=s3%3A%2F%2Flsmc-dewey-0%2Fgui-audit%2F20260916T183133Z%2FI1-A%2Fhello%20world%20%C3%BC.txt&kind=object
+  - button "Replace…"
+  - button "Delete…"
+  - generic: "{ \"bucket\": \"lsmc-dewey-0\", \"key\": \"gui-audit/20260916T183133Z/I1-A/hello world ü.txt\", \"version_id\": null, \"size\": 80, \"content_type\": \"text/plain\", \"storage_class\": null, \"etag\": \"15be505d7213af5333e6d85eab109a7d-1\", \"sha256\": null, \"metadata\": {}, \"last_modified\": \"2026-09-16T19:11:11+00:00\", \"registered_artifact\": { \"artifact_euid\": \"M-DGX-TQ2W\", \"artifact_type\": \"object\", \"storage_kind\": \"object\", \"node_kind\": \"file\", \"storage_backend\": \"s3\", \"bucket\": \"lsmc-dewey-0\", \"key\": \"gui-audit/20260916T183133Z/I1-A/hello world ü.txt\", \"version_id\": null, \"size\": null, \"checksums\": {}, \"content_type\": null, \"original_filename\": \"hello world ü.txt\", \"producer_system\": \"dewey\", \"producer_object_euid\": null, \"storage_class\": null, \"availability_status\": null, \"metadata\": {}, \"storage_uri\": \"s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-A/hello world ü.txt\", \"storage_console_url\": \"https://s3.console.aws.amazon.com/s3/buckets/lsmc-dewey-0?prefix=gui-audit/20260916T183133Z/I1-A/hello%20world%20%C3%BC.txt&showversions=false\", \"source_uri\": \"s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-A/hello world ü.txt\", \"import_mode\": \"register\", \"storage_status\": \"registered\", \"storage_verified_at\": null, \"is_terminal\": true, \"retention_mode\": null, \"retain_until\": null, \"share_status\": null, \"share_last_issued_at\": null, \"created_at\": \"2026-09-16T19:11:11.511432Z\" }, \"uri\": \"s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-A/hello world ü.txt\" }"
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

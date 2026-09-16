@@ -1,0 +1,411 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / S3 BROWSER
+  - heading "S3 Browser" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - textbox "S3 URI":
+    - /placeholder: s3://bucket/exact/prefix/
+    - text: s3://lsmc-atlas-dev/
+  - button "Go"
+  - link "All buckets":
+    - /url: /storage
+  - generic: s3://lsmc-atlas-dev/
+  - button "Upload files"
+  - link "Register this folder":
+    - /url: /add?kind=prefix&uri=s3%3A%2F%2Flsmc-atlas-dev%2F
+  - link "lsmc-atlas-dev":
+    - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F
+  - searchbox "Filter names on this page"
+  - button "Register selection as a set"
+  - table:
+    - rowgroup:
+      - row "Kind Name Size Registration":
+        - columnheader "Kind"
+        - columnheader "Name"
+        - columnheader "Size"
+        - columnheader "Registration"
+    - rowgroup:
+      - row "Select 0aef0e6f-927a-488c-930c-0ecfd9c478cf/ prefix 0aef0e6f-927a-488c-930c-0ecfd9c478cf/ — Register":
+        - cell "Select 0aef0e6f-927a-488c-930c-0ecfd9c478cf/ prefix":
+          - checkbox "Select 0aef0e6f-927a-488c-930c-0ecfd9c478cf/"
+          - generic: prefix
+        - cell "0aef0e6f-927a-488c-930c-0ecfd9c478cf/":
+          - link "0aef0e6f-927a-488c-930c-0ecfd9c478cf/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F0aef0e6f-927a-488c-930c-0ecfd9c478cf%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2F0aef0e6f-927a-488c-930c-0ecfd9c478cf%2F&kind=prefix
+      - row "Select 0b0f9abd-7300-4009-8345-d4fb6456ad71/ prefix 0b0f9abd-7300-4009-8345-d4fb6456ad71/ — Register":
+        - cell "Select 0b0f9abd-7300-4009-8345-d4fb6456ad71/ prefix":
+          - checkbox "Select 0b0f9abd-7300-4009-8345-d4fb6456ad71/"
+          - generic: prefix
+        - cell "0b0f9abd-7300-4009-8345-d4fb6456ad71/":
+          - link "0b0f9abd-7300-4009-8345-d4fb6456ad71/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F0b0f9abd-7300-4009-8345-d4fb6456ad71%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2F0b0f9abd-7300-4009-8345-d4fb6456ad71%2F&kind=prefix
+      - row "Select 12818226-667d-4c63-919f-7cedc566420c/ prefix 12818226-667d-4c63-919f-7cedc566420c/ — Register":
+        - cell "Select 12818226-667d-4c63-919f-7cedc566420c/ prefix":
+          - checkbox "Select 12818226-667d-4c63-919f-7cedc566420c/"
+          - generic: prefix
+        - cell "12818226-667d-4c63-919f-7cedc566420c/":
+          - link "12818226-667d-4c63-919f-7cedc566420c/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F12818226-667d-4c63-919f-7cedc566420c%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2F12818226-667d-4c63-919f-7cedc566420c%2F&kind=prefix
+      - row "Select 12a60b71-14d8-4e23-b731-362ff5ebb881/ prefix 12a60b71-14d8-4e23-b731-362ff5ebb881/ — Register":
+        - cell "Select 12a60b71-14d8-4e23-b731-362ff5ebb881/ prefix":
+          - checkbox "Select 12a60b71-14d8-4e23-b731-362ff5ebb881/"
+          - generic: prefix
+        - cell "12a60b71-14d8-4e23-b731-362ff5ebb881/":
+          - link "12a60b71-14d8-4e23-b731-362ff5ebb881/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F12a60b71-14d8-4e23-b731-362ff5ebb881%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2F12a60b71-14d8-4e23-b731-362ff5ebb881%2F&kind=prefix
+      - row "Select 17e2f5ba-0634-4740-816c-fd28dc628837/ prefix 17e2f5ba-0634-4740-816c-fd28dc628837/ — Register":
+        - cell "Select 17e2f5ba-0634-4740-816c-fd28dc628837/ prefix":
+          - checkbox "Select 17e2f5ba-0634-4740-816c-fd28dc628837/"
+          - generic: prefix
+        - cell "17e2f5ba-0634-4740-816c-fd28dc628837/":
+          - link "17e2f5ba-0634-4740-816c-fd28dc628837/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F17e2f5ba-0634-4740-816c-fd28dc628837%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2F17e2f5ba-0634-4740-816c-fd28dc628837%2F&kind=prefix
+      - row "Select 1d6df62b-6971-401f-bc6e-9250778b2c46/ prefix 1d6df62b-6971-401f-bc6e-9250778b2c46/ — Register":
+        - cell "Select 1d6df62b-6971-401f-bc6e-9250778b2c46/ prefix":
+          - checkbox "Select 1d6df62b-6971-401f-bc6e-9250778b2c46/"
+          - generic: prefix
+        - cell "1d6df62b-6971-401f-bc6e-9250778b2c46/":
+          - link "1d6df62b-6971-401f-bc6e-9250778b2c46/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F1d6df62b-6971-401f-bc6e-9250778b2c46%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2F1d6df62b-6971-401f-bc6e-9250778b2c46%2F&kind=prefix
+      - row "Select 248cd4d4-c3d1-4231-ba7d-2b7ae022140a/ prefix 248cd4d4-c3d1-4231-ba7d-2b7ae022140a/ — Register":
+        - cell "Select 248cd4d4-c3d1-4231-ba7d-2b7ae022140a/ prefix":
+          - checkbox "Select 248cd4d4-c3d1-4231-ba7d-2b7ae022140a/"
+          - generic: prefix
+        - cell "248cd4d4-c3d1-4231-ba7d-2b7ae022140a/":
+          - link "248cd4d4-c3d1-4231-ba7d-2b7ae022140a/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F248cd4d4-c3d1-4231-ba7d-2b7ae022140a%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2F248cd4d4-c3d1-4231-ba7d-2b7ae022140a%2F&kind=prefix
+      - row "Select 2b8eef9a-f3f2-4f50-b368-c25cb428aad6/ prefix 2b8eef9a-f3f2-4f50-b368-c25cb428aad6/ — Register":
+        - cell "Select 2b8eef9a-f3f2-4f50-b368-c25cb428aad6/ prefix":
+          - checkbox "Select 2b8eef9a-f3f2-4f50-b368-c25cb428aad6/"
+          - generic: prefix
+        - cell "2b8eef9a-f3f2-4f50-b368-c25cb428aad6/":
+          - link "2b8eef9a-f3f2-4f50-b368-c25cb428aad6/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F2b8eef9a-f3f2-4f50-b368-c25cb428aad6%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2F2b8eef9a-f3f2-4f50-b368-c25cb428aad6%2F&kind=prefix
+      - row "Select 2fabbc96-630f-4e07-bda6-135032b89834/ prefix 2fabbc96-630f-4e07-bda6-135032b89834/ — Register":
+        - cell "Select 2fabbc96-630f-4e07-bda6-135032b89834/ prefix":
+          - checkbox "Select 2fabbc96-630f-4e07-bda6-135032b89834/"
+          - generic: prefix
+        - cell "2fabbc96-630f-4e07-bda6-135032b89834/":
+          - link "2fabbc96-630f-4e07-bda6-135032b89834/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F2fabbc96-630f-4e07-bda6-135032b89834%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2F2fabbc96-630f-4e07-bda6-135032b89834%2F&kind=prefix
+      - row "Select 3c0c2dbe-b46e-41a8-af28-7875a031ea41/ prefix 3c0c2dbe-b46e-41a8-af28-7875a031ea41/ — Register":
+        - cell "Select 3c0c2dbe-b46e-41a8-af28-7875a031ea41/ prefix":
+          - checkbox "Select 3c0c2dbe-b46e-41a8-af28-7875a031ea41/"
+          - generic: prefix
+        - cell "3c0c2dbe-b46e-41a8-af28-7875a031ea41/":
+          - link "3c0c2dbe-b46e-41a8-af28-7875a031ea41/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F3c0c2dbe-b46e-41a8-af28-7875a031ea41%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2F3c0c2dbe-b46e-41a8-af28-7875a031ea41%2F&kind=prefix
+      - row "Select 3ce16753-b727-4f84-9759-cbf6cdebe028/ prefix 3ce16753-b727-4f84-9759-cbf6cdebe028/ — Register":
+        - cell "Select 3ce16753-b727-4f84-9759-cbf6cdebe028/ prefix":
+          - checkbox "Select 3ce16753-b727-4f84-9759-cbf6cdebe028/"
+          - generic: prefix
+        - cell "3ce16753-b727-4f84-9759-cbf6cdebe028/":
+          - link "3ce16753-b727-4f84-9759-cbf6cdebe028/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F3ce16753-b727-4f84-9759-cbf6cdebe028%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2F3ce16753-b727-4f84-9759-cbf6cdebe028%2F&kind=prefix
+      - row "Select 4435c8e0-49ac-4f38-80e5-0b667d4c96d4/ prefix 4435c8e0-49ac-4f38-80e5-0b667d4c96d4/ — Register":
+        - cell "Select 4435c8e0-49ac-4f38-80e5-0b667d4c96d4/ prefix":
+          - checkbox "Select 4435c8e0-49ac-4f38-80e5-0b667d4c96d4/"
+          - generic: prefix
+        - cell "4435c8e0-49ac-4f38-80e5-0b667d4c96d4/":
+          - link "4435c8e0-49ac-4f38-80e5-0b667d4c96d4/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F4435c8e0-49ac-4f38-80e5-0b667d4c96d4%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2F4435c8e0-49ac-4f38-80e5-0b667d4c96d4%2F&kind=prefix
+      - row "Select 4b33407d-1a6e-47d9-b358-4b0aff650eb8/ prefix 4b33407d-1a6e-47d9-b358-4b0aff650eb8/ — Register":
+        - cell "Select 4b33407d-1a6e-47d9-b358-4b0aff650eb8/ prefix":
+          - checkbox "Select 4b33407d-1a6e-47d9-b358-4b0aff650eb8/"
+          - generic: prefix
+        - cell "4b33407d-1a6e-47d9-b358-4b0aff650eb8/":
+          - link "4b33407d-1a6e-47d9-b358-4b0aff650eb8/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F4b33407d-1a6e-47d9-b358-4b0aff650eb8%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2F4b33407d-1a6e-47d9-b358-4b0aff650eb8%2F&kind=prefix
+      - row "Select 559fed94-ef56-485d-9307-8cbd6a1595a8/ prefix 559fed94-ef56-485d-9307-8cbd6a1595a8/ — Register":
+        - cell "Select 559fed94-ef56-485d-9307-8cbd6a1595a8/ prefix":
+          - checkbox "Select 559fed94-ef56-485d-9307-8cbd6a1595a8/"
+          - generic: prefix
+        - cell "559fed94-ef56-485d-9307-8cbd6a1595a8/":
+          - link "559fed94-ef56-485d-9307-8cbd6a1595a8/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F559fed94-ef56-485d-9307-8cbd6a1595a8%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2F559fed94-ef56-485d-9307-8cbd6a1595a8%2F&kind=prefix
+      - row "Select 5c879549-98ed-4d7d-91a7-7c248f2b0dc5/ prefix 5c879549-98ed-4d7d-91a7-7c248f2b0dc5/ — Register":
+        - cell "Select 5c879549-98ed-4d7d-91a7-7c248f2b0dc5/ prefix":
+          - checkbox "Select 5c879549-98ed-4d7d-91a7-7c248f2b0dc5/"
+          - generic: prefix
+        - cell "5c879549-98ed-4d7d-91a7-7c248f2b0dc5/":
+          - link "5c879549-98ed-4d7d-91a7-7c248f2b0dc5/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F5c879549-98ed-4d7d-91a7-7c248f2b0dc5%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2F5c879549-98ed-4d7d-91a7-7c248f2b0dc5%2F&kind=prefix
+      - row "Select 5de2ee66-6427-4ef5-8cf3-4a154734482c/ prefix 5de2ee66-6427-4ef5-8cf3-4a154734482c/ — Register":
+        - cell "Select 5de2ee66-6427-4ef5-8cf3-4a154734482c/ prefix":
+          - checkbox "Select 5de2ee66-6427-4ef5-8cf3-4a154734482c/"
+          - generic: prefix
+        - cell "5de2ee66-6427-4ef5-8cf3-4a154734482c/":
+          - link "5de2ee66-6427-4ef5-8cf3-4a154734482c/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F5de2ee66-6427-4ef5-8cf3-4a154734482c%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2F5de2ee66-6427-4ef5-8cf3-4a154734482c%2F&kind=prefix
+      - row "Select 61417d97-c196-49cb-a1d8-909eb28a43f0/ prefix 61417d97-c196-49cb-a1d8-909eb28a43f0/ — Register":
+        - cell "Select 61417d97-c196-49cb-a1d8-909eb28a43f0/ prefix":
+          - checkbox "Select 61417d97-c196-49cb-a1d8-909eb28a43f0/"
+          - generic: prefix
+        - cell "61417d97-c196-49cb-a1d8-909eb28a43f0/":
+          - link "61417d97-c196-49cb-a1d8-909eb28a43f0/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F61417d97-c196-49cb-a1d8-909eb28a43f0%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2F61417d97-c196-49cb-a1d8-909eb28a43f0%2F&kind=prefix
+      - row "Select 63c61f6f-9131-44e2-84f6-e977fc2dd362/ prefix 63c61f6f-9131-44e2-84f6-e977fc2dd362/ — Register":
+        - cell "Select 63c61f6f-9131-44e2-84f6-e977fc2dd362/ prefix":
+          - checkbox "Select 63c61f6f-9131-44e2-84f6-e977fc2dd362/"
+          - generic: prefix
+        - cell "63c61f6f-9131-44e2-84f6-e977fc2dd362/":
+          - link "63c61f6f-9131-44e2-84f6-e977fc2dd362/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F63c61f6f-9131-44e2-84f6-e977fc2dd362%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2F63c61f6f-9131-44e2-84f6-e977fc2dd362%2F&kind=prefix
+      - row "Select 70d89b09-c784-4da6-90d0-cca2d35d8ebd/ prefix 70d89b09-c784-4da6-90d0-cca2d35d8ebd/ — Register":
+        - cell "Select 70d89b09-c784-4da6-90d0-cca2d35d8ebd/ prefix":
+          - checkbox "Select 70d89b09-c784-4da6-90d0-cca2d35d8ebd/"
+          - generic: prefix
+        - cell "70d89b09-c784-4da6-90d0-cca2d35d8ebd/":
+          - link "70d89b09-c784-4da6-90d0-cca2d35d8ebd/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F70d89b09-c784-4da6-90d0-cca2d35d8ebd%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2F70d89b09-c784-4da6-90d0-cca2d35d8ebd%2F&kind=prefix
+      - row "Select 99e1ffad-2511-43ce-8f63-c563d2a65448/ prefix 99e1ffad-2511-43ce-8f63-c563d2a65448/ — Register":
+        - cell "Select 99e1ffad-2511-43ce-8f63-c563d2a65448/ prefix":
+          - checkbox "Select 99e1ffad-2511-43ce-8f63-c563d2a65448/"
+          - generic: prefix
+        - cell "99e1ffad-2511-43ce-8f63-c563d2a65448/":
+          - link "99e1ffad-2511-43ce-8f63-c563d2a65448/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F99e1ffad-2511-43ce-8f63-c563d2a65448%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2F99e1ffad-2511-43ce-8f63-c563d2a65448%2F&kind=prefix
+      - row "Select 9a65c1b0-cdcf-4d1b-804f-ad1a82d3fedf/ prefix 9a65c1b0-cdcf-4d1b-804f-ad1a82d3fedf/ — Register":
+        - cell "Select 9a65c1b0-cdcf-4d1b-804f-ad1a82d3fedf/ prefix":
+          - checkbox "Select 9a65c1b0-cdcf-4d1b-804f-ad1a82d3fedf/"
+          - generic: prefix
+        - cell "9a65c1b0-cdcf-4d1b-804f-ad1a82d3fedf/":
+          - link "9a65c1b0-cdcf-4d1b-804f-ad1a82d3fedf/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F9a65c1b0-cdcf-4d1b-804f-ad1a82d3fedf%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2F9a65c1b0-cdcf-4d1b-804f-ad1a82d3fedf%2F&kind=prefix
+      - row "Select a048a584-ed1c-4e46-b850-9b66affec86b/ prefix a048a584-ed1c-4e46-b850-9b66affec86b/ — Register":
+        - cell "Select a048a584-ed1c-4e46-b850-9b66affec86b/ prefix":
+          - checkbox "Select a048a584-ed1c-4e46-b850-9b66affec86b/"
+          - generic: prefix
+        - cell "a048a584-ed1c-4e46-b850-9b66affec86b/":
+          - link "a048a584-ed1c-4e46-b850-9b66affec86b/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2Fa048a584-ed1c-4e46-b850-9b66affec86b%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2Fa048a584-ed1c-4e46-b850-9b66affec86b%2F&kind=prefix
+      - row "Select aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaa005/ prefix aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaa005/ — Register":
+        - cell "Select aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaa005/ prefix":
+          - checkbox "Select aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaa005/"
+          - generic: prefix
+        - cell "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaa005/":
+          - link "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaa005/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2Faaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaa005%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2Faaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaa005%2F&kind=prefix
+      - row "Select ae75a762-ecf5-4692-a058-aa06ea7798f4/ prefix ae75a762-ecf5-4692-a058-aa06ea7798f4/ — Register":
+        - cell "Select ae75a762-ecf5-4692-a058-aa06ea7798f4/ prefix":
+          - checkbox "Select ae75a762-ecf5-4692-a058-aa06ea7798f4/"
+          - generic: prefix
+        - cell "ae75a762-ecf5-4692-a058-aa06ea7798f4/":
+          - link "ae75a762-ecf5-4692-a058-aa06ea7798f4/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2Fae75a762-ecf5-4692-a058-aa06ea7798f4%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2Fae75a762-ecf5-4692-a058-aa06ea7798f4%2F&kind=prefix
+      - row "Select b2efce84-db20-4ebf-9069-0f79fa8e0ff6/ prefix b2efce84-db20-4ebf-9069-0f79fa8e0ff6/ — Register":
+        - cell "Select b2efce84-db20-4ebf-9069-0f79fa8e0ff6/ prefix":
+          - checkbox "Select b2efce84-db20-4ebf-9069-0f79fa8e0ff6/"
+          - generic: prefix
+        - cell "b2efce84-db20-4ebf-9069-0f79fa8e0ff6/":
+          - link "b2efce84-db20-4ebf-9069-0f79fa8e0ff6/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2Fb2efce84-db20-4ebf-9069-0f79fa8e0ff6%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2Fb2efce84-db20-4ebf-9069-0f79fa8e0ff6%2F&kind=prefix
+      - row "Select b89ca44e-261d-420b-a938-c19209921390/ prefix b89ca44e-261d-420b-a938-c19209921390/ — Register":
+        - cell "Select b89ca44e-261d-420b-a938-c19209921390/ prefix":
+          - checkbox "Select b89ca44e-261d-420b-a938-c19209921390/"
+          - generic: prefix
+        - cell "b89ca44e-261d-420b-a938-c19209921390/":
+          - link "b89ca44e-261d-420b-a938-c19209921390/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2Fb89ca44e-261d-420b-a938-c19209921390%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2Fb89ca44e-261d-420b-a938-c19209921390%2F&kind=prefix
+      - row "Select bed2bc1c-61b0-46d3-880e-bb51bf9070dd/ prefix bed2bc1c-61b0-46d3-880e-bb51bf9070dd/ — Register":
+        - cell "Select bed2bc1c-61b0-46d3-880e-bb51bf9070dd/ prefix":
+          - checkbox "Select bed2bc1c-61b0-46d3-880e-bb51bf9070dd/"
+          - generic: prefix
+        - cell "bed2bc1c-61b0-46d3-880e-bb51bf9070dd/":
+          - link "bed2bc1c-61b0-46d3-880e-bb51bf9070dd/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2Fbed2bc1c-61b0-46d3-880e-bb51bf9070dd%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2Fbed2bc1c-61b0-46d3-880e-bb51bf9070dd%2F&kind=prefix
+      - row "Select ca17aab4-5bd3-413c-9299-00665ff1d888/ prefix ca17aab4-5bd3-413c-9299-00665ff1d888/ — Register":
+        - cell "Select ca17aab4-5bd3-413c-9299-00665ff1d888/ prefix":
+          - checkbox "Select ca17aab4-5bd3-413c-9299-00665ff1d888/"
+          - generic: prefix
+        - cell "ca17aab4-5bd3-413c-9299-00665ff1d888/":
+          - link "ca17aab4-5bd3-413c-9299-00665ff1d888/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2Fca17aab4-5bd3-413c-9299-00665ff1d888%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2Fca17aab4-5bd3-413c-9299-00665ff1d888%2F&kind=prefix
+      - row "Select cf27f697-ec98-45b3-ba7b-a905d5605702/ prefix cf27f697-ec98-45b3-ba7b-a905d5605702/ — Register":
+        - cell "Select cf27f697-ec98-45b3-ba7b-a905d5605702/ prefix":
+          - checkbox "Select cf27f697-ec98-45b3-ba7b-a905d5605702/"
+          - generic: prefix
+        - cell "cf27f697-ec98-45b3-ba7b-a905d5605702/":
+          - link "cf27f697-ec98-45b3-ba7b-a905d5605702/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2Fcf27f697-ec98-45b3-ba7b-a905d5605702%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2Fcf27f697-ec98-45b3-ba7b-a905d5605702%2F&kind=prefix
+      - row "Select d29e45ac-5741-43b8-91bc-2b8354c32a97/ prefix d29e45ac-5741-43b8-91bc-2b8354c32a97/ — Register":
+        - cell "Select d29e45ac-5741-43b8-91bc-2b8354c32a97/ prefix":
+          - checkbox "Select d29e45ac-5741-43b8-91bc-2b8354c32a97/"
+          - generic: prefix
+        - cell "d29e45ac-5741-43b8-91bc-2b8354c32a97/":
+          - link "d29e45ac-5741-43b8-91bc-2b8354c32a97/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2Fd29e45ac-5741-43b8-91bc-2b8354c32a97%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2Fd29e45ac-5741-43b8-91bc-2b8354c32a97%2F&kind=prefix
+      - row "Select da443ab3-f2cf-426a-a061-117808042a17/ prefix da443ab3-f2cf-426a-a061-117808042a17/ — Register":
+        - cell "Select da443ab3-f2cf-426a-a061-117808042a17/ prefix":
+          - checkbox "Select da443ab3-f2cf-426a-a061-117808042a17/"
+          - generic: prefix
+        - cell "da443ab3-f2cf-426a-a061-117808042a17/":
+          - link "da443ab3-f2cf-426a-a061-117808042a17/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2Fda443ab3-f2cf-426a-a061-117808042a17%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2Fda443ab3-f2cf-426a-a061-117808042a17%2F&kind=prefix
+      - row "Select tmp/ prefix tmp/ — Register":
+        - cell "Select tmp/ prefix":
+          - checkbox "Select tmp/"
+          - generic: prefix
+        - cell "tmp/":
+          - link "tmp/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2Ftmp%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-atlas-dev%2Ftmp%2F&kind=prefix
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

@@ -1,0 +1,21 @@
+- generic: Sign in with your social account
+- button "Continue with Google":
+  - text: Continue with Google
+- text: We won't post to any of your accounts without asking first
+- generic: or
+- generic: Sign up with a new account
+- generic: Email
+- textbox "Email" [active]:
+  - /placeholder: name@host.com
+- generic: Password
+- textbox "Password"
+- generic: ✖ Password must contain a lower case letter
+- generic: ✖ Password must contain an upper case letter
+- generic: ✖ Password must contain a number
+- generic: ✖ Password must contain at least 8 characters
+- generic: ✓ Password must not contain a leading or trailing space
+- button "Sign up" [disabled]
+- paragraph:
+  - text: Already have an account?
+  - link "Sign in":
+    - /url: /login?client_id=737empi6dno0kbefh28g23u9jv&response_type=code&scope=openid+email+profile&redirect_uri=https%3A%2F%2Flogin.day.lsmc.bio%2Fauth%2Fcallback&state=[REDACTED]

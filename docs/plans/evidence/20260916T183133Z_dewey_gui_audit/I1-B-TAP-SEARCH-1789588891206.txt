@@ -1,0 +1,94 @@
+- banner:
+  - link "Dewey / TapDB":
+    - /url: /tapdb/
+  - navigation:
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Admin":
+      - /url: /admin
+    - link "Overview":
+      - /url: /tapdb/admin/overview
+    - link "Search":
+      - /url: /tapdb/search
+    - link "Graph":
+      - /url: /tapdb/graph
+    - link "Templates":
+      - /url: /tapdb/templates
+    - link "Audit":
+      - /url: /tapdb/audit
+    - link "Help":
+      - /url: /tapdb/help
+    - link "Readiness":
+      - /url: /tapdb/admin/readiness
+    - link "Inventory":
+      - /url: /tapdb/admin/inventory
+    - link "Meridian":
+      - /url: /tapdb/admin/meridian
+    - link "Metrics":
+      - /url: /tapdb/admin/metrics
+    - link "Runtime":
+      - /url: /tapdb/admin/runtime
+    - link "Backups":
+      - /url: /tapdb/admin/backups
+    - link "Sign out":
+      - /url: /auth/logout
+  - generic: johnm@lsmc.com · admin
+- main:
+  - heading "Search" [level=1]
+  - textbox "EUID, name, type, status": M-DGX-TST9
+  - combobox:
+    - option "all"
+    - option "template"
+    - option "instance" [selected]
+    - option "lineage"
+  - textbox "name contains"
+  - textbox "EUID contains"
+  - textbox "category"
+  - textbox "type"
+  - textbox "subtype"
+  - button "Search"
+  - heading "Results" [level=2]
+  - table:
+    - rowgroup:
+      - row "EUID Kind Name Type Status":
+        - columnheader "EUID"
+        - columnheader "Kind"
+        - columnheader "Name"
+        - columnheader "Type"
+        - columnheader "Status"
+    - rowgroup:
+      - row "M-DGX-TST9 instance Dewey GUI audit 20260916 I1-B prefix data/artifact/generic active":
+        - cell "M-DGX-TST9":
+          - link "M-DGX-TST9":
+            - /url: /tapdb/object/M-DGX-TST9
+        - cell "instance"
+        - cell "Dewey GUI audit 20260916 I1-B prefix"
+        - cell "data/artifact/generic"
+        - cell "active"
+      - row "M-DGX-TSV7 instance Access for M-DGX-TST9 access/registry_policy/generic active":
+        - cell "M-DGX-TSV7":
+          - link "M-DGX-TSV7":
+            - /url: /tapdb/object/M-DGX-TSV7
+        - cell "instance"
+        - cell "Access for M-DGX-TST9"
+        - cell "access/registry_policy/generic"
+        - cell "active"
+- contentinfo: TapDB 10.1.1rc1
+- text: Theme
+- combobox "Theme":
+  - option "original" [selected]
+  - option "light"
+  - option "dark"
+  - option "CBF"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"
