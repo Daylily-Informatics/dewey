@@ -1,0 +1,362 @@
+{
+  "availability": [
+    {
+      "error_type": "HTTPError",
+      "observed_at": "2026-09-19T10:05:25.748390+00:00"
+    },
+    {
+      "error_type": "HTTPError",
+      "observed_at": "2026-09-19T10:05:27.761481+00:00"
+    },
+    {
+      "error_type": "HTTPError",
+      "observed_at": "2026-09-19T10:05:29.771296+00:00"
+    },
+    {
+      "error_type": "HTTPError",
+      "observed_at": "2026-09-19T10:05:31.780495+00:00"
+    },
+    {
+      "body_sha256": "3abba2a70edf58d2be5a3b2d9aa61e7767eecb46614f2277805400ef032e9bce",
+      "observed_at": "2026-09-19T10:05:33.792401+00:00",
+      "status": 200
+    }
+  ],
+  "build_receipt": "/home/ubuntu/dewey-10.0.7-20260919T100009Z/image-receipt.json",
+  "builder_receipt": {
+    "path": "/home/ubuntu/dewey-10.0.7-20260919T100009Z/image-receipt.json",
+    "sha256": "7463bd1fab97f1a6cf108c25923c3efe9fd58ec550fe32ba64ae8d9befa55560"
+  },
+  "completed_at": "2026-09-19T10:05:34.747729+00:00",
+  "compose_after_sha256": "ff627f8f20e6cd2f817feba406350e496203998cd704dc3235716ade4afb7697",
+  "compose_before_sha256": "38dea560137d345aa575d6dcf5d282c9f9fa55ef7b6cce199e32fcacf7c57c20",
+  "compose_sha256": "ff627f8f20e6cd2f817feba406350e496203998cd704dc3235716ade4afb7697",
+  "containers_after": {
+    "dayhoff-day-atlas-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/atlas@sha256:cf1c0690ae277e4ef2d0621724575771e72856930a81d959a6d465de2ad94c7a",
+      "id": "9dc66ad2a1f7353132769bf10de83865ea83bac34e03145b50ee2f42ba0adf01",
+      "image": "sha256:cf1c0690ae277e4ef2d0621724575771e72856930a81d959a6d465de2ad94c7a",
+      "restarts": 0,
+      "source_commit": null,
+      "source_tag": null,
+      "started_at": "2026-07-02T16:14:55.339267769Z",
+      "status": "running"
+    },
+    "dayhoff-day-bloom-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/bloom@sha256:99b2b16e54a018df748599bc9ebe0e8f1f587ee2c96b3cfb2ff72a92e46a0a4e",
+      "id": "e7a9e8bc2b898697a022218ad5ed74a0de285df84dce5c954c3a27ab2dbab8d0",
+      "image": "sha256:99b2b16e54a018df748599bc9ebe0e8f1f587ee2c96b3cfb2ff72a92e46a0a4e",
+      "restarts": 0,
+      "source_commit": "e29b6d6d8baf60e5cd9da5b82c74c86c0cd65953",
+      "source_tag": "10.0.11",
+      "started_at": "2026-09-19T01:10:15.896502136Z",
+      "status": "running"
+    },
+    "dayhoff-day-dewey-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:50ef1ba6922be663e7c88839849b4a1649590ae8674c819dc8862e695055b7ac",
+      "id": "fe6b85a3031dfb31cc16d8dc0863cd9f80995703c053771323fc52e8b40b417d",
+      "image": "sha256:50ef1ba6922be663e7c88839849b4a1649590ae8674c819dc8862e695055b7ac",
+      "restarts": 0,
+      "source_commit": "8d04719a6ad82a6808bf38933b39cadb210b43d0",
+      "source_tag": "10.0.7",
+      "started_at": "2026-09-19T10:05:25.617193635Z",
+      "status": "running"
+    },
+    "dayhoff-day-kahlo-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/kahlo@sha256:43acd01c695639e5d9557015fda8614959404a308ca083f2ef193121e0a5f6f7",
+      "id": "1d20793485ebaa0c0dcf6a47ed59cdcf76ab68c79e04cc54b12afaa55f44410c",
+      "image": "sha256:43acd01c695639e5d9557015fda8614959404a308ca083f2ef193121e0a5f6f7",
+      "restarts": 0,
+      "source_commit": "2bdcea03bd244d3d527a86916e29c87a67b9ec10",
+      "source_tag": "9.0.12",
+      "started_at": "2026-09-19T09:59:29.602998101Z",
+      "status": "running"
+    },
+    "dayhoff-day-login-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/lsmc-oauth-login@sha256:d955b71ef2a1f69bf06018a61336c764af46969402433bbe6196280dd283c8ba",
+      "id": "0c905a1041a6c6cd4db65c246aa593612109e2f02dbfa3116653f5c99f69a034",
+      "image": "sha256:d955b71ef2a1f69bf06018a61336c764af46969402433bbe6196280dd283c8ba",
+      "restarts": 0,
+      "source_commit": null,
+      "source_tag": null,
+      "started_at": "2026-07-02T14:04:46.429097101Z",
+      "status": "running"
+    },
+    "dayhoff-day-qeo-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/qeo@sha256:82810a338b93489ffce125d206bd30556d9f6e7f3236940bbdc930ffc8b5f312",
+      "id": "56bf2291980850596b03864a3399ccb708217600ee0cf7c24e9fae04f6dc4ea2",
+      "image": "sha256:82810a338b93489ffce125d206bd30556d9f6e7f3236940bbdc930ffc8b5f312",
+      "restarts": 0,
+      "source_commit": null,
+      "source_tag": null,
+      "started_at": "2026-09-13T07:57:47.91531829Z",
+      "status": "running"
+    },
+    "dayhoff-day-ursa-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "id": "470e931a6bb127a11e527c3b4f5f6129a23b1bb87d4d106df39b589b766b7b4f",
+      "image": "sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "restarts": 0,
+      "source_commit": "125d56a64999a3d11d0eb590637d232311c75194",
+      "source_tag": "14.1.5",
+      "started_at": "2026-09-19T09:37:12.957839736Z",
+      "status": "running"
+    },
+    "dayhoff-day-ursa-cluster-sweeper-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "id": "3b647fd821f78e3eb0210f0b3c339fc817be10c56e229607996b487edcca209d",
+      "image": "sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "restarts": 0,
+      "source_commit": "125d56a64999a3d11d0eb590637d232311c75194",
+      "source_tag": "14.1.5",
+      "started_at": "2026-09-19T09:37:13.109809153Z",
+      "status": "running"
+    },
+    "dayhoff-day-ursa-cost-guardrail-scheduler-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "id": "1ff7c5463fcc3773efb94127d38919acd84cc68cf48866800362b4826af9e3c2",
+      "image": "sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "restarts": 0,
+      "source_commit": "125d56a64999a3d11d0eb590637d232311c75194",
+      "source_tag": "14.1.5",
+      "started_at": "2026-09-19T09:37:34.107038389Z",
+      "status": "running"
+    },
+    "dayhoff-day-ursa-placement-scheduler-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "id": "2bb5f232adb8c54540ad780b8fce778dc4e4fc7865f73068482fc89dcb7dff94",
+      "image": "sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "restarts": 0,
+      "source_commit": "125d56a64999a3d11d0eb590637d232311c75194",
+      "source_tag": "14.1.5",
+      "started_at": "2026-09-19T09:37:13.124338312Z",
+      "status": "running"
+    },
+    "dayhoff-day-ursa-v2-run-monitor-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "id": "b67554e7c8ab21a29dac248718bd49f815d13ff9215a20c073f5491de62f51da",
+      "image": "sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "restarts": 0,
+      "source_commit": "125d56a64999a3d11d0eb590637d232311c75194",
+      "source_tag": "14.1.5",
+      "started_at": "2026-09-19T09:37:13.126503199Z",
+      "status": "running"
+    },
+    "dayhoff-day-ursa-v2-run-worker-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "id": "c14371b6872ae5769a23d23c85e45b7a9d75c3983b5dbe23244149e23295d7a7",
+      "image": "sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "restarts": 0,
+      "source_commit": "125d56a64999a3d11d0eb590637d232311c75194",
+      "source_tag": "14.1.5",
+      "started_at": "2026-09-19T09:37:13.122063476Z",
+      "status": "running"
+    },
+    "dayhoff-day-zebra-day-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/zebra-day@sha256:c3c93ed8d2a79381a22f1d2c3575b1e5cd7a9f166d683aa22217ce3e37185593",
+      "id": "4f2b16fc88c28440d22ebd12f24a05849238663b7239bad9d4b89df1cf4256b2",
+      "image": "sha256:c3c93ed8d2a79381a22f1d2c3575b1e5cd7a9f166d683aa22217ce3e37185593",
+      "restarts": 0,
+      "source_commit": null,
+      "source_tag": null,
+      "started_at": "2026-07-02T14:04:46.435451162Z",
+      "status": "running"
+    }
+  },
+  "containers_before": {
+    "dayhoff-day-atlas-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/atlas@sha256:cf1c0690ae277e4ef2d0621724575771e72856930a81d959a6d465de2ad94c7a",
+      "id": "9dc66ad2a1f7353132769bf10de83865ea83bac34e03145b50ee2f42ba0adf01",
+      "image": "sha256:cf1c0690ae277e4ef2d0621724575771e72856930a81d959a6d465de2ad94c7a",
+      "restarts": 0,
+      "source_commit": null,
+      "source_tag": null,
+      "started_at": "2026-07-02T16:14:55.339267769Z",
+      "status": "running"
+    },
+    "dayhoff-day-bloom-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/bloom@sha256:99b2b16e54a018df748599bc9ebe0e8f1f587ee2c96b3cfb2ff72a92e46a0a4e",
+      "id": "e7a9e8bc2b898697a022218ad5ed74a0de285df84dce5c954c3a27ab2dbab8d0",
+      "image": "sha256:99b2b16e54a018df748599bc9ebe0e8f1f587ee2c96b3cfb2ff72a92e46a0a4e",
+      "restarts": 0,
+      "source_commit": "e29b6d6d8baf60e5cd9da5b82c74c86c0cd65953",
+      "source_tag": "10.0.11",
+      "started_at": "2026-09-19T01:10:15.896502136Z",
+      "status": "running"
+    },
+    "dayhoff-day-dewey-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:0af4bf5a62d2a35c0e3b9304a7da383b142aa45a89427a634774e65b90258315",
+      "id": "5bdffcddb175153303344ef3ec1c30b41d5632362b80e7e8874e5f60fdc0f3ba",
+      "image": "sha256:0af4bf5a62d2a35c0e3b9304a7da383b142aa45a89427a634774e65b90258315",
+      "restarts": 0,
+      "source_commit": "c98cbbbd5c5f7b1b622579923800e6ffa2f382e6",
+      "source_tag": "10.0.6",
+      "started_at": "2026-09-16T20:22:03.743868894Z",
+      "status": "running"
+    },
+    "dayhoff-day-kahlo-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/kahlo@sha256:43acd01c695639e5d9557015fda8614959404a308ca083f2ef193121e0a5f6f7",
+      "id": "1d20793485ebaa0c0dcf6a47ed59cdcf76ab68c79e04cc54b12afaa55f44410c",
+      "image": "sha256:43acd01c695639e5d9557015fda8614959404a308ca083f2ef193121e0a5f6f7",
+      "restarts": 0,
+      "source_commit": "2bdcea03bd244d3d527a86916e29c87a67b9ec10",
+      "source_tag": "9.0.12",
+      "started_at": "2026-09-19T09:59:29.602998101Z",
+      "status": "running"
+    },
+    "dayhoff-day-login-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/lsmc-oauth-login@sha256:d955b71ef2a1f69bf06018a61336c764af46969402433bbe6196280dd283c8ba",
+      "id": "0c905a1041a6c6cd4db65c246aa593612109e2f02dbfa3116653f5c99f69a034",
+      "image": "sha256:d955b71ef2a1f69bf06018a61336c764af46969402433bbe6196280dd283c8ba",
+      "restarts": 0,
+      "source_commit": null,
+      "source_tag": null,
+      "started_at": "2026-07-02T14:04:46.429097101Z",
+      "status": "running"
+    },
+    "dayhoff-day-qeo-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/qeo@sha256:82810a338b93489ffce125d206bd30556d9f6e7f3236940bbdc930ffc8b5f312",
+      "id": "56bf2291980850596b03864a3399ccb708217600ee0cf7c24e9fae04f6dc4ea2",
+      "image": "sha256:82810a338b93489ffce125d206bd30556d9f6e7f3236940bbdc930ffc8b5f312",
+      "restarts": 0,
+      "source_commit": null,
+      "source_tag": null,
+      "started_at": "2026-09-13T07:57:47.91531829Z",
+      "status": "running"
+    },
+    "dayhoff-day-ursa-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "id": "470e931a6bb127a11e527c3b4f5f6129a23b1bb87d4d106df39b589b766b7b4f",
+      "image": "sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "restarts": 0,
+      "source_commit": "125d56a64999a3d11d0eb590637d232311c75194",
+      "source_tag": "14.1.5",
+      "started_at": "2026-09-19T09:37:12.957839736Z",
+      "status": "running"
+    },
+    "dayhoff-day-ursa-cluster-sweeper-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "id": "3b647fd821f78e3eb0210f0b3c339fc817be10c56e229607996b487edcca209d",
+      "image": "sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "restarts": 0,
+      "source_commit": "125d56a64999a3d11d0eb590637d232311c75194",
+      "source_tag": "14.1.5",
+      "started_at": "2026-09-19T09:37:13.109809153Z",
+      "status": "running"
+    },
+    "dayhoff-day-ursa-cost-guardrail-scheduler-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "id": "1ff7c5463fcc3773efb94127d38919acd84cc68cf48866800362b4826af9e3c2",
+      "image": "sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "restarts": 0,
+      "source_commit": "125d56a64999a3d11d0eb590637d232311c75194",
+      "source_tag": "14.1.5",
+      "started_at": "2026-09-19T09:37:34.107038389Z",
+      "status": "running"
+    },
+    "dayhoff-day-ursa-placement-scheduler-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "id": "2bb5f232adb8c54540ad780b8fce778dc4e4fc7865f73068482fc89dcb7dff94",
+      "image": "sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "restarts": 0,
+      "source_commit": "125d56a64999a3d11d0eb590637d232311c75194",
+      "source_tag": "14.1.5",
+      "started_at": "2026-09-19T09:37:13.124338312Z",
+      "status": "running"
+    },
+    "dayhoff-day-ursa-v2-run-monitor-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "id": "b67554e7c8ab21a29dac248718bd49f815d13ff9215a20c073f5491de62f51da",
+      "image": "sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "restarts": 0,
+      "source_commit": "125d56a64999a3d11d0eb590637d232311c75194",
+      "source_tag": "14.1.5",
+      "started_at": "2026-09-19T09:37:13.126503199Z",
+      "status": "running"
+    },
+    "dayhoff-day-ursa-v2-run-worker-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "id": "c14371b6872ae5769a23d23c85e45b7a9d75c3983b5dbe23244149e23295d7a7",
+      "image": "sha256:30811db9f1f66c0ecb49eea09d230eafd1bf079e2f882a33318d080fcacecc46",
+      "restarts": 0,
+      "source_commit": "125d56a64999a3d11d0eb590637d232311c75194",
+      "source_tag": "14.1.5",
+      "started_at": "2026-09-19T09:37:13.122063476Z",
+      "status": "running"
+    },
+    "dayhoff-day-zebra-day-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/zebra-day@sha256:c3c93ed8d2a79381a22f1d2c3575b1e5cd7a9f166d683aa22217ce3e37185593",
+      "id": "4f2b16fc88c28440d22ebd12f24a05849238663b7239bad9d4b89df1cf4256b2",
+      "image": "sha256:c3c93ed8d2a79381a22f1d2c3575b1e5cd7a9f166d683aa22217ce3e37185593",
+      "restarts": 0,
+      "source_commit": null,
+      "source_tag": null,
+      "started_at": "2026-07-02T14:04:46.435451162Z",
+      "status": "running"
+    }
+  },
+  "credential_changes": false,
+  "database_operations": [],
+  "evidence_completion": {
+    "docker_health": "NOT_CAPTURED_IN_ORIGINAL_CONTAINER_PROJECTION",
+    "kind": "canonical-fields-from-immutable-cutover-evidence",
+    "manifest_before": {
+      "path": "/home/ubuntu/dewey-10.0.7-cutover-20260919T100700Z/previous-manifest.json",
+      "sha256": "7db0ab90d6a45d8660f02680ad977f318f57c17aa0cd9624902ecc82f7eca8ad"
+    },
+    "original_receipt": {
+      "path": "/home/ubuntu/dewey-10.0.7-cutover-20260919T100700Z/deployment-receipt.json",
+      "sha256": "7d92be3bec61ab3e354d95d00c931045d7d0e9393580b330178c8d0ee9193c8a"
+    },
+    "runtime_operations": []
+  },
+  "evidence_prepared_at": "2026-09-19T10:18:56.699229+00:00",
+  "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:50ef1ba6922be663e7c88839849b4a1649590ae8674c819dc8862e695055b7ac",
+  "installed_package_version": "10.0.7",
+  "instance_id": "i-07df3a933e4839f52",
+  "manifest_sha256": "b4c56e4654ca5960aead6391d9e7f4bf4284036061996251faf0ff8d49481ee4",
+  "observed_at": "2026-09-19T10:05:34.747707+00:00",
+  "performance_acceptance": false,
+  "phase": "SUCCESS",
+  "predecessor_shutdown": {
+    "container_id": "5bdffcddb175153303344ef3ec1c30b41d5632362b80e7e8874e5f60fdc0f3ba",
+    "exit_code": 0,
+    "finished_at": "2026-09-19T10:05:18.934233578Z",
+    "force_used": false,
+    "oom_killed": false,
+    "signal": "SIGTERM",
+    "status": "exited",
+    "timeout_seconds": -1
+  },
+  "previous_commit": "c98cbbbd5c5f7b1b622579923800e6ffa2f382e6",
+  "previous_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:0af4bf5a62d2a35c0e3b9304a7da383b142aa45a89427a634774e65b90258315",
+  "previous_tag": "10.0.6",
+  "roles": {
+    "dayhoff-day-dewey-1": {
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:50ef1ba6922be663e7c88839849b4a1649590ae8674c819dc8862e695055b7ac",
+      "health": null,
+      "id": "fe6b85a3031dfb31cc16d8dc0863cd9f80995703c053771323fc52e8b40b417d",
+      "image": "sha256:50ef1ba6922be663e7c88839849b4a1649590ae8674c819dc8862e695055b7ac",
+      "restarts": 0,
+      "source_commit": "8d04719a6ad82a6808bf38933b39cadb210b43d0",
+      "source_tag": "10.0.7",
+      "started_at": "2026-09-19T10:05:25.617193635Z",
+      "status": "running"
+    }
+  },
+  "runtime_provenance": {
+    "DEWEY_BUILD_BRANCH": "codex/dewey-gui-performance-20260919",
+    "DEWEY_BUILD_SHA": "8d04719a6ad82a6808bf38933b39cadb210b43d0",
+    "LSMC_RELEASE_SHA": "8d04719a6ad82a6808bf38933b39cadb210b43d0"
+  },
+  "schema": "ursa-owy-kahlo.deployment/v1",
+  "service": "dewey",
+  "service_configuration_preserved": true,
+  "siblings_unchanged": true,
+  "source_branch": "codex/dewey-gui-performance-20260919",
+  "source_commit": "8d04719a6ad82a6808bf38933b39cadb210b43d0",
+  "source_tag": "10.0.7",
+  "source_tag_object": "77be87d92ae3f4f6dd217f88cdc31013a8125246",
+  "started_at": "2026-09-19T10:05:17.118730+00:00",
+  "tests_run": false
+}

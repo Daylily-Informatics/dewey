@@ -36,3 +36,12 @@ Five bounded authenticated production calls returned200 after deployment. Librar
 G0/D1/D2/D3 are SUCCESS within this bounded Dewey latency scope. Dewey source/build/deploy/backend acceptance are complete. The larger six-proof objective and combined authority publication remain parent-owned and incomplete.
 
 Separate source-only freshness clarification for C: observability.py196 builds a static running-release capability declaration once; app.py520 merges the actual successful TapDB mount fragment; observability.py394 reuses its declaration timestamp. projection234 reportsready/stale=false while outerbaseframe is fresh. This age is declaration-generation age, not evidence of stale dynamic health probes. A restart genuinely rebuilds the declaration but does not redefine that contract. No timestamp was fabricated and no additional image was built for this classification.
+
+
+## 2026-09-19T10:18:56Z — canonical evidence completion
+
+- SUCCESS: prepared a separate canonical native deployment receipt from immutable cutover files. Original receipt/source observation remains unchanged at 10:05:34.747707Z; no deployment, restart, credential or configuration operation occurred.
+- Receipt: `20260919T101700Z_dewey107_canonical_completion.json`, SHA256 `6658bedf43bb6798e3700dc0d21b82a9a1119b31a9a55f8fe7b5f64e65e10370`; remote `/home/ubuntu/dewey-10.0.7-cutover-20260919T100700Z/canonical-completion-20260919T101700Z.json`.
+- Exact native fields now identify the build path, one Dewey role, previous release, preserved before/after Compose hashes, and manifest identity change. Docker health is explicitly null because that field was not captured in the original projection; actual HTTP health200 remains separate evidence.
+- Original receipt SHA256 `7d92be3bec61ab3e354d95d00c931045d7d0e9393580b330178c8d0ee9193c8a`; before-manifest `previous-manifest.json` SHA256 `7db0ab90d6a45d8660f02680ad977f318f57c17aa0cd9624902ecc82f7eca8ad`.
+- Preparation source: `20260919T101700Z_complete_dewey_deployment_evidence.py`, SHA256 `2743a7216c9d311d6ffbbfda22ef53c9ef0b482f164b1c476053eaa8222f19e7`. Dayhoff publication is owned by C/root; no claim of that later publication here.
