@@ -1,0 +1,26 @@
+# Dewey production GUI latency ledger — 2026-09-19T09:51Z
+
+Owner: Agent B. Controlling work: parent Ursa/OWY/Kahlo plan and the user's09:39 request for2x responsiveness. Scope is Dewey only; C owns Kahlo and root owns Ursa. No tests, intermediate builds, deployment or owner mutation is authorized in this diagnosis/source pass. The existing service credential stays in process memory. Browser authentication is explicitly unnecessary; use the same public backend routes called by the GUI.
+
+| ID | Owner | Dependency | Status | Evidence / acceptance |
+|---|---|---|---|---|
+| G0 | B | — | SUCCESS | Interactive AWS SSM using operator profilelsmc/us-west-2 confirmed ubuntu oni-07df3a933e4839f52. Dewey containerdayhoff-day-dewey-1 runs10.0.6, revisionc98cbbbd5c5f7b1b622579923800e6ffa2f382e6, image0af4bf5a62d2a35c0e3b9304a7da383b142aa45a89427a634774e65b90258315, started2026-09-16T20:22:03.743868894Z. Exact tag peels to the same source. |
+| D1 | B | G0 | IN_PROGRESS | Capture one authenticated production observation of Library query, Sets query and a real registered set detail. Keep status, timing, response integrity and counts, not payloads or credentials. |
+| D2 | B | D1 | OPEN | Diagnose the specific owning-source bottleneck and make the smallest semantics-preserving change. Preserve principal/lineage visibility and detail/history completeness. |
+| D3 | Root + B | D2 review | OPEN | Parent reviews source; final tagged release/deployment only when authorized. Compare the same production routes and principals. No2x improvement claim before deployed measurements. |
+
+Isolated branchcodex/dewey-gui-performance-20260919 starts from the actual deployed immutable source. Existing Dewey worktrees and production are untouched. Container inspect was projected to source/image/compose/mount references; no Config.Env or secret values were emitted. The last30minutes/250line native container-log window contained no JSON request-duration rows, so it supplies no route baseline.
+
+## Native baseline and source candidate
+
+The three actual requests ran09:49:09.232705–09:49:10.769380Z, allHTTP200 using the existing OWY bearer; no credential values/hashes or response bodies were retained. Library25 rows/5,616total took408.565ms (native service68ms),46,195bytes. Sets25 rows/26total took857.658ms (service135ms),1,357,675bytes. Exact P1 registered set detailM-DGX-VVW1 took262.517ms,111,637bytes and33visible members. The first two requests are the read-only POST search calls used by the GUI. The detail GET remains a continuity/control route. These are service-principal backend observations, not a browser rendering or every-human-role performance claim.
+
+Root approved the explicit summary request and batched visible-member counts. Source candidate changes only registry.py, registry.js and the API explanation in README.md. The GUI requests `projection: "summary"`; existing full search and exact detail remain unchanged. Search visibility, complete counts/facets, filters, sorting and pagination precede projection exactly as before. One grouped query counts distinct visible children using the same live typed lineage and child-visibility predicate as list_children; duplicate edges do not inflate counts and empty visible membership yields0. No member metadata or external-object detail is hydrated merely to render the summary table. Unknown projections fail clearly.
+
+D1 SUCCESS; D2 SOURCE_READY for parent review; D3 OPEN. Source was reviewed without imports, syntax checks, tests, benchmarks, container builds or deployment. The required2x measurement remains pending final deployed before/after observations with identical user actions and principal. The network floor may prevent2x on an already fast control route; do not inflate the claim. Parent separately records new DYEC69/DayOA58 constraints: P1/P3 existing67/55compute must finish registration; missing P2 requires an explicit successor; future P4–P6 need actual new bindings. No OWY source or workflow action is part of this Dewey candidate.
+
+## Parent review and release authorization — 2026-09-19T09:55Z
+
+Root reviewed the complete source diff and authorized the next unused numeric10.0.x release and final EC2 build for immediate selected Dewey deployment, after the builder slot is released and the deployment helper is reviewed. The timestamp correction now selects recorded payload.created_at or recorded instance.created_dt and fails when neither is present; no new summary timestamp is synthesized. The existing full response remains unchanged. A bounded public read of the same25Sets retained each EUID, creation timestamp, member count and summary-field hash: all25creation timestamps predate the request (none used the full response's current-time branch) and every member count equals distinct members. Receipt `20260919T095700Z_dewey_existing_summary_authority.json`, SHAe2915f2321ae66c0cc7bdb8715e0a9d6f3030a1e16853a69a777b2a11d1ddfc2. This is actual row authority, not an offline test or a deployed summary acceptance.
+
+Remote tag inventory contains10.0.0–10.0.6;10.0.7 is unused. Intended immutable release10.0.7 contains this reviewed source and evidence. Kahlo holds the EC2 builder first; no Dewey build or cutover has started.

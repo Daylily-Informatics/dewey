@@ -81,6 +81,14 @@ GUI pages must not expose raw presigned URLs, bucket keys, or sensitive storage 
 
 The primary API is under `/api/v1/*`. Current route families include artifact registration/resolve, external objects, external-object relations, shares/share roots, search, QEO handoff, and observability.
 
+Library, Sets and Sharing request `projection: "summary"` from
+`POST /api/v1/registry/search`. This returns the complete authorized page of table
+fields and visible member counts without expanding set members or external-object
+details. The same search, filters, sorting, pagination and exact facet totals apply.
+Omitting `projection`, or selecting `"full"`, retains the complete search response.
+`GET /api/v1/records/{euid}` retains full record and visible member details. Unknown
+projection values are rejected.
+
 Health and observability routes follow the Dayhoff/Kahlo v3 shape: `/healthz`, `/readyz`, `/health`, `/obs_services`, `/api_health`, `/endpoint_health`, `/db_health`, `/my_health`, and `/auth_health`.
 
 ## Testing Info

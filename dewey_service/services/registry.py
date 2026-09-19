@@ -223,6 +223,56 @@ class RegistryServiceMixin:
         with self.backend.session_scope(commit=False) as session:
             return self._registry_payload(session, self._registry_record(session, euid))
 
+    def _registry_summary_items(self, session, records):
+        """Project the visible page without hydrating set members or external detail."""
+        set_uids = [record.uid for record in records if record.type == "artifact_set"]
+        member_counts = dict.fromkeys(set_uids, 0)
+        if set_uids:
+            counts = session.query(
+                generic_instance_lineage.parent_instance_uid,
+                func.count(func.distinct(generic_instance.uid)),
+            ).select_from(generic_instance_lineage).join(
+                generic_instance,
+                generic_instance_lineage.child_instance_uid == generic_instance.uid,
+            ).filter(
+                generic_instance_lineage.parent_instance_uid.in_(set_uids),
+                generic_instance_lineage.relationship_type == "artifact_set_member",
+                generic_instance_lineage.is_deleted.is_(False),
+                generic_instance.is_deleted.is_(False),
+                visibility_clause(session, generic_instance),
+            ).group_by(generic_instance_lineage.parent_instance_uid).all()
+            member_counts.update(counts)
+        fields = (
+            "euid", "kind", "record_type", "source_kind", "name", "label",
+            "original_filename", "producer_system", "created_at", "modified_at",
+            "status", "dewey_path", "member_count", "audience", "allowed_users",
+            "allowed_domains", "allowed_groups", "expires_at", "owner_email",
+            "last_accessed_at",
+        )
+        items = []
+        for record in records:
+            payload = normalize_instance_payload(record)
+            created_at = payload.get("created_at")
+            if not created_at and record.created_dt is not None:
+                created_at = record.created_dt.isoformat()
+            if not isinstance(created_at, str) or not created_at.strip():
+                raise RuntimeError(f"Record {record.euid} has no recorded creation timestamp")
+            if record.type == "artifact_set":
+                value = {
+                    "euid": record.euid, "kind": "set", "record_type": record.type,
+                    "source_kind": "dewey.artifact_set", "name": record.name,
+                    "label": payload.get("label"), "status": record.bstatus,
+                    "created_at": created_at,
+                    "modified_at": record.modified_dt.isoformat() if record.modified_dt else None,
+                    "dewey_path": f"/records/{record.euid}",
+                    "member_count": member_counts[record.uid],
+                }
+            else:
+                value = self._registry_payload(session, record, details=False)
+                value["created_at"] = created_at
+            items.append({key: value[key] for key in fields if key in value})
+        return items
+
     def share_registry(self, euid: str, data: dict[str, Any], *, idempotency_key: str):
         from dewey_service.settings import get_settings
         allowed = {"name", "purpose", "audience", "allowed_users", "allowed_domains", "expires_at", "lifetime_days"}
@@ -460,6 +510,9 @@ class RegistryServiceMixin:
         from time import perf_counter
         started = perf_counter()
         data = dict(request or {})
+        projection = data.get("projection", "full")
+        if projection not in ("full", "summary"):
+            raise ValueError("Registry projection must be full or summary")
         scopes = data.get("scopes") or ["artifact", "artifact_set"]
         self._validate_property_filters(data.get("property_filters"))
         page = max(1, int(data.get("page") or 1))
@@ -571,6 +624,11 @@ class RegistryServiceMixin:
             total = sum(facets.values())
             order = columns[sort].asc() if direction == "asc" else columns[sort].desc()
             records = query.order_by(order, generic_instance.euid).offset((page - 1) * page_size).limit(page_size).all()
+            if projection == "summary":
+                items = self._registry_summary_items(session, records)
+                return {"items": items, "facets": facets, "total": total, "page": page,
+                        "page_size": page_size, "has_more": page * page_size < total,
+                        "projection": projection, "timing_ms": int((perf_counter() - started) * 1000)}
             items = [self._registry_payload(session, record, details=False) for record in records]
             for item, record in zip(items, records):
                 if record.type == "artifact":
