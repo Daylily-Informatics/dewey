@@ -1,0 +1,121 @@
+{
+  "browser_paint_timing": false,
+  "detail_continuity": {
+    "actual_returned_member_count": 33,
+    "capabilities": {
+      "download": true,
+      "edit": true,
+      "metadata": true,
+      "owner": true,
+      "share": true
+    },
+    "same_persisted_set": true,
+    "visible_member_count": 33
+  },
+  "load_campaign": false,
+  "measure": "single authenticated backend action per route before/after, same OWY principal, network-inclusive elapsed wall time",
+  "routes": [
+    {
+      "after_bytes": 8192,
+      "after_duration_ms": 175.23,
+      "after_request": {
+        "page": 1,
+        "page_size": 25,
+        "projection": "summary",
+        "property_filters": [],
+        "q": "",
+        "scopes": [
+          "artifact",
+          "artifact_set"
+        ],
+        "sort_dir": "desc",
+        "sort_field": "created_at"
+      },
+      "after_server_ms": 35,
+      "at_least_2x_elapsed": true,
+      "before_bytes": 46195,
+      "before_duration_ms": 408.565,
+      "before_request": {
+        "page": 1,
+        "page_size": 25,
+        "property_filters": [],
+        "q": "",
+        "scopes": [
+          "artifact",
+          "artifact_set"
+        ],
+        "sort_dir": "desc",
+        "sort_field": "created_at"
+      },
+      "before_server_ms": 68,
+      "label": "library",
+      "same_row_count": true,
+      "same_total": true,
+      "speedup": 2.3315927637961535
+    },
+    {
+      "after_bytes": 8968,
+      "after_duration_ms": 187.92,
+      "after_request": {
+        "page": 1,
+        "page_size": 25,
+        "projection": "summary",
+        "property_filters": [],
+        "q": "",
+        "scopes": [
+          "artifact_set"
+        ],
+        "sort_dir": "desc",
+        "sort_field": "created_at"
+      },
+      "after_server_ms": 49,
+      "at_least_2x_elapsed": true,
+      "before_bytes": 1357675,
+      "before_duration_ms": 857.658,
+      "before_request": {
+        "page": 1,
+        "page_size": 25,
+        "property_filters": [],
+        "q": "",
+        "scopes": [
+          "artifact_set"
+        ],
+        "sort_dir": "desc",
+        "sort_field": "created_at"
+      },
+      "before_server_ms": 135,
+      "label": "sets",
+      "same_row_count": true,
+      "same_total": true,
+      "speedup": 4.563952745849298
+    }
+  ],
+  "schema": "dewey.gui-latency-comparison/1",
+  "semantic_parity": {
+    "library": {
+      "complete_count_page_facets_equal": true,
+      "every_returned_table_field_matches_full": true,
+      "explicit_summary_projection": true,
+      "full_response_keeps_historical_shape": true,
+      "same_row_ids_and_order": true,
+      "summary_contains_no_members_or_external_details": true,
+      "visible_member_counts_match_full_distinct_members": true
+    },
+    "sets": {
+      "complete_count_page_facets_equal": true,
+      "every_returned_table_field_matches_full": true,
+      "explicit_summary_projection": true,
+      "full_response_keeps_historical_shape": true,
+      "same_row_ids_and_order": true,
+      "summary_contains_no_members_or_external_details": true,
+      "visible_member_counts_match_full_distinct_members": true
+    }
+  },
+  "source_commit": "8d04719a6ad82a6808bf38933b39cadb210b43d0",
+  "source_tag": "10.0.7",
+  "unchanged_detail_control": {
+    "after_ms": 269.12,
+    "before_ms": 262.517,
+    "member_count": 33
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "command_id": "d16a0775-87de-410d-8c90-57aa8a9a9631",
+  "target": "/home/ubuntu/dewey-10.0.7-preparation-20260919T100300Z/selected_cutover.py",
+  "helper_sha256": "eb3665d31ed66748b22ac03c16fce983a8b1c80db6439b87be9214bd0b13734d",
+  "execution_requested": false,
+  "instance_id": "i-07df3a933e4839f52",
+  "profile": "lsmc",
+  "region": "us-west-2"
+}
