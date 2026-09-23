@@ -29,7 +29,7 @@ OLD_IMAGE = REGISTRY + "@sha256:50ef1ba6922be663e7c88839849b4a1649590ae8674c819d
 OLD_COMMIT = "8d04719a6ad82a6808bf38933b39cadb210b43d0"
 SERVICE_SHA = "125765623414b9f26e3527454c2bf6c07f2da83e5722c759a4b117d7c975b17d"
 MANIFEST_ROW_SHA = "0e5c9471dda8682f2bc61928e3c2d898618ccfedb120e5bae14cb09dcd379649"
-TAG = "10.0.9"
+TAG = "10.0.10"
 BRANCH = "codex/dewey-gui-performance-20260919"
 
 
@@ -71,7 +71,7 @@ def containers():
         "started_at": row["State"]["StartedAt"], "restarts": row["RestartCount"],
         "source_commit": row["Config"].get("Labels", {}).get("org.opencontainers.image.revision"),
         "source_tag": row["Config"].get("Labels", {}).get("org.opencontainers.image.version")}
-        for row in values if row["Name"].lstrip("/") != "dewey-performance-settings-1009"}
+        for row in values if row["Name"].lstrip("/") != "dewey-performance-settings-10010"}
 
 
 parser = argparse.ArgumentParser(description=__doc__)
@@ -144,7 +144,7 @@ try:
     initialization_compose = args.receipt_dir / "initialization-compose.yml"
     save(initialization_compose, yaml.safe_dump(updated, sort_keys=False).encode())
     init_command = ["sudo", "docker", "compose", "-p", "dayhoff-day", "-f", str(initialization_compose),
-        "run", "-T", "--no-deps", "--pull", "never", "--name", "dewey-performance-settings-1009",
+        "run", "-T", "--no-deps", "--pull", "never", "--name", "dewey-performance-settings-10010",
         "--entrypoint", "/app/.venv/bin/dewey", "dewey", "db", "initialize-performance-settings",
         "--actor", "codex:dewey-performance-20260923", "--listing-cache-ttl-seconds", "15"]
     initialization = subprocess.run(init_command, capture_output=True, text=True)
@@ -178,7 +178,7 @@ try:
     ):
         staged = args.receipt_dir / ("selected-" + label)
         save(staged, value)
-        temporary = str(target) + ".dewey1009-new"
+        temporary = str(target) + ".dewey10010-new"
         subprocess.run(["sudo", "install", "-m", "600", str(staged), temporary], check=True)
         subprocess.run(["sudo", "mv", temporary, str(target)], check=True)
     receipt["phase"] = "CONFIGURATION_SELECTED"

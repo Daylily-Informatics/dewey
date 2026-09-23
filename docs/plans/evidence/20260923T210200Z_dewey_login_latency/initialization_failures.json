@@ -1,0 +1,52 @@
+{
+  "initialization_failures": [
+    {
+      "builder_receipt": {
+        "path": "/home/ubuntu/dewey-10.0.8-20260923T215039Z/image-receipt.json",
+        "sha256": "e1dd6728dd31c15fb9d86c00981fa97b5078f8c34bc5b962f7163406316a29ec"
+      },
+      "credential_changes": false,
+      "database_operations": [],
+      "error": "Native settings initialization failed; prior Dewey remains running; inspect private initialization logs",
+      "error_type": "RuntimeError",
+      "failed_at": "2026-09-23T21:52:56.809993+00:00",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:e450e571a09548794d7172adb23fcda044064b511a500edd8e905dfcf86e36f3",
+      "instance_id": "i-07df3a933e4839f52",
+      "phase": "FAIL",
+      "previous_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:50ef1ba6922be663e7c88839849b4a1649590ae8674c819dc8862e695055b7ac",
+      "schema": "ursa-owy-kahlo.deployment/v1",
+      "service": "dewey",
+      "service_configuration_preserved": true,
+      "source_branch": "codex/dewey-gui-performance-20260919",
+      "source_commit": "ed74f512e499433d13e948ec2299b4cd30475646",
+      "source_tag": "10.0.8",
+      "source_tag_object": "9c5b5b72d61c20c4b720dbd538a8a442d8b2da0c",
+      "started_at": "2026-09-23T21:52:51.939238+00:00",
+      "tests_run": false
+    },
+    {
+      "builder_receipt": {
+        "path": "/home/ubuntu/dewey-10.0.9-20260923T215517Z/image-receipt.json",
+        "sha256": "04143ebf02228265d59bc9325896b9ecbdeb0111735191330eb4683ce4414999"
+      },
+      "credential_changes": false,
+      "database_operations": [],
+      "error": "Native settings initialization failed; prior Dewey remains running; inspect private initialization logs",
+      "error_type": "RuntimeError",
+      "failed_at": "2026-09-23T21:57:59.922958+00:00",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:eba0107e6cb492f12136d36acdafc8fae42222b9821b31c3398dd2e6b3fd9ed1",
+      "instance_id": "i-07df3a933e4839f52",
+      "phase": "FAIL",
+      "previous_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:50ef1ba6922be663e7c88839849b4a1649590ae8674c819dc8862e695055b7ac",
+      "schema": "ursa-owy-kahlo.deployment/v1",
+      "service": "dewey",
+      "service_configuration_preserved": true,
+      "source_branch": "codex/dewey-gui-performance-20260919",
+      "source_commit": "b6ff75f49931bc06085abcd8a6893776a7ea5e0c",
+      "source_tag": "10.0.9",
+      "source_tag_object": "b4b1a0aa4865745a7afc7f6c54c2e00b8bb461fb",
+      "started_at": "2026-09-23T21:57:54.832871+00:00",
+      "tests_run": false
+    }
+  ]
+}

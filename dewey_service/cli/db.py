@@ -151,7 +151,7 @@ def initialize_performance_settings(
             created = False
             if row is None:
                 row, created = backend.claim_global_instance(session, template_code=POLICY_TEMPLATE,
-                    identity_key="dewey-registry-service-defaults", name="Dewey registry defaults",
+                    identity_key="dewey:registry-service-defaults", name="Dewey registry defaults",
                     json_addl={"policy_kind": "service_defaults",
                         "share_lifetime_days": settings.registry_default_share_lifetime_days,
                         "delivery_lifetime_seconds": settings.share_default_signed_ttl_seconds,
