@@ -210,12 +210,16 @@ def record_clause(session, model, action: str = "metadata"):
     return and_(direct, ~ancestor_denied)
 
 
-def visibility_clause(session, model):
+def visibility_clause(session, model, *, types=None):
     actor = _PRINCIPAL.get()
     if maintenance_mode() or (actor is not None and actor.admin):
         return true()
     if actor is None:
         return false()
+    if types and set(types) <= REGISTRY_TYPES:
+        return record_clause(session, model)
+    if types and not set(types) & {*REGISTRY_TYPES, "share", "external_object", "external_object_relation"}:
+        return true()
     from daylily_tapdb import generic_instance, generic_instance_lineage
     target = aliased(generic_instance)
     edge = aliased(generic_instance_lineage)
@@ -331,7 +335,8 @@ class RegistryPrincipalMiddleware(BaseHTTPMiddleware):
                         return JSONResponse({"detail": "Service credential has no configured registry identity"}, status_code=503)
                     actor = Principal(subject=identity["subject"], roles=tuple(identity["roles"]), internal=True, service=True)
                 elif token.startswith("dewey_user_"):
-                    actor = request.app.state.service.authenticate_registry_token(token)
+                    from starlette.concurrency import run_in_threadpool
+                    actor = await run_in_threadpool(request.app.state.service.authenticate_registry_token, token)
             path = request.url.path
             admin_path = path.startswith(("/tapdb", "/api/dag", "/admin", "/ui/anomalies", "/ui/observability")) or path == "/graph"
             if path.startswith("/tapdb/change-password"):

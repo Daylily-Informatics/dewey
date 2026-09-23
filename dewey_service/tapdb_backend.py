@@ -121,6 +121,12 @@ class TapDBBackend:
         self.templates = TemplateManager()
         self.factory = InstanceFactory(self.templates, domain_code=self.domain_code)
         self.observability = None
+        from sqlalchemy import event
+        from dewey_service.performance import before_query, after_query, query_error
+        if not event.contains(self.connection.engine, "before_cursor_execute", before_query):
+            event.listen(self.connection.engine, "before_cursor_execute", before_query)
+            event.listen(self.connection.engine, "after_cursor_execute", after_query)
+            event.listen(self.connection.engine, "handle_error", query_error)
 
     @contextmanager
     def session_scope(self, commit: bool = False) -> Generator[Session, None, None]:
@@ -277,8 +283,9 @@ class TapDBBackend:
             return None
         query = session.query(generic_instance).filter(
             generic_instance.template_uid == template.uid,
+            generic_instance.type == template.type,
             generic_instance.is_deleted.is_(False),
-            visibility_clause(session, generic_instance),
+            visibility_clause(session, generic_instance, types=(template.type,)),
         )
         if for_update:
             query = query.with_for_update()
@@ -306,8 +313,9 @@ class TapDBBackend:
         template_code: str,
         field: str,
         value: str,
+        for_update: bool = False,
     ) -> Optional[generic_instance]:
-        query = self._template_query(session, template_code=template_code)
+        query = self._template_query(session, template_code=template_code, for_update=for_update)
         if query is None:
             return None
         return query.filter(generic_instance.json_addl[field].as_string() == value).first()

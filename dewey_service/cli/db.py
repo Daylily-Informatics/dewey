@@ -129,6 +129,46 @@ def registry_templates(
         "export_sha256": receipt["content_sha256"], "export_pack": str(receipt_pack)}))
 
 
+def initialize_performance_settings(
+    actor: str = typer.Option(..., help="Explicit operator audit identity"),
+    listing_cache_ttl_seconds: int = typer.Option(..., min=0, max=300),
+) -> None:
+    """Explicitly initialize the required global listing TTL without overwriting existing settings."""
+    import json
+    import os
+    from dewey_service.registry_access import POLICY_TEMPLATE, Principal, principal_context
+    from dewey_service.tapdb_backend import TapDBBackend, normalize_instance_payload
+    from dewey_service.settings import get_settings
+    if not actor.strip() or not Path(os.environ.get("DEWEY_CONFIG", "")).is_absolute():
+        raise typer.BadParameter("An operator audit identity and explicit absolute DEWEY_CONFIG are required")
+    settings = get_settings()
+    backend = TapDBBackend(app_username=actor)
+    with principal_context(Principal(subject=actor, roles=("ADMIN",), service=True), maintenance=True):
+        with backend.session_scope(commit=True) as session:
+            backend.lock_external_key(session, operation="registry.defaults", key="service_defaults")
+            row = backend.find_by_json_field(session, template_code=POLICY_TEMPLATE,
+                field="policy_kind", value="service_defaults", for_update=True)
+            created = False
+            if row is None:
+                row, created = backend.claim_global_instance(session, template_code=POLICY_TEMPLATE,
+                    identity_key="dewey-registry-service-defaults", name="Dewey registry defaults",
+                    json_addl={"policy_kind": "service_defaults",
+                        "share_lifetime_days": settings.registry_default_share_lifetime_days,
+                        "delivery_lifetime_seconds": settings.share_default_signed_ttl_seconds,
+                        "listing_cache_ttl_seconds": listing_cache_ttl_seconds},
+                    command_evidence={"actor": actor, "operation": "registry.defaults.initialize-performance"})
+            data = normalize_instance_payload(row)
+            if "listing_cache_ttl_seconds" not in data:
+                backend.update_instance_json(session, row, {"listing_cache_ttl_seconds": listing_cache_ttl_seconds})
+                status = "initialized"
+            elif data["listing_cache_ttl_seconds"] != listing_cache_ttl_seconds:
+                raise ValueError("Existing TTL differs; use the authenticated Admin settings to change it")
+            else:
+                status = "created" if created else "already_initialized"
+            result = {"status": status, "settings_euid": row.euid, "listing_cache_ttl_seconds": listing_cache_ttl_seconds}
+    ccyo_out.print_text(json.dumps(result))
+
+
 def register(registry: CommandRegistry, spec: CliSpec) -> None:
     """Register verification and lifecycle guidance, with no bootstrap aliases."""
     _ = spec
@@ -136,7 +176,8 @@ def register(registry: CommandRegistry, spec: CliSpec) -> None:
         registry,
         "db",
         "Verify existing Dewey data and review native TapDB lifecycle ownership",
-        [("verify-templates", verify_templates, REQUIRED), ("lifecycle", lifecycle, EXEMPT),
+        [("initialize-performance-settings", initialize_performance_settings, REQUIRED_MUTATING),
+         ("verify-templates", verify_templates, REQUIRED), ("lifecycle", lifecycle, EXEMPT),
          ("registry-conversion", registry_conversion, REQUIRED_MUTATING),
          ("registry-templates", registry_templates, REQUIRED_MUTATING)],
     )

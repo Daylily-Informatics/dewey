@@ -68,6 +68,12 @@ class S3StorageClient:
             config=Config(s3={"use_accelerate_endpoint": False}),
         )
         self._client_error = ClientError
+        # Separate interactive listing client keeps upload/download timeout contracts intact.
+        self._listing_client = session.client("s3", config=Config(
+            s3={"use_accelerate_endpoint": False}, connect_timeout=2, read_timeout=5,
+            retries={"total_max_attempts": 1}))
+        from dewey_service.listing_cache import ListingCache
+        self.listing_cache = ListingCache()
 
     def head_object(
         self,
@@ -87,16 +93,17 @@ class S3StorageClient:
         if str(request_payer or "").strip():
             params["RequestPayer"] = str(request_payer).strip()
         try:
-            response = self._client.head_object(**params)
+            response = self._listing_client.head_object(**params)
         except self._client_error as exc:
             raise self._translate_error(exc, bucket=bucket, key=key) from exc
         return self._to_storage_object(bucket=bucket, key=key, response=response)
 
-    def list_buckets(self, *, continuation_token: str | None = None) -> dict[str, Any]:
+    def list_buckets(self, *, continuation_token: str | None = None, cache_ttl: int, refresh: bool = False) -> dict[str, Any]:
         params: dict[str, Any] = {"MaxBuckets": 100}
         if continuation_token:
             params["ContinuationToken"] = continuation_token
-        response = self._client.list_buckets(**params)
+        response = self.listing_cache.get(("buckets", tuple(sorted(params.items()))), ttl=cache_ttl, refresh=refresh,
+            fetch=lambda: self._listing_client.list_buckets(**params))
         return {"items": [{"name": item["Name"], "region": item.get("BucketRegion"),
                            "created_at": item["CreationDate"].isoformat()} for item in response.get("Buckets", [])],
                 "next_continuation_token": response.get("ContinuationToken")}
@@ -124,8 +131,11 @@ class S3StorageClient:
     def complete_multipart(self, *, bucket: str, key: str, upload_id: str, parts: list[dict], replace_etag: str | None = None):
         self._check(bucket, key, "upload")
         condition = {"IfMatch": replace_etag} if replace_etag else {"IfNoneMatch": "*"}
-        return self._client.complete_multipart_upload(Bucket=bucket, Key=key,
-            UploadId=upload_id, MultipartUpload={"Parts": parts}, **condition)
+        try:
+            return self._client.complete_multipart_upload(Bucket=bucket, Key=key,
+                UploadId=upload_id, MultipartUpload={"Parts": parts}, **condition)
+        finally:
+            self.listing_cache.invalidate()
 
     def abort_multipart(self, *, bucket: str, key: str, upload_id: str):
         self._check(bucket, key, "upload")
@@ -136,7 +146,10 @@ class S3StorageClient:
             self._check(bucket, item["Key"], "delete")
         if not objects or len(objects) > 1000 or any(not o.get("Key") or not o.get("ETag") for o in objects):
             raise ValueError("Deletion requires 1..1000 exact keys with reviewed ETags")
-        return self._client.delete_objects(Bucket=bucket, Delete={"Objects": objects, "Quiet": False})
+        try:
+            return self._client.delete_objects(Bucket=bucket, Delete={"Objects": objects, "Quiet": False})
+        finally:
+            self.listing_cache.invalidate()
 
     def bucket_versioning(self, bucket: str) -> str:
         return self._client.get_bucket_versioning(Bucket=bucket).get("Status", "Unversioned")
@@ -191,6 +204,8 @@ class S3StorageClient:
         limit: int = 200,
         continuation_token: str | None = None,
         request_payer: str | None = None,
+        cache_ttl: int,
+        refresh: bool = False,
     ) -> dict[str, Any]:
         self._check(bucket, prefix, "metadata")
         params: dict[str, Any] = {
@@ -204,7 +219,8 @@ class S3StorageClient:
         if str(request_payer or "").strip():
             params["RequestPayer"] = str(request_payer).strip()
         try:
-            response = self._client.list_objects_v2(**params)
+            response = self.listing_cache.get(("objects", tuple(sorted(params.items()))), ttl=cache_ttl, refresh=refresh,
+                fetch=lambda: self._listing_client.list_objects_v2(**params))
         except self._client_error as exc:
             raise self._translate_error(exc, bucket=bucket, key=prefix) from exc
         prefixes = [
@@ -312,6 +328,7 @@ class S3StorageClient:
             params["ContentType"] = content_type
         try:
             self._client.put_object(**params)
+            self.listing_cache.invalidate()
         except self._client_error as exc:
             raise self._translate_error(exc, bucket=bucket, key=key) from exc
         return self.head_object(bucket=bucket, key=key)

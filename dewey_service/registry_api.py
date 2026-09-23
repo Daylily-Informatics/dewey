@@ -100,6 +100,23 @@ def attach_registry_api(app, *, templates):
         detail = "The object changed or already exists; review the target again" if status == 409 else f"S3 returned {code}; check the selected location and server permissions"
         return JSONResponse({"detail": detail}, status_code=status)
 
+    from sqlalchemy.exc import DBAPIError
+    from botocore.exceptions import ConnectTimeoutError, ReadTimeoutError, EndpointConnectionError
+
+    @app.exception_handler(DBAPIError)
+    async def database_error(request, exc):
+        code = getattr(exc.orig, "pgcode", None) or getattr(exc.orig, "sqlstate", None)
+        timeout = code in {"57014", "55P03"}
+        return JSONResponse({"detail": "Database read deadline exceeded; narrow the query or retry" if timeout
+            else "Dewey database operation failed; inspect service diagnostics"}, status_code=504 if timeout else 503)
+
+    @app.exception_handler(TimeoutError)
+    @app.exception_handler(ConnectTimeoutError)
+    @app.exception_handler(ReadTimeoutError)
+    @app.exception_handler(EndpointConnectionError)
+    async def read_timeout(request, exc):
+        return JSONResponse({"detail": "Storage read did not complete within its deadline; retry explicitly"}, status_code=504)
+
     @app.exception_handler(StorageError)
     async def storage_error(request, exc):
         status = 403 if isinstance(exc, StoragePermissionError) else 404 if isinstance(exc, StorageObjectNotFoundError) else 502
@@ -128,8 +145,20 @@ def attach_registry_api(app, *, templates):
         return JSONResponse(result, status_code=code)
 
     @router.get("/records/{euid}")
-    def resolve(euid: str):
-        return service.resolve_registry(euid)
+    def resolve(euid: str, projection: str = "full"):
+        return service.resolve_registry(euid, projection=projection)
+
+    @router.get("/records/{euid}/metadata")
+    def record_metadata(euid: str):
+        return service.registry_section(euid, "metadata")
+
+    @router.get("/records/{euid}/activity")
+    def record_activity(euid: str, page: int = Query(1, ge=1), limit: int = Query(25, ge=1, le=100)):
+        return service.registry_section(euid, "activity", page=page, limit=limit)
+
+    @router.get("/records/{euid}/members")
+    def record_members(euid: str, page: int = Query(1, ge=1), limit: int = Query(25, ge=1, le=100)):
+        return service.registry_section(euid, "members", page=page, limit=limit)
 
     @router.patch("/records/{euid}")
     def edit(euid: str, data: MetadataUpdate):
@@ -144,8 +173,9 @@ def attach_registry_api(app, *, templates):
         return service.update_registry_permissions(euid, data)
 
     @router.get("/records/{euid}/contents")
-    def contents(euid: str, relative_prefix: str = "", continuation_token: str | None = None):
-        return service.registry_contents(euid, relative_prefix=relative_prefix, continuation_token=continuation_token)
+    def contents(euid: str, relative_prefix: str = "", continuation_token: str | None = None,
+                 limit: int = Query(100, ge=1, le=1000), refresh: bool = False):
+        return service.registry_contents(euid, relative_prefix=relative_prefix, continuation_token=continuation_token, limit=limit, refresh=refresh)
 
     @router.post("/records/{euid}/members")
     def add_member(euid: str, data: dict[str, str] = Body(...), idempotency_key: str = Header(alias="Idempotency-Key")):
@@ -170,6 +200,10 @@ def attach_registry_api(app, *, templates):
     def search(data: dict[str, Any] = Body(default={})):
         return service.search_registry(data)
 
+    @router.post("/registry/search/counts")
+    def search_counts(data: dict[str, Any] = Body(default={})):
+        return service.search_registry(data, counts_only=True)
+
     @router.get("/registry/shares/{euid}")
     def share_detail(euid: str):
         return service.registry_share_detail(euid)
@@ -189,8 +223,8 @@ def attach_registry_api(app, *, templates):
         return service.invite_registry_recipient(euid, data["email"])
 
     @router.get("/storage/buckets", tags=["S3 storage"])
-    def buckets(continuation_token: str | None = None, locations_page: int = Query(default=1, ge=1)):
-        return service.registry_buckets(continuation_token, locations_page=locations_page)
+    def buckets(continuation_token: str | None = None, locations_page: int = Query(default=1, ge=1), refresh: bool = False):
+        return service.registry_buckets(continuation_token, locations_page=locations_page, refresh=refresh)
 
     @router.get("/storage/object", tags=["S3 storage"])
     def object_detail(uri: str):

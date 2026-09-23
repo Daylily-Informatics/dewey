@@ -31,34 +31,43 @@ class RegistryServiceMixin:
         self.backend.create_lineage(session, parent=record, child=receipt, relationship_type="has_storage_operation")
 
     def registry_defaults(self):
-        from dewey_service.settings import get_settings
-        settings = get_settings()
         with self.backend.session_scope(commit=False) as session:
             row = self.backend.find_by_json_field(session, template_code=POLICY_TEMPLATE,
                 field="policy_kind", value="service_defaults")
-            if row is not None:
-                data = normalize_instance_payload(row)
-                return {key: data[key] for key in ("share_lifetime_days", "delivery_lifetime_seconds")}
-        return {"share_lifetime_days": settings.registry_default_share_lifetime_days,
-            "delivery_lifetime_seconds": settings.share_default_signed_ttl_seconds}
+            if row is None:
+                raise HTTPException(503, "Run dewey db initialize-performance-settings with the explicit service configuration")
+            data = normalize_instance_payload(row)
+            keys = ("share_lifetime_days", "delivery_lifetime_seconds", "listing_cache_ttl_seconds")
+            if any(key not in data for key in keys):
+                raise HTTPException(503, "Dewey performance settings have not been explicitly initialized")
+            if type(data["listing_cache_ttl_seconds"]) is not int or not 0 <= data["listing_cache_ttl_seconds"] <= 300:
+                raise HTTPException(503, "Invalid persisted listing cache TTL")
+            return {key: data[key] for key in keys}
 
     def update_registry_defaults(self, changes):
         if not principal().admin:
             raise HTTPException(403, "Admin access required")
-        if not changes or set(changes) - {"share_lifetime_days", "delivery_lifetime_seconds"}:
-            raise ValueError("Only share and delivery lifetimes may be changed")
-        data = {**self.registry_defaults(), **changes}
-        if type(data["share_lifetime_days"]) is not int or not 1 <= data["share_lifetime_days"] <= self.share_max_lifetime_days:
-            raise ValueError("Share lifetime exceeds the configured range")
-        if type(data["delivery_lifetime_seconds"]) is not int or not 1 <= data["delivery_lifetime_seconds"] <= 3600:
-            raise ValueError("Delivery lifetime must be 1..3600 seconds")
+        if not changes or set(changes) - {"share_lifetime_days", "delivery_lifetime_seconds", "listing_cache_ttl_seconds"}:
+            raise ValueError("Only share lifetime, delivery lifetime and listing cache TTL may be changed")
         with self.backend.session_scope(commit=True) as session:
-            row, _ = self.backend.claim_global_instance(session, template_code=POLICY_TEMPLATE,
-                identity_key="dewey-registry-service-defaults", name="Dewey registry defaults",
-                json_addl={"policy_kind": "service_defaults", **data},
-                command_evidence={"actor": principal().subject, "operation": "registry.defaults.update"})
-            self.backend.update_instance_json(session, row, data)
-        return data
+            self.backend.lock_external_key(session, operation="registry.defaults", key="service_defaults")
+            row = self.backend.find_by_json_field(session, template_code=POLICY_TEMPLATE,
+                field="policy_kind", value="service_defaults", for_update=True)
+            if row is None or "listing_cache_ttl_seconds" not in normalize_instance_payload(row):
+                raise HTTPException(503, "Dewey performance settings have not been explicitly initialized")
+            data = {**normalize_instance_payload(row), **changes}
+            if type(data["share_lifetime_days"]) is not int or not 1 <= data["share_lifetime_days"] <= self.share_max_lifetime_days:
+                raise ValueError("Share lifetime exceeds the configured range")
+            if type(data["delivery_lifetime_seconds"]) is not int or not 1 <= data["delivery_lifetime_seconds"] <= 3600:
+                raise ValueError("Delivery lifetime must be 1..3600 seconds")
+            if type(data["listing_cache_ttl_seconds"]) is not int or not 0 <= data["listing_cache_ttl_seconds"] <= 300:
+                raise ValueError("Listing cache TTL must be 0..300 seconds; zero disables caching")
+            self.backend.update_instance_json(session, row, changes)
+            self._registry_event(session, row, "registry.defaults.updated")
+            result = {key: data[key] for key in ("share_lifetime_days", "delivery_lifetime_seconds", "listing_cache_ttl_seconds")}
+        if self.storage is not None:
+            self.storage.listing_cache.invalidate()
+        return result
 
     def register_registry(self, data: dict[str, Any], *, idempotency_key: str):
         """Register one explicit object, prefix, or set; never discover members."""
@@ -150,9 +159,10 @@ class RegistryServiceMixin:
             raise RuntimeError("Required registry templates are missing")
         query = session.query(generic_instance).filter(
             generic_instance.template_uid.in_([t.uid for t in templates]),
+            generic_instance.type.in_(scopes),
             generic_instance.is_deleted.is_(False),
         )
-        return query.filter(generic_instance.bstatus != "archived", visibility_clause(session, generic_instance)) if authorize else query
+        return query.filter(generic_instance.bstatus != "archived", visibility_clause(session, generic_instance, types=scopes)) if authorize else query
 
     def _registry_record(self, session, euid: str, *, action="metadata", lock=False):
         query = self._registry_query(session, authorize=False).filter(generic_instance.euid == euid,
@@ -160,7 +170,6 @@ class RegistryServiceMixin:
         record = (query.with_for_update() if lock else query).first()
         if record is None:
             raise DeweyNotFoundError("Dewey record not found or not visible")
-        require_record(self.backend, session, record, action)
         return record
 
     def _registry_policy(self, session, record):
@@ -169,8 +178,14 @@ class RegistryServiceMixin:
             raise RuntimeError(f"Record {record.euid} requires exactly one initialized registry policy")
         return rows[0]
 
-    def _registry_payload(self, session, record, *, details=True):
-        if record.type == "artifact":
+    def _registry_payload(self, session, record, *, details=True, summary=False):
+        if summary:
+            data = normalize_instance_payload(record)
+            value = {key: data[key] for key in ("storage_kind", "storage_uri", "storage_backend", "key",
+                "size", "content_type", "artifact_type", "producer_system", "created_at", "original_filename", "label") if key in data}
+            kind = "set" if record.type == "artifact_set" else data["storage_kind"]
+            value["created_at"] = data.get("created_at") or record.created_dt.isoformat()
+        elif record.type == "artifact":
             value = self._artifact_response(record)
             kind = value["storage_kind"]
         elif record.type == "artifact_set":
@@ -190,11 +205,10 @@ class RegistryServiceMixin:
             "description": normalize_instance_payload(record).get("description"),
         })
         if details and record.type in {"artifact", "artifact_set"}:
-            capabilities = {}
-            for action in ("metadata", "download", "edit", "share"):
-                capabilities[action] = bool(session.query(generic_instance.uid).filter(
-                    generic_instance.uid == record.uid, record_clause(session, generic_instance, action)
-                ).first())
+            actions = ("metadata", "download", "edit", "share")
+            allowed = session.query(*(record_clause(session, generic_instance, action) for action in actions)).select_from(
+                generic_instance).filter(generic_instance.uid == record.uid).one()
+            capabilities = dict(zip(actions, map(bool, allowed)))
             value["capabilities"] = capabilities
             policy = normalize_instance_payload(self._registry_policy(session, record))
             value["owner"] = policy.get("owner_email") or policy["owner_subject"]
@@ -209,19 +223,51 @@ class RegistryServiceMixin:
                 "share": f"/api/v1/records/{record.euid}/shares",
                 "web": value["dewey_path"],
             }
-            operations = session.query(generic_instance).join(generic_instance_lineage,
-                generic_instance_lineage.child_instance_uid == generic_instance.uid).filter(
-                generic_instance_lineage.parent_instance_uid == record.uid,
-                generic_instance_lineage.relationship_type == "has_storage_operation",
-                generic_instance_lineage.is_deleted.is_(False), generic_instance.is_deleted.is_(False),
-            ).order_by(generic_instance.created_dt.desc()).limit(50).all()
-            value["activity"] = [{"euid": op.euid, **{key: normalize_instance_payload(op).get(key)
-                for key in ("operation", "created_at", "status")}} for op in operations]
+            if not summary:
+                operations = session.query(generic_instance).join(generic_instance_lineage,
+                    generic_instance_lineage.child_instance_uid == generic_instance.uid).filter(
+                    generic_instance_lineage.parent_instance_uid == record.uid,
+                    generic_instance_lineage.relationship_type == "has_storage_operation",
+                    generic_instance_lineage.is_deleted.is_(False), generic_instance.is_deleted.is_(False),
+                ).order_by(generic_instance.created_dt.desc()).limit(50).all()
+                value["activity"] = [{"euid": op.euid, **{key: normalize_instance_payload(op).get(key)
+                    for key in ("operation", "created_at", "status")}} for op in operations]
         return value
 
-    def resolve_registry(self, euid: str):
+    def resolve_registry(self, euid: str, *, projection="full"):
+        if projection not in {"full", "summary"}:
+            raise ValueError("Record projection must be full or summary")
         with self.backend.session_scope(commit=False) as session:
-            return self._registry_payload(session, self._registry_record(session, euid))
+            return self._registry_payload(session, self._registry_record(session, euid), summary=projection == "summary")
+
+    def registry_section(self, euid, section, *, page=1, limit=25):
+        if section not in {"metadata", "activity", "members"}:
+            raise ValueError("Unknown record section")
+        with self.backend.session_scope(commit=False) as session:
+            record = self._registry_record(session, euid)
+            if section == "metadata":
+                data = normalize_instance_payload(record)
+                return {"euid": euid, "metadata": data.get("metadata", {})}
+            relation = "artifact_set_member" if section == "members" else "has_storage_operation"
+            if section == "members" and record.type != "artifact_set":
+                raise ValueError("Only sets have members")
+            query = session.query(generic_instance).join(generic_instance_lineage,
+                generic_instance_lineage.child_instance_uid == generic_instance.uid).filter(
+                generic_instance_lineage.parent_instance_uid == record.uid,
+                generic_instance_lineage.relationship_type == relation,
+                generic_instance_lineage.is_deleted.is_(False), generic_instance.is_deleted.is_(False))
+            if section == "members":
+                query = query.filter(generic_instance.type == "artifact",
+                    record_clause(session, generic_instance))
+            rows = query.distinct().order_by(generic_instance.created_dt.desc(), generic_instance.euid).offset(
+                (page - 1) * limit).limit(limit + 1).all()
+            more = len(rows) > limit
+            if section == "members":
+                items = self._registry_summary_items(session, rows[:limit])
+            else:
+                items = [{"euid": op.euid, **{key: normalize_instance_payload(op).get(key)
+                    for key in ("operation", "created_at", "status")}} for op in rows[:limit]]
+            return {"items": items, "page": page, "has_more": more}
 
     def _registry_summary_items(self, session, records):
         """Project the visible page without hydrating set members or external detail."""
@@ -236,10 +282,11 @@ class RegistryServiceMixin:
                 generic_instance_lineage.child_instance_uid == generic_instance.uid,
             ).filter(
                 generic_instance_lineage.parent_instance_uid.in_(set_uids),
+                generic_instance.type == "artifact",
                 generic_instance_lineage.relationship_type == "artifact_set_member",
                 generic_instance_lineage.is_deleted.is_(False),
                 generic_instance.is_deleted.is_(False),
-                visibility_clause(session, generic_instance),
+                visibility_clause(session, generic_instance, types=("artifact",)),
             ).group_by(generic_instance_lineage.parent_instance_uid).all()
             member_counts.update(counts)
         fields = (
@@ -506,10 +553,13 @@ class RegistryServiceMixin:
             self._registry_event(session, record, "ownership_transferred")
             return {"euid": euid, "owner": email, "changed_by": actor.subject}
 
-    def search_registry(self, request: dict[str, Any] | None):
+    def search_registry(self, request: dict[str, Any] | None, *, counts_only=False):
         from time import perf_counter
         started = perf_counter()
         data = dict(request or {})
+        include_totals = data.get("include_totals", True)
+        if type(include_totals) is not bool:
+            raise ValueError("include_totals must be a boolean")
         projection = data.get("projection", "full")
         if projection not in ("full", "summary"):
             raise ValueError("Registry projection must be full or summary")
@@ -618,16 +668,23 @@ class RegistryServiceMixin:
                     if op == "exists" and value is False:
                         condition = ~condition
                 query = query.filter(condition)
-            facets = {key: 0 for key in ("artifact", "artifact_set", "share")}
-            for kind, count in query.with_entities(generic_instance.type, func.count()).group_by(generic_instance.type).all():
-                facets[kind] = count
-            total = sum(facets.values())
+            facets = total = None
+            if include_totals or counts_only:
+                facets = {key: 0 for key in ("artifact", "artifact_set", "share")}
+                for kind, count in query.with_entities(generic_instance.type, func.count()).group_by(generic_instance.type).all():
+                    facets[kind] = count
+                total = sum(facets.values())
+            if counts_only:
+                return {"total": total, "facets": facets, "timing_ms": int((perf_counter() - started) * 1000)}
             order = columns[sort].asc() if direction == "asc" else columns[sort].desc()
-            records = query.order_by(order, generic_instance.euid).offset((page - 1) * page_size).limit(page_size).all()
+            records = query.order_by(order, generic_instance.euid).offset((page - 1) * page_size).limit(
+                page_size if include_totals else page_size + 1).all()
+            has_more = page * page_size < total if include_totals else len(records) > page_size
+            records = records[:page_size]
             if projection == "summary":
                 items = self._registry_summary_items(session, records)
                 return {"items": items, "facets": facets, "total": total, "page": page,
-                        "page_size": page_size, "has_more": page * page_size < total,
+                        "page_size": page_size, "has_more": has_more,
                         "projection": projection, "timing_ms": int((perf_counter() - started) * 1000)}
             items = [self._registry_payload(session, record, details=False) for record in records]
             for item, record in zip(items, records):
@@ -642,7 +699,7 @@ class RegistryServiceMixin:
                         for key in ("title", "pmid", "doi", "pmcid", "storage_mode", "fulltext_status", "authors", "journal", "year", "abstract_snippet"):
                             item[key] = metadata.get(key)
             return {"items": items, "facets": facets, "total": total, "page": page,
-                    "page_size": page_size, "has_more": page * page_size < total,
+                    "page_size": page_size, "has_more": has_more,
                     "timing_ms": int((perf_counter() - started) * 1000)}
 
     def issue_registry_token(self, *, name: str, lifetime_days: int = 30, role: str | None = None):

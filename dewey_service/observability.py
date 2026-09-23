@@ -649,6 +649,8 @@ def build_endpoint_health_payload(
     payload["page"] = {"total": total, "offset": offset, "limit": limit}
     payload["items"] = items
     payload["projection"] = projection.model_dump()
+    from dewey_service.performance import snapshot
+    payload["performance"] = snapshot()
     return payload
 
 

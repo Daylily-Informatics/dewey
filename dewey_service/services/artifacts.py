@@ -604,10 +604,9 @@ class ArtifactServiceMixin:
         root_uri: str,
         limit: int = 200,
         continuation_token: str | None = None,
+        refresh: bool = False,
     ) -> dict[str, Any]:
-        result = self.registry_browse(root_uri, limit=limit, continuation_token=continuation_token)
-        with self.backend.session_scope(commit=False) as session:
-            result["current_artifact"] = self._artifact_for_storage_uri(session, storage_uri=result["root_uri"])
+        result = self.registry_browse(root_uri, limit=limit, continuation_token=continuation_token, refresh=refresh)
         result["prefixes"] = [{**item, "storage_uri": item["uri"], "prefix": item["key"], "artifact_euid": item["euid"]} for item in result["items"] if item["kind"] == "prefix"]
         result["objects"] = [{**item, "storage_uri": item["uri"], "artifact_euid": item["euid"]} for item in result["items"] if item["kind"] == "object"]
         return result

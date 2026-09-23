@@ -29,6 +29,68 @@ def parse_s3_uri(uri: str, *, prefix: bool = False):
 
 
 class RegistryStorageServiceMixin:
+    def _storage_locations_batch(self, session, locations, *, action="metadata"):
+        """Evaluate each relevant registered ancestor once, preserving the SQL policy contract."""
+        actor = principal()
+        locations = list(dict.fromkeys(locations))
+        if not locations:
+            return {}, {}
+        action_key = "download" if action == "download" else "edit" if action == "upload" else "metadata"
+        key_column = generic_instance.json_addl["key"].astext
+        grouped = {}
+        for bucket, key in locations:
+            grouped.setdefault(bucket, []).append(key)
+        paths = []
+        for bucket, keys in grouped.items():
+            paths.append(and_(generic_instance.json_addl["bucket"].astext == bucket,
+                or_(key_column.in_(keys), and_(
+                    generic_instance.json_addl["storage_kind"].astext == "prefix",
+                    or_(*(func.left(literal(key), func.length(key_column)) == key_column for key in keys))))))
+        query = self._registry_query(session, scopes=("artifact",), authorize=False).filter(
+            generic_instance.json_addl["storage_backend"].astext == "s3", or_(*paths))
+        records = query.with_entities(generic_instance, record_clause(session, generic_instance, action_key)).all()
+        policies = {}
+        if records and not actor.admin:
+            # Policy objects themselves have no independent registry visibility restriction.
+            rows = session.query(generic_instance_lineage.parent_instance_uid, generic_instance).select_from(generic_instance_lineage).join(
+                generic_instance, generic_instance.uid == generic_instance_lineage.child_instance_uid).filter(
+                generic_instance_lineage.parent_instance_uid.in_([r.uid for r, _ in records]),
+                generic_instance_lineage.relationship_type == "registry_policy",
+                generic_instance.type == "registry_policy",
+                generic_instance_lineage.is_deleted.is_(False), generic_instance.is_deleted.is_(False)).all()
+            for parent_uid, policy in rows:
+                policies.setdefault(parent_uid, {})[policy.uid] = policy
+            for record, _ in records:
+                if len(policies.get(record.uid, {})) != 1:
+                    raise RuntimeError(f"Record {record.euid} requires exactly one initialized registry policy")
+        authorized = dict.fromkeys(locations, bool(actor.internal or actor.admin))
+        denied = set()
+        registered = {}
+        for record, allowed in records:
+            data = normalize_instance_payload(record)
+            path = data["key"]
+            policy = {} if actor.admin else normalize_instance_payload(next(iter(policies[record.uid].values())))
+            location = (data["bucket"], path)
+            if allowed and location in authorized and location not in registered:
+                registered[location] = record
+            for bucket, key in locations:
+                if bucket != data["bucket"]:
+                    continue
+                exact = path == key
+                if not exact and not (data["storage_kind"] == "prefix" and key.startswith(path)):
+                    continue
+                if not allowed and (exact or policy.get("explicit_restriction") or record.bstatus == "archived"):
+                    denied.add((bucket, key))
+                authorized[(bucket, key)] = authorized[(bucket, key)] or bool(allowed)
+        for key in denied:
+            authorized[key] = False
+        return authorized, registered
+
+    def _storage_access_batch(self, session, bucket, keys, *, action="metadata"):
+        allowed, registered = self._storage_locations_batch(session, [(bucket, key) for key in keys], action=action)
+        return ({key: value for (_, key), value in allowed.items()},
+                {key: value for (_, key), value in registered.items()})
+
     def require_storage_access(self, bucket: str, key: str, *, action: str, session=None):
         actor = principal()
         if action in {"upload", "delete"}:
@@ -41,39 +103,20 @@ class RegistryStorageServiceMixin:
         if session is None:
             with self.backend.session_scope(commit=False) as opened:
                 return self.require_storage_access(bucket, key, action=action, session=opened)
-        query = self._registry_query(session, scopes=("artifact",), authorize=False).filter(
-            generic_instance.json_addl["storage_backend"].astext == "s3",
-            generic_instance.json_addl["bucket"].astext == bucket,
-            or_(generic_instance.json_addl["key"].astext == key,
-                and_(generic_instance.json_addl["storage_kind"].astext == "prefix",
-                     func.left(literal(key), func.length(generic_instance.json_addl["key"].astext)) == generic_instance.json_addl["key"].astext)),
-        )
-        action_key = "download" if action == "download" else "edit" if action == "upload" else "metadata"
-        permitted = actor.internal
-        for record, allowed in query.with_entities(generic_instance, record_clause(session, generic_instance, action_key)).all():
-            data = normalize_instance_payload(record)
-            policy = normalize_instance_payload(self._registry_policy(session, record))
-            exact = data["key"] == key
-            if not allowed and (exact or policy.get("explicit_restriction") or record.bstatus == "archived"):
-                raise HTTPException(403, "This S3 path is restricted in Dewey")
-            permitted = permitted or bool(allowed)
-        if not permitted:
-            raise HTTPException(403, "This S3 location has not been shared with you")
+        authorized, _ = self._storage_access_batch(session, bucket, [key], action=action)
+        if not authorized[key]:
+            raise HTTPException(403, "This S3 path is restricted or has not been shared with you")
 
-    def registry_buckets(self, continuation_token=None, locations_page=1):
+    def registry_buckets(self, continuation_token=None, locations_page=1, refresh=False):
         actor = principal()
         owned = {"items": [], "next_continuation_token": None}
         if actor.internal or actor.admin:
-            owned = self._require_storage().list_buckets(continuation_token=continuation_token)
-            visible_buckets = []
-            for bucket in owned["items"]:
-                try:
-                    self.require_storage_access(bucket["name"], "", action="metadata")
-                    visible_buckets.append(bucket)
-                except HTTPException as exc:
-                    if exc.status_code != 403:
-                        raise
-            owned["items"] = visible_buckets
+            owned = self._require_storage().list_buckets(continuation_token=continuation_token,
+                cache_ttl=self.registry_defaults()["listing_cache_ttl_seconds"], refresh=refresh)
+            if not actor.admin:
+                with self.backend.session_scope(commit=False) as session:
+                    allowed, _ = self._storage_locations_batch(session, [(b["name"], "") for b in owned["items"]])
+                owned["items"] = [b for b in owned["items"] if allowed[(b["name"], "")]]
         with self.backend.session_scope(commit=False) as session:
             query = self._registry_query(session, scopes=("artifact",)).filter(
                 generic_instance.json_addl["storage_backend"].astext == "s3",
@@ -89,47 +132,38 @@ class RegistryStorageServiceMixin:
         return {**owned, "registered_locations": locations, "credential_mode": "service",
             "next_locations_page": page + 1 if more else None}
 
-    def registry_browse(self, root_uri: str, *, limit=100, continuation_token=None):
+    def registry_browse(self, root_uri: str, *, limit=100, continuation_token=None, refresh=False):
         bucket, prefix, uri = parse_s3_uri(root_uri, prefix=True)
-        self.require_storage_access(bucket, prefix, action="metadata")
-        result = self._require_storage().browse_prefix(bucket=bucket, prefix=prefix, limit=limit, continuation_token=continuation_token)
-        rows = []
-        with self.backend.session_scope(commit=False) as session:
-            for item in result["prefixes"]:
-                try:
-                    self.require_storage_access(bucket, item.prefix, action="metadata", session=session)
-                except HTTPException as exc:
-                    if exc.status_code == 403: continue
-                    raise
-                location = f"s3://{bucket}/{item.prefix}"
-                registered = self._artifact_for_storage_uri(session, storage_uri=location)
-                rows.append({"kind": "prefix", "name": item.prefix[len(prefix):], "key": item.prefix,
-                    "uri": location, "euid": registered["artifact_euid"] if registered else None})
-            for item in result["objects"]:
-                try:
-                    self.require_storage_access(bucket, item.key, action="metadata", session=session)
-                except HTTPException as exc:
-                    if exc.status_code == 403: continue
-                    raise
-                location = f"s3://{bucket}/{item.key}"
-                registered = self._artifact_for_storage_uri(session, storage_uri=location)
-                rows.append({"kind": "object", "name": item.key[len(prefix):], "key": item.key,
-                    "size": item.size, "etag": item.etag, "uri": location,
-                    "euid": registered["artifact_euid"] if registered else None})
-        crumbs = [{"label": bucket, "uri": f"s3://{bucket}/"}]
+        result = self._require_storage().browse_prefix(bucket=bucket, prefix=prefix, limit=limit,
+            continuation_token=continuation_token, refresh=refresh,
+            cache_ttl=self.registry_defaults()["listing_cache_ttl_seconds"])
+        crumbs = [{"label": bucket, "uri": f"s3://{bucket}/", "key": ""}]
         for index, character in enumerate(prefix):
             if character == "/":
                 part = prefix[:index + 1]
-                crumbs.append({"label": part[:-1].rpartition("/")[2] or "/", "uri": f"s3://{bucket}/{part}"})
-        visible_crumbs = []
-        for crumb in crumbs:
-            try:
-                _, path, _ = parse_s3_uri(crumb["uri"])
-                self.require_storage_access(bucket, path, action="metadata")
-                visible_crumbs.append(crumb)
-            except HTTPException as exc:
-                if exc.status_code != 403: raise
+                crumbs.append({"label": part[:-1].rpartition("/")[2] or "/", "uri": f"s3://{bucket}/{part}", "key": part})
+        entries = [("prefix", item.prefix, item) for item in result["prefixes"]]
+        entries += [("object", item.key, item) for item in result["objects"]]
+        keys = [prefix, *(key for _, key, _ in entries), *(c["key"] for c in crumbs)]
+        with self.backend.session_scope(commit=False) as session:
+            authorized, registered = self._storage_access_batch(session, bucket, keys)
+            if not authorized[prefix]:
+                raise HTTPException(403, "This S3 path is restricted or has not been shared with you")
+            rows = []
+            for kind, key, item in entries:
+                if not authorized[key]:
+                    continue
+                registration = registered.get(key)
+                row = {"kind": kind, "name": key[len(prefix):], "key": key,
+                       "uri": f"s3://{bucket}/{key}", "euid": registration.euid if registration is not None else None}
+                if kind == "object":
+                    row.update(size=item.size, etag=item.etag)
+                rows.append(row)
+            current = registered.get(prefix)
+            current_artifact = self._artifact_response(current) if current is not None else None
+        visible_crumbs = [{"label": c["label"], "uri": c["uri"]} for c in crumbs if authorized[c["key"]]]
         return {"root_uri": uri, "bucket": bucket, "prefix": prefix, "items": rows,
+                "current_artifact": current_artifact,
                 "breadcrumbs": visible_crumbs, "parent_uri": visible_crumbs[-2]["uri"] if len(visible_crumbs) > 1 else None,
                 "next_continuation_token": result["next_continuation_token"], "is_truncated": result["is_truncated"]}
 
@@ -141,15 +175,15 @@ class RegistryStorageServiceMixin:
             result["registered_artifact"] = self._artifact_for_storage_uri(session, storage_uri=uri)
         return {**result, "uri": uri}
 
-    def registry_contents(self, euid: str, *, relative_prefix="", continuation_token=None):
-        value = self.resolve_registry(euid)
+    def registry_contents(self, euid: str, *, relative_prefix="", continuation_token=None, limit=100, refresh=False):
+        value = self.resolve_registry(euid, projection="summary")
         if value["kind"] == "set":
-            return {"euid": euid, "kind": "set", "items": value["members"]}
+            return {"euid": euid, "kind": "set", "items": self.resolve_registry(euid)["members"]}
         if value["kind"] != "prefix":
             raise ValueError("This EUID is an object; use its access action")
         # S3 keys are literal; never normalize away repeated separators or spaces.
         root = value["storage_uri"]
-        result = self.registry_browse(root + relative_prefix, continuation_token=continuation_token)
+        result = self.registry_browse(root + relative_prefix, continuation_token=continuation_token, limit=limit, refresh=refresh)
         return {**result, "euid": euid}
 
     def registry_download(self, *, euid: str | None = None, uri: str | None = None, relative_key="", version_id=None, ttl_seconds=None):

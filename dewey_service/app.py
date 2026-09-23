@@ -1567,7 +1567,7 @@ def create_app(
         )
 
     @app.get("/readyz")
-    async def readyz(request: Request) -> JSONResponse:
+    def readyz(request: Request) -> JSONResponse:
         probe = probe_database(service)
         app.state.observability.record_db_probe(
             status=str(probe["status"]),
@@ -1632,7 +1632,7 @@ def create_app(
         )
 
     @app.get("/db_health")
-    async def db_health(
+    def db_health(
         request: Request,
         _auth: dict[str, Any] = Depends(observability_auth_dep),
     ) -> dict[str, Any]:
@@ -3408,10 +3408,11 @@ def create_app(
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.get("/api/v1/storage/browse")
-    async def browse_storage_prefix(
+    def browse_storage_prefix(
         root_uri: str = Query(...),
         limit: int = Query(default=200, ge=1, le=1000),
         continuation_token: str | None = Query(default=None),
+        refresh: bool = Query(default=False),
         _auth: dict[str, Any] = Depends(session_or_api_auth_dep),
     ) -> dict[str, Any]:
         _ = _auth
@@ -3420,6 +3421,7 @@ def create_app(
                 root_uri=root_uri,
                 limit=limit,
                 continuation_token=continuation_token,
+                refresh=refresh,
             )
         except DeweyNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -4171,4 +4173,6 @@ def create_app(
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
+    from dewey_service.performance import PerformanceMiddleware
+    app.add_middleware(PerformanceMiddleware)
     return app
