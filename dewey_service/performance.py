@@ -11,10 +11,21 @@ from fastapi import HTTPException
 
 _current = ContextVar("dewey_performance", default=None)
 _lock = Lock()
+_instrument_lock = Lock()
 _active = {}
 _recent = deque(maxlen=200)
 _started = 0
 _completed = 0
+
+
+def instrument_engine(engine):
+    """Use the public Session bind; TapDB's runtime wrapper is not an Engine."""
+    from sqlalchemy import event
+    with _instrument_lock:
+        if not event.contains(engine, "before_cursor_execute", before_query):
+            event.listen(engine, "before_cursor_execute", before_query)
+            event.listen(engine, "after_cursor_execute", after_query)
+            event.listen(engine, "handle_error", query_error)
 
 
 def remaining_seconds():

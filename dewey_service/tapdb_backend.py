@@ -121,12 +121,6 @@ class TapDBBackend:
         self.templates = TemplateManager()
         self.factory = InstanceFactory(self.templates, domain_code=self.domain_code)
         self.observability = None
-        from sqlalchemy import event
-        from dewey_service.performance import before_query, after_query, query_error
-        if not event.contains(self.connection.engine, "before_cursor_execute", before_query):
-            event.listen(self.connection.engine, "before_cursor_execute", before_query)
-            event.listen(self.connection.engine, "after_cursor_execute", after_query)
-            event.listen(self.connection.engine, "handle_error", query_error)
 
     @contextmanager
     def session_scope(self, commit: bool = False) -> Generator[Session, None, None]:
@@ -134,6 +128,8 @@ class TapDBBackend:
         success = False
         try:
             with self.connection.session_scope(commit=commit) as session:
+                from dewey_service.performance import instrument_engine
+                instrument_engine(session.get_bind())
                 yield session
                 success = True
         finally:
