@@ -1,0 +1,830 @@
+{
+  "observed_at": "2026-09-23T21:07:25.692982+00:00",
+  "scope": "Existing logs only; no requests replayed; no data or service mutation.",
+  "method": "Match Apache request-start timestamp to application response-header timestamp by method, exact original URI and status. URI values and client addresses are never emitted.",
+  "limitations": "Apache starts have one-second precision. Repeated identical request pairing can be ambiguous. No identity-to-client or role-to-client assertion is made.",
+  "container": {
+    "name": "dayhoff-day-dewey-1",
+    "id": "fe6b85a3031dfb31cc16d8dc0863cd9f80995703c053771323fc52e8b40b417d",
+    "image": "sha256:50ef1ba6922be663e7c88839849b4a1649590ae8674c819dc8862e695055b7ac",
+    "started_at": "2026-09-19T10:05:25.617193635Z",
+    "restart_count": 0,
+    "oom_killed": false
+  },
+  "requests": [
+    {
+      "start_utc": "2026-09-23T20:47:08+00:00",
+      "app_headers_utc": "2026-09-23T20:47:08.806675+00:00",
+      "method": "GET",
+      "route": "/",
+      "status": 303,
+      "response_wire_bytes": 4444,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.807
+    },
+    {
+      "start_utc": "2026-09-23T20:47:08+00:00",
+      "app_headers_utc": "2026-09-23T20:47:08.914796+00:00",
+      "method": "GET",
+      "route": "/login",
+      "status": 200,
+      "response_wire_bytes": 1572,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.915
+    },
+    {
+      "start_utc": "2026-09-23T20:47:09+00:00",
+      "app_headers_utc": "2026-09-23T20:47:09.174960+00:00",
+      "method": "GET",
+      "route": "/api/v1/me/preferences",
+      "status": 401,
+      "response_wire_bytes": 414,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.175
+    },
+    {
+      "start_utc": "2026-09-23T20:47:10+00:00",
+      "app_headers_utc": "2026-09-23T20:47:10.744090+00:00",
+      "method": "GET",
+      "route": "/auth/login",
+      "status": 303,
+      "response_wire_bytes": 792,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.744
+    },
+    {
+      "start_utc": "2026-09-23T20:47:15+00:00",
+      "app_headers_utc": "2026-09-23T20:47:15.448763+00:00",
+      "method": "GET",
+      "route": "/auth/lsmc/callback",
+      "status": 303,
+      "response_wire_bytes": 3304,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.449
+    },
+    {
+      "start_utc": "2026-09-23T20:47:15+00:00",
+      "app_headers_utc": "2026-09-23T20:47:15.526377+00:00",
+      "method": "GET",
+      "route": "/",
+      "status": 303,
+      "response_wire_bytes": 344,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.526
+    },
+    {
+      "start_utc": "2026-09-23T20:47:15+00:00",
+      "app_headers_utc": "2026-09-23T20:47:15.619577+00:00",
+      "method": "GET",
+      "route": "/ui",
+      "status": 200,
+      "response_wire_bytes": 1335,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.62
+    },
+    {
+      "start_utc": "2026-09-23T20:47:15+00:00",
+      "app_headers_utc": "2026-09-23T20:47:16.034426+00:00",
+      "method": "POST",
+      "route": "/api/v1/registry/search",
+      "status": 200,
+      "response_wire_bytes": 8652,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 1.034
+    },
+    {
+      "start_utc": "2026-09-23T20:47:23+00:00",
+      "app_headers_utc": "2026-09-23T20:47:24.015273+00:00",
+      "method": "POST",
+      "route": "/api/v1/registry/search",
+      "status": 200,
+      "response_wire_bytes": 9791,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 1.015
+    },
+    {
+      "start_utc": "2026-09-23T20:47:33+00:00",
+      "app_headers_utc": "2026-09-23T20:47:33.781374+00:00",
+      "method": "GET",
+      "route": "/records/:id",
+      "status": 200,
+      "response_wire_bytes": 1669,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.781
+    },
+    {
+      "start_utc": "2026-09-23T20:47:34+00:00",
+      "app_headers_utc": "2026-09-23T20:47:34.059418+00:00",
+      "method": "GET",
+      "route": "/api/v1/records/:id",
+      "status": 200,
+      "response_wire_bytes": 2837,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.059
+    },
+    {
+      "start_utc": "2026-09-23T20:47:34+00:00",
+      "app_headers_utc": "2026-09-23T20:47:34.304758+00:00",
+      "method": "GET",
+      "route": "/api/v1/records/:id/contents",
+      "status": 200,
+      "response_wire_bytes": 1653,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.305
+    },
+    {
+      "start_utc": "2026-09-23T20:47:43+00:00",
+      "app_headers_utc": "2026-09-23T20:47:43.750425+00:00",
+      "method": "GET",
+      "route": "/storage",
+      "status": 200,
+      "response_wire_bytes": 1669,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.75
+    },
+    {
+      "start_utc": "2026-09-23T20:47:43+00:00",
+      "app_headers_utc": "2026-09-23T20:47:44.140294+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/browse",
+      "status": 200,
+      "response_wire_bytes": 3821,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 1.14
+    },
+    {
+      "start_utc": "2026-09-23T20:48:13+00:00",
+      "app_headers_utc": "2026-09-23T20:48:13.479947+00:00",
+      "method": "GET",
+      "route": "/storage",
+      "status": 200,
+      "response_wire_bytes": 1668,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.48
+    },
+    {
+      "start_utc": "2026-09-23T20:48:13+00:00",
+      "app_headers_utc": "2026-09-23T20:48:14.512468+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/browse",
+      "status": 200,
+      "response_wire_bytes": 39226,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 1.512
+    },
+    {
+      "start_utc": "2026-09-23T20:48:52+00:00",
+      "app_headers_utc": "2026-09-23T20:48:52.949354+00:00",
+      "method": "GET",
+      "route": "/storage",
+      "status": 200,
+      "response_wire_bytes": 1669,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.949
+    },
+    {
+      "start_utc": "2026-09-23T20:48:53+00:00",
+      "app_headers_utc": "2026-09-23T20:48:53.319073+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/buckets",
+      "status": 200,
+      "response_wire_bytes": 7181,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.319
+    },
+    {
+      "start_utc": "2026-09-23T20:49:03+00:00",
+      "app_headers_utc": "2026-09-23T20:49:03.122808+00:00",
+      "method": "GET",
+      "route": "/ui",
+      "status": 200,
+      "response_wire_bytes": 1658,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.123
+    },
+    {
+      "start_utc": "2026-09-23T20:49:03+00:00",
+      "app_headers_utc": "2026-09-23T20:49:03.522355+00:00",
+      "method": "POST",
+      "route": "/api/v1/registry/search",
+      "status": 200,
+      "response_wire_bytes": 8652,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.522
+    },
+    {
+      "start_utc": "2026-09-23T20:49:11+00:00",
+      "app_headers_utc": "2026-09-23T20:49:11.983843+00:00",
+      "method": "POST",
+      "route": "/api/v1/registry/search",
+      "status": 200,
+      "response_wire_bytes": 959,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.984
+    },
+    {
+      "start_utc": "2026-09-23T20:49:21+00:00",
+      "app_headers_utc": "2026-09-23T20:49:21.993880+00:00",
+      "method": "POST",
+      "route": "/api/v1/registry/search",
+      "status": 200,
+      "response_wire_bytes": 959,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.994
+    },
+    {
+      "start_utc": "2026-09-23T20:49:31+00:00",
+      "app_headers_utc": "2026-09-23T20:49:31.102361+00:00",
+      "method": "GET",
+      "route": "/storage",
+      "status": 303,
+      "response_wire_bytes": 4566,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 0.102
+    },
+    {
+      "start_utc": "2026-09-23T20:49:31+00:00",
+      "app_headers_utc": "2026-09-23T20:49:31.145660+00:00",
+      "method": "GET",
+      "route": "/login",
+      "status": 200,
+      "response_wire_bytes": 1649,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 0.146
+    },
+    {
+      "start_utc": "2026-09-23T20:49:31+00:00",
+      "app_headers_utc": "2026-09-23T20:49:31.357063+00:00",
+      "method": "GET",
+      "route": "/api/v1/me/preferences",
+      "status": 401,
+      "response_wire_bytes": 414,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 0.357
+    },
+    {
+      "start_utc": "2026-09-23T20:49:37+00:00",
+      "app_headers_utc": "2026-09-23T20:49:38.109613+00:00",
+      "method": "POST",
+      "route": "/api/v1/registry/search",
+      "status": 200,
+      "response_wire_bytes": 8986,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 1.11
+    },
+    {
+      "start_utc": "2026-09-23T20:49:42+00:00",
+      "app_headers_utc": "2026-09-23T20:49:42.875188+00:00",
+      "method": "GET",
+      "route": "/auth/login",
+      "status": 303,
+      "response_wire_bytes": 1374,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 0.875
+    },
+    {
+      "start_utc": "2026-09-23T20:49:45+00:00",
+      "app_headers_utc": "2026-09-23T20:49:45.534025+00:00",
+      "method": "GET",
+      "route": "/records/:id",
+      "status": 200,
+      "response_wire_bytes": 1671,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.534
+    },
+    {
+      "start_utc": "2026-09-23T20:49:45+00:00",
+      "app_headers_utc": "2026-09-23T20:49:45.864136+00:00",
+      "method": "GET",
+      "route": "/api/v1/records/:id",
+      "status": 200,
+      "response_wire_bytes": 4154,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.864
+    },
+    {
+      "start_utc": "2026-09-23T20:49:47+00:00",
+      "app_headers_utc": "2026-09-23T20:49:47.136928+00:00",
+      "method": "GET",
+      "route": "/auth/lsmc/callback",
+      "status": 303,
+      "response_wire_bytes": 2706,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 0.137
+    },
+    {
+      "start_utc": "2026-09-23T20:49:47+00:00",
+      "app_headers_utc": "2026-09-23T20:49:47.229005+00:00",
+      "method": "GET",
+      "route": "/storage",
+      "status": 200,
+      "response_wire_bytes": 1340,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 0.229
+    },
+    {
+      "start_utc": "2026-09-23T20:49:47+00:00",
+      "app_headers_utc": "2026-09-23T20:49:54.533765+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/browse",
+      "status": 200,
+      "response_wire_bytes": 5464,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 7.534
+    },
+    {
+      "start_utc": "2026-09-23T20:49:53+00:00",
+      "app_headers_utc": "2026-09-23T20:49:54.537092+00:00",
+      "method": "GET",
+      "route": "/storage",
+      "status": 200,
+      "response_wire_bytes": 1668,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 1.537
+    },
+    {
+      "start_utc": "2026-09-23T20:49:54+00:00",
+      "app_headers_utc": "2026-09-23T20:49:55.184671+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/browse",
+      "status": 200,
+      "response_wire_bytes": 14882,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 1.185
+    },
+    {
+      "start_utc": "2026-09-23T20:49:57+00:00",
+      "app_headers_utc": "2026-09-23T20:49:57.184207+00:00",
+      "method": "GET",
+      "route": "/storage",
+      "status": 200,
+      "response_wire_bytes": 1288,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 0.184
+    },
+    {
+      "start_utc": "2026-09-23T20:49:57+00:00",
+      "app_headers_utc": "2026-09-23T20:49:59.820826+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/browse",
+      "status": 200,
+      "response_wire_bytes": 1988,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 2.821
+    },
+    {
+      "start_utc": "2026-09-23T20:50:03+00:00",
+      "app_headers_utc": "2026-09-23T20:50:03.488284+00:00",
+      "method": "GET",
+      "route": "/storage",
+      "status": 200,
+      "response_wire_bytes": 1289,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 0.488
+    },
+    {
+      "start_utc": "2026-09-23T20:50:03+00:00",
+      "app_headers_utc": "2026-09-23T20:50:06.685935+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/browse",
+      "status": 200,
+      "response_wire_bytes": 1966,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 3.686
+    },
+    {
+      "start_utc": "2026-09-23T20:50:09+00:00",
+      "app_headers_utc": "2026-09-23T20:50:09.452198+00:00",
+      "method": "GET",
+      "route": "/storage",
+      "status": 200,
+      "response_wire_bytes": 1339,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 0.452
+    },
+    {
+      "start_utc": "2026-09-23T20:50:09+00:00",
+      "app_headers_utc": "2026-09-23T20:50:12.508704+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/browse",
+      "status": 200,
+      "response_wire_bytes": 2609,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 3.509
+    },
+    {
+      "start_utc": "2026-09-23T20:50:28+00:00",
+      "app_headers_utc": "2026-09-23T20:50:28.636849+00:00",
+      "method": "GET",
+      "route": "/storage",
+      "status": 200,
+      "response_wire_bytes": 1665,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 0.637
+    },
+    {
+      "start_utc": "2026-09-23T20:50:28+00:00",
+      "app_headers_utc": "2026-09-23T20:50:33.072303+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/browse",
+      "status": 200,
+      "response_wire_bytes": 5280,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 5.072
+    },
+    {
+      "start_utc": "2026-09-23T20:50:43+00:00",
+      "app_headers_utc": "2026-09-23T20:50:43.442639+00:00",
+      "method": "GET",
+      "route": "/storage",
+      "status": 200,
+      "response_wire_bytes": 1662,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 0.443
+    },
+    {
+      "start_utc": "2026-09-23T20:50:43+00:00",
+      "app_headers_utc": "2026-09-23T20:50:55.469094+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/browse",
+      "status": 200,
+      "response_wire_bytes": 19849,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 12.469
+    },
+    {
+      "start_utc": "2026-09-23T20:51:15+00:00",
+      "app_headers_utc": "2026-09-23T20:51:15.996411+00:00",
+      "method": "GET",
+      "route": "/storage",
+      "status": 200,
+      "response_wire_bytes": 1662,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 0.996
+    },
+    {
+      "start_utc": "2026-09-23T20:51:16+00:00",
+      "app_headers_utc": "2026-09-23T20:52:03.037398+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/browse",
+      "status": 200,
+      "response_wire_bytes": 83127,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 47.037
+    },
+    {
+      "start_utc": "2026-09-23T20:51:31+00:00",
+      "app_headers_utc": "2026-09-23T20:52:04.042097+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/object",
+      "status": 200,
+      "response_wire_bytes": 1587,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 33.042
+    },
+    {
+      "start_utc": "2026-09-23T20:51:56+00:00",
+      "app_headers_utc": "2026-09-23T20:52:04.453359+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/object",
+      "status": 200,
+      "response_wire_bytes": 1587,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 8.453
+    },
+    {
+      "start_utc": "2026-09-23T20:52:04+00:00",
+      "app_headers_utc": "2026-09-23T20:52:04.785279+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/object",
+      "status": 200,
+      "response_wire_bytes": 1263,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 0.785
+    },
+    {
+      "start_utc": "2026-09-23T20:52:05+00:00",
+      "app_headers_utc": "2026-09-23T20:52:05.417201+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/object",
+      "status": 200,
+      "response_wire_bytes": 1556,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.417
+    },
+    {
+      "start_utc": "2026-09-23T20:52:04+00:00",
+      "app_headers_utc": "2026-09-23T20:52:05.644279+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/object",
+      "status": 200,
+      "response_wire_bytes": 1263,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 1.644
+    },
+    {
+      "start_utc": "2026-09-23T20:52:05+00:00",
+      "app_headers_utc": "2026-09-23T20:52:06.869801+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/object",
+      "status": 200,
+      "response_wire_bytes": 1263,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 1.87
+    },
+    {
+      "start_utc": "2026-09-23T20:52:06+00:00",
+      "app_headers_utc": "2026-09-23T20:52:07.875971+00:00",
+      "method": "POST",
+      "route": "/api/v1/storage/access",
+      "status": 200,
+      "response_wire_bytes": 2463,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 1.876
+    },
+    {
+      "start_utc": "2026-09-23T20:54:00+00:00",
+      "app_headers_utc": "2026-09-23T20:54:00.123232+00:00",
+      "method": "GET",
+      "route": "/add",
+      "status": 200,
+      "response_wire_bytes": 1648,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 0.123
+    },
+    {
+      "start_utc": "2026-09-23T20:54:08+00:00",
+      "app_headers_utc": "2026-09-23T20:54:08.844265+00:00",
+      "method": "GET",
+      "route": "/storage",
+      "status": 200,
+      "response_wire_bytes": 1663,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 0.844
+    },
+    {
+      "start_utc": "2026-09-23T20:54:08+00:00",
+      "app_headers_utc": "2026-09-23T20:54:19.627526+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/browse",
+      "status": 200,
+      "response_wire_bytes": 19871,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 11.628
+    },
+    {
+      "start_utc": "2026-09-23T20:54:24+00:00",
+      "app_headers_utc": "2026-09-23T20:54:25.169371+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/object",
+      "status": 200,
+      "response_wire_bytes": 1263,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 1.169
+    },
+    {
+      "start_utc": "2026-09-23T20:54:32+00:00",
+      "app_headers_utc": "2026-09-23T20:54:32.029061+00:00",
+      "method": "GET",
+      "route": "/add",
+      "status": 200,
+      "response_wire_bytes": 1646,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 0.029
+    },
+    {
+      "start_utc": "2026-09-23T20:54:35+00:00",
+      "app_headers_utc": "2026-09-23T20:54:35.102255+00:00",
+      "method": "GET",
+      "route": "/storage",
+      "status": 200,
+      "response_wire_bytes": 1340,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 0.102
+    },
+    {
+      "start_utc": "2026-09-23T20:54:35+00:00",
+      "app_headers_utc": "2026-09-23T20:54:46.187269+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/browse",
+      "status": 200,
+      "response_wire_bytes": 19871,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 11.187
+    },
+    {
+      "start_utc": "2026-09-23T20:54:50+00:00",
+      "app_headers_utc": "2026-09-23T20:54:51.181602+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/object",
+      "status": 200,
+      "response_wire_bytes": 1263,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 1.182
+    },
+    {
+      "start_utc": "2026-09-23T20:54:54+00:00",
+      "app_headers_utc": "2026-09-23T20:54:54.867020+00:00",
+      "method": "GET",
+      "route": "/ui",
+      "status": 200,
+      "response_wire_bytes": 1330,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 0.867
+    },
+    {
+      "start_utc": "2026-09-23T20:55:51+00:00",
+      "app_headers_utc": "2026-09-23T20:55:51.494871+00:00",
+      "method": "GET",
+      "route": "/ui",
+      "status": 200,
+      "response_wire_bytes": 1655,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 0.495
+    },
+    {
+      "start_utc": "2026-09-23T20:55:55+00:00",
+      "app_headers_utc": "2026-09-23T20:55:55.475730+00:00",
+      "method": "GET",
+      "route": "/ui",
+      "status": 200,
+      "response_wire_bytes": 1659,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.476
+    },
+    {
+      "start_utc": "2026-09-23T20:55:55+00:00",
+      "app_headers_utc": "2026-09-23T20:55:56.024801+00:00",
+      "method": "POST",
+      "route": "/api/v1/registry/search",
+      "status": 200,
+      "response_wire_bytes": 8653,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 1.025
+    },
+    {
+      "start_utc": "2026-09-23T20:56:11+00:00",
+      "app_headers_utc": "2026-09-23T20:56:11.036113+00:00",
+      "method": "GET",
+      "route": "/storage",
+      "status": 200,
+      "response_wire_bytes": 1663,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 0.036
+    },
+    {
+      "start_utc": "2026-09-23T20:56:11+00:00",
+      "app_headers_utc": "2026-09-23T20:56:25.153060+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/buckets",
+      "status": 200,
+      "response_wire_bytes": 7181,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 14.153
+    },
+    {
+      "start_utc": "2026-09-23T20:56:34+00:00",
+      "app_headers_utc": "2026-09-23T20:56:34.041894+00:00",
+      "method": "GET",
+      "route": "/storage",
+      "status": 200,
+      "response_wire_bytes": 1662,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 0.042
+    },
+    {
+      "start_utc": "2026-09-23T20:56:34+00:00",
+      "app_headers_utc": "2026-09-23T20:57:49.640480+00:00",
+      "method": "GET",
+      "route": "/api/v1/storage/browse",
+      "status": 200,
+      "response_wire_bytes": 32190,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": 75.64
+    },
+    {
+      "start_utc": "2026-09-23T20:56:58+00:00",
+      "app_headers_utc": "2026-09-23T20:57:49.644439+00:00",
+      "method": "GET",
+      "route": "/",
+      "status": 303,
+      "response_wire_bytes": 668,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 51.644
+    },
+    {
+      "start_utc": "2026-09-23T20:56:53+00:00",
+      "app_headers_utc": "2026-09-23T20:57:49.645020+00:00",
+      "method": "GET",
+      "route": "/ui",
+      "status": 200,
+      "response_wire_bytes": 1658,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 56.645
+    },
+    {
+      "start_utc": "2026-09-23T20:56:57+00:00",
+      "app_headers_utc": "2026-09-23T20:57:49.646403+00:00",
+      "method": "GET",
+      "route": "/records/:id",
+      "status": 200,
+      "response_wire_bytes": 1668,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 52.646
+    },
+    {
+      "start_utc": "2026-09-23T20:56:56+00:00",
+      "app_headers_utc": "2026-09-23T20:57:49.646139+00:00",
+      "method": "GET",
+      "route": "/storage",
+      "status": 200,
+      "response_wire_bytes": 1668,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 53.646
+    },
+    {
+      "start_utc": "2026-09-23T20:56:57+00:00",
+      "app_headers_utc": "2026-09-23T20:57:49.648903+00:00",
+      "method": "GET",
+      "route": "/ui",
+      "status": 200,
+      "response_wire_bytes": 1659,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 52.649
+    },
+    {
+      "start_utc": "2026-09-23T20:54:55+00:00",
+      "app_headers_utc": null,
+      "method": "POST",
+      "route": "/api/v1/registry/search",
+      "status": 502,
+      "response_wire_bytes": 0,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": null
+    },
+    {
+      "start_utc": "2026-09-23T21:00:09+00:00",
+      "app_headers_utc": "2026-09-23T21:00:09.510885+00:00",
+      "method": "GET",
+      "route": "/readyz",
+      "status": 200,
+      "response_wire_bytes": 5177,
+      "client_label": "client_3",
+      "approx_to_app_headers_seconds": 0.511
+    },
+    {
+      "start_utc": "2026-09-23T21:00:20+00:00",
+      "app_headers_utc": "2026-09-23T21:00:20.476439+00:00",
+      "method": "GET",
+      "route": "/healthz",
+      "status": 200,
+      "response_wire_bytes": 4992,
+      "client_label": "client_1",
+      "approx_to_app_headers_seconds": 0.476
+    },
+    {
+      "start_utc": "2026-09-23T20:55:51+00:00",
+      "app_headers_utc": null,
+      "method": "POST",
+      "route": "/api/v1/registry/search",
+      "status": 502,
+      "response_wire_bytes": 0,
+      "client_label": "client_2",
+      "approx_to_app_headers_seconds": null
+    }
+  ],
+  "proxy_errors": [
+    {
+      "time": "Wed Sep 23 20:59:55.174983 2026",
+      "codes": [
+        "AH01102"
+      ],
+      "category": "backend_timeout",
+      "registry_search": false
+    },
+    {
+      "time": "Wed Sep 23 20:59:55.175063 2026",
+      "codes": [
+        "AH00898"
+      ],
+      "category": "backend_error",
+      "registry_search": true
+    },
+    {
+      "time": "Wed Sep 23 21:00:51.698933 2026",
+      "codes": [
+        "AH01102"
+      ],
+      "category": "backend_timeout",
+      "registry_search": false
+    },
+    {
+      "time": "Wed Sep 23 21:00:51.698982 2026",
+      "codes": [
+        "AH00898"
+      ],
+      "category": "backend_error",
+      "registry_search": true
+    }
+  ]
+}
