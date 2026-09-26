@@ -12,7 +12,7 @@ from pathlib import Path
 from time import monotonic, time_ns
 from typing import Any
 from urllib.parse import quote, urlencode, urlsplit, urlunsplit
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import httpx
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, UploadFile, status
@@ -716,9 +716,9 @@ def create_app(
                 raise ValueError(
                     f"external_reference_targets[{index}].base_url must be an https:// URL"
                 )
-            if "{euid}" not in object_path:
+            if object_path != "/api/dag/v2/object/{euid}":
                 raise ValueError(
-                    f"external_reference_targets[{index}].object_path must include {{euid}}"
+                    f"external_reference_targets[{index}].object_path must be the native DAG-v2 exact lookup path"
                 )
             if "{euid}" not in detail_url_template:
                 raise ValueError(
@@ -728,9 +728,17 @@ def create_app(
                 raise ValueError(
                     f"external_reference_targets[{index}].verify_ssl must be true or false"
                 )
-            headers = raw.get("headers") or {}
-            if not isinstance(headers, dict):
-                raise ValueError(f"external_reference_targets[{index}].headers must be a mapping")
+            if raw.get("headers"):
+                raise ValueError(
+                    f"external_reference_targets[{index}].headers is not a native DAG read credential"
+                )
+            dag_read_token = raw.get("dag_read_token")
+            if (not isinstance(dag_read_token, str) or not dag_read_token or
+                    dag_read_token != dag_read_token.strip() or
+                    "\n" in dag_read_token or "\r" in dag_read_token):
+                raise ValueError(
+                    f"external_reference_targets[{index}].dag_read_token is required and must be exact"
+                )
             targets.append(
                 {
                     "service_id": service_id,
@@ -739,35 +747,43 @@ def create_app(
                     "detail_url_template": detail_url_template,
                     "verify_ssl": verify_ssl,
                     "graph_data_path": graph_data_path,
-                    "headers": {str(k): str(v) for k, v in headers.items()},
+                    "headers": {"Authorization": f"Bearer {dag_read_token}"},
                 }
             )
         return targets
 
-    def _extract_euid_from_peer_payload(payload: dict[str, Any]) -> str:
-        for container in (
-            payload,
-            payload.get("data") if isinstance(payload.get("data"), dict) else {},
-        ):
-            if not isinstance(container, dict):
-                continue
-            for key in ("euid", "uid", "raw_id", "id"):
-                value = str(container.get(key) or "").strip()
-                if value:
-                    return value
-        return ""
-
-    async def _validate_external_reference_euid(euid: str) -> dict[str, Any]:
+    async def _validate_external_reference_euid(
+        euid: str, *, expected_service_id: str | None = None
+    ) -> dict[str, Any]:
         requested_euid = str(euid or "").strip()
         if not requested_euid:
             raise ValueError("External EUID is required")
         matches: list[dict[str, Any]] = []
         errors: list[str] = []
-        for target in _configured_external_reference_targets():
+        targets = _configured_external_reference_targets()
+        if expected_service_id is not None:
+            targets = [target for target in targets if target["service_id"] == expected_service_id]
+            if len(targets) != 1:
+                raise ValueError(f"No exact native peer configured for {expected_service_id}")
+        for target in targets:
             encoded = quote(requested_euid, safe="")
             url = f"{target['base_url']}{target['object_path'].replace('{euid}', encoded)}"
             try:
                 async with httpx.AsyncClient(timeout=5.0, verify=target["verify_ssl"]) as client:
+                    manifest_response = await client.get(
+                        f"{target['base_url']}/api/dag/manifest", headers=target["headers"]
+                    )
+                    if manifest_response.status_code != 200:
+                        errors.append(f"{target['service_id']}: native manifest HTTP {manifest_response.status_code}")
+                        continue
+                    from daylily_tapdb.web.dag_v2 import validate_dag_v2_manifest
+
+                    reason = validate_dag_v2_manifest(
+                        manifest_response.json(), expected_service_id=target["service_id"]
+                    )
+                    if reason is not None:
+                        errors.append(f"{target['service_id']}: native manifest rejected: {reason.value}")
+                        continue
                     response = await client.get(url, headers=target["headers"])
             except httpx.HTTPError as exc:
                 errors.append(f"{target['service_id']}: {exc}")
@@ -778,31 +794,39 @@ def create_app(
                 errors.append(f"{target['service_id']}: HTTP {response.status_code}")
                 continue
             payload = response.json()
-            peer_euid = _extract_euid_from_peer_payload(payload)
-            if peer_euid.lower() != requested_euid.lower():
+            if not isinstance(payload, dict):
+                errors.append(f"{target['service_id']}: native object response must be an object")
+                continue
+            peer_euid = payload.get("euid")
+            if payload.get("service_id") != target["service_id"] or peer_euid != requested_euid:
                 errors.append(
-                    f"{target['service_id']}: response did not contain EUID {requested_euid}"
+                    f"{target['service_id']}: native object identity does not match {requested_euid}"
                 )
                 continue
+            record_type = payload.get("record_type")
+            if record_type != "instance":
+                errors.append(f"{target['service_id']}: native target is not a persisted instance")
+                continue
+            if "tenant_id" not in payload:
+                errors.append(f"{target['service_id']}: native target tenant scope is missing")
+                continue
+            owner_tenant = payload["tenant_id"]
+            if owner_tenant is not None:
+                try:
+                    if not isinstance(owner_tenant, str) or str(UUID(owner_tenant)) != owner_tenant:
+                        raise ValueError("noncanonical tenant")
+                except ValueError:
+                    errors.append(f"{target['service_id']}: native target tenant scope is invalid")
+                    continue
             detail_url = target["detail_url_template"].replace("{euid}", encoded)
             matches.append(
                 {
                     "service_id": target["service_id"],
                     "euid": peer_euid,
                     "external_uri": detail_url,
-                    "external_object_type": str(
-                        payload.get("record_type")
-                        or payload.get("type")
-                        or payload.get("classifier")
-                        or payload.get("template_code")
-                        or "tapdb_object"
-                    ),
-                    "label": str(
-                        payload.get("label")
-                        or payload.get("display_label")
-                        or payload.get("name")
-                        or peer_euid
-                    ),
+                    "external_object_type": record_type,
+                    "target_tenant_id": owner_tenant,
+                    "label": payload.get("display_label") or peer_euid,
                     "source_payload": payload,
                     "base_url": target["base_url"],
                     "graph_data_path": target.get("graph_data_path"),
@@ -2181,7 +2205,11 @@ def create_app(
                 external_object_type=candidate["external_object_type"],
                 external_object_id=candidate["euid"],
                 external_uri=candidate["external_uri"],
-                reference_target={"kind": "tapdb_object"},
+                reference_target={
+                    "kind": "tapdb_object",
+                    **({"target_tenant_id": candidate["target_tenant_id"]}
+                       if candidate["target_tenant_id"] is not None else {}),
+                },
                 metadata={
                     "validated_by": "dewey.artifact_detail",
                     "validated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
@@ -4112,6 +4140,24 @@ def create_app(
         idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
     ) -> dict[str, Any]:
         try:
+            from daylily_tapdb.external_references import TapDBObjectTarget
+            from dewey_service.integrations.tapdb_external_references import build_external_target
+
+            target = build_external_target({
+                "external_system": body.external_system.strip().lower(),
+                "external_object_type": body.external_object_type.strip().lower(),
+                "external_object_id": body.external_object_id.strip(),
+                "reference_target": body.reference_target,
+            })
+            if isinstance(target, TapDBObjectTarget):
+                owner = await _validate_external_reference_euid(
+                    target.target_object_euid,
+                    expected_service_id=target.target_service_id,
+                )
+                declared_tenant = (str(target.target_tenant_id)
+                                   if target.target_tenant_id is not None else None)
+                if declared_tenant != owner["target_tenant_id"]:
+                    raise ValueError("Native target tenant scope differs from owner receipt")
             status_code, payload = service.create_external_object(
                 external_system=body.external_system,
                 external_object_type=body.external_object_type,

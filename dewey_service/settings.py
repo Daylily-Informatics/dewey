@@ -229,6 +229,8 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
     remap = {
         "application_api_bearer_token": "api_bearer_token",
         "application_api_bearer_tokens": "api_bearer_tokens",
+        "application_dag_read_token_sha256": "dag_read_token_sha256",
+        "application_dag_read_actor": "dag_read_actor",
         "application_session_secret_key": "session_secret_key",
         "application_host": "host",
         "application_port": "port",
@@ -452,6 +454,9 @@ class Settings(BaseSettings):
     environment: str = "development"
     api_bearer_token: str = "dewey-dev-token"
     api_bearer_tokens: str = ""
+    # Native DAG-v2 GET routes only. Keep this hash outside api_bearer_tokens.
+    dag_read_token_sha256: str = ""
+    dag_read_actor: str = ""
     registry_internal_domains: list[str] = Field(default_factory=lambda: ["lsmc.com"])
     registry_service_principals: dict[str, dict[str, Any]] = Field(default_factory=dict)
     registry_default_share_lifetime_days: int = 30
@@ -713,6 +718,18 @@ class Settings(BaseSettings):
         return normalized
 
     @model_validator(mode="after")
+    def validate_dag_read_credential(self) -> "Settings":
+        fingerprint = self.dag_read_token_sha256
+        actor = self.dag_read_actor
+        if bool(fingerprint) != bool(actor):
+            raise ValueError("Dewey DAG read token hash and actor must be configured together")
+        if fingerprint and not re.fullmatch(r"[0-9a-f]{64}", fingerprint):
+            raise ValueError("Dewey DAG read token hash must be lowercase SHA256")
+        if actor and (actor != actor.strip() or len(actor) > 128):
+            raise ValueError("Dewey DAG read actor must be exact and at most 128 characters")
+        return self
+
+    @model_validator(mode="after")
     def validate_cognito_contract(self) -> "Settings":
         for fingerprint, identity in self.registry_service_principals.items():
             if not re.fullmatch(r"[0-9a-f]{64}", fingerprint) or not str(identity.get("subject", "")).strip():
@@ -831,7 +848,9 @@ class Settings(BaseSettings):
             if cleaned:
                 tokens.add(cleaned)
         # Resolver-only credentials cannot become write credentials by misconfiguration.
-        return {item for item in tokens if item and not item.startswith("dewey_qeo_resolver_")}
+        return {item for item in tokens if item and not item.startswith((
+            "dewey_qeo_resolver_", "dewey_dag_",
+        ))}
 
     @property
     def is_production(self) -> bool:

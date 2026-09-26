@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
+import re
+import secrets
 from typing import Any
 
 from daylily_tapdb.web import (
@@ -12,6 +15,7 @@ from daylily_tapdb.web import (
     mount_tapdb_dag_surfaces,
 )
 from fastapi import Depends, HTTPException, Request
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from dewey_service.auth import (
     build_browser_login_href,
@@ -86,9 +90,28 @@ def build_tapdb_host_bridge(settings: Settings) -> TapdbHostBridge:
 def build_dag_auth_dependency(settings: Settings):
     """Project verified host auth into the stable actor contract required by DAG v2."""
 
+    regular_auth = require_session_or_api_auth(settings)
+    bearer = HTTPBearer(auto_error=False)
+
     async def require_dag_actor(
-        authenticated: dict[str, Any] = Depends(require_session_or_api_auth(settings)),
+        request: Request,
+        credentials: HTTPAuthorizationCredentials | None = Depends(bearer),
     ) -> dict[str, str]:
+        token = str(credentials.credentials or "") if credentials else ""
+        if token.startswith("dewey_dag_"):
+            path = request.url.path
+            allowed = path in {
+                "/api/dag/manifest", "/api/dag/v2/data", "/api/dag/v2/search",
+            } or re.fullmatch(r"/api/dag/v2/object/[^/]+", path) is not None
+            if request.method != "GET" or not allowed:
+                raise HTTPException(status_code=403, detail="DAG read credential has no route scope")
+            expected = settings.dag_read_token_sha256
+            fingerprint = hashlib.sha256(token.encode()).hexdigest()
+            if not expected or not secrets.compare_digest(fingerprint, expected):
+                raise HTTPException(status_code=401, detail="Invalid DAG read credential")
+            return {"username": settings.dag_read_actor}
+
+        authenticated = regular_auth(request, credentials)
         if authenticated.get("service_principal") is True:
             # Dewey's configured bearer tokens authorize this one service principal.
             return {"username": "dewey-service-token"}

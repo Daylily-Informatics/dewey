@@ -448,10 +448,10 @@ def test_artifact_detail_external_reference_validate_and_create(
         {
             "service_id": "ursa",
             "base_url": "https://localhost:8913",
-            "object_path": "/api/dag/object/{euid}",
+            "object_path": "/api/dag/v2/object/{euid}",
             "detail_url_template": "https://ursa.dev.lsmc.life/object/{euid}",
             "verify_ssl": False,
-            "headers": {"Authorization": "Bearer token"},
+            "dag_read_token": "native-read-token",
         }
     ]
 
@@ -460,7 +460,14 @@ def test_artifact_detail_external_reference_validate_and_create(
 
         @staticmethod
         def json() -> dict:
-            return {"euid": "Z-RGX-15T", "label": "Result Graph", "record_type": "analysis_result"}
+            return {"service_id": "ursa", "euid": "Z-RGX-15T", "display_label": "Result Graph", "record_type": "instance", "tenant_id": None}
+
+    class _ManifestResponse:
+        status_code = 200
+
+        @staticmethod
+        def json() -> dict:
+            return {"service_id": "ursa", "contract": "dag:v2"}
 
     class _AsyncClient:
         def __init__(self, *, timeout: float, verify: bool) -> None:
@@ -474,11 +481,21 @@ def test_artifact_detail_external_reference_validate_and_create(
             return False
 
         async def get(self, url: str, *, headers: dict):
-            assert url == "https://localhost:8913/api/dag/object/Z-RGX-15T"
-            assert headers["Authorization"] == "Bearer token"
+            assert headers["Authorization"] == "Bearer native-read-token"
+            if url == "https://localhost:8913/api/dag/manifest":
+                return _ManifestResponse()
+            assert url == "https://localhost:8913/api/dag/v2/object/Z-RGX-15T"
             return _Response()
 
     monkeypatch.setattr("dewey_service.app.httpx.AsyncClient", _AsyncClient)
+    def _validate_manifest(payload, *, expected_service_id):
+        assert payload == {"service_id": expected_service_id, "contract": "dag:v2"}
+        return None
+
+    monkeypatch.setattr(
+        "daylily_tapdb.web.dag_v2.validate_dag_v2_manifest",
+        _validate_manifest,
+    )
     app = create_app(settings=test_settings, service=fake_service)
     with TestClient(app, base_url="https://localhost:8914") as local_client:
         _login_user(monkeypatch, local_client)

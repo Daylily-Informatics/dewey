@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import hashlib
 from types import SimpleNamespace
 
 import pytest
 from fastapi import FastAPI, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials
+from starlette.requests import Request
 
 from dewey_service.app import create_app
 from dewey_service.integrations import tapdb_ui
@@ -69,18 +72,50 @@ def test_failed_dag_mount_is_fatal(monkeypatch, test_settings):
     assert not any(getattr(route, "path", None) == "/tapdb" for route in app.routes)
 
 
-def test_dag_session_auth_projects_stable_subject(test_settings):
+def test_dag_session_auth_projects_stable_subject(monkeypatch, test_settings):
     import asyncio
 
+    profile = {"service_principal": False, "profile": {"sub": "test-subject"}}
+    monkeypatch.setattr(
+        tapdb_ui, "require_session_or_api_auth",
+        lambda settings: lambda request, credentials: profile,
+    )
     dependency = tapdb_ui.build_dag_auth_dependency(test_settings)
+    request = Request({"type": "http", "method": "GET", "path": "/api/dag/manifest",
+                       "headers": []})
     result = asyncio.run(
-        dependency({"service_principal": False, "profile": {"sub": "test-subject"}})
+        dependency(request, None)
     )
     assert result == {"sub": "test-subject"}
+    profile["profile"] = {"email": "operator@example.test"}
     with pytest.raises(HTTPException):
-        asyncio.run(
-            dependency({"service_principal": False, "profile": {"email": "operator@example.test"}})
-        )
+        asyncio.run(dependency(request, None))
+
+
+def test_dag_read_credential_is_limited_to_native_get_routes(test_settings):
+    import asyncio
+
+    token = "dewey_dag_test_only"
+    test_settings.dag_read_token_sha256 = hashlib.sha256(token.encode()).hexdigest()
+    test_settings.dag_read_actor = "dewey-dag-reader-test"
+    test_settings.api_bearer_tokens = token
+    assert token not in test_settings.api_tokens()
+    dependency = tapdb_ui.build_dag_auth_dependency(test_settings)
+    credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=token)
+    request = Request({"type": "http", "method": "GET", "path": "/api/dag/manifest",
+                       "headers": []})
+    assert asyncio.run(dependency(request, credentials)) == {
+        "username": "dewey-dag-reader-test"
+    }
+    bad = HTTPAuthorizationCredentials(scheme="Bearer", credentials="dewey_dag_wrong")
+    with pytest.raises(HTTPException) as error:
+        asyncio.run(dependency(request, bad))
+    assert error.value.status_code == 401
+    write_request = Request({"type": "http", "method": "POST", "path": "/api/v1/objects",
+                             "headers": []})
+    with pytest.raises(HTTPException) as error:
+        asyncio.run(dependency(write_request, credentials))
+    assert error.value.status_code == 403
 
 
 def test_host_bridge_preserves_authenticated_role(monkeypatch, test_settings):
