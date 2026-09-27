@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
-import re
-import secrets
 from typing import Any
 
 from daylily_tapdb.web import (
@@ -17,6 +14,7 @@ from daylily_tapdb.web import (
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from dewey_service.dag_auth import dedicated_dag_actor
 from dewey_service.auth import (
     build_browser_login_href,
     require_session_or_api_auth,
@@ -98,18 +96,9 @@ def build_dag_auth_dependency(settings: Settings):
         credentials: HTTPAuthorizationCredentials | None = Depends(bearer),
     ) -> dict[str, str]:
         token = str(credentials.credentials or "") if credentials else ""
-        if token.startswith("dewey_dag_"):
-            path = request.url.path
-            allowed = path in {
-                "/api/dag/manifest", "/api/dag/v2/data", "/api/dag/v2/search",
-            } or re.fullmatch(r"/api/dag/v2/object/[^/]+", path) is not None
-            if request.method != "GET" or not allowed:
-                raise HTTPException(status_code=403, detail="DAG read credential has no route scope")
-            expected = settings.dag_read_token_sha256
-            fingerprint = hashlib.sha256(token.encode()).hexdigest()
-            if not expected or not secrets.compare_digest(fingerprint, expected):
-                raise HTTPException(status_code=401, detail="Invalid DAG read credential")
-            return {"username": settings.dag_read_actor}
+        reader = dedicated_dag_actor(request, settings, token)
+        if reader is not None:
+            return reader
 
         authenticated = regular_auth(request, credentials)
         if authenticated.get("service_principal") is True:

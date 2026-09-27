@@ -13,10 +13,13 @@ from hashlib import sha256
 from typing import Any
 
 from fastapi import HTTPException, Request
+from fastapi.security.utils import get_authorization_scheme_param
 from sqlalchemy import DateTime, and_, cast, exists, false, func, literal, or_, select, true
 from sqlalchemy.orm import aliased
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse, RedirectResponse
+
+from dewey_service.dag_auth import dedicated_dag_actor, is_canonical_dag_get
 
 POLICY_TEMPLATE = "access/registry_policy/generic/1.0/"
 TOKEN_TEMPLATE = "access/api_client/generic/1.0/"
@@ -338,10 +341,15 @@ class RegistryPrincipalMiddleware(BaseHTTPMiddleware):
                     from starlette.concurrency import run_in_threadpool
                     actor = await run_in_threadpool(request.app.state.service.authenticate_registry_token, token)
             path = request.url.path
+            dag_reader = None
+            if is_canonical_dag_get(request):
+                scheme, token = get_authorization_scheme_param(authorization)
+                if scheme.lower() == "bearer":
+                    dag_reader = dedicated_dag_actor(request, settings, token)
             admin_path = path.startswith(("/tapdb", "/api/dag", "/admin", "/ui/anomalies", "/ui/observability")) or path == "/graph"
             if path.startswith("/tapdb/change-password"):
                 return JSONResponse({"detail": "Credentials are managed by shared LSMC login"}, status_code=410)
-            if admin_path and (actor is None or not actor.admin):
+            if admin_path and dag_reader is None and (actor is None or not actor.admin):
                 if actor is None and not path.startswith("/api/"):
                     return RedirectResponse("/login", status_code=303)
                 return JSONResponse({"detail": "Dewey admin access required"}, status_code=403)
