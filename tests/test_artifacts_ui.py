@@ -460,7 +460,17 @@ def test_artifact_detail_external_reference_validate_and_create(
 
         @staticmethod
         def json() -> dict:
-            return {"service_id": "ursa", "euid": "Z-RGX-15T", "display_label": "Result Graph", "record_type": "instance", "tenant_id": None}
+            return {
+                "service_id": "ursa",
+                "euid": "Z-RGX-15T",
+                "display_label": "Result Graph",
+                "record_type": "instance",
+                "tenant_id": None,
+                "category": "analysis",
+                "type": "run-linked",
+                "subtype": "generic",
+                "version": "1.0",
+            }
 
     class _ManifestResponse:
         status_code = 200
@@ -519,6 +529,8 @@ def test_artifact_detail_external_reference_validate_and_create(
         assert create.status_code == 200
         assert len(fake_service.external_relations) == 1
         assert fake_service.external_relations[0]["relation_type"] == "analysis_result"
+        external_object = next(iter(fake_service.external_objects.values()))
+        assert external_object["external_object_type"] == "analysis"
 
 
 def test_artifact_detail_external_reference_requires_explicit_targets(monkeypatch, client) -> None:

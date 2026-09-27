@@ -51,6 +51,30 @@ EXPLICIT_TARGET_TYPES = {
     },
 }
 
+# Exact owner templates for the business kinds that Dewey can create from a
+# native peer object receipt. A DAG record_type of "instance" is only the
+# persistence class; it does not establish one of these domain kinds.
+OWNER_KIND_COORDINATES = {
+    ("atlas", "patient"): frozenset({("subjects", "subject-ref", "generic", "1.0")}),
+    ("bloom", "sequencer"): frozenset(
+        ("equipment", "sequencers", subtype, "1.0")
+        for subtype in ("miseq-y", "novaseq-6000", "ont-minion")
+    ),
+    ("bloom", "sequencing_run"): frozenset(
+        ("data", "sequencing_run", subtype, "1.0")
+        for subtype in ("illumina", "ont", "ultima", "pacbio", "completegenomics")
+    ),
+    ("ursa", "analysis"): frozenset(
+        {
+            ("analysis", "run-linked", "generic", "1.0"),
+            ("analysis", "run", "generic", "1.0"),
+        }
+    ),
+    ("ursa", "analysis_job"): frozenset(
+        {("analysis", "submission-request", "generic", "1.0")}
+    ),
+}
+
 
 class DeweyExternalReferenceError(ValueError):
     """The persisted Dewey relationship cannot establish a native assertion."""
@@ -59,6 +83,27 @@ class DeweyExternalReferenceError(ValueError):
 def _require(condition: bool, message: str) -> None:
     if not condition:
         raise DeweyExternalReferenceError(message)
+
+
+def owner_business_kind(service_id: str, owner: dict[str, Any]) -> str:
+    """Classify only reviewed owner-issued native template coordinates."""
+    coordinates = tuple(
+        owner.get(field) for field in ("category", "type", "subtype", "version")
+    )
+    _require(
+        all(isinstance(value, str) and value for value in coordinates),
+        f"Native {service_id} owner template coordinates are missing or invalid",
+    )
+    matches = [
+        kind
+        for (service, kind), allowed in OWNER_KIND_COORDINATES.items()
+        if service == service_id and coordinates in allowed
+    ]
+    _require(
+        len(matches) == 1,
+        f"No unique reviewed {service_id} business kind for native owner template {coordinates}",
+    )
+    return matches[0]
 
 
 def _coordinates(instance) -> tuple[str, str, str, str]:

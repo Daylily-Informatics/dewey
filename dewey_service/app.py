@@ -818,13 +818,16 @@ def create_app(
                 except ValueError:
                     errors.append(f"{target['service_id']}: native target tenant scope is invalid")
                     continue
+            from dewey_service.integrations.tapdb_external_references import owner_business_kind
+
+            business_kind = owner_business_kind(target["service_id"], payload)
             detail_url = target["detail_url_template"].replace("{euid}", encoded)
             matches.append(
                 {
                     "service_id": target["service_id"],
                     "euid": peer_euid,
                     "external_uri": detail_url,
-                    "external_object_type": record_type,
+                    "external_object_type": business_kind,
                     "target_tenant_id": owner_tenant,
                     "label": payload.get("display_label") or peer_euid,
                     "source_payload": payload,
@@ -4158,6 +4161,10 @@ def create_app(
                                    if target.target_tenant_id is not None else None)
                 if declared_tenant != owner["target_tenant_id"]:
                     raise ValueError("Native target tenant scope differs from owner receipt")
+                if body.external_object_type.strip().lower() != owner["external_object_type"]:
+                    raise ValueError(
+                        "Declared external object type differs from native owner template"
+                    )
             status_code, payload = service.create_external_object(
                 external_system=body.external_system,
                 external_object_type=body.external_object_type,

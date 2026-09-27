@@ -32,6 +32,26 @@ def external_payload(**changes):
     }
 
 
+@pytest.mark.parametrize(
+    "service_id,coordinates,expected_kind",
+    [
+        ("atlas", ("subjects", "subject-ref", "generic", "1.0"), "patient"),
+        ("bloom", ("equipment", "sequencers", "novaseq-6000", "1.0"), "sequencer"),
+        ("bloom", ("data", "sequencing_run", "illumina", "1.0"), "sequencing_run"),
+        ("ursa", ("analysis", "run-linked", "generic", "1.0"), "analysis"),
+        ("ursa", ("analysis", "run", "generic", "1.0"), "analysis"),
+        ("ursa", ("analysis", "submission-request", "generic", "1.0"), "analysis_job"),
+    ],
+)
+def test_native_owner_template_classifies_declared_business_kind(
+    service_id, coordinates, expected_kind
+):
+    owner = dict(zip(("category", "type", "subtype", "version"), coordinates))
+    assert refs.owner_business_kind(service_id, owner) == expected_kind
+    with pytest.raises(refs.DeweyExternalReferenceError, match="No unique reviewed"):
+        refs.owner_business_kind(service_id, {**owner, "version": "unreviewed"})
+
+
 def instance(uid, kind, **changes):
     category, object_type = kind
     return SimpleNamespace(
