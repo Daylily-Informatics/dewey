@@ -496,7 +496,7 @@ class RegistryServiceMixin:
                 name = str(changes["name"]).strip()
                 if not name:
                     raise ValueError("name cannot be empty")
-                record.name = name
+                self.backend.update_persisted_fields(session, record, {"name": name})
                 updates["label" if record.type == "artifact_set" else "original_filename"] = name
             self.backend.update_instance_json(session, record, updates)
             self._registry_event(session, record, "metadata_updated")
@@ -508,7 +508,7 @@ class RegistryServiceMixin:
             self.backend.update_instance_json(session, record, {
                 "archived_at": utc_now_iso(), "archived_by": principal().subject,
             })
-            record.bstatus = "archived"
+            self.backend.update_persisted_fields(session, record, {"bstatus": "archived"})
             self._registry_event(session, record, "registration_archived")
             shares = session.query(generic_instance).join(generic_instance_lineage,
                 generic_instance_lineage.child_instance_uid == generic_instance.uid).filter(

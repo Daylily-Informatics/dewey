@@ -14,6 +14,7 @@ from cli_core_yo import ccyo_out
 from cli_core_yo.spec import CommandPolicy
 
 from dewey_service.cli._registry_v2 import REQUIRED_JSON, REQUIRED_MUTATING
+from dewey_service.audit import explicit_attribution_context, qeo_dispatch_attribution_context
 from dewey_service.cli._service import build_cli_service
 from dewey_service.qeo_package_contract import PackageRegistration
 from dewey_service.qeo_resolver_auth import issue_resolver_credential
@@ -36,6 +37,7 @@ def _resolver_credential_create(
 
 
 def _package_register(
+    attribution: Path = typer.Option(..., help="Absolute native Attribution JSON for the initiating actor."),
     manifest: Path = typer.Option(..., help="Absolute JSON manifest of existing artifact EUIDs."),
     idempotency_key: str | None = typer.Option(
         None,
@@ -47,9 +49,12 @@ def _package_register(
         if not manifest.is_absolute():
             raise ValueError("An absolute manifest is required")
         request = PackageRegistration.model_validate_json(manifest.read_text())
-        _, result = build_cli_service().register_qeo_package(
-            request, idempotency_key=idempotency_key
-        )
+        if not attribution.is_absolute():
+            raise ValueError("An absolute attribution envelope is required")
+        with explicit_attribution_context(attribution):
+            _, result = build_cli_service().register_qeo_package(
+                request, idempotency_key=idempotency_key
+            )
     except Exception as exc:
         ccyo_out.error(f"Package registration failed: {exc}")
         raise typer.Exit(1) from exc
@@ -94,12 +99,13 @@ def _dispatch(
         return {str(item) for item in value}
 
     try:
-        result = build_cli_service().dispatch_qeo_outbox(
-            limit=limit,
-            retry_errors=retry_errors,
-            event_ids=_normalize_repeated_option(event_id),
-            artifact_set_euids=_normalize_repeated_option(artifact_set_euid),
-        )
+        with qeo_dispatch_attribution_context():
+            result = build_cli_service().dispatch_qeo_outbox(
+                limit=limit,
+                retry_errors=retry_errors,
+                event_ids=_normalize_repeated_option(event_id),
+                artifact_set_euids=_normalize_repeated_option(artifact_set_euid),
+            )
     except Exception as exc:
         ccyo_out.error(f"QEO dispatch failed: {exc}")
         raise typer.Exit(1) from exc

@@ -324,7 +324,7 @@ def resolve_external_broker_principal(user: dict[str, Any], request: Request) ->
     settings: Settings = request.app.state.settings
     email = str(user.get("email") or "").strip().lower()
     subject = str(
-        user.get("canonical_user_id") or user.get("sub") or user.get("user_id") or email
+        user.get("canonical_user_id") or ""
     ).strip()
     name = str(user.get("display_name") or user.get("name") or "").strip() or None
     if not email or not subject:
@@ -502,6 +502,10 @@ def _load_ui_profile(request: Request) -> dict[str, Any] | None:
     if principal is not None:
         settings: Settings = request.app.state.settings
         request.state.auth_mode = principal.auth_mode
+        if principal.auth_mode == "external_broker":
+            canonical = principal.app_context.get("canonical_user", {}).get("canonical_user_id")
+            if not canonical or canonical != principal.user_sub:
+                raise HTTPException(401, "Dewey session requires a canonical broker identity; sign in again")
         profile = normalize_session_profile(
             email=principal.email,
             sub=principal.user_sub,

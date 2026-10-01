@@ -6,6 +6,7 @@ from hashlib import sha256
 from typing import Any, cast
 
 import httpx
+from fastapi import HTTPException
 
 from dewey_service.registration_contracts import OutboxEventEnvelope, canonical_json
 from dewey_service.tapdb_backend import (
@@ -189,7 +190,7 @@ class OutboxServiceMixin:
                     artifact_set_euids=artifact_set_euids,
                 ):
                     continue
-                candidates.append(payload)
+                candidates.append({**payload, "tapdb_record_revision": row.record_revision})
                 if len(candidates) >= capped_limit:
                     break
             return candidates
@@ -230,6 +231,9 @@ class OutboxServiceMixin:
         timeout: float,
         verify: bool | str,
     ) -> dict[str, Any]:
+        expected_revision = row.get("tapdb_record_revision")
+        if type(expected_revision) is not int or expected_revision < 0:
+            raise HTTPException(409, "Outbox dispatch requires its originally observed native revision")
         event = self._event_from_outbox_row(row)
         row_euid = str(row.get("euid") or "").strip()
         attempts = int(row.get("dispatch_attempt_count") or 0) + 1
@@ -251,7 +255,8 @@ class OutboxServiceMixin:
         except httpx.HTTPError as exc:
             return self._update_outbox_dispatch(
                 row_euid,
-                {
+                expected_revision=expected_revision,
+                updates={
                     **base_update,
                     "dispatch_status": "error",
                     "last_dispatch_error_class": exc.__class__.__name__,
@@ -264,7 +269,8 @@ class OutboxServiceMixin:
         except ValueError as exc:
             return self._update_outbox_dispatch(
                 row_euid,
-                {
+                expected_revision=expected_revision,
+                updates={
                     **base_update,
                     "dispatch_status": "error",
                     "last_dispatch_http_status": response.status_code,
@@ -278,7 +284,8 @@ class OutboxServiceMixin:
         if response.is_error:
             return self._update_outbox_dispatch(
                 row_euid,
-                {
+                expected_revision=expected_revision,
+                updates={
                     **base_update,
                     "dispatch_status": "error",
                     "last_dispatch_http_status": response.status_code,
@@ -293,7 +300,8 @@ class OutboxServiceMixin:
         if status == "PARSED" or write_status == "idempotent_noop":
             return self._update_outbox_dispatch(
                 row_euid,
-                {
+                expected_revision=expected_revision,
+                updates={
                     **base_update,
                     "dispatch_status": "dispatched",
                     "dispatched_at": utc_now_iso(),
@@ -309,7 +317,8 @@ class OutboxServiceMixin:
 
         return self._update_outbox_dispatch(
             row_euid,
-            {
+            expected_revision=expected_revision,
+            updates={
                 **base_update,
                 "dispatch_status": "error",
                 "last_dispatch_http_status": response.status_code,
@@ -332,7 +341,11 @@ class OutboxServiceMixin:
         text = canonical_json(payload) if isinstance(payload, dict) else str(payload)
         return text[:1000]
 
-    def _update_outbox_dispatch(self, row_euid: str, updates: dict[str, Any]) -> dict[str, Any]:
+    def _update_outbox_dispatch(
+        self, row_euid: str, *, expected_revision: int, updates: dict[str, Any]
+    ) -> dict[str, Any]:
+        if type(expected_revision) is not int or expected_revision < 0:
+            raise HTTPException(409, "Outbox completion requires its originally observed native revision")
         if not row_euid:
             raise RuntimeError("Outbox row has no EUID and cannot be updated")
         with self.backend.session_scope(commit=True) as session:
@@ -343,9 +356,12 @@ class OutboxServiceMixin:
                 for_update=True,
             )
             if row is None:
-                raise RuntimeError(f"Outbox row not found: {row_euid}")
-            self.backend.update_instance_json(session, row, updates)
-            return normalize_instance_payload(row)
+                from daylily_tapdb.revisions import RevisionConflict
+                raise RevisionConflict(f"Observed outbox row no longer exists: {row_euid}")
+            self.backend.update_instance_json(
+                session, row, updates, expected_revision=expected_revision
+            )
+            return {**normalize_instance_payload(row), "tapdb_record_revision": row.record_revision}
 
 
 __all__ = ["OutboxServiceMixin"]

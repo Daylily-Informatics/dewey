@@ -565,3 +565,48 @@ def test_artifact_detail_rejects_invalid_share_days(monkeypatch, client) -> None
     )
     assert too_long.status_code == 400
     assert "at most 365.0" in too_long.text
+
+
+def test_gui_quick_registration_preserves_native_conflict(monkeypatch, client, fake_service):
+    from fastapi import HTTPException
+    _login_user(monkeypatch, client)
+    calls = []
+    def conflict(**kwargs):
+        calls.append(kwargs)
+        raise HTTPException(409, "TapDB revision conflict; explicitly reconcile")
+    monkeypatch.setattr(fake_service, "import_artifact_from_uri", conflict)
+    response = client.post("/ui/register", data={"source_s3_uri": "s3://fixture-bucket/input.txt"})
+    assert response.status_code == 409
+    assert len(calls) == 1
+
+
+def test_gui_multi_upload_conflict_stops_later_writes(monkeypatch, client, fake_service):
+    from fastapi import HTTPException
+    _login_user(monkeypatch, client)
+    calls = []
+    def conflict(**kwargs):
+        calls.append(kwargs)
+        raise HTTPException(409, "TapDB revision conflict; explicitly reconcile")
+    monkeypatch.setattr(fake_service, "upload_artifact_bytes", conflict)
+    response = client.post("/artifacts/register", data={"artifact_type": "report"},
+        files=[("directory_data", ("first.txt", b"one", "text/plain")),
+               ("directory_data", ("second.txt", b"two", "text/plain"))])
+    assert response.status_code == 409
+    assert len(calls) == 1
+
+
+def test_gui_bulk_conflict_stops_later_rows(monkeypatch, client, fake_service):
+    from fastapi import HTTPException
+    _login_user(monkeypatch, client)
+    calls = []
+    def conflict(**kwargs):
+        calls.append(kwargs)
+        raise HTTPException(409, "TapDB revision conflict; explicitly reconcile")
+    monkeypatch.setattr(fake_service, "import_artifact_from_uri", conflict)
+    body = ("source_mode\tartifact_type\tsource_uri\n"
+            "reference\treport\ts3://fixture-bucket/first.txt\n"
+            "reference\treport\ts3://fixture-bucket/second.txt\n")
+    response = client.post("/artifacts/bulk-upload",
+        files={"bulk_tsv": ("artifacts.tsv", body.encode(), "text/tab-separated-values")})
+    assert response.status_code == 409
+    assert len(calls) == 1

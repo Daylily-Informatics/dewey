@@ -336,13 +336,28 @@ def build_external_link_spec(relation, endpoints: RelationEndpoints) -> External
     )
 
 
+def attach_observed_reference(session, source, spec):
+    """Observe an exact native edge before attach acquires and checks its locks."""
+    source_revision = source.record_revision
+    edge = (session.query(generic_instance_lineage)
+        .join(generic_instance, generic_instance.uid == generic_instance_lineage.child_instance_uid)
+        .filter(generic_instance_lineage.parent_instance_uid == source.uid,
+            generic_instance_lineage.relationship_type == spec.relationship_type,
+            generic_instance.identity_key == spec.target.identity_key,
+            generic_instance.category == "reference")
+        .one_or_none())
+    return ExternalReferenceService(session).attach(source, spec,
+        expected_source_revision=source_revision,
+        expected_lineage_revision=None if edge is None else edge.record_revision)
+
+
 def attach_external_relation(session, relation):
     """Attach native XRF lineage without committing or changing historical DGX rows."""
     endpoints = resolve_relation_endpoints(session, relation)
     spec = build_external_link_spec(relation, endpoints)
     if spec is None:
         return NonFederatedOutcome()
-    return ExternalReferenceService(session).attach(endpoints.source, spec)
+    return attach_observed_reference(session, endpoints.source, spec)
 
 
 def attach_analysis_result_owner_reference(
@@ -375,4 +390,4 @@ def attach_analysis_result_owner_reference(
         asserted_at=asserted_at,
         assertion_provenance=assertion_provenance,
     )
-    return ExternalReferenceService(session).attach(locked_source, spec)
+    return attach_observed_reference(session, locked_source, spec)

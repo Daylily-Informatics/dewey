@@ -17,7 +17,8 @@ from pathlib import Path
 from daylily_tapdb import generic_instance, generic_instance_lineage
 from sqlalchemy import text
 
-from dewey_service.audit import authenticated_user_email_context
+from dewey_service.audit import authenticated_user_email_context, explicit_attribution_context
+from contextlib import nullcontext
 from dewey_service.registry_access import POLICY_TEMPLATE, Principal, default_policy, principal_context, validate_policy
 from dewey_service.service import DeweyService
 from dewey_service.tapdb_backend import TapDBBackend, normalize_instance_payload, utc_now_iso
@@ -178,8 +179,8 @@ def reverse(service, manifest, receipt, actor, *, expected_sha256):
                     generic_instance_lineage.is_deleted.is_(False)).all()
                 if len(edges) != 1:
                     raise ValueError("Policy lineage changed after conversion")
-                edges[0].is_deleted = True
-                policy.is_deleted = True
+                service.backend.delete_persisted(session, edges[0])
+                service.backend.delete_persisted(session, policy)
             raw = dict(record.json_addl)
             for field in entry["changes"]:
                 before = entry["before"][field]
@@ -187,7 +188,7 @@ def reverse(service, manifest, receipt, actor, *, expected_sha256):
                     raw[field] = before["value"]
                 else:
                     raw.pop(field, None)
-            record.json_addl = raw
+            service.backend.update_persisted_fields(session, record, {"json_addl": raw})
         session.flush()
     return {"status": "reversed", "records": len(manifest["rows"]), "actor": actor,
         "manifest_sha256": expected_sha256, "completed_at": utc_now_iso(), "storage_deleted": False}
@@ -200,9 +201,12 @@ def main(argv=None):
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--receipt", type=Path)
     parser.add_argument("--expected-sha256")
+    parser.add_argument("--attribution", type=Path)
     args = parser.parse_args(argv)
+    if args.mode != "plan" and (args.attribution is None or not args.attribution.is_absolute()):
+        parser.error("Writes require --attribution with an explicit absolute native Attribution JSON path")
     service = DeweyService(TapDBBackend(app_username=args.actor))
-    with principal_context(Principal(subject=args.actor, roles=("ADMIN",), internal=True), maintenance=True), authenticated_user_email_context(args.actor if "@" in args.actor else None):
+    with (explicit_attribution_context(args.attribution) if args.attribution else nullcontext()), principal_context(Principal(subject=args.actor, roles=("ADMIN",), internal=True), maintenance=True), authenticated_user_email_context(args.actor if "@" in args.actor else None):
         if args.mode == "plan":
             result = plan(service, args.actor)
             write_private(args.manifest, result)

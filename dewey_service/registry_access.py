@@ -49,6 +49,10 @@ _PRINCIPAL: ContextVar[Principal | None] = ContextVar("dewey_registry_principal"
 _MAINTENANCE: ContextVar[bool] = ContextVar("dewey_registry_maintenance", default=False)
 
 
+def current_principal() -> Principal | None:
+    return _PRINCIPAL.get()
+
+
 def principal() -> Principal:
     actor = _PRINCIPAL.get()
     if actor is None:

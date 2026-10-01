@@ -14,6 +14,7 @@ from daylily_tapdb.web import (
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from dewey_service.audit import human_issuer
 from dewey_service.dag_auth import dedicated_dag_actor
 from dewey_service.auth import (
     build_browser_login_href,
@@ -44,6 +45,9 @@ def _resolve_host_user(request: Request) -> dict[str, Any] | None:
         raise HTTPException(status_code=401, detail="Authenticated subject and email are required")
     return {
         "uid": subject,
+        "actor_kind": "human",
+        "actor_issuer": human_issuer(request.app.state.settings),
+        "actor_subject": subject,
         "username": email,
         "email": email,
         "display_name": str(profile.get("name") or email).strip(),

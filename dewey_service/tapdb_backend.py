@@ -19,7 +19,10 @@ from daylily_tapdb.web.runtime import get_db
 from sqlalchemy import and_, text
 from sqlalchemy.orm import Session
 
-from dewey_service.audit import creation_audit_fields, update_audit_fields
+from dewey_service.audit import creation_audit_fields, update_audit_fields, transaction_attribution
+from daylily_tapdb.revisions import RevisionConflict
+from daylily_tapdb.services.object_operations import ObjectSelector, update_object, soft_delete_object
+from fastapi import HTTPException
 from dewey_service.integrations.tapdb_runtime import ensure_tapdb_version, load_runtime_config
 from dewey_service.settings import get_settings
 from dewey_service.ui_metadata import resolve_package_version
@@ -115,6 +118,8 @@ class TapDBBackend:
 
         ensure_tapdb_version()
         cfg = load_runtime_config(settings)
+        self.config_path = settings.tapdb_config_path
+        self.settings = settings
         self.connection = get_db(settings.tapdb_config_path)
         self.connection.app_username = app_username
         self.domain_code = cfg["domain_code"]
@@ -127,11 +132,16 @@ class TapDBBackend:
         started = monotonic()
         success = False
         try:
-            with self.connection.session_scope(commit=commit) as session:
+            connection = get_db(self.config_path)
+            connection.app_username = self.connection.app_username
+            connection.attribution = transaction_attribution(self.settings, self._operation_label(), commit=commit)
+            with connection.session_scope(commit=commit) as session:
                 from dewey_service.performance import instrument_engine
                 instrument_engine(session.get_bind())
                 yield session
                 success = True
+        except RevisionConflict as exc:
+            raise HTTPException(409, "TapDB revision conflict; reread and explicitly reconcile the change") from exc
         finally:
             if self.observability is not None:
                 self.observability.record_db_operation(
@@ -204,15 +214,13 @@ class TapDBBackend:
             create_children=False,
         )
         envelope = validate_instance_envelope(instance.json_addl)
-        instance.json_addl = {
+        payload = {
             **envelope,
             **json_addl,
             **creation_audit_fields(),
             "properties": {**envelope["properties"], **supplied_properties},
         }
-        instance.bstatus = status
-        instance.is_singleton = False
-        session.flush()
+        self.update_persisted_fields(session, instance, {"json_addl": payload, "bstatus": status})
         if template_code in {ARTIFACT_TEMPLATE, ARTIFACT_SET_TEMPLATE} and not maintenance_mode():
             actor = principal()
             if not actor.writable:
@@ -251,12 +259,12 @@ class TapDBBackend:
                     **creation_audit_fields(),
                 },
             )
-            claim.instance.bstatus = "active"
-            session.flush()
+            self.update_persisted_fields(session, claim.instance, {"bstatus": "active"})
         return claim.instance, created
 
     def update_instance_json(
-        self, session: Session, instance: generic_instance, updates: dict[str, Any]
+        self, session: Session, instance: generic_instance, updates: dict[str, Any],
+        *, expected_revision: int | None = None,
     ) -> None:
         if instance.type in {"artifact", "artifact_set"} and not maintenance_mode():
             derived = {"share_status", "share_last_issued_at"}
@@ -264,8 +272,23 @@ class TapDBBackend:
         payload = validate_instance_envelope(instance.json_addl)
         payload.update(updates)
         payload.update(update_audit_fields())
-        instance.json_addl = validate_instance_envelope(payload)
-        session.flush()
+        self.update_persisted_fields(
+            session, instance, {"json_addl": validate_instance_envelope(payload)},
+            expected_revision=expected_revision,
+        )
+
+    def update_persisted_fields(self, session, instance, changes, *, expected_revision: int | None = None):
+        """Apply the proposal against the revision observed before native locking."""
+        expected = instance.record_revision if expected_revision is None else expected_revision
+        update_object(session, ObjectSelector(euid=instance.euid,
+            record_type="lineage" if isinstance(instance, generic_instance_lineage) else "instance"),
+            changes, actor=self.connection.app_username, dry_run=False, expected_revision=expected)
+
+    def delete_persisted(self, session, instance):
+        expected = instance.record_revision
+        soft_delete_object(session, ObjectSelector(euid=instance.euid,
+            record_type="lineage" if isinstance(instance, generic_instance_lineage) else "instance"),
+            actor=self.connection.app_username, dry_run=False, expected_revision=expected)
 
     def _template_query(
         self,
@@ -400,9 +423,8 @@ class TapDBBackend:
         )
         if lineage is None:
             return False
-        lineage.is_deleted = True
-        lineage.bstatus = "deleted"
-        session.flush()
+        self.update_persisted_fields(session, lineage, {"bstatus": "deleted"})
+        self.delete_persisted(session, lineage)
         return True
 
     def list_children(

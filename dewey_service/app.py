@@ -1344,9 +1344,11 @@ def create_app(
 
     @app.middleware("http")
     async def _reset_audit_principal(request: Request, call_next):
+        from dewey_service.audit import request_audit_context
         token = set_current_authenticated_user_email(None)
         try:
-            return await call_next(request)
+            with request_audit_context():
+                return await call_next(request)
         finally:
             reset_current_authenticated_user_email(token)
 
@@ -1839,6 +1841,8 @@ def create_app(
                     idempotency_key=_new_idempotency_key("ui-home-s3"),
                 )
                 result_detail = f"Registered {source_s3_uri} as {payload['artifact_type']}."
+        except HTTPException:
+            raise
         except Exception as exc:
             return _ui_home_response(
                 request,
@@ -1908,6 +1912,8 @@ def create_app(
         bucket_form = {"managed_storage_bucket": bucket_value}
         try:
             config_path, normalized_bucket = persist_managed_storage_bucket(bucket_value)
+        except HTTPException:
+            raise
         except Exception as exc:
             return _admin_page_response(
                 request,
@@ -2117,6 +2123,8 @@ def create_app(
                         artifact_euid=selected_artifact["artifact_euid"],
                         depth=4,
                     )
+        except HTTPException:
+            raise
         except Exception as exc:
             dag_message = {"state": "error", "detail": str(exc)}
             response_status = 400
@@ -2169,6 +2177,8 @@ def create_app(
         candidate_euid = str(values.get("external_reference_euid") or "").strip()
         try:
             candidate = await _validate_external_reference_euid(candidate_euid)
+        except HTTPException:
+            raise
         except Exception as exc:
             return _artifact_detail_response(
                 request,
@@ -2234,6 +2244,8 @@ def create_app(
                 },
                 idempotency_key=_new_idempotency_key("ui-external-object-relation"),
             )
+        except HTTPException:
+            raise
         except Exception as exc:
             return _artifact_detail_response(
                 request,
@@ -2460,6 +2472,8 @@ def create_app(
                             idempotency_key=_new_idempotency_key("ui-artifact-set-member"),
                         )
                     _remember_result(expanded_source, payload)
+        except HTTPException:
+            raise
         except Exception as exc:
             results.append({"status": "error", "detail": str(exc), "source": "register"})
 
@@ -2607,6 +2621,8 @@ def create_app(
                         "storage_uri": payload.get("storage_uri"),
                     }
                 )
+            except HTTPException:
+                raise
             except Exception as exc:
                 results.append({"row_number": index, "status": "error", "detail": str(exc)})
         return _artifact_page_response(
@@ -2657,6 +2673,8 @@ def create_app(
                 prefix_register_result={"state": "ok", "artifact": payload},
                 active_section="register",
             )
+        except HTTPException:
+            raise
         except Exception as exc:
             return _artifact_page_response(
                 request,
@@ -2699,6 +2717,8 @@ def create_app(
                 run_prefix_result=payload,
                 active_section="register",
             )
+        except HTTPException:
+            raise
         except Exception as exc:
             return _artifact_page_response(
                 request,
@@ -2743,6 +2763,8 @@ def create_app(
                 ),
             )
             return JSONResponse(status_code=status_code, content=payload)
+        except HTTPException:
+            raise
         except Exception as exc:
             return JSONResponse(status_code=400, content={"detail": str(exc)})
 
@@ -2849,6 +2871,8 @@ def create_app(
                 user_agent=request.headers.get("user-agent"),
                 signed_ttl_seconds=_share_duration_to_seconds(duration_days),
             )
+        except HTTPException:
+            raise
         except Exception as exc:
             return _artifact_detail_response(
                 request,
@@ -2931,6 +2955,8 @@ def create_app(
                 ),
                 status_code=201,
             )
+        except HTTPException:
+            raise
         except Exception as exc:
             return templates.TemplateResponse(
                 request,
@@ -3065,6 +3091,8 @@ def create_app(
                 ),
                 status_code=201,
             )
+        except HTTPException:
+            raise
         except Exception as exc:
             return templates.TemplateResponse(
                 request,
@@ -3113,6 +3141,8 @@ def create_app(
                 ),
                 status_code=201,
             )
+        except HTTPException:
+            raise
         except Exception as exc:
             return templates.TemplateResponse(
                 request,

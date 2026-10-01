@@ -41,7 +41,7 @@ def lifecycle() -> None:
         "It never creates databases, migrates schemas, seeds templates or prepares principals.\n"
         "Use the reviewed migration ledger with an explicit absolute operator config: "
         "tapdb --config /absolute/operator-config.yaml --help.\n"
-        "TapDB 10.1.1rc1 owns backup plan/create/verify/restore-plan/restore, "
+        "TapDB 11.0.1 owns backup plan/create/verify/restore-plan/restore, "
         "db schema migrate, db identity inventory/verify, db sequences advance/verify/reconcile, "
         "and db runtime-principal bootstrap/bind.\n"
         "Application data preparation belongs in an explicitly reviewed native lifecycle, "
@@ -58,6 +58,7 @@ def registry_conversion(
     manifest: Path = typer.Option(...),
     receipt: Path | None = typer.Option(None),
     expected_sha256: str | None = typer.Option(None),
+    attribution: Path | None = typer.Option(None, exists=True, dir_okay=False),
 ) -> None:
     """Plan or execute the explicit Dewey 10 data conversion with private receipts."""
     from dewey_service.registry_conversion import main
@@ -72,6 +73,8 @@ def registry_conversion(
         args += ["--receipt", str(receipt)]
     if expected_sha256:
         args += ["--expected-sha256", expected_sha256]
+    if attribution is not None:
+        args += ["--attribution", str(attribution)]
     main(args)
 
 
@@ -80,6 +83,7 @@ def registry_templates(
     repository_pack: Path = typer.Option(..., exists=True, dir_okay=False),
     receipt_pack: Path = typer.Option(...),
     actor: str = typer.Option(...),
+    attribution: Path = typer.Option(..., exists=True, dir_okay=False),
 ) -> None:
     """Create only the three new Dewey templates through TapDB's governed loader."""
     from dataclasses import asdict
@@ -90,7 +94,9 @@ def registry_templates(
     from dewey_service.settings import get_settings
     from dewey_service.integrations.tapdb_runtime import load_runtime_config
     import json
-    if any(not p.is_absolute() for p in (operator_config, repository_pack, receipt_pack)) or receipt_pack.exists():
+    from daylily_tapdb.security_context import Attribution
+    envelope = Attribution(**json.loads(attribution.read_text()))
+    if any(not p.is_absolute() for p in (operator_config, repository_pack, receipt_pack, attribution)) or receipt_pack.exists():
         raise typer.BadParameter("Use absolute paths and a new export receipt pack")
     runtime = load_runtime_config(get_settings())
     cfg = get_db_config(config_path=str(operator_config))
@@ -108,6 +114,7 @@ def registry_templates(
         db_user=cfg["operator_user"], db_pass=cfg.get("operator_password"),
         secret_arn=cfg.get("operator_secret_arn"), db_name=cfg["database"], engine_type=cfg["engine_type"],
         region=cfg["region"], iam_auth=cfg.get("operator_iam_auth", False), app_username=actor,
+        attribution=envelope,
         domain_code=cfg["domain_code"], owner_repo_name=cfg["owner_repo_name"], schema_name=cfg["schema_name"],
         config_identity=str(operator_config), connection_role="operator", aws_profile=cfg.get("aws_profile"),
         sslrootcert=cfg.get("sslrootcert"), echo_sql=False) as connection:
@@ -132,6 +139,7 @@ def registry_templates(
 def initialize_performance_settings(
     actor: str = typer.Option(..., help="Explicit operator audit identity"),
     listing_cache_ttl_seconds: int = typer.Option(..., min=0, max=300),
+    attribution: Path = typer.Option(..., exists=True, dir_okay=False),
 ) -> None:
     """Explicitly initialize the required global listing TTL without overwriting existing settings."""
     import json
@@ -143,7 +151,10 @@ def initialize_performance_settings(
         raise typer.BadParameter("An operator audit identity and explicit absolute DEWEY_CONFIG are required")
     settings = get_settings()
     backend = TapDBBackend(app_username=actor)
-    with principal_context(Principal(subject=actor, roles=("ADMIN",), service=True), maintenance=True):
+    from dewey_service.audit import explicit_attribution_context
+    if not attribution.is_absolute():
+        raise typer.BadParameter("Attribution must use an explicit absolute JSON path")
+    with explicit_attribution_context(attribution), principal_context(Principal(subject=actor, roles=("ADMIN",), service=True), maintenance=True):
         with backend.session_scope(commit=True) as session:
             backend.lock_external_key(session, operation="registry.defaults", key="service_defaults")
             row = backend.find_by_json_field(session, template_code=POLICY_TEMPLATE,
