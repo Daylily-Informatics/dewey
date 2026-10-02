@@ -1,4 +1,4 @@
-"""Focused 11.0.1 transaction and optimistic concurrency contracts."""
+"""Focused 11.0.2 transaction and optimistic concurrency contracts."""
 from types import SimpleNamespace
 from contextlib import contextmanager
 

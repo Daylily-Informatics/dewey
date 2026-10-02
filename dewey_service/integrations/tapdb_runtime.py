@@ -24,7 +24,7 @@ def _utcnow() -> str:
     return datetime.now(UTC).isoformat()
 
 
-TAPDB_VERSION = "11.0.1"
+TAPDB_VERSION = "11.0.2"
 MERIDIAN_VERSION = "0.4.8"
 
 

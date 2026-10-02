@@ -41,7 +41,7 @@ def lifecycle() -> None:
         "It never creates databases, migrates schemas, seeds templates or prepares principals.\n"
         "Use the reviewed migration ledger with an explicit absolute operator config: "
         "tapdb --config /absolute/operator-config.yaml --help.\n"
-        "TapDB 11.0.1 owns backup plan/create/verify/restore-plan/restore, "
+        "TapDB 11.0.2 owns backup plan/create/verify/restore-plan/restore, "
         "db schema migrate, db identity inventory/verify, db sequences advance/verify/reconcile, "
         "and db runtime-principal bootstrap/bind.\n"
         "Application data preparation belongs in an explicitly reviewed native lifecycle, "
