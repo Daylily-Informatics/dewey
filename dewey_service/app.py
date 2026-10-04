@@ -227,17 +227,21 @@ class ShareCreateRequest(BaseModel):
     allowed_users: list[str] = Field(default_factory=list)
     allowed_domains: list[str] = Field(default_factory=list)
     allowed_groups: list[str] = Field(default_factory=list)
-    delivery_modes: list[str] = Field(default_factory=list)
+    delivery_modes: list[str] = Field(default_factory=lambda: ["gateway"])
     expires_at: str | None = None
     ttl_seconds: int | None = None
+    grants: list[dict[str, Any]] | None = None
+    include_patterns: list[str] = Field(default_factory=lambda: ["**"])
+    exclude_patterns: list[str] = Field(default_factory=list)
+    denied_emails: list[str] = Field(default_factory=list)
 
 
 class ShareAccessPackageRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     delivery_mode: str = Field(
-        default="presigned_s3_manifest",
-        pattern="^(presigned_s3|presigned_s3_manifest|cloudfront_signed_url|cloudfront_signed_cookie|dewey_html_browser)$",
+        default="gateway",
+        pattern="^(gateway|presigned|presigned_s3|presigned_s3_manifest|dewey_html_browser)$",
     )
     actor_email: str | None = None
     actor_groups: list[str] = Field(default_factory=list)
@@ -248,6 +252,7 @@ class ShareRevokeRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     reason: str | None = None
+    policy_revision: int = Field(ge=1)
 
 
 class ShareRootCreateRequest(BaseModel):
@@ -406,6 +411,8 @@ def create_app(
     service: DeweyService | None = None,
 ) -> FastAPI:
     settings = settings or get_settings()
+    from dewey_service.share_routing import validate_sharing_configuration
+    validate_sharing_configuration(settings)
     allow_local_domain_access = not settings.is_production
     configured_allowed_hosts = settings.network_allowed_hosts
 
@@ -486,6 +493,7 @@ def create_app(
         allow_origin_regex=build_allowed_origin_regex(
             allow_local=allow_local_domain_access,
             additional_hosts=configured_allowed_hosts,
+            excluded_host_suffix=settings.share_content_host_suffix,
         ),
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -528,6 +536,7 @@ def create_app(
             dag_v2=fragment["dag_v2"],
         )
 
+    from dewey_service.registry_access import principal as managed_share_auth_dep
     api_auth_dep = require_api_auth(settings)
     observability_auth_dep = require_observability_access(settings)
     session_or_api_auth_dep = require_session_or_api_auth(settings)
@@ -1355,14 +1364,16 @@ def create_app(
     @app.middleware("http")
     async def _enforce_origin_allowlist(request: Request, call_next):
         origin = request.headers.get("origin")
-        if origin == "null" and request.method == "GET" and request.url.path.startswith("/previews/"):
-            # Opaque report frames authenticate each asset using their issued,
-            # short-lived preview capability. This exception grants no API access.
+        host = request.url.hostname or ""
+        if host.endswith("." + settings.share_content_host_suffix):
+            # The outer host boundary admits only isolated preview paths and
+            # exact application/current-content origins on this subtree.
             return await call_next(request)
         if origin and not is_allowed_origin(
             origin,
             allow_local=allow_local_domain_access,
             additional_hosts=configured_allowed_hosts,
+            excluded_host_suffix=settings.share_content_host_suffix,
         ):
             return HTMLResponse(status_code=403, content="Origin not allowed")
         return await call_next(request)
@@ -1604,12 +1615,15 @@ def create_app(
             detail=str(probe["detail"]),
         )
         ready = str(probe.get("status") or "") == "ok"
+        sharing_ready = service.sharing_upgrade_ready() if ready else False
+        ready = ready and sharing_ready
         payload = build_readyz_payload(
             request,
             started_at=app.state.observability.started_at,
             database_check=probe,
             ready=ready,
         )
+        payload["sharing_schema"] = "verified" if sharing_ready else "conversion_required"
         return JSONResponse(status_code=200 if ready else 503, content=payload)
 
     @app.get("/health")
@@ -3047,6 +3061,7 @@ def create_app(
                 share_euid,
                 revoked_by=str(profile.get("email") or "").strip(),
                 reason=str(form.get("reason") or "").strip() or None,
+                policy_revision=int(form["policy_revision"]) if form.get("policy_revision") else None,
             )
             return templates.TemplateResponse(
                 request,
@@ -3956,7 +3971,7 @@ def create_app(
 
     @app.post(
         "/api/v1/shares",
-        dependencies=[Depends(api_auth_dep)],
+        dependencies=[Depends(managed_share_auth_dep)],
     )
     async def create_share(
         body: ShareCreateRequest,
@@ -3976,6 +3991,10 @@ def create_app(
                 delivery_modes=body.delivery_modes,
                 expires_at=body.expires_at,
                 ttl_seconds=body.ttl_seconds,
+                grants=body.grants,
+                include_patterns=body.include_patterns,
+                exclude_patterns=body.exclude_patterns,
+                denied_emails=body.denied_emails,
                 idempotency_key=_require_idempotency_key(idempotency_key),
             )
             return {"status_code": status_code, **payload}
@@ -3990,7 +4009,7 @@ def create_app(
 
     @app.get(
         "/api/v1/shares/{share_euid}",
-        dependencies=[Depends(api_auth_dep)],
+        dependencies=[Depends(managed_share_auth_dep)],
     )
     async def get_share(share_euid: str) -> dict[str, Any]:
         try:
@@ -4003,20 +4022,14 @@ def create_app(
         request: Request,
         share_euid: str,
         body: ShareAccessPackageRequest,
-        auth_context: dict[str, Any] = Depends(session_or_api_auth_dep),
+        actor = Depends(managed_share_auth_dep),
     ) -> dict[str, Any]:
-        profile = auth_context.get("profile") if isinstance(auth_context, dict) else None
-        actor_email = str(body.actor_email or "").strip()
-        actor_groups = list(body.actor_groups or [])
-        if isinstance(profile, dict):
-            actor_email = str(profile.get("email") or "").strip()
-            actor_groups = list(profile.get("groups") or [])
         try:
             return service.create_share_access_package(
                 share_euid,
                 delivery_mode=body.delivery_mode,
-                actor_email=actor_email,
-                actor_groups=actor_groups,
+                actor_email=actor.email,
+                actor_groups=list(actor.groups),
                 ip=request.client.host if request.client else None,
                 user_agent=request.headers.get("user-agent"),
                 signed_ttl_seconds=body.signed_ttl_seconds,
@@ -4032,17 +4045,18 @@ def create_app(
 
     @app.post(
         "/api/v1/shares/{share_euid}/revoke",
-        dependencies=[Depends(api_auth_dep)],
+        dependencies=[Depends(managed_share_auth_dep)],
     )
     async def revoke_share(share_euid: str, body: ShareRevokeRequest) -> dict[str, Any]:
         try:
-            return service.revoke_share(share_euid, revoked_by="api", reason=body.reason)
+            return service.revoke_share(share_euid, revoked_by="api", reason=body.reason,
+                                        policy_revision=body.policy_revision)
         except DeweyNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.get(
         "/api/v1/shares/{share_euid}/audit",
-        dependencies=[Depends(api_auth_dep)],
+        dependencies=[Depends(managed_share_auth_dep)],
     )
     async def list_share_audit(share_euid: str) -> dict[str, Any]:
         try:
@@ -4052,7 +4066,7 @@ def create_app(
 
     @app.post(
         "/api/v1/share-roots",
-        dependencies=[Depends(api_auth_dep)],
+        dependencies=[Depends(managed_share_auth_dep)],
     )
     async def create_share_root(
         body: ShareRootCreateRequest,
@@ -4075,7 +4089,7 @@ def create_app(
 
     @app.post(
         "/api/v1/share-roots/{share_root_euid}/subsets",
-        dependencies=[Depends(api_auth_dep)],
+        dependencies=[Depends(managed_share_auth_dep)],
     )
     async def create_share_root_subset(
         share_root_euid: str,
@@ -4095,6 +4109,10 @@ def create_app(
                 delivery_modes=body.delivery_modes,
                 expires_at=body.expires_at,
                 ttl_seconds=body.ttl_seconds,
+                grants=body.grants,
+                include_patterns=body.include_patterns,
+                exclude_patterns=body.exclude_patterns,
+                denied_emails=body.denied_emails,
                 idempotency_key=_require_idempotency_key(idempotency_key),
             )
             return {"status_code": status_code, **payload}
@@ -4258,4 +4276,10 @@ def create_app(
 
     from dewey_service.performance import PerformanceMiddleware
     app.add_middleware(PerformanceMiddleware)
+    from dewey_service.share_routing import ShareHostBoundaryMiddleware
+    from dewey_service.share_context import ManagedShareIngressMiddleware
+    app.add_middleware(ShareHostBoundaryMiddleware, settings=settings)
+    # Last-added middleware runs first: use the real ASGI transport peer,
+    # before sessions, principals, host dispatch or forwarded-header handling.
+    app.add_middleware(ManagedShareIngressMiddleware, settings=settings)
     return app

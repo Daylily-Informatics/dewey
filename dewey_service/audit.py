@@ -70,6 +70,11 @@ def human_issuer(settings) -> str:
 _EXPLICIT_ATTRIBUTION = ContextVar("dewey_explicit_attribution", default=None)
 
 
+def current_explicit_attribution():
+    """Return the explicit native-operation envelope, never inferred identity."""
+    return _EXPLICIT_ATTRIBUTION.get()
+
+
 _REQUEST_ID: ContextVar[str | None] = ContextVar("dewey_audit_request_id", default=None)
 
 

@@ -48,6 +48,7 @@ SENSITIVE_CONFIG_KEY_PARTS = {
     "api_key",
     "access_key",
     "secret_key",
+    "assertion",
 }
 
 
@@ -261,6 +262,12 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "share_approved_origins": "share_approved_origins",
         "share_default_signed_ttl_seconds": "share_default_signed_ttl_seconds",
         "share_max_lifetime_days": "share_max_lifetime_days",
+        "share_trusted_proxy_peer": "share_trusted_proxy_peer",
+        "share_ingress_assertion_header": "share_ingress_assertion_header",
+        "share_ingress_assertion": "share_ingress_assertion",
+        "share_application_origin": "share_application_origin",
+        "share_content_host_suffix": "share_content_host_suffix",
+        "share_session_generation": "share_session_generation",
         "auth_cognito_domain": "cognito_domain",
         "auth_cognito_app_client_id": "cognito_app_client_id",
         "auth_cognito_app_client_secret": "cognito_app_client_secret",
@@ -543,6 +550,38 @@ class Settings(BaseSettings):
     share_approved_origins: list[str] = Field(default_factory=list)
     share_default_signed_ttl_seconds: int = 900
     share_max_lifetime_days: int = 3650
+    share_trusted_proxy_peer: str = ""
+    share_ingress_assertion_header: str = "X-Dewey-Tailnet-Assertion"
+    share_ingress_assertion: str = ""
+    share_application_origin: str = ""
+    share_content_host_suffix: str = ""
+    share_session_generation: str = ""
+
+    @field_validator("share_application_origin")
+    @classmethod
+    def validate_share_origin(cls, value: str) -> str:
+        if not value:
+            return value
+        parsed = urlsplit(value)
+        if (parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password
+                or parsed.path or parsed.query or parsed.fragment or parsed.port not in {None, 443}):
+            raise ValueError("share_application_origin must be an exact HTTPS origin without path")
+        return value
+
+    @field_validator("share_content_host_suffix")
+    @classmethod
+    def validate_content_suffix(cls, value: str) -> str:
+        if value and (len(value) > 220 or not all(re.fullmatch(r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?", label)
+                                                for label in value.split(".")) or "." not in value):
+            raise ValueError("share_content_host_suffix must be an explicit lowercase DNS suffix")
+        return value
+
+    @field_validator("share_ingress_assertion_header")
+    @classmethod
+    def validate_ingress_header(cls, value: str) -> str:
+        if not re.fullmatch(r"[A-Za-z0-9-]+", value):
+            raise ValueError("share_ingress_assertion_header must be an HTTP header name")
+        return value
 
     # Literature integration
     literature_managed_copy_allowed_domains: str = "europepmc.org,ncbi.nlm.nih.gov"

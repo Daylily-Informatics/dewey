@@ -101,20 +101,11 @@ def owner_clause(data, actor: Principal):
 
 
 def share_clause(data, actor: Principal, *, active_only: bool = True):
-    allowed = owner_clause(data, actor)
-    criteria = []
-    if actor.email:
-        criteria.append(data["allowed_users"].contains([actor.email]))
-        criteria.extend(data["allowed_domains"].contains([d]) for d in domain_suffixes(actor.email))
-    criteria.extend(data["allowed_groups"].contains([g]) for g in actor.groups)
-    criteria.append(data["audience"].astext == "authenticated")
-    if actor.internal:
-        criteria.append(data["audience"].astext == "internal")
-    recipients = or_(*criteria)
-    if active_only:
-        now = datetime.now(timezone.utc)
-        recipients = and_(data["status"].astext == "active", cast(data["expires_at"].astext, DateTime(timezone=True)) > now, recipients)
-    return or_(allowed, recipients)
+    """SQL discovery exposes management rights only; recipients use canonical evaluation."""
+    from dewey_service.share_context import share_context_available
+    if not share_context_available():
+        return false()
+    return owner_clause(data, actor)
 
 
 def direct_record_clause(session, model, action: str = "metadata"):
@@ -148,21 +139,6 @@ def direct_record_clause(session, model, action: str = "metadata"):
         edge.is_deleted.is_(False), policy.is_deleted.is_(False),
         policy.type == "registry_policy", allowed,
     )).correlate(model)
-    if action in {"metadata", "download"}:
-        share = aliased(generic_instance)
-        share_edge = aliased(generic_instance_lineage)
-        now = datetime.now(timezone.utc)
-        share_grant = exists(select(literal(1)).select_from(share_edge).join(
-            share, share.uid == share_edge.child_instance_uid
-        ).where(
-            share_edge.parent_instance_uid == model.uid,
-            share_edge.relationship_type == "has_share",
-            share_edge.is_deleted.is_(False), share.is_deleted.is_(False),
-            share.type == "share", share.json_addl["status"].astext == "active",
-            cast(share.json_addl["expires_at"].astext, DateTime(timezone=True)) > now,
-            share_clause(share.json_addl, actor),
-        )).correlate(model)
-        policy_grant = or_(policy_grant, share_grant)
     return and_(model.bstatus != "archived", policy_grant)
 
 
@@ -219,14 +195,21 @@ def record_clause(session, model, action: str = "metadata"):
 
 def visibility_clause(session, model, *, types=None):
     actor = _PRINCIPAL.get()
-    if maintenance_mode() or (actor is not None and actor.admin):
+    if maintenance_mode():
         return true()
+    from dewey_service.share_context import share_context_available
+    protected_types = {"share_grant", "share_event"}
+    if not share_context_available():
+        protected_types.add("share")
+    visible_type = ~model.type.in_(protected_types)
+    if actor is not None and actor.admin:
+        return visible_type
     if actor is None:
         return false()
     if types and set(types) <= REGISTRY_TYPES:
         return record_clause(session, model)
     if types and not set(types) & {*REGISTRY_TYPES, "share", "external_object", "external_object_relation"}:
-        return true()
+        return visible_type
     from daylily_tapdb import generic_instance, generic_instance_lineage
     target = aliased(generic_instance)
     edge = aliased(generic_instance_lineage)
@@ -256,13 +239,13 @@ def visibility_clause(session, model, *, types=None):
         external_edge.parent_instance_uid == model.uid,
         external_edge.relationship_type == "is_external_relation_for",
         external_edge.is_deleted.is_(False))).correlate(model)
-    return or_(
+    return and_(visible_type, or_(
         and_(model.type.in_(REGISTRY_TYPES), record_clause(session, model)),
         and_(model.type == "share", or_(share_clause(model.json_addl, actor), can_manage_share)),
         and_(model.type == "external_object_relation", readable_relation),
         and_(model.type == "external_object", or_(readable_external, and_(~any_external_link, literal(actor.internal)))),
         ~model.type.in_([*REGISTRY_TYPES, "share", "external_object", "external_object_relation"]),
-    )
+    ))
 
 
 def require_record(backend, session, record, action: str):

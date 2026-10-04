@@ -38,6 +38,17 @@ class AccessRequest(BaseModel):
     ttl_seconds: int | None = Field(default=None, ge=1, le=3600)
 
 
+class RecipientGrantRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    recipient_type: Literal["email", "domain"]
+    recipient: str
+    include_subdomains: bool = False
+    include_patterns: list[str] = Field(default_factory=lambda: ["**"])
+    exclude_patterns: list[str] = Field(default_factory=list)
+    expires_at: str | None = None
+    target_euids: list[str] | None = None
+
+
 class ShareRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str | None = None
@@ -47,6 +58,17 @@ class ShareRequest(BaseModel):
     allowed_domains: list[str] = Field(default_factory=list)
     expires_at: str | None = None
     lifetime_days: int | None = Field(default=None, ge=1)
+    grants: list[RecipientGrantRequest] | None = None
+    include_patterns: list[str] = Field(default_factory=lambda: ["**"])
+    exclude_patterns: list[str] = Field(default_factory=list)
+    denied_emails: list[str] = Field(default_factory=list)
+    delivery_modes: list[Literal["gateway", "presigned"]] = Field(default_factory=lambda: ["gateway"])
+
+
+class GrantRevocationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    policy_revision: int = Field(ge=1)
+    reason: str | None = None
 
 
 class UploadRequest(BaseModel):
@@ -74,6 +96,8 @@ def attach_registry_api(app, *, templates):
     router = APIRouter(prefix="/api/v1", tags=["EUID registry"], dependencies=[Depends(principal)])
     from dewey_service.report_preview import attach_report_preview
     attach_report_preview(app, router, service)
+    from dewey_service.share_gateway import attach_share_gateway
+    attach_share_gateway(app, router, service)
 
     @app.middleware("http")
     async def private_registry_responses(request, call_next):
@@ -196,6 +220,10 @@ def attach_registry_api(app, *, templates):
         code, result = service.share_registry(euid, data.model_dump(exclude_none=True), idempotency_key=idempotency_key)
         return JSONResponse(result, status_code=code)
 
+    @router.post("/records/{euid}/shares/preview")
+    def preview_selection(euid: str, data: ShareRequest):
+        return service.preview_share_selection(euid, data.model_dump(exclude_none=True))
+
     @router.post("/registry/search")
     def search(data: dict[str, Any] = Body(default={})):
         return service.search_registry(data)
@@ -204,17 +232,37 @@ def attach_registry_api(app, *, templates):
     def search_counts(data: dict[str, Any] = Body(default={})):
         return service.search_registry(data, counts_only=True)
 
+    @router.get("/registry/shares")
+    def share_index(page: int = Query(1, ge=1), page_size: int = Query(25, ge=1, le=100),
+            q: str = "", sort: Literal["created_at", "name"] = "created_at"):
+        return service.list_registry_shares(page=page, page_size=page_size, q=q, sort=sort)
+
     @router.get("/registry/shares/{euid}")
     def share_detail(euid: str):
         return service.registry_share_detail(euid)
+
+    @router.get("/registry/shares/{euid}/contents")
+    def share_contents(euid: str, target_euid: str | None = None, prefix: str = "",
+                       limit: int = Query(200, ge=1, le=1000), continuation_token: str | None = None):
+        return service.list_share_contents(euid, target_euid=target_euid, prefix=prefix,
+            limit=limit, continuation_token=continuation_token)
+
+    @router.get("/registry/shares/{euid}/activity")
+    def share_activity(euid: str, limit: int = Query(100, ge=1, le=200), continuation_token: str | None = None):
+        return service.list_share_audit(euid, limit=limit, continuation_token=continuation_token)
+
+    @router.post("/registry/shares/{euid}/grants/{grant_euid}/revoke")
+    def revoke_grant(euid: str, grant_euid: str, data: GrantRevocationRequest):
+        return service.revoke_share_grant(euid, grant_euid, policy_revision=data.policy_revision, reason=data.reason)
 
     @router.patch("/registry/shares/{euid}")
     def share_edit(euid: str, data: dict[str, Any] = Body(...)):
         return service.modify_registry_share(euid, data)
 
     @router.post("/registry/shares/{euid}/revoke")
-    def share_revoke(euid: str, data: dict[str, Any] = Body(default={})):
-        return service.revoke_share(euid, revoked_by=principal().subject, reason=data.get("reason"))
+    def share_revoke(euid: str, data: GrantRevocationRequest):
+        return service.revoke_share(euid, revoked_by=principal().subject, reason=data.reason,
+                                    policy_revision=data.policy_revision)
 
     @router.post("/registry/shares/{euid}/invite")
     def invite(euid: str, data: dict[str, str] = Body(...)):
@@ -307,6 +355,9 @@ def attach_registry_api(app, *, templates):
     app.include_router(router)
 
     def page(request: Request, section: str, *, euid=""):
+        if section in {"Sharing", "Share"}:
+            from dewey_service.share_context import require_trusted_tailnet
+            require_trusted_tailnet(request)
         actor = getattr(request.state, "registry_principal", None)
         if actor is None:
             next_path = request.url.path

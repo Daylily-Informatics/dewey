@@ -85,6 +85,7 @@ def is_allowed_origin(
     *,
     allow_local: bool,
     additional_hosts: Iterable[str] | None = None,
+    excluded_host_suffix: str | None = None,
 ) -> bool:
     candidate = str(origin or "").strip()
     if not candidate:
@@ -94,6 +95,8 @@ def is_allowed_origin(
         return False
     host = _normalize_host(candidate)
     if not host:
+        return False
+    if excluded_host_suffix and (host == excluded_host_suffix or host.endswith("." + excluded_host_suffix)):
         return False
     if is_local_host(host):
         return allow_local or _is_configured_host(host, additional_hosts)
@@ -123,6 +126,7 @@ def build_allowed_origin_regex(
     *,
     allow_local: bool,
     additional_hosts: Iterable[str] | None = None,
+    excluded_host_suffix: str | None = None,
 ) -> str:
     domain_expr = "|".join(re.escape(item) for item in APPROVED_WEB_DOMAIN_SUFFIXES)
     patterns = [
@@ -134,4 +138,7 @@ def build_allowed_origin_regex(
         pattern = _origin_pattern_for_host(host, allow_http=is_local_host(host))
         if pattern:
             patterns.append(pattern)
-    return rf"^(?:{'|'.join(patterns)})$"
+    exclusion = ""
+    if excluded_host_suffix:
+        exclusion = rf"(?!https?://(?:[A-Za-z0-9-]+\.)*{re.escape(excluded_host_suffix)}(?::\d+)?(?:/|$))"
+    return rf"^{exclusion}(?:{'|'.join(patterns)})$"

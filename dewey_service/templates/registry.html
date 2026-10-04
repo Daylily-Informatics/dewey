@@ -4,6 +4,8 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ section }} · Dewey</title>
   <link rel="stylesheet" href="{{ static_url('registry.css') }}">
+  <link rel="stylesheet" href="{{ static_url('sharing.css') }}">
+  <script src="{{ static_url('sharing.js') }}" defer></script>
   <script src="{{ static_url('registry.js') }}" defer></script>
 </head>
 <body data-section="{{ section }}" data-euid="{{ euid }}" data-admin="{{ 'true' if actor.admin else 'false' }}" data-writable="{{ 'true' if actor.writable else 'false' }}" data-internal="{{ 'true' if actor.internal else 'false' }}">

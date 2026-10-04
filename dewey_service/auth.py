@@ -107,7 +107,7 @@ def build_cognito_web_session_config(
         redirect_uri=settings.cognito_redirect_uri,
         logout_uri=settings.cognito_logout_url,
         session_secret_key=settings.session_secret_key,
-        session_cookie_name="dewey_session",
+        session_cookie_name="__Host-dewey_session" if _origin(settings.cognito_redirect_uri).startswith("https://") else "dewey_session",
         public_base_url=_origin(settings.cognito_redirect_uri),
         client_secret=settings.cognito_app_client_secret or None,
         allow_insecure_http=_origin(settings.cognito_redirect_uri).startswith("http://"),
@@ -138,7 +138,7 @@ def build_web_session_config(
         redirect_uri=settings.external_broker_callback_url,
         logout_uri=public_base_url,
         session_secret_key=settings.session_secret_key,
-        session_cookie_name="dewey_session",
+        session_cookie_name="__Host-dewey_session" if public_base_url.startswith("https://") else "dewey_session",
         public_base_url=public_base_url,
         allow_insecure_http=public_base_url.startswith("http://"),
         server_instance_id=server_instance_id or secrets.token_urlsafe(16),
@@ -214,7 +214,7 @@ def start_browser_login(
 
 def _safe_next_path(value: str | None) -> str:
     cleaned = str(value or "").strip()
-    return cleaned if cleaned.startswith("/") else "/ui"
+    return cleaned if cleaned.startswith("/") and not cleaned.startswith("//") and "\\" not in cleaned else "/ui"
 
 
 def start_external_broker_login(
@@ -248,6 +248,7 @@ async def complete_browser_login(
     code: str | None,
     state: str | None,
 ) -> RedirectResponse:
+    previous_user = load_session_principal(request)
     try:
         response = await complete_cognito_callback(
             request,
@@ -263,6 +264,9 @@ async def complete_browser_login(
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
+    if load_session_principal(request) is not None:
+        from dewey_service.preview_sessions import establish_session_binding
+        establish_session_binding(request, config, previous_user=previous_user)
     return response
 
 
@@ -373,6 +377,7 @@ async def complete_external_broker_login(
     code: str | None,
     state: str | None,
 ) -> RedirectResponse:
+    previous_user = load_session_principal(request)
     if not code:
         return RedirectResponse(
             url="/auth/error?reason=missing_code",
@@ -399,6 +404,8 @@ async def complete_external_broker_login(
             )
         principal = resolve_external_broker_principal(user, request)
         store_session_principal(request, config, principal)
+        from dewey_service.preview_sessions import establish_session_binding
+        establish_session_binding(request, config, previous_user=previous_user)
     except CognitoWebAuthError as exc:
         clear_ui_session(request)
         return RedirectResponse(
@@ -414,6 +421,8 @@ async def complete_external_broker_login(
 
 
 def clear_ui_session(request: Request) -> None:
+    from dewey_service.preview_sessions import revoke_session_binding
+    revoke_session_binding(request)
     clear_session_principal(request)
     config = getattr(getattr(request.app, "state", None), "web_session_config", None)
     if config is not None:
@@ -501,6 +510,17 @@ def _load_ui_profile(request: Request) -> dict[str, Any] | None:
     principal = load_session_principal(request)
     if principal is not None:
         settings: Settings = request.app.state.settings
+        if settings.share_session_generation:
+            from dewey_service.preview_sessions import current_session_binding
+            try:
+                current_session_binding(request, request.app.state.service)
+            except HTTPException as exc:
+                if exc.status_code != 401:
+                    raise
+                clear_session_principal(request)
+                request.state.cognito_auth_reason = "session_expired"
+                set_current_authenticated_user_email(None)
+                return None
         request.state.auth_mode = principal.auth_mode
         if principal.auth_mode == "external_broker":
             canonical = principal.app_context.get("canonical_user", {}).get("canonical_user_id")

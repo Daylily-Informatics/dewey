@@ -105,7 +105,7 @@ class RegistryStorageServiceMixin:
                 return self.require_storage_access(bucket, key, action=action, session=opened)
         authorized, _ = self._storage_access_batch(session, bucket, [key], action=action)
         if not authorized[key]:
-            raise HTTPException(403, "This S3 path is restricted or has not been shared with you")
+            raise HTTPException(403, "This S3 path requires independent access or an exact share-scoped operation")
 
     def registry_buckets(self, continuation_token=None, locations_page=1, refresh=False):
         actor = principal()
@@ -169,7 +169,18 @@ class RegistryStorageServiceMixin:
 
     def registry_object(self, uri: str):
         bucket, key, _ = parse_s3_uri(uri)
-        self.require_storage_access(bucket, key, action="metadata")
+        with self.backend.session_scope(commit=False) as session:
+            independent, _ = self._storage_access_batch(session, bucket, [key], action="metadata")
+        if not independent[key]:
+            from dewey_service.storage import storage_authorization_context
+            receipt = self.authorize_shared_storage(bucket, key, action="metadata")
+            def scope(request_bucket, request_key, action):
+                if (request_bucket, request_key) != (bucket, key) or action != "metadata":
+                    raise HTTPException(403, "Storage request exceeds the shared object")
+            with storage_authorization_context(scope):
+                result = asdict(self._require_storage().head_object(bucket=bucket, key=key, version_id=receipt["version_id"],
+                    request_payer=self._request_payer_for_bucket(bucket)))
+            return {**result, "uri": uri, "registered_artifact": None}
         result = asdict(self._require_storage().head_object(bucket=bucket, key=key))
         with self.backend.session_scope(commit=False) as session:
             result["registered_artifact"] = self._artifact_for_storage_uri(session, storage_uri=uri)
@@ -188,6 +199,29 @@ class RegistryStorageServiceMixin:
 
     def registry_download(self, *, euid: str | None = None, uri: str | None = None, relative_key="", version_id=None, ttl_seconds=None):
         actor = principal()
+        # Determine the exact bytes first. A share-only right must pass the same explicit
+        # presign capability check as the share-scoped endpoint, including raw-URI aliases.
+        share_location = None
+        with self.backend.session_scope(commit=False) as session:
+            if euid:
+                candidate = self._registry_query(session, scopes=("artifact",), authorize=False).filter(
+                    generic_instance.euid == euid).first()
+                if candidate is not None:
+                    raw = normalize_instance_payload(candidate)
+                    if raw.get("storage_backend") == "s3" and (raw.get("storage_kind") == "object" or relative_key):
+                        if raw.get("storage_kind") == "object" and relative_key:
+                            raise ValueError("relative_key is only valid for a Prefix EUID")
+                        share_location = (raw["bucket"], raw["key"] + relative_key)
+            elif uri:
+                share_location = parse_s3_uri(uri)[:2]
+            if share_location:
+                independently_allowed, _ = self._storage_locations_batch(session, [share_location], action="download")
+                if not independently_allowed[share_location]:
+                    receipt = self.authorize_shared_storage(*share_location, action="presign")
+                    if version_id is not None and version_id != receipt["version_id"]:
+                        raise ValueError("Requested version differs from the shared target")
+                    return self.presign_share_object(receipt["share_euid"], receipt["target_euid"],
+                        relative_key=receipt["relative_key"], ttl_seconds=ttl_seconds)
         if euid:
             with self.backend.session_scope(commit=False) as session:
                 record = self._registry_record(session, euid, action="download")
@@ -228,25 +262,7 @@ class RegistryStorageServiceMixin:
         if not 1 <= ttl <= 3600:
             raise ValueError("Delivery lifetime must be 1..3600 seconds")
         with self.backend.session_scope(commit=True) as session:
-            source = aliased(generic_instance)
-            now = datetime.now(timezone.utc)
-            shares = session.query(generic_instance).join(generic_instance_lineage,
-                generic_instance_lineage.child_instance_uid == generic_instance.uid).join(source,
-                source.uid == generic_instance_lineage.parent_instance_uid).filter(
-                generic_instance.type == "share", generic_instance.is_deleted.is_(False),
-                generic_instance_lineage.relationship_type == "has_share", generic_instance_lineage.is_deleted.is_(False),
-                source.type == "artifact", source.is_deleted.is_(False), source.bstatus != "archived",
-                source.json_addl["storage_backend"].astext == "s3", source.json_addl["bucket"].astext == bucket,
-                or_(source.json_addl["key"].astext == key, and_(source.json_addl["storage_kind"].astext == "prefix",
-                    func.left(literal(key), func.length(source.json_addl["key"].astext)) == source.json_addl["key"].astext)),
-                generic_instance.json_addl["status"].astext == "active",
-                cast(generic_instance.json_addl["expires_at"].astext, DateTime(timezone=True)) > now,
-                share_clause(generic_instance.json_addl, actor)).all()
-            if shares:
-                remaining = min(int((datetime.fromisoformat(normalize_instance_payload(s)["expires_at"].replace("Z", "+00:00")) - now).total_seconds()) for s in shares)
-                if remaining < 1:
-                    raise HTTPException(410, "The applicable share has expired")
-                ttl = min(ttl, remaining)
+            shares = []
             url = storage.generate_presigned_get_url(bucket=bucket, key=key, version_id=obj.version_id, expires_in=ttl)
             receipt = self.backend.create_instance(session, template_code=OPERATION_TEMPLATE,
                 name="Download credential issued", json_addl={"operation": "download_issued", "actor": actor.subject,

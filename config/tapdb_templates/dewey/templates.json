@@ -182,6 +182,32 @@
       "bstatus": "active",
       "is_singleton": false,
       "json_addl": {}
+    },
+    {
+      "name": "Dewey Share Grant",
+      "polymorphic_discriminator": "data_template",
+      "category": "access",
+      "type": "share_grant",
+      "subtype": "generic",
+      "version": "1.0",
+      "instance_prefix": "DGX",
+      "instance_polymorphic_identity": "data_instance",
+      "bstatus": "active",
+      "is_singleton": false,
+      "json_addl": {}
+    },
+    {
+      "name": "Dewey Share Event",
+      "polymorphic_discriminator": "data_template",
+      "category": "operational",
+      "type": "share_event",
+      "subtype": "generic",
+      "version": "1.0",
+      "instance_prefix": "DGX",
+      "instance_polymorphic_identity": "data_instance",
+      "bstatus": "active",
+      "is_singleton": false,
+      "json_addl": {}
     }
   ]
 }

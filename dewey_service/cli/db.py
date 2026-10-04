@@ -108,8 +108,10 @@ def registry_templates(
     _, pack, _ = read_repository_pack(repository_pack)
     expected = {("access", "registry_policy", "generic", "1.0"),
         ("access", "api_client", "generic", "1.0"), ("operational", "storage_operation", "generic", "1.0")}
-    if {template_key(t) for t in pack["templates"]} != expected or len(pack["templates"]) != 3:
-        raise typer.BadParameter("This operation accepts only the three Dewey 10 templates")
+    sharing = {("access", "share_grant", "generic", "1.0"), ("operational", "share_event", "generic", "1.0")}
+    keys = {template_key(t) for t in pack["templates"]}
+    if keys not in (expected, sharing) or len(pack["templates"]) != len(keys):
+        raise typer.BadParameter("This operation accepts only the exact registry10 or sharing2 release pack")
     with TAPDBConnection(db_hostname=f"{cfg['host']}:{cfg['port']}", db_hostaddr=cfg.get("hostaddr"),
         db_user=cfg["operator_user"], db_pass=cfg.get("operator_password"),
         secret_arn=cfg.get("operator_secret_arn"), db_name=cfg["database"], engine_type=cfg["engine_type"],
@@ -180,6 +182,42 @@ def initialize_performance_settings(
     ccyo_out.print_text(json.dumps(result))
 
 
+def upgrade_sharing(
+    phase: str = typer.Option(..., help="inventory, apply, or verify; never runs at startup"),
+    inventory: Path = typer.Option(..., help="Absolute private reviewed inventory path"),
+    actor: str = typer.Option(...),
+    attribution: Path = typer.Option(..., exists=True, dir_okay=False),
+    expected_sha256: str | None = typer.Option(None),
+    receipt: Path | None = typer.Option(None),
+) -> None:
+    import json
+    import os
+    from dewey_service.audit import explicit_attribution_context
+    from dewey_service.registry_access import Principal, principal_context
+    from dewey_service.service import DeweyService
+    from dewey_service.tapdb_backend import TapDBBackend
+    from dewey_service import share_upgrade
+    if phase not in {"inventory", "apply", "verify"} or not actor.strip():
+        raise typer.BadParameter("Explicit phase and operator identity required")
+    if not Path(os.environ.get("DEWEY_CONFIG", "")).is_absolute() or not inventory.is_absolute() or not attribution.is_absolute():
+        raise typer.BadParameter("DEWEY_CONFIG, inventory and attribution paths must be absolute")
+    if phase != "inventory" and (not expected_sha256 or receipt is None or not receipt.is_absolute() or receipt.exists()):
+        raise typer.BadParameter("Apply/verify require reviewed digest and a new absolute receipt path")
+    backend = TapDBBackend(app_username=actor)
+    service = DeweyService(backend)
+    with explicit_attribution_context(attribution), principal_context(Principal(subject=actor, roles=("ADMIN",), service=True), maintenance=True):
+        if phase == "inventory":
+            result = share_upgrade.inventory(service)
+            share_upgrade.write_private(inventory, result)
+            summary = {"phase": phase, "share_count": len(result["shares"]), "ambiguous_count": len(result["ambiguous"]), "inventory_sha256": result["inventory_sha256"]}
+        else:
+            reviewed = json.loads(inventory.read_text())
+            result = getattr(share_upgrade, phase)(service, reviewed, expected_sha256)
+            share_upgrade.write_private(receipt, result)
+            summary = result
+    ccyo_out.print_text(json.dumps(summary))
+
+
 def register(registry: CommandRegistry, spec: CliSpec) -> None:
     """Register verification and lifecycle guidance, with no bootstrap aliases."""
     _ = spec
@@ -187,7 +225,8 @@ def register(registry: CommandRegistry, spec: CliSpec) -> None:
         registry,
         "db",
         "Verify existing Dewey data and review native TapDB lifecycle ownership",
-        [("initialize-performance-settings", initialize_performance_settings, REQUIRED_MUTATING),
+        [("upgrade-sharing", upgrade_sharing, REQUIRED_MUTATING),
+         ("initialize-performance-settings", initialize_performance_settings, REQUIRED_MUTATING),
          ("verify-templates", verify_templates, REQUIRED), ("lifecycle", lifecycle, EXEMPT),
          ("registry-conversion", registry_conversion, REQUIRED_MUTATING),
          ("registry-templates", registry_templates, REQUIRED_MUTATING)],

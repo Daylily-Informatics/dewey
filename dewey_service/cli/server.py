@@ -330,6 +330,7 @@ def _start_server(
             host,
             "--port",
             str(port),
+            "--no-proxy-headers",
         ]
         if ssl_enabled:
             cmd.extend(
@@ -375,6 +376,9 @@ def _start_server(
         "host": host,
         "port": port,
         "reload": reload,
+        # Share ingress attestation checks the actual proxy transport peer.
+        # Forwarded headers must not replace it with caller-controlled addresses.
+        "proxy_headers": False,
     }
     if ssl_enabled:
         uvicorn_kwargs["ssl_certfile"] = str(resolved_cert)

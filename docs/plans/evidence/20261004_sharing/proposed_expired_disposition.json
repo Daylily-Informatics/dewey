@@ -1,0 +1,143 @@
+{
+  "status": "pending_user_disposition",
+  "action": "retain_non_serving_history",
+  "reviewed_inventory_sha256": "5d580817db32ea8a6cd845a389ea94126281d846a0b374dea6b51d4f12317e61",
+  "share_euids": [
+    "M-DGX-9YHS",
+    "M-DGX-9YKN",
+    "M-DGX-A1PA",
+    "M-DGX-K3NQ",
+    "M-DGX-K3QK",
+    "M-DGX-K3SF",
+    "M-DGX-K3VB",
+    "M-DGX-K3Z3",
+    "M-DGX-K41Z",
+    "M-DGX-K43V",
+    "M-DGX-K45Q",
+    "M-DGX-K47K",
+    "M-DGX-K49F",
+    "M-DGX-K4BB",
+    "M-DGX-K4D7",
+    "M-DGX-K8ZY",
+    "M-DGX-K91T",
+    "M-DGX-M61V",
+    "M-DGX-M63Q",
+    "M-DGX-MDQ7",
+    "M-DGX-MDWX",
+    "M-DGX-ME1K"
+  ],
+  "scope": "Preserve existing identity, URL, payload, lineage and audit; never serve these expired records or infer missing permissions. Apply only after explicit approval and refreshed native inventory.",
+  "refreshed_evidence_inventory_sha256": "394a18a5ca47bcffe44bb4f402ecdd3d7630019d1d884485b2565703632aca1d",
+  "native_revision_evidence": [
+    {
+      "euid": "M-DGX-9YHS",
+      "record_revision": 0,
+      "payload_sha256": "428f6ae7687ad00f8f1fd58dbcc50400856334a6537f04b4a83daed7ec6aed0d"
+    },
+    {
+      "euid": "M-DGX-9YKN",
+      "record_revision": 0,
+      "payload_sha256": "72d7d2f822664d01f2f26b893cf05401c17d1d22be6e595b326a86df8e321894"
+    },
+    {
+      "euid": "M-DGX-A1PA",
+      "record_revision": 0,
+      "payload_sha256": "edac97efd83fc67f9023ffac29a9f75381dd7959b490d68ee2c979710214d5a0"
+    },
+    {
+      "euid": "M-DGX-K3NQ",
+      "record_revision": 0,
+      "payload_sha256": "754dff14cd61fb4a9fdab6da5eb69cb5734be84fdb0aba8cfe883b693083ba49"
+    },
+    {
+      "euid": "M-DGX-K3QK",
+      "record_revision": 0,
+      "payload_sha256": "21ab663fdc8153ffac190bf11bf94bb8a48cc98b0af3c9baf3d8a6b0196d6393"
+    },
+    {
+      "euid": "M-DGX-K3SF",
+      "record_revision": 0,
+      "payload_sha256": "d89e63513baa747d3113ee82ce3c73aaa62ef043f6747fe010d247cad0dcd8c8"
+    },
+    {
+      "euid": "M-DGX-K3VB",
+      "record_revision": 0,
+      "payload_sha256": "fc9b9fcf6b0bd3a6f57055fb9a2a8ec317875a05776989d1470985decc81680b"
+    },
+    {
+      "euid": "M-DGX-K3Z3",
+      "record_revision": 0,
+      "payload_sha256": "6d007407b83a9d7d4a0ee8852945b2223cbb5604bed4e183f61607d211b31ded"
+    },
+    {
+      "euid": "M-DGX-K41Z",
+      "record_revision": 0,
+      "payload_sha256": "b69f65442cec59a00a9e992ccf50ed7706032940c00fe89abb26f0532d1f50f2"
+    },
+    {
+      "euid": "M-DGX-K43V",
+      "record_revision": 0,
+      "payload_sha256": "938b265a6cc91de1553541dcb7d306b7be06bd35a3470444d4d3e2165ffa85bb"
+    },
+    {
+      "euid": "M-DGX-K45Q",
+      "record_revision": 0,
+      "payload_sha256": "24621a896d2d1ab3610761d967b6659b375380646a19ab4395e0179f9b98c9ee"
+    },
+    {
+      "euid": "M-DGX-K47K",
+      "record_revision": 0,
+      "payload_sha256": "06cb84d7b22dabfb75a4878a61f83f591a1d56052cb0e1e03e969205adba1ddd"
+    },
+    {
+      "euid": "M-DGX-K49F",
+      "record_revision": 0,
+      "payload_sha256": "1da7f8bb6d0804ba263a14ceffac2ec35f47273643ae430fb6245169c1b33d4e"
+    },
+    {
+      "euid": "M-DGX-K4BB",
+      "record_revision": 0,
+      "payload_sha256": "b6d82eb1dffc61ce3923219c72d9b11f2432706c187436fc53991612f7436426"
+    },
+    {
+      "euid": "M-DGX-K4D7",
+      "record_revision": 0,
+      "payload_sha256": "8b7eceb31f0ea49d641f30782f6179acef5165c0906b6d5ea6006ce99f574e54"
+    },
+    {
+      "euid": "M-DGX-K8ZY",
+      "record_revision": 0,
+      "payload_sha256": "809b09678e9496c838ed3018adbdf691c41824cf0ec1d1a5db28b6041bc78941"
+    },
+    {
+      "euid": "M-DGX-K91T",
+      "record_revision": 0,
+      "payload_sha256": "1e2217a3c39ad0faea0428e0f5d89b8becee783b2353df90e53e4a572e1edfe9"
+    },
+    {
+      "euid": "M-DGX-M61V",
+      "record_revision": 0,
+      "payload_sha256": "d8a47a50760cb8fe701bd1c8eadb2f18b7a3c419a5e93ee804863f298e5d75db"
+    },
+    {
+      "euid": "M-DGX-M63Q",
+      "record_revision": 0,
+      "payload_sha256": "4e4ee8a407b7537168c18ff867dec2c28396daa487dc2995c91a233de4dcd7d2"
+    },
+    {
+      "euid": "M-DGX-MDQ7",
+      "record_revision": 0,
+      "payload_sha256": "0f63a37b8aec5543a82c8147ae99ec807de0a3ea710783534c414a0c90536ed6"
+    },
+    {
+      "euid": "M-DGX-MDWX",
+      "record_revision": 0,
+      "payload_sha256": "392f7c7cb1e318631c389216a218f0351046ee8d41360d1beb4dae1a64b0b62b"
+    },
+    {
+      "euid": "M-DGX-ME1K",
+      "record_revision": 0,
+      "payload_sha256": "2850420e908d850ee943517e1ea9b9656e0b37ab654d323c28211fc57608bfd0"
+    }
+  ]
+}

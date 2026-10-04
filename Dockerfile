@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 ARG PYTHON_VERSION=3.12
 
-FROM ghcr.io/astral-sh/uv:0.5.30-python${PYTHON_VERSION}-bookworm-slim AS builder
+FROM ghcr.io/astral-sh/uv:0.5.30-python3.12-bookworm-slim@sha256:dae7f9060850980a52f1c629f2e94024c7d267f506dbc465c170553200e19d9f AS builder
 
 ARG SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0
 ENV SETUPTOOLS_SCM_PRETEND_VERSION_FOR_DEWEY_SERVICE=${SETUPTOOLS_SCM_PRETEND_VERSION} \
@@ -22,9 +22,18 @@ COPY dewey_service ./dewey_service
 RUN unset SETUPTOOLS_SCM_PRETEND_VERSION && uv sync --frozen --no-dev
 RUN /app/.venv/bin/python -c "from dewey_service.integrations.tapdb_runtime import ensure_tapdb_version; ensure_tapdb_version()"
 
-FROM python:${PYTHON_VERSION}-slim-bookworm AS runtime
+FROM python:3.12-slim-bookworm@sha256:9c47360a2a0355e2da18516d0b1c2126ec22c195d2185e97347c9d98398c5bef AS runtime
+
+ARG SETUPTOOLS_SCM_PRETEND_VERSION
+ARG DEWEY_BUILD_SHA
+ARG DEWEY_BUILD_BRANCH
+LABEL org.opencontainers.image.version=${SETUPTOOLS_SCM_PRETEND_VERSION} \
+    org.opencontainers.image.revision=${DEWEY_BUILD_SHA} \
+    org.opencontainers.image.source="https://github.com/Daylily-Informatics/dewey.git"
 
 ENV PATH="/app/.venv/bin:${PATH}" \
+    DEWEY_BUILD_SHA=${DEWEY_BUILD_SHA} \
+    DEWEY_BUILD_BRANCH=${DEWEY_BUILD_BRANCH} \
     DEWEY_EXECUTION_BACKEND=dewey-container \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1

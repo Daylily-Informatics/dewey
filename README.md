@@ -107,6 +107,7 @@ Deployed evidence should target `https://dewey.<deploy>.dev.lsmc.bio` and includ
 - [`docs/README.md`](docs/README.md): Dewey docs index.
 - [`docs/apis.md`](docs/apis.md): HTTP routes and auth modes.
 - [`docs/gui.md`](docs/gui.md): browser surfaces.
+- [`docs/sharing.md`](docs/sharing.md): Tailscale plus shared Login, filtered recipient grants, gateway downloads, explicit S3 presigns, and conversion requirements. Deployment status is tracked in the linked implementation ledger.
 - [`docs/architecture.md`](docs/architecture.md): domain ownership and runtime model.
 - [`docs/sequencer_run_registration.md`](docs/sequencer_run_registration.md): run-directory registration.
 - [`docs/qeo/`](docs/qeo/): QEO/Dewey handoff contracts.

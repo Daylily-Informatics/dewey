@@ -1,0 +1,65 @@
+{
+  "reviewer": {
+    "agent": "sharing_review",
+    "model": "gpt-6-astra",
+    "effort": "high"
+  },
+  "method": "source inspection only",
+  "findings": [
+    {
+      "id": "SR-01",
+      "issue": "Share editor PATCH included creation-only audience",
+      "status": "resolved"
+    },
+    {
+      "id": "SR-02",
+      "issue": "Omitted grants broke explicit legacy email/domain inputs",
+      "status": "resolved"
+    },
+    {
+      "id": "SR-03",
+      "issue": "Recipient Sharing index used manager-only generic discovery",
+      "status": "resolved"
+    },
+    {
+      "id": "SR-04",
+      "issue": "Creation replay lacked actor binding and fresh manager gate",
+      "status": "resolved"
+    },
+    {
+      "id": "SR-05",
+      "issue": "Legacy aliases omitted exact application Origin guard",
+      "status": "resolved"
+    },
+    {
+      "id": "SR-06",
+      "issue": "Gateway audit lacked correlation and setup-failure outcomes",
+      "status": "resolved"
+    },
+    {
+      "id": "SR-07",
+      "issue": "Safe inventory summary exported unrestricted lineage/type labels",
+      "status": "resolved",
+      "resolution": "Allowlist known structural values and hash unknown labels; native evidence version2 independently reread."
+    }
+  ],
+  "automated_tests": false,
+  "lint": false,
+  "functional_campaign": false,
+  "deployment_review": "source_review_complete; live conversion blocked pending explicit expired-record disposition",
+  "review_limits": [
+    "No automated tests, lint or functional campaign executed.",
+    "Native read-only inventory is operational conversion evidence, not application acceptance.",
+    "Expired-record disposition remains pending and any ensuing conversion changes require a focused review."
+  ],
+  "evidence_v2_review": "Bounded native set-member evidence source reviewed; no new disclosure or conversion-authority finding.",
+  "updated_at": "2026-10-04T03:22:45.939739+00:00",
+  "historical_set_conversion_review": {
+    "status": "no_new_actionable_findings",
+    "source_sha256": "fc1041c44b1538ba8b1a16d7ee027e93fa298ec565834538bb7074ca8178f197",
+    "native_authority": "exact parent/member lineage; bounded complete scope; locks and snapshot recheck; preserve and verify original relationships, new canonical edges, recipients and audit",
+    "fresh_inventory_sha256": "394a18a5ca47bcffe44bb4f402ecdd3d7630019d1d884485b2565703632aca1d"
+  },
+  "literal_key_review": "DOTALL preserves All selection for S3 keys containing newline; source review only.",
+  "overlapping_grant_contract": "Share-wide exclusions override every grant; per-grant exclusions narrow that grant and another applicable grant can independently allow the key. Share-wide denied emails override all grants. Draft selection preview is an audience union."
+}

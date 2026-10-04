@@ -5,6 +5,26 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
+from contextlib import contextmanager
+from contextvars import ContextVar
+
+_STORAGE_AUTHORIZATION: ContextVar[Any] = ContextVar("dewey_storage_authorization", default=None)
+
+
+@contextmanager
+def storage_authorization_context(authorization):
+    """Use a fresh canonical evaluator for one scoped storage operation.
+
+    The callable must authorize every exact bucket/key/action it receives.
+    Listing callers must filter every returned candidate before disclosure.
+    """
+    if not callable(authorization):
+        raise ValueError("Scoped storage authorization requires a callable")
+    token = _STORAGE_AUTHORIZATION.set(authorization)
+    try:
+        yield
+    finally:
+        _STORAGE_AUTHORIZATION.reset(token)
 
 
 class StorageError(RuntimeError):
@@ -43,7 +63,7 @@ class S3StorageClient:
     """Small S3 adapter kept intentionally narrow for Dewey flows."""
 
     def _check(self, bucket: str, key: str, action: str) -> None:
-        authorization = getattr(self, "authorization", None)
+        authorization = _STORAGE_AUTHORIZATION.get() or getattr(self, "authorization", None)
         if authorization is None:
             raise RuntimeError("Storage requires an explicit Dewey authorization provider")
         authorization(bucket, key, action=action)
@@ -65,7 +85,7 @@ class S3StorageClient:
         session = boto3.session.Session(**session_kwargs)
         self._client = session.client(
             "s3",
-            config=Config(s3={"use_accelerate_endpoint": False}),
+            config=Config(signature_version="s3v4", s3={"use_accelerate_endpoint": False}),
         )
         self._client_error = ClientError
         # Separate interactive listing client keeps upload/download timeout contracts intact.
@@ -118,6 +138,39 @@ class S3StorageClient:
         except self._client_error as exc:
             raise self._translate_error(exc, bucket=bucket, key=key) from exc
         return result["Body"], result.get("ContentType")
+
+    def object_response(self, *, bucket: str, key: str, version_id: str | None = None,
+                        head: bool = False, byte_range: str | None = None,
+                        request_payer: str | None = None,
+                        if_match: str | None = None, if_none_match: str | None = None,
+                        if_modified_since: datetime | None = None,
+                        if_unmodified_since: datetime | None = None) -> dict[str, Any]:
+        """Return S3 response metadata and its bounded-readable body.
+
+        GET supplies validators atomically to S3; callers do not race a HEAD
+        against an unconditional GET. Storage authorization remains mandatory.
+        """
+        self._check(bucket, key, "download")
+        params: dict[str, Any] = {"Bucket": bucket, "Key": key}
+        if version_id:
+            params["VersionId"] = version_id
+        if request_payer:
+            params["RequestPayer"] = request_payer
+        if byte_range:
+            params["Range"] = byte_range
+        for name, value in (("IfMatch", if_match), ("IfNoneMatch", if_none_match),
+                            ("IfModifiedSince", if_modified_since), ("IfUnmodifiedSince", if_unmodified_since)):
+            if value is not None:
+                params[name] = value
+        try:
+            return (self._client.head_object if head else self._client.get_object)(**params)
+        except self._client_error as exc:
+            code = str(exc.response.get("Error", {}).get("Code", ""))
+            from fastapi import HTTPException
+            http = int(exc.response.get("ResponseMetadata", {}).get("HTTPStatusCode", 0))
+            if http in {304, 412, 416} or code in {"NotModified", "PreconditionFailed", "InvalidRange"}:
+                raise HTTPException(http if http in {304, 412, 416} else {"NotModified": 304, "PreconditionFailed": 412, "InvalidRange": 416}[code], "Object condition was not satisfied") from exc
+            raise self._translate_error(exc, bucket=bucket, key=key) from exc
 
     def begin_multipart(self, *, bucket: str, key: str, content_type: str, metadata: dict | None = None) -> str:
         self._check(bucket, key, "upload")
@@ -195,6 +248,25 @@ class S3StorageClient:
         except self._client_error as exc:
             raise self._translate_error(exc, bucket=bucket, key=prefix) from exc
         return rows
+
+    def list_share_candidates(self, *, bucket: str, prefix: str, limit: int = 1000,
+                              continuation_token: str | None = None, request_payer: str | None = None):
+        """Bounded raw candidates; the canonical caller must filter disclosure."""
+        self._check(bucket, prefix, "metadata")
+        params = {"Bucket": bucket, "Prefix": prefix, "MaxKeys": max(1, min(int(limit), 1000))}
+        if continuation_token:
+            params["ContinuationToken"] = continuation_token
+        if request_payer:
+            params["RequestPayer"] = request_payer
+        try:
+            response = self._listing_client.list_objects_v2(**params)
+        except self._client_error as exc:
+            raise self._translate_error(exc, bucket=bucket, key=prefix) from exc
+        return {"objects": [StorageObject(bucket=bucket, key=item["Key"], size=item.get("Size"),
+            etag=item.get("ETag"), storage_class=item.get("StorageClass"),
+            last_modified=item["LastModified"].isoformat() if item.get("LastModified") else None)
+            for item in response.get("Contents", ())],
+            "next_continuation_token": response.get("NextContinuationToken")}
 
     def browse_prefix(
         self,

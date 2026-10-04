@@ -168,6 +168,18 @@ class RegistryServiceMixin:
         query = self._registry_query(session, authorize=False).filter(generic_instance.euid == euid,
             generic_instance.bstatus != "archived", record_clause(session, generic_instance, action))
         record = (query.with_for_update() if lock else query).first()
+        if record is None and action in {"metadata", "download"}:
+            candidate = self._registry_query(session, scopes=("artifact",), authorize=False).filter(
+                generic_instance.euid == euid, generic_instance.bstatus != "archived").first()
+            if candidate is not None:
+                data = normalize_instance_payload(candidate)
+                # Prefix/set metadata contains broad membership. Recipients use the filtered share browser.
+                if data.get("storage_backend") == "s3" and data.get("storage_kind") == "object":
+                    authorization = self.authorize_shared_storage(data["bucket"], data["key"],
+                        action="metadata" if action == "metadata" else "gateway")
+                    if data.get("version_id") != authorization.get("version_id"):
+                        raise HTTPException(403, "Alias version differs from the shared target")
+                    record = candidate
         if record is None:
             raise DeweyNotFoundError("Dewey record not found or not visible")
         return record
@@ -320,120 +332,35 @@ class RegistryServiceMixin:
             items.append({key: value[key] for key in fields if key in value})
         return items
 
-    def share_registry(self, euid: str, data: dict[str, Any], *, idempotency_key: str):
-        from dewey_service.settings import get_settings
-        allowed = {"name", "purpose", "audience", "allowed_users", "allowed_domains", "expires_at", "lifetime_days"}
-        if set(data) - allowed:
-            raise ValueError("Unknown share fields")
-        audience = data.get("audience", "private")
-        policy = validate_policy({"metadata": {"scope": audience,
-            "users": data.get("allowed_users", []), "domains": data.get("allowed_domains", [])}})["metadata"]
-        defaults = self.registry_defaults()
-        days = int(data.get("lifetime_days", defaults["share_lifetime_days"]))
-        if not 1 <= days <= self.share_max_lifetime_days:
-            raise ValueError("Share lifetime exceeds the configured range")
-        expiry = self._normalize_share_expiry(data.get("expires_at") or (datetime.now(timezone.utc) + timedelta(days=days)).isoformat())
-        fingerprint = self._fingerprint({"euid": euid, **data})
-        with self.backend.session_scope(commit=True) as session:
-            target = self._registry_record(session, euid, action="share")
-            replay = self._idempotency_replay(session, operation="registry.share", idempotency_key=idempotency_key, fingerprint=fingerprint)
-            if replay is not None:
-                return replay.status_code, replay.response
-            targets = [target]
-            if target.type == "artifact_set":
-                # Share only members the issuer can themselves share. Membership alone grants nothing.
-                members = session.query(generic_instance).join(generic_instance_lineage,
-                    generic_instance_lineage.child_instance_uid == generic_instance.uid).filter(
-                    generic_instance_lineage.parent_instance_uid == target.uid,
-                    generic_instance_lineage.relationship_type == "artifact_set_member",
-                    generic_instance_lineage.is_deleted.is_(False), generic_instance.is_deleted.is_(False)).all()
-                for member in members:
-                    require_record(self.backend, session, member, "share")
-                targets.extend(members)
-            kind = "artifact_set" if target.type == "artifact_set" else "artifact_" + normalize_instance_payload(target)["storage_kind"]
-            actor = principal()
-            share = self.backend.create_instance(session, template_code=SHARE_TEMPLATE, name=data.get("name") or target.name,
-                json_addl={"target_kind": kind, "target_euid": euid, "name": data.get("name") or target.name,
-                    "purpose": data.get("purpose"), "owner_subject": actor.subject, "owner_email": actor.email,
-                    "audience": audience, "allowed_users": policy["users"], "allowed_domains": policy["domains"],
-                    "allowed_groups": [], "expires_at": expiry, "status": "active", "starts_at": utc_now_iso(),
-                    "created_at": utc_now_iso(), "delivery_modes": ["dewey_html_browser", "presigned_s3_manifest"],
-                    "default_signed_ttl_seconds": defaults["delivery_lifetime_seconds"],
-                    "member_count": len(targets) - 1 if kind == "artifact_set" else 1, "audit_events": []})
-            for item in targets:
-                self.backend.create_lineage(session, parent=item, child=share, relationship_type="has_share")
-            body = {**self._share_response(share), "euid": share.euid, "web_path": f"/shares/{share.euid}", "audience": audience}
-            self._store_idempotency(session, operation="registry.share", idempotency_key=idempotency_key,
-                fingerprint=fingerprint, status_code=201, response=body)
-            return 201, body
-
-    def registry_share_detail(self, euid: str):
+    def share_registry(self, euid, data, *, idempotency_key):
+        allowed = {"name", "purpose", "audience", "allowed_users", "allowed_domains", "expires_at", "lifetime_days",
+            "grants", "include_patterns", "exclude_patterns", "denied_emails", "delivery_modes"}
+        if set(data) - allowed or data.get("audience", "recipients") not in {"recipients", "private"}:
+            raise ValueError("Only explicit recipient shares are supported")
+        self._require_sharing()
         with self.backend.session_scope(commit=False) as session:
-            share = self.backend.find_by_euid(session, template_code=SHARE_TEMPLATE, euid=euid)
-            if share is None:
-                raise DeweyNotFoundError("Share not found or not visible")
-            data = normalize_instance_payload(share)
-            actor = principal()
-            manager = self._registry_share_manager(session, share)
-            value = self._share_response(share)
-            if not manager:
-                for field in ("allowed_users", "allowed_domains", "allowed_groups", "last_accessed_by"):
-                    value.pop(field, None)
-            value.update(euid=euid, audience=data.get("audience", "recipients"), can_manage=manager,
-                web_path=f"/shares/{euid}", delivery_window_seconds=3600,
-                default_delivery_seconds=self.registry_defaults()["delivery_lifetime_seconds"],
-                live_prefix=data.get("target_kind") == "artifact_prefix")
-            if manager:
-                value["activity"] = data.get("audit_events", [])
-                operations = self.backend.list_children(session, parent=share, relationship_type="has_storage_operation")
-                value["activity"] = value["activity"] + [{"euid": op.euid,
-                    **{key: normalize_instance_payload(op).get(key) for key in ("operation", "actor", "created_at", "expires_in", "status")}}
-                    for op in operations]
-            return value
+            target = self._registry_record(session, euid, action="share")
+            kind = "artifact_set" if target.type == "artifact_set" else "artifact_" + normalize_instance_payload(target)["storage_kind"]
+        args = {k: v for k, v in data.items() if k not in {"lifetime_days", "audience"}}
+        if not args.get("expires_at") and "lifetime_days" in data:
+            days = int(data["lifetime_days"])
+            if not 1 <= days <= self.share_max_lifetime_days: raise ValueError("Invalid share lifetime")
+            args["expires_at"] = (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
+        return self.create_share(target_kind=kind, target_euid=euid, idempotency_key=idempotency_key, **args)
+
+    def registry_share_detail(self, euid):
+        return self.get_share(euid)
 
     def _registry_share_manager(self, session, share):
         actor = principal()
         data = normalize_instance_payload(share)
         if actor.admin or data.get("owner_subject") == actor.subject or actor.email and data.get("owner_email") == actor.email:
             return True
-        return bool(session.query(generic_instance.uid).join(generic_instance_lineage,
-            generic_instance_lineage.parent_instance_uid == generic_instance.uid).filter(
-            generic_instance_lineage.child_instance_uid == share.uid,
-            generic_instance_lineage.relationship_type == "has_share", generic_instance_lineage.is_deleted.is_(False),
-            generic_instance.is_deleted.is_(False), record_clause(session, generic_instance, "share")).first())
+        return False
 
-    def modify_registry_share(self, euid: str, changes: dict[str, Any]):
-        if not changes or set(changes) - {"name", "purpose", "audience", "allowed_users", "allowed_domains", "expires_at"}:
-            raise ValueError("Unsupported share changes")
-        with self.backend.session_scope(commit=True) as session:
-            share = self.backend.find_by_euid(session, template_code=SHARE_TEMPLATE, euid=euid, for_update=True)
-            if share is None:
-                raise DeweyNotFoundError("Share not found")
-            data = normalize_instance_payload(share)
-            actor = principal()
-            if not self._registry_share_manager(session, share):
-                raise HTTPException(403, "Share owner or admin access is required")
-            if data["status"] != "active" or datetime.fromisoformat(data["expires_at"].replace("Z", "+00:00")) <= datetime.now(timezone.utc):
-                raise ValueError("Revoked and expired shares cannot be reactivated")
-            targets = session.query(generic_instance).join(generic_instance_lineage,
-                generic_instance_lineage.parent_instance_uid == generic_instance.uid).filter(
-                generic_instance_lineage.child_instance_uid == share.uid,
-                generic_instance_lineage.relationship_type == "has_share", generic_instance_lineage.is_deleted.is_(False),
-                generic_instance.is_deleted.is_(False)).all()
-            for target in targets:
-                require_record(self.backend, session, target, "share")
-            merged = {**data, **changes}
-            audience = validate_policy({"metadata": {"scope": merged.get("audience", "recipients"),
-                "users": merged.get("allowed_users", []), "domains": merged.get("allowed_domains", [])}})["metadata"]
-            updates = {**changes, "allowed_users": audience["users"], "allowed_domains": audience["domains"]}
-            if "expires_at" in changes:
-                updates["expires_at"] = self._normalize_share_expiry(changes["expires_at"])
-            self.backend.update_instance_json(session, share, updates)
-            self._append_share_audit(session, share, self._share_audit_event(route="modify", decision="change",
-                actor_email=actor.email, actor_groups=list(actor.groups)))
-            return self._share_response(share)
 
     def invite_registry_recipient(self, euid: str, email: str):
+        self._require_sharing()
         import os
         import requests
         from urllib.parse import urlsplit
@@ -454,12 +381,14 @@ class RegistryServiceMixin:
             data = normalize_instance_payload(share)
             if data["status"] != "active" or datetime.fromisoformat(data["expires_at"].replace("Z", "+00:00")) <= datetime.now(timezone.utc):
                 raise ValueError("Only active, unexpired shares can send invitations")
-            recipient = Principal(subject="recipient:" + email, email=email, roles=("READ_ONLY",),
-                internal=email.rpartition("@")[2] in settings.registry_internal_domains)
-            allowed = session.query(generic_instance.uid).filter(generic_instance.uid == share.uid,
-                share_clause(generic_instance.json_addl, recipient)).first()
+            from dewey_service.services.share_policy import recipient_matches, expiry
+            allowed = email not in data["denied_emails"] and any(
+                normalize_instance_payload(g).get("status") == "active" and
+                normalize_instance_payload(g).get("policy_revision") == data["policy_revision"] and
+                expiry(normalize_instance_payload(g)["expires_at"]) > datetime.now(timezone.utc) and
+                recipient_matches(normalize_instance_payload(g), email) for g in self._share_grants(session, share))
             if not allowed:
-                raise ValueError("This email is not included in the share audience")
+                raise ValueError("This email is not included in a current recipient grant")
             origin = urlsplit(settings.external_broker_callback_url)
             share_url = f"{origin.scheme}://{origin.netloc}/shares/{euid}"
             receipt = self.backend.create_instance(session, template_code=OPERATION_TEMPLATE, name="Share invitation",

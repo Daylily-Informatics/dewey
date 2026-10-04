@@ -1,0 +1,8 @@
+{
+  "observed_at": "2026-10-04T03:07:10.318573+00:00",
+  "path": "/home/ubuntu/dewey-sharing-20261004T000136Z/source/dewey_service/share_upgrade.py",
+  "previous_sha256": "44111e085af01dd8a57fef9bbd4fd1a320d30e9f20d4d24867744030f7107a1c",
+  "sha256": "86542f3bf822088fe6e505d4d351ee5a577e6406af998250274c7aca9a1312a1",
+  "purpose": "Native read-only inventory evidence version 2",
+  "command_id": "5fc6073d-9dd6-4841-990d-526676ce556d"
+}

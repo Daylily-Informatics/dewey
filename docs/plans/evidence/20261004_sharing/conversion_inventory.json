@@ -1,0 +1,1226 @@
+{
+  "ambiguous_count": 23,
+  "command_id": "dd50e6e6-faae-4bd7-bbba-f715f64a057c",
+  "evidence_note": "Native inventory source hash recorded below predates structural-label allowlisting; every observed relationship/type label is in the final allowlist. A new inventory is required before apply.",
+  "inventory_sha256": "5d580817db32ea8a6cd845a389ea94126281d846a0b374dea6b51d4f12317e61",
+  "observed_at": "2026-10-04T03:04:57.567552+00:00",
+  "private_inventory_path": "/home/ubuntu/dewey-sharing-20261004T000136Z/disposition-inventory.json",
+  "production_changed": false,
+  "share_count": 42,
+  "shares": [
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [],
+      "delivery_modes_invalid_type": true,
+      "euid": "M-DGX-9YHS",
+      "expires_at": "2026-06-03T10:55:12.137999+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 0,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 0,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": null,
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-9TWT",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-9XX2",
+          "parent_type": "artifact",
+          "relationship_type": "has_share_reference"
+        }
+      ],
+      "reason": "No persisted artifact member lineage; explicit disposition required",
+      "status": null,
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [],
+      "delivery_modes_invalid_type": true,
+      "euid": "M-DGX-9YKN",
+      "expires_at": "2026-06-03T10:55:12.300264+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 0,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 0,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": null,
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-9TXR",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-9XKP",
+          "parent_type": "artifact",
+          "relationship_type": "has_share_reference"
+        }
+      ],
+      "reason": "No persisted artifact member lineage; explicit disposition required",
+      "status": null,
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [],
+      "delivery_modes_invalid_type": true,
+      "euid": "M-DGX-A1PA",
+      "expires_at": "2026-06-09T18:38:40.527846+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 0,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 0,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": null,
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-9W9Z",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-9S3V",
+          "parent_type": "artifact",
+          "relationship_type": "has_share_reference"
+        }
+      ],
+      "reason": "No persisted artifact member lineage; explicit disposition required",
+      "status": "active",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3_manifest"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K2PP",
+      "expires_at": "2031-07-13T23:59:59+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 2,
+      "legacy_recipient_counts": {
+        "domain": 1,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_set",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-A9JX",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2G2",
+          "parent_type": "artifact_set",
+          "relationship_type": "has_share"
+        }
+      ],
+      "reason": "No persisted artifact member lineage; explicit disposition required",
+      "status": "active",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3",
+        "presigned_s3_manifest",
+        "cloudfront_signed_url",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K3NQ",
+      "expires_at": "2026-07-14T22:44:33.943450+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 6,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_object",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AA01",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2BD",
+          "parent_type": "artifact",
+          "relationship_type": "has_share"
+        }
+      ],
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3",
+        "presigned_s3_manifest",
+        "cloudfront_signed_url",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K3QK",
+      "expires_at": "2026-07-14T22:44:34.037574+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 6,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_set",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AA1Z",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2G2",
+          "parent_type": "artifact_set",
+          "relationship_type": "has_share"
+        }
+      ],
+      "reason": "No persisted artifact member lineage; explicit disposition required",
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3_manifest",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K3SF",
+      "expires_at": "2026-07-14T22:44:34.109573+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 4,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_prefix",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AA2X",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K3KV",
+          "parent_type": "artifact",
+          "relationship_type": "has_share"
+        }
+      ],
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3",
+        "presigned_s3_manifest",
+        "cloudfront_signed_url",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K3VB",
+      "expires_at": "2026-07-14T22:44:34.179936+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 6,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": false,
+        "target_kind": "mixed_set",
+        "targets_count": 2
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AA3V",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2BD",
+          "parent_type": "artifact",
+          "relationship_type": "has_share"
+        },
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AA4S",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2G2",
+          "parent_type": "artifact_set",
+          "relationship_type": "has_share"
+        }
+      ],
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3",
+        "presigned_s3_manifest",
+        "cloudfront_signed_url",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K3Z3",
+      "expires_at": "2026-07-14T23:06:31.862298+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 3,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_object",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AA6N",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2BD",
+          "parent_type": "artifact",
+          "relationship_type": "has_share"
+        }
+      ],
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3",
+        "presigned_s3_manifest",
+        "cloudfront_signed_url",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K41Z",
+      "expires_at": "2026-07-14T23:06:31.961582+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 2,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_set",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AA7K",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2G2",
+          "parent_type": "artifact_set",
+          "relationship_type": "has_share"
+        }
+      ],
+      "reason": "No persisted artifact member lineage; explicit disposition required",
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3_manifest",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K43V",
+      "expires_at": "2026-07-14T23:06:32.033277+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 2,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_prefix",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AA8H",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K3KV",
+          "parent_type": "artifact",
+          "relationship_type": "has_share"
+        }
+      ],
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3",
+        "presigned_s3_manifest",
+        "cloudfront_signed_url",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K45Q",
+      "expires_at": "2026-07-14T23:06:32.101637+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 2,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": false,
+        "target_kind": "mixed_set",
+        "targets_count": 2
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AA9F",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2BD",
+          "parent_type": "artifact",
+          "relationship_type": "has_share"
+        },
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AAAD",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2G2",
+          "parent_type": "artifact_set",
+          "relationship_type": "has_share"
+        }
+      ],
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3",
+        "presigned_s3_manifest",
+        "cloudfront_signed_url",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K47K",
+      "expires_at": "2026-07-14T23:16:00.682508+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 8,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_object",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AABB",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2BD",
+          "parent_type": "artifact",
+          "relationship_type": "has_share"
+        }
+      ],
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3",
+        "presigned_s3_manifest",
+        "cloudfront_signed_url",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K49F",
+      "expires_at": "2026-07-14T23:16:00.779559+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 7,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_set",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AAC9",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2G2",
+          "parent_type": "artifact_set",
+          "relationship_type": "has_share"
+        }
+      ],
+      "reason": "No persisted artifact member lineage; explicit disposition required",
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3_manifest",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K4BB",
+      "expires_at": "2026-07-14T23:16:00.853926+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 5,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_prefix",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AAD7",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K3KV",
+          "parent_type": "artifact",
+          "relationship_type": "has_share"
+        }
+      ],
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3",
+        "presigned_s3_manifest",
+        "cloudfront_signed_url",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K4D7",
+      "expires_at": "2026-07-14T23:16:00.937454+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 7,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": false,
+        "target_kind": "mixed_set",
+        "targets_count": 2
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AAE5",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2BD",
+          "parent_type": "artifact",
+          "relationship_type": "has_share"
+        },
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AAF3",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2G2",
+          "parent_type": "artifact_set",
+          "relationship_type": "has_share"
+        }
+      ],
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "cloudfront_signed_url"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K8ZY",
+      "expires_at": "2026-07-18T15:26:40.734667+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 1,
+      "legacy_recipient_counts": {
+        "domain": 1,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_object",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-ACHW",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K8T8",
+          "parent_type": "artifact",
+          "relationship_type": "has_share"
+        }
+      ],
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "status": "active",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "cloudfront_signed_url"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K91T",
+      "expires_at": "2026-07-18T15:26:41.014693+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 1,
+      "legacy_recipient_counts": {
+        "domain": 1,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_object",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-ACJT",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K8X2",
+          "parent_type": "artifact",
+          "relationship_type": "has_share"
+        }
+      ],
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "status": "active",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "cloudfront_signed_url"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-M61V",
+      "expires_at": "2026-07-18T21:13:45.608592+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 1,
+      "legacy_recipient_counts": {
+        "domain": 1,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_object",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-ACKR",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-M5W5",
+          "parent_type": "artifact",
+          "relationship_type": "has_share"
+        }
+      ],
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "status": "active",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "cloudfront_signed_url"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-M63Q",
+      "expires_at": "2026-07-18T21:13:45.836191+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 1,
+      "legacy_recipient_counts": {
+        "domain": 1,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_object",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-ACMP",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-M5ZZ",
+          "parent_type": "artifact",
+          "relationship_type": "has_share"
+        }
+      ],
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "status": "active",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "cloudfront_signed_url"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-MDQ7",
+      "expires_at": "2026-07-19T14:59:11.577443+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 0,
+      "legacy_recipient_counts": {
+        "domain": 1,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_object",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-ACSC",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-MDNB",
+          "parent_type": "artifact",
+          "relationship_type": "has_share"
+        }
+      ],
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "status": "active",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "cloudfront_signed_url"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-MDWX",
+      "expires_at": "2026-07-31T21:30:59.250742+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 1,
+      "legacy_recipient_counts": {
+        "domain": 1,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_object",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-ACTA",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-MDT1",
+          "parent_type": "artifact",
+          "relationship_type": "has_share"
+        }
+      ],
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "status": "active",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "cloudfront_signed_url"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-ME1K",
+      "expires_at": "2026-07-31T21:31:00.129877+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 1,
+      "legacy_recipient_counts": {
+        "domain": 1,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_object",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-ACV8",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-MDZQ",
+          "parent_type": "artifact",
+          "relationship_type": "has_share"
+        }
+      ],
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "status": "active",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    }
+  ],
+  "source_file_sha256": "44111e085af01dd8a57fef9bbd4fd1a320d30e9f20d4d24867744030f7107a1c"
+}

@@ -13,7 +13,7 @@ from cli_core_yo import ccyo_out
 from cli_core_yo.spec import CommandPolicy
 
 
-def _request(method, path, *, data=None, params=None, key=None, body=None):
+def _connection():
     base = os.environ.get("DEWEY_API_URL", "").rstrip("/")
     parsed = urlsplit(base)
     if parsed.scheme != "https" or not parsed.netloc or parsed.path or parsed.username or parsed.password or parsed.query or parsed.fragment:
@@ -24,6 +24,11 @@ def _request(method, path, *, data=None, params=None, key=None, body=None):
     token = token_path.read_text().strip()
     if not token or any(c.isspace() for c in token):
         raise ValueError("Token file must contain one nonempty bearer token")
+    return base, token
+
+
+def _request(method, path, *, data=None, params=None, key=None, body=None):
+    base, token = _connection()
     headers = {"Authorization": "Bearer " + token, "Accept": "application/json"}
     if key:
         headers["Idempotency-Key"] = key
@@ -107,8 +112,65 @@ def _share_edit(euid: str = typer.Argument(...), changes: Path = typer.Option(..
     _emit(lambda: _request("PATCH", f"/api/v1/registry/shares/{quote(euid, safe='')}", data=_data(changes)))
 
 
-def _revoke(euid: str = typer.Argument(...), reason: str = typer.Option(...)):
-    _emit(lambda: _request("POST", f"/api/v1/registry/shares/{quote(euid, safe='')}/revoke", data={"reason":reason}))
+def _revoke(euid: str = typer.Argument(...), reason: str = typer.Option(...), policy_revision: int = typer.Option(..., min=1)):
+    _emit(lambda: _request("POST", f"/api/v1/registry/shares/{quote(euid, safe='')}/revoke", data={"reason":reason,"policy_revision":policy_revision}))
+
+
+def _share_contents(euid: str = typer.Argument(...), target_euid: str = typer.Option(""), prefix: str = typer.Option(""), continuation_token: str | None = typer.Option(None), limit: int = typer.Option(100, min=1, max=1000)):
+    """List only current permitted files within this share; preserve exact relative keys."""
+    _emit(lambda: _request("GET", f"/api/v1/registry/shares/{quote(euid, safe='')}/contents", params={"target_euid":target_euid,"prefix":prefix,"continuation_token":continuation_token,"limit":limit}))
+
+
+def _share_selection_preview(euid: str = typer.Argument(..., help="Persisted target record EUID."), policy: Path = typer.Option(..., exists=True, dir_okay=False)):
+    """Preview a draft policy using bounded metadata; incomplete is not a complete inventory."""
+    _emit(lambda: _request("POST", f"/api/v1/records/{quote(euid, safe='')}/shares/preview", data=_data(policy)))
+
+
+def _share_activity(euid: str = typer.Argument(...), continuation_token: str | None = typer.Option(None), limit: int = typer.Option(100, min=1, max=200)):
+    """Export one page of append-only share activity as JSON; follow continuation_token."""
+    _emit(lambda: _request("GET", f"/api/v1/registry/shares/{quote(euid, safe='')}/activity", params={"continuation_token":continuation_token,"limit":limit}))
+
+
+def _share_revoke_grant(euid: str = typer.Argument(...), grant_euid: str = typer.Argument(...), policy_revision: int = typer.Option(..., min=1), reason: str = typer.Option(...)):
+    """Revoke one persisted recipient grant at the explicit current policy revision."""
+    _emit(lambda: _request("POST", f"/api/v1/registry/shares/{quote(euid, safe='')}/grants/{quote(grant_euid, safe='')}/revoke", data={"policy_revision":policy_revision,"reason":reason}))
+
+
+def _share_presign(euid: str = typer.Argument(...), target_euid: str = typer.Argument(...), relative_key: str = typer.Option(""), ttl_seconds: int = typer.Option(900, min=1, max=3600)):
+    """Explicitly issue a raw S3 bearer URL; anyone can consume it until actual expires_at."""
+    _emit(lambda: _request("POST", f"/api/v1/registry/shares/{quote(euid, safe='')}/presign", data={"target_euid":target_euid,"relative_key":relative_key,"ttl_seconds":ttl_seconds}))
+
+
+def _share_report(euid: str = typer.Argument(...)):
+    """Show the authenticated share page for isolated report viewing in a browser."""
+    def run():
+        base, _ = _connection()
+        detail = _request("GET", f"/api/v1/registry/shares/{quote(euid, safe='')}")
+        return {"share_euid":detail["euid"], "browser_url":base + "/shares/" + quote(euid, safe=""), "requirements":["Tailscale", "Dewey browser sign-in"], "action":"Choose View report for an authorized HTML file"}
+    _emit(run)
+
+
+def _share_download(euid: str = typer.Argument(...), target_euid: str = typer.Argument(...), output: Path = typer.Option(..., dir_okay=False, help="New output path; existing files are never overwritten."), relative_key: str = typer.Option("")):
+    """Stream a file through the authenticated Dewey gateway using this share only."""
+    def run():
+        base, token = _connection()
+        if output.exists():
+            raise ValueError("Output already exists; choose a new path")
+        path = f"/shares/{quote(euid, safe='')}/files/{quote(target_euid, safe='')}"
+        count = 0
+        with requests.get(base+path, params={"relative_key":relative_key}, headers={"Authorization":"Bearer "+token}, stream=True, timeout=(10,300), allow_redirects=False) as response:
+            if response.status_code != 200:
+                raise RuntimeError(f"Dewey gateway returned HTTP {response.status_code}; no download was written")
+            with output.open("xb") as destination:
+                for chunk in response.iter_content(chunk_size=1024*1024):
+                    if chunk:
+                        destination.write(chunk)
+                        count += len(chunk)
+            expected = response.headers.get("Content-Length")
+            if expected is not None and int(expected) != count:
+                raise RuntimeError("Gateway download length mismatch; partial output retained for inspection")
+        return {"share_euid":euid,"target_euid":target_euid,"output":str(output.resolve()),"bytes_received":count,"status":"complete"}
+    _emit(run)
 
 
 def _invite(euid: str = typer.Argument(...), email: str = typer.Option(...)):
@@ -129,15 +191,16 @@ def _buckets(continuation_token: str | None = typer.Option(None), locations_page
 
 
 def _share_list(query: str = typer.Argument(""), page: int = typer.Option(1, min=1)):
-    _emit(lambda: _request("POST", "/api/v1/registry/search", data={"q":query,"scopes":["share"],"page":page,"page_size":50}))
+    _emit(lambda: _request("GET", "/api/v1/registry/shares", params={"q":query,"page":page,"page_size":50,"sort":"created_at"}))
 
 
 def _owner(euid: str = typer.Argument(...), email: str = typer.Option(...)):
     _emit(lambda: _request("PATCH", f"/api/v1/records/{quote(euid, safe='')}/owner", data={"email":email}))
 
 
-def _preview(euid: str = typer.Argument(...)):
-    _emit(lambda: _request("POST", f"/api/v1/records/{quote(euid, safe='')}/preview", data={}))
+def _preview(euid: str = typer.Argument(...), share_euid: str = typer.Option(..., help="Explicit managed share to view this report; Tailscale and browser sign-in required.")):
+    """View through an explicit managed share rather than issuing a bearer preview."""
+    _share_report(share_euid)
 
 
 def _browse(uri: str = typer.Argument(...), continuation_token: str | None = typer.Option(None), limit: int = typer.Option(100, min=1, max=1000)):
@@ -198,7 +261,7 @@ def register(registry, spec):
     common = [("get",_get,"Resolve an EUID without storing a URL.",read),
         ("contents",_contents,"Browse a Prefix or inspect Set membership by EUID.",read),
         ("access",_access,"Request authorized delivery using only an EUID.",write),
-        ("preview",_preview,"Issue an isolated HTML report preview using its Object EUID.",write),
+        ("preview",_preview,"View an HTML report through an explicit managed share.",write),
         ("register",_register,"Register an explicit object, prefix, or set manifest.",write),
         ("search",_search,"Search the authorized registry before pagination.",read),
         ("update",_edit,"Update name, description, or arbitrary JSON metadata.",write),
@@ -211,7 +274,7 @@ def register(registry, spec):
             registry.add_command(group, name, command, help_text=help_text, policy=policy)
     for group, commands in {
         "sets": [("add-member",_member_add,write),("remove-member",_member_remove,write)],
-        "shares": [("list",_share_list,read),("get",_share_get,read),("create",_share,write),("update",_share_edit,write),("revoke",_revoke,write),("invite",_invite,write)],
+        "shares": [("list",_share_list,read),("get",_share_get,read),("create",_share,write),("update",_share_edit,write),("revoke",_revoke,write),("invite",_invite,write),("contents",_share_contents,read),("preview",_share_selection_preview,read),("activity",_share_activity,read),("revoke-grant",_share_revoke_grant,write),("download",_share_download,write),("presign",_share_presign,write),("report",_share_report,read)],
         "storage": [("buckets",_buckets,read),("browse",_browse,read),("object",_object,read),("upload",_upload,write),
             ("operation",_operation,read),("abort-upload",_abort,write),("delete-preview",_delete_preview,write),("delete-execute",_delete_execute,write)],
     }.items():
