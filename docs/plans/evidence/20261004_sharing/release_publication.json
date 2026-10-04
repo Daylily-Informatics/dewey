@@ -14,5 +14,21 @@
   "build_completed_at": "2026-10-04T05:05:51.508122+00:00",
   "build_receipt": "/home/ubuntu/dewey-11.0.0-20261004T050427Z/image-receipt.json",
   "build_log_sha256": "72426d266d69980112a26c0977798395afbd451e2201e7944b1a20042d5e8b90",
-  "dockerfile_sha256": "5ff3b3f7d5aac7ec78c0bcd3c72a7a21cfa12afeb7402ec8fbd45463aef3eded"
+  "dockerfile_sha256": "5ff3b3f7d5aac7ec78c0bcd3c72a7a21cfa12afeb7402ec8fbd45463aef3eded",
+  "superseded_without_starting_worker": true,
+  "corrected_release": {
+    "tag": "11.0.1",
+    "annotated_tag_object": "a3a65a4f61430dc7ac8aa1cb499c801f47778050",
+    "source_commit": "67b0f702b9daabfd2bb604c59ce1e2dff33f4ea4",
+    "build_status": "published",
+    "builder_instance": "i-07df3a933e4839f52",
+    "remote_confirmed": true,
+    "recorded_at": "2026-10-04T05:23:46.826005+00:00",
+    "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:31ed96826facacfa6230793a5e77e2f742185c058837f9960797c9133981bc30",
+    "build_completed_at": "2026-10-04T05:24:32.774536+00:00",
+    "deployed_at": "2026-10-04T05:25:07.598613+00:00",
+    "native_conversion": "verified",
+    "availability": "process200; readiness503 due anonymous marker visibility",
+    "build_receipt": "/home/ubuntu/dewey-11.0.1-20261004T052306Z/image-receipt.json"
+  }
 }

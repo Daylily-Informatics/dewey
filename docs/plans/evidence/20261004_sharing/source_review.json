@@ -55,6 +55,13 @@
       "resolution": "Reconstruct only absent persisted updated_at using reviewed original native modification time; all raw native/history/lineage/decision guards retained",
       "reviewer": "sharing_review gpt-6-astra high",
       "source_sha256": "ed55351e6db38bc17c98bc099ec13053af978d7d58a4710b08944b113c16af9f"
+    },
+    {
+      "id": "SR-10",
+      "issue": "Anonymous readiness hid verified schema marker through recipient visibility predicate",
+      "status": "resolved_in_source",
+      "resolution": "Exact native operational marker query independent of recipient filters; no elevated principal or auth bypass",
+      "source_sha256": "90aa89d3bb5dca78fae01bcb3776f6c104f0e6dcc7e6903014a6707ed1368c7a"
     }
   ],
   "automated_tests": false,
@@ -67,7 +74,7 @@
     "Final-image inventory must confirm cutoff disposition and unchanged native authority before apply."
   ],
   "evidence_v2_review": "Bounded native set-member evidence source reviewed; no new disclosure or conversion-authority finding.",
-  "updated_at": "2026-10-04T05:21:57.418865+00:00",
+  "updated_at": "2026-10-04T05:31:23.908647+00:00",
   "historical_set_conversion_review": {
     "status": "no_new_actionable_findings",
     "source_sha256": "fc1041c44b1538ba8b1a16d7ee027e93fa298ec565834538bb7074ca8178f197",
@@ -103,5 +110,12 @@
     "method": "source_only",
     "source_sha256": "30774426c8897d2dd7a59c9b07b4c3e98ff4c4e62416a677a6d06ccb1ca6f601",
     "contract": "Existing epoch verification only; no reapply; exact drained predecessor, original receipts, corrected image and unchanged sibling identities"
+  },
+  "readiness_release_review": {
+    "status": "no_blocking_findings",
+    "reviewer": "sharing_review gpt-6-astra high",
+    "method": "source_only",
+    "source_sha256": "02c8c1f72a94026977bb5084285da8356c716e91001658c78f5c7744e4389e3a",
+    "contract": "Only Dewey image/provenance replace; original verified inventory/config/proxy/DNS unchanged; no DB operations"
   }
 }

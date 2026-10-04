@@ -202,13 +202,27 @@ class SharingServiceMixin:
         return self._share_related(session, share, relationship="share_grant", kind="share_grant")
 
     def sharing_upgrade_ready(self):
+        from daylily_tapdb import generic_instance
         from dewey_service.registry_access import POLICY_TEMPLATE
         from dewey_service.services.share_policy import SCHEMA_VERSION
         with self.backend.session_scope(commit=False) as session:
-            marker = self.backend.find_by_json_field(session, template_code=POLICY_TEMPLATE,
-                field="policy_kind", value="sharing_schema")
-            return bool(marker and normalize_instance_payload(marker).get("schema_version") == SCHEMA_VERSION
-                and normalize_instance_payload(marker).get("status") == "verified")
+            template = self.backend.templates.get_template(session, POLICY_TEMPLATE,
+                domain_code=self.backend.domain_code)
+            if template is None or template.type != "registry_policy":
+                return False
+            # Operational readiness is independent of recipient visibility. This
+            # exact typed marker read exposes only a boolean and grants no access.
+            markers = session.query(generic_instance).filter(
+                generic_instance.template_uid == template.uid,
+                generic_instance.type == "registry_policy",
+                generic_instance.domain_code == self.backend.domain_code,
+                generic_instance.is_deleted.is_(False),
+                generic_instance.json_addl["policy_kind"].as_string() == "sharing_schema",
+            ).limit(2).all()
+            if len(markers) != 1 or markers[0].bstatus != "active":
+                return False
+            data = normalize_instance_payload(markers[0])
+            return type(data.get("schema_version")) is int and data["schema_version"] == SCHEMA_VERSION and data.get("status") == "verified"
 
     def _require_sharing(self):
         from dewey_service.share_context import require_share_context
