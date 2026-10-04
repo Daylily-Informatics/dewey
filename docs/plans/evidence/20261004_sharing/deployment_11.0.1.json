@@ -1,0 +1,29 @@
+{
+  "phase": "deployed",
+  "deployed_at": "2026-10-04T05:25:07.598613+00:00",
+  "tag": "11.0.1",
+  "commit": "67b0f702b9daabfd2bb604c59ce1e2dff33f4ea4",
+  "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:31ed96826facacfa6230793a5e77e2f742185c058837f9960797c9133981bc30",
+  "container": {
+    "id": "71902878e479f4c44a4951b31857166d6e6db235779ec4d8ec84e6264212bddf",
+    "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:31ed96826facacfa6230793a5e77e2f742185c058837f9960797c9133981bc30",
+    "running": true
+  },
+  "inventory_sha256": "2ef9d7c87e2ea37dcfb3018e75f45ebcbdb5ac53b0764f57dc7a0770d2f71f13",
+  "native_conversion": {
+    "converted_share_count": 0,
+    "created_since": "2026-09-27T04:43:55+00:00",
+    "eligible_share_count": 0,
+    "historical_set_conversions": [],
+    "inventory_sha256": "2ef9d7c87e2ea37dcfb3018e75f45ebcbdb5ac53b0764f57dc7a0770d2f71f13",
+    "readiness": "ready",
+    "retire_before_cutoff_count": 42,
+    "share_count": 42,
+    "status": "verified"
+  },
+  "retirement_reapplied": false,
+  "sibling_containers_unchanged": true,
+  "superseded_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:25f4e1c34b93215498845c3affe965e864e48d1a1c3a39f69146c57c7e5049b7",
+  "tests_run": false,
+  "user_acceptance": "pending"
+}

@@ -1,0 +1,19 @@
+{
+  "phase": "deployed",
+  "started_at": "2026-10-04T05:34:03.045615+00:00",
+  "deployed_at": "2026-10-04T05:34:07.282939+00:00",
+  "tag": "11.0.2",
+  "commit": "3f782eebc6e43ded3fa655c3fcdc1c2c616bcd89",
+  "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:df7bca9ea7cf9e999a24d4d8e8f1369182104d989fc20c25b3cc4209ecb31499",
+  "container": {
+    "id": "7a34c472d7e6e0d6c000f977d3e06513660510963869e2dca11bb1d03d6089c2",
+    "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:df7bca9ea7cf9e999a24d4d8e8f1369182104d989fc20c25b3cc4209ecb31499",
+    "running": true
+  },
+  "native_conversion_repeated": false,
+  "prior_verified_inventory": "2ef9d7c87e2ea37dcfb3018e75f45ebcbdb5ac53b0764f57dc7a0770d2f71f13",
+  "force_used": false,
+  "sibling_containers_unchanged": true,
+  "tests_run": false,
+  "user_acceptance": "pending"
+}

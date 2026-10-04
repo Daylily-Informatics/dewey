@@ -30,5 +30,19 @@
     "native_conversion": "verified",
     "availability": "process200; readiness503 due anonymous marker visibility",
     "build_receipt": "/home/ubuntu/dewey-11.0.1-20261004T052306Z/image-receipt.json"
+  },
+  "final_release": {
+    "tag": "11.0.2",
+    "annotated_tag_object": "1576d437256de5494b18a30302fd368a33c27130",
+    "source_commit": "3f782eebc6e43ded3fa655c3fcdc1c2c616bcd89",
+    "build_status": "published",
+    "builder_instance": "i-07df3a933e4839f52",
+    "remote_confirmed": true,
+    "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:df7bca9ea7cf9e999a24d4d8e8f1369182104d989fc20c25b3cc4209ecb31499",
+    "build_completed_at": "2026-10-04T05:33:26.554693+00:00",
+    "build_receipt": "/home/ubuntu/dewey-11.0.2-20261004T053201Z/image-receipt.json",
+    "deployed_at": "2026-10-04T05:34:07.282939+00:00",
+    "availability": "health200; readiness200; schema_verified",
+    "user_acceptance": "pending"
   }
 }

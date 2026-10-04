@@ -51,7 +51,7 @@
     {
       "id": "SR-09",
       "issue": "Retirement verification compared a timestamp-derived display payload after native modification time changed",
-      "status": "resolved_in_source",
+      "status": "resolved_and_deployed",
       "resolution": "Reconstruct only absent persisted updated_at using reviewed original native modification time; all raw native/history/lineage/decision guards retained",
       "reviewer": "sharing_review gpt-6-astra high",
       "source_sha256": "ed55351e6db38bc17c98bc099ec13053af978d7d58a4710b08944b113c16af9f"
@@ -59,7 +59,7 @@
     {
       "id": "SR-10",
       "issue": "Anonymous readiness hid verified schema marker through recipient visibility predicate",
-      "status": "resolved_in_source",
+      "status": "resolved_and_deployed",
       "resolution": "Exact native operational marker query independent of recipient filters; no elevated principal or auth bypass",
       "source_sha256": "90aa89d3bb5dca78fae01bcb3776f6c104f0e6dcc7e6903014a6707ed1368c7a"
     }
@@ -67,14 +67,14 @@
   "automated_tests": false,
   "lint": false,
   "functional_campaign": false,
-  "deployment_review": "source_review_complete; fresh final-image native inventory required before authorized cutover",
+  "deployment_review": "deployed11.0.2; native retirement verified; runtime health/readiness200; acceptance pending",
   "review_limits": [
     "No automated tests, lint or functional campaign executed.",
-    "Native read-only inventory is operational conversion evidence, not application acceptance.",
-    "Final-image inventory must confirm cutoff disposition and unchanged native authority before apply."
+    "Source review and native conversion evidence do not establish browser/share functional acceptance.",
+    "Runtime identity, health200 and readiness200 observed separately; user acceptance pending."
   ],
   "evidence_v2_review": "Bounded native set-member evidence source reviewed; no new disclosure or conversion-authority finding.",
-  "updated_at": "2026-10-04T05:31:23.908647+00:00",
+  "updated_at": "2026-10-04T05:39:37.311289+00:00",
   "historical_set_conversion_review": {
     "status": "no_new_actionable_findings",
     "source_sha256": "fc1041c44b1538ba8b1a16d7ee027e93fa298ec565834538bb7074ca8178f197",

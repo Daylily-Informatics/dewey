@@ -1,0 +1,9 @@
+{
+  "started_at": "2026-10-04T05:15:07.849151+00:00",
+  "predecessor": {
+    "id": "8cf45a2bb64a876f92cad799265dfe83ab44a0d2d33734746de461fec16ab236",
+    "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:30b155ab0a3555cd03a8ccbe59c340f8b801331bbe4ea0b64f56e3c473ab7d5a",
+    "running": true
+  },
+  "drain_limit_seconds": 120
+}
