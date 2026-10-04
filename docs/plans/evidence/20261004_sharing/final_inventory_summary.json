@@ -1,0 +1,12 @@
+{
+  "image_tag": "11.0.0",
+  "inventory_sha256": "2ef9d7c87e2ea37dcfb3018e75f45ebcbdb5ac53b0764f57dc7a0770d2f71f13",
+  "created_since": "2026-09-27T04:43:55+00:00",
+  "share_count": 42,
+  "eligible_share_count": 0,
+  "retire_before_cutoff_count": 42,
+  "ambiguous_count": 0,
+  "cross_share_lineage_count": 0,
+  "private_inventory": "/home/ubuntu/dewey-sharing-20261004T000136Z/final-inventory.json",
+  "applied": false
+}

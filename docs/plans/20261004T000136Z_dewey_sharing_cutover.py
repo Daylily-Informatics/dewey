@@ -46,6 +46,11 @@ def read(path):
     return subprocess.check_output(["sudo", "cat", str(path)])
 
 
+def protected_path_exists(path):
+    return json.loads(subprocess.check_output(["sudo", "python3", "-c",
+        "import json, os, sys; print(json.dumps(os.path.lexists(sys.argv[1])))", str(path)]))
+
+
 def private(path, value):
     data = value if isinstance(value, bytes) else value.encode() if isinstance(value, str) else json.dumps(value, indent=2).encode()
     with os.fdopen(os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600), "wb") as handle:
@@ -205,7 +210,7 @@ def prepare(image_receipt):
 
 
 def certificate():
-    require(not Path(CERT).exists(), "Content certificate already exists; inspect instead of reissuing")
+    require(not protected_path_exists(CERT), "Content certificate already exists; inspect instead of reissuing")
     logged("certificate", ["sudo", "env", "AWS_PROFILE=lsmc", "AWS_CONFIG_FILE=/home/ubuntu/.aws/config",
         "AWS_SHARED_CREDENTIALS_FILE=/home/ubuntu/.aws/credentials", "certbot", "certonly", "--dns-route53",
         "--non-interactive", "--cert-name", "dewey-content-day", "-d", "*.dewey-content.day.lsmc.bio"], timeout=180)
@@ -234,7 +239,7 @@ def cutover(expected_sha256):
         require(digest(read(path)) == prepared[key + "_before_sha256"], "Concurrent configuration change: " + key)
     before = containers()
     require(before == json.loads((ROOT / "containers-before.json").read_text()), "Runtime containers changed since preparation")
-    require(Path(CERT).exists(), "Content certificate must be prepared before maintenance")
+    require(protected_path_exists(CERT), "Content certificate must be prepared before maintenance")
     native("templates", ["registry-templates", "--operator-config", "/opt/dewey-sharing/operator.yaml",
         "--repository-pack", "/app/config/tapdb_templates/dewey/sharing2.repository-pack.json",
         "--receipt-pack", "/opt/dewey-sharing/template-receipt.json", "--actor", ACTOR,

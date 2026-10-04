@@ -47,6 +47,14 @@
       "issue": "Live runtime configuration could drift after private deployment preparation",
       "status": "resolved",
       "resolution": "Record exact live config source hashes; reread before every native operation, installation and service start. Independently reviewed."
+    },
+    {
+      "id": "SR-09",
+      "issue": "Retirement verification compared a timestamp-derived display payload after native modification time changed",
+      "status": "resolved_in_source",
+      "resolution": "Reconstruct only absent persisted updated_at using reviewed original native modification time; all raw native/history/lineage/decision guards retained",
+      "reviewer": "sharing_review gpt-6-astra high",
+      "source_sha256": "ed55351e6db38bc17c98bc099ec13053af978d7d58a4710b08944b113c16af9f"
     }
   ],
   "automated_tests": false,
@@ -59,7 +67,7 @@
     "Final-image inventory must confirm cutoff disposition and unchanged native authority before apply."
   ],
   "evidence_v2_review": "Bounded native set-member evidence source reviewed; no new disclosure or conversion-authority finding.",
-  "updated_at": "2026-10-04T05:03:33.261399+00:00",
+  "updated_at": "2026-10-04T05:21:57.418865+00:00",
   "historical_set_conversion_review": {
     "status": "no_new_actionable_findings",
     "source_sha256": "fc1041c44b1538ba8b1a16d7ee027e93fa298ec565834538bb7074ca8178f197",
@@ -79,5 +87,21 @@
       "dewey_service/services/sharing.py": "d2248aaa19a91a83767d0783fa669020d827a6f0be86be26fbac096293f62a62",
       "docs/plans/20261004T000136Z_dewey_sharing_cutover.py": "eba74f710181849f175fc7eaaf3b32c20ccba36b1f44b35909b608c5ea828aad"
     }
+  },
+  "deployment_helper_correction": {
+    "status": "independently_reviewed",
+    "method": "source_only",
+    "issue": "Ubuntu cannot traverse root-only certificate ancestor for Path.exists",
+    "resolution": "Targeted sudo path inspection; original helper/preparation preserved; unchanged candidate and live config/image guards verified before and after explicit receipt revision",
+    "revised_script_sha256": "8d9bae80cc9125210075614d23e0067f66dee319ab31aff149b548cee633389b",
+    "prior_preparation_sha256": "83c52cafdfdab537008a4a968beba1cca57a0eca8734b7de3072faab20e0332c",
+    "application_image_unchanged": true
+  },
+  "resume_review": {
+    "status": "no_blocking_findings",
+    "reviewer": "sharing_review gpt-6-astra high",
+    "method": "source_only",
+    "source_sha256": "30774426c8897d2dd7a59c9b07b4c3e98ff4c4e62416a677a6d06ccb1ca6f601",
+    "contract": "Existing epoch verification only; no reapply; exact drained predecessor, original receipts, corrected image and unchanged sibling identities"
   }
 }

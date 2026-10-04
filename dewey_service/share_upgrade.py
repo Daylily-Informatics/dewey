@@ -83,16 +83,27 @@ def _verify_retirement(service, session, row, before, receipt, inventory_sha256,
     from daylily_tapdb import generic_instance, generic_instance_lineage
     if row["bstatus"] != "archived" or row["record_revision"] != receipt["record_revision"] or row["native_sha256"] != receipt["native_sha256"]:
         raise ValueError("Retired share status or native revision differs from the applied receipt")
-    for key in ("retirement_invariant_sha256", "payload_sha256", "legacy_audit_sha256"):
+    for key in ("retirement_invariant_sha256", "legacy_audit_sha256"):
         if row[key] != before[key]:
             raise ValueError("Original retired share fields or history changed")
+    share = service._share_query(session).filter_by(euid=row["euid"]).one()
+    original_projection = normalize_instance_payload(share)
+    if not share.json_addl.get("updated_at"):
+        # The normalized display payload derives this absent field from native
+        # modified_dt. Archive changes that timestamp, not persisted JSON. Rebuild
+        # the reviewed display projection while keeping raw native hashes exact.
+        original_projection["updated_at"] = (
+            before["modified_at"].replace("+00:00", "Z")
+            if before["modified_at"] else original_projection["created_at"]
+        )
+    if digest(original_projection) != before["payload_sha256"]:
+        raise ValueError("Original retired share payload changed")
     edges = {edge["euid"]: edge for edge in row["incident_lineage"]}
     old_edges = {edge["euid"]: edge for edge in before["incident_lineage"]}
     if any(edges.get(euid) != edge for euid, edge in old_edges.items()) or set(edges) - set(old_edges) != {receipt["lineage_euid"]}:
         raise ValueError("Original retirement lineage or related records changed")
     decision = session.query(generic_instance).filter(generic_instance.euid == receipt["event_euid"]).with_for_update().one()
     edge = session.query(generic_instance_lineage).filter(generic_instance_lineage.euid == receipt["lineage_euid"]).with_for_update().one()
-    share = service._share_query(session).filter_by(euid=row["euid"]).one()
     if decision.type != "share_event" or decision.is_deleted or decision.bstatus != "active" or edge.is_deleted or edge.bstatus != "active":
         raise ValueError("Retirement requires an active typed native decision")
     if edge.parent_instance_uid != share.uid or edge.child_instance_uid != decision.uid or edge.relationship_type != "share_event":
