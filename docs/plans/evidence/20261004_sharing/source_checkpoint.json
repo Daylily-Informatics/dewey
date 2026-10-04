@@ -1,0 +1,43 @@
+{
+  "recorded_at": "2026-10-04T03:25:38.211090+00:00",
+  "source_commit": "db80dc93d9883e03825e61c0a14c888539b6692c",
+  "branch": "codex/dewey-tapdb-globaldag-20260926",
+  "source_review": "complete; seven findings resolved; historical-set conversion rereviewed without new actionable findings",
+  "native_inventory_sha256": "394a18a5ca47bcffe44bb4f402ecdd3d7630019d1d884485b2565703632aca1d",
+  "native_inventory_scope": "Read-only CLI from staged source using existing published image; final tagged image inventory still required before apply.",
+  "source_status": "implemented",
+  "release_status": "blocked",
+  "deployment_status": "not_performed",
+  "acceptance_status": "pending",
+  "blocker": "Explicit disposition of 22 expired ambiguous shares is pending.",
+  "tests_run": false,
+  "lint_run": false,
+  "functional_campaign_run": false,
+  "tag_created": false,
+  "pushed": false,
+  "image_built": false,
+  "production_changed": false,
+  "planned_release_version": "11.0.0",
+  "agents": [
+    {
+      "name": "share_policy",
+      "model": "gpt-6-astra",
+      "effort": "high"
+    },
+    {
+      "name": "gateway_delivery",
+      "model": "gpt-6.1-sol",
+      "effort": "high"
+    },
+    {
+      "name": "share_experience",
+      "model": "gpt-6.1-sol",
+      "effort": "high"
+    },
+    {
+      "name": "sharing_review",
+      "model": "gpt-6-astra",
+      "effort": "high"
+    }
+  ]
+}
