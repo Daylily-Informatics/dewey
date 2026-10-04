@@ -1,0 +1,358 @@
+{
+  "command_id": "fd8dd6fb-25f4-44be-94b2-07496c51efd1",
+  "cutoff": "2026-09-27T04:43:55+00:00",
+  "inventory_sha256": "20d093b47c01ff212e24027b9d1c38743ecc22419ee0d8250432660520c9898e",
+  "live_baseline": {
+    "container": {
+      "id": "8cf45a2bb64a876f92cad799265dfe83ab44a0d2d33734746de461fec16ab236",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:30b155ab0a3555cd03a8ccbe59c340f8b801331bbe4ea0b64f56e3c473ab7d5a",
+      "running": true
+    },
+    "dewey_dns": "100.71.233.11",
+    "login_dns": "100.71.233.11",
+    "managed_ingress_assertion_present": false,
+    "tailnet_ip": "100.71.233.11"
+  },
+  "observed_at": "2026-10-04T04:47:44.478419+00:00",
+  "production_changed": false,
+  "recent": [],
+  "shares": [
+    {
+      "ambiguous": true,
+      "created_at": "2026-06-02T10:55:12.139173+00:00",
+      "euid": "M-DGX-9YHS",
+      "expires_at": "2026-06-03T10:55:12.137999+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": null
+    },
+    {
+      "ambiguous": true,
+      "created_at": "2026-06-02T10:55:12.301237+00:00",
+      "euid": "M-DGX-9YKN",
+      "expires_at": "2026-06-03T10:55:12.300264+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": null
+    },
+    {
+      "ambiguous": true,
+      "created_at": "2026-06-08T18:38:40.529298+00:00",
+      "euid": "M-DGX-A1PA",
+      "expires_at": "2026-06-09T18:38:40.527846+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": false,
+      "created_at": "2026-07-13T21:00:00.117128+00:00",
+      "euid": "M-DGX-K2MT",
+      "expires_at": "2031-07-13T23:59:59+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": false,
+      "created_at": "2026-07-13T21:00:00.186574+00:00",
+      "euid": "M-DGX-K2PP",
+      "expires_at": "2031-07-13T23:59:59+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": false,
+      "created_at": "2026-07-14T16:11:17.305801+00:00",
+      "euid": "M-DGX-K39G",
+      "expires_at": "2026-07-14T16:26:17.304538+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": false,
+      "created_at": "2026-07-14T16:12:45.891458+00:00",
+      "euid": "M-DGX-K3BC",
+      "expires_at": "2026-07-14T16:27:45.890552+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": false,
+      "created_at": "2026-07-14T16:39:52.576616+00:00",
+      "euid": "M-DGX-K3D8",
+      "expires_at": "2026-07-15T16:39:52.575984+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": false,
+      "created_at": "2026-07-14T16:44:56.916724+00:00",
+      "euid": "M-DGX-K3F4",
+      "expires_at": "2026-07-21T15:24:56.915767+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": false,
+      "created_at": "2026-07-14T16:45:20.903385+00:00",
+      "euid": "M-DGX-K3HZ",
+      "expires_at": "2026-07-21T15:25:20.902113+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": true,
+      "created_at": "2026-07-14T22:34:33.944382+00:00",
+      "euid": "M-DGX-K3NQ",
+      "expires_at": "2026-07-14T22:44:33.943450+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "revoked"
+    },
+    {
+      "ambiguous": true,
+      "created_at": "2026-07-14T22:34:34.038425+00:00",
+      "euid": "M-DGX-K3QK",
+      "expires_at": "2026-07-14T22:44:34.037574+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "revoked"
+    },
+    {
+      "ambiguous": true,
+      "created_at": "2026-07-14T22:34:34.110474+00:00",
+      "euid": "M-DGX-K3SF",
+      "expires_at": "2026-07-14T22:44:34.109573+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "revoked"
+    },
+    {
+      "ambiguous": true,
+      "created_at": "2026-07-14T22:34:34.180697+00:00",
+      "euid": "M-DGX-K3VB",
+      "expires_at": "2026-07-14T22:44:34.179936+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "revoked"
+    },
+    {
+      "ambiguous": false,
+      "created_at": "2026-07-14T22:34:38.831849+00:00",
+      "euid": "M-DGX-K3X7",
+      "expires_at": "2026-07-14T22:34:43.827854+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "revoked"
+    },
+    {
+      "ambiguous": true,
+      "created_at": "2026-07-14T22:56:31.870932+00:00",
+      "euid": "M-DGX-K3Z3",
+      "expires_at": "2026-07-14T23:06:31.862298+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "revoked"
+    },
+    {
+      "ambiguous": true,
+      "created_at": "2026-07-14T22:56:31.962330+00:00",
+      "euid": "M-DGX-K41Z",
+      "expires_at": "2026-07-14T23:06:31.961582+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "revoked"
+    },
+    {
+      "ambiguous": true,
+      "created_at": "2026-07-14T22:56:32.034095+00:00",
+      "euid": "M-DGX-K43V",
+      "expires_at": "2026-07-14T23:06:32.033277+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "revoked"
+    },
+    {
+      "ambiguous": true,
+      "created_at": "2026-07-14T22:56:32.102395+00:00",
+      "euid": "M-DGX-K45Q",
+      "expires_at": "2026-07-14T23:06:32.101637+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "revoked"
+    },
+    {
+      "ambiguous": true,
+      "created_at": "2026-07-14T23:06:00.683382+00:00",
+      "euid": "M-DGX-K47K",
+      "expires_at": "2026-07-14T23:16:00.682508+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "revoked"
+    },
+    {
+      "ambiguous": true,
+      "created_at": "2026-07-14T23:06:00.780491+00:00",
+      "euid": "M-DGX-K49F",
+      "expires_at": "2026-07-14T23:16:00.779559+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "revoked"
+    },
+    {
+      "ambiguous": true,
+      "created_at": "2026-07-14T23:06:00.854786+00:00",
+      "euid": "M-DGX-K4BB",
+      "expires_at": "2026-07-14T23:16:00.853926+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "revoked"
+    },
+    {
+      "ambiguous": true,
+      "created_at": "2026-07-14T23:06:00.938358+00:00",
+      "euid": "M-DGX-K4D7",
+      "expires_at": "2026-07-14T23:16:00.937454+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "revoked"
+    },
+    {
+      "ambiguous": false,
+      "created_at": "2026-07-14T23:06:05.281881+00:00",
+      "euid": "M-DGX-K4F3",
+      "expires_at": "2026-07-14T23:06:10.278026+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "expired"
+    },
+    {
+      "ambiguous": true,
+      "created_at": "2026-07-16T15:21:40.738739+00:00",
+      "euid": "M-DGX-K8ZY",
+      "expires_at": "2026-07-18T15:26:40.734667+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": true,
+      "created_at": "2026-07-16T15:21:41.018239+00:00",
+      "euid": "M-DGX-K91T",
+      "expires_at": "2026-07-18T15:26:41.014693+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": true,
+      "created_at": "2026-07-16T21:08:45.611232+00:00",
+      "euid": "M-DGX-M61V",
+      "expires_at": "2026-07-18T21:13:45.608592+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": true,
+      "created_at": "2026-07-16T21:08:45.839597+00:00",
+      "euid": "M-DGX-M63Q",
+      "expires_at": "2026-07-18T21:13:45.836191+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": true,
+      "created_at": "2026-07-17T14:59:11.578516+00:00",
+      "euid": "M-DGX-MDQ7",
+      "expires_at": "2026-07-19T14:59:11.577443+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": true,
+      "created_at": "2026-07-17T21:25:59.253989+00:00",
+      "euid": "M-DGX-MDWX",
+      "expires_at": "2026-07-31T21:30:59.250742+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": true,
+      "created_at": "2026-07-17T21:26:00.132801+00:00",
+      "euid": "M-DGX-ME1K",
+      "expires_at": "2026-07-31T21:31:00.129877+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": false,
+      "created_at": "2026-07-22T19:45:54.429473+00:00",
+      "euid": "M-DGX-MWNW",
+      "expires_at": "2026-07-23T19:45:54.428726+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": false,
+      "created_at": "2026-07-22T21:05:24.491909+00:00",
+      "euid": "M-DGX-MWQR",
+      "expires_at": "2026-07-23T21:05:24.491223+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": false,
+      "created_at": "2026-07-26T22:26:17.216291+00:00",
+      "euid": "M-DGX-N8DZ",
+      "expires_at": "2026-07-29T22:26:17.215666+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": false,
+      "created_at": "2026-09-03T10:20:22.513434+00:00",
+      "euid": "M-DGX-NJDN",
+      "expires_at": "2026-09-04T10:20:22.512618+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": false,
+      "created_at": "2026-09-03T22:23:50.712578+00:00",
+      "euid": "M-DGX-NJFH",
+      "expires_at": "2026-09-10T22:23:50.711730+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": false,
+      "created_at": "2026-09-04T00:08:05.936505+00:00",
+      "euid": "M-DGX-NJHC",
+      "expires_at": "2026-09-18T00:08:05.935719+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": false,
+      "created_at": "2026-09-04T15:53:31.519137+00:00",
+      "euid": "M-DGX-NJK8",
+      "expires_at": "2026-09-11T15:53:31.518335+00:00",
+      "modified_at": "2026-09-11T10:50:02.438993+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": false,
+      "created_at": "2026-09-16T19:20:26.308557+00:00",
+      "euid": "M-DGX-TQZ1",
+      "expires_at": "2026-09-17T19:20:26.307511+00:00",
+      "modified_at": "2026-09-16T19:21:23.875666+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": false,
+      "created_at": "2026-09-16T19:49:36.829655+00:00",
+      "euid": "M-DGX-TSNK",
+      "expires_at": "2026-09-17T19:49:36.828719+00:00",
+      "modified_at": "2026-09-16T19:49:38.185560+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": false,
+      "created_at": "2026-09-16T20:29:16.797596+00:00",
+      "euid": "M-DGX-TVD2",
+      "expires_at": "2026-09-17T20:29:16.796723+00:00",
+      "modified_at": "2026-09-16T20:29:18.256720+00:00",
+      "status": "active"
+    },
+    {
+      "ambiguous": false,
+      "created_at": "2026-09-16T20:46:50.717313+00:00",
+      "euid": "M-DGX-TX3M",
+      "expires_at": "2026-09-17T20:46:50.716316+00:00",
+      "modified_at": "2026-09-16T20:47:07.522750+00:00",
+      "status": "active"
+    }
+  ],
+  "source_sha256": "ea4f5c5355ceaaa3823f0108af23e2e827bec4f44b044e771f9224a01736a07a"
+}

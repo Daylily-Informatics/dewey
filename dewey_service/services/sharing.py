@@ -221,6 +221,8 @@ class SharingServiceMixin:
         share = (query.with_for_update() if lock else query).first()
         if share is None:
             raise DeweyNotFoundError("Share not found")
+        if share.bstatus == "archived":
+            raise HTTPException(410, "Share is archived")
         if normalize_instance_payload(share).get("schema_version") != 2:
             raise HTTPException(503, "Share requires explicit canonical upgrade")
         return share

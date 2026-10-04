@@ -30,6 +30,7 @@ INSTANCE = "i-07df3a933e4839f52"
 NAME = "dayhoff-day-dewey-1"
 OLD_IMAGE = "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:30b155ab0a3555cd03a8ccbe59c340f8b801331bbe4ea0b64f56e3c473ab7d5a"
 ACTOR = "codex:dewey-sharing-20261004"
+CREATED_SINCE = "2026-09-27T04:43:55Z"
 
 
 def now():
@@ -82,6 +83,8 @@ def verify_prepared():
     prepared = json.loads((ROOT / "final-preparation.json").read_text())
     for name, expected in prepared["candidate_sha256"].items():
         require(digest((ROOT / name).read_bytes()) == expected, "Prepared candidate changed: " + name)
+    for path, expected in prepared["live_config_sha256"].items():
+        require(digest(read(path)) == expected, "Live configuration changed after preparation: " + path)
     require(digest(Path(__file__).read_bytes()) == prepared["execution_script_sha256"], "Cutover script changed after preparation")
     image = prepared["image"]
     observed = json.loads(subprocess.check_output(["sudo", "docker", "image", "inspect", image["image"]]))[0]
@@ -103,6 +106,17 @@ def prepare(image_receipt):
     require(containers()[NAME]["image"] == OLD_IMAGE, "Actual predecessor changed")
     labels = json.loads(subprocess.check_output(["sudo", "docker", "image", "inspect", image["image"]]))[0]["Config"]["Labels"]
     require(labels.get("org.opencontainers.image.revision") == image["source_commit"] and labels.get("org.opencontainers.image.version") == image["source_tag"], "Image labels differ from tagged release")
+    current_service = compose["services"]["dewey"]
+    live_config_sha256 = {}
+    for field, saved in (("DEWEY_CONFIG", "dewey-config.yaml"), ("TAPDB_CONFIG_PATH", "tapdb-runtime.yaml")):
+        sources = [v for v in current_service["volumes"] if isinstance(v, dict)
+            and v.get("target") == current_service["environment"][field]]
+        require(len(sources) == 1, "Ambiguous live configuration identity: " + field)
+        source = sources[0]["source"]
+        source_sha256 = digest(read(source))
+        require(source_sha256 == digest((ROOT / saved).read_bytes()),
+            "Private inventory configuration differs from live configuration: " + field)
+        live_config_sha256[source] = source_sha256
     for name, raw in (("previous-compose.yml", raw_compose), ("previous-manifest.json", raw_manifest),
                       ("previous-proxy.conf", raw_proxy), ("previous-dns.conf", raw_dns)):
         private(ROOT / name, raw)
@@ -183,6 +197,7 @@ def prepare(image_receipt):
         "final-proxy.conf", "content-proxy.conf", "final-dns.conf", "tapdb-runtime.yaml", "operator.yaml", "attribution.json")
     private(ROOT / "final-preparation.json", {"phase": "prepared", "image": image, "prepared_at": now(),
         "candidate_sha256": {name: digest((ROOT / name).read_bytes()) for name in candidate_files},
+        "live_config_sha256": live_config_sha256,
         "execution_script_sha256": digest(Path(__file__).read_bytes()),
         "compose_before_sha256": digest(raw_compose), "manifest_before_sha256": digest(raw_manifest),
         "proxy_before_sha256": digest(raw_proxy), "dns_before_sha256": digest(raw_dns), "tests_run": False})
@@ -202,14 +217,17 @@ def certificate():
 
 def inventory():
     native("final-inventory", ["upgrade-sharing", "--phase", "inventory", "--inventory", "/opt/dewey-sharing/final-inventory.json",
-        "--actor", ACTOR, "--attribution", "/opt/dewey-sharing/attribution.json"])
+        "--created-since", CREATED_SINCE, "--actor", ACTOR, "--attribution", "/opt/dewey-sharing/attribution.json"])
     data = json.loads((ROOT / "final-inventory.json").read_text())
-    print(json.dumps({"phase": "inventory", "sha256": data["inventory_sha256"], "shares": len(data["shares"]), "ambiguous": data["ambiguous"]}))
+    print(json.dumps({"phase": "inventory", "sha256": data["inventory_sha256"], "created_since": data["created_since"],
+        "shares": len(data["shares"]), "eligible_share_count": data["eligible_share_count"],
+        "retire_before_cutoff_count": data["retire_before_cutoff_count"], "ambiguous": data["ambiguous"]}))
 
 
 def cutover(expected_sha256):
     inventory = json.loads((ROOT / "final-inventory.json").read_text())
     require(expected_sha256 and inventory["inventory_sha256"] == expected_sha256 and not inventory["ambiguous"], "Review exact unambiguous inventory before cutover")
+    require(datetime.fromisoformat(inventory["created_since"]) == datetime.fromisoformat(CREATED_SINCE.replace("Z", "+00:00")), "Reviewed creation cutoff changed")
     prepared = verify_prepared()
     image = prepared["image"]
     for path, key in ((COMPOSE, "compose"), (MANIFEST, "manifest"), (APACHE, "proxy"), (DNS, "dns")):
@@ -236,6 +254,7 @@ def cutover(expected_sha256):
     private(ROOT / "predecessor-drain.json", {"finished_at": state["FinishedAt"], "exit_code": state["ExitCode"], "force_used": False})
     for phase in ("apply", "verify"):
         native("upgrade-" + phase, ["upgrade-sharing", "--phase", phase, "--inventory", "/opt/dewey-sharing/final-inventory.json",
+            "--created-since", CREATED_SINCE,
             "--expected-sha256", expected_sha256, "--receipt", "/opt/dewey-sharing/upgrade-" + phase + ".json",
             "--actor", ACTOR, "--attribution", "/opt/dewey-sharing/attribution.json"])
     for path, key in ((COMPOSE, "compose"), (MANIFEST, "manifest"), (APACHE, "proxy"), (DNS, "dns")):
@@ -247,6 +266,7 @@ def cutover(expected_sha256):
     subprocess.run(["sudo", "ln", "-s", str(CONTENT), "/etc/apache2/sites-enabled/dewey-content-day.conf"], check=True)
     logged("apache-configuration", ["sudo", "apache2ctl", "configtest"])
     logged("dns-configuration", ["sudo", "dnsmasq", "--test", "--conf-file=" + str(DNS)])
+    verify_prepared()
     logged("service-start", ["sudo", "docker", "compose", "-p", "dayhoff-day", "-f", str(COMPOSE), "up", "-d", "--no-deps", "--pull", "never", "dewey"])
     logged("proxy-reload", ["sudo", "systemctl", "reload", "apache2"])
     logged("dns-reload", ["sudo", "systemctl", "restart", "dayhoff-day-lsmc-bio-dnsmasq"])

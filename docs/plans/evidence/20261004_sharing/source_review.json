@@ -41,19 +41,25 @@
       "issue": "Safe inventory summary exported unrestricted lineage/type labels",
       "status": "resolved",
       "resolution": "Allowlist known structural values and hash unknown labels; native evidence version2 independently reread."
+    },
+    {
+      "id": "SR-08",
+      "issue": "Live runtime configuration could drift after private deployment preparation",
+      "status": "resolved",
+      "resolution": "Record exact live config source hashes; reread before every native operation, installation and service start. Independently reviewed."
     }
   ],
   "automated_tests": false,
   "lint": false,
   "functional_campaign": false,
-  "deployment_review": "source_review_complete; live conversion blocked pending explicit expired-record disposition",
+  "deployment_review": "source_review_complete; fresh final-image native inventory required before authorized cutover",
   "review_limits": [
     "No automated tests, lint or functional campaign executed.",
     "Native read-only inventory is operational conversion evidence, not application acceptance.",
-    "Expired-record disposition remains pending and any ensuing conversion changes require a focused review."
+    "Final-image inventory must confirm cutoff disposition and unchanged native authority before apply."
   ],
   "evidence_v2_review": "Bounded native set-member evidence source reviewed; no new disclosure or conversion-authority finding.",
-  "updated_at": "2026-10-04T03:22:45.939739+00:00",
+  "updated_at": "2026-10-04T05:03:33.261399+00:00",
   "historical_set_conversion_review": {
     "status": "no_new_actionable_findings",
     "source_sha256": "fc1041c44b1538ba8b1a16d7ee027e93fa298ec565834538bb7074ca8178f197",
@@ -61,5 +67,17 @@
     "fresh_inventory_sha256": "394a18a5ca47bcffe44bb4f402ecdd3d7630019d1d884485b2565703632aca1d"
   },
   "literal_key_review": "DOTALL preserves All selection for S3 keys containing newline; source review only.",
-  "overlapping_grant_contract": "Share-wide exclusions override every grant; per-grant exclusions narrow that grant and another applicable grant can independently allow the key. Share-wide denied emails override all grants. Draft selection preview is an audience union."
+  "overlapping_grant_contract": "Share-wide exclusions override every grant; per-grant exclusions narrow that grant and another applicable grant can independently allow the key. Share-wide denied emails override all grants. Draft selection preview is an audience union.",
+  "creation_cutoff_review": {
+    "status": "no_remaining_blocking_findings",
+    "created_since": "2026-09-27T04:43:55Z",
+    "reviewer": "sharing_review (gpt-6-astra, high)",
+    "native_contract": "Installed TapDB11.0.2 source: bstatus-only update with revision guard; native revision and modified time may change. Original payload/history/lineage retained. Typed retirement decision verified.",
+    "source_sha256": {
+      "dewey_service/share_upgrade.py": "7fbcd55bce366a38d1193f630a165994e9ed9e5ccded79c6f4fccd86096cf103",
+      "dewey_service/cli/db.py": "746eba018305a822e4a7d2261ea6302eb6ae88cb5e89dc9357e43d37a9dd3d5d",
+      "dewey_service/services/sharing.py": "d2248aaa19a91a83767d0783fa669020d827a6f0be86be26fbac096293f62a62",
+      "docs/plans/20261004T000136Z_dewey_sharing_cutover.py": "eba74f710181849f175fc7eaaf3b32c20ccba36b1f44b35909b608c5ea828aad"
+    }
+  }
 }

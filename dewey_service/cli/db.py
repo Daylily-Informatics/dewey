@@ -185,6 +185,7 @@ def initialize_performance_settings(
 def upgrade_sharing(
     phase: str = typer.Option(..., help="inventory, apply, or verify; never runs at startup"),
     inventory: Path = typer.Option(..., help="Absolute private reviewed inventory path"),
+    created_since: str = typer.Option(..., help="Fixed timezone-bearing creation cutoff; must match across all phases"),
     actor: str = typer.Option(...),
     attribution: Path = typer.Option(..., exists=True, dir_okay=False),
     expected_sha256: str | None = typer.Option(None),
@@ -207,12 +208,14 @@ def upgrade_sharing(
     service = DeweyService(backend)
     with explicit_attribution_context(attribution), principal_context(Principal(subject=actor, roles=("ADMIN",), service=True), maintenance=True):
         if phase == "inventory":
-            result = share_upgrade.inventory(service)
+            result = share_upgrade.inventory(service, created_since=created_since)
             share_upgrade.write_private(inventory, result)
-            summary = {"phase": phase, "share_count": len(result["shares"]), "ambiguous_count": len(result["ambiguous"]), "inventory_sha256": result["inventory_sha256"]}
+            summary = {"phase": phase, **{key: result[key] for key in (
+                "created_since", "share_count", "ambiguous_count", "eligible_share_count",
+                "retire_before_cutoff_count", "inventory_sha256")}}
         else:
             reviewed = json.loads(inventory.read_text())
-            result = getattr(share_upgrade, phase)(service, reviewed, expected_sha256)
+            result = getattr(share_upgrade, phase)(service, reviewed, expected_sha256, created_since=created_since)
             share_upgrade.write_private(receipt, result)
             summary = result
     ccyo_out.print_text(json.dumps(summary))

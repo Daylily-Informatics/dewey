@@ -1,5 +1,5 @@
 {
-  "status": "pending_user_disposition",
+  "status": "superseded_by_user_creation_cutoff",
   "action": "retain_non_serving_history",
   "reviewed_inventory_sha256": "5d580817db32ea8a6cd845a389ea94126281d846a0b374dea6b51d4f12317e61",
   "share_euids": [
@@ -139,5 +139,7 @@
       "record_revision": 0,
       "payload_sha256": "2850420e908d850ee943517e1ea9b9656e0b37ab654d323c28211fc57608bfd0"
     }
-  ]
+  ],
+  "superseding_instruction": "only preserve things made in the last week",
+  "created_since": "2026-09-27T04:43:55Z"
 }

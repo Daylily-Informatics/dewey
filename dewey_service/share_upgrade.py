@@ -9,6 +9,107 @@ from dewey_service.services.share_policy import GRANT_TEMPLATE, EVENT_TEMPLATE, 
 from dewey_service.tapdb_backend import normalize_instance_payload, utc_now_iso
 
 
+def _cutoff(value):
+    try:
+        return expiry(value).isoformat()
+    except (ValueError, TypeError) as exc:
+        raise ValueError("created_since must be an explicit timezone-bearing ISO8601 boundary") from exc
+
+
+def _native_hash(record, *, omit=()):
+    """Hash persisted native columns without exporting names, payloads, or credentials."""
+    from sqlalchemy import inspect
+
+    def serial(value):
+        if isinstance(value, dict):
+            return {key: serial(item) for key, item in value.items()}
+        if isinstance(value, (list, tuple)):
+            return [serial(item) for item in value]
+        if value is None or isinstance(value, (str, int, float, bool)):
+            return value
+        return value.isoformat() if isinstance(value, datetime) else str(value)
+
+    return digest({attr.key: serial(getattr(record, attr.key))
+        for attr in inspect(record).mapper.column_attrs if attr.key not in omit})
+
+
+def _incident_lineage(session, share):
+    from daylily_tapdb import generic_instance, generic_instance_lineage
+    from sqlalchemy import or_
+    edges = session.query(generic_instance_lineage).filter(or_(
+        generic_instance_lineage.parent_instance_uid == share.uid,
+        generic_instance_lineage.child_instance_uid == share.uid)).order_by(generic_instance_lineage.euid).all()
+    rows = []
+    for edge in edges:
+        other_uid = edge.child_instance_uid if edge.parent_instance_uid == share.uid else edge.parent_instance_uid
+        other = session.query(generic_instance).filter(generic_instance.uid == other_uid).one_or_none()
+        rows.append({"euid": edge.euid, "record_revision": edge.record_revision,
+            "native_sha256": _native_hash(edge), "related_euid": other.euid if other is not None else None,
+            "related_native_sha256": _native_hash(other) if other is not None else None})
+    return rows
+
+
+def _retire(service, session, share, row, inventory_sha256, created_since):
+    from dewey_service.audit import current_explicit_attribution
+    from dewey_service.registry_access import principal
+    attribution = current_explicit_attribution()
+    if attribution is None or not attribution.request_id:
+        raise ValueError("Retirement requires explicit native request attribution")
+    if share.bstatus != "archived":
+        service.backend.update_persisted_fields(session, share, {"bstatus": "archived"},
+            expected_revision=row["record_revision"])
+        session.refresh(share)
+    if _native_hash(share, omit=("bstatus", "record_revision", "modified_dt")) != row["retirement_invariant_sha256"]:
+        raise ValueError("Native retirement changed fields beyond status, revision, or modification time")
+    decision = service.backend.create_instance(session, template_code=EVENT_TEMPLATE,
+        name="share_retired_before_cutoff", json_addl={
+            "event_type": "share_retired_before_cutoff", "decision": "retire", "actor": principal().subject,
+            "created_at": utc_now_iso(), "request_id": attribution.request_id,
+            "trusted_tailnet": None, "managed_origin": None,
+            "details": {"created_since": created_since, "inventory_sha256": inventory_sha256,
+                "source_native_sha256": row["native_sha256"], "source_payload_sha256": row["payload_sha256"],
+                "source_record_revision": row["record_revision"], "retired_record_revision": share.record_revision,
+                "source_bstatus_sha256": row["bstatus_sha256"], "retired_bstatus": "archived"}})
+    edge = service.backend.create_lineage(session, parent=share, child=decision, relationship_type="share_event")
+    session.flush()
+    session.refresh(share)
+    return {"share_euid": share.euid, "record_revision": share.record_revision,
+        "native_sha256": _native_hash(share), "event_euid": decision.euid,
+        "event_native_sha256": _native_hash(decision), "lineage_euid": edge.euid,
+        "lineage_native_sha256": _native_hash(edge)}
+
+
+def _verify_retirement(service, session, row, before, receipt, inventory_sha256, created_since):
+    from daylily_tapdb import generic_instance, generic_instance_lineage
+    if row["bstatus"] != "archived" or row["record_revision"] != receipt["record_revision"] or row["native_sha256"] != receipt["native_sha256"]:
+        raise ValueError("Retired share status or native revision differs from the applied receipt")
+    for key in ("retirement_invariant_sha256", "payload_sha256", "legacy_audit_sha256"):
+        if row[key] != before[key]:
+            raise ValueError("Original retired share fields or history changed")
+    edges = {edge["euid"]: edge for edge in row["incident_lineage"]}
+    old_edges = {edge["euid"]: edge for edge in before["incident_lineage"]}
+    if any(edges.get(euid) != edge for euid, edge in old_edges.items()) or set(edges) - set(old_edges) != {receipt["lineage_euid"]}:
+        raise ValueError("Original retirement lineage or related records changed")
+    decision = session.query(generic_instance).filter(generic_instance.euid == receipt["event_euid"]).with_for_update().one()
+    edge = session.query(generic_instance_lineage).filter(generic_instance_lineage.euid == receipt["lineage_euid"]).with_for_update().one()
+    share = service._share_query(session).filter_by(euid=row["euid"]).one()
+    if decision.type != "share_event" or decision.is_deleted or decision.bstatus != "active" or edge.is_deleted or edge.bstatus != "active":
+        raise ValueError("Retirement requires an active typed native decision")
+    if edge.parent_instance_uid != share.uid or edge.child_instance_uid != decision.uid or edge.relationship_type != "share_event":
+        raise ValueError("Retirement decision lacks exact native share lineage")
+    if _native_hash(decision) != receipt["event_native_sha256"] or _native_hash(edge) != receipt["lineage_native_sha256"]:
+        raise ValueError("Retirement decision or lineage changed")
+    event = normalize_instance_payload(decision)
+    details = event.get("details") or {}
+    if event.get("event_type") != "share_retired_before_cutoff" or event.get("decision") != "retire" or not event.get("request_id"):
+        raise ValueError("Retirement decision attribution is missing")
+    if details != {"created_since": created_since, "inventory_sha256": inventory_sha256,
+            "source_native_sha256": before["native_sha256"], "source_payload_sha256": before["payload_sha256"],
+            "source_record_revision": before["record_revision"], "retired_record_revision": row["record_revision"],
+            "source_bstatus_sha256": before["bstatus_sha256"], "retired_bstatus": "archived"}:
+        raise ValueError("Retirement decision differs from the exact reviewed disposition")
+
+
 def _record_receipt(record):
     from dewey_service.registry_conversion import coordinates
     return {"euid": record.euid, "record_revision": record.record_revision,
@@ -113,6 +214,10 @@ def _lock_inventory_authority(service, session, reviewed):
     from daylily_tapdb import generic_instance, generic_instance_lineage
     object_euids, edge_euids = set(), set()
     for row in reviewed["shares"]:
+        for edge in row.get("incident_lineage", []):
+            edge_euids.add(edge["euid"])
+            if edge["related_euid"]:
+                object_euids.add(edge["related_euid"])
         basis = row.get("conversion_basis") or {}
         if basis.get("kind") == "historical_set_membership":
             object_euids.add(basis["set"]["euid"])
@@ -121,8 +226,7 @@ def _lock_inventory_authority(service, session, reviewed):
             object_euids.add(member["member"]["euid"])
             edge_euids.add(member["lineage"]["euid"])
     if object_euids:
-        records = session.query(generic_instance).filter(generic_instance.euid.in_(sorted(object_euids)),
-            generic_instance.domain_code == service.backend.domain_code).order_by(generic_instance.euid).with_for_update().all()
+        records = session.query(generic_instance).filter(generic_instance.euid.in_(sorted(object_euids))).order_by(generic_instance.euid).with_for_update().all()
         if {record.euid for record in records} != object_euids:
             raise ValueError("A reviewed source object is missing")
     if edge_euids:
@@ -304,6 +408,8 @@ def _disposition_evidence(service, session, share, data):
         grant_status_counts[status if isinstance(status, str) and status in {"active", "revoked", "superseded"} else "other"] += 1
     typed_events = service._share_related(session, share, relationship="share_event", kind="share_event")
     return {
+        "created_at": timestamp(share.created_dt),
+        "modified_at": timestamp(share.modified_dt),
         "status": literal(data.get("status"), {"active", "revoked", "expired"}),
         "bstatus": literal(share.bstatus, {"active", "archived", "inactive", "deleted", "draft", "pending"}),
         "expires_at": expiry_value,
@@ -330,58 +436,82 @@ def _disposition_evidence(service, session, share, data):
     }
 
 
-def snapshot(service, session):
+def snapshot(service, session, created_since):
+    created_since = _cutoff(created_since)
+    cutoff = expiry(created_since)
     rows, ambiguous = [], []
     for share in service._share_query(session).order_by("euid").all():
         data = normalize_instance_payload(share)
         members = service._share_members(session, share)
         direct_members = sorted(member.euid for member in members)
-        basis = None
-        try:
-            members, basis = _conversion_scope(service, session, share)
-            proposal = _proposal(service, session, share, members=members)
-        except (ValueError, KeyError, TypeError) as exc:
-            proposal = None
-            ambiguous.append({"euid": share.euid, "reason": str(exc)})
+        created = share.created_dt
+        if created is None or created.tzinfo is None or created.utcoffset() is None:
+            raise ValueError("Native share creation timestamp must carry a timezone")
+        disposition = "retire_before_cutoff" if created < cutoff else "eligible_convert"
+        basis, proposal = None, None
+        if disposition == "eligible_convert":
+            try:
+                members, basis = _conversion_scope(service, session, share)
+                proposal = _proposal(service, session, share, members=members)
+            except (ValueError, KeyError, TypeError) as exc:
+                ambiguous.append({"euid": share.euid, "reason": str(exc)})
         rows.append({"euid": share.euid, "record_revision": share.record_revision,
+            "created_at": created.isoformat(), "modified_at": share.modified_dt.isoformat() if share.modified_dt else None,
+            "bstatus": share.bstatus if share.bstatus in {"active", "archived", "inactive", "deleted", "draft", "pending"} else None,
+            "bstatus_sha256": digest(share.bstatus), "disposition": disposition, "native_sha256": _native_hash(share),
+            "retirement_invariant_sha256": _native_hash(share, omit=("bstatus", "record_revision", "modified_dt")),
+            "incident_lineage": _incident_lineage(session, share),
             "payload_sha256": digest(data), "member_euids": sorted(m.euid for m in members),
             "direct_member_euids": direct_members, "conversion_basis": basis,
             "legacy_audit_sha256": digest(data.get("audit_events") or []),
             "member_coordinates_sha256": digest([{ "euid": m.euid, "payload": normalize_instance_payload(m)} for m in sorted(members, key=lambda m: m.euid)]),
             "proposal": proposal, "audit_event_count": len(data.get("audit_events") or []),
             "disposition_evidence": _disposition_evidence(service, session, share, data)})
-    return {"format": "dewey.sharing-upgrade/v2", "disposition_evidence_version": 3,
+    return {"format": "dewey.sharing-upgrade/v2", "disposition_evidence_version": 4,
         "database": identity(session), "domain_code": service.backend.domain_code,
+        "created_since": created_since, "share_count": len(rows), "ambiguous_count": len(ambiguous),
+        "retire_before_cutoff_count": sum(row["disposition"] == "retire_before_cutoff" for row in rows),
+        "eligible_share_count": sum(row["disposition"] == "eligible_convert" for row in rows),
         "shares": rows, "ambiguous": ambiguous}
 
 
-def inventory(service):
+def inventory(service, *, created_since):
     with service.backend.session_scope(commit=False) as session:
-        result = snapshot(service, session)
+        result = snapshot(service, session, created_since)
     return {**result, "inventory_sha256": digest(result)}
 
 
-def apply(service, reviewed, expected_sha256):
+def apply(service, reviewed, expected_sha256, *, created_since):
     from daylily_tapdb import generic_instance
     unsigned = {k: v for k, v in reviewed.items() if k != "inventory_sha256"}
     if digest(unsigned) != reviewed.get("inventory_sha256") or reviewed.get("inventory_sha256") != expected_sha256:
         raise ValueError("Reviewed inventory digest does not match")
+    created_since = _cutoff(created_since)
+    if reviewed.get("created_since") != created_since:
+        raise ValueError("Explicit cutoff differs from the reviewed inventory")
     if reviewed.get("ambiguous"):
         raise ValueError("Ambiguous inventory records require explicit disposition before apply")
     with service.backend.session_scope(commit=True) as session:
         service.backend.ensure_templates(session, template_codes=(GRANT_TEMPLATE, EVENT_TEMPLATE))
         service.backend.lock_external_key(session, operation="sharing.upgrade", key="schema-v2")
+        existing_marker = service.backend.find_by_json_field(session, template_code=POLICY_TEMPLATE,
+            field="policy_kind", value="sharing_schema", for_update=True)
+        if existing_marker is not None and normalize_instance_payload(existing_marker).get("status") in {"applied", "verified"}:
+            raise ValueError("A sharing epoch already exists; verify its original inventory instead of applying another cutoff")
         # Lock all reviewed shares before comparing their native revisions and member coordinates.
         service._share_query(session).with_for_update().all()
         _lock_inventory_authority(service, session, reviewed)
-        current = snapshot(service, session)
+        current = snapshot(service, session, created_since)
         if current != unsigned:
             raise ValueError("Sharing inventory changed; review a new inventory")
-        changed = []
+        changed, retired = [], []
         historical_set_conversions = []
         for row in current["shares"]:
-            if row["proposal"] is None: continue
             share = service._share_query(session).filter(generic_instance.euid == row["euid"]).one()
+            if row["disposition"] == "retire_before_cutoff":
+                retired.append(_retire(service, session, share, row, expected_sha256, created_since))
+                continue
+            if row["proposal"] is None: continue
             old = normalize_instance_payload(share)
             proposal = dict(row["proposal"])
             grants = proposal.pop("grants")
@@ -416,34 +546,59 @@ def apply(service, reviewed, expected_sha256):
                     "new_member_lineages": new_member_lineages})
         marker = service.backend.find_by_json_field(session, template_code=POLICY_TEMPLATE, field="policy_kind", value="sharing_schema", for_update=True)
         values = {"policy_kind": "sharing_schema", "schema_version": 2, "status": "applied",
-            "inventory_sha256": expected_sha256, "applied_at": utc_now_iso()}
+            "inventory_sha256": expected_sha256, "applied_at": utc_now_iso(), "created_since": created_since,
+            "share_count": current["share_count"], "eligible_share_count": current["eligible_share_count"],
+            "retire_before_cutoff_count": current["retire_before_cutoff_count"],
+            "converted_share_count": len(changed), "retirement_receipts": retired}
         if marker is None:
             marker = service.backend.create_instance(session, template_code=POLICY_TEMPLATE, name="Canonical sharing schema", json_addl=values)
         else:
             service.backend.update_instance_json(session, marker, values)
-        return {"status": "applied", "inventory_sha256": expected_sha256, "changed_share_euids": changed,
+        return {"status": "applied", "inventory_sha256": expected_sha256, "created_since": created_since,
+            "share_count": current["share_count"], "eligible_share_count": current["eligible_share_count"],
+            "retire_before_cutoff_count": len(retired), "converted_share_count": len(changed),
+            "retirement_receipts": retired, "changed_share_euids": changed,
             "historical_set_conversions": historical_set_conversions, "readiness": "blocked_until_verify"}
 
 
-def verify(service, reviewed, expected_sha256):
+def verify(service, reviewed, expected_sha256, *, created_since):
     if reviewed.get("inventory_sha256") != expected_sha256 or digest({k: v for k, v in reviewed.items() if k != "inventory_sha256"}) != expected_sha256:
         raise ValueError("Reviewed inventory digest does not match")
+    created_since = _cutoff(created_since)
+    if reviewed.get("created_since") != created_since:
+        raise ValueError("Explicit cutoff differs from the reviewed inventory")
     with service.backend.session_scope(commit=True) as session:
         service.backend.lock_external_key(session, operation="sharing.upgrade", key="schema-v2")
         marker = service.backend.find_by_json_field(session, template_code=POLICY_TEMPLATE, field="policy_kind", value="sharing_schema", for_update=True)
         if marker is None or normalize_instance_payload(marker).get("inventory_sha256") != expected_sha256:
             raise ValueError("No matching applied upgrade")
+        marker_data = normalize_instance_payload(marker)
+        if marker_data.get("created_since") != created_since or marker_data.get("status") not in {"applied", "verified"}:
+            raise ValueError("Applied epoch cutoff or status differs")
         service._share_query(session).with_for_update().all()
         _lock_inventory_authority(service, session, reviewed)
-        result = snapshot(service, session)
+        result = snapshot(service, session, created_since)
         if result["database"] != reviewed["database"] or result["domain_code"] != reviewed["domain_code"]:
             raise ValueError("Database identity changed")
         expected = {r["euid"]: r for r in reviewed["shares"]}
         if {r["euid"] for r in result["shares"]} != set(expected):
             raise ValueError("Share inventory changed during cutover")
         historical_set_conversions = []
+        retirement_receipts = marker_data.get("retirement_receipts", [])
+        retired = {receipt["share_euid"]: receipt for receipt in retirement_receipts}
+        expected_retired = {row["euid"] for row in reviewed["shares"] if row["disposition"] == "retire_before_cutoff"}
+        if set(retired) != expected_retired or len(retired) != len(retirement_receipts):
+            raise ValueError("Retirement decision inventory differs")
+        for key in ("share_count", "eligible_share_count", "retire_before_cutoff_count"):
+            if result[key] != reviewed[key] or marker_data.get(key) != reviewed[key]:
+                raise ValueError("Cutover disposition counts changed")
         for row in result["shares"]:
             before = expected[row["euid"]]
+            if row["created_at"] != before["created_at"] or row["disposition"] != before["disposition"]:
+                raise ValueError("Native creation identity or cutoff disposition changed")
+            if before["disposition"] == "retire_before_cutoff":
+                _verify_retirement(service, session, row, before, retired[row["euid"]], expected_sha256, created_since)
+                continue
             if row["member_euids"] != before["member_euids"] or row["member_coordinates_sha256"] != before["member_coordinates_sha256"]:
                 raise ValueError("Reviewed member identity or coordinates changed")
             if row["proposal"] is not None:
@@ -497,8 +652,12 @@ def verify(service, reviewed, expected_sha256):
                 imported = [e for e in events if normalize_instance_payload(e).get("event_type") == "historical_share_event"]
                 if len(imported) != before["audit_event_count"]:
                     raise ValueError("Historical audit import count differs")
+        if marker_data.get("converted_share_count") != sum(row["proposal"] is not None for row in reviewed["shares"]):
+            raise ValueError("Converted share count differs from reviewed proposals")
         if result["ambiguous"]:
             raise ValueError("Canonical share verification found ambiguous records")
         service.backend.update_instance_json(session, marker, {"status": "verified", "verified_at": utc_now_iso()})
-        return {"status": "verified", "inventory_sha256": expected_sha256, "share_count": len(result["shares"]),
+        return {"status": "verified", "inventory_sha256": expected_sha256, "created_since": created_since,
+            "share_count": len(result["shares"]), "eligible_share_count": result["eligible_share_count"],
+            "retire_before_cutoff_count": len(retired), "converted_share_count": marker_data["converted_share_count"],
             "historical_set_conversions": historical_set_conversions, "readiness": "ready"}

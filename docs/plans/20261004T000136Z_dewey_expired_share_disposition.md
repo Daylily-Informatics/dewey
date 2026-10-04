@@ -1,8 +1,10 @@
 # Proposed disposition of expired Dewey shares
 
-Status: pending explicit user disposition. No production mutation has occurred.
+Status: SUPERSEDED by the user instruction on 2026-10-04: "only preserve things made in the last week." Fresh native creation dates show all these records predate the cutoff. They will not carry forward as serving shares. No physical deletion is authorized or performed; the table below is historical evidence, not a pending decision.
 
-The approved implementation plan requires ambiguous records to block conversion. The final native inventory found the following 22 expired records. The proposed disposition preserves their EUIDs, URLs, existing payloads, recipient evidence, lineage and audit as non-serving history. It grants no access, reconstructs no missing membership and does not revive or delete a share. Manager access to historical evidence would still require Tailscale and sign-in.
+Historical proposal below (superseded):
+
+The approved implementation plan required ambiguous records to block conversion. The final native inventory found the following 22 expired records. The proposed disposition preserves their EUIDs, URLs, existing payloads, recipient evidence, lineage and audit as non-serving history. It grants no access, reconstructs no missing membership and does not revive or delete a share. Manager access to historical evidence would still require Tailscale and sign-in.
 
 The active set share `M-DGX-K2PP` is excluded from this proposal. Complete native evidence established its two current members; the reviewed converter can now preserve that share without a separate disposition.
 
