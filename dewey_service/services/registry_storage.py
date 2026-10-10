@@ -1,6 +1,8 @@
 """Authorized S3 navigation and durable, explicitly selected storage operations."""
 from __future__ import annotations
 
+from dewey_service.deletion_policy import reject_deletion
+
 import math
 from dataclasses import asdict
 from datetime import datetime, timedelta, timezone
@@ -92,12 +94,12 @@ class RegistryStorageServiceMixin:
                 {key: value for (_, key), value in registered.items()})
 
     def require_storage_access(self, bucket: str, key: str, *, action: str, session=None):
+        if action == "delete":
+            reject_deletion()
         actor = principal()
-        if action in {"upload", "delete"}:
+        if action == "upload":
             if not actor.writable or not (actor.internal or actor.admin):
                 raise HTTPException(403, "S3 changes require internal LSMC write access")
-            if action == "delete" and not actor.admin:
-                raise HTTPException(403, "S3 deletion requires admin access")
         if actor.admin:
             return
         if session is None:
@@ -277,22 +279,20 @@ class RegistryStorageServiceMixin:
                 "receipt_euid": receipt_euid, "download_completion_observed": False}
 
     def begin_registry_upload(self, *, uri: str, size: int, content_type: str, replace_etag=None):
+        if replace_etag is not None:
+            reject_deletion()
         actor = principal()
         bucket, key, _ = parse_s3_uri(uri)
         if not key or size < 0 or size > 5 * 1024 ** 4:
             raise ValueError("Upload requires an object key and size from 0 bytes through 5 TiB")
         self.require_storage_access(bucket, key, action="upload")
-        if replace_etag and not actor.admin:
-            raise HTTPException(403, "Replacement requires admin access")
         storage = self._require_storage()
         try:
             existing = storage.head_object(bucket=bucket, key=key, permission="upload")
         except StorageObjectNotFoundError:
             existing = None
-        if existing and (not replace_etag or replace_etag.strip('"') != existing.etag):
-            raise HTTPException(409, "An object already exists; choose a new key or explicitly review admin replacement")
-        if not existing and replace_etag:
-            raise HTTPException(409, "The reviewed replacement object no longer exists")
+        if existing:
+            raise HTTPException(409, "An object already exists; choose a new key. Replacement is disabled.")
         part_size = max(16 * 1024 ** 2, math.ceil(size / 10000))
         with self.backend.session_scope(commit=True) as session:
             row = self.backend.create_instance(session, template_code=OPERATION_TEMPLATE, name=f"Upload {key}", json_addl={
@@ -337,19 +337,19 @@ class RegistryStorageServiceMixin:
             return {"operation_euid": euid, "part": number, "uploaded_bytes": sum(p["size"] for p in parts.values())}
 
     def complete_registry_upload(self, euid: str, *, abort=False):
+        if abort:
+            reject_deletion()
         with self.backend.session_scope(commit=True) as session:
             row, data = self._storage_operation(session, euid, lock=True)
             if data.get("operation") != "upload":
                 raise ValueError("This operation is not an upload")
             if data["status"] == "complete" and not abort:
                 return {"operation_euid": euid, "status": "complete", "uri": data["uri"], "registered": False}
-            if data["status"] == "aborted" and abort:
-                return {"operation_euid": euid, "status": "aborted", "uri": data["uri"], "registered": False}
             if data["status"] != "uploading":
                 raise HTTPException(409, "Upload outcome requires inspection; no completion or abort was retried")
             self.require_storage_access(data["bucket"], data["key"], action="upload")
-            if data.get("replace_etag") and not principal().admin:
-                raise HTTPException(403, "Replacement requires current admin access")
+            if data.get("replace_etag") is not None:
+                reject_deletion()
             parts = sorted(data["parts"].values(), key=lambda p: p["PartNumber"])
             if not abort and (sum(p["size"] for p in parts) != data["size"] or not parts):
                 raise ValueError("Upload does not yet contain all declared bytes")
@@ -357,13 +357,9 @@ class RegistryStorageServiceMixin:
                 "finalization_started_at": utc_now_iso()})
         storage = self._require_storage()
         try:
-            if abort:
-                storage.abort_multipart(bucket=data["bucket"], key=data["key"], upload_id=data["upload_id"])
-                state = "aborted"
-            else:
-                storage.complete_multipart(bucket=data["bucket"], key=data["key"], upload_id=data["upload_id"],
-                    parts=[{k: p[k] for k in ("ETag", "PartNumber")} for p in parts], replace_etag=data["replace_etag"])
-                state = "complete"
+            storage.complete_multipart(bucket=data["bucket"], key=data["key"], upload_id=data["upload_id"],
+                parts=[{k: p[k] for k in ("ETag", "PartNumber")} for p in parts], replace_etag=None)
+            state = "complete"
         except Exception:
             with self.backend.session_scope(commit=True) as session:
                 row, _ = self._storage_operation(session, euid, lock=True)
@@ -376,64 +372,7 @@ class RegistryStorageServiceMixin:
         return {"operation_euid": euid, "status": state, "uri": data["uri"], "registered": False}
 
     def preview_registry_delete(self, *, uri: str, kind: str, max_objects=10000):
-        bucket, key, _ = parse_s3_uri(uri, prefix=kind == "prefix")
-        self.require_storage_access(bucket, key, action="delete")
-        if kind not in {"object", "prefix"} or not key:
-            raise ValueError("Select an object or non-root folder; bucket deletion is not supported")
-        storage = self._require_storage()
-        versioning = storage.bucket_versioning(bucket)
-        items = storage.list_objects(bucket=bucket, prefix=key, limit=max_objects + 1) if kind == "prefix" else [storage.head_object(bucket=bucket, key=key)]
-        if len(items) > max_objects:
-            raise ValueError(f"This preview exceeds {max_objects} objects; select a narrower folder")
-        if not items:
-            raise ValueError("There are no objects to delete")
-        manifest = [{"Key": item.key, "ETag": item.etag, "size": item.size} for item in items]
-        if any(not item["ETag"] for item in manifest):
-            raise ValueError("Every deletion target requires an observed ETag")
-        digest = self._fingerprint(manifest)
-        with self.backend.session_scope(commit=True) as session:
-            row = self.backend.create_instance(session, template_code=OPERATION_TEMPLATE, name=f"Delete review {uri}", json_addl={
-                "operation": "delete", "actor": principal().subject, "uri": uri, "bucket": bucket,
-                "manifest": manifest, "manifest_sha256": digest, "versioning": versioning,
-                "status": "preview", "created_at": utc_now_iso(),
-                "expires_at": (datetime.now(timezone.utc) + timedelta(minutes=15)).isoformat(), "results": [],
-            })
-            return {"operation_euid": row.euid, "manifest_sha256": digest, "targets": manifest,
-                    "count": len(manifest), "bytes": sum(item["size"] or 0 for item in manifest), "versioning": versioning,
-                    "effect": "Create delete markers; retain version history" if versioning == "Enabled" else "Remove current objects; unversioned bytes may be permanently deleted"}
+        reject_deletion()
 
     def execute_registry_delete(self, euid: str, *, manifest_sha256: str, confirmation: str):
-        if not principal().admin:
-            raise HTTPException(403, "S3 deletion requires admin access")
-        with self.backend.session_scope(commit=True) as session:
-            row, data = self._storage_operation(session, euid, lock=True)
-            if data["operation"] != "delete" or data["status"] != "preview":
-                raise ValueError("Only a pending reviewed deletion can be executed")
-            if confirmation != "DELETE" or data["manifest_sha256"] != manifest_sha256:
-                raise ValueError("Confirm DELETE and the exact reviewed manifest digest")
-            if datetime.fromisoformat(data["expires_at"]) <= datetime.now(timezone.utc):
-                raise ValueError("Deletion preview expired; review the current objects again")
-            self.backend.update_instance_json(session, row, {"status": "executing", "confirmed_at": utc_now_iso()})
-        results = []
-        state = "complete"
-        try:
-            for start in range(0, len(data["manifest"]), 1000):
-                batch = [{"Key": item["Key"], "ETag": item["ETag"]} for item in data["manifest"][start:start + 1000]]
-                response = self._require_storage().delete_reviewed_objects(bucket=data["bucket"], objects=batch)
-                results.extend({"status": "deleted", **item} for item in response.get("Deleted", []))
-                results.extend({"status": "failed", **item} for item in response.get("Errors", []))
-                observed = {item["Key"] for item in response.get("Deleted", []) + response.get("Errors", [])}
-                missing = [item for item in batch if item["Key"] not in observed]
-                results.extend({"Key": item["Key"], "status": "unknown"} for item in missing)
-                if response.get("Errors") or missing: state = "partial_failure"
-                with self.backend.session_scope(commit=True) as session:
-                    row, _ = self._storage_operation(session, euid, lock=True)
-                    self.backend.update_instance_json(session, row, {"results": results})
-        except Exception:
-            state = "uncertain_failure"
-            raise
-        finally:
-            with self.backend.session_scope(commit=True) as session:
-                row, _ = self._storage_operation(session, euid, lock=True)
-                self.backend.update_instance_json(session, row, {"status": state, "results": results, "completed_at": utc_now_iso()})
-        return {"operation_euid": euid, "status": state, "results": results}
+        reject_deletion()

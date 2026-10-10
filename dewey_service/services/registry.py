@@ -1,6 +1,8 @@
 """EUID-first registry operations shared by HTTP, browser, and CLI clients."""
 from __future__ import annotations
 
+from dewey_service.deletion_policy import reject_deletion
+
 import json
 import secrets
 from datetime import datetime, timedelta, timezone
@@ -432,25 +434,7 @@ class RegistryServiceMixin:
             return self._registry_payload(session, record)
 
     def archive_registry(self, euid: str):
-        with self.backend.session_scope(commit=True) as session:
-            record = self._registry_record(session, euid, action="edit", lock=True)
-            self.backend.update_instance_json(session, record, {
-                "archived_at": utc_now_iso(), "archived_by": principal().subject,
-            })
-            self.backend.update_persisted_fields(session, record, {"bstatus": "archived"})
-            self._registry_event(session, record, "registration_archived")
-            shares = session.query(generic_instance).join(generic_instance_lineage,
-                generic_instance_lineage.child_instance_uid == generic_instance.uid).filter(
-                generic_instance_lineage.parent_instance_uid == record.uid,
-                generic_instance_lineage.relationship_type == "has_share",
-                generic_instance_lineage.is_deleted.is_(False), generic_instance.is_deleted.is_(False),
-            ).all()
-            for share in shares:
-                self.backend.update_instance_json(session, share, {
-                    "status": "revoked", "revoked_at": utc_now_iso(),
-                    "revoked_by": principal().subject, "revocation_reason": "Registration archived",
-                })
-            return {"euid": euid, "status": "archived", "storage_deleted": False}
+        reject_deletion()
 
     def update_registry_permissions(self, euid: str, changes: dict[str, Any]):
         normalized = validate_policy(changes)

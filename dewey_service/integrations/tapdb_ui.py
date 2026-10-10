@@ -25,7 +25,6 @@ from dewey_service.integrations.tapdb_runtime import (
     _resolve_tapdb_config_path,
     ensure_tapdb_version,
 )
-from dewey_service.rbac import Role, profile_has_role
 from dewey_service.settings import Settings
 
 
@@ -51,7 +50,7 @@ def _resolve_host_user(request: Request) -> dict[str, Any] | None:
         "username": email,
         "email": email,
         "display_name": str(profile.get("name") or email).strip(),
-        "role": "admin" if profile_has_role(profile, Role.ADMIN) else "user",
+        "role": "user",  # Embedded generic database browser is read-only, even for admins.
         "is_active": True,
         "require_password_change": False,
     }

@@ -496,7 +496,7 @@ def create_app(
             excluded_host_suffix=settings.share_content_host_suffix,
         ),
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "OPTIONS"],
         allow_headers=["*"],
     )
 
@@ -4279,7 +4279,9 @@ def create_app(
     from dewey_service.share_routing import ShareHostBoundaryMiddleware
     from dewey_service.share_context import ManagedShareIngressMiddleware
     app.add_middleware(ShareHostBoundaryMiddleware, settings=settings)
-    # Last-added middleware runs first: use the real ASGI transport peer,
-    # before sessions, principals, host dispatch or forwarded-header handling.
+    # Inspect the real ASGI transport peer before sessions and forwarded headers.
+    # The outer deletion prohibition rejects without examining identity or bodies.
     app.add_middleware(ManagedShareIngressMiddleware, settings=settings)
+    from dewey_service.deletion_policy import DeletionProhibitionMiddleware
+    app.add_middleware(DeletionProhibitionMiddleware)
     return app

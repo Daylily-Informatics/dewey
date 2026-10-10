@@ -112,3 +112,15 @@ Deployed evidence should target `https://dewey.<deploy>.dev.lsmc.bio` and includ
 - [`docs/sequencer_run_registration.md`](docs/sequencer_run_registration.md): run-directory registration.
 - [`docs/qeo/`](docs/qeo/): QEO/Dewey handoff contracts.
 - [`docs/old_docs/`](docs/old_docs/): historical material only.
+
+## Deletion policy
+
+Dewey GUI and API deletion are disabled for all users, including administrators
+and service principals. DELETE requests, S3 deletion review/execution, registration
+archiving, artifact-set member removal, upload abort, and existing-object replacement
+are prohibited. Existing deletion previews cannot be executed. The embedded TapDB
+browser is read-only, including generic edits and backup restoration, to prevent
+deleting data through a secondary surface. New registrations, registry metadata
+edits, uploads to new keys, downloads, and sharing remain available. Revoking shares
+or tokens retains their records and remains available as an access-security control.
+The prohibition has no configuration switch or administrator exemption.

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dewey_service.deletion_policy import reject_deletion
+
 from typing import Any
 from urllib.parse import urlsplit
 
@@ -312,59 +314,7 @@ class ArtifactSetServiceMixin:
         artifact_euid: str,
         idempotency_key: str,
     ) -> tuple[int, dict[str, Any]]:
-        payload = {
-            "artifact_set_euid": str(artifact_set_euid or "").strip(),
-            "artifact_euid": str(artifact_euid or "").strip(),
-        }
-        if not payload["artifact_set_euid"]:
-            raise ValueError("artifact_set_euid is required")
-        if not payload["artifact_euid"]:
-            raise ValueError("artifact_euid is required")
-
-        fingerprint = self._fingerprint(payload)
-        with self.backend.session_scope(commit=True) as session:
-            replay = self._idempotency_replay(
-                session,
-                operation="artifact_set.member.remove",
-                idempotency_key=idempotency_key,
-                fingerprint=fingerprint,
-            )
-            if replay is not None:
-                return replay.status_code, replay.response
-
-            artifact_set = self.backend.find_by_euid(
-                session,
-                template_code=ARTIFACT_SET_TEMPLATE,
-                euid=payload["artifact_set_euid"],
-                for_update=True,
-            )
-            if artifact_set is None:
-                raise DeweyNotFoundError(f"Artifact set not found: {payload['artifact_set_euid']}")
-
-            artifact = self.backend.find_by_euid(
-                session,
-                template_code=ARTIFACT_TEMPLATE,
-                euid=payload["artifact_euid"],
-            )
-            if artifact is None:
-                raise DeweyNotFoundError(f"Artifact not found: {payload['artifact_euid']}")
-
-            self.backend.delete_lineage(
-                session,
-                parent=artifact_set,
-                child=artifact,
-                relationship_type="artifact_set_member",
-            )
-            body = self._artifact_set_response(session, artifact_set)
-            self._store_idempotency(
-                session,
-                operation="artifact_set.member.remove",
-                idempotency_key=idempotency_key,
-                fingerprint=fingerprint,
-                status_code=200,
-                response=body,
-            )
-            return 200, body
+        reject_deletion()
 
     def get_artifact_set(self, artifact_set_euid: str) -> dict[str, Any]:
         with self.backend.session_scope(commit=False) as session:
