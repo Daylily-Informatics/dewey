@@ -1,0 +1,21 @@
+{
+  "schema": "dewey.final-image/v1",
+  "service": "dewey",
+  "source_tag": "11.0.3",
+  "source_commit": "eba14993e342386641803fa99b58ce63cf51e5a1",
+  "source_branch": "codex/dewey-tapdb-globaldag-20260926",
+  "source_tag_object": "be76d8d33b49df7441c39204c65d02ff5486f2f8",
+  "source_url": "https://github.com/Daylily-Informatics/dewey.git",
+  "dockerfile_sha256": "5ff3b3f7d5aac7ec78c0bcd3c72a7a21cfa12afeb7402ec8fbd45463aef3eded",
+  "builder_instance": "i-07df3a933e4839f52",
+  "builder_region": "us-west-2",
+  "builder_aws_profile": "lsmc",
+  "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:5605870c2bf4cbafa89049ef08997ea50b73ca1cc557fff2255ad0752af126fb",
+  "image_tag": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey:11.0.3",
+  "build_root": "/home/ubuntu/dewey-11.0.3-20261010T235719Z",
+  "build_log": "/home/ubuntu/dewey-11.0.3-20261010T235719Z/build.log",
+  "build_log_sha256": "21d02a6432e7175a57d7ba4d72751133bf42b20d02a0e9f4b0f9fe0d7a18c52a",
+  "completed_at": "2026-10-10T23:58:45.886674+00:00",
+  "tests_run": false,
+  "deployed": false
+}
