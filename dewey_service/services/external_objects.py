@@ -136,8 +136,10 @@ class ExternalObjectServiceMixin:
         self._assert_generic_relation_available(
             external_object=external_object, relation_type=relation_type
         )
+        if artifact_instance.type not in {"artifact", "artifact_set"}:
+            raise ValueError("External relation source must be an artifact or set")
         relation_identity = (
-            f"artifact:{artifact_instance.euid}:{external_object.euid}:{relation_type}"
+            f"{artifact_instance.type}:{artifact_instance.euid}:{external_object.euid}:{relation_type}"
         )
         existing = self.backend.find_by_json_field(
             session,
@@ -151,7 +153,7 @@ class ExternalObjectServiceMixin:
                 template_code=EXTERNAL_OBJECT_RELATION_TEMPLATE,
                 name=relation_identity,
                 json_addl={
-                    "target_type": "artifact",
+                    "target_type": artifact_instance.type,
                     "target_euid": artifact_instance.euid,
                     "external_object_euid": external_object.euid,
                     "relation_type": relation_type,

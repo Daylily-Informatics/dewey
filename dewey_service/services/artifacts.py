@@ -1320,6 +1320,7 @@ class ArtifactServiceMixin:
         metadata: dict[str, Any] | None,
         lock_after_import: bool,
         idempotency_key: str,
+        description: str | None = None,
     ) -> tuple[int, dict[str, Any]]:
         if not self.managed_storage_bucket:
             raise ValueError("managed_storage_bucket is required for upload sessions")
@@ -1334,6 +1335,8 @@ class ArtifactServiceMixin:
             "metadata": dict(metadata or {}),
             "lock_after_import": bool(lock_after_import),
         }
+        if description is not None:
+            payload["description"] = description.strip() or None
         fingerprint = self._fingerprint(payload)
 
         with self.backend.session_scope(commit=True) as session:
@@ -1470,6 +1473,8 @@ class ArtifactServiceMixin:
                 storage_status="verified",
                 storage_verified_at=now_iso,
             )
+            if "description" in token_payload:
+                artifact_payload["description"] = token_payload["description"]
             status_code, body = self._upsert_artifact_record(
                 session,
                 payload=artifact_payload,

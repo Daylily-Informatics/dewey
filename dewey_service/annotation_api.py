@@ -3,11 +3,14 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager, contextmanager
 from uuid import UUID
+import hashlib
+from urllib.parse import urlsplit, quote
 
 import httpx
 from fastapi import APIRouter, HTTPException, Request
 from itsdangerous import BadSignature
 from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy import text
 from starlette.concurrency import run_in_threadpool
 
 from dewey_service.artifact_ui import resolve_artifact_type
@@ -15,16 +18,23 @@ from dewey_service.storage import StorageObjectNotFoundError, storage_authorizat
 from dewey_service.auth import resolve_external_broker_principal
 from dewey_service.audit import authenticated_user_email_context
 from dewey_service.registry_access import Principal, principal_context
+from dewey_service.tapdb_backend import utc_now_iso
 
 MAX_BYTES = 50 * 1024 * 1024
 
 
-class CreateAnnotationUpload(BaseModel):
+class AnnotationContext(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    target: dict[str, str]
+    target_url: str = Field(min_length=1, max_length=2048)
+    description: str = Field(default="", max_length=2000)
+
+
+class CreateAnnotationUpload(AnnotationContext):
     model_config = ConfigDict(extra="forbid")
     filename: str = Field(min_length=1, max_length=255)
     size: int = Field(ge=1, le=MAX_BYTES)
     content_type: str = Field(default="application/octet-stream", max_length=128)
-    target: dict[str, str]
 
 
 class CompleteAnnotationUpload(BaseModel):
@@ -58,16 +68,21 @@ async def delegated(request, operation, resource):
 
 
 def managed_payload(service, actor, resource, body):
+    validate_context(body)
     metadata = {"annotation_operation_id": resource, "annotation_owner_subject": actor.subject,
-                "calling_service": "kahlo", "declared_size": body.size, "target": body.target}
+                "calling_service": "kahlo", "declared_size": body.size, "target": body.target,
+                "target_url": body.target_url, "run_name": body.target["run_name"],
+                "xfer_name": body.target.get("xfer_name", ""), "description": body.description.strip()}
     return {"artifact_type": resolve_artifact_type("other", body.filename),
             "original_filename": service._safe_filename(body.filename),
             "content_type": body.content_type.strip() or None, "producer_system": "kahlo",
-            "producer_object_euid": None, "metadata": metadata, "lock_after_import": False}
+            "producer_object_euid": None, "metadata": metadata, "lock_after_import": False,
+            "description": body.description.strip()}
 
 
 def managed_key(service, actor, resource, payload):
-    spec = {k: payload[k] for k in ("artifact_type", "original_filename", "content_type", "producer_system", "producer_object_euid", "metadata", "lock_after_import")}
+    spec = {k: payload[k] for k in ("artifact_type", "original_filename", "content_type", "producer_system", "producer_object_euid", "metadata", "lock_after_import", "description")}
+    spec["description"] = spec["description"] or None
     return service._managed_key(namespace="uploads",
         seed=f"annotation:{actor.subject}:{resource}:create:{service._fingerprint(spec)}",
         filename=payload["original_filename"])
@@ -84,6 +99,60 @@ def managed_receipt(service, actor, resource, receipt):
         return payload
     except (BadSignature, KeyError, TypeError, ValueError) as exc:
         raise HTTPException(401, "Invalid managed upload receipt") from exc
+
+
+def validate_context(body):
+    import re
+    target = body.target
+    if (target.get("scope") not in {"run", "attempt"}
+            or not re.fullmatch(r"[a-f0-9]{64}", target.get("run_identity_key", ""))
+            or not target.get("run_name")
+            or any(len(v) > 1024 or any(ord(c) < 32 or ord(c) == 127 for c in v) for v in target.values())):
+        raise HTTPException(400, "Exact run context and a printable run name are required")
+    if target["scope"] == "attempt":
+        identity = target.get("attempt_id", "")
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}", identity) or not target.get("xfer_name"):
+            raise HTTPException(400, "Exact transfer context and name are required")
+        expected = "/seqnas/xfer/" + quote(identity, safe="")
+    else:
+        if target.get("attempt_id"):
+            raise HTTPException(400, "Physical run context cannot name a transfer attempt")
+        expected = "/seqnas/physical-run/" + target["run_identity_key"]
+    parsed = urlsplit(body.target_url)
+    if (parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password
+            or parsed.query or parsed.fragment or parsed.path != expected):
+        raise HTTPException(400, "Canonical Kahlo target URL must match the exact run or transfer")
+
+
+def link_context(service, actor, euid, operation_id, body):
+    """Append a human-audited native external reference; never change file ownership."""
+    validate_context(body)
+    operation_id = str(UUID(operation_id))
+    payload = {"euid": euid, "target": body.target, "target_url": body.target_url,
+               "description": body.description.strip()}
+    key = f"seqnas-context:{actor.subject}:{operation_id}"
+    fingerprint = service._fingerprint(payload)
+    with service.backend.session_scope(commit=True) as session:
+        lock = int.from_bytes(hashlib.sha256(key.encode()).digest()[:8], "big", signed=True)
+        session.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": lock})
+        record = service._registry_record(session, euid, action="edit", lock=True)
+        replay = service._idempotency_replay(session, operation="annotation.context.link",
+            idempotency_key=key, fingerprint=fingerprint)
+        if replay is not None:
+            return replay.response
+        external = service._find_or_create_external_object(session, external_system="kahlo",
+            external_object_type="seqnas_annotation", external_object_id=f"{actor.subject}:{operation_id}",
+            external_uri=body.target_url)
+        service.backend.update_instance_json(session, external, {"metadata": {
+            **payload, "run_name": body.target["run_name"], "xfer_name": body.target.get("xfer_name", ""),
+            "created_at": utc_now_iso(), "created_by": {"subject": actor.subject, "email": actor.email}}})
+        service._ensure_external_object_relation(session, artifact_instance=record,
+            external_object=external, relation_type="seqnas_annotation")
+        service._registry_event(session, record, "seqnas_context_linked")
+        result = service._registry_payload(session, record)
+        service._store_idempotency(session, operation="annotation.context.link", idempotency_key=key,
+            fingerprint=fingerprint, status_code=200, response=result)
+        return result
 
 
 @contextmanager
@@ -155,7 +224,14 @@ def attach_annotation_api(app):
             resolved = await run_in_threadpool(service.resolve_registry, result["artifact_euid"])
             if resolved.get("owner") not in {actor.email, actor.subject}:
                 raise HTTPException(409, "Dewey artifact owner differs from the authenticated human")
-            return resolved
+            context = AnnotationContext(target=token["metadata"]["target"],
+                target_url=token["metadata"]["target_url"], description=token["description"] or "")
+            return await run_in_threadpool(link_context, service, actor, resolved["euid"], resource, context)
+
+    @router.post("/artifacts/{euid}/context")
+    async def context(request: Request, euid: str, body: AnnotationContext):
+        async with delegated(request, "dewey.annotation.link", euid) as (actor, claims):
+            return await run_in_threadpool(link_context, service, actor, euid, claims["operation_id"], body)
 
     @router.get("/artifacts/{euid}")
     async def resolve(request: Request, euid: str):

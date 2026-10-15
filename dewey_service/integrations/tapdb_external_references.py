@@ -18,6 +18,12 @@ from daylily_tapdb.external_references import (
 
 ASSERTION_AUTHORITY = "dewey.external_object_relation"
 EXPLICIT_TARGET_TYPES = {
+    ("kahlo", "seqnas_annotation"): {
+        "kind": "opaque",
+        "namespace": "kahlo",
+        "identifier_kind": "seqnas_annotation",
+        "scope": "public_global",
+    },
     ("labcore", "sequencing_run"): {
         "kind": "opaque",
         "namespace": "labcore",
