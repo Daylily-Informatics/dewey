@@ -10,10 +10,10 @@ from dewey_service.integrations import tapdb_runtime
 
 
 def test_ensure_tapdb_version_requires_exact_released_pair(monkeypatch):
-    versions = {"daylily-tapdb": "10.1.1rc1", "meridian-euid": "0.4.8"}
+    versions = {"daylily-tapdb": "11.0.9", "meridian-euid": "0.4.8"}
     monkeypatch.setattr(tapdb_runtime.importlib.metadata, "version", versions.__getitem__)
-    assert tapdb_runtime.ensure_tapdb_version() == "10.1.1rc1"
-    for package, wrong in (("daylily-tapdb", "10.1.1"), ("meridian-euid", "0.4.7")):
+    assert tapdb_runtime.ensure_tapdb_version() == "11.0.9"
+    for package, wrong in (("daylily-tapdb", "11.0.8"), ("meridian-euid", "0.4.7")):
         expected = versions[package]
         versions[package] = wrong
         with pytest.raises(tapdb_runtime.TapDBRuntimeError, match="must be exactly"):
