@@ -35,6 +35,8 @@ EXPLICIT_TARGET_TYPES = {
     ("bloom", "sequencing_run"): {"kind": "tapdb_object"},
     ("ursa", "analysis"): {"kind": "tapdb_object"},
     ("ursa", "analysis_job"): {"kind": "tapdb_object"},
+    ("ursa", "analysis_execution"): {"kind": "tapdb_object"},
+    ("ursa", "analysis_unit"): {"kind": "tapdb_object"},
     ("dyec", "dayoa_analysis_directory"): {"kind": "non_federated"},
     ("ursa", "run_directory_analysis_trigger"): {"kind": "non_federated"},
     ("pubmed", "pmid"): {
@@ -78,6 +80,12 @@ OWNER_KIND_COORDINATES = {
     ),
     ("ursa", "analysis_job"): frozenset(
         {("analysis", "submission-request", "generic", "1.0")}
+    ),
+    ("ursa", "analysis_execution"): frozenset(
+        {("analysis", "execution", "generic", "2.0")}
+    ),
+    ("ursa", "analysis_unit"): frozenset(
+        {("analysis", "unit", "generic", "1.0")}
     ),
 }
 

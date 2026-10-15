@@ -41,6 +41,8 @@ def external_payload(**changes):
         ("ursa", ("analysis", "run-linked", "generic", "1.0"), "analysis"),
         ("ursa", ("analysis", "run", "generic", "1.0"), "analysis"),
         ("ursa", ("analysis", "submission-request", "generic", "1.0"), "analysis_job"),
+        ("ursa", ("analysis", "execution", "generic", "2.0"), "analysis_execution"),
+        ("ursa", ("analysis", "unit", "generic", "1.0"), "analysis_unit"),
     ],
 )
 def test_native_owner_template_classifies_declared_business_kind(
@@ -50,6 +52,17 @@ def test_native_owner_template_classifies_declared_business_kind(
     assert refs.owner_business_kind(service_id, owner) == expected_kind
     with pytest.raises(refs.DeweyExternalReferenceError, match="No unique reviewed"):
         refs.owner_business_kind(service_id, {**owner, "version": "unreviewed"})
+
+
+@pytest.mark.parametrize("kind", ["analysis_execution", "analysis_unit"])
+def test_ursa_analysis_identity_kinds_require_tapdb_semantics(kind):
+    payload = external_payload(external_system="ursa", external_object_type=kind)
+    target = refs.build_external_target(payload)
+    assert isinstance(target, TapDBObjectTarget)
+    assert target.target_service_id == "ursa"
+    assert target.target_object_kind == kind
+    with pytest.raises(refs.DeweyExternalReferenceError, match="contradicts"):
+        refs.build_external_target({**payload, "reference_target": {"kind": "opaque"}})
 
 
 def instance(uid, kind, **changes):
