@@ -229,7 +229,10 @@ class TapDBBackend:
         self.update_persisted_fields(session, instance, {"json_addl": payload, "bstatus": status})
         if template_code in {ARTIFACT_TEMPLATE, ARTIFACT_SET_TEMPLATE} and not maintenance_mode():
             actor = principal()
-            if not actor.writable:
+            managed_annotation = (actor.annotation_upload and template_code == ARTIFACT_TEMPLATE
+                                  and json_addl.get("metadata", {}).get("annotation_owner_subject") == actor.subject
+                                  and json_addl.get("producer_system") == "kahlo")
+            if not actor.writable and not managed_annotation:
                 raise PermissionError("Registry write permission is required")
             policy = self.create_instance(
                 session, template_code=POLICY_TEMPLATE,

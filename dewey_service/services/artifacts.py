@@ -1394,11 +1394,15 @@ class ArtifactServiceMixin:
         checksums: dict[str, Any] | None,
         metadata: dict[str, Any] | None,
         idempotency_key: str,
+        annotation_recovery: bool = False,
     ) -> tuple[int, dict[str, Any]]:
+        from dewey_service.registry_access import principal
+        if annotation_recovery and not principal().annotation_upload:
+            raise ValueError("Annotation recovery requires scoped human authorization")
         try:
             token_payload = self._upload_serializer.loads(
                 str(upload_token or "").strip(),
-                max_age=self.upload_session_ttl_seconds,
+                max_age=None if annotation_recovery else self.upload_session_ttl_seconds,
             )
         except SignatureExpired as exc:
             raise ValueError("upload_token has expired") from exc

@@ -35,6 +35,7 @@ class Principal:
     groups: tuple[str, ...] = ()
     internal: bool = False
     service: bool = False
+    annotation_upload: bool = False
 
     @property
     def admin(self) -> bool:

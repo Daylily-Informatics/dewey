@@ -517,6 +517,8 @@ def create_app(
     templates.env.globals["static_url"] = _static_url
     from dewey_service.registry_api import attach_registry_api
     attach_registry_api(app, templates=templates)
+    from dewey_service.annotation_api import attach_annotation_api
+    attach_annotation_api(app)
     static_dir = Path(__file__).resolve().parent / "static"
     if static_dir.exists():
         app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
