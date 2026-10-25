@@ -83,6 +83,7 @@ The registry routes are attached before older browser routes in `create_app`; fo
 | CAP-27 | Configuration and lifecycle tools | `dewey config`, `db`, `server`, `tapdb`, `cognito`, `qeo`, quality/test command families | Explicit configs; DB/template/conversion controls; process lifecycle; delegated substrate/identity operations and QEO outbox/resolver utilities. Presence of a tool is not authority to execute it. [CLI source][cli] |
 | CAP-28 | Preferences | `/api/v1/me/preferences` GET/PUT | Shared-broker preference contract; separate from artifact or share policy. [Application][app] |
 | CAP-29 | Deletion prohibition | Middleware plus service rejection | All DELETE requests, record archive, S3 deletion review/execute, upload abort/replacement, and embedded TapDB mutations are prohibited for all roles. Share/token revocation remains allowed and retains records. [Deletion source][deletion] |
+| CAP-30 | Storage evidence and retention | Artifact storage verify/lock POST routes | Object verification issues S3 HEAD and updates observed metadata/status; it is not a full downloaded-content checksum or scientific validation. Object-backed S3 retention requests are implemented and update the registry after storage acceptance; effective bucket/IAM/retention configuration was not exercised. [Artifact storage operations][artifacts] |
 
 ## 5. Sharing semantics that matter to users
 
@@ -127,6 +128,7 @@ Share history includes creation, policy revision, recipient/share revocation, co
 | Older GUI guides/handlers coexist with the current registry interface | Use current registration order and UI source for the active page description |
 | Immutable EUID resolution exists, but record edit only permits metadata/name/description | No reviewed API workflow was found for moving backing S3 content while preserving the same artifact EUID and existing shares |
 | Generic service principals are distinct from personal user tokens | Do not assume a service API key can consume a human managed share |
+| A feature-gated Kahlo AI-agent validator and endpoint catalog remain in source | Current route/dependency parity and deployment enablement were not established; this is not counted as a verified machine-sharing mode. See [validator source][agent] and [auth integration][auth] |
 | Domain recipient grants exist; domain-to-organization onboarding is elsewhere | No evidence here establishes safe automatic tenant creation/join or email-confirmation behavior in deployed Login/Cognito |
 
 ## 7. What was not established
@@ -294,3 +296,4 @@ All source references below are pinned to the observed release `11.0.10`.
 [deletion]: https://github.com/Daylily-Informatics/dewey/blob/11.0.10/dewey_service/deletion_policy.py
 [cli]: https://github.com/Daylily-Informatics/dewey/tree/11.0.10/dewey_service/cli
 [project]: https://github.com/Daylily-Informatics/dewey/blob/11.0.10/pyproject.toml
+[agent]: https://github.com/Daylily-Informatics/dewey/blob/11.0.10/dewey_service/ai_agent_access.py
