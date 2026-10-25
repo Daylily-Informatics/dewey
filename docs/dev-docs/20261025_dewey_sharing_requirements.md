@@ -22,7 +22,7 @@ Interpretation of the storage goal: backing S3 locations may change without brea
 | Set EUID | Existing persisted selection of artifact objects/prefixes |
 | Share EUID | Existing persisted identity for one access policy, target selection, lifecycle and audit history |
 | Recipient | Registered identity with a confirmed email, or an email grant awaiting that identity's first verified use |
-| Share manager | Creator/owner or explicitly authorized administrator/delegate who may change the share; downloading does not automatically grant management or resharing |
+| Share manager | Creator/owner or appropriately authorized administrator who may change the share; downloading does not automatically grant management or resharing |
 | Named-recipient share | Access is restricted to explicit email grants; existing deliberate domain grants can remain an additional capability |
 | Public with registration | Any registered, authenticated identity with verified email may access this share while it is active; no prior individual invitation is required |
 | Download share | Files/prefixes/sets delivered as attachments or a complete recursive collection |

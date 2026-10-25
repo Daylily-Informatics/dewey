@@ -41,6 +41,59 @@ flowchart LR
 
 Dewey writes registry objects and share state through explicit service config and TapDB-backed storage. Delivery URLs stay lazy and managed: active shares expose stable Dewey routes, while raw presigned URLs, object keys, and storage internals are not shown to unauthorized users. CLI, GUI, and API surfaces are alternate entrypoints over that same registry/share logic where the feature is implemented.
 
+## Sharing
+
+Dewey supports sharing registered **S3 files, sets of files/prefixes, and prefix
+contents including subdirectories** with individual email addresses or domains.
+Internal LSMC and external recipients can be mixed in one share. The current
+contract below was inspected against deployed release **11.0.10 on 2026-10-25**;
+authenticated recipient workflows were not exercised in that review.
+
+| Operation | Current behavior |
+|---|---|
+| Select content | Share an object, prefix, set or mixed targets; apply root-relative include/exclude patterns and recipient-specific target restrictions |
+| Choose recipients | Email/domain grants can name a new user; creating a grant does not require an existing Dewey account. Domain grants match exactly unless subdomains are explicitly enabled |
+| Edit or revoke | Add/remove recipient grants, change finite expiry and filters, revoke a grant or revoke the whole share; edits use the current policy revision |
+| Change files | Filters can change paths within existing prefix targets. Adding/removing persisted target members from an existing share is not supported; later ordinary set changes do not update its frozen share membership |
+| Download | Authenticated Dewey gateway with GET/HEAD, single byte ranges and HTTP conditions; personal-token CLI access and single-file streaming |
+| Recursive access | Authorized, paginated prefix listings; follow all continuation tokens. No complete recursive downloader/archive workflow is provided |
+| View HTML reports | An explicit HTML entrypoint and bundle root can render permitted sidecars through an isolated report origin; sharing only an HTML object does not include its siblings |
+| Audit | Per-share policy/access/issuance/transfer events and paginated JSON activity export; aggregate share-lifetime/download reporting is not provided |
+
+Current recipient links use `/shares/<share-euid>`. File delivery uses
+`/shares/<share-euid>/files/<target-euid>?relative_key=<encoded-relative-key>`.
+Every managed request requires **trusted Tailscale ingress, verified shared Login
+identity and current share authorization**. Explicit artifact/ancestor restrictions
+can also deny a recipient. External email grants therefore do not, by themselves,
+provide worldwide internet access. Managers do not bypass recipient grants when
+reading files.
+
+Shares have finite expiration. Optional raw S3 presigns are a separate delivery
+mode: anyone holding an issued URL can use it until expiry, even without Dewey
+login. Revocation stops new issuance but cannot recall an issued presign or bytes
+already downloaded. This differs from the proposed registered-users-only policy.
+
+Typical existing workflow:
+
+1. Open a registered object, prefix or set and choose **Share**; enter recipients,
+   scope and a deadline, then preview the selected files.
+2. Create the share and copy its Dewey URL. **Send login invitation** is a separate
+   explicit email action for a permitted address; creation sends no email.
+3. The recipient signs in over the required network and selects **Download** or
+   **View report**. Managers use **Edit share**, revocation controls and **Load activity**.
+
+See [Managed sharing](docs/sharing.md) for current API/CLI commands, filters,
+expiration, report bundles, invitation prerequisites and delivery limitations.
+The following are **proposed, not existing complete features**: stable `/fetch/`
+URLs and human slugs, unrestricted-network verified registration, **Public with
+registration**, indefinite shares, editable share target membership, complete
+recursive delivery, aggregate reporting, and controlled storage relocation that
+preserves links. Review these documents before implementation:
+
+- [Current capabilities and full API inventory](docs/dev-docs/20261025_dewey_capabilities.md)
+- [Sharing requirements and consequential design choices](docs/dev-docs/20261025_dewey_sharing_requirements.md)
+- [Requirement-by-requirement gap analysis](docs/dev-docs/20261025_dewey_sharing_gap_analysis.md)
+
 ## Quickstart
 
 ```bash

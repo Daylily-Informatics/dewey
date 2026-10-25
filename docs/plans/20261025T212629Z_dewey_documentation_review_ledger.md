@@ -10,7 +10,7 @@ Updated: 2026-10-25; documentation-only task.
 - Authority: user's 2026-10-25 request explicitly authorizes investigation, README/document writing, commit, and push. Review precedes any later multi-agent ledgered implementation plan. No shares, users, invitations, tokens, storage objects, network rules, release tags, deployments, tests, CI campaigns, or scheduled work are being created/changed.
 - Completed: live health/readiness and OpenAPI inspected; 105 paths / 114 operations captured; release tag matches live build; two deployed GUI JavaScript assets match the tag byte-for-byte. Static source route inventory contains 176 decorators (not 176 live routes).
 - Limits: browser tool returned “The browser access host is unavailable”; no preconfigured Dewey user token was available in the shell. Authenticated UI, real recipient delivery, Login provisioning, and global-network reachability are not functionally verified. Read-only HTTP inspection is available.
-- Next: publish the requirements draft, then finish gap analysis and README cross-links. Capabilities baseline is pushed at `01a767d`. Use `[skip ci]` on documentation commits because tests are off by explicit policy.
+- Next: push the gap analysis and README, verify the remote branch, and close this documentation ledger. Capabilities baseline is pushed at `01a767d`; requirements at `3220c8c`. Use `[skip ci]` on documentation commits because tests are off by explicit policy.
 - Evidence: `docs/dev-docs/evidence/20261025_dewey_sharing_review/` contains sanitized live observations and source/API inventory; documents cite immutable release source.
 
 ## Gate 0 inventory and scope
@@ -29,6 +29,6 @@ This ledger tracks document delivery only. It is not the later feature implement
 | ID | Requirement | Status | Category | Gate | Owner | Evidence | Terminal note |
 |---|---|---|---|---|---|---|---|
 | DOC-01 | Current capability baseline and source/live inventory | SUCCESS | historical_docs_only | Documentation | Primary agent | `01a767d` pushed; capability document and evidence directory | Current-source inventory complete; authenticated functional limits explicit |
-| DOC-02 | Sharing requirements and consequential design decisions | IN_PROGRESS | historical_docs_only | Documentation | Primary agent | `docs/dev-docs/20261025_dewey_sharing_requirements.md` | Draft complete; publication next |
-| DOC-03 | Traceable gap analysis | OPEN | historical_docs_only | Documentation | Primary agent | DOC-01 and DOC-02 | Pending |
-| DOC-04 | Accurate README sharing section and pushed documentation | OPEN | historical_docs_only | Documentation | Primary agent | README; Git receipts | Pending |
+| DOC-02 | Sharing requirements and consequential design decisions | SUCCESS | historical_docs_only | Documentation | Primary agent | `3220c8c` pushed; requirements SHR-01 through SHR-20 | Requested behavior and proposed decisions separated |
+| DOC-03 | Traceable gap analysis | IN_PROGRESS | historical_docs_only | Documentation | Primary agent | `docs/dev-docs/20261025_dewey_sharing_gap_analysis.md`; 20/20 requirement mappings | Draft reviewed; publication next |
+| DOC-04 | Accurate README sharing section and pushed documentation | IN_PROGRESS | historical_docs_only | Documentation | Primary agent | README Sharing; documentation link/whitespace review | Publication next |
