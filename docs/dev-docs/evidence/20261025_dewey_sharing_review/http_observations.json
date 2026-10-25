@@ -1,0 +1,176 @@
+{
+  "method": "Bounded read-only anonymous HTTP inspection, redirects not followed, no credentials or cookie values retained. These are discovery observations, not a functional acceptance campaign.",
+  "observations": [
+    {
+      "path": "/",
+      "observed_at": "2026-10-25T21:29:42.432903+00:00",
+      "status": 303,
+      "content_type": null,
+      "authentication": "anonymous GET; no session cookies or bearer token",
+      "redirect_without_query": "/login"
+    },
+    {
+      "path": "/login",
+      "observed_at": "2026-10-25T21:29:42.822442+00:00",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "authentication": "anonymous GET; no session cookies or bearer token"
+    },
+    {
+      "path": "/auth/login",
+      "observed_at": "2026-10-25T21:29:43.077662+00:00",
+      "status": 303,
+      "content_type": null,
+      "authentication": "anonymous GET; no session cookies or bearer token",
+      "redirect_without_query": "https://login.day.lsmc.bio/auth/login"
+    },
+    {
+      "path": "/ui",
+      "observed_at": "2026-10-25T21:29:43.289913+00:00",
+      "status": 303,
+      "content_type": null,
+      "authentication": "anonymous GET; no session cookies or bearer token",
+      "redirect_without_query": "/login"
+    },
+    {
+      "path": "/storage",
+      "observed_at": "2026-10-25T21:29:43.530487+00:00",
+      "status": 303,
+      "content_type": null,
+      "authentication": "anonymous GET; no session cookies or bearer token",
+      "redirect_without_query": "/login"
+    },
+    {
+      "path": "/sets",
+      "observed_at": "2026-10-25T21:29:43.745737+00:00",
+      "status": 303,
+      "content_type": null,
+      "authentication": "anonymous GET; no session cookies or bearer token",
+      "redirect_without_query": "/login"
+    },
+    {
+      "path": "/shares",
+      "observed_at": "2026-10-25T21:29:44.048855+00:00",
+      "status": 303,
+      "content_type": null,
+      "authentication": "anonymous GET; no session cookies or bearer token",
+      "redirect_without_query": "/login"
+    },
+    {
+      "path": "/literature",
+      "observed_at": "2026-10-25T21:29:44.263545+00:00",
+      "status": 303,
+      "content_type": null,
+      "authentication": "anonymous GET; no session cookies or bearer token",
+      "redirect_without_query": "/login"
+    },
+    {
+      "path": "/add",
+      "observed_at": "2026-10-25T21:29:44.504385+00:00",
+      "status": 303,
+      "content_type": null,
+      "authentication": "anonymous GET; no session cookies or bearer token",
+      "redirect_without_query": "/login"
+    },
+    {
+      "path": "/account",
+      "observed_at": "2026-10-25T21:29:44.725290+00:00",
+      "status": 303,
+      "content_type": null,
+      "authentication": "anonymous GET; no session cookies or bearer token",
+      "redirect_without_query": "/login"
+    },
+    {
+      "path": "/admin",
+      "observed_at": "2026-10-25T21:29:45.029394+00:00",
+      "status": 303,
+      "content_type": null,
+      "authentication": "anonymous GET; no session cookies or bearer token",
+      "redirect_without_query": "/login"
+    },
+    {
+      "path": "/ui/anomalies",
+      "observed_at": "2026-10-25T21:29:45.247010+00:00",
+      "status": 303,
+      "content_type": null,
+      "authentication": "anonymous GET; no session cookies or bearer token",
+      "redirect_without_query": "/login"
+    },
+    {
+      "path": "/ui/observability",
+      "observed_at": "2026-10-25T21:29:45.554824+00:00",
+      "status": 303,
+      "content_type": null,
+      "authentication": "anonymous GET; no session cookies or bearer token",
+      "redirect_without_query": "/login"
+    },
+    {
+      "path": "/tapdb/",
+      "observed_at": "2026-10-25T21:29:45.768356+00:00",
+      "status": 303,
+      "content_type": null,
+      "authentication": "anonymous GET; no session cookies or bearer token",
+      "redirect_without_query": "/login"
+    },
+    {
+      "path": "/graph",
+      "observed_at": "2026-10-25T21:29:45.988333+00:00",
+      "status": 303,
+      "content_type": null,
+      "authentication": "anonymous GET; no session cookies or bearer token",
+      "redirect_without_query": "/login"
+    },
+    {
+      "path": "/docs",
+      "observed_at": "2026-10-25T21:29:46.291368+00:00",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "authentication": "anonymous GET; no session cookies or bearer token"
+    },
+    {
+      "path": "/redoc",
+      "observed_at": "2026-10-25T21:29:46.629630+00:00",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "authentication": "anonymous GET; no session cookies or bearer token"
+    },
+    {
+      "path": "/api/v1/registry/shares",
+      "observed_at": "2026-10-25T21:29:46.865386+00:00",
+      "status": 401,
+      "content_type": "application/json",
+      "authentication": "anonymous GET; no session cookies or bearer token",
+      "detail": "A verified Dewey principal is required"
+    },
+    {
+      "path": "/api/v1/storage/buckets",
+      "observed_at": "2026-10-25T21:29:47.126394+00:00",
+      "status": 401,
+      "content_type": "application/json",
+      "authentication": "anonymous GET; no session cookies or bearer token",
+      "detail": "A verified Dewey principal is required"
+    },
+    {
+      "path": "/fetch",
+      "observed_at": "2026-10-25T21:29:47.345025+00:00",
+      "status": 404,
+      "content_type": "application/json",
+      "authentication": "anonymous GET; no session cookies or bearer token",
+      "detail": "Not Found"
+    },
+    {
+      "path": "/static/registry.js",
+      "status": 200,
+      "observed_at": "2026-10-25T21:29:48.011664+00:00",
+      "sha256": "7f4b1124910f0330a3335966b36efaab55f48bde7c7df9524d981fa297c5377d",
+      "matches_tag_11_0_10": true
+    },
+    {
+      "path": "/static/sharing.js",
+      "status": 200,
+      "observed_at": "2026-10-25T21:29:48.390728+00:00",
+      "sha256": "43edac3ef267bc6cf6d710940378d652480eb3aefef75bbd51174bd88770f36f",
+      "matches_tag_11_0_10": true
+    }
+  ]
+}
