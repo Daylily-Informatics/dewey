@@ -1,0 +1,65 @@
+{
+  "recorded_at": "2026-10-26T15:17:33.833Z",
+  "repository": "Daylily-Informatics/dewey",
+  "pull_request": 64,
+  "head_sha": "f339ff4de50f45a7499cb778a69b1f4d0b80c3c6",
+  "run_id": 40346672128,
+  "run_url": "https://github.com/Daylily-Informatics/dewey/actions/runs/40346672128",
+  "jobs": [
+    {
+      "id": 121655315133,
+      "name": "Security Scanning (Bandit)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 121655315524,
+      "name": "Code Quality (Ruff)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 121655487549,
+      "name": "Isolated PostgreSQL sharing contracts",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 121655487606,
+      "name": "Tests and Build",
+      "status": "completed",
+      "conclusion": "failure",
+      "failed_steps": [
+        {
+          "name": "Install Playwright browsers",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 5,
+          "started_at": "2026-10-26T15:10:47Z",
+          "completed_at": "2026-10-26T15:10:48Z"
+        }
+      ]
+    }
+  ],
+  "failure_evidence": [
+    "2026-10-26T15:10:36.6376236Z 26.04.1",
+    "2026-10-26T15:10:36.6380234Z Image: ubuntu-26.04",
+    "2026-10-26T15:10:48.0097114Z Cannot install dependencies for ubuntu26.04-x64 with Playwright 1.60.0!",
+    "2026-10-26T15:10:48.0176345Z Error: ERROR: Playwright does not support chromium on ubuntu26.04-x64"
+  ],
+  "root_cause": "ubuntu-latest selected Ubuntu 26.04, unsupported by frozen Playwright 1.60.0; failure occurred before test execution",
+  "locked_playwright_version": "1.60.0",
+  "resolution": {
+    "workflow": ".github/workflows/ci.yml",
+    "job": "test",
+    "runs_on": "ubuntu-24.04",
+    "scope": "Only the browser test job runner; dependency lock files unchanged",
+    "versioned_primary_source": "https://github.com/microsoft/playwright/blob/v1.60.0/packages/playwright-core/src/server/registry/nativeDeps.ts"
+  },
+  "new_run_status": "pending push and fresh CI",
+  "production_changes": false,
+  "container_image_builds": 0
+}

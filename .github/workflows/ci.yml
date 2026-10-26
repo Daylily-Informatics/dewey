@@ -57,7 +57,8 @@ jobs:
 
   test:
     name: Tests and Build
-    runs-on: ubuntu-latest
+    # Keep the browser runner within the locked Playwright version's OS support.
+    runs-on: ubuntu-24.04
     needs: [lint, security]
     env:
       DEWEY_DEPLOYMENT_CODE: ci

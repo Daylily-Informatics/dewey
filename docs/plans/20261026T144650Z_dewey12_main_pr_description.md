@@ -42,6 +42,8 @@ The first main-target run failed Ruff with 308 style/import diagnostics; Bandit 
 
 Local `ruff check` and `ruff format --check` now pass. After the documented import/helper normalizations, all 194 files retain equivalent non-import ASTs. Import initialization remains subject to full PR CI. The retained production-tag coverage percentages above are separate from the normalized PR head's forthcoming CI measurements. See [cleanup review](https://github.com/Daylily-Informatics/dewey/blob/codex/dewey-sharing-review-20261025/docs/plans/evidence/20261026_dewey12/pr64-quality-cleanup-review.json).
 
+Run [40346672128](https://github.com/Daylily-Informatics/dewey/actions/runs/40346672128) passed Ruff, Bandit and isolated PostgreSQL contracts. Tests stopped during browser installation, before pytest: `ubuntu-latest` supplied Ubuntu 26.04, which locked Playwright 1.60.0 rejects. The browser test job is now pinned to supported Ubuntu 24.04, with dependency locks unchanged; fresh full-test, coverage and package-build results remain pending. The [versioned Playwright dependency table](https://github.com/microsoft/playwright/blob/v1.60.0/packages/playwright-core/src/server/registry/nativeDeps.ts) includes Ubuntu 24.04.
+
 ## Remaining acceptance boundary
 
 The internal acceptance identity is enabled, confirmed and email-verified; registration must not be repeated. Its exact first-use return, internal share admission and denied management access remain unverified. Earlier missing denial events before 12.0.6 were not reconstructed. These limits remain explicit in the ledger; this PR does not manufacture that missing live acceptance or assert full release-objective completion.
