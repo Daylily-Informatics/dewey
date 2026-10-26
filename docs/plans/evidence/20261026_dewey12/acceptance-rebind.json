@@ -1,0 +1,432 @@
+{
+  "assertion_count": 7,
+  "assertions": [
+    {
+      "assertion": "recipient-cursor-retained-before-rebind",
+      "cursor_value_omitted": true,
+      "passed": true
+    },
+    {
+      "assertion": "rebind-preserved-artifact-and-incremented-location",
+      "location_revision": 2,
+      "passed": true
+    },
+    {
+      "assertion": "qualified-equivalence-evidence-complete",
+      "evidence_euid": "M-DGX-14MYD",
+      "object_count": 1,
+      "passed": true,
+      "physical_data_changed": false,
+      "total_bytes": 40
+    },
+    {
+      "assertion": "stale-rebind-revision-rejected409",
+      "http_status": 409,
+      "passed": true
+    },
+    {
+      "assertion": "stable-dewey-fetch-retained-exact-bytes",
+      "bytes": 40,
+      "passed": true,
+      "sha256": "e114395a773c9378e136625da541493b44db71e8d2ae0396e2d621a57ee63172"
+    },
+    {
+      "assertion": "old-recipient-cursor-invalidated409",
+      "http_status": 409,
+      "passed": true
+    },
+    {
+      "assertion": "post-rebind-inventory-remains-complete",
+      "manifest_object_count": 5,
+      "passed": true
+    }
+  ],
+  "assertions_passed": 7,
+  "evidence_kind": "projection-of-existing-completed-browser-phase-receipts",
+  "format": "dewey12-sanitized-acceptance-receipt-v1",
+  "http_expectations_passed": 15,
+  "http_status_counts": {
+    "200": 13,
+    "409": 2
+  },
+  "identities": {
+    "artifact_euid": "M-DGX-14C58",
+    "collection_share_euid": "M-DGX-14CVV",
+    "evidence_euid": "M-DGX-14MYD",
+    "share_euid": "M-DGX-14CN7"
+  },
+  "limitations": [
+    "Counts describe these retained HTTP expectations and explicit evidence assertions; they are not code-coverage percentages.",
+    "This receipt does not establish unperformed recipient or machine-client checks."
+  ],
+  "new_network_requests": 0,
+  "phase_count": 3,
+  "phases": [
+    {
+      "http_expectations_passed": 2,
+      "http_status_counts": {
+        "200": 2
+      },
+      "phase": "rebind-prepare",
+      "request_count": 2,
+      "requests": [
+        {
+          "http_status": 200,
+          "label": "external-verified-account",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:16:49.761Z",
+          "path": "/recipient/account",
+          "response_bytes": 1214,
+          "response_headers": {},
+          "response_sha256": "957f5a39029f2721ccebd25f1f2b2defab2665d5260befb8623be535e88b602b"
+        },
+        {
+          "http_status": 200,
+          "label": "pre-rebind-cursor",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:16:50.516Z",
+          "path": "/fetch/M-DGX-14CVV?format=manifest&limit=1",
+          "response_bytes": 542,
+          "response_fields": {
+            "enumeration_complete": false,
+            "has_continuation": true,
+            "incomplete": true,
+            "items": [
+              {
+                "etag": "\"67ace7ed2966bf27fc36ec51cee35389\"",
+                "fetch_path": "/fetch/M-DGX-14CVV/M-DGX-14C58/readme.txt",
+                "location_revision": 1,
+                "path": "M-DGX-14C58/readme.txt",
+                "size": 40,
+                "target_euid": "M-DGX-14C58"
+              }
+            ],
+            "page_complete": true,
+            "policy_revision": 3,
+            "share_euid": "M-DGX-14CVV"
+          },
+          "response_headers": {
+            "content-length": "542"
+          },
+          "response_sha256": "fbdeb6d192b48c3cf055d8f80cfc55a74a3ee492e6d6f2c9ac8c1135025106c2"
+        }
+      ],
+      "source_exported_at": "2026-10-26T05:16:50.518Z",
+      "source_snapshot": "dewey12-acceptance-20261026-browser-rebind-prepare-2026-10-26T05-16-50-522Z.json",
+      "source_snapshot_sha256": "f2f017e596008807e2fa170c5ac314365d6f1bdb0f4fb851f5e29f94a72efea6",
+      "status": "complete"
+    },
+    {
+      "http_expectations_passed": 5,
+      "http_status_counts": {
+        "200": 4,
+        "409": 1
+      },
+      "phase": "rebind-apply",
+      "request_count": 5,
+      "requests": [
+        {
+          "http_status": 200,
+          "label": "manager-verified-account",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:17:27.787Z",
+          "path": "/recipient/account",
+          "response_bytes": 1201,
+          "response_headers": {},
+          "response_sha256": "6e4187027c8084b7ab9f023266e9b23c7c44e641f7275d70db7028c3d9715ef1"
+        },
+        {
+          "http_status": 200,
+          "label": "manager-private-api",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:17:28.153Z",
+          "path": "/api/v1/registry/defaults",
+          "response_bytes": 89,
+          "response_fields": {},
+          "response_headers": {
+            "content-length": "89"
+          },
+          "response_sha256": "a82038dc3bcca804bf82940dc381e8b72992a75d05e448ddd9ffde91a8194284"
+        },
+        {
+          "http_status": 200,
+          "label": "pre-rebind-record",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:17:28.482Z",
+          "path": "/api/v1/records/M-DGX-14C58",
+          "response_bytes": 1987,
+          "response_fields": {
+            "artifact_euid": "M-DGX-14C58",
+            "euid": "M-DGX-14C58",
+            "location_revision": 1,
+            "size": null,
+            "status": "active"
+          },
+          "response_headers": {
+            "content-length": "1987"
+          },
+          "response_sha256": "96917223bf5f5e72d1bfb506cd110971c32b7e8213f358d949225980d55947b0"
+        },
+        {
+          "http_status": 200,
+          "label": "rebind-location",
+          "method": "POST",
+          "observed_at": "2026-10-26T05:17:29.041Z",
+          "path": "/api/v1/records/M-DGX-14C58/location-rebind",
+          "request_fields": {
+            "expected_location_revision": 1
+          },
+          "response_bytes": 346,
+          "response_fields": {
+            "artifact_euid": "M-DGX-14C58",
+            "evidence_euid": "M-DGX-14MYD",
+            "inventory_complete": true,
+            "location_revision": 2,
+            "object_count": 1,
+            "physical_data_changed": false,
+            "total_bytes": 40
+          },
+          "response_headers": {
+            "content-length": "346"
+          },
+          "response_sha256": "179616dbcebdaf8e4cb0b094da73b58b5ee725923570cbfa5f9b586a5fc30aa6"
+        },
+        {
+          "http_status": 409,
+          "label": "stale-location-rebind",
+          "method": "POST",
+          "observed_at": "2026-10-26T05:17:29.343Z",
+          "path": "/api/v1/records/M-DGX-14C58/location-rebind",
+          "request_fields": {
+            "expected_location_revision": 1
+          },
+          "response_bytes": 67,
+          "response_fields": {},
+          "response_headers": {
+            "content-length": "67"
+          },
+          "response_sha256": "2ad2157b088790cf2d9f2c6dae9e953bfab37dc87fa9a490ed1963a961a2adfd"
+        }
+      ],
+      "source_exported_at": "2026-10-26T05:17:29.346Z",
+      "source_snapshot": "dewey12-acceptance-20261026-browser-rebind-apply-2026-10-26T05-17-29-350Z.json",
+      "source_snapshot_sha256": "f1ffa4e469f9a732308490330d2c8000e39e9cab2766bfaad4804866a4147bad",
+      "status": "complete"
+    },
+    {
+      "http_expectations_passed": 8,
+      "http_status_counts": {
+        "200": 7,
+        "409": 1
+      },
+      "phase": "rebind-check",
+      "request_count": 8,
+      "requests": [
+        {
+          "http_status": 200,
+          "label": "external-verified-account",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:18:41.162Z",
+          "path": "/recipient/account",
+          "response_bytes": 1214,
+          "response_headers": {},
+          "response_sha256": "957f5a39029f2721ccebd25f1f2b2defab2665d5260befb8623be535e88b602b"
+        },
+        {
+          "http_status": 200,
+          "label": "stable-fetch-after-rebind",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:18:41.886Z",
+          "path": "/fetch/M-DGX-14CN7",
+          "response_bytes": 40,
+          "response_headers": {
+            "content-length": "40",
+            "etag": "\"67ace7ed2966bf27fc36ec51cee35389\""
+          },
+          "response_sha256": "e114395a773c9378e136625da541493b44db71e8d2ae0396e2d621a57ee63172"
+        },
+        {
+          "continuation_was_supplied": true,
+          "http_status": 409,
+          "label": "stale-cursor-after-rebind",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:18:42.415Z",
+          "path": "/fetch/M-DGX-14CVV?format=manifest&limit=1",
+          "response_bytes": 63,
+          "response_headers": {
+            "content-length": "63"
+          },
+          "response_sha256": "a4b83641c323ca8552043daa76244042ca9ca57dc77acfa248f2bb396e248e6e"
+        },
+        {
+          "http_status": 200,
+          "label": "set-manifest-0",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:18:43.126Z",
+          "path": "/fetch/M-DGX-14CVV?format=manifest&limit=1",
+          "response_bytes": 542,
+          "response_fields": {
+            "enumeration_complete": false,
+            "has_continuation": true,
+            "incomplete": true,
+            "items": [
+              {
+                "etag": "\"67ace7ed2966bf27fc36ec51cee35389\"",
+                "fetch_path": "/fetch/M-DGX-14CVV/M-DGX-14C58/readme.txt",
+                "location_revision": 2,
+                "path": "M-DGX-14C58/readme.txt",
+                "size": 40,
+                "target_euid": "M-DGX-14C58"
+              }
+            ],
+            "page_complete": true,
+            "policy_revision": 3,
+            "share_euid": "M-DGX-14CVV"
+          },
+          "response_headers": {
+            "content-length": "542"
+          },
+          "response_sha256": "553123922d6ed446bd29f7f6ec6e31ee48ab533722e93065e3123820874afd2a"
+        },
+        {
+          "continuation_was_supplied": true,
+          "http_status": 200,
+          "label": "set-manifest-1",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:18:43.986Z",
+          "path": "/fetch/M-DGX-14CVV?format=manifest&limit=1",
+          "response_bytes": 583,
+          "response_fields": {
+            "enumeration_complete": false,
+            "has_continuation": true,
+            "incomplete": true,
+            "items": [
+              {
+                "etag": "\"651d5fe9e5167b35ddd7522ecbf5f775\"",
+                "fetch_path": "/fetch/M-DGX-14CVV/M-DGX-14CDR/dewey-acceptance.css",
+                "location_revision": 1,
+                "path": "M-DGX-14CDR/dewey-acceptance.css",
+                "size": 561,
+                "target_euid": "M-DGX-14CDR"
+              }
+            ],
+            "page_complete": true,
+            "policy_revision": 3,
+            "share_euid": "M-DGX-14CVV"
+          },
+          "response_headers": {
+            "content-length": "583"
+          },
+          "response_sha256": "619d49584576e7f1a32242448415c8cf95e7d8f6bd09ec4fb5bbe2d9ec81b5fc"
+        },
+        {
+          "continuation_was_supplied": true,
+          "http_status": 200,
+          "label": "set-manifest-2",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:18:44.730Z",
+          "path": "/fetch/M-DGX-14CVV?format=manifest&limit=1",
+          "response_bytes": 619,
+          "response_fields": {
+            "enumeration_complete": false,
+            "has_continuation": true,
+            "incomplete": true,
+            "items": [
+              {
+                "etag": "\"f10b64da71b7ff0f26e3613d4f68ec5a\"",
+                "fetch_path": "/fetch/M-DGX-14CVV/M-DGX-14CDR/dewey-acceptance/data/probe.json",
+                "location_revision": 1,
+                "path": "M-DGX-14CDR/dewey-acceptance/data/probe.json",
+                "size": 211,
+                "target_euid": "M-DGX-14CDR"
+              }
+            ],
+            "page_complete": true,
+            "policy_revision": 3,
+            "share_euid": "M-DGX-14CVV"
+          },
+          "response_headers": {
+            "content-length": "619"
+          },
+          "response_sha256": "36d05b655cbac50c49c02df4f8f03d928262a17b4d7105342e2cbb53542d36b1"
+        },
+        {
+          "continuation_was_supplied": true,
+          "http_status": 200,
+          "label": "set-manifest-3",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:18:45.855Z",
+          "path": "/fetch/M-DGX-14CVV?format=manifest&limit=1",
+          "response_bytes": 623,
+          "response_fields": {
+            "enumeration_complete": false,
+            "has_continuation": true,
+            "incomplete": true,
+            "items": [
+              {
+                "etag": "\"13a47afce9e7e65a97e9d512f8cbb601\"",
+                "fetch_path": "/fetch/M-DGX-14CVV/M-DGX-14CDR/dewey-acceptance/scripts/probe.js",
+                "location_revision": 1,
+                "path": "M-DGX-14CDR/dewey-acceptance/scripts/probe.js",
+                "size": 1168,
+                "target_euid": "M-DGX-14CDR"
+              }
+            ],
+            "page_complete": true,
+            "policy_revision": 3,
+            "share_euid": "M-DGX-14CVV"
+          },
+          "response_headers": {
+            "content-length": "623"
+          },
+          "response_sha256": "811ea64922b1dbe72aebd9e7e609efa0be9a8498c151f17bc65749a5801dc15c"
+        },
+        {
+          "continuation_was_supplied": true,
+          "http_status": 200,
+          "label": "set-manifest-4",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:18:46.605Z",
+          "path": "/fetch/M-DGX-14CVV?format=manifest&limit=1",
+          "response_bytes": 554,
+          "response_fields": {
+            "enumeration_complete": true,
+            "has_continuation": false,
+            "incomplete": false,
+            "items": [
+              {
+                "etag": "\"f68472ae9196c2eb5bdff0a4bfcafaef\"",
+                "fetch_path": "/fetch/M-DGX-14CVV/M-DGX-14CDR/multiqc.html",
+                "location_revision": 1,
+                "path": "M-DGX-14CDR/multiqc.html",
+                "size": 2193966,
+                "target_euid": "M-DGX-14CDR"
+              }
+            ],
+            "page_complete": true,
+            "policy_revision": 3,
+            "share_euid": "M-DGX-14CVV"
+          },
+          "response_headers": {
+            "content-length": "554"
+          },
+          "response_sha256": "61cb15905b7f2254d8eccd92fe91d8463dc73b90f45d04f41f15679eda7112b6"
+        }
+      ],
+      "source_exported_at": "2026-10-26T05:18:46.607Z",
+      "source_snapshot": "dewey12-acceptance-20261026-browser-rebind-check-2026-10-26T05-18-46-611Z.json",
+      "source_snapshot_sha256": "00c3f67fa5568f9cbb48aa1d63d469661d06312a51deb0691f78bb57fbc6865d",
+      "status": "complete"
+    }
+  ],
+  "request_count": 15,
+  "sanitization": {
+    "authentication_material_removed": true,
+    "continuation_values_omitted": true,
+    "personal_identity_values_omitted": true,
+    "raw_state_and_response_blobs_removed": true,
+    "recipient_emails_removed": true
+  },
+  "scope": "rebind",
+  "review": "Lead verified retained phase completion, assertion counts, source snapshot hashes and sanitization."
+}

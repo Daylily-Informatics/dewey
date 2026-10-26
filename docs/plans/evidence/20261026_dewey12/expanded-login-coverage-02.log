@@ -1,0 +1,56 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.0, pytest-9.0.3, pluggy-1.6.0
+rootdir: /Users/jmajor/projects/lsmc/lsmc-oauth-login
+configfile: pyproject.toml
+plugins: cov-7.1.0, base-url-2.1.0, playwright-0.8.0, anyio-4.13.0
+collected 90 items
+
+tests/test_recipient_provider_boundaries.py ............................ [ 31%]
+                                                                         [ 31%]
+tests/test_recipient_identity_boundaries.py ........................     [ 57%]
+tests/test_recipient_store_boundaries.py ........                        [ 66%]
+tests/test_recipient_onboarding_boundaries.py ......F.....               [ 80%]
+tests/test_recipient_mail_boundaries.py .......                          [ 87%]
+tests/test_recipient_settings_cli_boundaries.py ...........              [100%]
+
+=================================== FAILURES ===================================
+________ test_public_callback_cannot_finish_an_ordinary_management_flow ________
+tests/test_recipient_onboarding_boundaries.py:62: in test_public_callback_cannot_finish_an_ordinary_management_flow
+    state = parse_qs(urlparse(response.headers["location"]).query)["state"][0]
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_models.py:302: in __getitem__
+    raise KeyError(key)
+E   KeyError: 'location'
+----------------------------- Captured stdout call -----------------------------
+{"actor":null,"ai_agent_id":null,"auth_mode":null,"authorizing_human":null,"correlation_id":"46e8138e-8b16-4026-a6a8-95e53a5c652d","denial_reason":null,"duration_ms":2.41,"event":"request_completed","ip":"testclient","method":"GET","path":"/auth/login","request_id":"46e8138e-8b16-4026-a6a8-95e53a5c652d","route":"/auth/login","route_template":"/auth/login","service_id":"lsmc-oauth-login","status":400}
+------------------------------ Captured log call -------------------------------
+WARNING  lsmc.access:access_logging.py:53 {"actor":null,"ai_agent_id":null,"auth_mode":null,"authorizing_human":null,"correlation_id":"46e8138e-8b16-4026-a6a8-95e53a5c652d","denial_reason":null,"duration_ms":2.41,"event":"request_completed","ip":"testclient","method":"GET","path":"/auth/login","request_id":"46e8138e-8b16-4026-a6a8-95e53a5c652d","route":"/auth/login","route_template":"/auth/login","service_id":"lsmc-oauth-login","status":400}
+================================ tests coverage ================================
+_______________ coverage: platform darwin, python 3.12.0-final-0 _______________
+
+Name                                     Stmts   Miss Branch BrPart  Cover
+--------------------------------------------------------------------------
+lsmc_oauth_login/account_linking.py         21      4      8      4    72%
+lsmc_oauth_login/cli/__init__.py            11      1      0      0    91%
+lsmc_oauth_login/cli/plugins/auth.py        38     22     10      0    33%
+lsmc_oauth_login/cli/plugins/server.py      48     29     16      0    30%
+lsmc_oauth_login/cli/plugins/state.py       35      8      8      0    72%
+lsmc_oauth_login/cli/plugins/status.py      22     11      2      0    46%
+lsmc_oauth_login/cognito_core.py            38     38     10      0     0%
+lsmc_oauth_login/container_entry.py         26     26      8      0     0%
+lsmc_oauth_login/contracts.py               78     10     10      2    80%
+lsmc_oauth_login/delegation.py              55     40     22      1    21%
+lsmc_oauth_login/handoff.py                 46      3      6      2    90%
+lsmc_oauth_login/identity_store.py         268     44     74     22    80%
+lsmc_oauth_login/invites.py                 68      1     10      1    97%
+lsmc_oauth_login/postgres_state.py         166     93     20      1    40%
+lsmc_oauth_login/settings.py               306     43     84     30    78%
+lsmc_oauth_login/web.py                    853    129    248     56    82%
+--------------------------------------------------------------------------
+TOTAL                                     2366    502    594    119    75%
+
+6 files skipped due to complete coverage.
+Coverage JSON written to file /tmp/dewey12-acceptance-20261026/login-coverage-02.json
+=========================== short test summary info ============================
+FAILED tests/test_recipient_onboarding_boundaries.py::test_public_callback_cannot_finish_an_ordinary_management_flow
+========================= 1 failed, 89 passed in 3.00s =========================

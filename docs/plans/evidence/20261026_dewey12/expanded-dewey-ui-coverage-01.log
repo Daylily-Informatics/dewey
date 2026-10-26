@@ -1,0 +1,58 @@
+✔ recipient account renders text safely and offers revocation only for active own tokens (5.790166ms)
+✔ recipient creation posts only name and finite lifetime, shows credential once as text and refreshes own list (2.249375ms)
+✔ recipient creation failure clears previous one-use display and reenables submission (0.916916ms)
+✔ recipient revoke success refreshes list (1.322916ms)
+✔ recipient revoke failure retains actionable button (1.381875ms)
+✔ recipient initial list failure is visible without exposing a credential (0.730792ms)
+✔ sharing editor creates registered-public WWW share with explicit indefinite lifetime and no anonymous grant (23.272083ms)
+✔ sharing editor preserves explicit domain/email scopes and null expiry when editing (1.353333ms)
+✔ sharing editor resolves changed target IDs and submits typed target set at reviewed revision (1.297083ms)
+✔ sharing editor rejects missing WWW entry without policy mutation (1.570417ms)
+✔ sharing editor rejects empty include policy without policy mutation (1.609959ms)
+✔ sharing editor rejects blank named recipient without policy mutation (1.114084ms)
+✔ sharing editor rejects email subdomain flag without policy mutation (1.010916ms)
+✔ sharing editor rejects zero targets without policy mutation (1.150667ms)
+✔ sharing editor rejects removed scoped target without policy mutation (0.982792ms)
+✔ sharing editor rejects invalid finite expiry without policy mutation (1.025667ms)
+✔ sharing editor rejects indefinite grant beyond finite share without policy mutation (1.780208ms)
+✔ sharing editor rejects missing target/revision and unsupported target kinds (1.488833ms)
+✔ duplicate share submission is suppressed and failed save reenables the form (1.834875ms)
+✔ registered-public editor does not manufacture explicit email grants (1.21375ms)
+✔ share pages render indefinite/public and expired policies without treating expiry null as expired (1.110125ms)
+✔ alias claim, copied report URL, permanent retirement and grant revoke carry reviewed revision (1.618458ms)
+✔ audit UI freezes timestamp/digest across pages and exports only declared inventory completeness (1.977916ms)
+✔ audit request failure reenables submission instead of exporting a stale result (0.850917ms)
+✔ manager copy-share retains canonical URL without report (1.84275ms)
+✔ manager copy-share retains canonical URL with deep path (0.840041ms)
+✔ manager invitation surfaces actual delivery state {"status":"accepted"} (1.299084ms)
+✔ manager invitation surfaces actual delivery state {"status":"uncertain"} (1.113833ms)
+✔ manager invitation surfaces actual delivery state {"invitation_status":"failed"} (0.932208ms)
+✔ manager invitation surfaces actual delivery state {} (0.996625ms)
+✔ manager revoke carries current revision and opens report through selected managed share (1.992708ms)
+✔ manager rebind posts reviewed location revision and null version (1.448417ms)
+✔ manager rebind posts reviewed location revision and explicit version (1.532166ms)
+✔ manager rebind refuses missing current revision or blank reason before sending mutation (2.424375ms)
+✔ manager token lifetime 0 is rejected before issuance (1.289084ms)
+✔ manager token lifetime 31 is rejected before issuance (1.236792ms)
+✔ manager token lifetime 1.5 is rejected before issuance (1.139083ms)
+✔ manager token lifetime not-a-number is rejected before issuance (0.94175ms)
+✔ manager token lifetime boundary 1 sends intended role and escapes one-use display (2.084667ms)
+✔ manager token lifetime boundary 30 sends intended role and escapes one-use display (1.070833ms)
+✔ sharing index displays no-expiry and expired rows and provides audit entry (1.339709ms)
+✔ record exposes storage rebind only when edit capability is false (3.216166ms)
+✔ record exposes storage rebind only when edit capability is true (1.249416ms)
+ℹ tests 43
+ℹ suites 0
+ℹ pass 43
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 172.701708
+
+=============================== Coverage summary ===============================
+Statements   : 75.57% ( 328/434 )
+Branches     : 73.31% ( 338/461 )
+Functions    : 67.44% ( 58/86 )
+Lines        : 75.57% ( 328/434 )
+================================================================================

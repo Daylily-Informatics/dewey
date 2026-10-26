@@ -1,0 +1,24 @@
+{
+  "purpose": "Final combined changed-code validation with a new coverage data file per repository",
+  "runs": {
+    "dewey": {
+      "cmd": "DEWEY_DEPLOYMENT_CODE=contract COVERAGE_FILE=/tmp/dewey12-acceptance-20261026/dewey-final-coverage.data /Users/jmajor/projects/dewey-sharing-docs-20261025/.venv/bin/python -m pytest -q tests/test_cli_registry_templates_scope.py tests/test_config_sharing_v12.py tests/test_fetch_delivery_v12.py tests/test_recipient_boundary_v12.py tests/test_recipient_identity_contract.py tests/test_recipient_tokens_v12.py tests/test_report_identity_v12.py tests/test_report_preview_attribution.py tests/test_share_api_contract_v12.py tests/test_share_fetch_cli_v12.py tests/test_share_invitation_v12.py tests/test_sharing_v3_core.py tests/test_share_grant_revision_envelope.py tests/test_auth_unit.py tests/test_storage_unit.py tests/test_recipient_client_boundaries.py tests/test_changed_coverage_gate.py tests/test_share_management.py tests/test_sharing_v12_policy_failures.py tests/test_sharing_v12_lifecycle.py tests/test_sharing_v12_listing.py tests/test_sharing_v12_rebind.py tests/test_sharing_v12_reports.py tests/test_sharing_v12_migration.py tests/test_sharing_release_cli_boundaries.py tests/test_preview_session_identity_boundaries.py tests/test_registry_sharing_routes_boundaries.py tests/test_delivery_cli_extended_v12.py tests/test_delivery_http_extended_v12.py --cov=dewey_service --cov-branch --cov-report=json:/tmp/dewey12-acceptance-20261026/dewey-final-coverage.json --cov-report=term:skip-covered --junitxml=/tmp/dewey12-acceptance-20261026/dewey-final-tests.xml > /tmp/dewey12-acceptance-20261026/dewey-final-tests.log 2>&1",
+      "repo": "/Users/jmajor/projects/dewey-sharing-docs-20261025",
+      "exit_code": 0
+    },
+    "login": {
+      "cmd": " COVERAGE_FILE=/tmp/dewey12-acceptance-20261026/login-final-coverage.data .venv/bin/python -m pytest -q tests/test_recipient_identity.py tests/test_recipient_mail.py tests/test_recipient_web.py tests/test_postgres_state_concurrency.py tests/test_handoff.py tests/test_invites.py tests/test_settings.py tests/test_web.py tests/test_recipient_provider_boundaries.py tests/test_recipient_identity_boundaries.py tests/test_recipient_store_boundaries.py tests/test_recipient_onboarding_boundaries.py tests/test_recipient_mail_boundaries.py tests/test_recipient_settings_cli_boundaries.py --cov=lsmc_oauth_login --cov-branch --cov-report=json:/tmp/dewey12-acceptance-20261026/login-final-coverage.json --cov-report=term:skip-covered --junitxml=/tmp/dewey12-acceptance-20261026/login-final-tests.xml > /tmp/dewey12-acceptance-20261026/login-final-tests.log 2>&1",
+      "repo": "/Users/jmajor/projects/lsmc/lsmc-oauth-login",
+      "exit_code": 0
+    },
+    "dayhoff": {
+      "cmd": " COVERAGE_FILE=/tmp/dewey12-acceptance-20261026/dayhoff-final-coverage.data /Users/jmajor/projects/dewey-sharing-docs-20261025/.venv/bin/python -m pytest -q tests/test_dewey_recipient_ingress.py tests/test_aws_host_container_release_build.py tests/test_dewey_ingress_boundaries.py tests/test_dewey_build_provenance.py tests/test_container_image_promotion.py::test_build_push_manifest_builds_pinned_service_images_and_writes_digest_manifest --cov=scripts --cov-branch --cov-report=json:/tmp/dewey12-acceptance-20261026/dayhoff-final-coverage.json --cov-report=term:skip-covered --junitxml=/tmp/dewey12-acceptance-20261026/dayhoff-final-tests.xml > /tmp/dewey12-acceptance-20261026/dayhoff-final-tests.log 2>&1",
+      "repo": "/Users/jmajor/projects/lsmc/dayhoff",
+      "exit_code": 0
+    }
+  },
+  "javascript": {
+    "command": "tests/ui/node_modules/.bin/c8 --all --include='dewey_service/static/recipient-account.js' --include='dewey_service/static/sharing.js' --include='dewey_service/static/registry.js' --temp-directory=/tmp/dewey12-acceptance-20261026/dewey-ui-v8-01 --clean=false --reporter=json --reporter=text-summary --reports-dir=/tmp/dewey12-acceptance-20261026/dewey-ui-coverage-01 node --test tests/ui/sharing_v12.test.cjs",
+    "exit_code": 0
+  }
+}

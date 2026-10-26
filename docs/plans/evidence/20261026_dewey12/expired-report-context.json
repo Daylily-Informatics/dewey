@@ -1,0 +1,11 @@
+{
+  "observed_at": "2026-10-26T05:16:12Z",
+  "url": "https://pv-7a7afaaff6f102f90e78ec3ff40be013.dewey-content.day.lsmc.bio/__dewey_preview/assets/multiqc.html",
+  "status": 410,
+  "body": "Preview expired; reopen it from Dewey",
+  "content_type": "text/html; charset=utf-8",
+  "cookies_supplied": false,
+  "context_previously_rendered": true,
+  "context_expiry": "2026-10-26T05:09:19.756537+00:00",
+  "collection_note": "First observation expected JSON; actual error is plain text. One affected read confirmed status/body; no service change."
+}

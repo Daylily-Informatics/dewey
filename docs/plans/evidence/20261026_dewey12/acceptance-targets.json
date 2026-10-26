@@ -1,0 +1,781 @@
+{
+  "assertion_count": 6,
+  "assertions": [
+    {
+      "assertion": "target-add-created-revision2",
+      "passed": true,
+      "policy_revision": 2
+    },
+    {
+      "assertion": "added-target-enumerated-in-complete-six-file-manifest",
+      "manifest_object_count": 6,
+      "passed": true
+    },
+    {
+      "assertion": "added-target-download-has-exact-synthetic-bytes",
+      "bytes": 37,
+      "passed": true,
+      "sha256": "e400f227541f30b3b22a4af4927982afbab25c04611eb17338537c16931acf77"
+    },
+    {
+      "assertion": "target-remove-created-revision3",
+      "passed": true,
+      "policy_revision": 3
+    },
+    {
+      "assertion": "removed-target-fetch-denied404",
+      "http_status": 404,
+      "passed": true
+    },
+    {
+      "assertion": "remaining-complete-manifest-has-five-files",
+      "manifest_object_count": 5,
+      "passed": true
+    }
+  ],
+  "assertions_passed": 6,
+  "evidence_kind": "projection-of-existing-completed-browser-phase-receipts",
+  "format": "dewey12-sanitized-acceptance-receipt-v1",
+  "http_expectations_passed": 23,
+  "http_status_counts": {
+    "200": 22,
+    "404": 1
+  },
+  "identities": {
+    "added_removed_target_euid": "M-DGX-14C90",
+    "retained_target_euids": [
+      "M-DGX-14C58",
+      "M-DGX-14CDR"
+    ],
+    "share_euid": "M-DGX-14CVV"
+  },
+  "limitations": [
+    "Counts describe these retained HTTP expectations and explicit evidence assertions; they are not code-coverage percentages.",
+    "This receipt does not establish unperformed recipient or machine-client checks."
+  ],
+  "new_network_requests": 0,
+  "phase_count": 4,
+  "phases": [
+    {
+      "http_expectations_passed": 4,
+      "http_status_counts": {
+        "200": 4
+      },
+      "phase": "target-add",
+      "request_count": 4,
+      "requests": [
+        {
+          "http_status": 200,
+          "label": "manager-verified-account",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:13:16.488Z",
+          "path": "/recipient/account",
+          "response_bytes": 1201,
+          "response_headers": {},
+          "response_sha256": "6e4187027c8084b7ab9f023266e9b23c7c44e641f7275d70db7028c3d9715ef1"
+        },
+        {
+          "http_status": 200,
+          "label": "manager-private-api",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:13:16.862Z",
+          "path": "/api/v1/registry/defaults",
+          "response_bytes": 89,
+          "response_fields": {},
+          "response_headers": {
+            "content-length": "89"
+          },
+          "response_sha256": "a82038dc3bcca804bf82940dc381e8b72992a75d05e448ddd9ffde91a8194284"
+        },
+        {
+          "http_status": 200,
+          "label": "current-set",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:13:17.190Z",
+          "path": "/api/v1/registry/shares/M-DGX-14CVV",
+          "response_bytes": 2982,
+          "response_fields": {
+            "euid": "M-DGX-14CVV",
+            "fetch_path": "/fetch/M-DGX-14CVV",
+            "member_count": 2,
+            "members": [
+              {
+                "artifact_euid": "M-DGX-14C58",
+                "location_revision": 1,
+                "size": null,
+                "target_kind": "artifact_object"
+              },
+              {
+                "artifact_euid": "M-DGX-14CDR",
+                "location_revision": 1,
+                "size": null,
+                "target_kind": "artifact_prefix"
+              }
+            ],
+            "policy_revision": 1,
+            "share_euid": "M-DGX-14CVV",
+            "status": "active",
+            "target_euid": "M-DGX-14CHF",
+            "target_kind": "artifact_set",
+            "targets": [
+              {
+                "euid": "M-DGX-14C58"
+              },
+              {
+                "euid": "M-DGX-14CDR"
+              }
+            ]
+          },
+          "response_headers": {
+            "content-length": "2982"
+          },
+          "response_sha256": "73f0e3d3c16f5a63ae86670e71c1e3c748e5e7627f743b895e858669a793883f"
+        },
+        {
+          "http_status": 200,
+          "label": "add-target",
+          "method": "PATCH",
+          "observed_at": "2026-10-26T05:13:17.876Z",
+          "path": "/api/v1/registry/shares/M-DGX-14CVV",
+          "request_fields": {
+            "policy_revision": 1,
+            "targets": [
+              {
+                "target_euid": "M-DGX-14C58",
+                "target_kind": "artifact_object"
+              },
+              {
+                "target_euid": "M-DGX-14CDR",
+                "target_kind": "artifact_prefix"
+              },
+              {
+                "target_euid": "M-DGX-14C90",
+                "target_kind": "artifact_object"
+              }
+            ]
+          },
+          "response_bytes": 3373,
+          "response_fields": {
+            "euid": "M-DGX-14CVV",
+            "fetch_path": "/fetch/M-DGX-14CVV",
+            "member_count": 3,
+            "members": [
+              {
+                "artifact_euid": "M-DGX-14C58",
+                "location_revision": 1,
+                "size": null,
+                "target_kind": "artifact_object"
+              },
+              {
+                "artifact_euid": "M-DGX-14CDR",
+                "location_revision": 1,
+                "size": null,
+                "target_kind": "artifact_prefix"
+              },
+              {
+                "artifact_euid": "M-DGX-14C90",
+                "location_revision": 1,
+                "size": null,
+                "target_kind": "artifact_object"
+              }
+            ],
+            "policy_revision": 2,
+            "share_euid": "M-DGX-14CVV",
+            "status": "active",
+            "target_euid": null,
+            "target_kind": "mixed_set",
+            "targets": [
+              {
+                "euid": "M-DGX-14C58"
+              },
+              {
+                "euid": "M-DGX-14CDR"
+              },
+              {
+                "euid": "M-DGX-14C90"
+              }
+            ]
+          },
+          "response_headers": {
+            "content-length": "3373"
+          },
+          "response_sha256": "b5d8fc8ed10bda5576637982b62889cb1626c93913803af8ad767bfee55b6f9b"
+        }
+      ],
+      "source_exported_at": "2026-10-26T05:13:17.878Z",
+      "source_snapshot": "dewey12-acceptance-20261026-browser-target-add-2026-10-26T05-13-17-881Z.json",
+      "source_snapshot_sha256": "75118874991caade426c46d1a6b26127e0ff32a2eb4af98ca7cc2255e7b1e6e0",
+      "status": "complete"
+    },
+    {
+      "http_expectations_passed": 8,
+      "http_status_counts": {
+        "200": 8
+      },
+      "phase": "target-check-added",
+      "request_count": 8,
+      "requests": [
+        {
+          "http_status": 200,
+          "label": "external-verified-account",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:14:19.212Z",
+          "path": "/recipient/account",
+          "response_bytes": 1214,
+          "response_headers": {},
+          "response_sha256": "957f5a39029f2721ccebd25f1f2b2defab2665d5260befb8623be535e88b602b"
+        },
+        {
+          "http_status": 200,
+          "label": "set-manifest-0",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:14:20.029Z",
+          "path": "/fetch/M-DGX-14CVV?format=manifest&limit=1",
+          "response_bytes": 542,
+          "response_fields": {
+            "enumeration_complete": false,
+            "has_continuation": true,
+            "incomplete": true,
+            "items": [
+              {
+                "etag": "\"67ace7ed2966bf27fc36ec51cee35389\"",
+                "fetch_path": "/fetch/M-DGX-14CVV/M-DGX-14C58/readme.txt",
+                "location_revision": 1,
+                "path": "M-DGX-14C58/readme.txt",
+                "size": 40,
+                "target_euid": "M-DGX-14C58"
+              }
+            ],
+            "page_complete": true,
+            "policy_revision": 2,
+            "share_euid": "M-DGX-14CVV"
+          },
+          "response_headers": {
+            "content-length": "542"
+          },
+          "response_sha256": "c15fbce51d772b48ad2bb9622b0488cfd03ee3e257ea271865bc3fb0a6355f64"
+        },
+        {
+          "continuation_was_supplied": true,
+          "http_status": 200,
+          "label": "set-manifest-1",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:14:20.786Z",
+          "path": "/fetch/M-DGX-14CVV?format=manifest&limit=1",
+          "response_bytes": 540,
+          "response_fields": {
+            "enumeration_complete": false,
+            "has_continuation": true,
+            "incomplete": true,
+            "items": [
+              {
+                "etag": "\"3edcee4e422496aada25de9603ebd450\"",
+                "fetch_path": "/fetch/M-DGX-14CVV/M-DGX-14C90/extra.txt",
+                "location_revision": 1,
+                "path": "M-DGX-14C90/extra.txt",
+                "size": 37,
+                "target_euid": "M-DGX-14C90"
+              }
+            ],
+            "page_complete": true,
+            "policy_revision": 2,
+            "share_euid": "M-DGX-14CVV"
+          },
+          "response_headers": {
+            "content-length": "540"
+          },
+          "response_sha256": "334ec916421ac650001fdf2fa8dfe6b697bf59725fa52056c1e6c4773bad6e5e"
+        },
+        {
+          "continuation_was_supplied": true,
+          "http_status": 200,
+          "label": "set-manifest-2",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:14:21.577Z",
+          "path": "/fetch/M-DGX-14CVV?format=manifest&limit=1",
+          "response_bytes": 583,
+          "response_fields": {
+            "enumeration_complete": false,
+            "has_continuation": true,
+            "incomplete": true,
+            "items": [
+              {
+                "etag": "\"651d5fe9e5167b35ddd7522ecbf5f775\"",
+                "fetch_path": "/fetch/M-DGX-14CVV/M-DGX-14CDR/dewey-acceptance.css",
+                "location_revision": 1,
+                "path": "M-DGX-14CDR/dewey-acceptance.css",
+                "size": 561,
+                "target_euid": "M-DGX-14CDR"
+              }
+            ],
+            "page_complete": true,
+            "policy_revision": 2,
+            "share_euid": "M-DGX-14CVV"
+          },
+          "response_headers": {
+            "content-length": "583"
+          },
+          "response_sha256": "a4a2b5bb61709f9c02cd38aeb5ec209e2072776dfa959e70d7b12495d320e6b2"
+        },
+        {
+          "continuation_was_supplied": true,
+          "http_status": 200,
+          "label": "set-manifest-3",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:14:22.358Z",
+          "path": "/fetch/M-DGX-14CVV?format=manifest&limit=1",
+          "response_bytes": 619,
+          "response_fields": {
+            "enumeration_complete": false,
+            "has_continuation": true,
+            "incomplete": true,
+            "items": [
+              {
+                "etag": "\"f10b64da71b7ff0f26e3613d4f68ec5a\"",
+                "fetch_path": "/fetch/M-DGX-14CVV/M-DGX-14CDR/dewey-acceptance/data/probe.json",
+                "location_revision": 1,
+                "path": "M-DGX-14CDR/dewey-acceptance/data/probe.json",
+                "size": 211,
+                "target_euid": "M-DGX-14CDR"
+              }
+            ],
+            "page_complete": true,
+            "policy_revision": 2,
+            "share_euid": "M-DGX-14CVV"
+          },
+          "response_headers": {
+            "content-length": "619"
+          },
+          "response_sha256": "e6ba49db92a288b7b46d3769338952fccf7f5ddc6f4563870ee5302aaf5cdf8f"
+        },
+        {
+          "continuation_was_supplied": true,
+          "http_status": 200,
+          "label": "set-manifest-4",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:14:23.106Z",
+          "path": "/fetch/M-DGX-14CVV?format=manifest&limit=1",
+          "response_bytes": 623,
+          "response_fields": {
+            "enumeration_complete": false,
+            "has_continuation": true,
+            "incomplete": true,
+            "items": [
+              {
+                "etag": "\"13a47afce9e7e65a97e9d512f8cbb601\"",
+                "fetch_path": "/fetch/M-DGX-14CVV/M-DGX-14CDR/dewey-acceptance/scripts/probe.js",
+                "location_revision": 1,
+                "path": "M-DGX-14CDR/dewey-acceptance/scripts/probe.js",
+                "size": 1168,
+                "target_euid": "M-DGX-14CDR"
+              }
+            ],
+            "page_complete": true,
+            "policy_revision": 2,
+            "share_euid": "M-DGX-14CVV"
+          },
+          "response_headers": {
+            "content-length": "623"
+          },
+          "response_sha256": "a11ea5871ba9cc0094141b5f8ee374a05d5ac8b574c7c230e7372da23a54c14d"
+        },
+        {
+          "continuation_was_supplied": true,
+          "http_status": 200,
+          "label": "set-manifest-5",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:14:23.828Z",
+          "path": "/fetch/M-DGX-14CVV?format=manifest&limit=1",
+          "response_bytes": 554,
+          "response_fields": {
+            "enumeration_complete": true,
+            "has_continuation": false,
+            "incomplete": false,
+            "items": [
+              {
+                "etag": "\"f68472ae9196c2eb5bdff0a4bfcafaef\"",
+                "fetch_path": "/fetch/M-DGX-14CVV/M-DGX-14CDR/multiqc.html",
+                "location_revision": 1,
+                "path": "M-DGX-14CDR/multiqc.html",
+                "size": 2193966,
+                "target_euid": "M-DGX-14CDR"
+              }
+            ],
+            "page_complete": true,
+            "policy_revision": 2,
+            "share_euid": "M-DGX-14CVV"
+          },
+          "response_headers": {
+            "content-length": "554"
+          },
+          "response_sha256": "0c0747812859e8bacb8031955fc63fd076be6b5ac682d4e641ee4954f8b98f30"
+        },
+        {
+          "http_status": 200,
+          "label": "added-target-download",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:14:24.455Z",
+          "path": "/fetch/M-DGX-14CVV/M-DGX-14C90/extra.txt",
+          "response_bytes": 37,
+          "response_headers": {
+            "content-length": "37",
+            "etag": "\"3edcee4e422496aada25de9603ebd450\""
+          },
+          "response_sha256": "e400f227541f30b3b22a4af4927982afbab25c04611eb17338537c16931acf77"
+        }
+      ],
+      "source_exported_at": "2026-10-26T05:14:24.456Z",
+      "source_snapshot": "dewey12-acceptance-20261026-browser-target-check-added-2026-10-26T05-14-24-460Z.json",
+      "source_snapshot_sha256": "a1fab9a6f3627379de04055e381d80e0e03f8be6ff39729e16f4032f8452b165",
+      "status": "complete"
+    },
+    {
+      "http_expectations_passed": 4,
+      "http_status_counts": {
+        "200": 4
+      },
+      "phase": "target-remove",
+      "request_count": 4,
+      "requests": [
+        {
+          "http_status": 200,
+          "label": "manager-verified-account",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:15:35.237Z",
+          "path": "/recipient/account",
+          "response_bytes": 1201,
+          "response_headers": {},
+          "response_sha256": "6e4187027c8084b7ab9f023266e9b23c7c44e641f7275d70db7028c3d9715ef1"
+        },
+        {
+          "http_status": 200,
+          "label": "manager-private-api",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:15:35.541Z",
+          "path": "/api/v1/registry/defaults",
+          "response_bytes": 89,
+          "response_fields": {},
+          "response_headers": {
+            "content-length": "89"
+          },
+          "response_sha256": "a82038dc3bcca804bf82940dc381e8b72992a75d05e448ddd9ffde91a8194284"
+        },
+        {
+          "http_status": 200,
+          "label": "current-set",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:15:35.953Z",
+          "path": "/api/v1/registry/shares/M-DGX-14CVV",
+          "response_bytes": 3373,
+          "response_fields": {
+            "euid": "M-DGX-14CVV",
+            "fetch_path": "/fetch/M-DGX-14CVV",
+            "member_count": 3,
+            "members": [
+              {
+                "artifact_euid": "M-DGX-14C58",
+                "location_revision": 1,
+                "size": null,
+                "target_kind": "artifact_object"
+              },
+              {
+                "artifact_euid": "M-DGX-14CDR",
+                "location_revision": 1,
+                "size": null,
+                "target_kind": "artifact_prefix"
+              },
+              {
+                "artifact_euid": "M-DGX-14C90",
+                "location_revision": 1,
+                "size": null,
+                "target_kind": "artifact_object"
+              }
+            ],
+            "policy_revision": 2,
+            "share_euid": "M-DGX-14CVV",
+            "status": "active",
+            "target_euid": null,
+            "target_kind": "mixed_set",
+            "targets": [
+              {
+                "euid": "M-DGX-14C58"
+              },
+              {
+                "euid": "M-DGX-14CDR"
+              },
+              {
+                "euid": "M-DGX-14C90"
+              }
+            ]
+          },
+          "response_headers": {
+            "content-length": "3373"
+          },
+          "response_sha256": "b5d8fc8ed10bda5576637982b62889cb1626c93913803af8ad767bfee55b6f9b"
+        },
+        {
+          "http_status": 200,
+          "label": "remove-target",
+          "method": "PATCH",
+          "observed_at": "2026-10-26T05:15:36.565Z",
+          "path": "/api/v1/registry/shares/M-DGX-14CVV",
+          "request_fields": {
+            "policy_revision": 2,
+            "targets": [
+              {
+                "target_euid": "M-DGX-14C58",
+                "target_kind": "artifact_object"
+              },
+              {
+                "target_euid": "M-DGX-14CDR",
+                "target_kind": "artifact_prefix"
+              }
+            ]
+          },
+          "response_bytes": 2970,
+          "response_fields": {
+            "euid": "M-DGX-14CVV",
+            "fetch_path": "/fetch/M-DGX-14CVV",
+            "member_count": 2,
+            "members": [
+              {
+                "artifact_euid": "M-DGX-14C58",
+                "location_revision": 1,
+                "size": null,
+                "target_kind": "artifact_object"
+              },
+              {
+                "artifact_euid": "M-DGX-14CDR",
+                "location_revision": 1,
+                "size": null,
+                "target_kind": "artifact_prefix"
+              }
+            ],
+            "policy_revision": 3,
+            "share_euid": "M-DGX-14CVV",
+            "status": "active",
+            "target_euid": null,
+            "target_kind": "mixed_set",
+            "targets": [
+              {
+                "euid": "M-DGX-14C58"
+              },
+              {
+                "euid": "M-DGX-14CDR"
+              }
+            ]
+          },
+          "response_headers": {
+            "content-length": "2970"
+          },
+          "response_sha256": "d1a5abf7c58f724e410b40539856830de3a6ef8161830cff589c226d79df17d7"
+        }
+      ],
+      "source_exported_at": "2026-10-26T05:15:36.567Z",
+      "source_snapshot": "dewey12-acceptance-20261026-browser-target-remove-2026-10-26T05-15-36-570Z.json",
+      "source_snapshot_sha256": "eb45ea540ea50f6c4a5d25b58d25acc6116d08208881a4c56f770267764d0beb",
+      "status": "complete"
+    },
+    {
+      "http_expectations_passed": 7,
+      "http_status_counts": {
+        "200": 6,
+        "404": 1
+      },
+      "phase": "target-check-removed",
+      "request_count": 7,
+      "requests": [
+        {
+          "http_status": 200,
+          "label": "external-verified-account",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:16:41.157Z",
+          "path": "/recipient/account",
+          "response_bytes": 1214,
+          "response_headers": {},
+          "response_sha256": "957f5a39029f2721ccebd25f1f2b2defab2665d5260befb8623be535e88b602b"
+        },
+        {
+          "http_status": 404,
+          "label": "removed-target-denied",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:16:41.541Z",
+          "path": "/fetch/M-DGX-14CVV/M-DGX-14C90/extra.txt",
+          "response_bytes": 36,
+          "response_headers": {
+            "content-length": "36"
+          },
+          "response_sha256": "f2419c4714e0f7a0b549612b6c4513938c856515c044f66bad34301cac238da3"
+        },
+        {
+          "http_status": 200,
+          "label": "set-manifest-0",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:16:42.612Z",
+          "path": "/fetch/M-DGX-14CVV?format=manifest&limit=1",
+          "response_bytes": 542,
+          "response_fields": {
+            "enumeration_complete": false,
+            "has_continuation": true,
+            "incomplete": true,
+            "items": [
+              {
+                "etag": "\"67ace7ed2966bf27fc36ec51cee35389\"",
+                "fetch_path": "/fetch/M-DGX-14CVV/M-DGX-14C58/readme.txt",
+                "location_revision": 1,
+                "path": "M-DGX-14C58/readme.txt",
+                "size": 40,
+                "target_euid": "M-DGX-14C58"
+              }
+            ],
+            "page_complete": true,
+            "policy_revision": 3,
+            "share_euid": "M-DGX-14CVV"
+          },
+          "response_headers": {
+            "content-length": "542"
+          },
+          "response_sha256": "99c2033782ce7c514d6c584c849e8b3fd1ec1a4674ab3c9751114f968d993726"
+        },
+        {
+          "continuation_was_supplied": true,
+          "http_status": 200,
+          "label": "set-manifest-1",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:16:43.427Z",
+          "path": "/fetch/M-DGX-14CVV?format=manifest&limit=1",
+          "response_bytes": 583,
+          "response_fields": {
+            "enumeration_complete": false,
+            "has_continuation": true,
+            "incomplete": true,
+            "items": [
+              {
+                "etag": "\"651d5fe9e5167b35ddd7522ecbf5f775\"",
+                "fetch_path": "/fetch/M-DGX-14CVV/M-DGX-14CDR/dewey-acceptance.css",
+                "location_revision": 1,
+                "path": "M-DGX-14CDR/dewey-acceptance.css",
+                "size": 561,
+                "target_euid": "M-DGX-14CDR"
+              }
+            ],
+            "page_complete": true,
+            "policy_revision": 3,
+            "share_euid": "M-DGX-14CVV"
+          },
+          "response_headers": {
+            "content-length": "583"
+          },
+          "response_sha256": "5cf8c86358d8e7edca28c727dc5eea716c95a3ad121e19ef91e92e2bdd9d3e2f"
+        },
+        {
+          "continuation_was_supplied": true,
+          "http_status": 200,
+          "label": "set-manifest-2",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:16:44.190Z",
+          "path": "/fetch/M-DGX-14CVV?format=manifest&limit=1",
+          "response_bytes": 619,
+          "response_fields": {
+            "enumeration_complete": false,
+            "has_continuation": true,
+            "incomplete": true,
+            "items": [
+              {
+                "etag": "\"f10b64da71b7ff0f26e3613d4f68ec5a\"",
+                "fetch_path": "/fetch/M-DGX-14CVV/M-DGX-14CDR/dewey-acceptance/data/probe.json",
+                "location_revision": 1,
+                "path": "M-DGX-14CDR/dewey-acceptance/data/probe.json",
+                "size": 211,
+                "target_euid": "M-DGX-14CDR"
+              }
+            ],
+            "page_complete": true,
+            "policy_revision": 3,
+            "share_euid": "M-DGX-14CVV"
+          },
+          "response_headers": {
+            "content-length": "619"
+          },
+          "response_sha256": "32b41e972d80b3d8050651c3a077d347af94584170c08be17f75e6f9b6de22cb"
+        },
+        {
+          "continuation_was_supplied": true,
+          "http_status": 200,
+          "label": "set-manifest-3",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:16:44.968Z",
+          "path": "/fetch/M-DGX-14CVV?format=manifest&limit=1",
+          "response_bytes": 623,
+          "response_fields": {
+            "enumeration_complete": false,
+            "has_continuation": true,
+            "incomplete": true,
+            "items": [
+              {
+                "etag": "\"13a47afce9e7e65a97e9d512f8cbb601\"",
+                "fetch_path": "/fetch/M-DGX-14CVV/M-DGX-14CDR/dewey-acceptance/scripts/probe.js",
+                "location_revision": 1,
+                "path": "M-DGX-14CDR/dewey-acceptance/scripts/probe.js",
+                "size": 1168,
+                "target_euid": "M-DGX-14CDR"
+              }
+            ],
+            "page_complete": true,
+            "policy_revision": 3,
+            "share_euid": "M-DGX-14CVV"
+          },
+          "response_headers": {
+            "content-length": "623"
+          },
+          "response_sha256": "4cb58c37526bac77acdf74c578c4438c53958827138fc9ff92e20c5bde46efaf"
+        },
+        {
+          "continuation_was_supplied": true,
+          "http_status": 200,
+          "label": "set-manifest-4",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:16:45.730Z",
+          "path": "/fetch/M-DGX-14CVV?format=manifest&limit=1",
+          "response_bytes": 554,
+          "response_fields": {
+            "enumeration_complete": true,
+            "has_continuation": false,
+            "incomplete": false,
+            "items": [
+              {
+                "etag": "\"f68472ae9196c2eb5bdff0a4bfcafaef\"",
+                "fetch_path": "/fetch/M-DGX-14CVV/M-DGX-14CDR/multiqc.html",
+                "location_revision": 1,
+                "path": "M-DGX-14CDR/multiqc.html",
+                "size": 2193966,
+                "target_euid": "M-DGX-14CDR"
+              }
+            ],
+            "page_complete": true,
+            "policy_revision": 3,
+            "share_euid": "M-DGX-14CVV"
+          },
+          "response_headers": {
+            "content-length": "554"
+          },
+          "response_sha256": "61cb15905b7f2254d8eccd92fe91d8463dc73b90f45d04f41f15679eda7112b6"
+        }
+      ],
+      "source_exported_at": "2026-10-26T05:16:45.732Z",
+      "source_snapshot": "dewey12-acceptance-20261026-browser-target-check-removed-2026-10-26T05-16-45-735Z.json",
+      "source_snapshot_sha256": "7655dbe0f4d51b55df29ddfdc13e02ccccc273d100ab000fb4d2e5b596155ce4",
+      "status": "complete"
+    }
+  ],
+  "request_count": 23,
+  "sanitization": {
+    "authentication_material_removed": true,
+    "continuation_values_omitted": true,
+    "personal_identity_values_omitted": true,
+    "raw_state_and_response_blobs_removed": true,
+    "recipient_emails_removed": true
+  },
+  "scope": "targets",
+  "review": "Lead verified retained phase completion, assertion counts, source snapshot hashes and sanitization."
+}

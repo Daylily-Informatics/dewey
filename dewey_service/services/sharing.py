@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -21,6 +22,15 @@ SHARE_TARGET_KINDS = {"artifact_object", "artifact_prefix", "artifact_set", "mix
 SHARE_DELIVERY_MODES = {
     "gateway",
 }
+_GRANT_POLICY_FIELDS = (
+    "recipient_type", "recipient", "include_subdomains", "include_patterns",
+    "exclude_patterns", "expires_at", "recipient_status",
+)
+
+
+def _grant_policy_payload(data):
+    """Copy grant predicates, never a prior instance's native envelope or identity."""
+    return {key: deepcopy(data[key]) for key in _GRANT_POLICY_FIELDS if key in data}
 
 
 def _clean_list(values: list[Any] | tuple[Any, ...] | set[Any] | None) -> list[str]:
@@ -260,8 +270,8 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
         targets = {member.euid: member for member in members}
         for data in grants:
             grant = self.backend.create_instance(session, template_code=GRANT_TEMPLATE,
-                name="Share recipient grant", json_addl={k: v for k, v in {
-                    **data, "status": "active", "policy_revision": revision, "created_at": utc_now_iso()}.items() if k != "target_euids"})
+                name="Share recipient grant", json_addl={**_grant_policy_payload(data),
+                    "status": "active", "policy_revision": revision, "created_at": utc_now_iso()})
             self.backend.create_lineage(session, parent=share, child=grant, relationship_type="share_grant")
             for euid in data["target_euids"]:
                 self.backend.create_lineage(session, parent=grant, child=targets[euid], relationship_type="share_grant_target")
@@ -665,7 +675,7 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
                     ids = new_ids if ids == old_ids else ids & new_ids
                     if not ids:
                         continue
-                    value = {k: v for k, v in rule.items() if k in {"recipient_type", "recipient", "include_subdomains", "include_patterns", "exclude_patterns", "expires_at", "recipient_status"}}
+                    value = _grant_policy_payload(rule)
                     value["target_euids"] = sorted(ids)
                     if value["expires_at"] == data["expires_at"] or expiry(value["expires_at"]) > expiry(deadline):
                         value["expires_at"] = deadline
@@ -713,7 +723,8 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
                     continue
                 self.backend.update_instance_json(session, grant, {"status": "revoked" if grant.euid == grant_euid else "superseded", "revoked_at": utc_now_iso() if grant.euid == grant_euid else None})
                 if grant.euid != grant_euid:
-                    remaining.append({**{k:v for k,v in rule.items() if k not in {"status", "policy_revision"}}, "target_euids": [t.euid for t in self._grant_targets(session, grant)]})
+                    remaining.append({**_grant_policy_payload(rule),
+                        "target_euids": [t.euid for t in self._grant_targets(session, grant)]})
             self._write_share_revision(session, share, members, revision, policy=normalize_instance_payload(self._share_revision(session, share))["policy"])
             self._write_grants(session, share, remaining, members, revision)
             self.backend.update_instance_json(session, share, {"policy_revision": revision})

@@ -152,21 +152,22 @@ Health and observability routes follow the Dayhoff/Kahlo v3 shape: `/healthz`, `
 
 ## Testing Info
 
-Focused checks:
+The sharing release requires **at least 80% changed-line and changed-branch coverage**, measured separately for Dewey Python, browser JavaScript, Login, and selected release tooling. See the [coverage contract](docs/dev-docs/20261026_sharing_test_coverage.md) for scopes, baselines, failure-path coverage, and evidence. This is change-specific coverage, not whole-repository coverage.
+
+Example focused checks, when explicitly authorized:
 
 ```bash
-python -m pytest tests -q
-python -m pytest tests/test_share_management.py tests/test_service_relationships.py -q
+DEWEY_DEPLOYMENT_CODE=contract python -m pytest tests/test_share_management.py tests/test_share_grant_revision_envelope.py -q
 ```
 
-Deployed evidence should target `https://dewey.<deploy>.dev.lsmc.bio` and include login redirect, artifact/search pages, share behavior, TapDB pages, and external-object APIs where credentials are available.
+Main/PR-only CI enforces the coverage gates. Feature-branch pushes do not start full CI. Deployed sharing acceptance targets `https://dewey.day.lsmc.bio` with controlled fixtures and real authorized identities, including deep login, isolated report sidecars, machine retrieval, lifecycle changes, and audit reconciliation. Build provenance and user acceptance remain separate receipts.
 
 ## Technical Details, History, And Linkouts
 
 - [`docs/README.md`](docs/README.md): Dewey docs index.
 - [`docs/apis.md`](docs/apis.md): HTTP routes and auth modes.
 - [`docs/gui.md`](docs/gui.md): browser surfaces.
-- [`docs/sharing.md`](docs/sharing.md): Tailscale plus shared Login, filtered recipient grants, gateway downloads, explicit S3 presigns, and conversion requirements. Deployment status is tracked in the linked implementation ledger.
+- [`docs/sharing.md`](docs/sharing.md): authenticated internal/external sharing, current recipient grants, stable fetch URLs, isolated reports, and preserving conversion. Deployment status is tracked in the linked implementation ledger.
 - [`docs/architecture.md`](docs/architecture.md): domain ownership and runtime model.
 - [`docs/sequencer_run_registration.md`](docs/sequencer_run_registration.md): run-directory registration.
 - [`docs/qeo/`](docs/qeo/): QEO/Dewey handoff contracts.

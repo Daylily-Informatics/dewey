@@ -1,0 +1,66 @@
+{
+  "status": "pass",
+  "thresholds": {
+    "changed_lines": 80,
+    "changed_branch_origins": 80
+  },
+  "totals": {
+    "covered_lines": 391,
+    "total_lines": 396,
+    "covered_branches": 124,
+    "total_branches": 126,
+    "line_percent": 98.73737373737374,
+    "branch_percent": 98.41269841269842
+  },
+  "unmeasured_files": [],
+  "files": {
+    "scripts/build_push_container_release_manifest.py": {
+      "covered_lines": 7,
+      "total_lines": 7,
+      "missing_lines": [],
+      "covered_branches": 6,
+      "total_branches": 6,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    },
+    "scripts/dewey_recipient_ingress.py": {
+      "covered_lines": 384,
+      "total_lines": 389,
+      "missing_lines": [
+        612,
+        613,
+        614,
+        615,
+        616
+      ],
+      "covered_branches": 118,
+      "total_branches": 120,
+      "missing_branches": [
+        [
+          463,
+          465
+        ],
+        [
+          611,
+          612
+        ]
+      ],
+      "excluded_changed_lines": []
+    }
+  },
+  "baseline_commit": "0b40c85a1b9ee9f6878092bd9ab6640fe148cf2d",
+  "head_commit": "3606b09efeebaab291dda200177a86ab93d97947",
+  "working_tree_changes": false,
+  "source_paths": [
+    "scripts/dewey_recipient_ingress.py",
+    "scripts/build_push_container_release_manifest.py"
+  ],
+  "coverage_timestamp": "2026-10-26T02:06:04.966603",
+  "format": "python",
+  "metric": "Executable added/modified lines and branches whose source line changed",
+  "measured_source_sha256": {
+    "scripts/build_push_container_release_manifest.py": "ccc7ed249a72f3d938eb4b6351b4512cbe6a26245fc3875f34685750279766b2",
+    "scripts/dewey_recipient_ingress.py": "4de26c023f3f9c26c8bb3d93a6dcac29b868c9de2436751270393d275259476a"
+  },
+  "evidence_note": "Fresh coverage data from the final fully passing combined selection. Repository HEAD precedes the final source/test/evidence commit; file SHA256 values bind the exact measured source."
+}

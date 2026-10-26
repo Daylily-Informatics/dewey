@@ -1,0 +1,729 @@
+{
+  "status": "pass",
+  "thresholds": {
+    "changed_lines": 80,
+    "changed_branch_origins": 80
+  },
+  "totals": {
+    "covered_lines": 1777,
+    "total_lines": 1846,
+    "covered_branches": 706,
+    "total_branches": 780,
+    "line_percent": 96.26218851570964,
+    "branch_percent": 90.51282051282051
+  },
+  "unmeasured_files": [],
+  "files": {
+    "dewey_service/app.py": {
+      "covered_lines": 8,
+      "total_lines": 17,
+      "missing_lines": [
+        1565,
+        1566,
+        1570,
+        1571,
+        1572,
+        4095,
+        4096,
+        4097,
+        4100
+      ],
+      "covered_branches": 0,
+      "total_branches": 4,
+      "missing_branches": [
+        [
+          1570,
+          1571
+        ],
+        [
+          1570,
+          1576
+        ],
+        [
+          4095,
+          4096
+        ],
+        [
+          4095,
+          4097
+        ]
+      ],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/auth.py": {
+      "covered_lines": 21,
+      "total_lines": 27,
+      "missing_lines": [
+        235,
+        357,
+        358,
+        359,
+        431,
+        464
+      ],
+      "covered_branches": 9,
+      "total_branches": 14,
+      "missing_branches": [
+        [
+          234,
+          235
+        ],
+        [
+          350,
+          365
+        ],
+        [
+          354,
+          357
+        ],
+        [
+          430,
+          431
+        ],
+        [
+          433,
+          435
+        ]
+      ],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/cli/config_extra.py": {
+      "covered_lines": 78,
+      "total_lines": 80,
+      "missing_lines": [
+        56,
+        64
+      ],
+      "covered_branches": 42,
+      "total_branches": 44,
+      "missing_branches": [
+        [
+          55,
+          56
+        ],
+        [
+          63,
+          64
+        ]
+      ],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/cli/db.py": {
+      "covered_lines": 52,
+      "total_lines": 55,
+      "missing_lines": [
+        104,
+        120,
+        163
+      ],
+      "covered_branches": 26,
+      "total_branches": 30,
+      "missing_branches": [
+        [
+          101,
+          102
+        ],
+        [
+          103,
+          104
+        ],
+        [
+          119,
+          120
+        ],
+        [
+          162,
+          163
+        ]
+      ],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/cli/registry.py": {
+      "covered_lines": 56,
+      "total_lines": 57,
+      "missing_lines": [
+        195
+      ],
+      "covered_branches": 19,
+      "total_branches": 20,
+      "missing_branches": [
+        [
+          193,
+          195
+        ]
+      ],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/cli/share_fetch.py": {
+      "covered_lines": 193,
+      "total_lines": 196,
+      "missing_lines": [
+        35,
+        110,
+        127
+      ],
+      "covered_branches": 82,
+      "total_branches": 86,
+      "missing_branches": [
+        [
+          34,
+          35
+        ],
+        [
+          109,
+          110
+        ],
+        [
+          126,
+          127
+        ],
+        [
+          154,
+          153
+        ]
+      ],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/defaults.py": {
+      "covered_lines": 0,
+      "total_lines": 0,
+      "missing_lines": [],
+      "covered_branches": 0,
+      "total_branches": 0,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/fetch.py": {
+      "covered_lines": 81,
+      "total_lines": 82,
+      "missing_lines": [
+        103
+      ],
+      "covered_branches": 29,
+      "total_branches": 30,
+      "missing_branches": [
+        [
+          101,
+          103
+        ]
+      ],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/preview_sessions.py": {
+      "covered_lines": 19,
+      "total_lines": 19,
+      "missing_lines": [],
+      "covered_branches": 12,
+      "total_branches": 12,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/recipient_api.py": {
+      "covered_lines": 30,
+      "total_lines": 30,
+      "missing_lines": [],
+      "covered_branches": 4,
+      "total_branches": 4,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/recipient_identity.py": {
+      "covered_lines": 52,
+      "total_lines": 52,
+      "missing_lines": [],
+      "covered_branches": 18,
+      "total_branches": 18,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/registry_access.py": {
+      "covered_lines": 17,
+      "total_lines": 20,
+      "missing_lines": [
+        124,
+        207,
+        332
+      ],
+      "covered_branches": 6,
+      "total_branches": 10,
+      "missing_branches": [
+        [
+          124,
+          125
+        ],
+        [
+          124,
+          126
+        ],
+        [
+          326,
+          333
+        ],
+        [
+          331,
+          332
+        ]
+      ],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/registry_api.py": {
+      "covered_lines": 43,
+      "total_lines": 43,
+      "missing_lines": [],
+      "covered_branches": 2,
+      "total_branches": 2,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/report_preview.py": {
+      "covered_lines": 47,
+      "total_lines": 52,
+      "missing_lines": [
+        243,
+        263,
+        267,
+        284,
+        285
+      ],
+      "covered_branches": 8,
+      "total_branches": 8,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/services/artifacts.py": {
+      "covered_lines": 0,
+      "total_lines": 4,
+      "missing_lines": [
+        382,
+        383,
+        384,
+        385
+      ],
+      "covered_branches": 0,
+      "total_branches": 2,
+      "missing_branches": [
+        [
+          382,
+          383
+        ],
+        [
+          382,
+          385
+        ]
+      ],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/services/base.py": {
+      "covered_lines": 0,
+      "total_lines": 0,
+      "missing_lines": [],
+      "covered_branches": 0,
+      "total_branches": 0,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/services/registry.py": {
+      "covered_lines": 43,
+      "total_lines": 54,
+      "missing_lines": [
+        341,
+        342,
+        347,
+        348,
+        349,
+        350,
+        420,
+        421,
+        635,
+        650,
+        718
+      ],
+      "covered_branches": 21,
+      "total_branches": 34,
+      "missing_branches": [
+        [
+          341,
+          342
+        ],
+        [
+          341,
+          343
+        ],
+        [
+          348,
+          349
+        ],
+        [
+          348,
+          350
+        ],
+        [
+          350,
+          351
+        ],
+        [
+          350,
+          354
+        ],
+        [
+          387,
+          389
+        ],
+        [
+          418,
+          420
+        ],
+        [
+          420,
+          421
+        ],
+        [
+          420,
+          424
+        ],
+        [
+          634,
+          635
+        ],
+        [
+          649,
+          650
+        ],
+        [
+          714,
+          718
+        ]
+      ],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/services/share_policy.py": {
+      "covered_lines": 35,
+      "total_lines": 35,
+      "missing_lines": [],
+      "covered_branches": 24,
+      "total_branches": 24,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/services/share_rebind.py": {
+      "covered_lines": 100,
+      "total_lines": 100,
+      "missing_lines": [],
+      "covered_branches": 44,
+      "total_branches": 44,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/services/share_reports.py": {
+      "covered_lines": 175,
+      "total_lines": 175,
+      "missing_lines": [],
+      "covered_branches": 62,
+      "total_branches": 72,
+      "missing_branches": [
+        [
+          24,
+          26
+        ],
+        [
+          26,
+          28
+        ],
+        [
+          28,
+          30
+        ],
+        [
+          30,
+          32
+        ],
+        [
+          82,
+          84
+        ],
+        [
+          85,
+          84
+        ],
+        [
+          94,
+          96
+        ],
+        [
+          96,
+          98
+        ],
+        [
+          98,
+          100
+        ],
+        [
+          100,
+          102
+        ]
+      ],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/services/share_revisions.py": {
+      "covered_lines": 165,
+      "total_lines": 166,
+      "missing_lines": [
+        216
+      ],
+      "covered_branches": 75,
+      "total_branches": 78,
+      "missing_branches": [
+        [
+          123,
+          119
+        ],
+        [
+          191,
+          189
+        ],
+        [
+          215,
+          216
+        ]
+      ],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/services/sharing.py": {
+      "covered_lines": 119,
+      "total_lines": 132,
+      "missing_lines": [
+        195,
+        426,
+        454,
+        581,
+        621,
+        622,
+        623,
+        646,
+        662,
+        664,
+        673,
+        876,
+        883
+      ],
+      "covered_branches": 55,
+      "total_branches": 68,
+      "missing_branches": [
+        [
+          194,
+          195
+        ],
+        [
+          264,
+          265
+        ],
+        [
+          361,
+          362
+        ],
+        [
+          364,
+          365
+        ],
+        [
+          426,
+          427
+        ],
+        [
+          426,
+          428
+        ],
+        [
+          453,
+          454
+        ],
+        [
+          645,
+          646
+        ],
+        [
+          655,
+          664
+        ],
+        [
+          661,
+          662
+        ],
+        [
+          667,
+          684
+        ],
+        [
+          672,
+          673
+        ],
+        [
+          680,
+          682
+        ]
+      ],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/settings.py": {
+      "covered_lines": 7,
+      "total_lines": 7,
+      "missing_lines": [],
+      "covered_branches": 0,
+      "total_branches": 0,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/share_context.py": {
+      "covered_lines": 13,
+      "total_lines": 14,
+      "missing_lines": [
+        68
+      ],
+      "covered_branches": 3,
+      "total_branches": 4,
+      "missing_branches": [
+        [
+          66,
+          68
+        ]
+      ],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/share_exports.py": {
+      "covered_lines": 248,
+      "total_lines": 250,
+      "missing_lines": [
+        303,
+        304
+      ],
+      "covered_branches": 87,
+      "total_branches": 90,
+      "missing_branches": [
+        [
+          235,
+          214
+        ],
+        [
+          265,
+          267
+        ],
+        [
+          325,
+          327
+        ]
+      ],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/share_gateway.py": {
+      "covered_lines": 4,
+      "total_lines": 4,
+      "missing_lines": [],
+      "covered_branches": 0,
+      "total_branches": 0,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/share_routing.py": {
+      "covered_lines": 18,
+      "total_lines": 20,
+      "missing_lines": [
+        40,
+        84
+      ],
+      "covered_branches": 10,
+      "total_branches": 12,
+      "missing_branches": [
+        [
+          39,
+          40
+        ],
+        [
+          83,
+          84
+        ]
+      ],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/share_upgrade_v3.py": {
+      "covered_lines": 147,
+      "total_lines": 149,
+      "missing_lines": [
+        137,
+        186
+      ],
+      "covered_branches": 66,
+      "total_branches": 68,
+      "missing_branches": [
+        [
+          136,
+          137
+        ],
+        [
+          185,
+          186
+        ]
+      ],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/storage.py": {
+      "covered_lines": 3,
+      "total_lines": 3,
+      "missing_lines": [],
+      "covered_branches": 2,
+      "total_branches": 2,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/tapdb_backend.py": {
+      "covered_lines": 3,
+      "total_lines": 3,
+      "missing_lines": [],
+      "covered_branches": 0,
+      "total_branches": 0,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    }
+  },
+  "baseline_commit": "7f6fde5429741780517cf461a615e5b3e5f102f2",
+  "head_commit": "9ae11e4ca0f2ad5abe2b026d0189e62adf53b01a",
+  "working_tree_changes": true,
+  "source_paths": [
+    "dewey_service"
+  ],
+  "coverage_timestamp": "2026-10-26T02:06:14.008402",
+  "format": "python",
+  "metric": "Executable added/modified lines and branches whose source line changed",
+  "measured_source_sha256": {
+    "dewey_service/app.py": "2332ac0f0111106601915c05569685c5cda6d352babdb2447ac45123ccf4ba10",
+    "dewey_service/auth.py": "6d6da26376fdc62349474dc6dc44f93445bc6971572f3d23d41910e2176217da",
+    "dewey_service/cli/config_extra.py": "381548ebfe5062fb6fae1f61479105051465b2538d889dad1680a34def904385",
+    "dewey_service/cli/db.py": "3a420eca9ae1e11995d0a571a16f38042539b886ba94bde4f3f7659f124ce830",
+    "dewey_service/cli/registry.py": "3a4dcb45ddf60907568f9fe52ec4dda86cfa7778055512afd70c62ac2fb2d9b0",
+    "dewey_service/cli/share_fetch.py": "e0aface3b001c0cbc72f3ed4b47cc50d1b17b8dcca000961357fda83f1b29333",
+    "dewey_service/defaults.py": "b34a1e8eddd897d5c80f515d05bb6ace40d32bbfa5f844a967af8c5536e1047a",
+    "dewey_service/fetch.py": "cf24da9551511d84dff8d81aaefbd86786f700ee0f2a90163c72bf9aba7580a8",
+    "dewey_service/preview_sessions.py": "4633625a8586d59e4054d2ce2ad065740dafa0f0dc237e711c38bc3f3d1272ca",
+    "dewey_service/recipient_api.py": "251bc4cf310a79bdfa8f3e1269e884fb7344cb7cc7ce54cbd22d3a59ccee9982",
+    "dewey_service/recipient_identity.py": "17de0cb567cc856d8e047b00fa92018107fff55f9a5522deb42ff8473ce988a0",
+    "dewey_service/registry_access.py": "02282c14bf60d050b98ca5d4b79d465f7f6dfa53b0f50e522b8c502e3b119b8c",
+    "dewey_service/registry_api.py": "8f75fc051c42dfdacd760628df9b8326c26ccd93de5072f2e3a0617762124a26",
+    "dewey_service/report_preview.py": "d42e8c17ec6a4cf18f4ec1b6fd61a5e2df662a876c0331c5b8ef54a50dd26103",
+    "dewey_service/services/artifacts.py": "55bd775d2758883c94950cbc405b9ac578ce486de1da16cdf29ca62d57e97b8b",
+    "dewey_service/services/base.py": "68f3a7b86f22c3d1ed83bf62ff79ed84c21647189e3d70e16682c7483855df71",
+    "dewey_service/services/registry.py": "14f67b4ef9d3a9c75102d7445dc0fbcb7dcf51d011955b8e0a917091e06b4980",
+    "dewey_service/services/share_policy.py": "35a12fbd7a263effbcd8abf90f202b3e17d20033663716f75d9edb6775424a09",
+    "dewey_service/services/share_rebind.py": "69f504e8ac170d3418e6b865db6484ad0b2f15cb8a5eda454a03e94d535382fd",
+    "dewey_service/services/share_reports.py": "3be2e6a4858495302a991caa7372ffad250f795fd16fe9e11eb6ddc201080744",
+    "dewey_service/services/share_revisions.py": "308308578d5724be10584cc8d605482a8b2992523b9a0dc870b151d01daf1e06",
+    "dewey_service/services/sharing.py": "687efef0959a4d66bf156e8ece7e1d2a4a140f34d54a7d0f252a88c2e39e8888",
+    "dewey_service/settings.py": "7f8b38393ed5e17959b1f89f0c6949c072b02c53bf7627cd4f8dbcb605827121",
+    "dewey_service/share_context.py": "c91a10d430c28103792ccd2c3f831e9b9f5dd3cb16288612cba4161b3883ec5b",
+    "dewey_service/share_exports.py": "5d8b994560f0d01e810706a56c90ae79fbecd7a7c0094fa639d514acb9b66715",
+    "dewey_service/share_gateway.py": "ea587f0ce356201b1e9d6596e77e417fc9fe5534c0a4662fd22dfd2ac2d5f579",
+    "dewey_service/share_routing.py": "f5636beb5fa9961a3ae3e0ce1a325561708567120fe9a2f527a056414b27c824",
+    "dewey_service/share_upgrade_v3.py": "29c53ff23d366c3d6a33bc109e5b34ca7749386a6821c8f07cb1a5a4c9df1531",
+    "dewey_service/storage.py": "f715311553ecabc0e3bcd56729fa329d3aef524f67ea3f42a6836f8c0e85cfe6",
+    "dewey_service/tapdb_backend.py": "a96bf6a6ddf74458b5a2e28ef858c41958814ca53b5b21e39d77f2aa3831c10c"
+  },
+  "evidence_note": "Fresh coverage data from the final fully passing combined selection. Repository HEAD precedes the final source/test/evidence commit; file SHA256 values bind the exact measured source."
+}
