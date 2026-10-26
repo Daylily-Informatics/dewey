@@ -1,0 +1,120 @@
+{
+  "observed_at": "2026-10-26T06:43:58.774Z",
+  "release": "12.0.5",
+  "source_commit": "79d2889c71fab3bda87f676d40bcbbc613d4cdda",
+  "share_euid": "M-DGX-14CN7",
+  "status": "pass_for_completed_cases",
+  "phases": [
+    {
+      "source_snapshot": "dewey12-acceptance-20261026-browser-lifecycle-remove-external-attempt-2-2026-10-26T06-33-03-437Z.json",
+      "source_sha256": "267e06c76d4650f3a63710407ff558199ba8f9332746a560ff6fa29ab0f55b0b",
+      "phase": "lifecycle-remove-external-attempt-2",
+      "status": "complete",
+      "requests": 5,
+      "http_expectations_passed": 5,
+      "identity_created": false,
+      "credentials_exported": false,
+      "storage_deleted": false
+    },
+    {
+      "source_snapshot": "dewey12-acceptance-20261026-browser-lifecycle-check-removed-attempt-2-2026-10-26T06-34-30-333Z.json",
+      "source_sha256": "21219464456611f4db95960bb613f9863d7662f7df57e5e5d9d6b4e253cdbfe5",
+      "phase": "lifecycle-check-removed-attempt-2",
+      "status": "complete",
+      "requests": 2,
+      "http_expectations_passed": 2,
+      "identity_created": false,
+      "credentials_exported": false,
+      "storage_deleted": false
+    },
+    {
+      "source_snapshot": "dewey12-acceptance-20261026-browser-lifecycle-restore-external-attempt-2-2026-10-26T06-40-40-129Z.json",
+      "source_sha256": "552428611fefa76ca8d79cb06097c818f4f5526b1d7607aa7bdf36a080542eb7",
+      "phase": "lifecycle-restore-external-attempt-2",
+      "status": "complete",
+      "requests": 5,
+      "http_expectations_passed": 5,
+      "identity_created": false,
+      "credentials_exported": false,
+      "storage_deleted": false
+    },
+    {
+      "source_snapshot": "dewey12-acceptance-20261026-browser-lifecycle-check-restored-attempt-2-2026-10-26T06-41-22-327Z.json",
+      "source_sha256": "89a0d1260a041429a8adc7602772134c7d77942da0b935b86524f63266e76752",
+      "phase": "lifecycle-check-restored-attempt-2",
+      "status": "complete",
+      "requests": 2,
+      "http_expectations_passed": 2,
+      "identity_created": false,
+      "credentials_exported": false,
+      "storage_deleted": false
+    },
+    {
+      "source_snapshot": "dewey12-acceptance-20261026-browser-revoke-share-2026-10-26T06-42-38-087Z.json",
+      "source_sha256": "2b97be6facb89443d09863f0e3fca6dd09f4b815839f12acb91bfe22c056794a",
+      "phase": "revoke-share",
+      "status": "complete",
+      "requests": 4,
+      "http_expectations_passed": 4,
+      "identity_created": false,
+      "credentials_exported": false,
+      "storage_deleted": false
+    },
+    {
+      "source_snapshot": "dewey12-acceptance-20261026-browser-check-revoked-2026-10-26T06-43-58-779Z.json",
+      "source_sha256": "1bc2e2a6ee6353274ad7d0ea99a1a778794ba17419f583deed5df834fc2f8b95",
+      "phase": "check-revoked",
+      "status": "complete",
+      "requests": 2,
+      "http_expectations_passed": 2,
+      "identity_created": false,
+      "credentials_exported": false,
+      "storage_deleted": false
+    }
+  ],
+  "checks": {
+    "recipient-remove-attempt-2:manager": {
+      "share_euid": "M-DGX-14CN7",
+      "policy_revision": 4,
+      "revoked_grant_euid": "M-DGX-14DM8",
+      "remaining_internal_grant_euid": "M-DGX-14Q9N",
+      "active_recipient_count": 1,
+      "original_pending_operation_preserved": true
+    },
+    "recipient-remove-attempt-2:external": {
+      "share_euid": "M-DGX-14CN7",
+      "role": "external",
+      "http_status": 403,
+      "bytes": 26,
+      "sha256": "5df1d0416dbc043ee352978b19bfcbf6eb956d421463346a6c799888edbfdba6"
+    },
+    "recipient-restore-attempt-2:manager": {
+      "share_euid": "M-DGX-14CN7",
+      "policy_revision": 5,
+      "active_recipient_count": 2,
+      "grant_euids": {
+        "internal": "M-DGX-14QCF",
+        "external": "M-DGX-14QDD"
+      },
+      "original_pending_operation_preserved": true
+    },
+    "recipient-restore-attempt-2:external": {
+      "share_euid": "M-DGX-14CN7",
+      "http_status": 200,
+      "bytes": 40,
+      "sha256": "e114395a773c9378e136625da541493b44db71e8d2ae0396e2d621a57ee63172"
+    }
+  },
+  "native_revisions": {
+    "before": 3,
+    "removed_external": 4,
+    "restored_mixed": 5,
+    "final_revoked": 6
+  },
+  "first_failed_operation_retained": true,
+  "final_revoke_operation_status": "done",
+  "limitations": [
+    "Unaffected internal identity during removal was not exercised because human registration remains incomplete.",
+    "The final single-file share is intentionally revoked. Named set and named/public WWW shares remain active for pending internal acceptance."
+  ]
+}

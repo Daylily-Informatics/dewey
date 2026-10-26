@@ -1,0 +1,44 @@
+{
+  "base": "https://dewey.day.lsmc.bio",
+  "completed_at": "2026-10-26T06:30:35.022902+00:00",
+  "expected_http_requests": 1,
+  "file_share_euid": "M-DGX-14CN7",
+  "format": "dewey12-machine-acceptance-v1",
+  "phase": "revoked",
+  "revocation_receipt": "external-pat-revoked.json",
+  "revocation_receipt_sha256": "b0f90df8923f8c20b46855079c742794bf75f4e2316eb70fcecd5897e7717d11",
+  "revoked_credential_denied": true,
+  "source": {
+    "checkout_commit": "79d2889c71fab3bda87f676d40bcbbc613d4cdda",
+    "release": "12.0.5",
+    "release_commit": "79d2889c71fab3bda87f676d40bcbbc613d4cdda",
+    "source_diff_empty": true
+  },
+  "started_at": "2026-10-26T06:30:34.595548+00:00",
+  "status": "complete",
+  "steps": [
+    {
+      "completed_at": "2026-10-26T06:30:35.020174+00:00",
+      "curl_metrics": {
+        "http_code": "401",
+        "num_redirects": 0,
+        "size_download": 51
+      },
+      "exit_code": 0,
+      "http_status": 401,
+      "label": "revoked-token-denied",
+      "response_body_sha256": "86c1c9898dea4619e4d8837949eba2561b3d7893ef955c802a9149fd4c5f00c0",
+      "response_headers": {
+        "cache-control": "no-store",
+        "content-length": "51",
+        "content-type": "application/json"
+      },
+      "started_at": "2026-10-26T06:30:34.596092+00:00",
+      "status": "complete",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 416
+    }
+  ],
+  "token_euid": "M-DGX-14NRR"
+}

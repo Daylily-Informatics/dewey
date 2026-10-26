@@ -6,7 +6,7 @@ Baseline: [Dewey capabilities and feature analysis](20261025_dewey_capabilities.
 
 ## Approved execution decisions — 2026-10-26
 
-The user approved **Dewey 12.0.0 + Login 4.1.0**, scoped Dayhoff ingress and preserving conversion. The [controlling ledger](../plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) owns validation/deployment status. Deployment preparation required immutable corrective patches: **12.0.1** preserves the existing logout service query; **12.0.2** limits template comparison and native export to the explicitly selected release templates. **12.0.3** reduces the browser session payload to avoid cookie rejection after real sign-in. Login **4.1.1** adds the focused correction for concurrent identity-store transaction access found during deployed acceptance. Deployed **12.0.4** corrects native attribution in isolated report challenge/handoff transactions and the wrapper-only referrer policy required by its exact-origin handoff. Requirement IDs below remain stable; earlier proposed choices are superseded as follows:
+The user approved **Dewey 12.0.0 + Login 4.1.0**, scoped Dayhoff ingress and preserving conversion. The [controlling ledger](../plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) owns validation/deployment status. Deployment preparation required immutable corrective patches: **12.0.1** preserves the existing logout service query; **12.0.2** limits template comparison and native export to the explicitly selected release templates. **12.0.3** reduces the browser session payload to avoid cookie rejection after real sign-in. Login **4.1.1** adds the focused correction for concurrent identity-store transaction access found during deployed acceptance. Deployed **12.0.4** corrects native attribution in isolated report challenge/handoff transactions and the wrapper-only referrer policy required by its exact-origin handoff. Deployed **12.0.5** corrects grant-revision creation by copying application policy fields while preserving TapDB-owned native metadata. Requirement IDs below remain stable; earlier proposed choices are superseded as follows:
 
 - Canonical fetch identity is the share EUID; aliases are global atomic claims with permanent tombstones.
 - Creator delegation authorizes verified recipients without independent artifact ACLs. Named recipients and Public with registration never permit anonymous access. New external users are share-only, without automatic domain tenant membership.
@@ -16,7 +16,7 @@ The user approved **Dewey 12.0.0 + Login 4.1.0**, scoped Dayhoff ingress and pre
 - Login retains encrypted provider credentials and supplies opaque bindings. Introspection checks current enabled/verified-email state and provider revocation with positive caching at most 60 seconds. Personal credentials are finite; explicit SES invitations have accepted/failed/uncertain receipts.
 - Dedicated HTTPS ALB and restricted private 8443/8444 listeners expose recipient routes only. Existing shared 443, private management, tailnet/backchannels and sibling services remain preserved.
 - Rebind requires complete qualified content equivalence and collision checks, with native location history. Physical S3 moves/deletes are excluded.
-- Changed-code tests, one isolated PostgreSQL contract group, one integrated focused pass and bounded controlled production acceptance are approved. Full main CI, PR creation and merges remain a separate later phase.
+- The twice-approved expanded changed-code validation passed 771 tests and all four independent 80% line/branch gates. Original isolated PostgreSQL evidence is retained separately. Controlled production acceptance continues; full main CI, PR creation and merging remain a later phase.
 
 See [Managed sharing](../sharing.md) for implemented interfaces and operational limits. This amendment is not a deployment or acceptance receipt.
 
@@ -30,7 +30,7 @@ Two content behaviors are required: downloadable files/recursive collections and
 
 Interpretation of the storage goal: backing S3 locations may change without breaking durable Dewey links. Original direct S3 links may cease to work. A successful storage move must not silently turn an artifact into different content.
 
-## 2. Terms and proposed identifier contract
+## 2. Terms and approved identifier contract
 
 | Term | Meaning |
 |---|---|
@@ -44,9 +44,9 @@ Interpretation of the storage goal: backing S3 locations may change without brea
 | Download share | Files/prefixes/sets delivered as attachments or a complete recursive collection |
 | WWW share | Explicit report entry file and authorized bundle root, rendered with linked HTML/CSS/JS/images/data |
 
-**Recommended interpretation for `/fetch/<DEWEY-EUID>`: use the existing share EUID.** An artifact can belong to several shares with different recipients, deadlines and selections. An artifact identifier alone does not identify which policy to use. Selecting a share EUID avoids a separate opaque-link mapping service and makes revocation/audit unambiguous. Artifact EUIDs remain the storage targets. The user specifically also described slug-to-share-EUID mapping; this interpretation keeps both URL forms consistent. This is a proposal to review, not a silent decision to change existing routes.
+**Approved interpretation for `/fetch/<DEWEY-EUID>`: use the existing share EUID.** An artifact can belong to several shares with different recipients, deadlines and selections. An artifact identifier alone does not identify which policy to use. Selecting a share EUID avoids a separate opaque-link mapping service and makes revocation/audit unambiguous. Artifact EUIDs remain the storage targets. The user specifically also described slug-to-share-EUID mapping; this interpretation keeps both URL forms consistent.
 
-Proposed public shapes, with placeholders rather than invented persisted EUIDs:
+Approved public shapes, with placeholders rather than invented persisted EUIDs:
 
 ```text
 https://dewey.day.lsmc.bio/fetch/<share-euid>
@@ -55,11 +55,11 @@ https://dewey.day.lsmc.bio/fetch/<share-euid>/multiqc.html
 https://dewey.day.lsmc.bio/fetch/<human-chosen-slug>/multiqc.html
 ```
 
-A single-object share can return its object at the root. A single-prefix/report share preserves its relative tree. A multi-root set needs an unambiguous namespace: recommend `<target-euid>/<relative-path>` beneath the share root. Two selected roots containing the same filename must never overwrite one another or resolve by guesswork. A share's identity and aliases do not change when its reviewed policy/content selection is edited.
+A single-object share can return its object at the root. A single-prefix/report share preserves its relative tree. A multi-root set uses `<target-euid>/<relative-path>` beneath the share root. Two selected roots containing the same filename must never overwrite one another or resolve by guesswork. A share's identity and aliases do not change when its reviewed policy/content selection is edited.
 
 ## 3. Normative requirements
 
-“Must” is required for the requested product. Concrete defaults marked **proposed** need review. Acceptance examples are future criteria, not instructions to run tests now.
+“Must” is required for the requested product. The approved execution decisions above resolve the original proposed defaults. Acceptance evidence is recorded separately in the execution ledger.
 
 | ID | Requirement | Required result / acceptance criterion |
 |---|---|---|
@@ -67,12 +67,12 @@ A single-object share can return its object at the root. A single-prefix/report 
 | SHR-02 | Intentional delegation is sufficient | Verify the creator's authority to share the selected content. Do not require the recipient to already possess the underlying artifact/ancestor ACL, S3 rights or organization membership. A valid share grant authorizes that recipient within its scope after identity verification. Unshareable content must be explained to the creator before publication, not unexpectedly denied because the recipient lacks an independent ACL. |
 | SHR-03 | Mixed recipients and pending identities | Accept any syntactically valid intended email, including a new external address. Permit internal and external addresses in one share. Record pending grants without manufacturing a verified user. The new person can register/verify from the shared-link flow and then use the same URL. No blanket domain or organization membership is inferred from an individual grant. |
 | SHR-04 | Editable lifecycle and contents | Managers can add/remove recipients, change expiry, revoke the share, add/remove selected objects/prefix targets and change included paths. Keep the same share EUID and aliases; publish an atomic policy revision and audit changes. Stale concurrent edits fail explicitly. Removing content from a share removes access, not the S3 object or artifact registration. |
-| SHR-05 | Finite and indefinite duration | Default to a finite lifetime; **proposed default: 30 days**, subject to review of the actual persisted default. Allow explicit indefinite duration only with registered/authenticated access. Represent “no expiry” explicitly rather than a far-future timestamp. Share expiry and credential/session expiry remain separate. Show indefinite status, creation age, last access and review need; indefinite is never anonymous or irrevocable. |
+| SHR-05 | Finite and indefinite duration | Default to a finite lifetime; **approved default: 30 days**. Allow explicit indefinite duration only with registered/authenticated access. Represent “no expiry” explicitly rather than a far-future timestamp. Share expiry and credential/session expiry remain separate. Show indefinite status, creation age, last access and review need; indefinite is never anonymous or irrevocable. |
 | SHR-06 | Two audience types | Named-recipient shares and `Public with registration` must be distinct UI/API choices. Registration-open means any verified registered email can access, including people unknown to LSMC. It does not expose the artifact library or other shares, grant tenant-wide privileges, or imply listing the share in a public directory. Mixed internal/external grants work in named-recipient mode. |
 | SHR-07 | Stable Dewey fetch URLs | Resolve existing share EUIDs directly at `/fetch/<share-euid>` and preserve deep paths. Authenticate browser visitors and return to the exact authorized entry path after login/registration. A signed-in unshared person is denied without names, bytes, listings or sidecars leaking. Machine unauthenticated requests receive an explicit 401/auth requirement rather than a successful download containing a login page. |
 | SHR-08 | Human URL mappings | Managers request a human-chosen URL-safe slug mapped to the share EUID. Grant it only if available; collision/reserved/invalid names return an explicit error, with no automatic suffix or reassignment. EUID and slug URLs share identical policy, lifecycle and audit. Aliases are owned and audited Dewey records/relationships, not another mapping service. |
 | SHR-09 | Standard HTTPS file consumption | A recipient can fetch authorized bytes through HTTPS using a browser, curl, wget or another client supporting credentials. Support GET, HEAD, Range/resume, relevant conditional responses, MIME type, filename and size. Preserve exact URL encoding; reject ambiguous/traversal paths. Keep S3 locations and credentials out of durable share links. Do not use a transferable raw S3 bearer URL as the implementation of “registered users only.” |
-| SHR-10 | Complete recursive retrieval | Provide a complete, paginated manifest and a supported tree download that preserves paths. Also provide a downloadable collection/archive representation for clients that can consume only one object URL. Final archive endpoint/format is a review decision. Do not represent an arbitrary directory as if plain curl downloads its children automatically. Report incomplete enumeration, changing selection, failed files and resumability honestly; never call a truncated page a complete download. |
+| SHR-10 | Complete recursive retrieval | Provide a complete, paginated manifest and a supported tree download that preserves paths. Also provide a downloadable collection/archive representation for clients that can consume only one object URL. `?format=tar` provides uncompressed streaming TAR after complete inventory; interrupted TAR downloads restart. Do not represent an arbitrary directory as if plain curl downloads its children automatically. Report incomplete enumeration, changing selection, failed files and resumability honestly; never call a truncated page a complete download. |
 | SHR-11 | WWW/report bundle behavior | A share declares an exact report entrypoint and bundle root. Opening `/fetch/<share-euid>/multiqc.html` prompts for login if needed and, for an allowed verified identity, renders the report with every authorized relative sibling/subdirectory dependency. Recheck policy for assets and reloads; exclude paths outside the selected bundle. Report scripts must remain isolated from Dewey application credentials/APIs. Entry URL can be Dewey while rendering uses an isolated content origin. |
 | SHR-12 | Shared verified identity onboarding | Reuse shared Login/Cognito for sign-in, registration, email proof, account recovery and identity lifecycle. Require trusted verified-email evidence, not just an entered address or an administrator-confirmed account. Preserve the requested destination through onboarding. An email change requires verification/rebinding; old grants must not automatically migrate to an unrelated new address. |
 | SHR-13 | Organization/tenant handling without unintended access | Do not make tenant admission a prerequisite to consuming an intentional share. Prefer existing Login guest/share-only identities and organization facilities. If domain grouping is needed, associate/create a share-only domain group through the owning identity service and reuse it for later eligible users. Domain grouping must not confer organization admin, existing org data visibility, or cross-service roles. Treat shared mail providers separately; `gmail.com` is not one customer tenant. |
@@ -115,9 +115,9 @@ A single-object share can return its object at the root. A single-prefix/report 
 3. The creator normally sets a finite deadline. Explicit indefinite duration remains valid only while the share is active and the viewer is registered/authenticated; revocation still applies.
 4. The audit report identifies old/unused/indefinite shares so an owner can review them. This specification does not create reminders, scheduled reports or automatic cleanup.
 
-## 5. Decisions and recommendations that materially affect feasibility
+## 5. Approved decisions and their rationale
 
-| Decision | Recommended resolution | Why it is necessary |
+| Decision | Approved resolution | Why it is necessary |
 |---|---|---|
 | DEC-01: Which EUID is in `/fetch/`? | Use the existing **share EUID**, with artifact/prefix EUIDs as targets | An artifact can be shared under multiple incompatible policies; guessing a policy undermines predictable revocation and the “no extra mapping layer” goal |
 | DEC-02: What does a valid share override? | Recipient grants supply artifact access; enforce the creator's delegation rights at selection/publication and preserve explicit non-delegable constraints if the product defines any | Current protected-ancestor checks can defeat a deliberate share. Retaining the current recipient-ACL intersection would not fulfill the request. A general read right must also not silently become permission to redistribute |
@@ -128,11 +128,11 @@ A single-object share can return its object at the root. A single-prefix/report 
 | DEC-07: Fixed versus live content | Preserve current explicit member lists and live prefix semantics, label them clearly, and snapshot each recursive export's selected inventory | Silent expansion or a partial inventory would undermine what the sharer intentionally selected and what the recipient downloaded |
 | DEC-08: Stable storage identity | Treat location changes as controlled reference revision with equivalence evidence; distinct content gets an explicit new version/identity | An unchanged link is useful only if its identity and provenance remain meaningful |
 
-Cognito can verify mailbox control, but a confirmed account is not necessarily a verified email. That distinction supports SHR-12; the exact deployed pool/broker contract still needs inspection. [AWS Cognito confirmation and verification](https://docs.aws.amazon.com/cognito/latest/developerguide/signing-up-users-in-your-app.html).
+Cognito can verify mailbox control, but a confirmed account is not necessarily a verified email. That distinction supports SHR-12; the deployed identity contract was inspected, and remaining human onboarding acceptance is tracked in the execution ledger. [AWS Cognito confirmation and verification](https://docs.aws.amazon.com/cognito/latest/developerguide/signing-up-users-in-your-app.html).
 
 S3 presigned URLs confer access to their holder until applicable expiry/credential limits, supporting DEC-04. [AWS S3 presigned URLs](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html). Wget's recursive HTTP behavior follows links in retrieved documents, supporting DEC-06; it does not discover a private storage tree from an opaque URL. [GNU Wget recursive retrieval](https://www.gnu.org/software/wget/manual/html_node/Recursive-Retrieval.html).
 
-### Slug rules proposed for review
+### Approved slug rules
 
 - One global namespace under the exact Dewey host; lowercase ASCII letters, digits and hyphens, 3–63 characters, alphanumeric first/last character. Show the normalized choice before submission.
 - Reserve application/control names and the canonical EUID namespace; path separators, encoded separators and dot segments are invalid.
@@ -140,7 +140,7 @@ S3 presigned URLs confer access to their holder until applicable expiry/credenti
 - Persist alias-to-share relationships using Dewey/TapDB typed objects and lineage. Do not create an independent link-shortener database or infer relationships from copied EUID text.
 - Retain revoked/retired aliases as tombstones so an old forwarded link cannot later point to somebody else's content. A share may have aliases, but an alias never bypasses policy or moves to a different share silently.
 
-### Measurement definitions proposed for review
+### Approved measurement definitions
 
 | Measure | Definition / required caveat |
 |---|---|
@@ -166,7 +166,9 @@ S3 presigned URLs confer access to their holder until applicable expiry/credenti
 | S3/storage executor | Stored bytes, version/checksum evidence, physical copy/move operations when separately requested; Dewey does not silently relocate or delete data |
 | DayOA / DYEC / Ursa / Kahlo | Produce/register/use artifacts through existing contracts; scientific QC, workflow completion and clinical acceptance remain with their owners |
 
-## 7. Review gates before an implementation plan
+## 7. Original plan-entry gates — retained for history
+
+The approved execution plan superseded these prerequisites. The numbered list records the original review gates; it does not reopen decisions or request new authorization.
 
 1. Agree on DEC-01 through DEC-08, especially EUID meaning, recipient-ACL override, global ingress, presigns and recursive archive delivery. These are product/architecture choices; this document itself does not mutate any policy.
 2. Inspect the actual shared Login/Cognito onboarding and email-proof contract, effective sharing configuration, content hosts and public network path. Record what is confirmed versus source-only.

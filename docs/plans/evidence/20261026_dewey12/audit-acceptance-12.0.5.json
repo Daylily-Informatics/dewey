@@ -1,0 +1,410 @@
+{
+  "observed_at": "2026-10-26T06:52:52.805Z",
+  "release": "12.0.5",
+  "source_snapshot": "dewey12-acceptance-20261026-browser-audit-2026-10-26T06-52-52-814Z.json",
+  "source_sha256": "f537f8ab2bc3bddefb371a859b016424a7474e28c75e239819c2d491e432d658",
+  "status": "arithmetic_reconciled_completeness_defect_open",
+  "phase_summary": {
+    "phase": "audit",
+    "status": "complete",
+    "requests": 9,
+    "http_expectations_passed": 9,
+    "identity_created": false,
+    "credentials_exported": false,
+    "storage_deleted": false
+  },
+  "report": {
+    "window": {
+      "starts_at": "2026-10-26T04:20:05.981000+00:00",
+      "ends_at": "2026-10-26T06:52:50.969994+00:00",
+      "end_exclusive": true
+    },
+    "coverage": {
+      "schema_version": 3,
+      "complete": true,
+      "event_watermark": "2026-10-26T06:42:37.999407+00:00",
+      "observed_at": "2026-10-26T06:52:50.997300+00:00",
+      "inventory_sha256": "af9a7d1ef7bffda742331e3b64d13f38e1ee201c024510fd33b35dd081cab117",
+      "share_counts": "current authorized schema3 state at observed_at",
+      "event_counts": "native events in the requested window",
+      "verified_viewers": "Only events with explicit verified non-service actor evidence",
+      "historical_legacy": {
+        "total": 0,
+        "excluded_from_schema3_metrics": true,
+        "groups": [],
+        "filters_applied": [
+          "owner_subject",
+          "created_from",
+          "created_before",
+          "older_than_days"
+        ],
+        "access_coverage": "Historical identity/access schemas are not inferred"
+      },
+      "client_persistence_observed": false,
+      "raw_presign_consumption_observed": false
+    },
+    "shares": {
+      "total": 4,
+      "indefinite": 3,
+      "created_in_window": 4,
+      "current_lifecycle_counts": {
+        "active": 3,
+        "revoked": 1
+      },
+      "duration_buckets": {
+        "indefinite": 3,
+        "over_30_up_to_90_days": 1
+      },
+      "never_accessed": 0,
+      "last_successful_access": "2026-10-26T06:41:22.349222+00:00",
+      "mean_finite_duration_seconds": 2592000.036958,
+      "groups": [
+        {
+          "audience": "public_registered",
+          "content_mode": "www",
+          "status": "active",
+          "count": 1
+        },
+        {
+          "audience": "recipients",
+          "content_mode": "download",
+          "status": "active",
+          "count": 1
+        },
+        {
+          "audience": "recipients",
+          "content_mode": "download",
+          "status": "revoked",
+          "count": 1
+        },
+        {
+          "audience": "recipients",
+          "content_mode": "www",
+          "status": "active",
+          "count": 1
+        }
+      ]
+    },
+    "metrics": {
+      "events": 274,
+      "authorization_evaluations": 107,
+      "denials": 0,
+      "file_responses_completed": 30,
+      "report_entries": 2,
+      "report_sidecars": 5,
+      "head_responses": 2,
+      "not_modified_responses": 1,
+      "range_responses": 5,
+      "archive_attempts": 2,
+      "archive_completions": 2,
+      "server_bytes_sent": 19769289,
+      "client_downloads_completed": null
+    },
+    "event_groups": [
+      {
+        "event_type": "archive_completed",
+        "decision": "completed",
+        "method": "GET",
+        "status_code": "unknown",
+        "inline_report": false,
+        "count": 2,
+        "server_bytes_sent": 4402176
+      },
+      {
+        "event_type": "archive_started",
+        "decision": "allow",
+        "method": "GET",
+        "status_code": "unknown",
+        "inline_report": false,
+        "count": 2,
+        "server_bytes_sent": 0
+      },
+      {
+        "event_type": "authorization",
+        "decision": "allow",
+        "method": "unknown",
+        "status_code": "unknown",
+        "inline_report": false,
+        "count": 107,
+        "server_bytes_sent": 0
+      },
+      {
+        "event_type": "contents",
+        "decision": "allow",
+        "method": "unknown",
+        "status_code": "unknown",
+        "inline_report": false,
+        "count": 35,
+        "server_bytes_sent": 0
+      },
+      {
+        "event_type": "created",
+        "decision": "change",
+        "method": "unknown",
+        "status_code": "unknown",
+        "inline_report": false,
+        "count": 4,
+        "server_bytes_sent": 0
+      },
+      {
+        "event_type": "gateway_condition_result",
+        "decision": "not_modified",
+        "method": "GET",
+        "status_code": "304",
+        "inline_report": false,
+        "count": 1,
+        "server_bytes_sent": 0
+      },
+      {
+        "event_type": "gateway_response_completed",
+        "decision": "completed",
+        "method": "GET",
+        "status_code": "200",
+        "inline_report": false,
+        "count": 25,
+        "server_bytes_sent": 13170534
+      },
+      {
+        "event_type": "gateway_response_completed",
+        "decision": "completed",
+        "method": "GET",
+        "status_code": "200",
+        "inline_report": true,
+        "count": 5,
+        "server_bytes_sent": 2196467
+      },
+      {
+        "event_type": "gateway_response_completed",
+        "decision": "completed",
+        "method": "GET",
+        "status_code": "206",
+        "inline_report": false,
+        "count": 5,
+        "server_bytes_sent": 112
+      },
+      {
+        "event_type": "gateway_response_completed",
+        "decision": "completed",
+        "method": "HEAD",
+        "status_code": "200",
+        "inline_report": false,
+        "count": 2,
+        "server_bytes_sent": 0
+      },
+      {
+        "event_type": "gateway_response_started",
+        "decision": "allow",
+        "method": "GET",
+        "status_code": "200",
+        "inline_report": false,
+        "count": 25,
+        "server_bytes_sent": 0
+      },
+      {
+        "event_type": "gateway_response_started",
+        "decision": "allow",
+        "method": "GET",
+        "status_code": "200",
+        "inline_report": true,
+        "count": 5,
+        "server_bytes_sent": 0
+      },
+      {
+        "event_type": "gateway_response_started",
+        "decision": "allow",
+        "method": "GET",
+        "status_code": "206",
+        "inline_report": false,
+        "count": 5,
+        "server_bytes_sent": 0
+      },
+      {
+        "event_type": "gateway_response_started",
+        "decision": "allow",
+        "method": "HEAD",
+        "status_code": "200",
+        "inline_report": false,
+        "count": 2,
+        "server_bytes_sent": 0
+      },
+      {
+        "event_type": "gateway_setup_failed",
+        "decision": "failed",
+        "method": "GET",
+        "status_code": "404",
+        "inline_report": false,
+        "count": 1,
+        "server_bytes_sent": 0
+      },
+      {
+        "event_type": "gateway_setup_failed",
+        "decision": "failed",
+        "method": "GET",
+        "status_code": "412",
+        "inline_report": false,
+        "count": 1,
+        "server_bytes_sent": 0
+      },
+      {
+        "event_type": "location_rebound",
+        "decision": "change",
+        "method": "unknown",
+        "status_code": "unknown",
+        "inline_report": false,
+        "count": 2,
+        "server_bytes_sent": 0
+      },
+      {
+        "event_type": "manifest_page",
+        "decision": "allow",
+        "method": "unknown",
+        "status_code": "unknown",
+        "inline_report": false,
+        "count": 33,
+        "server_bytes_sent": 0
+      },
+      {
+        "event_type": "policy_updated",
+        "decision": "change",
+        "method": "unknown",
+        "status_code": "unknown",
+        "inline_report": false,
+        "count": 6,
+        "server_bytes_sent": 0
+      },
+      {
+        "event_type": "recipient_revoked",
+        "decision": "revoke",
+        "method": "unknown",
+        "status_code": "unknown",
+        "inline_report": false,
+        "count": 1,
+        "server_bytes_sent": 0
+      },
+      {
+        "event_type": "report_context_created",
+        "decision": "allow",
+        "method": "unknown",
+        "status_code": "unknown",
+        "inline_report": false,
+        "count": 2,
+        "server_bytes_sent": 0
+      },
+      {
+        "event_type": "revoked",
+        "decision": "revoke",
+        "method": "unknown",
+        "status_code": "unknown",
+        "inline_report": false,
+        "count": 1,
+        "server_bytes_sent": 0
+      },
+      {
+        "event_type": "slug_claimed",
+        "decision": "change",
+        "method": "unknown",
+        "status_code": "unknown",
+        "inline_report": false,
+        "count": 1,
+        "server_bytes_sent": 0
+      },
+      {
+        "event_type": "slug_retired",
+        "decision": "revoke",
+        "method": "unknown",
+        "status_code": "unknown",
+        "inline_report": false,
+        "count": 1,
+        "server_bytes_sent": 0
+      }
+    ]
+  },
+  "activity": {
+    "file": {
+      "events": 53,
+      "kinds": [
+        "authorization",
+        "created",
+        "gateway_condition_result",
+        "gateway_response_completed",
+        "gateway_response_started",
+        "gateway_setup_failed",
+        "location_rebound",
+        "policy_updated",
+        "recipient_revoked",
+        "revoked"
+      ]
+    },
+    "set": {
+      "events": 101,
+      "kinds": [
+        "archive_completed",
+        "archive_started",
+        "authorization",
+        "contents",
+        "created",
+        "gateway_response_completed",
+        "gateway_response_started",
+        "location_rebound",
+        "manifest_page",
+        "policy_updated"
+      ]
+    },
+    "www": {
+      "events": 35,
+      "kinds": [
+        "authorization",
+        "created",
+        "gateway_response_completed",
+        "gateway_response_started",
+        "gateway_setup_failed",
+        "report_context_created",
+        "slug_claimed",
+        "slug_retired"
+      ]
+    },
+    "public": {
+      "events": 85,
+      "kinds": [
+        "archive_completed",
+        "archive_started",
+        "authorization",
+        "contents",
+        "created",
+        "gateway_response_completed",
+        "gateway_response_started",
+        "manifest_page",
+        "policy_updated",
+        "report_context_created"
+      ]
+    }
+  },
+  "reconciled_events": 274,
+  "inventory_export": {
+    "observed_at": "2026-10-26T06:52:50.056749+00:00",
+    "inventory_sha256": "af9a7d1ef7bffda742331e3b64d13f38e1ee201c024510fd33b35dd081cab117",
+    "complete": true
+  },
+  "inventory_share_euids": [
+    "M-DGX-14CN7",
+    "M-DGX-14CVV",
+    "M-DGX-14D1F",
+    "M-DGX-14D73"
+  ],
+  "findings": [
+    {
+      "id": "AUDIT-DENIAL-01",
+      "status": "confirmed",
+      "observed": "Native report counts 0 denials despite completed authenticated403 fetch receipts after recipient removal and share revocation.",
+      "cause": "resolve_share_identifier rejects via _require_recipient in a read-only transaction before authorize_share_object can persist its denial event.",
+      "effect": "Access control works; share audit coverage omits early verified-recipient denials.",
+      "next": "Persist one native correlated denial before reraising; affected regression and one corrected tagged EC2 deployment required."
+    },
+    {
+      "id": "AUDIT-DURATION-01",
+      "status": "under_review",
+      "observed": "Nominal30day default classified over30days because native creation timestamp precedes application deadline clock by0.036958s.",
+      "next": "Review authoritative policy timestamps and duration bucket semantics; no physical storage change."
+    }
+  ]
+}

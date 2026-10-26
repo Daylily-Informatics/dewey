@@ -8,18 +8,22 @@ Baseline: [current capabilities](20261025_dewey_capabilities.md), observed deplo
 
 The original comparison below is the **11.0.10 baseline**, preserved for traceability. The user subsequently approved implementation. The [execution ledger](../plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) controls completion; source changes alone do not close live acceptance.
 
-| Requirements | Implemented source | Remaining release evidence |
+| Requirements | Implemented source | Verified evidence and remaining acceptance |
 |---|---|---|
-| SHR-01,02,04,05,19 | Schema-3 revisions, delegation, atomic target/grant/expiry edits, preserved history | PostgreSQL contracts passed; preserving schema-3 production conversion verified; authenticated journeys pending |
-| SHR-03,06,12,13 | Mixed/pending grants, registration-open audience, share-only verified Login identities, current introspection | Identity tests passed; controlled internal/external onboarding pending |
-| SHR-07,08,09 | Canonical fetch, native global aliases/tombstones, HTTP/range/conditional behavior | Focused contracts passed; deployed credential access pending |
-| SHR-10,11 | Complete manifests, recursive CLI/resume receipts, streaming TAR, isolated WWW entry/assets | Pagination/change/interruption tests passed; deployed report/tree proof pending |
-| SHR-14 | Dedicated ALB and restricted origin/DNS operator | Dedicated ingress active; four targets healthy, public DNS INSYNC, nonmanagement-source boundaries passed |
-| SHR-15,16 | Native events, lifecycle inventory, windowed aggregate reports, complete frozen exports | Source fixture reconciliation passed; deployed audit totals pending |
-| SHR-17 | Qualified-equivalence rebind, collision checks, native location revisions | Rebind contracts passed; preserved deployed URLs pending |
-| SHR-18,20 | Management/recipient API, GUI/CLI, README and sharing guide | Focused source checks passed; authenticated interface acceptance pending |
+| SHR-01,02,04,05,19 | Schema-3 revisions, delegation, atomic target/grant/expiry edits, preserved history | Native contracts and preserving conversion passed; deployed membership/duration edits passed. Recipient removal/restoration and final share revocation passed with external403/200/403; the internal identity check remains pending. |
+| SHR-03,06,12,13 | Mixed/pending grants, registration-open audience, share-only verified Login identities, current introspection | Identity tests, mixed pending grants and real external sign-in passed. New internal registration/email confirmation remains human-blocked. |
+| SHR-07,08,09 | Canonical fetch, native global aliases/tombstones, HTTP/range/conditional behavior | Canonical/alias HTTP access and real curl/wget/CLI retrieval passed; revoked credential returned 401. |
+| SHR-10,11 | Complete manifests, recursive CLI/resume receipts, streaming TAR, isolated WWW entry/assets | Complete manifest/recursive/TAR delivery and actual external MultiQC with sibling/nested sidecars passed. |
+| SHR-14 | Dedicated ALB and restricted origin/DNS operator | Dedicated ingress active; four targets healthy, public DNS INSYNC, nonmanagement-source boundaries passed. |
+| SHR-15,16 | Native events, lifecycle inventory, windowed aggregate reports, complete frozen exports | Source fixture and274native-event arithmetic reconcile. Known defect: early authenticated403fetch denials bypass the durable event writer; correction and renewed audit completeness proof are required. |
+| SHR-17 | Qualified-equivalence rebind, collision checks, native location revisions | Controlled rebind and unchanged fetch URLs passed. |
+| SHR-18,20 | Management/recipient API, GUI/CLI, README and sharing guide | Manager/recipient journeys and machine clients passed; remaining onboarding/lifecycle and final interface/audit review stay open. |
 
-Dewey **12.0.4** and Login **4.1.1** are deployed with verified image/package provenance. The native conversion preserved all 42 historical shares without retiring or deleting any. All 11 unselected containers retain baseline identity, image, start time and restart count. Source tests and ingress boundaries passed; the oversized-cookie sign-in defect is corrected and real manager browser login succeeds. Login4.1.1 also corrects concurrent identity-store transactions; the Sharing UI, controlled creation, explicit SES invitations and duration edits passed. Audience and alias checks also passed. Dewey **12.0.4** corrects isolated report write attribution and wrapper referrer policy. The actual external Google recipient reaches the named report deep link and renders MultiQC with its sibling and nested assets. Controlled recipient and report acceptance remains in progress. See [current sharing behavior](../sharing.md) and the ledger for subsequent receipts, limitations and terminal status.
+**Dewey 12.0.5 and Login 4.1.1 are deployed with verified provenance.** Conversion preserved 42 historical shares without retirement/deletion; 11 unselected containers remain unchanged. Expanded validation passed 771 tests and all four changed-code coverage gates. Real external WWW/sidecars, HTTP, recursive/TAR delivery, membership, aliases, rebind, curl/wget/CLI and revoked-credential401 checks passed. Internal signup and final interface review are incomplete. Audit arithmetic passed, but early authenticated denials are absent from native history; a corrective Dewey patch is required before audit/release acceptance. The execution ledger controls final acceptance.
+
+## Historical 11.0.10 comparison
+
+Sections 1–6 retain the findings and open questions as observed on 2026-10-25. The current 12.x disposition above supersedes their implementation-status statements; their baseline evidence remains unchanged.
 
 ## 1. Finding
 
@@ -99,7 +103,7 @@ This is a dependency analysis, not work assignment, scheduling, implementation s
 
 The requirements document supplies recommendations for each. No additional feature wishlist is needed before making these decisions.
 
-## 6. Remaining evidence required for honest end-to-end claims
+## 6. Historical evidence questions from the 11.0.10 review
 
 | Evidence question | Why it remains open | Controlling future receipt |
 |---|---|---|
@@ -118,7 +122,7 @@ These are future acceptance needs, not requests to initiate a test campaign now.
 
 The requested review packet comprises the current-capability document, requirements, this gap analysis, the README Sharing section, and sanitized evidence. Publication is recorded in the [documentation delivery ledger](../plans/20261025T212629Z_dewey_documentation_review_ledger.md).
 
-Document completion does not imply feature implementation, authenticated acceptance, a release, a production policy change, or approval of the proposed design choices. The next user decision is to review this packet and decide when it is ready for the separate multi-agent ledgered implementation plan.
+The original documentation delivery did not authorize implementation or establish authenticated acceptance. The user subsequently approved the [multiagent execution ledger](../plans/20261026T010947Z_dewey_12_sharing_release_ledger.md), which now controls implementation, release and remaining acceptance. The current disposition above distinguishes those states.
 
 [sharing]: https://github.com/Daylily-Informatics/dewey/blob/11.0.10/dewey_service/services/sharing.py
 [policy]: https://github.com/Daylily-Informatics/dewey/blob/11.0.10/dewey_service/services/share_policy.py

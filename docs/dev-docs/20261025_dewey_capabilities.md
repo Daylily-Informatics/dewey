@@ -1,6 +1,6 @@
 # Dewey capabilities and feature analysis — 2026-10-25
 
-Status: current-release baseline for review. This document describes existing behavior; it is not a feature implementation plan.
+Status: historical 11.0.10 baseline observed 2026-10-25. Preserve these findings; current 12.x implementation and acceptance status are recorded in the gap disposition and execution ledger.
 
 ## 1. Executive finding
 

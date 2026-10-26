@@ -74,15 +74,23 @@ or uncertain submission; it does not establish mailbox delivery. Existing durabl
 obsolete delivery payloads fail explicitly.
 
 For curl/wget/CLI, sign in at `/recipient/account` and create a personal credential.
-Keep it in a private file or environment, never in the durable URL. These shell
-examples use the caller's `DEWEY_TOKEN` and an actual persisted `SHARE_EUID`:
+Keep it in a private file or environment, never in the durable URL. These
+curl/wget examples use the caller's `DEWEY_TOKEN` and an actual persisted `SHARE_EUID`:
 
 ```bash
 curl --fail -H "Authorization: Bearer ${DEWEY_TOKEN}" \
   "https://dewey.day.lsmc.bio/fetch/${SHARE_EUID}" -o artifact.bin
 wget --header="Authorization: Bearer ${DEWEY_TOKEN}" \
   "https://dewey.day.lsmc.bio/fetch/${SHARE_EUID}?format=tar" -O collection.tar
-dewey shares fetch "${SHARE_EUID}" --output ./collection --recursive --resume
+```
+
+The CLI requires an existing absolute-path credential file with mode 0600; it does
+not read `DEWEY_TOKEN`. Configure its endpoint and private token file explicitly:
+
+```bash
+DEWEY_API_URL=https://dewey.day.lsmc.bio \
+DEWEY_API_TOKEN_FILE=/absolute/private/token-file \
+  dewey shares fetch "${SHARE_EUID}" --output ./collection --recursive --resume
 ```
 
 Each request and each TAR member checks current policy. An admitted individual-file
@@ -160,7 +168,7 @@ Example focused checks, when explicitly authorized:
 DEWEY_DEPLOYMENT_CODE=contract python -m pytest tests/test_share_management.py tests/test_share_grant_revision_envelope.py -q
 ```
 
-Main/PR-only CI enforces the coverage gates. Feature-branch pushes do not start full CI. Deployed sharing acceptance targets `https://dewey.day.lsmc.bio` with controlled fixtures and real authorized identities, including deep login, isolated report sidecars, machine retrieval, lifecycle changes, and audit reconciliation. Build provenance and user acceptance remain separate receipts.
+Main/PR-only CI is configured to enforce the coverage gates; those workflows have not run during this release. Feature-branch pushes do not start full CI. Deployed sharing acceptance targets `https://dewey.day.lsmc.bio` with controlled fixtures and real authorized identities, including deep login, isolated report sidecars, machine retrieval, lifecycle changes, and audit reconciliation. Build provenance and user acceptance remain separate receipts.
 
 ## Technical Details, History, And Linkouts
 

@@ -1,0 +1,15 @@
+{
+  "observed_at": "2026-10-26T06:31:48.484464+00:00",
+  "service": "dewey",
+  "container_id": "f3bbac7b4dc2dfb965cd209b00a9743af19ab682bde3f37947da293aa2389454",
+  "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:500ae751a29656c5f6f789bb1c4a1d92291de489057974f0001b91f45c9733c9",
+  "oci_version": "12.0.5",
+  "oci_revision": "79d2889c71fab3bda87f676d40bcbbc613d4cdda",
+  "packages": {
+    "dewey-service": "12.0.5",
+    "daylily-tapdb": "11.0.9",
+    "daylily-auth-cognito": "2.1.5"
+  },
+  "started_at": "2026-10-26T06:18:41.054108216Z",
+  "restart_count": 0
+}

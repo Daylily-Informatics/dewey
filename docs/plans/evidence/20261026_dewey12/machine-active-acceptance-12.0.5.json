@@ -1,0 +1,241 @@
+{
+  "base": "https://dewey.day.lsmc.bio",
+  "browser_report_execution_exercised": false,
+  "cli_partial_resume_exercised": false,
+  "completed_at": "2026-10-26T06:20:56.042362+00:00",
+  "expected_http_requests": 13,
+  "file_share_euid": "M-DGX-14CN7",
+  "files_verified": 4,
+  "fixture_manifest_sha256": "b06902aea65c454d64ef4745a7c315dc7a87d1b1d143b19504eb53ee48de4f3d",
+  "format": "dewey12-machine-acceptance-v1",
+  "machine_client_acceptance": true,
+  "named_external_credential": true,
+  "native_commands": 9,
+  "phase": "active",
+  "public_share_euid": "M-DGX-14D73",
+  "run": "dewey12-acceptance-20261026",
+  "snapshot": "dewey12-acceptance-20261026-browser-grant-revoke-failure-reconcile-2026-10-26T05-22-27-955Z.json",
+  "snapshot_sha256": "d1fcbd48974304a6d2a64e4a850ff12211bf11b385871dba9478a53547c934b5",
+  "source": {
+    "checkout_commit": "79d2889c71fab3bda87f676d40bcbbc613d4cdda",
+    "release": "12.0.5",
+    "release_commit": "79d2889c71fab3bda87f676d40bcbbc613d4cdda",
+    "source_diff_empty": true
+  },
+  "started_at": "2026-10-26T06:20:33.356671+00:00",
+  "status": "complete",
+  "steps": [
+    {
+      "completed_at": "2026-10-26T06:20:34.652908+00:00",
+      "curl_metrics": {
+        "http_code": "200",
+        "num_redirects": 0,
+        "size_download": 1214
+      },
+      "exit_code": 0,
+      "http_status": 200,
+      "label": "verified-external-account",
+      "response_headers": {
+        "cache-control": "no-store",
+        "content-length": "1214",
+        "content-type": "text/html; charset=utf-8"
+      },
+      "started_at": "2026-10-26T06:20:33.357551+00:00",
+      "status": "complete",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 434,
+      "verified_external_identity": true
+    },
+    {
+      "completed_at": "2026-10-26T06:20:35.646564+00:00",
+      "curl_metrics": {
+        "http_code": "200",
+        "num_redirects": 0,
+        "size_download": 40
+      },
+      "exit_code": 0,
+      "http_status": 200,
+      "label": "curl-full",
+      "response_headers": {
+        "accept-ranges": "bytes",
+        "cache-control": "no-store",
+        "content-length": "40",
+        "content-type": "text/plain",
+        "etag": "\"67ace7ed2966bf27fc36ec51cee35389\""
+      },
+      "started_at": "2026-10-26T06:20:34.655719+00:00",
+      "status": "complete",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 682,
+      "verified_bytes": 40,
+      "verified_sha256": "e114395a773c9378e136625da541493b44db71e8d2ae0396e2d621a57ee63172"
+    },
+    {
+      "completed_at": "2026-10-26T06:20:36.503811+00:00",
+      "curl_metrics": {
+        "http_code": "206",
+        "num_redirects": 0,
+        "size_download": 8
+      },
+      "exit_code": 0,
+      "http_status": 206,
+      "label": "curl-first-eight",
+      "response_headers": {
+        "accept-ranges": "bytes",
+        "cache-control": "no-store",
+        "content-length": "8",
+        "content-range": "bytes 0-7/40",
+        "content-type": "text/plain",
+        "etag": "\"67ace7ed2966bf27fc36ec51cee35389\""
+      },
+      "started_at": "2026-10-26T06:20:35.650590+00:00",
+      "status": "complete",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 722
+    },
+    {
+      "completed_at": "2026-10-26T06:20:37.288382+00:00",
+      "curl_metrics": {
+        "http_code": "206",
+        "num_redirects": 0,
+        "size_download": 32
+      },
+      "exit_code": 0,
+      "http_status": 206,
+      "label": "curl-native-resume",
+      "response_headers": {
+        "accept-ranges": "bytes",
+        "cache-control": "no-store",
+        "content-length": "32",
+        "content-range": "bytes 8-39/40",
+        "content-type": "text/plain",
+        "etag": "\"67ace7ed2966bf27fc36ec51cee35389\""
+      },
+      "started_at": "2026-10-26T06:20:36.505813+00:00",
+      "status": "complete",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 725,
+      "verified_bytes": 40,
+      "verified_sha256": "e114395a773c9378e136625da541493b44db71e8d2ae0396e2d621a57ee63172"
+    },
+    {
+      "completed_at": "2026-10-26T06:20:38.270294+00:00",
+      "exit_code": 0,
+      "http_status": 200,
+      "label": "wget-full",
+      "response_headers": {
+        "accept-ranges": "bytes",
+        "cache-control": "no-store",
+        "content-length": "40",
+        "content-type": "text/plain",
+        "etag": "\"67ace7ed2966bf27fc36ec51cee35389\""
+      },
+      "started_at": "2026-10-26T06:20:37.292604+00:00",
+      "status": "complete",
+      "stderr_bytes": 832,
+      "stderr_sha256": "3ef0ff7567047cf7750f0521ace4badf5de094138a63c618d3c7bcc90144c240",
+      "stdout_bytes": 0,
+      "verified_bytes": 40,
+      "verified_sha256": "e114395a773c9378e136625da541493b44db71e8d2ae0396e2d621a57ee63172"
+    },
+    {
+      "completed_at": "2026-10-26T06:20:39.127407+00:00",
+      "exit_code": 0,
+      "http_status": 206,
+      "label": "wget-native-resume",
+      "partial_seed": {
+        "bytes": 8,
+        "source": "first8bytes-of-verified-wget-full-download"
+      },
+      "response_headers": {
+        "accept-ranges": "bytes",
+        "cache-control": "no-store",
+        "content-length": "32",
+        "content-range": "bytes 8-39/40",
+        "content-type": "text/plain",
+        "etag": "\"67ace7ed2966bf27fc36ec51cee35389\""
+      },
+      "started_at": "2026-10-26T06:20:38.274162+00:00",
+      "status": "complete",
+      "stderr_bytes": 879,
+      "stderr_sha256": "b2a48836e8a610f4f46346cd7eb76e9e6883d4e0674e6129aa83c9831e218e5d",
+      "stdout_bytes": 0,
+      "verified_bytes": 40,
+      "verified_sha256": "e114395a773c9378e136625da541493b44db71e8d2ae0396e2d621a57ee63172"
+    },
+    {
+      "completed_at": "2026-10-26T06:20:41.651769+00:00",
+      "exit_code": 0,
+      "label": "cli-complete-manifest",
+      "response": {
+        "objects": 4,
+        "output": "/private/tmp/dewey12-acceptance-20261026/machine-client-01/public-manifest.json",
+        "status": "complete"
+      },
+      "started_at": "2026-10-26T06:20:39.130243+00:00",
+      "status": "complete",
+      "stderr_bytes": 102,
+      "stderr_sha256": "1c651cf2ce3db9563063b185a20b6001551429c6a5a56c10d425dd3184000d7c",
+      "stdout_bytes": 138
+    },
+    {
+      "completed_at": "2026-10-26T06:20:53.723075+00:00",
+      "exit_code": 0,
+      "label": "cli-recursive-fetch",
+      "response": {
+        "already_complete": 0,
+        "bytes_received": 2195906,
+        "enumeration_complete": true,
+        "files": 4,
+        "output": "/private/tmp/dewey12-acceptance-20261026/machine-client-01/cli-public",
+        "status": "complete"
+      },
+      "started_at": "2026-10-26T06:20:41.653319+00:00",
+      "status": "complete",
+      "stderr_bytes": 102,
+      "stderr_sha256": "b38e0a1d3f439d5187b6bdec2e5d9fb75a27f875539be8f734e1dd457adcf851",
+      "stdout_bytes": 212,
+      "verified_files": {
+        "dewey-acceptance.css": {
+          "bytes": 561,
+          "sha256": "9808b7a65b599ef0cb2e76ecc693b37c8a04ddb50be9e730f02a3c18ca5d66a8"
+        },
+        "dewey-acceptance/data/probe.json": {
+          "bytes": 211,
+          "sha256": "f3b01165446ba530d3cd130036f8bbbb7958830254a9a71a72038e48c5b81045"
+        },
+        "dewey-acceptance/scripts/probe.js": {
+          "bytes": 1168,
+          "sha256": "75b7a4504b721de02160c40ea2a78234faa6392551b9aa5619e56ddb19aeef7b"
+        },
+        "multiqc.html": {
+          "bytes": 2193966,
+          "sha256": "b715dc98b3095ab1f4d466ca65a1635746c999b7c9a5d5e6b46b07688165c626"
+        }
+      }
+    },
+    {
+      "completed_at": "2026-10-26T06:20:56.040950+00:00",
+      "exit_code": 0,
+      "label": "cli-verified-complete-resume",
+      "response": {
+        "already_complete": 4,
+        "bytes_received": 0,
+        "enumeration_complete": true,
+        "files": 4,
+        "output": "/private/tmp/dewey12-acceptance-20261026/machine-client-01/cli-public",
+        "status": "complete"
+      },
+      "started_at": "2026-10-26T06:20:53.728308+00:00",
+      "status": "complete",
+      "stderr_bytes": 102,
+      "stderr_sha256": "3920447a16772f355632d83bb90cf26c6f7797af19690b46f1dcc51b5baa3a02",
+      "stdout_bytes": 206
+    }
+  ],
+  "token_euid": "M-DGX-14NRR"
+}

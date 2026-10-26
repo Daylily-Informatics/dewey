@@ -34,6 +34,15 @@ The gate utility itself has focused tests for exact thresholds, empty denominato
 
 Run the selected changed-code groups once with coverage, then rerun only new, changed, or failing tests. Coverage may be accumulated only while the measured production source is unchanged; preserve each command, exit result, and intermediate coverage snapshot. A source correction invalidates affected measurements and requires its affected tests again. Do not increase coverage by skipping failures, removing policy checks, or adding exclusion pragmas.
 
-The controlling execution ledger is [the Dewey 12 release ledger](../plans/20261026T010947Z_dewey_12_sharing_release_ledger.md). Its evidence directory records the final measured percentages and any unresolved failures. Until those receipts pass, the 80% requirement is pending. Archived one-off operator recipes have reviewed execution receipts; they are not part of the maintained-product coverage percentage.
+The final expanded selection passed **771 tests with zero failures or skips**: 525 Dewey, 148 Login, 55 Dayhoff and 43 browser-script tests. All four independent changed-code gates passed:
+
+| Group | Changed line coverage | Changed branch coverage |
+|---|---:|---:|
+| Dewey Python |96.26% (1777/1846)|90.51% (706/780)|
+| Dewey browser JavaScript |100% (108/108)|88.15% (186/211)|
+| Login Python |96.95% (476/491)|95.90% (117/122)|
+| Dayhoff release/ingress tooling |98.74% (391/396)|98.41% (124/126)|
+
+The [coverage summary](../plans/evidence/20261026_dewey12/expanded-coverage-summary.json), [exact commands](../plans/evidence/20261026_dewey12/expanded-validation-commands.json), individual gate receipts, logs and JUnit reports are committed under the [release ledger](../plans/20261026T010947Z_dewey_12_sharing_release_ledger.md). Measured source-file SHA256 values bind the receipts to the released code. The earlier isolated PostgreSQL result remains the native contract proof and was not rerun for this expansion. Archived operator recipes have reviewed execution receipts and are outside the maintained-product coverage denominator. Full main CI and human acceptance remain separate.
 
 The final container is built from an immutable annotated tag on EC2, once per actual source correction. Build tests mock Docker/AWS execution and verify command/provenance contracts; the real EC2 image digest and deployed OCI/package checks establish release provenance. Login and unrelated images are not rebuilt for test-only changes.

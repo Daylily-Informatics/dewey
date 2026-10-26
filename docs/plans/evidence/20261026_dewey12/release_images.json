@@ -86,8 +86,21 @@
       "commit": "482c8013a8e0946376cb7565ec381a0eb7836065",
       "tag_object": "17aac2848427fe94b60c558c97e5fdde67f15e0b",
       "digest": "sha256:e4e43c72f33d110e4b2f4c61526cf60377e97bc2351ea4a210effe6a2f5739cb",
-      "disposition": "deployed and ready; external named report and authenticated file/recursive/TAR browser checks pass",
+      "disposition": "deployed then superseded by native grant policy projection correction",
       "packages": {
+        "daylily-tapdb": "11.0.9",
+        "daylily-auth-cognito": "2.1.5"
+      }
+    },
+    {
+      "service": "dewey",
+      "version": "12.0.5",
+      "commit": "79d2889c71fab3bda87f676d40bcbbc613d4cdda",
+      "tag_object": "2617281dd612c46919b4d68417dcac2e50223136",
+      "digest": "sha256:500ae751a29656c5f6f789bb1c4a1d92291de489057974f0001b91f45c9733c9",
+      "disposition": "deployed and ready; final expanded changed-code gates and real curl/wget/CLI acceptance passed",
+      "packages": {
+        "dewey-service": "12.0.5",
         "daylily-tapdb": "11.0.9",
         "daylily-auth-cognito": "2.1.5"
       }
@@ -124,6 +137,15 @@
   "report_corrective_build": {
     "started_at": "2026-10-26T04:47:05.718583+00:00",
     "finished_at": "2026-10-26T04:48:35.908236+00:00",
+    "exit_code": 0,
+    "selected": [
+      "dewey"
+    ],
+    "cache_mode": "off"
+  },
+  "grant_corrective_build": {
+    "started_at": "2026-10-26T06:13:37.920217+00:00",
+    "finished_at": "2026-10-26T06:15:16.516913+00:00",
     "exit_code": 0,
     "selected": [
       "dewey"
