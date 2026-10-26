@@ -2,8 +2,8 @@
 
 This is the schema-3 source contract. The [release ledger](plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) separates implementation, tests, tagged images, deployment and acceptance. The [11.0.10 analysis](dev-docs/20261025_dewey_capabilities.md) remains a historical baseline.
 
-The recorded deployed versions are **Dewey 12.0.7 / Login 4.1.1**. The application
-package matches the published Dewey tag byte-for-byte. Internal registration is
+The recorded deployed versions are **Dewey 12.0.8 / Login 4.1.1**. All 113 application
+files match the published Dewey tag and merged main byte-for-byte. Internal registration is
 confirmed; internal first-use/scoped-access proof and final acceptance remain open.
 
 ## Authority, recipients and selection

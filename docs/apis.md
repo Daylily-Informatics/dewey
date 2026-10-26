@@ -1,7 +1,7 @@
 # Dewey API Surface
 
 This page indexes the HTTP contract in `dewey_service/app.py`, `registry_api.py`,
-`fetch.py`, `recipient_api.py` and `report_preview.py` at release 12.0.7. The
+`fetch.py`, `recipient_api.py` and `report_preview.py` at release 12.0.8. The
 configured service's OpenAPI document supplies request schemas; hidden browser
 routes are described separately below.
 
@@ -46,10 +46,10 @@ Current auth modes used in this document:
 | `GET` | `/api/anomalies` | `bearer token` | Local anomaly list |
 | `GET` | `/api/anomalies/{anomaly_id}` | `bearer token` | Local anomaly detail |
 
-The integration branch keeps sharing readiness inside
+Release 12.0.8 keeps sharing readiness inside
 `checks.database.details.sharing_schema` (`verified` or `conversion_required`),
-within the pinned Dayhoff readiness schema. The deployed 12.0.7 response still
-has that diagnostic at the top level; moving it is a PR-only contract correction.
+within the pinned Dayhoff readiness schema. This corrects the top-level diagnostic
+in 12.0.7; the deployed response passes the unchanged canonical schema.
 Readiness still requires both a healthy database and the verified sharing schema.
 
 ## Auth Pages And Session UX
@@ -291,8 +291,7 @@ in the [release ledger](plans/20261026T010947Z_dewey_12_sharing_release_ledger.m
 
 Omitted or null `scopes` uses the declared artifact/artifact-set default. An
 explicit empty list or an unsupported scope is invalid; it does not broaden the
-query to default scopes. Empty-list rejection is an integration-branch correction
-after 12.0.7 and is not part of the currently deployed tag.
+query to default scopes. Empty-list rejection is deployed in 12.0.8.
 
 | Method | Path | Auth | `Idempotency-Key` |
 | --- | --- | --- | --- |

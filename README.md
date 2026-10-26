@@ -18,10 +18,11 @@ Dayhoff release inputs are maintained in its `services/pins.toml`. Dewey 12 reta
 
 The GUI centers on Library, S3 Browser, Sets, Sharing and Literature. Metadata and download permissions are independent; every share requires authentication. Prefix browsing is bounded and does not register descendants. Physical S3 deletion is prohibited. See the [Dewey 12 release ledger](docs/plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) for source, validation, deployment and acceptance states.
 
-The recorded production release is **Dewey 12.0.7** with **Login 4.1.1**. All 113
-installed Dewey application files and assets match the published `12.0.7` tag;
-the [running-source receipt](docs/plans/evidence/20261026_dewey12/running-source-pr-binding-12.0.7.json)
-binds that source to the deployed image. Internal registration is confirmed.
+The recorded production release is **Dewey 12.0.8** with **Login 4.1.1**. All 113
+installed Dewey application files and assets match the published `12.0.8` tag
+and merged `main`; the [running-source receipt](docs/plans/evidence/20261026_dewey12/running-source-binding-12.0.8.json)
+binds that source to the deployed image. The final patch deploys the tested search
+validation and canonical readiness-schema corrections. Internal registration is confirmed.
 Internal first-use/scoped-access verification and final acceptance remain open in
 the ledger.
 

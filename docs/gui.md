@@ -1,6 +1,6 @@
 # Dewey GUI Guide
 
-This guide describes release 12.0.7. Main navigation is **Library**, **S3 Browser**, **Sets**, **Sharing** and **Literature**. Writable principals see **Add**; administrators see **Admin**. The day deployment uses shared Login. Management remains on approved-network ingress; outside recipients use the configured fetch, authentication and isolated content surfaces.
+This guide describes release 12.0.8. Main navigation is **Library**, **S3 Browser**, **Sets**, **Sharing** and **Literature**. Writable principals see **Add**; administrators see **Admin**. The day deployment uses shared Login. Management remains on approved-network ingress; outside recipients use the configured fetch, authentication and isolated content surfaces.
 
 ## Roles And Record Capabilities
 

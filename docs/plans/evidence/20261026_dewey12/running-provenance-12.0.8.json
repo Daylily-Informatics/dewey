@@ -1,0 +1,110 @@
+{
+  "observed_at": "2026-10-26T21:18:41.924637+00:00",
+  "instance": "i-07df3a933e4839f52",
+  "region": "us-west-2",
+  "version": "12.0.8",
+  "source_commit": "c8a73360fcb6b908c2e575cb381e359dd425f838",
+  "tag_object": "0f3513b8bdad207db3c49f2c935a0e44eb0c897b",
+  "runtime": {
+    "id": "4d604bf8e6be84b09f2ede84b0748a9802f8ec4ae783c443fc017b7c7d5b28a9",
+    "name": "/dayhoff-day-dewey-1",
+    "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:c7071e396fd54b9502d68b77ecd7cfb178dc2d07a9a04b92fc07a75cbf84dbea",
+    "image_id": "sha256:c7071e396fd54b9502d68b77ecd7cfb178dc2d07a9a04b92fc07a75cbf84dbea",
+    "running": true,
+    "started_at": "2026-10-26T21:16:53.440548253Z",
+    "restart_count": 0
+  },
+  "image_verification": {
+    "version": "12.0.8",
+    "source_commit": "c8a73360fcb6b908c2e575cb381e359dd425f838",
+    "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:c7071e396fd54b9502d68b77ecd7cfb178dc2d07a9a04b92fc07a75cbf84dbea",
+    "image_id": "sha256:c7071e396fd54b9502d68b77ecd7cfb178dc2d07a9a04b92fc07a75cbf84dbea",
+    "packages": {
+      "dewey-service": "12.0.8",
+      "daylily-tapdb": "11.0.9",
+      "daylily-auth-cognito": "2.1.5"
+    },
+    "unselected_manifest_entries_unchanged": true,
+    "build": {
+      "started_at": "2026-10-26T21:13:58.921431+00:00",
+      "finished_at": "2026-10-26T21:15:32.543593+00:00",
+      "exit_code": 0,
+      "selected": [
+        "dewey"
+      ],
+      "cache_mode": "off"
+    }
+  },
+  "readyz": {
+    "contract_version": "v3",
+    "service": "dewey",
+    "environment": "day",
+    "instance_id": "514fbbfd90cb4488841f24baeee46fb8",
+    "observed_at": "2026-10-26T21:17:39.937906+00:00",
+    "status": "ok",
+    "request_id": "DcXIHumva_sY2wndpK2zWadG7qp4Wbpc",
+    "correlation_id": "905e53e95c1b37f9",
+    "build": {
+      "version": "12.0.8",
+      "sha": "c8a73360fcb6b908c2e575cb381e359dd425f838"
+    },
+    "ready": true,
+    "checks": {
+      "process": {
+        "status": "ok",
+        "started_at": "2026-10-26T21:16:57.501659+00:00",
+        "details": {}
+      },
+      "database": {
+        "status": "ok",
+        "latency_ms": 26.05,
+        "detail": "ok",
+        "observed_at": "2026-10-26T21:17:39.937906+00:00",
+        "details": {
+          "sharing_schema": "verified"
+        }
+      }
+    },
+    "projection": {
+      "state": "ready",
+      "stale": false,
+      "observed_at": "2026-10-26T21:17:39.937906+00:00",
+      "last_synced_at": "2026-10-26T21:17:39.937906+00:00",
+      "detail": null
+    }
+  },
+  "healthz": {
+    "contract_version": "v3",
+    "service": "dewey",
+    "environment": "day",
+    "instance_id": "514fbbfd90cb4488841f24baeee46fb8",
+    "observed_at": "2026-10-26T21:18:41.923091+00:00",
+    "status": "ok",
+    "request_id": "alVVX9oARTn1QAz5VHI9HuOCLgcb1AwV",
+    "correlation_id": "b1a187f8d478ec45",
+    "build": {
+      "version": "12.0.8",
+      "sha": "c8a73360fcb6b908c2e575cb381e359dd425f838"
+    },
+    "checks": {
+      "process": {
+        "status": "ok",
+        "started_at": "2026-10-26T21:16:57.501659+00:00"
+      }
+    },
+    "projection": {
+      "state": "ready",
+      "stale": false,
+      "observed_at": "2026-10-26T21:18:41.923091+00:00",
+      "last_synced_at": "2026-10-26T21:18:41.923091+00:00",
+      "detail": null
+    }
+  },
+  "source_files_verified": 113,
+  "siblings_unchanged": 12,
+  "validation_reused": {
+    "main_commit": "74b426b82829be852f128b9541c38d49ea05c983",
+    "ci_run": 40399463503,
+    "runtime_build_lock_inputs_identical": true
+  }
+}

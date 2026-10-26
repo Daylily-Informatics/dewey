@@ -123,9 +123,22 @@
       "commit": "3adc81c622d3a8e81fa31b91a2d3ce43690c8202",
       "tag_object": "898668b4b69925bc9631fa6f6325ebeb71102b6e",
       "digest": "sha256:fdf49285e8884894c6f0ee5ce72b6bda61bfd9f6e7ead31990c6e52bc2d64e41",
-      "disposition": "deployed and ready;17affected Python and45browser-script tests passed; all7selected MultiQC PNGs downloaded through canonical authenticated share",
+      "disposition": "deployed and ready;17affected Python and45browser-script tests passed; all7selected MultiQC PNGs downloaded through canonical authenticated share; superseded by final12.0.8 merged-main search/readiness corrections; existing report-export acceptance retained",
       "packages": {
         "dewey-service": "12.0.7",
+        "daylily-tapdb": "11.0.9",
+        "daylily-auth-cognito": "2.1.5"
+      }
+    },
+    {
+      "service": "dewey",
+      "version": "12.0.8",
+      "commit": "c8a73360fcb6b908c2e575cb381e359dd425f838",
+      "tag_object": "0f3513b8bdad207db3c49f2c935a0e44eb0c897b",
+      "digest": "sha256:c7071e396fd54b9502d68b77ecd7cfb178dc2d07a9a04b92fc07a75cbf84dbea",
+      "disposition": "deployed and ready; all113 installed package files match tag and merged main; canonical readiness schema valid; all12 siblings unchanged; remaining internal live acceptance separate",
+      "packages": {
+        "dewey-service": "12.0.8",
         "daylily-tapdb": "11.0.9",
         "daylily-auth-cognito": "2.1.5"
       }
@@ -189,6 +202,15 @@
   "report_export_corrective_build": {
     "started_at": "2026-10-26T10:15:06.777263+00:00",
     "finished_at": "2026-10-26T10:16:39.078192+00:00",
+    "exit_code": 0,
+    "selected": [
+      "dewey"
+    ],
+    "cache_mode": "off"
+  },
+  "final_integration_build": {
+    "started_at": "2026-10-26T21:13:58.921431+00:00",
+    "finished_at": "2026-10-26T21:15:32.543593+00:00",
     "exit_code": 0,
     "selected": [
       "dewey"

@@ -1,6 +1,6 @@
 # Dewey How-Tos
 
-These workflows describe release 12.0.7. The day service uses shared Login; management remains on approved-network ingress, while verified recipients use the explicit public fetch/auth/content surfaces. See [Managed sharing](sharing.md) for the full contract and [the release ledger](plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) for acceptance status.
+These workflows describe release 12.0.8. The day service uses shared Login; management remains on approved-network ingress, while verified recipients use the explicit public fetch/auth/content surfaces. See [Managed sharing](sharing.md) for the full contract and [the release ledger](plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) for acceptance status.
 
 ## Activate And Inspect The Repo Environment
 
@@ -19,7 +19,7 @@ Root-global `--json` is supported only by commands that declare it. Business CLI
 
 ## Configure Existing Storage And Start The Service
 
-Release 12.0.7 pins TapDB 11.0.9, `meridian-euid==0.4.8` and `daylily-auth-cognito==2.1.5` on Python >=3.12. All Python dependencies live in `project.dependencies` and the frozen lock. Pass every service/TapDB config path explicitly as an absolute path.
+Release 12.0.8 pins TapDB 11.0.9, `meridian-euid==0.4.8` and `daylily-auth-cognito==2.1.5` on Python >=3.12. All Python dependencies live in `project.dependencies` and the frozen lock. Pass every service/TapDB config path explicitly as an absolute path.
 
 ```bash
 dewey config init

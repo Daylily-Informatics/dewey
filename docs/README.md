@@ -1,6 +1,6 @@
 # Dewey Docs
 
-This directory contains the maintained Dewey 12.0.7 guides and explicitly dated
+This directory contains the maintained Dewey 12.0.8 guides and explicitly dated
 historical references. Deployment, software validation and live/user acceptance
 are separate states in the release ledger.
 

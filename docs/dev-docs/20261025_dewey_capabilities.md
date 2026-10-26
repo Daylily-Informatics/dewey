@@ -2,7 +2,7 @@
 
 Status: historical 11.0.10 baseline observed 2026-10-25. Preserve these findings; current 12.x implementation and acceptance status are recorded in the gap disposition and execution ledger.
 
-For the current **12.0.7** surface, read the [current overview](../../README.md),
+For the current **12.0.8** surface, read the [current overview](../../README.md),
 [sharing guide](../sharing.md), and [current gap disposition](20261025_dewey_sharing_gap_analysis.md).
 Present-tense findings and operation counts below describe only the dated 11.0.10
 observation; they are not current release instructions.

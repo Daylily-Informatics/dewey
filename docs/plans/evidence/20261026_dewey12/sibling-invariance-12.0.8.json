@@ -1,0 +1,227 @@
+{
+  "observed_at": "2026-10-26T21:18:41.924637+00:00",
+  "unchanged_count": 12,
+  "includes_login": true,
+  "all_unchanged": true,
+  "differences": [],
+  "before": {
+    "login": {
+      "id": "bfe936144539aed8fa5f993b38e38b83b82b2abe0e58bef54dbc6c7526e2d3b6",
+      "name": "/dayhoff-day-login-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/lsmc-oauth-login@sha256:82985b4c51c2f397d1e2a209c3e43f06b7328eca56f0bc4d618c3316cd41c355",
+      "image_id": "sha256:82985b4c51c2f397d1e2a209c3e43f06b7328eca56f0bc4d618c3316cd41c355",
+      "running": true,
+      "started_at": "2026-10-26T04:19:39.235169785Z",
+      "restart_count": 0
+    },
+    "kahlo": {
+      "id": "66dbf0bf4560d772316b7cd0483176adfae1c65bbde8156b0fe1c2f5b57f8222",
+      "name": "/dayhoff-day-kahlo-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/kahlo@sha256:b39683585b750b3dbc43b908a640030e8c5c941eebbd383d3e345b93532f2acb",
+      "image_id": "sha256:b39683585b750b3dbc43b908a640030e8c5c941eebbd383d3e345b93532f2acb",
+      "running": true,
+      "started_at": "2026-10-19T10:43:39.384006415Z",
+      "restart_count": 0
+    },
+    "ursa-v2-run-worker": {
+      "id": "336d63dc93f79819b8a0e03d122b3037da7478cad7e1de600e2c5b8bbcaf3bb7",
+      "name": "/dayhoff-day-ursa-v2-run-worker-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "image_id": "sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "running": true,
+      "started_at": "2026-10-19T09:24:02.702804431Z",
+      "restart_count": 0
+    },
+    "ursa-placement-scheduler": {
+      "id": "4e9c8a3d062b3bc930b5532e6ec150aa7c3d81e107df8b310abbe403d64de99f",
+      "name": "/dayhoff-day-ursa-placement-scheduler-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "image_id": "sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "running": true,
+      "started_at": "2026-10-19T09:24:02.708264969Z",
+      "restart_count": 0
+    },
+    "ursa-cluster-sweeper": {
+      "id": "ae4fa00afb4665c805137f20416d129c52a847a1260df39dc160c7308fdb4f8b",
+      "name": "/dayhoff-day-ursa-cluster-sweeper-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "image_id": "sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "running": true,
+      "started_at": "2026-10-19T09:24:02.68999943Z",
+      "restart_count": 0
+    },
+    "ursa-v2-run-monitor": {
+      "id": "9bab91e777e67259f1db89911410a1d5590d05753a7d7e2dea1ea9ab549de824",
+      "name": "/dayhoff-day-ursa-v2-run-monitor-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "image_id": "sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "running": true,
+      "started_at": "2026-10-19T09:24:02.705008093Z",
+      "restart_count": 0
+    },
+    "ursa-cost-guardrail-scheduler": {
+      "id": "bb310f4cac6cc1060941a12b751839bbd20f6efa512e84234df460516353fd41",
+      "name": "/dayhoff-day-ursa-cost-guardrail-scheduler-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "image_id": "sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "running": true,
+      "started_at": "2026-10-19T09:24:02.698090938Z",
+      "restart_count": 0
+    },
+    "ursa": {
+      "id": "d90533b530f41d96165c8db5135184f32d8069801f5ea8fdcfe037d85bfead82",
+      "name": "/dayhoff-day-ursa-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "image_id": "sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "running": true,
+      "started_at": "2026-10-19T09:24:02.529332342Z",
+      "restart_count": 0
+    },
+    "atlas": {
+      "id": "b6dd52681d7b54cc44779146431d8fbaa1fb9a8b271b09d035c9e790b7ef85b4",
+      "name": "/dayhoff-day-atlas-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/atlas@sha256:9f52170c56568ac8ef8b914233476471c999ab23fc3188fcb44c71c384d00037",
+      "image_id": "sha256:9f52170c56568ac8ef8b914233476471c999ab23fc3188fcb44c71c384d00037",
+      "running": true,
+      "started_at": "2026-10-14T21:35:19.153529945Z",
+      "restart_count": 0
+    },
+    "zebra-day": {
+      "id": "9a39b0bcd29f18bce0b3c334f6e192ea7edc649752d9f0d53613268ad0b1d928",
+      "name": "/dayhoff-day-zebra-day-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/zebra-day@sha256:aa0383ca291f735357ae7754651d10e825d5f1b7bc81659c04a0018991bcc7d1",
+      "image_id": "sha256:aa0383ca291f735357ae7754651d10e825d5f1b7bc81659c04a0018991bcc7d1",
+      "running": true,
+      "started_at": "2026-10-02T20:08:57.883126646Z",
+      "restart_count": 0
+    },
+    "bloom": {
+      "id": "12ae49f7feb39ae55c7a6bfd2a4a56f9983e1b1efcec47a03f22bf206051ee85",
+      "name": "/dayhoff-day-bloom-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/bloom@sha256:888b5c887f4c4c9d307069bfbe902f3b80b5305e953a3bf82c76c06485df96dc",
+      "image_id": "sha256:888b5c887f4c4c9d307069bfbe902f3b80b5305e953a3bf82c76c06485df96dc",
+      "running": true,
+      "started_at": "2026-10-14T06:07:59.588111826Z",
+      "restart_count": 0
+    },
+    "qeo": {
+      "id": "0edc56c9308eb1dec8773c32f1f26fda2319492af3e016871b4858337b683e21",
+      "name": "/dayhoff-day-qeo-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/qeo@sha256:bcb1ddbaee37c44f9a3c332908112eccfa5273f87c0ffc9437291051e7cada0a",
+      "image_id": "sha256:bcb1ddbaee37c44f9a3c332908112eccfa5273f87c0ffc9437291051e7cada0a",
+      "running": true,
+      "started_at": "2026-09-27T06:01:42.889491554Z",
+      "restart_count": 0
+    }
+  },
+  "after": {
+    "login": {
+      "id": "bfe936144539aed8fa5f993b38e38b83b82b2abe0e58bef54dbc6c7526e2d3b6",
+      "name": "/dayhoff-day-login-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/lsmc-oauth-login@sha256:82985b4c51c2f397d1e2a209c3e43f06b7328eca56f0bc4d618c3316cd41c355",
+      "image_id": "sha256:82985b4c51c2f397d1e2a209c3e43f06b7328eca56f0bc4d618c3316cd41c355",
+      "running": true,
+      "started_at": "2026-10-26T04:19:39.235169785Z",
+      "restart_count": 0
+    },
+    "kahlo": {
+      "id": "66dbf0bf4560d772316b7cd0483176adfae1c65bbde8156b0fe1c2f5b57f8222",
+      "name": "/dayhoff-day-kahlo-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/kahlo@sha256:b39683585b750b3dbc43b908a640030e8c5c941eebbd383d3e345b93532f2acb",
+      "image_id": "sha256:b39683585b750b3dbc43b908a640030e8c5c941eebbd383d3e345b93532f2acb",
+      "running": true,
+      "started_at": "2026-10-19T10:43:39.384006415Z",
+      "restart_count": 0
+    },
+    "ursa-v2-run-worker": {
+      "id": "336d63dc93f79819b8a0e03d122b3037da7478cad7e1de600e2c5b8bbcaf3bb7",
+      "name": "/dayhoff-day-ursa-v2-run-worker-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "image_id": "sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "running": true,
+      "started_at": "2026-10-19T09:24:02.702804431Z",
+      "restart_count": 0
+    },
+    "ursa-placement-scheduler": {
+      "id": "4e9c8a3d062b3bc930b5532e6ec150aa7c3d81e107df8b310abbe403d64de99f",
+      "name": "/dayhoff-day-ursa-placement-scheduler-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "image_id": "sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "running": true,
+      "started_at": "2026-10-19T09:24:02.708264969Z",
+      "restart_count": 0
+    },
+    "ursa-cluster-sweeper": {
+      "id": "ae4fa00afb4665c805137f20416d129c52a847a1260df39dc160c7308fdb4f8b",
+      "name": "/dayhoff-day-ursa-cluster-sweeper-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "image_id": "sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "running": true,
+      "started_at": "2026-10-19T09:24:02.68999943Z",
+      "restart_count": 0
+    },
+    "ursa-v2-run-monitor": {
+      "id": "9bab91e777e67259f1db89911410a1d5590d05753a7d7e2dea1ea9ab549de824",
+      "name": "/dayhoff-day-ursa-v2-run-monitor-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "image_id": "sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "running": true,
+      "started_at": "2026-10-19T09:24:02.705008093Z",
+      "restart_count": 0
+    },
+    "ursa-cost-guardrail-scheduler": {
+      "id": "bb310f4cac6cc1060941a12b751839bbd20f6efa512e84234df460516353fd41",
+      "name": "/dayhoff-day-ursa-cost-guardrail-scheduler-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "image_id": "sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "running": true,
+      "started_at": "2026-10-19T09:24:02.698090938Z",
+      "restart_count": 0
+    },
+    "ursa": {
+      "id": "d90533b530f41d96165c8db5135184f32d8069801f5ea8fdcfe037d85bfead82",
+      "name": "/dayhoff-day-ursa-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "image_id": "sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "running": true,
+      "started_at": "2026-10-19T09:24:02.529332342Z",
+      "restart_count": 0
+    },
+    "atlas": {
+      "id": "b6dd52681d7b54cc44779146431d8fbaa1fb9a8b271b09d035c9e790b7ef85b4",
+      "name": "/dayhoff-day-atlas-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/atlas@sha256:9f52170c56568ac8ef8b914233476471c999ab23fc3188fcb44c71c384d00037",
+      "image_id": "sha256:9f52170c56568ac8ef8b914233476471c999ab23fc3188fcb44c71c384d00037",
+      "running": true,
+      "started_at": "2026-10-14T21:35:19.153529945Z",
+      "restart_count": 0
+    },
+    "zebra-day": {
+      "id": "9a39b0bcd29f18bce0b3c334f6e192ea7edc649752d9f0d53613268ad0b1d928",
+      "name": "/dayhoff-day-zebra-day-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/zebra-day@sha256:aa0383ca291f735357ae7754651d10e825d5f1b7bc81659c04a0018991bcc7d1",
+      "image_id": "sha256:aa0383ca291f735357ae7754651d10e825d5f1b7bc81659c04a0018991bcc7d1",
+      "running": true,
+      "started_at": "2026-10-02T20:08:57.883126646Z",
+      "restart_count": 0
+    },
+    "bloom": {
+      "id": "12ae49f7feb39ae55c7a6bfd2a4a56f9983e1b1efcec47a03f22bf206051ee85",
+      "name": "/dayhoff-day-bloom-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/bloom@sha256:888b5c887f4c4c9d307069bfbe902f3b80b5305e953a3bf82c76c06485df96dc",
+      "image_id": "sha256:888b5c887f4c4c9d307069bfbe902f3b80b5305e953a3bf82c76c06485df96dc",
+      "running": true,
+      "started_at": "2026-10-14T06:07:59.588111826Z",
+      "restart_count": 0
+    },
+    "qeo": {
+      "id": "0edc56c9308eb1dec8773c32f1f26fda2319492af3e016871b4858337b683e21",
+      "name": "/dayhoff-day-qeo-1",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/qeo@sha256:bcb1ddbaee37c44f9a3c332908112eccfa5273f87c0ffc9437291051e7cada0a",
+      "image_id": "sha256:bcb1ddbaee37c44f9a3c332908112eccfa5273f87c0ffc9437291051e7cada0a",
+      "running": true,
+      "started_at": "2026-09-27T06:01:42.889491554Z",
+      "restart_count": 0
+    }
+  }
+}

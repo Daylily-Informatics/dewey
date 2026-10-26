@@ -1,0 +1,53 @@
+{
+  "version": "12.0.8",
+  "observed_at": "2026-10-26T21:31:29Z",
+  "engineering_status": "released_and_verified",
+  "production_objective_complete": false,
+  "source_commit": "c8a73360fcb6b908c2e575cb381e359dd425f838",
+  "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:c7071e396fd54b9502d68b77ecd7cfb178dc2d07a9a04b92fc07a75cbf84dbea",
+  "completed": {
+    "annotated_release_tag_verified": true,
+    "final_ec2_builds": 1,
+    "selected_services": [
+      "dewey"
+    ],
+    "readyz_and_healthz_200": true,
+    "canonical_readiness_schema_valid": true,
+    "installed_tag_and_main_files_equal": 113,
+    "unchanged_sibling_containers": 12,
+    "main_pr": 64,
+    "main_merge": "74b426b82829be852f128b9541c38d49ea05c983",
+    "main_ci_run": 40399463503,
+    "line_coverage_percent": 83.62976406533575,
+    "branch_coverage_percent": 82.43494423791822,
+    "extra_test_campaigns": 0,
+    "physical_s3_changes": 0
+  },
+  "live_entry_receipt": "public-entry-12.0.8.json",
+  "manager_browser": {
+    "cached_session_expired": "A direct management API read returned401; no audit history was fetched.",
+    "first_login_attempt": "invalid_state; retained as an unsuccessful attempt rather than access proof",
+    "canonical_retry": "Normal fresh LSMC Login/Google flow succeeded without entering or extracting credentials. The own-account page confirmed the existing manager identity.",
+    "recipient_boundary": "The manager without a recipient grant received No current recipient grant at the controlled share fetch.",
+    "counts_as_internal_recipient_acceptance": false
+  },
+  "internal_acceptance": {
+    "status": "blocked",
+    "registration": "Already enabled, CONFIRMED and email-verified; prior authoritative receipt retained.",
+    "missing": "Actual confirmed internal recipient's report deep return/sidecars and management-denial evidence.",
+    "reason": "Available verified session belongs to the existing manager. No authenticated session for the distinct internal acceptance recipient was supplied.",
+    "user_input": "Existing-account sign-in requested asynchronously; no new signup or password/code disclosure requested.",
+    "do_not": [
+      "impersonate the internal recipient",
+      "create or reset a password",
+      "repeat registration",
+      "replace live acceptance with Cognito registration alone"
+    ]
+  },
+  "user_acceptance": "Not supplied; completion instruction is authority to work, not an acceptance receipt.",
+  "documentation": {
+    "dayhoff_commit": "b82c8fd6ad131a1a329e707a34a2a3b317e6a98d",
+    "login_commit": "f8090f7c82d293aec2b76d360ee633b36bee58d7",
+    "publication": "Existing scoped branches only. No extra PR, merge or direct main push."
+  }
+}
