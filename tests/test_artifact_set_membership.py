@@ -37,7 +37,7 @@ def test_create_artifact_set_and_add_member(client) -> None:
     assert artifact_euid in add_payload["artifact_euids"]
 
 
-def test_remove_artifact_set_member(client) -> None:
+def test_remove_artifact_set_member(client, fake_service) -> None:
     artifact_euid = _register_artifact(client, "idem-artifact-set-member-rm")
     create_set = client.post(
         "/api/v1/artifact-sets",
@@ -46,15 +46,21 @@ def test_remove_artifact_set_member(client) -> None:
     )
     artifact_set_euid = create_set.json()["artifact_set_euid"]
 
-    client.post(
+    added = client.post(
         f"/api/v1/artifact-sets/{artifact_set_euid}/members",
         headers={"Authorization": "Bearer token-123", "Idempotency-Key": "idem-set-rm-2"},
         json={"artifact_euid": artifact_euid},
     )
+    assert added.status_code == 200
+    before = fake_service.get_artifact_set(artifact_set_euid)
 
     remove = client.delete(
         f"/api/v1/artifact-sets/{artifact_set_euid}/members/{artifact_euid}",
         headers={"Authorization": "Bearer token-123", "Idempotency-Key": "idem-set-rm-3"},
     )
-    assert remove.status_code == 200
-    assert artifact_euid not in remove.json()["artifact_euids"]
+    assert remove.status_code == 403
+    assert remove.json()["detail"] == (
+        "Deletion is disabled in Dewey for all users, including administrators."
+    )
+    assert fake_service.get_artifact_set(artifact_set_euid) == before
+    assert artifact_euid in before["artifact_euids"]

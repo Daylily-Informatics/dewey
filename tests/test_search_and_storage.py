@@ -69,17 +69,19 @@ def test_search_api_query_and_export(client) -> None:
             "original_filename": "case-report.pdf",
         },
     ).json()
-    client.post(
+    share = client.post(
         "/api/v1/shares",
         headers={"Authorization": "Bearer token-123", "Idempotency-Key": "idem-search-share-1"},
         json={
             "target_kind": "artifact_object",
             "target_euid": artifact["artifact_euid"],
             "purpose": "download",
-            "owner_email": "tester@example.com",
-            "delivery_modes": ["presigned_s3"],
+            "allowed_users": ["tester@example.com"],
+            "delivery_modes": ["gateway"],
         },
     )
+    assert share.status_code == 403
+    assert share.json()["detail"] == "Verified sharing ingress is required"
 
     query = client.post(
         "/api/search/v2/query",
@@ -112,10 +114,9 @@ def test_search_api_query_and_export(client) -> None:
         json={"format": "json", "scopes": ["artifact", "share"], "max_rows": 25},
     )
     assert json_export.status_code == 200
-    assert json_export.json()["row_count"] == 2
+    assert json_export.json()["row_count"] == 1
     assert {item["record_type"] for item in json_export.json()["items"]} == {
         "artifact",
-        "share",
     }
 
     removed_export = client.post(
@@ -131,13 +132,12 @@ def test_search_page_renders_after_login(monkeypatch, client) -> None:
 
     response = client.get("/search")
     assert response.status_code == 200
-    assert "Artifact and Share Search" in response.text
-    assert "search-filter-panel" in response.text
-    assert "search-results-table" in response.text
-    assert "Download Selected" in response.text
-    assert "Quick Presigned Links" in response.text
-    assert "Create Artifact Set" in response.text
-    assert 'data-sort="record"' in response.text
+    assert 'data-section="Library"' in response.text
+    assert 'data-writable="true"' in response.text
+    assert 'id="content" aria-busy="true"' in response.text
+    assert "/static/registry.js" in response.text
+    assert 'href="/sets"' in response.text
+    assert 'href="/add"' in response.text
 
 
 def test_search_export_page_returns_authenticated_json_results(monkeypatch, client) -> None:

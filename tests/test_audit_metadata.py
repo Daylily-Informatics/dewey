@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dewey_service.audit import authenticated_user_email_context
+from dewey_service.registry_access import Principal, principal_context
 from dewey_service.service import DeweyService
 from dewey_service.tapdb_backend import ARTIFACT_TEMPLATE
 from tests.support.service_fakes import _FakeStorageClient, _InMemoryBackend
@@ -21,7 +22,18 @@ def test_authenticated_user_create_stamps_tapdb_object_email(
     service: DeweyService,
     backend: _InMemoryBackend,
 ) -> None:
-    with authenticated_user_email_context("Operator@LSMC.BIO"):
+    with (
+        principal_context(
+            Principal(
+                subject="fixture-human-operator",
+                email="operator@lsmc.bio",
+                roles=("ADMIN",),
+                internal=True,
+                email_verified=True,
+            )
+        ),
+        authenticated_user_email_context("Operator@LSMC.BIO"),
+    ):
         status_code, artifact = service.register_artifact(
             artifact_type="report",
             storage_backend="s3",
@@ -73,7 +85,18 @@ def test_authenticated_user_edit_stamps_updated_email_without_backfilling_creato
         )
 
     before = _artifact_payload(backend, artifact["artifact_euid"])
-    with authenticated_user_email_context("Editor@LSMC.BIO"):
+    with (
+        principal_context(
+            Principal(
+                subject="fixture-human-editor",
+                email="editor@lsmc.bio",
+                roles=("ADMIN",),
+                internal=True,
+                email_verified=True,
+            )
+        ),
+        authenticated_user_email_context("Editor@LSMC.BIO"),
+    ):
         service.verify_artifact_storage(
             artifact_euid=artifact["artifact_euid"],
             idempotency_key="audit-edit-1",

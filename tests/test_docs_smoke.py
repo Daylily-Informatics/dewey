@@ -75,8 +75,8 @@ def test_readme_and_how_tos_reference_current_cli_commands() -> None:
         "dewey db lifecycle",
         "dewey db verify-templates",
         "dewey server start --port 8914",
-        "pytest --collect-only -q",
-        "pytest --cov=dewey_service --cov-report=term-missing:skip-covered",
+        "DEWEY_DEPLOYMENT_CODE=contract python -m pytest tests/test_share_management.py "
+        "tests/test_share_grant_revision_envelope.py -q",
     ]
 
     for command in expected_commands:

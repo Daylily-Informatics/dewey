@@ -92,18 +92,21 @@ def test_server_port_host_and_status_resolution(monkeypatch: pytest.MonkeyPatch)
     assert server_cli._status_bind() == ("unknown", "unknown")
 
 
-def test_optional_ncbi_api_key_file(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_ncbi_api_key_loads_only_explicit_file(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     key_file = tmp_path / "ncbi-key.txt"
 
     monkeypatch.setattr(server_cli, "NCBI_API_KEY_FILE", key_file)
     monkeypatch.delenv("NCBI_API_KEY", raising=False)
+    monkeypatch.delenv("DEWEY_NCBI_API_KEY_FILE", raising=False)
 
     server_cli._maybe_set_ncbi_api_key()
     assert "NCBI_API_KEY" not in os.environ
 
     key_file.write_text("file-key\n", encoding="utf-8")
     server_cli._maybe_set_ncbi_api_key()
-    assert os.environ["NCBI_API_KEY"] == "file-key"
+    assert "NCBI_API_KEY" not in os.environ
 
     monkeypatch.setenv("NCBI_API_KEY", "already-set")
     key_file.write_text("replacement-key\n", encoding="utf-8")
@@ -260,6 +263,7 @@ def test_start_server_branches(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) 
     monkeypatch.setattr(server_cli, "_runtime_meta_file", lambda: tmp_path / "server-meta.json")
     monkeypatch.setattr(server_cli, "NCBI_API_KEY_FILE", tmp_path / "ncbi-key.txt")
     monkeypatch.delenv("NCBI_API_KEY", raising=False)
+    monkeypatch.delenv("DEWEY_NCBI_API_KEY_FILE", raising=False)
 
     cert = tmp_path / "cert.pem"
     key = tmp_path / "key.pem"
@@ -323,6 +327,7 @@ def test_start_server_branches(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) 
         return RunningProc()
 
     (tmp_path / "ncbi-key.txt").write_text("bg-key\n", encoding="utf-8")
+    monkeypatch.setenv("DEWEY_NCBI_API_KEY_FILE", str(tmp_path / "ncbi-key.txt"))
     monkeypatch.setattr(server_cli.subprocess, "Popen", fake_popen)
     monkeypatch.setattr(server_cli, "write_pid", lambda path, pid: writes.append(pid))
     server_cli._start_server(

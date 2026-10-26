@@ -14,9 +14,20 @@ from dewey_service.app import create_app
 from dewey_service.integrations import tapdb_ui
 
 
-def test_real_dag_v2_manifest_requires_auth_and_advertises_exact_paths(client):
-    assert client.get("/api/dag/manifest").status_code == 401
-    response = client.get("/api/dag/manifest", headers={"Authorization": "Bearer token-123"})
+def test_real_dag_v2_manifest_requires_scoped_auth_and_advertises_exact_paths(
+    client, test_settings
+):
+    denied = client.get("/api/dag/manifest")
+    assert denied.status_code == 403
+    assert denied.json() == {"detail": "Dewey admin access required"}
+    assert (
+        client.get("/api/dag/manifest", headers={"Authorization": "Bearer token-123"}).status_code
+        == 403
+    )
+    token = "dewey_dag_native_reader_fixture"
+    test_settings.dag_read_token_sha256 = hashlib.sha256(token.encode()).hexdigest()
+    test_settings.dag_read_actor = "native-dag-reader-fixture"
+    response = client.get("/api/dag/manifest", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     payload = response.json()
     assert payload["contract"] == "dag:v2"
@@ -28,14 +39,15 @@ def test_real_dag_v2_manifest_requires_auth_and_advertises_exact_paths(client):
     }
     assert payload["features"]["outbound_fetch"] is False
     for path in ("/api/dag/data", "/api/dag/search", "/api/dag/external"):
-        assert client.get(path, headers={"Authorization": "Bearer token-123"}).status_code == 404
+        assert client.get(path, headers={"Authorization": f"Bearer {token}"}).status_code == 403
 
 
 def test_actual_embedded_gui_rejects_anonymous_html_and_json(client):
     response = client.get("/tapdb/graph", follow_redirects=False)
-    assert response.status_code == 302
+    assert response.status_code == 303
     assert "/login" in response.headers["location"]
-    assert client.get("/tapdb/api/graph").status_code == 401
+    response = client.get("/tapdb/api/graph", follow_redirects=False)
+    assert response.status_code == 303 and response.headers["location"] == "/login"
 
 
 def test_observability_uses_successful_mount_manifest(client):
@@ -114,7 +126,7 @@ def test_dag_read_credential_is_limited_to_native_get_routes(test_settings):
     assert error.value.status_code == 403
 
 
-def test_host_bridge_preserves_authenticated_role(monkeypatch, test_settings):
+def test_host_bridge_keeps_admin_identity_read_only(monkeypatch, test_settings):
     monkeypatch.setattr(
         tapdb_ui,
         "require_ui_session",
@@ -122,12 +134,19 @@ def test_host_bridge_preserves_authenticated_role(monkeypatch, test_settings):
             "sub": "test-subject",
             "email": "operator@example.test",
             "name": "Test Operator",
+            "roles": ["ADMIN"],
         },
     )
-    monkeypatch.setattr(tapdb_ui, "profile_has_role", lambda profile, role: True)
-    user = tapdb_ui.build_tapdb_host_bridge(test_settings).resolve_user(None)
+    app = FastAPI()
+    app.state.settings = test_settings
+    request = Request(
+        {"type": "http", "method": "GET", "path": "/tapdb/graph", "headers": [], "app": app}
+    )
+    user = tapdb_ui.build_tapdb_host_bridge(test_settings).resolve_user(request)
     assert user["uid"] == "test-subject"
-    assert user["role"] == "admin"
+    assert user["role"] == "user"
+    assert user["actor_subject"] == "test-subject"
+    assert user["actor_issuer"] == "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_fixture"
 
 
 def test_gui_only_accepts_complete_authenticated_identity(monkeypatch):
@@ -139,18 +158,21 @@ def test_gui_only_accepts_complete_authenticated_identity(monkeypatch):
 
 
 def test_dag_v2_data_routes_reject_anonymous_requests(client):
-    assert client.get("/api/dag/v2/data").status_code == 401
-    assert client.get("/api/dag/v2/search").status_code == 401
-    assert client.get("/api/dag/v2/object/persisted-object-test").status_code == 401
+    assert client.get("/api/dag/v2/data").status_code == 403
+    assert client.get("/api/dag/v2/search").status_code == 403
+    assert client.get("/api/dag/v2/object/persisted-object-test").status_code == 403
 
 
 def test_graph_uses_native_gui_and_preferences_require_browser_session(client, monkeypatch):
-    from tests.test_observability_contract import _login_operator
+    from tests.test_ui_session_auth import _login_user
 
-    assert client.get("/graph", follow_redirects=False).status_code == 401
+    anonymous = client.get("/graph", follow_redirects=False)
+    assert anonymous.status_code == 303 and anonymous.headers["location"] == "/login"
     assert client.get("/api/v1/me/preferences").status_code == 401
     assert client.put("/api/v1/me/preferences", json={}).status_code == 401
-    _login_operator(monkeypatch, client)
+    _login_user(monkeypatch, client)
+    assert client.get("/graph", follow_redirects=False).status_code == 403
+    _login_user(monkeypatch, client, groups=["platform-admin"])
     graph = client.get("/graph")
     assert graph.status_code == 200
     assert 'src="/tapdb/graph"' in graph.text

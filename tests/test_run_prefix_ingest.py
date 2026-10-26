@@ -63,14 +63,14 @@ def test_service_import_run_prefix_creates_hierarchy_and_freeze_behavior(
     assert status_code == 201
     run_artifact = payload["run_artifact"]
     assert run_artifact["storage_kind"] == "prefix"
-    assert run_artifact["node_kind"] == "run_folder"
+    assert run_artifact["node_kind"] == "folder"
     assert run_artifact["metadata"]["run_id"] == "RUN504352"
     assert run_artifact["metadata"]["owner_email"] == "johnm@lsmc.com"
 
     run_children = service.list_artifact_children(artifact_euid=run_artifact["artifact_euid"])
     assert {item["original_filename"] for item in run_children} == {sample_a, sample_b}
     sample_a_node = next(item for item in run_children if item["original_filename"] == sample_a)
-    assert sample_a_node["node_kind"] == "sample_folder"
+    assert sample_a_node["node_kind"] == "folder"
     assert sample_a_node["is_terminal"] is False
     assert sample_a_node["metadata"]["seq_index"] == "CAACGATATGTGAT"
 
@@ -94,20 +94,10 @@ def test_service_import_run_prefix_creates_hierarchy_and_freeze_behavior(
             idempotency_key="idem-run-prefix-lock",
         )
     with pytest.raises(ValueError, match="object-backed artifact"):
-        service.create_share(
+        service._expand_share_targets(
+            service.backend,
             target_kind="artifact_object",
             target_euid=run_artifact["artifact_euid"],
-            targets=[],
-            name=None,
-            purpose="download",
-            owner_email="johnm@lsmc.com",
-            allowed_users=[],
-            allowed_domains=[],
-            allowed_groups=[],
-            delivery_modes=["presigned_s3"],
-            expires_at=None,
-            ttl_seconds=None,
-            idempotency_key="idem-run-prefix-share",
         )
 
     freeze_code, freeze_payload = service.import_run_prefix(
@@ -221,7 +211,15 @@ def test_run_prefix_ui_flow_renders_hierarchy_detail(monkeypatch, client, fake_s
     )
     detail = client.get(f"/artifacts/euid/{run_artifact['artifact_euid']}")
     assert detail.status_code == 200
-    assert "Hierarchy" in detail.text
-    assert "Open In Console" in detail.text
-    assert "Prefix nodes use prefix or mixed-set shares from the Shares page." in detail.text
+    assert 'data-section="Record"' in detail.text
+    assert f'data-euid="{run_artifact["artifact_euid"]}"' in detail.text
+    assert "/static/registry.js" in detail.text
+    assert 'href="/shares"' in detail.text
     assert f'action="/artifacts/euid/{run_artifact["artifact_euid"]}/download"' not in detail.text
+    children = client.get(
+        f"/api/v1/artifacts/{run_artifact['artifact_euid']}/children",
+        headers={"Authorization": "Bearer token-123"},
+    )
+    assert children.status_code == 200
+    assert children.json()["total"] == 2
+    assert all(item["storage_kind"] == "prefix" for item in children.json()["items"])

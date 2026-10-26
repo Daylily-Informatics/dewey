@@ -5,7 +5,7 @@ from types import SimpleNamespace
 
 import pytest
 from daylily_tapdb.external_references import ExternalIdentifierTarget, TapDBObjectTarget
-from daylily_tapdb.services.graph_payloads import DagV2GraphContractError, build_graph_v2_payload
+from daylily_tapdb.services.graph_payloads import build_graph_v2_payload
 
 from dewey_service.integrations import tapdb_external_references as refs
 from dewey_service.services.base import DeweyConflictError
@@ -75,6 +75,8 @@ def instance(uid, kind, **changes):
         subtype="generic",
         version="1.0",
         is_deleted=False,
+        record_revision=1,
+        bstatus="active",
         domain_code="Z",
         issuer_app_code="dewey",
         tenant_id=None,
@@ -235,8 +237,12 @@ def test_adapter_invokes_only_native_attach_with_stable_spec(monkeypatch):
         def __init__(self, passed_session):
             assert passed_session is session
 
-        def attach(self, passed_source, spec):
-            calls.append((passed_source, spec))
+        def attach(
+            self, passed_source, spec, *, expected_source_revision, expected_lineage_revision
+        ):
+            assert expected_source_revision == passed_source.record_revision
+            assert expected_lineage_revision is None
+            calls.append((passed_source, spec, expected_source_revision, expected_lineage_revision))
             return SimpleNamespace(status="existing")
 
     monkeypatch.setattr(refs, "ExternalReferenceService", Native)
@@ -348,10 +354,14 @@ def test_stored_invalid_envelopes_are_rejected_without_fallback(payload):
 def test_native_dag_accepts_retained_properties_and_flat_business_values():
     obj = instance(1, ("data", "artifact_set"))
     obj.json_addl = {"label": "retained business label"}
-    with pytest.raises(DagV2GraphContractError, match="properties"):
-        build_graph_v2_payload(
-            obj, record_type="instance", service_id="dewey", depth=0, max_nodes=1
-        )
+    # Dewey enforces its own persisted envelope. Native DAG rendering safely
+    # projects absent public properties without importing flat app metadata.
+    with pytest.raises(ValueError, match="properties"):
+        validate_instance_envelope(obj.json_addl)
+    graph = build_graph_v2_payload(
+        obj, record_type="instance", service_id="dewey", depth=0, max_nodes=1
+    )
+    assert graph["elements"]["nodes"][0]["data"]["properties"] == {}
     obj.json_addl = {"label": "retained business label", "properties": {}}
     validate_instance_envelope(obj.json_addl)
     graph = build_graph_v2_payload(

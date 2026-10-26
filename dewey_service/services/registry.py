@@ -858,7 +858,9 @@ class RegistryServiceMixin:
         projection = data.get("projection", "full")
         if projection not in ("full", "summary"):
             raise ValueError("Registry projection must be full or summary")
-        scopes = data.get("scopes") or ["artifact", "artifact_set"]
+        scopes = data.get("scopes")
+        if scopes is None:
+            scopes = ["artifact", "artifact_set"]
         self._validate_property_filters(data.get("property_filters"))
         page = max(1, int(data.get("page") or 1))
         page_size = max(1, min(int(data.get("page_size") or 25), self.search_export_max_rows))

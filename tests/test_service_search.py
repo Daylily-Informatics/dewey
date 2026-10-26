@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import pytest
+from fastapi import HTTPException
 
 from dewey_service.literature import ViewerContext
+from dewey_service.registry_access import Principal, principal_context
 from dewey_service.service import DeweyService
 from tests.support.service_fakes import _FakeStorageClient
 
 
-def test_artifact_set_search_scope_and_share_transports(
+def test_artifact_set_search_scope_and_retired_share_transport_rejection(
     service: DeweyService,
     storage: _FakeStorageClient,
 ) -> None:
@@ -85,31 +87,14 @@ def test_artifact_set_search_scope_and_share_transports(
     assert search["total"] == 1
     assert search["items"][0]["artifact_set_euid"] == artifact_set["artifact_set_euid"]
 
-    _, presigned = service.create_share(
-        target_kind="artifact_set",
-        target_euid=artifact_set["artifact_set_euid"],
-        targets=[],
-        name="delivery share",
-        purpose="delivery",
-        owner_email="release@example.com",
-        allowed_users=[],
-        allowed_domains=[],
-        allowed_groups=[],
-        delivery_modes=["presigned_s3_manifest"],
-        expires_at=None,
-        ttl_seconds=300,
-        idempotency_key="idem-set-share-presigned",
-    )
-    assert presigned["delivery_modes"] == ["presigned_s3_manifest"]
-    assert presigned["member_count"] == 2
-    package = service.create_share_access_package(
-        presigned["share_euid"],
-        delivery_mode="presigned_s3_manifest",
-        actor_email="release@example.com",
-        actor_groups=[],
-    )
-    assert len(package["manifest"]) == 2
-    assert all(item["status"] == "active" for item in package["manifest"])
+    before = len(service.backend.instances.get("access/share/generic/1.0/", []))
+    with pytest.raises(HTTPException) as removed:
+        service.create_share_access_package(
+            "fixture-retired-share", delivery_mode="presigned_s3_manifest"
+        )
+    assert removed.value.status_code == 410
+    assert "authenticated /fetch" in removed.value.detail
+    assert len(service.backend.instances.get("access/share/generic/1.0/", [])) == before
 
 
 def test_upload_complete_verify_lock_and_search(
@@ -162,11 +147,13 @@ def test_upload_complete_verify_lock_and_search(
 
     query = service.query_search_v2(
         {
-            "q": "CASE-1",
             "scopes": ["artifact"],
             "page": 1,
             "page_size": 25,
-            "property_filters": [{"path": "import_mode", "op": "eq", "value": "upload"}],
+            "property_filters": [
+                {"path": "import_mode", "op": "eq", "value": "upload"},
+                {"path": "metadata.case_id", "op": "eq", "value": "CASE-1"},
+            ],
         }
     )
     assert query["total"] == 1
@@ -201,10 +188,29 @@ def test_literature_query_search_v2_enrichment(service: DeweyService) -> None:
         idempotency_key="lit-search-1",
     )
 
-    result = service.query_search_v2(
-        {"q": "789012", "scopes": ["artifact"], "page": 1, "page_size": 25},
-        viewer_context=viewer,
-    )
+    # The verified principal owns visibility; a caller-supplied ViewerContext
+    # cannot impersonate another user's save summary.
+    with principal_context(
+        Principal(
+            subject=viewer.subject,
+            email=viewer.email,
+            groups=viewer.groups,
+            roles=("ADMIN",),
+            internal=True,
+            email_verified=True,
+        )
+    ):
+        result = service.query_search_v2(
+            {
+                "scopes": ["artifact"],
+                "page": 1,
+                "page_size": 25,
+                "property_filters": [{"path": "pmid", "op": "eq", "value": "789012"}],
+            },
+            viewer_context=ViewerContext(
+                subject="different-viewer", email="different@example.test", groups=()
+            ),
+        )
 
     assert result["total"] == 1
     item = result["items"][0]
@@ -235,3 +241,17 @@ def test_literature_query_search_v2_enrichment(service: DeweyService) -> None:
 def test_invalid_search_has_no_match_all_fallback_on_empty_database(service, query):
     with pytest.raises(ValueError):
         service.query_search_v2(query)
+
+
+def test_search_wrapper_preserves_text_query_and_export_bound(service, monkeypatch):
+    calls = []
+    response = {"items": [{"euid": "fixture-visible-result"}], "total": 2}
+    monkeypatch.setattr(
+        service, "search_registry", lambda request: calls.append(dict(request)) or response
+    )
+    query = {"q": "CASE-1", "scopes": ["artifact"], "page": 4, "max_rows": 1}
+    assert service.query_search_v2(query) is response
+    rows, timing, truncated = service.collect_search_export_rows(query)
+    assert rows == response["items"] and truncated is True and timing >= 0
+    assert calls == [query, {**query, "page": 1, "page_size": 1}]
+    assert query["page"] == 4

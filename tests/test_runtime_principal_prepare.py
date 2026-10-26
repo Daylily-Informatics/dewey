@@ -214,6 +214,24 @@ def test_fresh_runtime_ddl_proof_requires_denial_after_session_setup(
     monkeypatch.setattr(native_config, "get_db_config", lambda **kwargs: cfg)
     monkeypatch.setattr(capsule, "validate_runtime", lambda *args: None)
     monkeypatch.setattr(capsule.importlib.metadata, "version", lambda name: "9.0.0")
+    # This archived operator capsule is explicitly pinned to Dewey 9.0.0 and
+    # its eleven templates; do not substitute the current release's boot set.
+    monkeypatch.setattr(
+        "dewey_service.tapdb_backend.BOOT_TEMPLATE_DEFINITIONS",
+        (
+            "data/artifact/generic/1.0/",
+            "data/artifact_set/generic/1.0/",
+            "access/share/generic/1.0/",
+            "access/share_root/generic/1.0/",
+            "integration/external_object/generic/1.0/",
+            "integration/external_object_relation/generic/1.0/",
+            "access/literature_save/generic/1.0/",
+            "operational/anomaly/generic/1.0/",
+            "system/idempotency_request/generic/1.0/",
+            "system/registration_receipt/generic/1.0/",
+            "system/outbox_event/generic/1.0/",
+        ),
+    )
     monkeypatch.setattr(
         daylily_tapdb,
         "TemplateManager",

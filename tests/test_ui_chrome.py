@@ -11,6 +11,7 @@ from dewey_service.settings import (
     Settings,
     _stable_region_color_hex,
 )
+from tests.conftest import explicit_application_settings
 
 
 @pytest.fixture(autouse=True)
@@ -20,6 +21,7 @@ def _explicit_config_file(explicit_config_file) -> None:
 
 def _settings_with_deployment() -> Settings:
     return Settings(
+        **explicit_application_settings(),
         api_bearer_token="token-123",
         session_secret_key="session-secret",
         cognito_domain="dewey-auth.example.com",
@@ -111,7 +113,7 @@ def test_create_app_accepts_shell_aws_profile_when_config_blank(monkeypatch) -> 
     assert captured == {"profile": "shell-profile", "region": "us-east-1"}
 
 
-def test_ui_page_renders_chrome_after_login(monkeypatch, fake_service) -> None:
+def test_ui_page_renders_registry_shell_after_login(monkeypatch, fake_service) -> None:
     monkeypatch.setattr(
         "dewey_service.app.resolve_package_version",
         lambda: "9.9.9",
@@ -154,28 +156,21 @@ def test_ui_page_renders_chrome_after_login(monkeypatch, fake_service) -> None:
         admin = client.get("/admin")
 
     assert ui.status_code == 200
-    assert "510X2" in ui.text
-    assert "#124e78" in ui.text
-    assert _stable_region_color_hex("us-east-1") in ui.text
-    assert "/static/favicon.svg" in ui.text
+    assert 'data-section="Library"' in ui.text
+    assert 'data-admin="true"' in ui.text
+    assert 'data-writable="true"' in ui.text
+    assert "/static/registry.js" in ui.text
+    assert "/static/sharing.js" in ui.text
     assert "/literature" in ui.text
-    assert "/artifacts/dag" in ui.text
-    assert "/search" in ui.text
-    assert "/ui/anomalies" in ui.text
+    assert "/storage" in ui.text
+    assert "/sets" in ui.text
+    assert "/shares" in ui.text
     assert "/admin" in ui.text
-    assert "Quick Register" in ui.text
-    assert "Comprehensive Artifact Registry" in ui.text
-    assert "dashboard_source_url" in ui.text
-    assert "dashboard_source_s3_uri" in ui.text
-    assert "Canonical file operations with registry discipline." not in ui.text
+    assert 'href="/add"' in ui.text
+    assert "ARTIFACT LIBRARY" in ui.text
     assert admin.status_code == 200
-    assert "Dewey Admin" in admin.text
-    assert "Operator Anomalies" in admin.text
-    assert "Open anomaly view" in admin.text
-    assert "Managed Artifact Storage" in admin.text
-    assert "Runtime Config" in admin.text
-    assert "ui.show_environment_chrome" in admin.text
-    assert "Version" in admin.text
+    assert 'data-section="Admin"' in admin.text
+    assert 'data-admin="true"' in admin.text
     assert "9.9.9" in admin.text
 
 

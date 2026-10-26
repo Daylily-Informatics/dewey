@@ -16,8 +16,31 @@ from dewey_service.defaults import build_default_config_template
 from dewey_service.settings import Settings
 
 
+def explicit_application_settings() -> dict[str, Any]:
+    """Synthetic, complete application boundaries; never inherited runtime config."""
+    return {
+        "share_application_origin": "https://localhost",
+        "share_content_host_suffix": "content.example.test",
+        "share_session_generation": "application-test-generation",
+        "share_trusted_proxy_peer": "127.0.0.1",
+        "share_ingress_assertion": "private-application-fixture-assertion",
+        "share_public_ingress_assertion": "public-application-fixture-assertion",
+        "cognito_region": "us-east-1",
+        "cognito_user_pool_id": "us-east-1_fixture",
+        "registry_service_principals": {
+            hashlib.sha256(b"token-123").hexdigest(): {
+                "subject": "application-test-service",
+                "roles": ["READ_WRITE"],
+            }
+        },
+    }
+
+
 class FakeDeweyService:
     def __init__(self) -> None:
+        from tests.support.service_fakes import _InMemoryBackend
+
+        self.backend = _InMemoryBackend()
         self._artifact_seq = 1
         self._artifact_set_seq = 1
         self._share_seq = 1
@@ -553,8 +576,10 @@ class FakeDeweyService:
         root_uri: str,
         limit: int = 200,
         continuation_token: str | None = None,
+        refresh: bool = False,
     ):
         _ = continuation_token
+        _ = refresh
         normalized = str(root_uri or "").strip()
         if not normalized.startswith("s3://"):
             raise ValueError("root_uri must use s3:// for S3 browse flows")
@@ -1136,6 +1161,13 @@ class FakeDeweyService:
         ttl_seconds: int | None = None,
         idempotency_key: str,
     ):
+        from dewey_service.share_context import require_share_context
+
+        require_share_context()
+        if ttl_seconds is not None:
+            raise ValueError("Raw signed URL lifetimes are no longer supported")
+        if delivery_modes is not None and delivery_modes != ["gateway"]:
+            raise ValueError("Only authenticated gateway delivery is supported")
         payload = {
             "target_kind": target_kind,
             "target_euid": target_euid,
@@ -1146,7 +1178,7 @@ class FakeDeweyService:
             "allowed_users": list(allowed_users or []),
             "allowed_domains": list(allowed_domains or []),
             "allowed_groups": list(allowed_groups or []),
-            "delivery_modes": list(delivery_modes or ["presigned_s3_manifest"]),
+            "delivery_modes": list(delivery_modes or ["gateway"]),
             "expires_at": expires_at,
             "ttl_seconds": ttl_seconds,
         }
@@ -1177,7 +1209,7 @@ class FakeDeweyService:
             "allowed_users": list(allowed_users or []),
             "allowed_domains": list(allowed_domains or []),
             "allowed_groups": list(allowed_groups or []),
-            "delivery_modes": list(delivery_modes or ["presigned_s3_manifest"]),
+            "delivery_modes": list(delivery_modes or ["gateway"]),
             "default_signed_ttl_seconds": ttl_seconds or 900,
             "member_count": 1,
             "access_count": 0,
@@ -1229,32 +1261,17 @@ class FakeDeweyService:
         user_agent: str | None = None,
         signed_ttl_seconds: int | None = None,
     ):
-        _ = actor_groups
-        _ = ip
-        _ = user_agent
-        _ = signed_ttl_seconds
-        share = self.get_share(share_euid)
-        if share.get("status") != "active":
-            raise ValueError("share is not active")
-        share["access_count"] = int(share.get("access_count") or 0) + 1
-        share["last_accessed_at"] = "2026-03-10T01:05:00Z"
-        share["last_accessed_by"] = actor_email
-        self.shares[share_euid] = share
-        signed_url = f"https://downloads.example.com/{share_euid}"
-        return {
-            "share_euid": share_euid,
-            "delivery_mode": delivery_mode,
-            "expires_in": signed_ttl_seconds or 900,
-            "signed_url": signed_url if delivery_mode == "presigned_s3" else None,
-            "manifest": [
-                {
-                    "target_kind": share.get("target_kind"),
-                    "target_euid": share.get("target_euid"),
-                    "status": "active",
-                    "signed_url": signed_url,
-                }
-            ],
-        }
+        from fastapi import HTTPException
+
+        from dewey_service.services.sharing import SharingServiceMixin
+        from dewey_service.share_context import require_share_context
+
+        if delivery_mode != "gateway":
+            raise HTTPException(410, "Raw S3 delivery was removed; use authenticated /fetch URLs")
+        require_share_context()
+        return SharingServiceMixin.create_share_access_package(
+            self, share_euid, delivery_mode=delivery_mode
+        )
 
     def list_shares(
         self,
@@ -1844,7 +1861,11 @@ def explicit_tapdb_test_config(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) 
 @pytest.fixture(autouse=True)
 def explicit_config_file(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
     config_path = tmp_path / "dewey-config-test.yaml"
-    config_path.write_bytes(build_default_config_template(session_secret_key="test-session-secret"))
+    config = yaml.safe_load(build_default_config_template(session_secret_key="test-session-secret"))
+    for key, value in explicit_application_settings().items():
+        if key.startswith("share_"):
+            config["share"][key.removeprefix("share_")] = value
+    config_path.write_text(yaml.safe_dump(config))
     monkeypatch.setenv("DEWEY_CONFIG", str(config_path))
     return config_path
 
@@ -1853,6 +1874,7 @@ def explicit_config_file(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Pat
 def test_settings(explicit_config_file: Path) -> Settings:
     _ = explicit_config_file
     return Settings(
+        **explicit_application_settings(),
         api_bearer_token="token-123",
         session_secret_key="session-secret",
         cognito_domain="dewey-auth.example.com",
@@ -1871,7 +1893,7 @@ def fake_service() -> FakeDeweyService:
 @pytest.fixture
 def client(test_settings: Settings, fake_service: FakeDeweyService) -> TestClient:
     app = create_app(settings=test_settings, service=fake_service)
-    with TestClient(app, base_url="https://localhost:8914") as tc:
+    with TestClient(app, base_url=test_settings.share_application_origin) as tc:
         yield tc
 
 

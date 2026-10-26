@@ -21,7 +21,7 @@ from dewey_service.labcore_owner_config import (
 from dewey_service.labcore_owner_contracts import bind_request_hash
 from dewey_service.service import DeweyConflictError, DeweyNotFoundError
 from dewey_service.settings import Settings
-from tests.conftest import FakeDeweyService
+from tests.conftest import FakeDeweyService, explicit_application_settings
 
 GOLDEN = (
     Path(__file__).resolve().parents[1]
@@ -47,6 +47,7 @@ class ReceiptService(FakeDeweyService):
 
 def _settings() -> Settings:
     return Settings(
+        **explicit_application_settings(),
         api_bearer_token="token-123",
         session_secret_key="session-secret",
         cognito_domain="dewey-auth.example.com",

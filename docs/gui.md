@@ -18,7 +18,7 @@ A share manager is the creator/owner or an authorized administrator. A recipient
 | Add | `/add`, `/artifacts` | Register an object, prefix, URL reference or set; use supported upload controls |
 | S3 Browser | `/storage` | Browse configured locations and register selected storage references |
 
-Prefix registration records a prefix identity without enumerating every child. Metadata visibility does not itself grant download permission. Archiving a registration, removing a member or revoking a share does not delete S3 bytes. The earlier `/artifacts/euid/<euid>` entry opens the same Record page. Retained dashboard/intake screenshots under `docs/assets/` describe the older interface, not the current Library/Add layout.
+Prefix registration records a prefix identity without enumerating every child. Metadata visibility does not itself grant download permission. Archiving a registration, removing a member or revoking a share does not delete S3 bytes. The earlier `/artifacts/euid/<euid>` entry opens the same Record page. Retained screenshots describe the older interface: [dashboard](assets/dashboard.png), [artifact intake](assets/artifacts-workflow.png), [literature](assets/literature-search-save.png), and [search](assets/unified-search-results.png). They are historical references; the current Library/Add layout is described here.
 
 ## Create And Edit A Share
 

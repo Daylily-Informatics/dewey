@@ -73,7 +73,7 @@ def test_upload_session_complete_route_round_trip(client) -> None:
     assert payload["import_mode"] == "upload"
 
 
-def test_share_lookup_and_external_object_relation_routes(client) -> None:
+def test_share_lookup_and_external_object_relation_routes(client, fake_service) -> None:
     artifact = client.post(
         "/api/v1/artifacts",
         headers={"Authorization": "Bearer token-123", "Idempotency-Key": "idem-gap-share-art"},
@@ -92,26 +92,27 @@ def test_share_lookup_and_external_object_relation_routes(client) -> None:
             "target_kind": "artifact_object",
             "target_euid": artifact["artifact_euid"],
             "purpose": "download",
-            "owner_email": "tester@example.com",
-            "delivery_modes": ["presigned_s3"],
+            "allowed_users": ["tester@example.com"],
+            "delivery_modes": ["gateway"],
         },
     )
-    assert share.status_code == 200
-    share_euid = share.json()["share_euid"]
+    assert share.status_code == 403
+    assert share.json()["detail"] == "Verified sharing ingress is required"
+    assert fake_service.shares == {}
 
     fetched_share = client.get(
-        f"/api/v1/shares/{share_euid}",
+        "/api/v1/shares/share-fixture",
         headers={"Authorization": "Bearer token-123"},
     )
-    assert fetched_share.status_code == 200
-    assert fetched_share.json()["share_euid"] == share_euid
+    assert fetched_share.status_code == 403
+    assert fetched_share.json()["detail"] == "Verified sharing ingress is required"
 
     listed_shares = client.get(
         f"/api/v1/artifacts/{artifact['artifact_euid']}/shares",
         headers={"Authorization": "Bearer token-123"},
     )
     assert listed_shares.status_code == 200
-    assert listed_shares.json()["total"] == 1
+    assert listed_shares.json()["total"] == 0
 
     external_object = client.post(
         "/api/v1/external-objects",
@@ -124,6 +125,12 @@ def test_share_lookup_and_external_object_relation_routes(client) -> None:
             "external_object_type": "document",
             "external_object_id": "DOC-GAP-1",
             "external_uri": "https://atlas.example/documents/DOC-GAP-1",
+            "reference_target": {
+                "kind": "opaque",
+                "namespace": "fixture-documents",
+                "identifier_kind": "document",
+                "scope": "public_global",
+            },
         },
     )
     assert external_object.status_code == 200

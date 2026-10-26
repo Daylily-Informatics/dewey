@@ -1,0 +1,255 @@
+{
+  "recorded_at": "2026-10-26T15:59:54.206Z",
+  "repository": "Daylily-Informatics/dewey",
+  "pull_request": 64,
+  "source_parent": "27122e7db6d189010957457d1bb8319838357c8a",
+  "status": "Focused repair selection complete; fresh full PR CI, coverage gates and package build pending",
+  "environment": {
+    "python": "3.12",
+    "tapdb": "11.0.9",
+    "pytest": "9.0.3",
+    "ruff": "0.15.14",
+    "deployment_code": "contract",
+    "runtime": "existing .venv/bin/python"
+  },
+  "unique_affected_cases": 383,
+  "interpretation": "Each case has passing evidence from the original affected run or failure-only rerun; this is not a single integrated full-suite pass",
+  "groups": [
+    {
+      "owner": "Lead",
+      "unique_cases": 37,
+      "selection": [
+        "tests/test_cli_server_db_unit.py",
+        "tests/test_packaging_metadata.py",
+        "tests/test_literature_helpers_unit.py",
+        "tests/test_docs_smoke.py"
+      ],
+      "attempts": [
+        {
+          "receipt": "lead-contract-updates.xml",
+          "selected": 37,
+          "passed": 37,
+          "failed": 0
+        }
+      ]
+    },
+    {
+      "owner": "A",
+      "unique_cases": 99,
+      "selection": [
+        "tests/test_tapdb_backend_unit.py",
+        "tests/test_tapdb_external_adoption.py",
+        "tests/test_runtime_principal_prepare.py",
+        "tests/test_rbac_unit.py",
+        "tests/test_service_literature.py",
+        "tests/test_service_search.py"
+      ],
+      "attempts": [
+        {
+          "receipt": "worker-a-affected-01.log",
+          "selected": 99,
+          "passed": 97,
+          "failed": 2
+        },
+        {
+          "receipt": "worker-a-affected-02.log",
+          "selected": 2,
+          "passed": 2,
+          "failed": 0
+        }
+      ]
+    },
+    {
+      "owner": "B UI",
+      "unique_cases": 122,
+      "selection": [
+        "tests/test_ui_chrome.py",
+        "tests/test_ui_session_auth.py",
+        "tests/test_labcore_owner_api.py",
+        "tests/test_report_preview_attribution.py",
+        "tests/test_tapdb_ui_integration.py",
+        "tests/test_route_surface_coverage.py"
+      ],
+      "attempts": [
+        {
+          "receipt": "worker-b-affected-05.xml",
+          "selected": 122,
+          "passed": 115,
+          "failed": 7
+        },
+        {
+          "receipt": "worker-b-denial-corrections-06.xml",
+          "selected": 7,
+          "passed": 6,
+          "failed": 1
+        },
+        {
+          "receipt": "worker-b-retired-response-07.xml",
+          "selected": 1,
+          "passed": 1,
+          "failed": 0
+        }
+      ]
+    },
+    {
+      "owner": "C",
+      "unique_cases": 63,
+      "selection": [
+        "tests/test_qeo_artifact_set_registration.py",
+        "tests/test_qeo_multiqc_registration.py",
+        "tests/test_qeo_package_resolver.py",
+        "tests/test_qeo_registration_events.py",
+        "tests/test_qeo_registration_security.py",
+        "tests/test_audit_metadata.py",
+        "tests/test_service_artifacts.py",
+        "tests/test_service_relationships.py",
+        "tests/test_run_prefix_ingest.py",
+        "tests/test_sequencer_run_registration.py"
+      ],
+      "attempts": [
+        {
+          "receipt": "worker-c-affected-01.log",
+          "selected": 63,
+          "passed": 21,
+          "failed": 42
+        },
+        {
+          "receipt": "worker-c-failures-02.log",
+          "selected": 42,
+          "passed": 34,
+          "failed": 8
+        },
+        {
+          "receipt": "worker-c-failures-03.log",
+          "selected": 8,
+          "passed": 7,
+          "failed": 1
+        },
+        {
+          "receipt": "worker-c-failure-04.log",
+          "selected": 1,
+          "passed": 1,
+          "failed": 0
+        }
+      ]
+    },
+    {
+      "owner": "B setup-blocked",
+      "unique_cases": 62,
+      "selection": [
+        "tests/test_anomaly_routes.py::test_anomaly_api_requires_bearer_token",
+        "tests/test_anomaly_routes.py::test_anomaly_ui_requires_login",
+        "tests/test_anomaly_routes.py::test_anomaly_api_and_ui_view_round_trip",
+        "tests/test_anomaly_routes.py::test_admin_page_links_to_anomaly_view",
+        "tests/test_anomaly_routes.py::test_admin_page_updates_managed_artifact_bucket",
+        "tests/test_artifact_registration.py::test_register_artifact",
+        "tests/test_artifact_registration.py::test_import_artifact_from_s3_uri",
+        "tests/test_artifact_registration.py::test_register_artifact_prefix_api",
+        "tests/test_artifact_registration.py::test_upload_session_round_trip",
+        "tests/test_artifact_resolution.py::test_resolve_artifact_and_set",
+        "tests/test_artifact_resolution.py::test_get_artifact_and_artifact_set_routes_return_registered_state",
+        "tests/test_artifact_resolution.py::test_list_artifact_sets_route_filters_by_type",
+        "tests/test_artifact_set_membership.py::test_create_artifact_set_and_add_member",
+        "tests/test_artifact_set_membership.py::test_remove_artifact_set_member",
+        "tests/test_artifacts_ui.py::test_artifacts_page_requires_login_and_serves_bulk_template",
+        "tests/test_artifacts_ui.py::test_artifacts_prefix_registration_form_creates_one_prefix_artifact",
+        "tests/test_artifacts_ui.py::test_artifacts_register_search_download_and_artifact_share",
+        "tests/test_artifacts_ui.py::test_artifact_dag_page_and_storage_browser_routes",
+        "tests/test_artifacts_ui.py::test_artifact_detail_page_and_direct_download_redirect",
+        "tests/test_artifacts_ui.py::test_artifacts_register_infers_artifact_type_from_extension",
+        "tests/test_artifacts_ui.py::test_artifacts_bulk_directory_limit_and_artifact_set_routes",
+        "tests/test_artifacts_ui.py::test_artifact_detail_external_reference_requires_explicit_targets",
+        "tests/test_artifacts_ui.py::test_artifact_detail_rejects_invalid_share_days",
+        "tests/test_artifacts_ui.py::test_gui_quick_registration_preserves_native_conflict",
+        "tests/test_artifacts_ui.py::test_gui_multi_upload_conflict_stops_later_writes",
+        "tests/test_artifacts_ui.py::test_gui_bulk_conflict_stops_later_rows",
+        "tests/test_auth_enforcement.py::test_api_requires_bearer_token",
+        "tests/test_auth_enforcement.py::test_api_accepts_valid_bearer_token",
+        "tests/test_domain_access.py::test_dewey_allows_approved_origin_preflight",
+        "tests/test_domain_access.py::test_dewey_rejects_disallowed_origin",
+        "tests/test_domain_access.py::test_dewey_rejects_disallowed_host",
+        "tests/test_external_object_links.py::test_create_external_object_and_relation",
+        "tests/test_idempotency.py::test_register_artifact_idempotent_replay",
+        "tests/test_idempotency.py::test_register_artifact_idempotency_conflict",
+        "tests/test_idempotency.py::test_mutation_requires_idempotency_key",
+        "tests/test_literature_routes.py::test_literature_page_requires_login",
+        "tests/test_literature_routes.py::test_literature_page_and_search_render_after_login",
+        "tests/test_literature_routes.py::test_literature_search_and_save_routes",
+        "tests/test_literature_routes.py::test_literature_search_page_shows_saved_badges",
+        "tests/test_literature_routes.py::test_literature_endpoints_return_503_when_unavailable",
+        "tests/test_literature_routes.py::test_literature_page_returns_503_for_runtime_config_failure",
+        "tests/test_observability_contract.py::test_healthz_is_public",
+        "tests/test_observability_contract.py::test_readyz_reports_backend_state",
+        "tests/test_observability_contract.py::test_privileged_observability_routes_require_auth",
+        "tests/test_observability_contract.py::test_obs_services_advertises_canonical_capabilities",
+        "tests/test_observability_contract.py::test_health_payload_is_service_token_accessible",
+        "tests/test_observability_contract.py::test_api_and_endpoint_rollups_capture_traffic",
+        "tests/test_observability_contract.py::test_db_health_reports_probe_and_rollups",
+        "tests/test_observability_contract.py::test_my_health_requires_session_and_rejects_bearer",
+        "tests/test_observability_contract.py::test_auth_health_reports_session_and_service_token_modes",
+        "tests/test_observability_contract.py::test_observability_page_renders_for_logged_in_operator",
+        "tests/test_observability_contract.py::test_observability_payload_reports_package_version",
+        "tests/test_route_coverage_gaps.py::test_artifact_detail_and_storage_routes",
+        "tests/test_route_coverage_gaps.py::test_upload_session_complete_route_round_trip",
+        "tests/test_route_coverage_gaps.py::test_share_lookup_and_external_object_relation_routes",
+        "tests/test_search_and_storage.py::test_storage_verify_and_lock_routes",
+        "tests/test_search_and_storage.py::test_search_api_query_and_export",
+        "tests/test_search_and_storage.py::test_search_page_renders_after_login",
+        "tests/test_search_and_storage.py::test_search_export_page_returns_authenticated_json_results"
+      ],
+      "attempts": [
+        {
+          "receipt": "worker-b-unreached-08.xml",
+          "selected": 59,
+          "passed": 39,
+          "failed": 20,
+          "errors": 0
+        },
+        {
+          "receipt": "worker-b-contract-corrections-09.xml",
+          "selected": 23,
+          "passed": 20,
+          "failed": 3,
+          "errors": 0,
+          "new_readiness_cases": 3
+        },
+        {
+          "receipt": "worker-b-api-fixture-corrections-10.xml",
+          "selected": 3,
+          "passed": 3,
+          "failed": 0,
+          "errors": 0
+        }
+      ]
+    }
+  ],
+  "local_receipt_directory": "/tmp/dewey-pr64-ci-20261026",
+  "gates": {
+    "changed_python_ruff_check": "pass",
+    "changed_python_ruff_format": "pass (35 files)",
+    "git_diff_check": "pass",
+    "canonical_observability_fixture_hashes": "unchanged; exact provenance verified",
+    "coverage_thresholds": {
+      "line": 80,
+      "branch": 80
+    },
+    "full_ci": "pending"
+  },
+  "source_sha256": {
+    "dewey_service/app.py": "8b6d7fa13d5b596f1aa783531bf72d1fc1d32c1d87aeb98744a417c1abb5eb1c",
+    "dewey_service/services/registry.py": "646a7ee828d73895df25d82dcdbbe0d929aedf98ea5bc78b552b3c1461ab8bc0",
+    "tests/fixtures/dayhoff_observability/healthz.schema.json": "e56c37e83ec1d546e3f9d133f8721aa15015b10d7accdd55cfc5df2251318c8e",
+    "tests/fixtures/dayhoff_observability/readyz.schema.json": "70d893404802c86aa45939fe4e742b1bf2175f76ed5bbe5a97da8108869c52e8"
+  },
+  "runtime_delta": {
+    "deployed_tag": "12.0.7",
+    "deployed_source": "3adc81c622d3a8e81fa31b91a2d3ce43690c8202",
+    "pr_only_fixes": [
+      "Reject explicit empty search scopes instead of silently defaulting",
+      "Move readiness sharing_schema to checks.database.details for canonical schema conformance"
+    ],
+    "dependencies": "unchanged",
+    "container_builds": 0,
+    "production_changes": false
+  }
+}

@@ -1656,7 +1656,9 @@ def create_app(
             database_check=probe,
             ready=ready,
         )
-        payload["sharing_schema"] = "verified" if sharing_ready else "conversion_required"
+        payload["checks"]["database"].setdefault("details", {})["sharing_schema"] = (
+            "verified" if sharing_ready else "conversion_required"
+        )
         return JSONResponse(status_code=200 if ready else 503, content=payload)
 
     @app.get("/health")

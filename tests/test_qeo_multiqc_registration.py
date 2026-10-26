@@ -5,11 +5,14 @@ from hashlib import sha256
 from fastapi.testclient import TestClient
 
 from dewey_service.app import create_app
+from dewey_service.qeo_package_contract import PackageRegistration
+from dewey_service.qeo_resolver_auth import issue_resolver_credential
 from dewey_service.registration_contracts import (
     FileArtifact,
     MultiQCArtifactSetRegistrationRequest,
     manifest_sha256_for_request,
 )
+from tests.test_qeo_package_resolver import manifest
 
 
 def _digest(value: str) -> str:
@@ -180,15 +183,26 @@ def test_multiqc_local_only_receipt_and_outbox(service, storage) -> None:
 
 
 def test_multiqc_registration_route_auth_and_computed_idempotency(
+    tmp_path,
     test_settings,
     service,
-    storage,
+    backend,
 ) -> None:
-    request = _multiqc_request()
-    _seed_multiqc_storage(storage, request)
+    request = PackageRegistration.model_validate(manifest(backend))
+    credential_file = tmp_path / "resolver-token"
+    credential = issue_resolver_credential(credential_file, lifetime_days=1)
+    test_settings.qeo_resolver_token_sha256 = credential["token_sha256"]
+    test_settings.qeo_resolver_token_expires_at = credential["expires_at"]
+    # Authenticate the same explicit operator that owns the seeded artifacts.
+    test_settings.registry_service_principals = {
+        sha256(b"token-123").hexdigest(): {
+            "subject": "fixture-service-operator",
+            "roles": ["ADMIN"],
+        }
+    }
     app = create_app(settings=test_settings, service=service)
 
-    with TestClient(app, base_url="https://localhost:8914") as client:
+    with TestClient(app, base_url=test_settings.share_application_origin) as client:
         unauthenticated = client.post(
             "/api/v1/artifact-sets/multiqc/register",
             json=request.model_dump(mode="json"),
@@ -198,16 +212,25 @@ def test_multiqc_registration_route_auth_and_computed_idempotency(
             headers={"Authorization": "Bearer token-123"},
             json=request.model_dump(mode="json"),
         )
-        resolved = client.post(
-            "/api/v1/resolve/artifact-set",
+        assert authenticated.status_code == 200, authenticated.json()
+        replay = client.post(
+            "/api/v1/artifact-sets/multiqc/register",
             headers={"Authorization": "Bearer token-123"},
-            json={"artifact_set_euid": authenticated.json()["artifact_set_euid"]},
+            json=request.model_dump(mode="json"),
+        )
+        resolved = client.post(
+            "/api/v1/resolve/multiqc",
+            headers={"Authorization": "Bearer " + credential_file.read_text().strip()},
+            json={"kind": "artifact_set", "euid": authenticated.json()["artifact_set_euid"]},
         )
 
     assert unauthenticated.status_code == 401
-    assert authenticated.status_code == 200
     assert authenticated.json()["status_code"] == 201
     assert authenticated.json()["artifact_set_euid"].startswith("AS-")
+    assert replay.status_code == 200 and replay.json() == authenticated.json()
     assert resolved.status_code == 200
-    assert resolved.json()["artifact_set_kind"] == "multiqc_artifact_set"
-    assert resolved.json()["manifest_sha256"] == request.manifest_sha256
+    assert resolved.json() == {
+        key: value for key, value in authenticated.json().items() if key != "status_code"
+    }
+    assert resolved.json()["contract"] == request.contract
+    assert resolved.json()["complete_data_package"] is True

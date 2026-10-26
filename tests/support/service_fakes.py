@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -10,7 +11,7 @@ from typing import Any
 import pytest
 from daylily_tapdb import generic_instance, generic_instance_lineage
 
-from dewey_service.audit import creation_audit_fields, update_audit_fields
+from dewey_service.registry_access import Principal, principal_context
 from dewey_service.service import DeweyService
 from dewey_service.storage import StorageObject, StorageObjectNotFoundError, StoragePrefix
 from dewey_service.tapdb_backend import (
@@ -25,6 +26,8 @@ from dewey_service.tapdb_backend import (
     REGISTRATION_RECEIPT_TEMPLATE,
     SHARE_ROOT_TEMPLATE,
     SHARE_TEMPLATE,
+    TEMPLATE_DEFINITIONS,
+    TapDBBackend,
 )
 
 
@@ -42,6 +45,10 @@ class _FakeInstance:
     domain_code: str = "Z"
     issuer_app_code: str = "dewey"
     tenant_id: None = None
+    template_uid: int = 0
+    bstatus: str = "active"
+    record_revision: int = 1
+    identity_key: str | None = None
 
     @property
     def category(self):
@@ -71,6 +78,9 @@ class _FakeLineage:
     domain_code: str = "Z"
     issuer_app_code: str = "dewey"
     tenant_id: None = None
+    bstatus: str = "active"
+    record_revision: int = 1
+    child_instance: _FakeInstance | None = None
 
     @property
     def parent_instance_uid(self):
@@ -82,10 +92,83 @@ class _FakeLineage:
 
 
 class _FakeReferenceQuery:
-    """Only the adapter's explicit equality/row-lock query boundary."""
+    """Persistence-only SQL subset; unsupported predicates fail explicitly."""
 
     def __init__(self, rows, backend):
         self.rows, self.backend = list(rows), backend
+        self.entities = ()
+        self.grouped = False
+
+    @staticmethod
+    def _value(expression, row):
+        from sqlalchemy.sql import operators
+        from sqlalchemy.sql.elements import (
+            BindParameter,
+            BooleanClauseList,
+            Cast,
+            False_,
+            Grouping,
+            Null,
+            True_,
+        )
+        from sqlalchemy.sql.functions import FunctionElement
+
+        value = _FakeReferenceQuery._value
+        if isinstance(expression, (True_, False_)):
+            return isinstance(expression, True_)
+        if isinstance(expression, Null):
+            return None
+        if isinstance(expression, BindParameter):
+            return expression.value
+        if isinstance(expression, (Grouping, Cast)):
+            inner = expression.element if isinstance(expression, Grouping) else expression.clause
+            return value(inner, row)
+        if isinstance(expression, BooleanClauseList):
+            children = (value(child, row) for child in expression.clauses)
+            return all(children) if expression.operator is operators.and_ else any(children)
+        if isinstance(expression, FunctionElement):
+            args = [value(child, row) for child in expression.clauses]
+            if expression.name == "length":
+                assert len(args) == 1 and isinstance(args[0], str)
+                return len(args[0])
+            if expression.name == "left":
+                assert len(args) == 2 and isinstance(args[0], str)
+                assert type(args[1]) is int and args[1] >= 0
+                return args[0][: args[1]]
+            if expression.name == "jsonb_path_exists":
+                data, path, variables = args
+                match = re.fullmatch(r'(\$(?:\."[^"]+")+)(?: \? \(@ == \$value\))?', path)
+                assert match, f"Unsupported fake JSONPath: {path}"
+                for part in re.findall(r'\."([^"]+)"', match[1]):
+                    if not isinstance(data, dict) or part not in data:
+                        return False
+                    data = data[part]
+                return data == variables["value"] if " ? " in path else True
+            raise AssertionError(f"Unsupported fake SQL function: {expression.name}")
+        operator = getattr(expression, "operator", None)
+        if operator is not None and hasattr(expression, "left"):
+            left, right = value(expression.left, row), value(expression.right, row)
+            if operator in (operators.eq, operators.is_):
+                return left == right
+            if operator in (operators.ne, operators.is_not):
+                return left != right
+            if operator is operators.in_op:
+                return left in right
+            if operator is operators.not_in_op:
+                return left not in right
+            if (
+                operator is operators.json_getitem_op
+                or getattr(operator, "opstring", None) == "->>"
+            ):
+                return left.get(right)
+            raise AssertionError(f"Unsupported fake SQL operator: {expression}")
+        key = getattr(expression, "key", None)
+        if key is not None:
+            table = getattr(getattr(expression, "table", None), "name", None)
+            if table == "generic_instance" and isinstance(row, _FakeLineage):
+                row = row.child_instance
+            return getattr(row, key)
+        raise AssertionError(f"Unsupported fake expression: {expression}")
 
     def filter_by(self, **filters):
         return _FakeReferenceQuery(
@@ -94,20 +177,39 @@ class _FakeReferenceQuery:
         )
 
     def filter(self, *expressions):
-        from sqlalchemy.sql import operators
-        from sqlalchemy.sql.elements import False_
-
         rows = self.rows
         for expression in expressions:
-            key = expression.left.key
-            value = False if isinstance(expression.right, False_) else expression.right.value
-            if expression.operator is operators.in_op:
-                rows = [row for row in rows if getattr(row, key) in value]
-            elif expression.operator in (operators.eq, operators.is_):
-                rows = [row for row in rows if getattr(row, key) == value]
-            else:
-                raise AssertionError(f"Unsupported fake expression: {expression}")
+            rows = [row for row in rows if self._value(expression, row)]
         return _FakeReferenceQuery(rows, self.backend)
+
+    def join(self, *args):
+        return self
+
+    def order_by(self, *columns):
+        from sqlalchemy.sql import operators
+
+        rows = self.rows
+        for column in reversed(columns):
+            descending = getattr(column, "modifier", None) is operators.desc_op
+            value = getattr(column, "element", column)
+            rows = sorted(rows, key=lambda row: self._value(value, row), reverse=descending)
+        return _FakeReferenceQuery(rows, self.backend)
+
+    def offset(self, count):
+        return _FakeReferenceQuery(self.rows[count:], self.backend)
+
+    def limit(self, count):
+        return _FakeReferenceQuery(self.rows[:count], self.backend)
+
+    def with_entities(self, *entities):
+        query = _FakeReferenceQuery(self.rows, self.backend)
+        query.entities = entities
+        return query
+
+    def group_by(self, column):
+        assert column is generic_instance.type
+        self.grouped = True
+        return self
 
     def options(self, *options):
         return self
@@ -117,7 +219,23 @@ class _FakeReferenceQuery:
         return self
 
     def all(self):
+        if self.grouped:
+            counts = {}
+            for row in self.rows:
+                counts[row.type] = counts.get(row.type, 0) + 1
+            return list(counts.items())
+        if self.entities:
+            return [
+                tuple(
+                    row if entity is generic_instance else self._value(entity, row)
+                    for entity in self.entities
+                )
+                for row in self.rows
+            ]
         return self.rows
+
+    def first(self):
+        return self.rows[0] if self.rows else None
 
     def one_or_none(self):
         assert len(self.rows) <= 1
@@ -125,11 +243,17 @@ class _FakeReferenceQuery:
 
 
 class _InMemoryBackend:
-    def __init__(self) -> None:
+    def __init__(self, settings=None) -> None:
+        self.domain_code = "Z"
+        self.settings = settings
+        self.connection = SimpleNamespace(app_username="fixture-operator")
+        self.factory = SimpleNamespace(create_instance=self._allocate_instance)
         self.instances: dict[str, list[_FakeInstance]] = {}
         self.lineages: list[_FakeLineage] = []
         self.session_scope_errors = 0
         self.source_locks = []
+        self.external_locks = []
+        self.coordinate_locks = []
         self.commits = []
         self.native_assertions = {}
         self.next_uid = 1
@@ -159,6 +283,18 @@ class _InMemoryBackend:
             REGISTRATION_RECEIPT_TEMPLATE: "RCP",
             OUTBOX_EVENT_TEMPLATE: "EVT",
         }
+        self._templates = {
+            code: SimpleNamespace(uid=index, type=code.split("/")[1], instance_prefix="DGX")
+            for index, code in enumerate(TEMPLATE_DEFINITIONS, 1)
+        }
+        for code in TEMPLATE_DEFINITIONS:
+            self.next_by_prefix.setdefault(code, 1)
+            self.prefixes.setdefault(code, f"fixture-{code.split('/')[1]}")
+        self.templates = SimpleNamespace(get_template=self._get_template)
+
+    def _get_template(self, session, code, *, domain_code=None):
+        assert domain_code in (None, self.domain_code)
+        return self._templates.get(code)
 
     @contextmanager
     def session_scope(self, commit: bool = False):
@@ -172,25 +308,24 @@ class _InMemoryBackend:
     def query(self, model):
         if model is generic_instance_lineage:
             return _FakeReferenceQuery(self.lineages, self)
-        assert model is generic_instance
+        assert model is generic_instance or model is generic_instance.uid
         return _FakeReferenceQuery([row for rows in self.instances.values() for row in rows], self)
 
-    def ensure_templates(self, session, template_definitions=None) -> None:
+    def ensure_templates(self, session, template_codes=TEMPLATE_DEFINITIONS) -> None:
         _ = session
-        _ = template_definitions
-        return
+        assert all(code in self._templates for code in template_codes)
 
-    def create_instance(
-        self,
-        session,
-        *,
-        template_code: str,
-        name: str,
-        json_addl: dict[str, Any],
-        status: str = "active",
-    ) -> _FakeInstance:
-        _ = session
-        _ = status
+    def lock_external_key(self, session, *, operation, key):
+        assert session is self
+        self.external_locks.append((operation, key))
+
+    def execute(self, statement, parameters):
+        assert str(statement) == "SELECT pg_advisory_xact_lock(:key)"
+        assert set(parameters) == {"key"} and type(parameters["key"]) is int
+        self.coordinate_locks.append(parameters["key"])
+
+    def _allocate_instance(self, *, session, template_code, name, properties, create_children):
+        assert session is self and properties == {} and create_children is False
         prefix = self.prefixes[template_code]
         seq = self.next_by_prefix[template_code]
         self.next_by_prefix[template_code] += 1
@@ -199,25 +334,30 @@ class _InMemoryBackend:
             euid=f"{prefix}-{seq:06d}",
             template_code=template_code,
             name=name,
-            json_addl={"properties": {}, **dict(json_addl), **creation_audit_fields()},
+            json_addl={"properties": {}, "action_groups": {}, "audit_log": []},
+            template_uid=self._templates[template_code].uid,
         )
         self.next_uid += 1
         self.instances.setdefault(template_code, []).append(instance)
         return instance
 
-    def update_instance_json(
-        self,
-        session,
-        instance: _FakeInstance,
-        updates: dict[str, Any],
-    ) -> None:
-        _ = session
-        payload = dict(instance.json_addl or {})
-        payload.update(updates)
-        payload.update(update_audit_fields())
-        instance.json_addl = payload
+    # Exercise Dewey's real native envelope, revision and policy creation contracts;
+    # only allocation and persistence are replaced by in-memory I/O.
+    create_instance = TapDBBackend.create_instance
+    update_instance_json = TapDBBackend.update_instance_json
 
-    def find_by_json_field(self, session, *, template_code: str, field: str, value: str):
+    def update_persisted_fields(self, session, instance, changes, *, expected_revision=None):
+        assert expected_revision is None or instance.record_revision == expected_revision
+        for key, value in changes.items():
+            setattr(instance, key, value)
+        instance.record_revision += 1
+
+    def delete_persisted(self, session, instance):
+        self.update_persisted_fields(session, instance, {"is_deleted": True})
+
+    def find_by_json_field(
+        self, session, *, template_code: str, field: str, value: str, for_update: bool = False
+    ):
         _ = session
         for instance in self.instances.get(template_code, []):
             if instance.is_deleted:
@@ -265,6 +405,7 @@ class _InMemoryBackend:
             relationship_type=relationship_type,
             uid=len(self.lineages) + 1,
             parent_instance=parent,
+            child_instance=child,
         )
         self.lineages.append(lineage)
         return lineage
@@ -451,11 +592,22 @@ class _FakeStorageClient:
         limit: int = 200,
         continuation_token: str | None = None,
         request_payer: str | None = None,
+        cache_ttl: int,
+        refresh: bool = False,
     ) -> dict[str, Any]:
         _ = continuation_token
         _ = request_payer
         self.calls.append(
-            ("browse_prefix", {"bucket": bucket, "prefix": prefix, "request_payer": request_payer})
+            (
+                "browse_prefix",
+                {
+                    "bucket": bucket,
+                    "prefix": prefix,
+                    "request_payer": request_payer,
+                    "cache_ttl": cache_ttl,
+                    "refresh": refresh,
+                },
+            )
         )
         prefixes: set[str] = set()
         objects: list[StorageObject] = []
@@ -603,8 +755,10 @@ def service(backend: _InMemoryBackend, storage: _FakeStorageClient, monkeypatch)
         def __init__(self, session):
             assert session is backend
 
-        def attach(self, source, spec):
+        def attach(self, source, spec, *, expected_source_revision, expected_lineage_revision):
             assert source.uid in backend.source_locks
+            assert expected_source_revision == source.record_revision
+            assert expected_lineage_revision is None
             key = (source.uid, spec.target.identity_key, spec.relationship_type)
             if key in backend.native_assertions:
                 assert backend.native_assertions[key] == spec
@@ -616,7 +770,7 @@ def service(backend: _InMemoryBackend, storage: _FakeStorageClient, monkeypatch)
         "dewey_service.integrations.tapdb_external_references.ExternalReferenceService",
         NativeReferenceRecorder,
     )
-    return DeweyService(
+    instance = DeweyService(
         backend,
         default_share_ttl_seconds=120,
         storage_client=storage,
@@ -632,6 +786,16 @@ def service(backend: _InMemoryBackend, storage: _FakeStorageClient, monkeypatch)
         qeo_api_token="qeo-token",
         qeo_consumer_group="qeo.test",
     )
+    actor = Principal(
+        subject="fixture-service-operator",
+        email="operator@example.test",
+        roles=("ADMIN",),
+        internal=True,
+        service=True,
+        email_verified=True,
+    )
+    with principal_context(actor):
+        yield instance
 
 
 __all__ = [

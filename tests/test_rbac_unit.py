@@ -23,12 +23,17 @@ def test_default_group_role_map_and_role_normalization() -> None:
         "lsmc:dewey:admin": "ADMIN",
         "lsmc:dewey:readwrite": "READ_WRITE",
         "lsmc:dewey:readonly": "READ_ONLY",
+        "lsmc:external-share-user": "READ_ONLY",
     }
 
     assert roles_from_groups(
         ["platform-admin", "dewey-readwrite", "dewey-readonly", "platform-admin"],
         DEFAULT_COGNITO_GROUP_ROLE_MAP,
     ) == ("ADMIN", "READ_WRITE", "READ_ONLY")
+
+    assert roles_from_groups(["lsmc:external-share-user"], DEFAULT_COGNITO_GROUP_ROLE_MAP) == (
+        "READ_ONLY",
+    )
 
     profile = normalize_session_profile(
         email="USER@example.com",

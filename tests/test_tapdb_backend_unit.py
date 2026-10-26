@@ -7,50 +7,24 @@ from types import SimpleNamespace
 import pytest
 
 import dewey_service.tapdb_backend as backend_mod
+from dewey_service.registry_access import Principal, principal_context
 
-
-class _FakeField:
-    def __init__(self, name: str) -> None:
-        self.name = name
-
-    def __eq__(self, other: object):
-        return ("eq", self.name, other)
-
-    def is_(self, other: object):
-        return ("is", self.name, other)
-
-    def desc(self):
-        return ("desc", self.name)
-
-    def as_string(self):
-        return self
-
-
-class _FakeJSONAccessor:
-    def __getitem__(self, key: str) -> _FakeField:
-        return _FakeField(f"json_addl.{key}")
-
-
-class _FakeGenericInstanceModel:
-    template_uid = _FakeField("template_uid")
-    is_deleted = _FakeField("is_deleted")
-    euid = _FakeField("euid")
-    created_dt = _FakeField("created_dt")
-    uid = _FakeField("uid")
-    json_addl = _FakeJSONAccessor()
+_FakeGenericInstanceModel = backend_mod.generic_instance
 
 
 class _FakeLineageModel:
-    parent_instance_uid = _FakeField("parent_instance_uid")
-    child_instance_uid = _FakeField("child_instance_uid")
-    relationship_type = _FakeField("relationship_type")
-    is_deleted = _FakeField("is_deleted")
+    parent_instance_uid = backend_mod.generic_instance_lineage.parent_instance_uid.expression
+    child_instance_uid = backend_mod.generic_instance_lineage.child_instance_uid.expression
+    relationship_type = backend_mod.generic_instance_lineage.relationship_type.expression
+    is_deleted = backend_mod.generic_instance_lineage.is_deleted.expression
 
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
         self.is_deleted = False
         self.bstatus = kwargs.get("bstatus", "active")
+        self.euid = "fixture-native-lineage"
+        self.record_revision = 1
 
 
 class _FakeQuery:
@@ -95,6 +69,8 @@ class _FakeSession:
         self.query_map = query_map or {}
         self.added: list[object] = []
         self.flush_count = 0
+        self.native_objects = {}
+        self.native_calls = []
 
     def query(self, model):
         queue = self.query_map.get(model)
@@ -104,6 +80,7 @@ class _FakeSession:
 
     def add(self, obj: object) -> None:
         self.added.append(obj)
+        self.native_objects[obj.euid] = obj
 
     def flush(self) -> None:
         self.flush_count += 1
@@ -114,9 +91,40 @@ def _backend() -> backend_mod.TapDBBackend:
     backend.domain_code = "Z"
     backend.templates = SimpleNamespace()
     backend.factory = SimpleNamespace()
-    backend.connection = SimpleNamespace()
+    backend.connection = SimpleNamespace(app_username="fixture-operator")
     backend.observability = None
     return backend
+
+
+@pytest.fixture(autouse=True)
+def verified_backend_actor():
+    with principal_context(Principal(subject="fixture-operator", roles=("ADMIN",), internal=True)):
+        yield
+
+
+@pytest.fixture
+def native_operations(monkeypatch):
+    def update(session, selector, changes, *, actor, dry_run, expected_revision):
+        instance = session.native_objects[selector.euid]
+        assert actor == "fixture-operator" and dry_run is False
+        assert expected_revision == instance.record_revision
+        session.native_calls.append((selector.record_type, dict(changes), expected_revision))
+        for key, value in changes.items():
+            setattr(instance, key, value)
+        instance.record_revision += 1
+
+    def delete(session, selector, *, actor, dry_run, expected_revision):
+        update(
+            session,
+            selector,
+            {"is_deleted": True},
+            actor=actor,
+            dry_run=dry_run,
+            expected_revision=expected_revision,
+        )
+
+    monkeypatch.setattr(backend_mod, "update_object", update)
+    monkeypatch.setattr(backend_mod, "soft_delete_object", delete)
 
 
 def test_backend_init_rejects_invalid_config_before_connect(monkeypatch, test_settings):
@@ -164,36 +172,64 @@ def test_backend_helpers_cover_utility_functions() -> None:
         backend_mod._parse_template_code("bad/template")
 
 
-def test_session_scope() -> None:
+def test_session_scope(monkeypatch) -> None:
     backend = _backend()
-    events: list[tuple[str, bool | None]] = []
+    backend.config_path = "/fixture/explicit-tapdb.yaml"
+    backend.settings = SimpleNamespace()
+    session = SimpleNamespace(get_bind=lambda: "fixture-engine")
+    calls = []
 
-    class Connection:
-        def session_scope(self, *, commit: bool = False):
-            class _Ctx:
-                def __enter__(self_nonlocal):
-                    events.append(("enter", commit))
-                    return "session"
+    class Conn:
+        def session_scope(self, *, commit=False):
+            calls.append(("session", commit))
 
-                def __exit__(self_nonlocal, exc_type, exc, tb):
-                    events.append(("exit", commit))
+            class Ctx:
+                def __enter__(self):
+                    return session
 
-            return _Ctx()
+                def __exit__(self, exc_type, exc, tb):
+                    return False
 
-    backend.connection = Connection()
+            return Ctx()
 
-    with backend.session_scope(commit=True) as session:
-        assert session == "session"
-
-    assert events == [("enter", True), ("exit", True)]
+    connection = Conn()
+    monkeypatch.setattr(
+        backend_mod, "get_db", lambda path: calls.append(("config", path)) or connection
+    )
+    monkeypatch.setattr(
+        backend_mod,
+        "transaction_attribution",
+        lambda settings, operation, *, commit: {"operation": operation, "commit": commit},
+    )
+    monkeypatch.setattr(
+        "dewey_service.performance.instrument_engine",
+        lambda engine: calls.append(("engine", engine)),
+    )
+    with backend.session_scope(commit=True) as active:
+        assert active is session
+    assert calls == [
+        ("config", backend.config_path),
+        ("session", True),
+        ("engine", "fixture-engine"),
+    ]
+    assert connection.app_username == "fixture-operator"
+    assert connection.attribution == {"operation": "tapdb_session", "commit": True}
 
 
 def test_template_definitions_are_required_codes() -> None:
     assert backend_mod.TEMPLATE_DEFINITIONS == (
+        backend_mod.POLICY_TEMPLATE,
+        backend_mod.TOKEN_TEMPLATE,
+        backend_mod.OPERATION_TEMPLATE,
         backend_mod.ARTIFACT_TEMPLATE,
         backend_mod.ARTIFACT_SET_TEMPLATE,
         backend_mod.SHARE_TEMPLATE,
+        backend_mod.SHARE_GRANT_TEMPLATE,
+        backend_mod.SHARE_EVENT_TEMPLATE,
         backend_mod.SHARE_ROOT_TEMPLATE,
+        backend_mod.SHARE_REVISION_TEMPLATE,
+        backend_mod.SHARE_ALIAS_TEMPLATE,
+        backend_mod.ARTIFACT_LOCATION_REVISION_TEMPLATE,
         backend_mod.EXTERNAL_OBJECT_TEMPLATE,
         backend_mod.EXTERNAL_OBJECT_RELATION_TEMPLATE,
         backend_mod.LITERATURE_SAVE_TEMPLATE,
@@ -203,10 +239,18 @@ def test_template_definitions_are_required_codes() -> None:
         backend_mod.OUTBOX_EVENT_TEMPLATE,
     )
     assert backend_mod.BOOT_TEMPLATE_DEFINITIONS == (
+        backend_mod.POLICY_TEMPLATE,
+        backend_mod.TOKEN_TEMPLATE,
+        backend_mod.OPERATION_TEMPLATE,
         backend_mod.ARTIFACT_TEMPLATE,
         backend_mod.ARTIFACT_SET_TEMPLATE,
         backend_mod.SHARE_TEMPLATE,
+        backend_mod.SHARE_GRANT_TEMPLATE,
+        backend_mod.SHARE_EVENT_TEMPLATE,
         backend_mod.SHARE_ROOT_TEMPLATE,
+        backend_mod.SHARE_REVISION_TEMPLATE,
+        backend_mod.SHARE_ALIAS_TEMPLATE,
+        backend_mod.ARTIFACT_LOCATION_REVISION_TEMPLATE,
         backend_mod.EXTERNAL_OBJECT_TEMPLATE,
         backend_mod.EXTERNAL_OBJECT_RELATION_TEMPLATE,
         backend_mod.LITERATURE_SAVE_TEMPLATE,
@@ -271,7 +315,7 @@ def test_ensure_templates_can_verify_startup_subset() -> None:
     assert backend_mod.OUTBOX_EVENT_TEMPLATE in calls
 
 
-def test_create_instance_covers_success_and_missing_template() -> None:
+def test_create_instance_covers_success_and_missing_template(native_operations) -> None:
     backend = _backend()
     session = _FakeSession()
     created = SimpleNamespace(
@@ -281,14 +325,30 @@ def test_create_instance_covers_success_and_missing_template() -> None:
             "audit_log": [],
         },
         bstatus="",
-        is_singleton=True,
+        is_singleton=False,
+        euid="fixture-native-artifact",
+        record_revision=1,
     )
     template = SimpleNamespace(instance_prefix=" AT ", uid=11)
 
     backend.templates = SimpleNamespace(
         get_template=lambda session, code, *, domain_code=None: template
     )
-    backend.factory = SimpleNamespace(create_instance=lambda **kwargs: created)
+    policy = SimpleNamespace(
+        euid="fixture-native-policy",
+        record_revision=1,
+        json_addl={"properties": {}, "action_groups": {}, "audit_log": []},
+    )
+    factory_calls, lineage_calls = [], []
+
+    def create(**kwargs):
+        factory_calls.append(kwargs)
+        obj = created if kwargs["template_code"] == backend_mod.ARTIFACT_TEMPLATE else policy
+        session.native_objects[obj.euid] = obj
+        return obj
+
+    backend.factory = SimpleNamespace(create_instance=create)
+    backend.create_lineage = lambda session, **kwargs: lineage_calls.append(kwargs)
 
     instance = backend.create_instance(
         session,
@@ -306,7 +366,18 @@ def test_create_instance_covers_success_and_missing_template() -> None:
     }
     assert created.bstatus == "active"
     assert created.is_singleton is False
-    assert session.flush_count == 1
+    assert [call["template_code"] for call in factory_calls] == [
+        backend_mod.ARTIFACT_TEMPLATE,
+        backend_mod.POLICY_TEMPLATE,
+    ]
+    assert all(
+        call["properties"] == {} and call["create_children"] is False for call in factory_calls
+    )
+    assert policy.json_addl["owner_subject"] == "fixture-operator"
+    assert lineage_calls == [
+        {"parent": created, "child": policy, "relationship_type": "registry_policy"}
+    ]
+    assert [call[2] for call in session.native_calls] == [1, 1]
 
     backend_missing = _backend()
     backend_missing.templates = SimpleNamespace(
@@ -322,9 +393,11 @@ def test_create_instance_covers_success_and_missing_template() -> None:
         )
 
 
-def test_update_instance_json_and_query_helpers(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_update_instance_json_and_query_helpers(
+    monkeypatch: pytest.MonkeyPatch, native_operations
+) -> None:
     backend = _backend()
-    template = SimpleNamespace(uid=7)
+    template = SimpleNamespace(uid=7, type="artifact")
     seen_domain_codes: list[str | None] = []
     backend.templates = SimpleNamespace(
         get_template=lambda session, code, *, domain_code=None: (
@@ -376,9 +449,17 @@ def test_update_instance_json_and_query_helpers(monkeypatch: pytest.MonkeyPatch)
         backend.find_by_euid(session, template_code=backend_mod.ARTIFACT_TEMPLATE, euid="") is None
     )
 
-    instance = SimpleNamespace(json_addl={"properties": {}, "a": 1})
+    instance = SimpleNamespace(
+        json_addl={"properties": {}, "a": 1},
+        type="anomaly",
+        euid="fixture-native-update",
+        record_revision=4,
+    )
+    session.native_objects[instance.euid] = instance
     backend.update_instance_json(session, instance, {"b": 2})
     assert instance.json_addl == {"properties": {}, "a": 1, "b": 2}
+    assert session.native_calls[-1][2] == 4
+    assert instance.record_revision == 5
 
     backend.templates = SimpleNamespace(
         get_template=lambda session, code, *, domain_code=None: None
@@ -388,16 +469,31 @@ def test_update_instance_json_and_query_helpers(monkeypatch: pytest.MonkeyPatch)
     assert all(domain_code == "Z" for domain_code in seen_domain_codes)
 
 
-def test_lineage_helpers_cover_create_delete_and_lists(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_lineage_helpers_cover_create_delete_and_lists(
+    monkeypatch: pytest.MonkeyPatch, native_operations
+) -> None:
     backend = _backend()
-    parent = SimpleNamespace(uid=1, euid="DGX-000002", polymorphic_discriminator="data_instance")
-    child = SimpleNamespace(uid=2, euid="DGX-000001", polymorphic_discriminator="data_instance")
+    parent = SimpleNamespace(
+        uid=1,
+        euid="DGX-000002",
+        polymorphic_discriminator="data_instance",
+        bstatus="active",
+        type="artifact_set",
+    )
+    child = SimpleNamespace(
+        uid=2,
+        euid="DGX-000001",
+        polymorphic_discriminator="data_instance",
+        bstatus="active",
+        type="artifact",
+    )
     monkeypatch.setattr(backend_mod, "generic_instance", _FakeGenericInstanceModel)
     monkeypatch.setattr(backend_mod, "generic_instance_lineage", _FakeLineageModel)
 
     existing_lineage = SimpleNamespace()
     create_session = _FakeSession(
         {
+            _FakeGenericInstanceModel.uid: [_FakeQuery(first_result=(1,)) for _ in range(5)],
             _FakeLineageModel: [
                 _FakeQuery(first_result=None),
                 _FakeQuery(first_result=existing_lineage),
@@ -432,9 +528,10 @@ def test_lineage_helpers_cover_create_delete_and_lists(monkeypatch: pytest.Monke
         is False
     )
 
-    deletable = SimpleNamespace(is_deleted=False, bstatus="active")
+    deletable = _FakeLineageModel(bstatus="active")
     delete_session = _FakeSession(
         {
+            _FakeGenericInstanceModel.uid: [_FakeQuery(first_result=(1,))],
             _FakeLineageModel: [_FakeQuery(first_result=deletable)],
             _FakeGenericInstanceModel: [
                 _FakeQuery(all_result=[child]),
@@ -442,6 +539,7 @@ def test_lineage_helpers_cover_create_delete_and_lists(monkeypatch: pytest.Monke
             ],
         }
     )
+    delete_session.native_objects[deletable.euid] = deletable
     assert (
         backend.delete_lineage(
             delete_session, parent=parent, child=child, relationship_type="artifact_set_member"
@@ -450,6 +548,10 @@ def test_lineage_helpers_cover_create_delete_and_lists(monkeypatch: pytest.Monke
     )
     assert deletable.is_deleted is True
     assert deletable.bstatus == "deleted"
+    assert delete_session.native_calls == [
+        ("lineage", {"bstatus": "deleted"}, 1),
+        ("lineage", {"is_deleted": True}, 2),
+    ]
 
     assert backend.list_children(
         delete_session, parent=parent, relationship_type="artifact_set_member"

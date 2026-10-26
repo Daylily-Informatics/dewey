@@ -423,7 +423,7 @@ def preview(monkeypatch):
             settings.share_public_ingress_assertion_header: settings.share_public_ingress_assertion
         },
     )
-    with client:
+    with principal_context(None), authenticated_user_email_context(None), client:
         yield SimpleNamespace(
             client=client,
             app=app,

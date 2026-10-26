@@ -46,6 +46,12 @@ Current auth modes used in this document:
 | `GET` | `/api/anomalies` | `bearer token` | Local anomaly list |
 | `GET` | `/api/anomalies/{anomaly_id}` | `bearer token` | Local anomaly detail |
 
+The integration branch keeps sharing readiness inside
+`checks.database.details.sharing_schema` (`verified` or `conversion_required`),
+within the pinned Dayhoff readiness schema. The deployed 12.0.7 response still
+has that diagnostic at the top level; moving it is a PR-only contract correction.
+Readiness still requires both a healthy database and the verified sharing schema.
+
 ## Auth Pages And Session UX
 
 | Method | Path | Auth | Notes |
@@ -258,6 +264,15 @@ durations from indefinite lifetimes. Partial event pages are not aggregate total
 
 ### Retained Service Entrypoints
 
+| Method | Path | Behavior |
+| --- | --- | --- |
+| `POST` | `/api/v1/shares` | Explicit-target create with `Idempotency-Key` and the schema-3 policy |
+| `GET` | `/api/v1/shares/{share_euid}` | Authorized share detail |
+| `POST` | `/api/v1/shares/{share_euid}/access-package` | Gateway paths for browser, manifest and TAR; other `delivery_mode` values fail request validation |
+| `POST` | `/api/v1/shares/{share_euid}/revoke` | Revision-fenced revoke |
+| `GET` | `/api/v1/shares/{share_euid}/audit` | Authorized share history |
+| `GET` | `/api/v1/artifacts/{artifact_euid}/shares` | Bearer-authenticated shares index for an artifact |
+
 `POST /api/v1/shares` remains the explicit-target create route for
 `artifact_object`, `artifact_prefix`, `artifact_set` or `mixed_set`. Its schema
 requires `target_euid` or explicit `targets` as appropriate and uses the same
@@ -273,6 +288,11 @@ in the [release ledger](plans/20261026T010947Z_dewey_12_sharing_release_ledger.m
 ## Search API
 
 ### Canonical endpoints
+
+Omitted or null `scopes` uses the declared artifact/artifact-set default. An
+explicit empty list or an unsupported scope is invalid; it does not broaden the
+query to default scopes. Empty-list rejection is an integration-branch correction
+after 12.0.7 and is not part of the currently deployed tag.
 
 | Method | Path | Auth | `Idempotency-Key` |
 | --- | --- | --- | --- |

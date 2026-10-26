@@ -7,6 +7,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 import jsonschema
+import pytest
 
 
 def _schema_root() -> Path:
@@ -18,7 +19,7 @@ def _validate(name: str, payload: dict) -> None:
     jsonschema.validate(payload, schema)
 
 
-def _login_operator(monkeypatch, client) -> None:
+def _login_operator(monkeypatch, client, *, groups=None) -> None:
     monkeypatch.setattr(
         "daylily_auth_cognito.browser.session.exchange_authorization_code_async",
         lambda **kwargs: asyncio.sleep(0, result={"id_token": "header.payload.sig"}),
@@ -28,7 +29,7 @@ def _login_operator(monkeypatch, client) -> None:
         lambda token: {
             "email": "operator@lsmc.bio",
             "sub": "sub-1",
-            "cognito:groups": ["operators"],
+            "cognito:groups": groups or ["operators"],
         },
     )
 
@@ -55,7 +56,8 @@ def test_healthz_is_public(client) -> None:
     assert payload["status"] == "ok"
 
 
-def test_readyz_reports_backend_state(client) -> None:
+def test_readyz_reports_backend_state(client, fake_service) -> None:
+    fake_service.backend = None
     response = client.get("/readyz")
     assert response.status_code == 503
     body = response.json()
@@ -63,6 +65,51 @@ def test_readyz_reports_backend_state(client) -> None:
     assert body["status"] == "degraded"
     assert body["checks"]["database"]["status"] == "unknown"
     assert body["checks"]["database"]["detail"] == "backend unavailable"
+    assert body["checks"]["database"]["details"]["sharing_schema"] == "conversion_required"
+    assert body["ready"] is False
+
+
+@pytest.mark.parametrize(
+    ("database_status", "sharing_ready", "expected_status", "expected_schema"),
+    [
+        ("ok", True, 200, "verified"),
+        ("ok", False, 503, "conversion_required"),
+        ("error", True, 503, "conversion_required"),
+    ],
+)
+def test_readyz_preserves_canonical_schema_for_sharing_readiness(
+    monkeypatch,
+    client,
+    fake_service,
+    database_status,
+    sharing_ready,
+    expected_status,
+    expected_schema,
+) -> None:
+    probe = {
+        "status": database_status,
+        "latency_ms": 1.25,
+        "detail": "synthetic database probe",
+        "observed_at": "2026-10-26T00:00:00Z",
+    }
+    monkeypatch.setattr("dewey_service.app.probe_database", lambda _service: dict(probe))
+    schema_calls = []
+
+    def schema_ready():
+        schema_calls.append(True)
+        return sharing_ready
+
+    monkeypatch.setattr(fake_service, "sharing_upgrade_ready", schema_ready, raising=False)
+    response = client.get("/readyz")
+    assert response.status_code == expected_status
+    body = response.json()
+    _validate("readyz.schema.json", body)
+    assert body["ready"] is (expected_status == 200)
+    assert body["status"] == ("ok" if expected_status == 200 else "degraded")
+    assert "sharing_schema" not in body
+    assert body["checks"]["database"]["status"] == database_status
+    assert body["checks"]["database"]["details"]["sharing_schema"] == expected_schema
+    assert len(schema_calls) == (1 if database_status == "ok" else 0)
 
 
 def test_privileged_observability_routes_require_auth(client) -> None:
@@ -128,7 +175,8 @@ def test_obs_services_advertises_canonical_capabilities(client) -> None:
     }
 
 
-def test_health_payload_is_service_token_accessible(client) -> None:
+def test_health_payload_is_service_token_accessible(client, fake_service) -> None:
+    fake_service.backend = None
     client.get("/readyz")
     response = client.get("/health", headers=_service_headers())
     assert response.status_code == 200
@@ -161,7 +209,8 @@ def test_api_and_endpoint_rollups_capture_traffic(client) -> None:
     assert "/api/v1/artifacts/AT-123" not in {item["route_template"] for item in items}
 
 
-def test_db_health_reports_probe_and_rollups(client) -> None:
+def test_db_health_reports_probe_and_rollups(client, fake_service) -> None:
+    fake_service.backend = None
     response = client.get("/db_health", headers=_service_headers())
     assert response.status_code == 200
     body = response.json()
@@ -209,6 +258,10 @@ def test_auth_health_reports_session_and_service_token_modes(monkeypatch, client
 
 def test_observability_page_renders_for_logged_in_operator(monkeypatch, client) -> None:
     _login_operator(monkeypatch, client)
+    denied = client.get("/ui/observability")
+    assert denied.status_code == 403
+    assert "Schema drift:" not in denied.text
+    _login_operator(monkeypatch, client, groups=["platform-admin"])
     client.get("/api/v1/artifacts", headers=_service_headers())
 
     response = client.get("/ui/observability")

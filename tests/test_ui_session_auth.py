@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 from dewey_service.app import create_app
 from dewey_service.auth import build_cognito_web_session_config
 from dewey_service.settings import Settings
+from tests.conftest import explicit_application_settings
 
 
 def _set_explicit_config_path(monkeypatch, tmp_path) -> None:
@@ -56,7 +57,7 @@ def _login_user(
 def test_html_login_redirect_preserves_next_path(client) -> None:
     response = client.get("/ui", headers={"accept": "text/html"}, follow_redirects=False)
 
-    assert response.status_code == 302
+    assert response.status_code == 303
     assert response.headers["location"] == "/login?next=%2Fui"
 
     login_page = client.get(response.headers["location"])
@@ -83,8 +84,10 @@ def test_root_redirects_authenticated_session_to_ui(monkeypatch, client) -> None
 
 
 def test_ui_requires_session_login(client) -> None:
-    response = client.get("/ui")
-    assert response.status_code == 401
+    response = client.get("/ui", follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login?next=%2Fui"
+    assert 'data-section="Library"' not in response.text
 
 
 def test_cognito_callback_sets_session(monkeypatch, client) -> None:
@@ -92,8 +95,9 @@ def test_cognito_callback_sets_session(monkeypatch, client) -> None:
 
     ui = client.get("/ui")
     assert ui.status_code == 200
-    assert "Dewey Console" in ui.text
-    assert "Quick Register" in ui.text
+    assert 'data-section="Library"' in ui.text
+    assert 'data-admin="false"' in ui.text
+    assert 'href="/add"' in ui.text
     assert "/admin" not in ui.text
 
 
@@ -171,7 +175,7 @@ def test_auth_login_redirects_to_local_auth_error_when_cognito_is_misconfigured(
     assert response.headers["location"] == "/auth/error?reason=cognito_sign_in_misconfigured"
 
 
-def test_session_expiration_redirects_to_auth_error(monkeypatch, client, test_settings) -> None:
+def test_session_expiration_returns_to_login(monkeypatch, client, test_settings) -> None:
     _login_user(monkeypatch, client)
 
     stale_config = build_cognito_web_session_config(
@@ -183,8 +187,9 @@ def test_session_expiration_redirects_to_auth_error(monkeypatch, client, test_se
 
     response = client.get("/ui", headers={"accept": "text/html"}, follow_redirects=False)
 
-    assert response.status_code == 302
-    assert response.headers["location"] == "/auth/error?reason=session_expired"
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login?next=%2Fui"
+    assert 'data-section="Library"' not in response.text
 
 
 def test_dashboard_quick_register_infers_artifact_type_for_local_file(
@@ -206,8 +211,11 @@ def test_dashboard_quick_register_infers_artifact_type_for_local_file(
 
     ui = client.get("/ui")
     assert ui.status_code == 200
-    assert f'href="/artifacts/euid/{artifact["artifact_euid"]}"' in ui.text
-    assert f'action="/artifacts/euid/{artifact["artifact_euid"]}/download"' in ui.text
+    assert 'data-section="Library"' in ui.text
+    record = client.get(f"/records/{artifact['artifact_euid']}")
+    assert record.status_code == 200
+    assert 'data-section="Record"' in record.text
+    assert f'data-euid="{artifact["artifact_euid"]}"' in record.text
 
 
 def test_dashboard_quick_register_imports_public_url(monkeypatch, client, fake_service) -> None:
@@ -258,8 +266,8 @@ def test_admin_session_exposes_admin_tab_and_page(monkeypatch, tmp_path, client)
 
     admin = client.get("/admin")
     assert admin.status_code == 200
-    assert "Dewey Admin" in admin.text
-    assert "Operator Anomalies" in admin.text
+    assert 'data-section="Admin"' in admin.text
+    assert 'data-admin="true"' in admin.text
 
 
 def test_logout_clears_session_and_redirects_to_cognito(monkeypatch, client, test_settings) -> None:
@@ -278,8 +286,9 @@ def test_logout_clears_session_and_redirects_to_cognito(monkeypatch, client, tes
     assert params["response_type"] == ["code"]
     assert params["state"][0]
 
-    ui = client.get("/ui")
-    assert ui.status_code == 401
+    ui = client.get("/ui", follow_redirects=False)
+    assert ui.status_code == 303
+    assert ui.headers["location"] == "/login?next=%2Fui"
 
 
 def test_logout_get_clears_session_and_redirects_to_cognito(
@@ -388,7 +397,9 @@ def test_logout_from_one_browser_does_not_clear_the_other(monkeypatch, client) -
         logout = client.post("/auth/logout", follow_redirects=False)
         assert logout.status_code == 303
 
-        assert client.get("/ui").status_code == 401
+        signed_out = client.get("/ui", follow_redirects=False)
+        assert signed_out.status_code == 303
+        assert signed_out.headers["location"] == "/login?next=%2Fui"
         ui_other = other_client.get("/ui")
         assert ui_other.status_code == 200
         assert "shared@lsmc.bio" in ui_other.text
@@ -397,6 +408,7 @@ def test_logout_from_one_browser_does_not_clear_the_other(monkeypatch, client) -
 def test_external_broker_login_sets_admin_session(monkeypatch, tmp_path, fake_service) -> None:
     _set_explicit_config_path(monkeypatch, tmp_path)
     settings = Settings(
+        **explicit_application_settings(),
         api_bearer_token="token-123",
         session_secret_key="session-secret",
         auth_mode="external_broker",
@@ -442,7 +454,8 @@ def test_external_broker_login_sets_admin_session(monkeypatch, tmp_path, fake_se
 
         admin = broker_client.get("/admin")
         assert admin.status_code == 200
-        assert "Dewey Admin" in admin.text
+        assert 'data-section="Admin"' in admin.text
+        assert 'data-admin="true"' in admin.text
 
         logout = broker_client.post("/auth/logout", follow_redirects=False)
         assert logout.status_code == 303
@@ -452,6 +465,7 @@ def test_external_broker_login_sets_admin_session(monkeypatch, tmp_path, fake_se
 def test_external_broker_login_next_root_reaches_ui(monkeypatch, tmp_path, fake_service) -> None:
     _set_explicit_config_path(monkeypatch, tmp_path)
     settings = Settings(
+        **explicit_application_settings(),
         api_bearer_token="token-123",
         session_secret_key="session-secret",
         auth_mode="external_broker",
@@ -497,11 +511,12 @@ def test_external_broker_login_next_root_reaches_ui(monkeypatch, tmp_path, fake_
 
         ui = broker_client.get("/ui")
         assert ui.status_code == 200
-        assert "Dewey Console" in ui.text
+        assert 'data-section="Library"' in ui.text
 
 
 def test_external_broker_callback_rejects_missing_roles(monkeypatch, fake_service) -> None:
     settings = Settings(
+        **explicit_application_settings(),
         api_bearer_token="token-123",
         session_secret_key="session-secret",
         auth_mode="external_broker",

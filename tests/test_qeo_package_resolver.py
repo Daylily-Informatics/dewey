@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 
 import pytest
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials
 from fastapi.testclient import TestClient
 from typer.testing import CliRunner
@@ -21,27 +21,31 @@ from dewey_service.service import DeweyConflictError, DeweyNotFoundError
 from dewey_service.tapdb_backend import ARTIFACT_TEMPLATE
 
 
-def manifest(backend):
+def manifest(backend=None):
     files = []
-    for role, name in [
-        ("report", "report.html"),
-        ("data", "unknown/tool-new.tsv"),
-        ("data", "data/notes.txt"),
-    ]:
-        artifact = backend.create_instance(
-            backend,
-            template_code=ARTIFACT_TEMPLATE,
-            name=name,
-            json_addl={
-                "storage_backend": "s3",
-                "storage_uri": "s3://owner/" + name,
-                "size": 4,
-                "checksums": {"sha256": "a" * 64},
-            },
-        )
+    for index, (role, name) in enumerate(
+        [
+            ("report", "report.html"),
+            ("data", "unknown/tool-new.tsv"),
+            ("data", "data/notes.txt"),
+        ]
+    ):
+        artifact_euid = f"fixture-package-artifact-{index}"
+        if backend is not None:
+            artifact_euid = backend.create_instance(
+                backend,
+                template_code=ARTIFACT_TEMPLATE,
+                name=name,
+                json_addl={
+                    "storage_backend": "s3",
+                    "storage_uri": "s3://owner/" + name,
+                    "size": 4,
+                    "checksums": {"sha256": "a" * 64},
+                },
+            ).euid
         files.append(
             {
-                "artifact_euid": artifact.euid,
+                "artifact_euid": artifact_euid,
                 "role": role,
                 "relative_path": name,
                 "sha256": "a" * 64,
@@ -58,13 +62,26 @@ def manifest(backend):
 
 def test_register_replay_resolve_uses_lineage_and_no_writes(service, backend, monkeypatch):
     request = PackageRegistration.model_validate(manifest(backend))
-    status, result = service.register_qeo_package(request, idempotency_key="fixture.package")
+    payload = request.model_dump()
+    payload["files"] = sorted(payload["files"], key=lambda item: item["relative_path"])
+    key = (
+        "qeo.package.register:"
+        + hashlib.sha256(
+            json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+        ).hexdigest()
+    )
+    status, result = service.register_qeo_package(request, idempotency_key=key)
     assert status == 201
-    assert len(backend.lineages) == len(request.files)
-    assert service.register_qeo_package(request, idempotency_key="fixture.package") == (
+    assert len(
+        [edge for edge in backend.lineages if edge.relationship_type == "artifact_set_member"]
+    ) == len(request.files)
+    assert service.register_qeo_package(request, idempotency_key=key) == (
         status,
         result,
     )
+    assert service.register_qeo_package(request) == (status, result)
+    reordered = request.model_copy(update={"files": list(reversed(request.files))})
+    assert service.register_qeo_package(reordered, idempotency_key=key) == (status, result)
     before = copy.deepcopy((backend.instances, backend.lineages))
 
     @contextmanager
@@ -86,7 +103,9 @@ def test_register_replay_resolve_uses_lineage_and_no_writes(service, backend, mo
         service.resolve_qeo_package(kind="artifact_set", euid=result["artifact_set_euid"]) == result
     )
     assert (backend.instances, backend.lineages) == before
-    assert [f["relative_path"] for f in result["files"]] == [f.relative_path for f in request.files]
+    assert [f["relative_path"] for f in result["files"]] == sorted(
+        f.relative_path for f in request.files
+    )
 
 
 def test_absent_ambiguous_and_broken_membership_fail_closed(service, backend):
@@ -94,26 +113,33 @@ def test_absent_ambiguous_and_broken_membership_fail_closed(service, backend):
     report = request.files[0].artifact_euid
     with pytest.raises(DeweyNotFoundError):
         service.resolve_qeo_package(kind="artifact", euid=report)
-    _, result = service.register_qeo_package(request, idempotency_key="first")
-    backend.lineages[-1].is_deleted = True
+    before = copy.deepcopy((backend.instances, backend.lineages))
+    with pytest.raises(DeweyConflictError, match="deterministic QEO package request hash"):
+        service.register_qeo_package(request, idempotency_key="first")
+    assert (backend.instances, backend.lineages) == before
+    _, result = service.register_qeo_package(request)
+    member_edge = next(
+        edge for edge in backend.lineages if edge.relationship_type == "artifact_set_member"
+    )
+    member_edge.is_deleted = True
     with pytest.raises(DeweyConflictError, match="lineage"):
         service.resolve_qeo_package(kind="artifact_set", euid=result["artifact_set_euid"])
-    backend.lineages[-1].is_deleted = False
-    service.register_qeo_package(request, idempotency_key="second")
+    member_edge.is_deleted = False
+    service.register_qeo_package(request.model_copy(update={"label": "Second fixture package"}))
     with pytest.raises(DeweyConflictError, match="Multiple"):
         service.resolve_qeo_package(kind="artifact", euid=report)
 
 
 @pytest.mark.parametrize("path", ["../escape", "/absolute", "a//b", "a/./b", "a\\b", "a\nb"])
-def test_manifest_rejects_unsafe_paths(backend, path):
-    body = manifest(backend)
+def test_manifest_rejects_unsafe_paths(path):
+    body = manifest()
     body["files"][1]["relative_path"] = path
     with pytest.raises(ValueError):
         PackageRegistration.model_validate(body)
 
 
-def test_manifest_requires_explicit_completeness_and_unambiguous_roles(backend):
-    body = manifest(backend)
+def test_manifest_requires_explicit_completeness_and_unambiguous_roles():
+    body = manifest()
     for amendment in [{"complete_data_package": False}, {"analysis_euid": "fixture.external"}]:
         with pytest.raises(ValueError):
             PackageRegistration.model_validate({**body, **amendment})
@@ -139,7 +165,10 @@ def test_token_private_exclusive_expiring_and_not_a_general_api_credential(tmp_p
     credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=token)
     assert require_qeo_resolver_auth(test_settings)(credentials) == "qeo"
     with pytest.raises(HTTPException) as exc:
-        require_api_auth(test_settings)(credentials)
+        require_api_auth(test_settings)(
+            Request({"type": "http", "method": "POST", "path": "/api/v1/resolve/artifact"}),
+            credentials,
+        )
     assert exc.value.status_code == 401
     with pytest.raises(HTTPException) as exc:
         require_qeo_resolver_auth(test_settings)(None)
@@ -178,7 +207,8 @@ def test_real_route_accepts_only_dedicated_credential(tmp_path, test_settings, f
 
     fake_service.resolve_qeo_package = resolve
     with TestClient(
-        create_app(settings=test_settings, service=fake_service), base_url="https://localhost:8914"
+        create_app(settings=test_settings, service=fake_service),
+        base_url=test_settings.share_application_origin,
     ) as client:
         body = {"kind": "artifact", "euid": "fixture.report"}
         for token in ["", "token-123", "wrong"]:
