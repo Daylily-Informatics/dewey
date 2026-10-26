@@ -1,0 +1,20 @@
+{
+  "status": "pass",
+  "purpose": "Affected early-denial audit correction; no full suite rerun",
+  "tests": {
+    "tests": "81",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "time": "0.537"
+  },
+  "changed_source": "dewey_service/services/share_revisions.py",
+  "changed_source_sha256": "6b5692b849c7b83649e8e9c99c868550fd32642d8cab83767c48685b29fd7694",
+  "new_regression_cases": 27,
+  "reused_unchanged_source_file_count": 29,
+  "coverage_inputs": {
+    "dewey-final-coverage.json": "66798c9d5a37292aeee3ce59c9915eac92bf200777b5ae9dccbd3fa32e2e9b91",
+    "dewey-audit-fix-coverage.json": "ff4cdec80309df2dfc19699b56b7406f5f1a3e7e3ddb0c6beb06e383eaf62d30"
+  },
+  "command": "DEWEY_DEPLOYMENT_CODE=contract COVERAGE_FILE=/tmp/dewey12-acceptance-20261026/dewey-audit-fix-coverage.data .venv/bin/python -m pytest -q tests/test_share_resolution_denial_audit.py tests/test_sharing_v12_lifecycle.py tests/test_share_management.py --cov=dewey_service.services.share_revisions --cov-branch --cov-report=json:/tmp/dewey12-acceptance-20261026/dewey-audit-fix-coverage.json --cov-report=term:skip-covered --junitxml=/tmp/dewey12-acceptance-20261026/dewey-audit-fix-tests.xml"
+}

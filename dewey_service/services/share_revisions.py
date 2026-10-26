@@ -168,7 +168,8 @@ class ShareRevisionMixin:
         self._require_sharing()
         if not isinstance(identifier, str) or not identifier or "/" in identifier or len(identifier) > 128:
             raise ValueError("An exact share EUID or slug is required")
-        with self.backend.session_scope(commit=False) as session:
+        denied = None
+        with self.backend.session_scope(commit=True) as session:
             share = self._share_query(session).filter_by(euid=identifier).first()
             if share is None:
                 alias = self._find_share_alias(session, identifier)
@@ -179,25 +180,36 @@ class ShareRevisionMixin:
                     raise HTTPException(503, "Share alias has invalid native authority")
                 share = linked[0]
             share = self._canonical_share(session, share.euid)
-            self._require_recipient(session, share)
-            data = normalize_instance_payload(share)
-            # Container metadata is visible to a recipient; file disclosure still
-            # passes the exact-object grant/path evaluator.
-            from dewey_service.services.share_policy import expiry, recipient_matches
-            from datetime import datetime, timezone
-            targets = set()
-            for grant in self._share_grants(session, share):
-                rule = normalize_instance_payload(grant)
-                if rule.get("status") == "active" and rule.get("policy_revision") == data["policy_revision"] and expiry(rule["expires_at"]) > datetime.now(timezone.utc) and recipient_matches(rule, principal().email):
-                    targets.update(t.euid for t in self._grant_targets(session, grant))
-            scope_members = self._share_members(session, share)
-            members = [self._artifact_member_from_instance(t) for t in scope_members if t.euid in targets]
-            return {"share_euid": share.euid, "euid": share.euid, "fetch_path": "/fetch/" + share.euid, "name": share.name,
-                    "policy_revision": data["policy_revision"], "content_mode": data["content_mode"],
-                    "report_entrypoint": data.get("report_entrypoint"), "report_bundle_root": data.get("report_bundle_root", ""), "expires_at": data["expires_at"],
-                    "target_count": len(members), "namespaced": len(scope_members) > 1,
-                    "is_collection": len(scope_members) != 1 or not members or members[0]["target_kind"] != "artifact_object",
-                    "members": members}
+            try:
+                self._require_recipient(session, share)
+            except HTTPException as exc:
+                if exc.status_code != 403:
+                    raise
+                self._event(session, share, event_type="authorization", decision="deny",
+                    details={"action": "resolve", "reason": str(exc.detail), "status_code": exc.status_code})
+                denied = exc
+            else:
+                data = normalize_instance_payload(share)
+                # Container metadata is visible to a recipient; file disclosure still
+                # passes the exact-object grant/path evaluator.
+                from dewey_service.services.share_policy import expiry, recipient_matches
+                from datetime import datetime, timezone
+                targets = set()
+                for grant in self._share_grants(session, share):
+                    rule = normalize_instance_payload(grant)
+                    if rule.get("status") == "active" and rule.get("policy_revision") == data["policy_revision"] and expiry(rule["expires_at"]) > datetime.now(timezone.utc) and recipient_matches(rule, principal().email):
+                        targets.update(t.euid for t in self._grant_targets(session, grant))
+                scope_members = self._share_members(session, share)
+                members = [self._artifact_member_from_instance(t) for t in scope_members if t.euid in targets]
+                return {"share_euid": share.euid, "euid": share.euid, "fetch_path": "/fetch/" + share.euid, "name": share.name,
+                        "policy_revision": data["policy_revision"], "content_mode": data["content_mode"],
+                        "report_entrypoint": data.get("report_entrypoint"), "report_bundle_root": data.get("report_bundle_root", ""), "expires_at": data["expires_at"],
+                        "target_count": len(members), "namespaced": len(scope_members) > 1,
+                        "is_collection": len(scope_members) != 1 or not members or members[0]["target_kind"] != "artifact_object",
+                        "members": members}
+        # Raising inside the write scope would roll back the denial receipt.
+        if denied is not None:
+            raise denied
 
     def resolve_share_fetch(self, identifier, relative_path=""):
         resolved = self.resolve_share_identifier(identifier)
