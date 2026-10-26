@@ -75,6 +75,10 @@ or uncertain submission; it does not establish mailbox delivery. Existing durabl
 `/shares/<share-euid>` links remain entrypoints. New raw S3 presigns are disabled;
 obsolete delivery payloads fail explicitly.
 
+MultiQC's **Export** toolbox can save generated plot images and data. If Chrome
+asks to download multiple files, choose **Allow**, then click the download button
+again. Reopen or refresh the report URL after a viewer update.
+
 For curl/wget/CLI, sign in at `/recipient/account` and create a personal credential.
 Keep it in a private file or environment, never in the durable URL. These
 curl/wget examples use the caller's `DEWEY_TOKEN` and an actual persisted `SHARE_EUID`:

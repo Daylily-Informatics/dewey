@@ -1,0 +1,44 @@
+{
+  "observed_at": "2026-10-26T10:32:32.071485+00:00",
+  "unchanged_sibling_count": 11,
+  "unchanged_siblings": [
+    "dayhoff-day-atlas-1",
+    "dayhoff-day-bloom-1",
+    "dayhoff-day-kahlo-1",
+    "dayhoff-day-qeo-1",
+    "dayhoff-day-ursa-1",
+    "dayhoff-day-ursa-cluster-sweeper-1",
+    "dayhoff-day-ursa-cost-guardrail-scheduler-1",
+    "dayhoff-day-ursa-placement-scheduler-1",
+    "dayhoff-day-ursa-v2-run-monitor-1",
+    "dayhoff-day-ursa-v2-run-worker-1",
+    "dayhoff-day-zebra-day-1"
+  ],
+  "login_unchanged_since_12_0_6": true,
+  "compared_fields": [
+    "id",
+    "image_id",
+    "configured_image",
+    "repo_digests",
+    "started_at",
+    "restart_count",
+    "version",
+    "source_revision"
+  ],
+  "differences": {
+    "dayhoff-day-atlas-1": [],
+    "dayhoff-day-bloom-1": [],
+    "dayhoff-day-kahlo-1": [],
+    "dayhoff-day-login-1": [],
+    "dayhoff-day-qeo-1": [],
+    "dayhoff-day-ursa-1": [],
+    "dayhoff-day-ursa-cluster-sweeper-1": [],
+    "dayhoff-day-ursa-cost-guardrail-scheduler-1": [],
+    "dayhoff-day-ursa-placement-scheduler-1": [],
+    "dayhoff-day-ursa-v2-run-monitor-1": [],
+    "dayhoff-day-ursa-v2-run-worker-1": [],
+    "dayhoff-day-zebra-day-1": []
+  },
+  "also_matches_12_0_6_inventory": true,
+  "gate0_sibling_invariance_reference": "sibling-invariance-12.0.6.json"
+}

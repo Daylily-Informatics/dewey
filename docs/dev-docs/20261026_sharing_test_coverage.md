@@ -34,12 +34,12 @@ The gate utility itself has focused tests for exact thresholds, empty denominato
 
 Run the selected changed-code groups once with coverage, then rerun only new, changed, or failing tests. Coverage may be accumulated only while the measured production source is unchanged; preserve each command, exit result, and intermediate coverage snapshot. A source correction invalidates affected measurements and requires its affected tests again. Do not increase coverage by skipping failures, removing policy checks, or adding exclusion pragmas.
 
-The expanded 12.0.5 selection passed **771 tests with zero failures or skips**: 525 Dewey, 148 Login, 55 Dayhoff and 43 browser-script tests. The 12.0.6 correction subsequently passed **81 affected tests**. These selections overlap and must not be added as distinct test cases. Current released-source coverage passes all four independent changed-code gates:
+The expanded 12.0.5 selection passed **771 tests with zero failures or skips**: 525 Dewey, 148 Login, 55 Dayhoff and 43 browser-script tests. The 12.0.6 correction subsequently passed **81 affected tests**, and 12.0.7 passed **17 affected Python and 45 browser-script tests**. These selections overlap and must not be added as distinct test cases. Current released-source coverage passes all four independent changed-code gates:
 
 | Group | Changed line coverage | Changed branch coverage |
 |---|---:|---:|
-| Dewey Python (12.0.6) |96.01% (1781/1855)|89.80% (704/784)|
-| Dewey browser JavaScript |100% (108/108)|88.15% (186/211)|
+| Dewey Python (12.0.7) |95.96% (1781/1856)|89.67% (703/784)|
+| Dewey browser JavaScript |100% (109/109)|88.79% (190/214)|
 | Login Python |96.95% (476/491)|95.90% (117/122)|
 | Dayhoff release/ingress tooling |98.74% (391/396)|98.41% (124/126)|
 
@@ -48,3 +48,5 @@ The [coverage summary](../plans/evidence/20261026_dewey12/expanded-coverage-summ
 The final container is built from an immutable annotated tag on EC2, once per actual source correction. Build tests mock Docker/AWS execution and verify command/provenance contracts; the real EC2 image digest and deployed OCI/package checks establish release provenance. Login and unrelated images are not rebuilt for test-only changes.
 
 The 12.0.6 selection includes 27 new denial-persistence cases. Only the changed module was remeasured; 29 unchanged measured Python source files were reused after exact SHA256 verification. The original 771-test receipt remains tied to 12.0.5; no new full-suite run is implied. See [affected validation](../plans/evidence/20261026_dewey12/audit-fix-validation.json), [updated coverage](../plans/evidence/20261026_dewey12/dewey-audit-corrected-coverage.json), and the [44-file release-source binding](../plans/evidence/20261026_dewey12/coverage-release-source-binding-12.0.6.json).
+
+The 12.0.7 report-export correction freshly measured `report_preview.py` and `sharing.js`; all other measured source files were retained after exact hashes matched. The [affected validation](../plans/evidence/20261026_dewey12/report-export-validation.json), [Python gate](../plans/evidence/20261026_dewey12/dewey-export-python-coverage.json), [browser gate](../plans/evidence/20261026_dewey12/dewey-export-ui-coverage.json), [44-file binding](../plans/evidence/20261026_dewey12/coverage-release-source-binding-12.0.7.json) and [production seven-PNG receipt](../plans/evidence/20261026_dewey12/report-export-deployed-12.0.7.json) establish the current result. No broad suite, database group or unrelated-service tests were repeated.

@@ -1,0 +1,12 @@
+{
+  "observed_at": "2026-10-26T10:18:55.227054+00:00",
+  "recipient_role": "controlled_new_internal_acceptance_recipient",
+  "source": "Cognito AdminGetUser, exact authorized pool/recipient; read-only query returned only enabled/status/email_verified",
+  "enabled": true,
+  "user_status": "CONFIRMED",
+  "email_verified": true,
+  "signup_complete": true,
+  "report_admission_proven_by_this_receipt": false,
+  "tenant_authority_proven_by_this_receipt": false,
+  "note": "User stated signup was already done; authoritative current registration status confirms it. Do not request repeat registration."
+}

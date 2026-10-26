@@ -1,0 +1,105 @@
+{
+  "observed_at": "2026-10-26T10:40:32.796313+00:00",
+  "status": "confirmed_success",
+  "release": "12.0.7",
+  "source_commit": "3adc81c622d3a8e81fa31b91a2d3ce43690c8202",
+  "running_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:fdf49285e8884894c6f0ee5ce72b6bda61bfd9f6e7ead31990c6e52bc2d64e41",
+  "share_euid": "M-DGX-14D1F",
+  "canonical_url": "https://dewey.day.lsmc.bio/fetch/M-DGX-14D1F/multiqc.html",
+  "verified_viewer_role": "existing authorized external recipient; ordinary Google refresh, no new credentials",
+  "report_rendered": true,
+  "sidecar_probe": "PASS: sibling CSS, nested JavaScript and nested JSON",
+  "content_host": "pv-09453c3c47ab771ab86c084b8b1e05e4.dewey-content.day.lsmc.bio",
+  "context_expires_at": "2026-10-26T10:53:37.805998+00:00",
+  "action": "Export toolbox; all seven plots selected; Download Plot Images",
+  "browser_permission": "Chrome requested multiple-file download permission; allowed for this requested fixture export, then clicked download again",
+  "downloaded_png_count": 7,
+  "files": [
+    {
+      "download_name": "general_stats_table (3).png",
+      "bytes": 35971,
+      "sha256": "b5872c864235d6c964f8862c2de17feb8aee2719ab62a9f77918645192c5e003",
+      "dimensions": [
+        1600,
+        800
+      ],
+      "png_chunks_crc_valid": true,
+      "modified_at": "2026-10-26T10:39:23.832412+00:00"
+    },
+    {
+      "download_name": "fastqc-status-check-heatmap (2).png",
+      "bytes": 54010,
+      "sha256": "fce1088a13991e4a756103be907cf8b52c885feee34184fc6896746b2899d2fb",
+      "dimensions": [
+        1600,
+        800
+      ],
+      "png_chunks_crc_valid": true,
+      "modified_at": "2026-10-26T10:39:15.823440+00:00"
+    },
+    {
+      "download_name": "fastqc_per_sequence_gc_content_plot (2).png",
+      "bytes": 77212,
+      "sha256": "eca4d93472c0109bb037f45642dcd6e54b7e717fc2bbae7a6b322e2d014de8e4",
+      "dimensions": [
+        1600,
+        800
+      ],
+      "png_chunks_crc_valid": true,
+      "modified_at": "2026-10-26T10:39:15.823140+00:00"
+    },
+    {
+      "download_name": "fastqc_sequence_counts_plot (2).png",
+      "bytes": 49434,
+      "sha256": "53c457ff5081f909713150044e9315d5a56ef3ae08ba4855e869ddfcbcbefd2d",
+      "dimensions": [
+        1600,
+        800
+      ],
+      "png_chunks_crc_valid": true,
+      "modified_at": "2026-10-26T10:39:15.822535+00:00"
+    },
+    {
+      "download_name": "table_scatter_plot (2).png",
+      "bytes": 35971,
+      "sha256": "b5872c864235d6c964f8862c2de17feb8aee2719ab62a9f77918645192c5e003",
+      "dimensions": [
+        1600,
+        800
+      ],
+      "png_chunks_crc_valid": true,
+      "modified_at": "2026-10-26T10:39:15.821649+00:00"
+    },
+    {
+      "download_name": "fastqc_per_sequence_quality_scores_plot (2).png",
+      "bytes": 75973,
+      "sha256": "e8dc20f256b1aa53aee5a6938d207a31fc63feee08d517716c7b4cce678ff2b5",
+      "dimensions": [
+        1600,
+        800
+      ],
+      "png_chunks_crc_valid": true,
+      "modified_at": "2026-10-26T10:39:15.820836+00:00"
+    },
+    {
+      "download_name": "fastqc_per_base_sequence_quality_plot (2).png",
+      "bytes": 72544,
+      "sha256": "952cf917ede0661c032fc25ddec5a17962d4571831b899e0b0fe67b0243f67ae",
+      "dimensions": [
+        1600,
+        800
+      ],
+      "png_chunks_crc_valid": true,
+      "modified_at": "2026-10-26T10:39:15.819276+00:00"
+    }
+  ],
+  "auth_flow_notes": [
+    "Initial prolonged external sign-in returned invalid_state; restarted the canonical share URL and fresh ordinary sign-in returned to the exact report path",
+    "Existing manager account without a recipient grant correctly received No current recipient grant; no grants were changed"
+  ],
+  "scope_limits": [
+    "Generated browser plot exports are separate from underlying share file/recursive downloads",
+    "No S3 report or sidecar bytes changed",
+    "No new credential, invitation, recipient grant or tenant membership was created"
+  ]
+}
