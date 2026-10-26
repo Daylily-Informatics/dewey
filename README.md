@@ -68,7 +68,9 @@ expire within 30 days and remain separately revocable.
 | Storage rebind | Compare destination content using qualified checksums, then revise the storage reference while retaining artifact/share identities and paths. No physical S3 move/delete occurs |
 
 Create or edit from **Sharing**, copy the canonical or claimed-slug URL, and send an
-invitation only when requested. SES acceptance is recorded separately from failed
+invitation only when requested. To manage a known share directly, open
+`/shares/<share-euid>`; Sharing search matches its name or purpose.
+SES acceptance is recorded separately from failed
 or uncertain submission; it does not establish mailbox delivery. Existing durable
 `/shares/<share-euid>` links remain entrypoints. New raw S3 presigns are disabled;
 obsolete delivery payloads fail explicitly.

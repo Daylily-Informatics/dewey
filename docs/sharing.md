@@ -91,6 +91,8 @@ For registration-open indefinite access, use `audience: public_registered` and `
 
 Reports cover current lifecycle/audience/mode, finite duration buckets, indefinite shares, age, last access, verified viewers and unused shares. Windowed native events distinguish authorization evaluations, report entries/assets, HEAD/304/ranges, archives, interruption and server bytes. Retries produce separate responses; server completion never proves client persistence. Historical raw-presign consumption is unobserved.
 
+Version 12.0.6 also persists authenticated denials during share identifier resolution. Earlier missing denial events are not backfilled; report completeness describes the retained source inventory and events, not reconstructed historical requests. The release ledger records the correction and its acceptance window.
+
 Inventory pages bind `observed_at` and `inventory_sha256`; send the latter as `expected_inventory_sha256` on following pages. Drift fails 409 rather than mixing exports. Exports report windows, watermarks and completeness. Owners see their inventory; admins can select other owners. Preserved legacy history has separate coverage.
 
 Rebind compares complete size and qualified S3 FULL_OBJECT SHA-256 evidence, rejects identity collisions/mismatch, then records a native location revision. Missing qualified evidence fails; ETags alone are insufficient. Artifact/share EUIDs, aliases and paths stay stable; location-bound cursors are invalidated. No physical S3 move/delete occurs.

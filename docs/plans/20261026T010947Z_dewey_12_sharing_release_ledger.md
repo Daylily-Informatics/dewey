@@ -2,93 +2,94 @@
 
 ## Current continuation state
 
-- Objective: close SHR-01–20 and release major 12 at `dewey.day.lsmc.bio`. **Dewey 12.0.5 and Login 4.1.1 are deployed and ready. External named MultiQC/sidecars, HTTP/recursive/TAR, membership, aliases, rebind, real curl/wget/CLI and temporary-credential revocation passed.** Internal signup and final interface acceptance remain incomplete. Audit arithmetic reconciles274events, but early authenticated fetch denials are missing from native events; correction passed81affected tests and updated96.01/89.80%line/branch coverage; final12.0.6publication/build is next.
-- Authority: user-approved implementation plan, three workers, scoped EC2 builds/deployments/ingress, preserving migration, and twice-confirmed bounded validation. Two controlled invitation mailboxes are private. User explicitly approved creating the external one-day read-only credential, private local storage, curl/wget/CLI checks, and revocation. No PR/merge/main CI, sibling changes, library upgrades, physical S3 movement/deletion, destructive cleanup, or recurring jobs. Only lead integrates and operates production.
-- Repos: Dewey `/Users/jmajor/projects/dewey-sharing-docs-20261025`, branch `codex/dewey-sharing-review-20261025`; Login `/Users/jmajor/projects/lsmc/lsmc-oauth-login`, branch `codex/dewey-recipient-identity-4-1-20261026`; Dayhoff `/Users/jmajor/projects/lsmc/dayhoff`, branch `codex/dewey12-sharing-ingress-20261026`. Running sources: Dewey `79d2889c71fab3bda87f676d40bcbbc613d4cdda`; Login `3a54d153c10193dda78e77a7c562529c2768ee45`. Dayhoff branch `4a1bf52a`; Login test-only branch `c48259b`; all pushed. Preserve unrelated work.
-- Runtime: EC2 `i-07df3a933e4839f52`, us-west-2. Dewey digest `sha256:500ae751a29656c5f6f789bb1c4a1d92291de489057974f0001b91f45c9733c9`; Login `sha256:82985b4c51c2f397d1e2a209c3e43f06b7328eca56f0bc4d618c3316cd41c355`. OCI/package/source match; auth 2.1.5/2.1.9 and TapDB 11.0.9 unchanged. Eleven siblings match baseline; Login unchanged by the last Dewey update. Complete manifest matches eight main images. EC2 workspace `/home/ubuntu/dewey12-release-20261026T021700Z`; current complete manifest `manifest-12.0.5.json`.
-- Migration: schema 3 verified; 42 historical inactive shares preserved, zero converted/retired/deleted. Inventory digest `204905bbd353f5b7eda25cfcc0eed72e1b09cf088cc39de16b9114fe7067675b`; backup `full-20261026T031312Z-3de749`, six deep checks passed. Do not repeat migration, templates, or backup. Image-only rollback to 11.x is invalid. Old-presign deadline 04:01:29Z elapsed.
-- Ingress: dedicated ALB, restricted 8443/8444, exact private zones and public DNS active; shared 443 preserved. Four targets and boundary checks passed. Two requested SES invitations accepted; no Cognito configuration changes. Scoped Apache no-gzip correction passed three cases and was gracefully installed at 05:01:51Z; managed GET/HEAD validators and ranges now pass.
-- Validation: initial 111 Dewey, 22 Login, 20 Dayhoff distinct cases and one isolated PostgreSQL group passed. Affected corrections only: 19 logout, four template, one proxy, one TLS, two cookie, one Login concurrency, five preview, three compression, and four grant-projection cases. Expanded changed-code coverage pass now explicitly approved twice (user requested 80%+ and answered Approve expanded changed-code coverage pass). Final fresh combined selections passed: 525 Dewey, 148 Login, 55 Dayhoff, plus 43 browser-script tests (771 total; no failures/skips). Changed line/branch coverage: Dewey 96.26/90.51%, browser 100/88.15%, Login 96.95/95.90%, Dayhoff 98.74/98.41%. Main/PR-only coverage gates added, with separate explicit isolated PostgreSQL CI provisioning. Full main CI remains deferred. Current release build/deploy receipts remain in evidence.
-- Acceptance: four synthetic records/four shares. Mixed pending recipients, 30-day default/null expiry, stale-edit rejection, wrong-email/anonymous denial, registered-public access, alias conflict/tombstone, external WWW, delivery, membership, and rebind passed. Original WWW, gzip, and grant failures remain recorded. The first failure remains preserved. Corrected attempt2 passed removal/external403/restoration/external200 at revisions3→4→5; final file-share revocation at revision6 and external403 passed (20requests across sixphases). Signup is open with the internal email prefilled; human owns password entry and email confirmation. External temporary one-day credential was created under explicit approval, used for nine native commands, revoked through the UI after ordinary session refresh, and denied by one curl401 probe. No new credential is needed.
-- Next: publish immutable12.0.6, build/deploy only Dewey on EC2, then verify the corrected denial/event/report path. Finish targeted denial/report acceptance and interface review, then close documentation. Do not rebuild Login/siblings or rerun broad suites. Internal signup requires human password/email verification; user reports the separate signup window is not visible and that window is now closed. Use the existing named WWW URL in a user-visible private browser; never enter their new credentials. The file share is deliberately revoked, so use prepared `INTERNAL_AFTER_FINAL_REVOKE.md` (new internal-only read phase) plus the existing WWW journey. Private root `/tmp/dewey12-acceptance-20261026`; latest completed snapshot `browser-check-revoked-2026-10-26T06-43-58-779Z.json`. Audit was deliberately dispatched after read-only reconciliation:9requests passed arithmetic,274events reconcile; denial completeness defect remains open. Evidence: `docs/plans/evidence/20261026_dewey12/`.
+- **Objective:** close SHR-01–20 at `dewey.day.lsmc.bio`. Dewey **12.0.6** and Login **4.1.1** are deployed. Implementation, automated gates, migration, ingress, release provenance, external journeys and final audit reconciliation passed. **Estimated work completion: 98%; objective incomplete pending the new internal recipient journey and user acceptance.**
+- **Authority:** approved plan and three workers; scoped EC2 releases, preserving migration, ingress and controlled acceptance. User separately approved expanded changed-code coverage and temporary credential create/test/revoke. No PR, merge, main CI, sibling changes, library upgrades, physical S3 movement/deletion or recurring jobs. Lead alone integrates and operates production.
+- **Repos/branches:** Dewey `/Users/jmajor/projects/dewey-sharing-docs-20261025`, `codex/dewey-sharing-review-20261025`; Login `/Users/jmajor/projects/lsmc/lsmc-oauth-login`, `codex/dewey-recipient-identity-4-1-20261026`; Dayhoff `/Users/jmajor/projects/lsmc/dayhoff`, `codex/dewey12-sharing-ingress-20261026`. Runtime sources: Dewey `25ec6c9d19ebbe32ef445aa348b2287aff89781f` / `12.0.6`; Login `3a54d153c10193dda78e77a7c562529c2768ee45` / `4.1.1`. Dayhoff `762db0b5`; Login test-only HEAD `c48259b`.
+- **Runtime:** EC2 `i-07df3a933e4839f52`, `us-west-2`. Dewey digest `05652be69cfabc252eeb331e6c16b023536da474de9ac5cdb73f53249b076fa1`; Login digest `82985b4c51c2f397d1e2a209c3e43f06b7328eca56f0bc4d618c3316cd41c355`. Login and all 11 other siblings remain unchanged by final Dewey patches. Auth 2.1.5/2.1.9 and TapDB 11.0.9 unchanged. EC2 evidence root `/home/ubuntu/dewey12-release-20261026T021700Z`.
+- **Migration/ingress:** 42 historical inactive shares preserved; zero ambiguous, converted, retired or deleted. Inventory digest `204905bbd353f5b7eda25cfcc0eed72e1b09cf088cc39de16b9114fe7067675b`; backup `full-20261026T031312Z-3de749`, six deep checks. Do not repeat migration/templates/backup. Image-only 11.x rollback is invalid. Old-presign deadline 2026-10-26T04:01:29Z elapsed. Dedicated ALB, 8443/8444 and DNS boundaries passed; shared 443 retained. SES accepted two requested invitations; Cognito configuration unchanged.
+- **Validation:** 771 passes in the expanded 12.0.5 selection; 81 affected passes for 12.0.6, including 27 new cases. These overlap, not 852 distinct tests. Current changed-line/branch coverage: Dewey 96.01/89.80%, browser 100/88.15%, Login 96.95/95.90%, Dayhoff 98.74/98.41%. Original isolated PostgreSQL group retained; 44 measured files bound to exact released source. No further campaign/build is planned.
+- **Acceptance:** file share `M-DGX-14CN7` deliberately revoked at revision 6; set `M-DGX-14CVV`, named WWW `M-DGX-14D1F` and registered-public WWW `M-DGX-14D73` remain active. Temporary credential `M-DGX-14NRR` revoked; curl 401 proven. Final audit passed at 07:55:21Z: 275→277 retained events, exactly one verified external denial plus one manager contents read, matching full/fresh aggregates. Earlier missing denials were not backfilled. Original failed operations/helper stops are preserved; do not replay them.
+- **Blocker/next action:** human completes first-time internal password creation/email verification through the canonical report URL supplied in chat. The separate signup window is closed. Then use `INTERNAL_AFTER_FINAL_REVOKE.md` and the internal WWW journey to verify exact return, named-set bytes and denied management access. Do not run the obsolete internal-file-200 script. Private helpers/snapshots: `/tmp/dewey12-acceptance-20261026`; latest `dewey12-acceptance-20261026-browser-audit-final-reconcile-2026-10-26T07-55-21-540Z.json`. Publish the remaining acceptance receipt and record user acceptance separately. Sanitized evidence is under `docs/plans/evidence/20261026_dewey12/`.
 
-## Completion survey — 2026-10-26, before audit correction
+## Completion survey — 2026-10-26, audit passed; internal onboarding pending
 
-**Overall: approximately 92% of the release work is complete. The production objective is not yet complete.** Percentages are engineering estimates of remaining work, not measured code coverage, time consumed, or user acceptance. The overall score uses explicit release-phase weights below. Individual ledger/SHR estimates describe their own scope and are not averaged again. A known defect reopens the affected final gates even when earlier test/build receipts remain valid.
+**Overall: approximately 98% of release work complete. The production objective is not yet complete.** These are engineering estimates of remaining work, not code coverage, elapsed-time percentages or user acceptance. Phase weights define the overall estimate. Task and requirement percentages describe their own end-to-end evidence and are not averaged again.
 
 | Release aspect | Weight | Estimated complete | Remaining |
 |---|---:|---:|---|
-| Implementation |40%|95%|Durable early-denial audit event; duration precision review |
-| Automated validation |20%|95%|Affected regressions and changed-source coverage after correction; existing 771 passes retained |
-| Migration and ingress |10%|100%|None in approved scope |
-| Final release provenance |10%|90%|One corrected immutable Dewey patch, EC2 build and selected deployment |
-| Controlled production acceptance |15%|80%|New-user registration/verification, corrected denial reporting, final interface review |
-| Documentation and closeout |5%|80%|Publish survey/evidence now; final receipts/terminal closeout after remaining checks |
+| Implementation | 40% | 100% | None known in approved scope |
+| Automated validation | 20% | 100% | All four independent 80% line/branch gates pass |
+| Migration and ingress | 10% | 100% | Complete |
+| Final release provenance | 10% | 100% | 12.0.6/4.1.1 source, tags, images and runtime match |
+| Controlled production acceptance | 15% | 90% | First-time internal registration, exact return and restricted access |
+| Documentation and closeout | 5% | 95% | Append remaining human-dependent receipt and final disposition |
 
-Weighted result:38+19+10+9+12+4=92%. Human acceptance has not been supplied; it is separate from these work estimates. At this checkpoint 11 of 15 ledger rows remain SUCCESS; AUDIT, VERIFY, RELEASE and ACCEPT are reopened for the identified correction/final acceptance. The earlier 14 of 15/93% gate count preceded discovery of the audit completeness defect and is superseded.
+Weighted result: 40 + 20 + 10 + 10 + 13.5 + 4.75 = **98.25%, approximately 98%**. Human acceptance has not been supplied. Earlier 92% and 97% checkpoints are superseded by the correction, deployment and successful audit reconciliation.
 
 ### Every plan row
 
 | Row | Estimated complete | Evidence / remaining |
 |---|---:|---|
-| G 0 |100%|Exact source/runtime/config/fixture inventory recorded |
-| CORE |100%|Native revisions, delegation, audiences, duration and editable scope; deployed lifecycle checks passed |
-| ALIAS |100%|Atomic claims, conflict/tombstone and stable canonical URL proven |
-| IDENTITY |90%|Login 4.1.1, verified external sign-in, introspection and SES receipts; new local-password signup remains |
-| FETCH |100%|HTTP semantics and actual authenticated curl/wget delivery passed |
-| TREE |100%|Complete manifests, recursive CLI, individual resume and TAR; source failure-path tests passed |
-| WWW |95%|Real external MultiQC with CSS/nested JS/JSON passed; new internal signup-to-report remains |
-| REBIND |100%|Equivalent location revision, unchanged identities/bytes/URLs and collision/stale tests passed |
-| AUDIT |75%|274 event arithmetic reconciles; early verified-recipient denials omitted and duration boundary under review |
-| INTERFACES |90%|API/CLI and browser-script tests complete; final management GUI review/closeout remains |
-| INGRESS |100%|Dedicated ALB/TLS/DNS,8443/8444 separation and preserved 443/backchannels verified |
-| MIGRATE |100%|42 historical shares preserved; no ambiguous conversions, retirement or deletion; backup/deep verification retained |
-| VERIFY |95%|771 passes, four independent 80% line/branch gates; only correction-affected tests/coverage remain |
-| RELEASE |90%|12.0.5 and 4.1.1 match source/image; new Dewey-only corrective patch pending |
-| ACCEPT |80%|External delivery/report/lifecycle/rebind/client journeys pass; new-user and corrected audit proof remain |
+| G0 | 100% | Exact source/runtime/configuration/fixture inventory recorded |
+| CORE | 100% | Native revisions, delegation, audiences, duration and editable scope; deployed lifecycle checks passed |
+| ALIAS | 100% | Atomic claims, conflicts, tombstones and stable canonical URL proven |
+| IDENTITY | 90% | Login 4.1.1, verified external sign-in, introspection and SES receipts; first-time internal registration remains |
+| FETCH | 100% | HTTP semantics and authenticated curl/wget delivery passed |
+| TREE | 100% | Complete manifests, recursive CLI, individual resume and TAR; failure-path tests passed |
+| WWW | 95% | Real external MultiQC with CSS/nested JS/JSON passed; new internal signup-to-report remains |
+| REBIND | 100% | Equivalent location revision and unchanged identities/bytes/URLs; collision/stale tests passed |
+| AUDIT | 100% | 12.0.6 persists the exact denial; 277 native events and fixed-window counts reconcile |
+| INTERFACES | 95% | API/CLI, browser handlers and management GUI review passed; final acceptance documentation remains |
+| INGRESS | 100% | Dedicated ALB/TLS/DNS, 8443/8444 separation and preserved 443/backchannels verified |
+| MIGRATE | 100% | 42 inactive historical shares preserved; no ambiguous conversion, retirement or deletion |
+| VERIFY | 100% | 771 original passes plus 81 affected passes; four independent 80% coverage gates pass |
+| RELEASE | 100% | 12.0.6 and 4.1.1 provenance verified; 11 siblings unchanged |
+| ACCEPT | 90% | External and audit journeys passed; new internal account journey remains |
 
 ### Every requirement
 
 | Requirement | Estimated complete | Outstanding item, if any |
 |---|---:|---|
-| SHR-01 File/set/recursive-prefix scope |100%|None |
-| SHR-02 Creator-authorized delegation |100%|None |
-| SHR-03 Mixed recipients and pending identities |80%|Complete new internal registration and access alongside existing external recipient |
-| SHR-04 Edit people/duration/content; revoke |100%|Removal 403, restoration 200 and final revoked 403 passed; no artifact deletion |
-| SHR-05 Finite and indefinite sharing |100%|Policy/lifecycle passed; reporting precision tracked under SHR-16 |
-| SHR-06 Public with registration |100%|Verified-user access and anonymous denial passed; onboarding covered separately |
-| SHR-07 Stable fetch/deep-link return |95%|Existing external login return passed; first-time registration return remains |
-| SHR-08 Human-readable slugs |100%|None |
-| SHR-09 Authenticated HTTPS/curl/wget |100%|None; temporary credential revoked and 401 confirmed |
-| SHR-10 Complete recursive retrieval |100%|None in approved bounded validation |
-| SHR-11 WWW/report bundles |95%|External rendering/sidecars passed; new internal report journey remains |
-| SHR-12 Verified registration and identity |80%|Human password/email confirmation and exact first-use return |
-| SHR-13 Share-only organization boundary |90%|Confirm new identity receives only share access, not organization/management authority |
-| SHR-14 Worldwide recipient ingress |100%|None |
-| SHR-15 Durable access audit |75%|Fix/persist early authenticated denial events and verify native history |
-| SHR-16 Aggregate lifecycle/use reports |85%|Reconcile corrected denial counts; review nominal 30 day duration boundary |
-| SHR-17 Storage-reference rebind |100%|None |
-| SHR-18 API/GUI/CLI parity |90%|Final live management-interface review |
-| SHR-19 Revocation/capacity semantics |100%|Access enforcement and bounded/failure contracts passed; missing denial reporting belongs to SHR-15 |
-| SHR-20 Documentation |95%|Current survey/evidence publication and final release closeout |
+| SHR-01 File/set/recursive-prefix scope | 100% | None |
+| SHR-02 Creator-authorized delegation | 100% | None |
+| SHR-03 Mixed recipients and pending identities | 80% | Verify newly registered internal recipient alongside the existing external recipient |
+| SHR-04 Edit people/duration/content; revoke | 100% | Removal 403, restoration 200 and final revoked 403 passed; no artifact deletion |
+| SHR-05 Finite and indefinite sharing | 100% | Creation-to-deadline reporting precision reviewed and correct |
+| SHR-06 Public with registration | 100% | Verified-user access and anonymous denial passed; first-time onboarding tracked separately |
+| SHR-07 Stable fetch/deep-link return | 95% | Existing external login return passed; first-time registration return remains |
+| SHR-08 Human-readable slugs | 100% | None |
+| SHR-09 Authenticated HTTPS/curl/wget | 100% | Temporary credential revoked and 401 confirmed |
+| SHR-10 Complete recursive retrieval | 100% | None in approved bounded validation |
+| SHR-11 WWW/report bundles | 95% | External rendering/sidecars passed; new internal report journey remains |
+| SHR-12 Verified registration and identity | 80% | Human password/email confirmation and first-use return |
+| SHR-13 Share-only organization boundary | 90% | Confirm new identity receives only share access, not management/organization authority |
+| SHR-14 Worldwide recipient ingress | 100% | None |
+| SHR-15 Durable access audit | 100% | Early-denial persistence corrected and proven; earlier missing events are not backfilled |
+| SHR-16 Aggregate lifecycle/use reports | 100% | Complete retained event inventory, corrected denial counts and fixed-window groups reconcile |
+| SHR-17 Storage-reference rebind | 100% | None |
+| SHR-18 API/GUI/CLI parity | 100% | Management GUI controls reviewed; handler tests and live management API mutations passed |
+| SHR-19 Revocation/capacity semantics | 100% | Current-policy enforcement and bounded/failure contracts passed |
+| SHR-20 Documentation | 95% | Current survey/evidence complete; append human-dependent acceptance and final disposition |
 
-### Validation and scope controls
+### Audit of plan constraints and deviations
 
-- Existing final selection:525 Dewey+148 Login+55 Dayhoff+43 browser=771 passing, zero failures/skips. Changed line/branch coverage:Dewey 96.26/90.51%; browser 100/88.15%; Login 96.95/95.90%; Dayhoff 98.74/98.41%. All 44 measured source files match 12.0.5/4.1.1/exactDayhoff commit. These receipts remain evidence for those versions; the correction must receive affected validation before any new coverage claim.
-- The isolated PostgreSQL contract group ran once. No additional database group, broad full suite, unrelated-service tests, PR, merge or main CI campaign is authorized by this closeout.
-- Every container build ran on the designated EC2 instance. Corrective immutable tags were required by actual discovered defects; no old tag moved. Login and 11 siblings will not be rebuilt/restarted for the audit patch. Shared-library pins remain unchanged.
--42 historical shares preserved; public ingress activates only approved recipient/auth/content surfaces; existing management/shared 443/tailnet/backchannels retained. No physicalS 3 movement/deletion, automatic domain tenant admission or anonymous share consumption was added.
-- Server event totals are not proof of client-persisted download. CLI/curl/wget fixture checksum receipts independently prove their controlled saved files. SESaccepted is not mailbox-delivery proof.
+- **Release versions:** corrective immutable patches advanced Dewey from planned 12.0.0 to 12.0.6 and Login from 4.1.0 to 4.1.1. Actual preparation/acceptance defects required those patches. Tags were not moved. All image builds ran on the designated EC2 instance, scoped to changed selected services; see `release_images.json` for every build and disposition.
+- **Testing:** the user expanded the original bounded scope and separately approved the changed-code coverage pass. Final selections were 525 Dewey, 148 Login, 55 Dayhoff and 43 browser tests. The 12.0.6 correction reran only 81 affected tests. Original isolated PostgreSQL evidence was retained. No unrelated-service suite, main CI, PR or merge was run. Coverage-source binding verifies all 44 measured files.
+- **Migration:** production contained 42 inactive historical shares, all preserved. No active legacy share required production conversion; native contract tests cover conversion and idempotency. No historical retirement logic was rerun.
+- **Preservation:** all 11 siblings match Gate0 container identities/images/start/restarts; Login is unchanged by final Dewey patches. Auth/TapDB pins, Cognito configuration, shared 443, tailnet and backchannels are preserved. No physical S3 move/delete or automatic domain tenant admission occurred.
+- **Audit:** final full totals are 277 events, 108 authorization evaluations and one recorded denial. The final two-event window contains exactly the external denial and a manager contents read, with zero transfer bytes. Earlier missing denials are explicitly historical gaps; server completion is not client-persisted delivery. SES acceptance is not mailbox-delivery proof.
+- **GUI scope:** live management controls/edit fields were reviewed without replaying mutations. Handler regression tests and actual management API mutations provide action evidence. A pre-existing 11.0.10 name-or-EUID search-label mismatch remains; name search and `/shares/<share-euid>` work. This baseline issue was not expanded into another release.
+- **Acceptance helper stops:** public health-route denial, text-versus-JSON parsing, and an extra expected manager contents event stopped strict checks. Original failures were retained, then reconciled from exact receipts. The denied fetch was issued once, with no replay; the final reconciliation added one fixed-window report request. These were helper issues, not further product builds.
 
 ### Remaining sequence and estimate
 
-1. Correct early-denial audit persistence and resolve duration-boundary classification; source owner A, lead integration.
-2. Run only affected regression/coverage checks, then one final tagged Dewey EC2 build and selected deploy; preserve Login/siblings and verify source→tag→digest→runtime.
-3. Run a bounded corrected denial/report proof and final GUI review. No new invitation or machine credential is needed.
-4. Human completes new-account password/email verification. Then verify exact named-report return, five-file named-set access and denied management access using the prepared post-revocation internal phase. Do not rerun the obsolete internalfile 200 script; the file share is intentionally revoked.
-5. Publish final sanitized receipts, update terminal counts and request/record user acceptance separately.
+1. Human completes the new internal account password/email confirmation using the canonical named-report link already supplied in chat. There is no preset password; no credential or verification code should be sent to the agent.
+2. Run the prepared bounded internal continuation: exact report return/sidecars, named-set access and denied management access. Retain the deliberately revoked single-file share; do not rerun the obsolete expectation of file 200.
+3. Append sanitized evidence, update acceptance/terminal counts and separately record user acceptance.
 
-Estimate from this checkpoint: roughly 40–60 minutes of agent work if the affected correction passes, plus human email verification. The human step has no reliable completion estimate. Full main CI, PR creation and merging remain a separately authorized later phase, not unfinished work in this deployment scope.
+**Estimate:** approximately 5–10 minutes of agent verification/closeout after successful human confirmation, assuming the journey passes. No reliable ETA exists for the human step. Further builds are not planned; a newly discovered defect would require a revised estimate. PRs, merges and full main CI remain separately authorized later work, not unfinished tasks within this deployment scope.
+
+**Tracking outcome:** 14 source/release rows SUCCESS; ACCEPT BLOCKED on the human action. All rows have an explicit disposition, but the release objective is not complete. Feature-row SUCCESS records that row's implementation gate; the percentages above include remaining end-to-end evidence.
 
 ## Accepted design and boundaries
 
@@ -123,13 +124,13 @@ Worker ownership is disjoint and phase-specific. Lead alone commits/tags/pushes,
 | TREE | SHR-10,19: complete manifests/TAR/recursive client | SUCCESS | feature_implementation | 1 contracts | B | Focused source contracts; validation logs below | — | Source complete; deployed proof tracked by ACCEPT |
 | WWW | SHR-11: deep report entry/isolated sidecars | SUCCESS | feature_implementation | 1 contracts | B | Focused source contracts; validation logs below | — | Source complete; deployed proof tracked by ACCEPT |
 | REBIND | SHR-17: audited equivalent storage-reference change | SUCCESS | feature_implementation | 1 contracts | A | Focused source contracts; validation logs below | — | Source complete; deployed proof tracked by ACCEPT |
-| AUDIT | SHR-15–16: precise events/aggregate/export | ATTEMPTING_BUGFIX | feature_implementation | 1 contracts | A | audit-acceptance-12.0.5.json;274 native events reconcile | Identifier resolution denies before durable audit writer | Source correction active; access denial itself works |
+| AUDIT | SHR-15–16: precise events/aggregate/export | SUCCESS | feature_implementation | 1 contracts | A/Lead | audit-acceptance-12.0.6.json; 277 retained events and final fixed window reconcile | Early resolver denial omitted durable event; corrected in 12.0.6 | One native external denial proven; earlier missing events not backfilled |
 | INTERFACES | SHR-18,20: API/GUI/CLI/docs parity | SUCCESS | feature_implementation | 2 integration | Lead/B | Focused source contracts; validation logs below | — | Source complete; deployed proof tracked by ACCEPT |
 | INGRESS | SHR-14: dedicated restricted public ALB/TLS/DNS | SUCCESS | config_or_startup_contract | 3 cutover | C/Lead | DNS INSYNC, four healthy targets, boundary receipts | Content TLS context corrected | Public recipient boundaries active; authenticated assets tracked by ACCEPT |
 | MIGRATE | Preserve EUIDs/grants/scope/lifecycle/history | SUCCESS | active_product_contract | 3 cutover | A/Lead | migration-verify.json; backup-sanitized.json | Loader scoped to requested templates | 42 preserved, zero retired/deleted; schema3 verified |
-| VERIFY | Changed-code + isolated PostgreSQL integrated pass | IN_PROGRESS | contract_test | 2 integration | Lead | Expanded coverage summary:771 passing; four independent line/branch gates above80%; native PostgreSQL retained | — | 771tests/four80% gates passed on12.0.5; affected correction validation pending |
-| RELEASE | Immutable tags/final EC2 images/scoped deployment | IN_PROGRESS | config_or_startup_contract | 3 cutover | Lead | running-provenance-12.0.5.json; sibling-invariance-12.0.5.json | Real defects corrected through immutable patch releases; original tags retained | 12.0.5 +4.1.1 ready; one final Dewey audit patch pending |
-| ACCEPT | Bounded live journeys/provenance/sibling invariance | ATTEMPTING_BUGFIX | contract_test | 4 acceptance | Lead | lifecycle-acceptance-12.0.5.json; machine receipts; external WWW/delivery/target/alias/rebind evidence | New-user verification requires human entry; final audit/interface proof pending | External lifecycle, client, report and rebind journeys passed; new internal onboarding remains open |
+| VERIFY | Changed-code + isolated PostgreSQL integrated pass | SUCCESS | contract_test | 2 integration | Lead | 771 original passes; 81 affected passes; four 80% gates; 44-file source binding; native PostgreSQL retained | — | Released-source validation complete; no repeated full suite |
+| RELEASE | Immutable tags/final EC2 images/scoped deployment | SUCCESS | config_or_startup_contract | 3 cutover | Lead | running-provenance-12.0.6.json; sibling-invariance-12.0.6.json; release_images.json | Corrective patches for actual preparation/acceptance defects | Dewey 12.0.6/Login 4.1.1 deployed; 11 siblings unchanged |
+| ACCEPT | Bounded live journeys/provenance/sibling invariance | BLOCKED | contract_test | 4 acceptance | Lead/User | External, machine, lifecycle, WWW, rebind and audit receipts; internal continuation prepared | Human new-password/email confirmation not completed | Internal first-use/restricted-access proof and user acceptance remain; objective incomplete |
 
 Allowed working states: OPEN, IN_PROGRESS, ATTEMPTING_BUGFIX. Terminal states: SUCCESS, DUPLICATE, NO_LONGER_NEEDED, FAIL, BLOCKED. FAIL requires a documented bugfix attempt; BLOCKED/FAIL require root cause and next action. Every required requirement must actually be satisfied before claiming objective complete.
 
@@ -213,3 +214,10 @@ Allowed working states: OPEN, IN_PROGRESS, ATTEMPTING_BUGFIX. Terminal states: S
 - Audit review checkpoint: the bounded inventory/activity report reconciled274events over04:20:05.981–06:52:50.969Z,9HTTPchecks passed. However, native denials=0despite retained authenticated403requests. Source review confirmed early resolver failures bypass the durable authorization event writer. Arithmetic success is not complete audit coverage; AUDIT/VERIFY/RELEASE/ACCEPT reopened. OwnerA implements a narrow commit-before-reraise event; no access-policy bypass or broad rebuild. Duration boundary also flagged for precise review. ETA revised from15–25minutes to40–60minutes plus humanverification; current survey records92%estimatedworkcompletion.
 
 - Audit correction source gate:81affected tests passed,0failures/errors/skips,in0.537s.27new regressions exercise canonical/alias403,expiry/revocation,grantchanges, native attribution/envelope ownership, one durableevent, historypreservationand write/commitfailure. Fresh changedmodule coverage replaced that moduleonly;29other measured sourcefiles reused afterSHA256match. Result:1781/1855changedlines96.01%,704/784changedbranches89.80%,unmeasured0. Duration review found the37ms boundary consistentwithnativecreation-to-deadline semantics; no arbitraryrounding or starts_atmigration added. One final12.0.6patchisrequired; Login/sharedlibrariesremainunchanged.
+
+-12.0.6 release checkpoint: immutable annotated tagd85c5e67→25ec6c9 remotelyverified. EC2Dewey-only build07:14:14–07:15:50Zexit0; selected gracefuldeploy07:16:49–07:16:52Zexit0; ready07:17:56Z. Nativepackages/OCI match;11siblings andLogin unchanged. Complete8image manifest installed c3370d378379cab28cdc49ace4c524a13a18da3114cbb62aa36c3f69adb6f3f3. Runtimeinventory first invocation omitted requiredexplicitpaths and emitted noinventory; corrected invocation with exactcompose/manifest succeeded. No runtime mutation from that inspection error.
+
+- GUIreview on12.0.6: actual managername-search found all4controlledshares; WWWdetail displays lifecycle, grants, aliases and activity. Editdialog showed audience, expiry, bundle/entry, targetmembership and recipient/filtercontrols; closed withoutsubmission. Existing11.0.10EUIDsearch-label mismatch confirmed unchanged inbothsourceversions; direct `/shares/<share-euid>` andnamesearchwork. This baseline UXlimitation is recorded, not expanded into anotherrelease. New auditbaseline10/10HTTPchecks passed at07:27:23Z; one externaldenial andmanagerreconciliation are next.
+
+- 2026-10-26T07:55:21Z final audit checkpoint: one external revoked-file GET returned 403 and persisted native denial M-DGX-14QQR at revision 6. Original helper stopped parsing its exact 22-byte text response as JSON; a zero-request reconciliation preserved the failure and completed its pending receipt. Reopening the manager share page added contents event M-DGX-14QRP, so the strict one-event comparison stopped after 10 successful reads. Final reviewed reconciliation retained all 275 prior events, identified exactly those two new verified actors/events, and issued one fixed-window report GET. It passed with 277 total events, 108 authorization evaluations, one denial; fresh window two events/one authorization/one denial/zero bytes. No denied-fetch replay, new product edit, test campaign or build. Sanitized receipt: audit-acceptance-12.0.6.json.
+- Current documentation/evidence checkpoint: management GUI review, 12.0.6 build/deploy/provenance/sibling/source-binding receipts and updated coverage/requirements/gap survey prepared for publication. Overall estimate 98.25% (approximately 98%). ACCEPT remains human-blocked; source/release/audit gates are satisfied. User was given the canonical report link to open in their own Incognito window; no invisible signup window is claimed to exist.

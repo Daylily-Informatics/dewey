@@ -1,0 +1,358 @@
+{
+  "observed_at": "2026-10-26T07:18:41.449699+00:00",
+  "containers": [
+    {
+      "name": "dayhoff-day-dewey-1",
+      "id": "ebb22ba30aaeba369859af8bcbc71e628b7bc22fed2c6ac6142d08a9dab7c55a",
+      "image_id": "sha256:05652be69cfabc252eeb331e6c16b023536da474de9ac5cdb73f53249b076fa1",
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:05652be69cfabc252eeb331e6c16b023536da474de9ac5cdb73f53249b076fa1",
+      "repo_digests": [
+        "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:05652be69cfabc252eeb331e6c16b023536da474de9ac5cdb73f53249b076fa1"
+      ],
+      "started_at": "2026-10-26T07:16:51.987998758Z",
+      "restart_count": 0,
+      "version": "12.0.6",
+      "source_revision": "25ec6c9d19ebbe32ef445aa348b2287aff89781f"
+    },
+    {
+      "name": "dayhoff-day-login-1",
+      "id": "bfe936144539aed8fa5f993b38e38b83b82b2abe0e58bef54dbc6c7526e2d3b6",
+      "image_id": "sha256:82985b4c51c2f397d1e2a209c3e43f06b7328eca56f0bc4d618c3316cd41c355",
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/lsmc-oauth-login@sha256:82985b4c51c2f397d1e2a209c3e43f06b7328eca56f0bc4d618c3316cd41c355",
+      "repo_digests": [
+        "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/lsmc-oauth-login@sha256:82985b4c51c2f397d1e2a209c3e43f06b7328eca56f0bc4d618c3316cd41c355"
+      ],
+      "started_at": "2026-10-26T04:19:39.235169785Z",
+      "restart_count": 0,
+      "version": "4.1.1",
+      "source_revision": "3a54d153c10193dda78e77a7c562529c2768ee45"
+    },
+    {
+      "name": "dayhoff-day-kahlo-1",
+      "id": "66dbf0bf4560d772316b7cd0483176adfae1c65bbde8156b0fe1c2f5b57f8222",
+      "image_id": "sha256:b39683585b750b3dbc43b908a640030e8c5c941eebbd383d3e345b93532f2acb",
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/kahlo@sha256:b39683585b750b3dbc43b908a640030e8c5c941eebbd383d3e345b93532f2acb",
+      "repo_digests": [
+        "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/kahlo@sha256:b39683585b750b3dbc43b908a640030e8c5c941eebbd383d3e345b93532f2acb"
+      ],
+      "started_at": "2026-10-19T10:43:39.384006415Z",
+      "restart_count": 0,
+      "version": "9.0.47",
+      "source_revision": "2a058076b70514482f7ca0881d2c5ff6aea99a15"
+    },
+    {
+      "name": "dayhoff-day-ursa-v2-run-worker-1",
+      "id": "336d63dc93f79819b8a0e03d122b3037da7478cad7e1de600e2c5b8bbcaf3bb7",
+      "image_id": "sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "repo_digests": [
+        "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d"
+      ],
+      "started_at": "2026-10-19T09:24:02.702804431Z",
+      "restart_count": 0,
+      "version": "14.1.98",
+      "source_revision": "f272799584ee91e4ee157e498f484144a1a04581"
+    },
+    {
+      "name": "dayhoff-day-ursa-placement-scheduler-1",
+      "id": "4e9c8a3d062b3bc930b5532e6ec150aa7c3d81e107df8b310abbe403d64de99f",
+      "image_id": "sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "repo_digests": [
+        "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d"
+      ],
+      "started_at": "2026-10-19T09:24:02.708264969Z",
+      "restart_count": 0,
+      "version": "14.1.98",
+      "source_revision": "f272799584ee91e4ee157e498f484144a1a04581"
+    },
+    {
+      "name": "dayhoff-day-ursa-cluster-sweeper-1",
+      "id": "ae4fa00afb4665c805137f20416d129c52a847a1260df39dc160c7308fdb4f8b",
+      "image_id": "sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "repo_digests": [
+        "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d"
+      ],
+      "started_at": "2026-10-19T09:24:02.68999943Z",
+      "restart_count": 0,
+      "version": "14.1.98",
+      "source_revision": "f272799584ee91e4ee157e498f484144a1a04581"
+    },
+    {
+      "name": "dayhoff-day-ursa-v2-run-monitor-1",
+      "id": "9bab91e777e67259f1db89911410a1d5590d05753a7d7e2dea1ea9ab549de824",
+      "image_id": "sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "repo_digests": [
+        "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d"
+      ],
+      "started_at": "2026-10-19T09:24:02.705008093Z",
+      "restart_count": 0,
+      "version": "14.1.98",
+      "source_revision": "f272799584ee91e4ee157e498f484144a1a04581"
+    },
+    {
+      "name": "dayhoff-day-ursa-cost-guardrail-scheduler-1",
+      "id": "bb310f4cac6cc1060941a12b751839bbd20f6efa512e84234df460516353fd41",
+      "image_id": "sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "repo_digests": [
+        "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d"
+      ],
+      "started_at": "2026-10-19T09:24:02.698090938Z",
+      "restart_count": 0,
+      "version": "14.1.98",
+      "source_revision": "f272799584ee91e4ee157e498f484144a1a04581"
+    },
+    {
+      "name": "dayhoff-day-ursa-1",
+      "id": "d90533b530f41d96165c8db5135184f32d8069801f5ea8fdcfe037d85bfead82",
+      "image_id": "sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "repo_digests": [
+        "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d"
+      ],
+      "started_at": "2026-10-19T09:24:02.529332342Z",
+      "restart_count": 0,
+      "version": "14.1.98",
+      "source_revision": "f272799584ee91e4ee157e498f484144a1a04581"
+    },
+    {
+      "name": "dayhoff-day-atlas-1",
+      "id": "b6dd52681d7b54cc44779146431d8fbaa1fb9a8b271b09d035c9e790b7ef85b4",
+      "image_id": "sha256:9f52170c56568ac8ef8b914233476471c999ab23fc3188fcb44c71c384d00037",
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/atlas@sha256:9f52170c56568ac8ef8b914233476471c999ab23fc3188fcb44c71c384d00037",
+      "repo_digests": [
+        "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/atlas@sha256:9f52170c56568ac8ef8b914233476471c999ab23fc3188fcb44c71c384d00037"
+      ],
+      "started_at": "2026-10-14T21:35:19.153529945Z",
+      "restart_count": 0,
+      "version": "7.2.12",
+      "source_revision": "3babdb3a5cb4d933a6371a0441b506ebd7fea31a"
+    },
+    {
+      "name": "dayhoff-day-zebra-day-1",
+      "id": "9a39b0bcd29f18bce0b3c334f6e192ea7edc649752d9f0d53613268ad0b1d928",
+      "image_id": "sha256:aa0383ca291f735357ae7754651d10e825d5f1b7bc81659c04a0018991bcc7d1",
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/zebra-day@sha256:aa0383ca291f735357ae7754651d10e825d5f1b7bc81659c04a0018991bcc7d1",
+      "repo_digests": [
+        "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/zebra-day@sha256:aa0383ca291f735357ae7754651d10e825d5f1b7bc81659c04a0018991bcc7d1"
+      ],
+      "started_at": "2026-10-02T20:08:57.883126646Z",
+      "restart_count": 0,
+      "version": null,
+      "source_revision": null
+    },
+    {
+      "name": "dayhoff-day-bloom-1",
+      "id": "12ae49f7feb39ae55c7a6bfd2a4a56f9983e1b1efcec47a03f22bf206051ee85",
+      "image_id": "sha256:888b5c887f4c4c9d307069bfbe902f3b80b5305e953a3bf82c76c06485df96dc",
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/bloom@sha256:888b5c887f4c4c9d307069bfbe902f3b80b5305e953a3bf82c76c06485df96dc",
+      "repo_digests": [
+        "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/bloom@sha256:888b5c887f4c4c9d307069bfbe902f3b80b5305e953a3bf82c76c06485df96dc"
+      ],
+      "started_at": "2026-10-14T06:07:59.588111826Z",
+      "restart_count": 0,
+      "version": null,
+      "source_revision": null
+    },
+    {
+      "name": "dayhoff-day-qeo-1",
+      "id": "0edc56c9308eb1dec8773c32f1f26fda2319492af3e016871b4858337b683e21",
+      "image_id": "sha256:bcb1ddbaee37c44f9a3c332908112eccfa5273f87c0ffc9437291051e7cada0a",
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/qeo@sha256:bcb1ddbaee37c44f9a3c332908112eccfa5273f87c0ffc9437291051e7cada0a",
+      "repo_digests": [
+        "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/qeo@sha256:bcb1ddbaee37c44f9a3c332908112eccfa5273f87c0ffc9437291051e7cada0a"
+      ],
+      "started_at": "2026-09-27T06:01:42.889491554Z",
+      "restart_count": 0,
+      "version": "2.7.7",
+      "source_revision": "b6d22d2c0657328a08b56d4b5cbb62cbb898e8fa"
+    }
+  ],
+  "selected_compose": {
+    "dewey": {
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:05652be69cfabc252eeb331e6c16b023536da474de9ac5cdb73f53249b076fa1",
+      "volumes": [
+        {
+          "type": "bind",
+          "source": "/home/ubuntu/dewey12-release-20261026T021700Z/dewey-config.yaml",
+          "target": "/opt/dewey/day/releases/11.0.1/dewey-config.yaml",
+          "read_only": true,
+          "bind": {
+            "create_host_path": false
+          }
+        },
+        {
+          "type": "bind",
+          "source": "/opt/dewey/day/releases/9.0.0/tapdb-runtime.yaml",
+          "target": "/opt/dewey/day/releases/9.0.0/tapdb-runtime.yaml",
+          "read_only": true,
+          "bind": {
+            "create_host_path": false
+          }
+        },
+        {
+          "type": "bind",
+          "source": "/home/ubuntu/.aws",
+          "target": "/home/ubuntu/.aws",
+          "read_only": true,
+          "bind": {
+            "create_host_path": false
+          }
+        },
+        {
+          "type": "bind",
+          "source": "/home/ubuntu/.config/tapdb/rds-ca-bundle.pem",
+          "target": "/home/ubuntu/.config/tapdb/rds-ca-bundle.pem",
+          "read_only": true,
+          "bind": {
+            "create_host_path": false
+          }
+        },
+        {
+          "type": "bind",
+          "source": "/home/ubuntu/.config/dewey-day/cloudfront-private-key.pem",
+          "target": "/home/ubuntu/.config/dewey-day/cloudfront-private-key.pem",
+          "read_only": true,
+          "bind": {
+            "create_host_path": false
+          }
+        },
+        {
+          "type": "bind",
+          "source": "/opt/dayhoff/deployments/day/state/kahlo/ai-agent-grants.json",
+          "target": "/opt/dayhoff/deployments/day/state/kahlo/ai-agent-grants.json",
+          "read_only": true,
+          "bind": {
+            "create_host_path": false
+          }
+        },
+        {
+          "type": "bind",
+          "source": "/opt/dayhoff/deployments/day/tapdb-registry/domain_code_registry.json",
+          "target": "/opt/dayhoff/deployments/day/tapdb-registry/domain_code_registry.json",
+          "read_only": true,
+          "bind": {
+            "create_host_path": false
+          }
+        },
+        {
+          "type": "bind",
+          "source": "/opt/dayhoff/deployments/day/tapdb-registry/prefix_ownership_registry.json",
+          "target": "/opt/dayhoff/deployments/day/tapdb-registry/prefix_ownership_registry.json",
+          "read_only": true,
+          "bind": {
+            "create_host_path": false
+          }
+        },
+        {
+          "type": "bind",
+          "source": "/home/ubuntu/dewey_ops/tapdb101-20260911/production-application-state-1f634ef66082",
+          "target": "/run/dewey-production-state",
+          "read_only": false,
+          "bind": {
+            "create_host_path": false
+          }
+        },
+        {
+          "type": "bind",
+          "source": "/home/ubuntu/.config/ncbi/key.txt",
+          "target": "/home/ubuntu/.config/ncbi/key.txt",
+          "read_only": true
+        }
+      ],
+      "extra_hosts": [
+        "login.day.lsmc.bio:127.0.0.1",
+        "atlas.day.lsmc.bio:127.0.0.1",
+        "bloom.day.lsmc.bio:127.0.0.1",
+        "ursa.day.lsmc.bio:127.0.0.1",
+        "dewey.day.lsmc.bio:127.0.0.1",
+        "qeo.day.lsmc.bio:127.0.0.1",
+        "zebra-day.day.lsmc.bio:127.0.0.1",
+        "kahlo.day.lsmc.bio:127.0.0.1"
+      ],
+      "network_mode": "host"
+    },
+    "login": {
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/lsmc-oauth-login@sha256:82985b4c51c2f397d1e2a209c3e43f06b7328eca56f0bc4d618c3316cd41c355",
+      "volumes": [
+        "/home/ubuntu/.config:/home/ubuntu/.config:ro",
+        "/opt/dayhoff/deployments/day:/opt/dayhoff/deployments/day:rw",
+        "/home/ubuntu/.aws:/home/ubuntu/.aws:ro",
+        {
+          "type": "bind",
+          "source": "/home/ubuntu/dewey12-release-20261026T021700Z/login-config.yaml",
+          "target": "/home/ubuntu/.config/lsmc-oauth-login-day/lsmc-oauth-login-config-day.yaml",
+          "read_only": true,
+          "bind": {
+            "create_host_path": false
+          }
+        }
+      ],
+      "extra_hosts": null,
+      "network_mode": "host"
+    }
+  },
+  "config_sha256": {
+    "/home/ubuntu/dewey12-release-20261026T021700Z/dewey-config.yaml": "018c3d6d77d5822f7c6eac598856299092774faa2c7c97251cb2b51588122ab9",
+    "/opt/dewey/day/releases/9.0.0/tapdb-runtime.yaml": "5b273ad698409fe910530ed825f60f4f8b56d7a17a1dfe3832ac43f9898baecf",
+    "/home/ubuntu/dewey12-release-20261026T021700Z/login-config.yaml": "e08ce13f45c746d0fc2cb2af7535bbd505bf8aec0429684ff18b506c9cabd26c"
+  },
+  "manifest": {
+    "deploy_name": "day",
+    "images": {
+      "atlas": {
+        "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/atlas@sha256:9f52170c56568ac8ef8b914233476471c999ab23fc3188fcb44c71c384d00037",
+        "repository": "dayhoff/day/atlas",
+        "source_commit": "3babdb3a5cb4d933a6371a0441b506ebd7fea31a",
+        "source_tag": "7.2.12"
+      },
+      "bloom": {
+        "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/bloom@sha256:888b5c887f4c4c9d307069bfbe902f3b80b5305e953a3bf82c76c06485df96dc",
+        "repository": "dayhoff/day/bloom",
+        "source_commit": "e7821bef2851f0c5b8e54d1871c9396609f25e64",
+        "source_tag": "10.1.1"
+      },
+      "dewey": {
+        "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:05652be69cfabc252eeb331e6c16b023536da474de9ac5cdb73f53249b076fa1",
+        "repository": "dayhoff/day/dewey",
+        "source_commit": "25ec6c9d19ebbe32ef445aa348b2287aff89781f",
+        "source_tag": "12.0.6"
+      },
+      "kahlo": {
+        "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/kahlo@sha256:b39683585b750b3dbc43b908a640030e8c5c941eebbd383d3e345b93532f2acb",
+        "repository": "dayhoff/day/kahlo",
+        "source_commit": "2a058076b70514482f7ca0881d2c5ff6aea99a15",
+        "source_tag": "9.0.47"
+      },
+      "lsmc-oauth-login": {
+        "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/lsmc-oauth-login@sha256:82985b4c51c2f397d1e2a209c3e43f06b7328eca56f0bc4d618c3316cd41c355",
+        "repository": "dayhoff/day/lsmc-oauth-login",
+        "source_commit": "3a54d153c10193dda78e77a7c562529c2768ee45",
+        "source_tag": "4.1.1"
+      },
+      "qeo": {
+        "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/qeo@sha256:bcb1ddbaee37c44f9a3c332908112eccfa5273f87c0ffc9437291051e7cada0a",
+        "repository": "dayhoff/day/qeo",
+        "source_commit": "b6d22d2c0657328a08b56d4b5cbb62cbb898e8fa",
+        "source_tag": "2.7.7"
+      },
+      "ursa": {
+        "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+        "repository": "dayhoff/day/ursa",
+        "source_commit": "f272799584ee91e4ee157e498f484144a1a04581",
+        "source_tag": "14.1.98"
+      },
+      "zebra_day": {
+        "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/zebra-day@sha256:aa0383ca291f735357ae7754651d10e825d5f1b7bc81659c04a0018991bcc7d1",
+        "repository": "dayhoff/day/zebra-day",
+        "source_commit": "3b18ad182612be5c5fadb56b5ba07fa977569302",
+        "source_tag": "9.0.2"
+      }
+    },
+    "version": 1
+  },
+  "compose_sha256": "e7acb6f9edcb66acb9f2d9e7c583ea389e2ed0da5f61214ef4abc6a15597ce12"
+}
