@@ -1,0 +1,6 @@
+{
+  "cognito_configuration_changed": false,
+  "dkim_status": "SUCCESS",
+  "domain": "lsmc.com",
+  "verified_for_sending": true
+}

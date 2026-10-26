@@ -43,7 +43,7 @@ Dewey writes registry objects and share state through explicit service config an
 
 ## Sharing
 
-The **12.0.0 contract** supports individual files, fixed selections and live recursive
+The **12.x contract** supports individual files, fixed selections and live recursive
 prefixes. Named recipients can mix internal and external email addresses, including
 people who have not registered. A creator must be allowed to delegate the selected
 content; an authorized recipient needs no separate artifact ACL, S3 permission or

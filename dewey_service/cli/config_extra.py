@@ -55,8 +55,9 @@ def _endpoint_authority(value, path):
     if not isinstance(value, str) or value != value.strip():
         raise ValueError("An exact HTTPS endpoint is required")
     parsed = urlsplit(value)
+    query_allowed = not parsed.query or (path == "/auth/logout" and parsed.query == "service=dewey")
     if (parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password
-            or parsed.query or parsed.fragment or parsed.path != path or parsed.netloc != parsed.netloc.lower()
+            or not query_allowed or parsed.fragment or parsed.path != path or parsed.netloc != parsed.netloc.lower()
             or any(c.isspace() for c in value)):
         raise ValueError("An exact HTTPS endpoint is required")
     if parsed.port not in {None, 443}:

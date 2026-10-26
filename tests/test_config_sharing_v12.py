@@ -47,6 +47,46 @@ def test_prepare_preserves_source_and_authority_and_emits_only_hashes(tmp_path,m
         config_extra._prepare_sharing_v12(destination,path)
 
 
+def test_prepare_preserves_existing_dewey_logout_service_query(tmp_path,monkeypatch):
+    source,payload,path,contract,output=fixtures(tmp_path,monkeypatch)
+    logout="https://login.example.test/auth/logout?service=dewey"
+    payload["auth"]["external_broker"]["logout_url"]=logout
+    source.write_text(yaml.safe_dump(payload))
+    original=source.read_bytes();destination=tmp_path/"release.yaml"
+    config_extra._prepare_sharing_v12(destination,path)
+    assert source.read_bytes()==original
+    prepared=yaml.safe_load(destination.read_bytes())
+    assert prepared["auth"]["external_broker"]["logout_url"]==logout
+    assert prepared["auth"]["external_broker"]["service_token"]==payload["auth"]["external_broker"]["service_token"]
+    assert set(output[0])=={"source_sha256","destination_sha256"}
+
+
+@pytest.mark.parametrize("logout",[
+    "https://login.example.test/auth/logout?service=other",
+    "https://login.example.test/auth/logout?service=dewey&service=dewey",
+    "https://login.example.test/auth/logout?service=dewey&next=%2Fui",
+    "https://login.example.test/auth/logout?service=%64ewey",
+    "https://login.example.test/auth/logout?service=dewey#fragment",
+    "https://other.example.test/auth/logout?service=dewey",
+    "https://user@login.example.test/auth/logout?service=dewey",
+])
+def test_prepare_rejects_other_logout_query_or_authority(tmp_path,monkeypatch,logout):
+    source,payload,path,contract,output=fixtures(tmp_path,monkeypatch)
+    payload["auth"]["external_broker"]["logout_url"]=logout
+    source.write_text(yaml.safe_dump(payload));destination=tmp_path/"release.yaml"
+    with pytest.raises(typer.BadParameter):config_extra._prepare_sharing_v12(destination,path)
+    assert not destination.exists() and not output
+
+
+@pytest.mark.parametrize("field",list(config_extra._RECIPIENT_ENDPOINTS))
+def test_new_recipient_endpoints_still_reject_logout_service_query(tmp_path,monkeypatch,field):
+    source,payload,path,contract,output=fixtures(tmp_path,monkeypatch)
+    contract["auth"]["external_broker"][field]+="?service=dewey"
+    path.write_text(json.dumps(contract));destination=tmp_path/"release.yaml"
+    with pytest.raises(typer.BadParameter):config_extra._prepare_sharing_v12(destination,path)
+    assert not destination.exists() and not output
+
+
 @pytest.mark.parametrize("bad",["authority","missing","public_private_equal","contract_mode","endpoint_query","source_authority"])
 def test_invalid_contract_fails_without_destination_or_secret_output(tmp_path,monkeypatch,bad):
     source,payload,path,contract,output=fixtures(tmp_path,monkeypatch)
