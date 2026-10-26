@@ -1,0 +1,11 @@
+{
+  "service": "dewey",
+  "deployment": "day",
+  "url": "https://dewey.day.lsmc.bio/login",
+  "observed_at": "2026-10-26T03:40:59Z",
+  "status": "confirmed_success",
+  "scope": "Login page and Google OAuth provider entry only",
+  "authenticated_return": "pending real human sign-in",
+  "screenshot": "dewey-login-google-entry.png",
+  "sha256": "00b07da100fc7581f39a744621daab4fb6e9838976adc08cb9af7b34dbf97f7e"
+}

@@ -1,0 +1,90 @@
+[
+  {
+    "group": "Dayhof-Dewey-SBMRZXCBX9YC",
+    "port": 8444,
+    "targets": [
+      {
+        "Target": {
+          "Id": "i-07df3a933e4839f52",
+          "Port": 8444
+        },
+        "HealthCheckPort": "8444",
+        "TargetHealth": {
+          "State": "unhealthy",
+          "Reason": "Target.ResponseCodeMismatch",
+          "Description": "Health checks failed with these codes: [503]"
+        },
+        "AdministrativeOverride": {
+          "State": "no_override",
+          "Reason": "AdministrativeOverride.NoOverride",
+          "Description": "No override is currently active on target"
+        }
+      }
+    ]
+  },
+  {
+    "group": "Dayhof-Dewey-U6YML1JNMPQB",
+    "port": 8443,
+    "targets": [
+      {
+        "Target": {
+          "Id": "i-07df3a933e4839f52",
+          "Port": 8443
+        },
+        "HealthCheckPort": "8443",
+        "TargetHealth": {
+          "State": "unhealthy",
+          "Reason": "Target.ResponseCodeMismatch",
+          "Description": "Health checks failed with these codes: [503]"
+        },
+        "AdministrativeOverride": {
+          "State": "no_override",
+          "Reason": "AdministrativeOverride.NoOverride",
+          "Description": "No override is currently active on target"
+        }
+      }
+    ]
+  },
+  {
+    "group": "Dayhof-Login-IEU0QWHJ8TC7",
+    "port": 8443,
+    "targets": [
+      {
+        "Target": {
+          "Id": "i-07df3a933e4839f52",
+          "Port": 8443
+        },
+        "HealthCheckPort": "8443",
+        "TargetHealth": {
+          "State": "healthy"
+        },
+        "AdministrativeOverride": {
+          "State": "no_override",
+          "Reason": "AdministrativeOverride.NoOverride",
+          "Description": "No override is currently active on target"
+        }
+      }
+    ]
+  },
+  {
+    "group": "Dayhof-Login-ZH4Z8QI46TST",
+    "port": 8444,
+    "targets": [
+      {
+        "Target": {
+          "Id": "i-07df3a933e4839f52",
+          "Port": 8444
+        },
+        "HealthCheckPort": "8444",
+        "TargetHealth": {
+          "State": "healthy"
+        },
+        "AdministrativeOverride": {
+          "State": "no_override",
+          "Reason": "AdministrativeOverride.NoOverride",
+          "Description": "No override is currently active on target"
+        }
+      }
+    ]
+  }
+]

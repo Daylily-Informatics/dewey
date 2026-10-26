@@ -1,0 +1,12 @@
+{
+  "activation_requested": true,
+  "change_id": "/change/C07213431YP4YNF7JODPC",
+  "hosts": [
+    "dewey.day.lsmc.bio",
+    "login.day.lsmc.bio",
+    "*.dewey-content.day.lsmc.bio"
+  ],
+  "load_balancer": "Dayhof-LoadB-yTZ2WPqXCI1t-291525477.us-west-2.elb.amazonaws.com",
+  "public_dns_activated": false,
+  "status": "PENDING"
+}

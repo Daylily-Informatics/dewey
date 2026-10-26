@@ -1,8 +1,8 @@
 # Dewey sharing gap analysis — 2026-10-25
 
-Status: review document; implementation and the later multi-agent ledgered plan are deferred.
+Status: dated gap baseline with implementation and release disposition updated below.
 
-Baseline: [current capabilities](20261025_dewey_capabilities.md), observed deployed `11.0.10` / `7f6fde5429741780517cf461a615e5b3e5f102f2`. Target: [sharing requirements](20261025_dewey_sharing_requirements.md), SHR-01 through SHR-20. The documentation branch does not change the deployed service.
+Baseline: [current capabilities](20261025_dewey_capabilities.md), observed deployed `11.0.10` / `7f6fde5429741780517cf461a615e5b3e5f102f2`. Target: [sharing requirements](20261025_dewey_sharing_requirements.md), SHR-01 through SHR-20. That original review was documentation-only; subsequent approved execution is recorded below.
 
 ## Dewey 12 implementation disposition — 2026-10-26
 
@@ -10,16 +10,16 @@ The original comparison below is the **11.0.10 baseline**, preserved for traceab
 
 | Requirements | Implemented source | Remaining release evidence |
 |---|---|---|
-| SHR-01,02,04,05,19 | Schema-3 revisions, delegation, atomic target/grant/expiry edits, preserved history | Native PostgreSQL contracts and deployed journeys |
-| SHR-03,06,12,13 | Mixed/pending grants, registration-open audience, share-only verified Login identities, current introspection | Identity tests and controlled internal/external onboarding |
-| SHR-07,08,09 | Canonical fetch, native global aliases/tombstones, HTTP/range/conditional behavior | Focused contracts and deployed URL/credential access |
-| SHR-10,11 | Complete manifests, recursive CLI/resume receipts, streaming TAR, isolated WWW entry/assets | Pagination/change/interruption tests and deployed report/tree proof |
-| SHR-14 | Dedicated ALB and restricted origin/DNS operator | Scoped infrastructure receipts and outside-network boundaries |
-| SHR-15,16 | Native events, lifecycle inventory, windowed aggregate reports, complete frozen exports | Fixture reconciliation and deployed audit totals |
-| SHR-17 | Qualified-equivalence rebind, collision checks, native location revisions | Rebind tests and preserved deployed URLs |
-| SHR-18,20 | Management/recipient API, GUI/CLI, README and sharing guide | Integrated interface checks and final verified documentation |
+| SHR-01,02,04,05,19 | Schema-3 revisions, delegation, atomic target/grant/expiry edits, preserved history | PostgreSQL contracts passed; preserving schema-3 production conversion verified; authenticated journeys pending |
+| SHR-03,06,12,13 | Mixed/pending grants, registration-open audience, share-only verified Login identities, current introspection | Identity tests passed; controlled internal/external onboarding pending |
+| SHR-07,08,09 | Canonical fetch, native global aliases/tombstones, HTTP/range/conditional behavior | Focused contracts passed; deployed credential access pending |
+| SHR-10,11 | Complete manifests, recursive CLI/resume receipts, streaming TAR, isolated WWW entry/assets | Pagination/change/interruption tests passed; deployed report/tree proof pending |
+| SHR-14 | Dedicated ALB and restricted origin/DNS operator | Dedicated ingress active; four targets healthy, public DNS INSYNC, nonmanagement-source boundaries passed |
+| SHR-15,16 | Native events, lifecycle inventory, windowed aggregate reports, complete frozen exports | Source fixture reconciliation passed; deployed audit totals pending |
+| SHR-17 | Qualified-equivalence rebind, collision checks, native location revisions | Rebind contracts passed; preserved deployed URLs pending |
+| SHR-18,20 | Management/recipient API, GUI/CLI, README and sharing guide | Focused source checks passed; authenticated interface acceptance pending |
 
-At this checkpoint, implementations are awaiting the bounded test/release gates; no row is represented as production-complete. See [current sharing behavior](../sharing.md) and the ledger for subsequent receipts, limitations and terminal status.
+Dewey **12.0.2** and Login **4.1.0** are deployed with verified image/package provenance. The native conversion preserved all 42 historical shares without retiring or deleting any. All 11 unselected containers retain baseline identity, image, start time and restart count. Source tests and ingress boundaries passed; authenticated acceptance found an oversized-cookie sign-in defect; the focused 12.0.3 correction is being released. See [current sharing behavior](../sharing.md) and the ledger for subsequent receipts, limitations and terminal status.
 
 ## 1. Finding
 

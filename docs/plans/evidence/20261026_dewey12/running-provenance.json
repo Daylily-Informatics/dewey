@@ -1,0 +1,35 @@
+[
+  {
+    "service": "dewey",
+    "container_id": "c7ad8ffeebdee1c1d7c7baea9bb7597735d45e9455c6e42dbe62e32229505cf0",
+    "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:0a65ed288bbd6b52c32ed6205ec478f052134534c43208a66b3f27f88951bc0a",
+    "oci_version": "12.0.2",
+    "oci_revision": "0a85f9ed959b7486b8a1ecc7b545ab103a53d917",
+    "packages": {
+      "dewey-service": "12.0.2",
+      "daylily-tapdb": "11.0.9",
+      "daylily-auth-cognito": "2.1.5"
+    },
+    "ready": true,
+    "health_build": {
+      "version": "12.0.2",
+      "sha": "0a85f9ed959b7486b8a1ecc7b545ab103a53d917"
+    }
+  },
+  {
+    "service": "login",
+    "container_id": "c4b81adc70f0258f76a31e535029b7b64c4911b5e7550afb20aee73344eb5c7b",
+    "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/lsmc-oauth-login@sha256:675b378414f04d173c01475ba1624abb1f3325b0fe49ea96e2b55e473c0ff516",
+    "oci_version": "4.1.0",
+    "oci_revision": "4836f1581b309176bdf1706cdb9eabbf4b4ea4b4",
+    "packages": {
+      "lsmc-oauth-login": "4.1.0",
+      "daylily-auth-cognito": "2.1.9"
+    },
+    "ready": true,
+    "health_build": {
+      "version": "4.1.0",
+      "sha": ""
+    }
+  }
+]

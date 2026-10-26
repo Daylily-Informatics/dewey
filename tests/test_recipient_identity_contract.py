@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+from dataclasses import replace
 from types import SimpleNamespace
 from urllib.parse import parse_qs, urlparse
 
 import pytest
-from fastapi import HTTPException
+from fastapi import FastAPI, HTTPException
+from fastapi.testclient import TestClient
+from daylily_auth_cognito.browser.session import (
+    CognitoWebSessionConfig, configure_session_middleware, load_session_principal, store_session_principal,
+)
 from starlette.requests import Request
 
 from dewey_service import auth, recipient_identity
@@ -59,6 +64,71 @@ def test_recipient_projection_cannot_inherit_administrator_groups():
     principal = auth.resolve_external_broker_principal(user, request)
     assert principal.roles == ["READ_ONLY"]
     assert principal.app_context["recipient_only"] is True
+
+
+def test_bulky_broker_user_cookie_fits_browser_limit_and_roundtrips(monkeypatch):
+    """Exercise real shared ASGI cookie serialization, not just a principal dict."""
+    app = FastAPI()
+    app.state.settings = settings()
+    app.state.settings.share_session_generation = ""
+    app.state.settings.validate_cognito_email_domain = lambda email: (True, "")
+    config = CognitoWebSessionConfig(domain="login.example.test", client_id="dewey",
+        redirect_uri="https://dewey.example.test/auth/lsmc/callback", logout_uri="https://dewey.example.test",
+        public_base_url="https://dewey.example.test", session_secret_key="fixture-session-signing-key",
+        session_cookie_name="__Host-dewey_session", server_instance_id="fixture-server-instance", auth_mode="external_broker")
+    app.state.web_session_config = config
+    configure_session_middleware(app, config)
+    current_binding = binding(recipient_only=False)
+    user = {"canonical_user_id": "fixture-canonical", "email": "recipient@example.test",
+        "email_verified": True, "verification_state": "verified", "display_name": "Fixture administrator",
+        "groups": ["lsmc:global-admin", "lsmc:internal-user"],
+        "providers": [{"provider": "fixture", "subject": "provider-history-" + str(i)} for i in range(80)],
+        "service_entitlements": [{"service": "dewey", "roles": ["admin"], "groups": ["dewey-admin"]}],
+        "preferences": {"fixture": "x" * 5000}, "audit_metadata": {"fixture": "y" * 5000}}
+
+    async def handoff(**kwargs):
+        return {"user": user, "recipient_identity": current_binding}
+
+    def native_binding(request, session_config, **kwargs):
+        principal = load_session_principal(request)
+        store_session_principal(request, session_config, replace(principal,
+            app_context={**principal.app_context, "dewey_session_binding_euid": "fixture-session-binding"}))
+
+    monkeypatch.setattr(auth, "exchange_external_broker_handoff", handoff)
+    monkeypatch.setattr("dewey_service.preview_sessions.establish_session_binding", native_binding)
+
+    @app.get("/auth/login")
+    def start(request: Request):
+        return auth.start_external_broker_login(request, settings=app.state.settings, next_path="/session")
+
+    @app.get("/auth/lsmc/callback")
+    async def callback(request: Request, code: str, state: str):
+        return await auth.complete_external_broker_login(request, config, code=code, state=state)
+
+    @app.get("/session")
+    def session_view(request: Request):
+        profile = auth._load_ui_profile(request)
+        assert profile is not None
+        return {"profile": profile, "app_context": load_session_principal(request).app_context}
+
+    client = TestClient(app, base_url="https://dewey.example.test")
+    started = client.get("/auth/login", follow_redirects=False)
+    state = parse_qs(urlparse(started.headers["location"]).query)["state"][0]
+    completed = client.get("/auth/lsmc/callback", params={"code": "fixture-handoff", "state": state}, follow_redirects=False)
+    assert completed.status_code == 303
+    assert completed.headers["location"] == "/session"
+    cookie = completed.headers["set-cookie"]
+    assert len(cookie.encode("utf-8")) < 4096
+    assert "secure" in cookie.lower() and "httponly" in cookie.lower()
+    loaded = client.get("/session")
+    assert loaded.status_code == 200
+    result = loaded.json()
+    assert set(result["profile"]["roles"]) == {"ADMIN", "READ_WRITE"}
+    assert result["app_context"]["canonical_user"] == {"canonical_user_id": "fixture-canonical"}
+    assert result["app_context"]["recipient_identity"] == current_binding
+    assert result["app_context"]["recipient_only"] is False
+    assert result["app_context"]["dewey_session_binding_euid"] == "fixture-session-binding"
+    assert result["profile"]["identity_grant_id"] == current_binding["grant_id"]
 
 
 @pytest.mark.parametrize("change", [

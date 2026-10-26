@@ -1,12 +1,12 @@
 # Dewey sharing requirements — 2026-10-25
 
-Status: proposed product requirements for user review. No implementation, deployment, migration, invitation, or multi-agent implementation plan is authorized by this document.
+Status: approved execution requirements with dated baseline retained. The separate user-approved execution plan authorized implementation and release; deployment and acceptance receipts are tracked in the controlling ledger.
 
 Baseline: [Dewey capabilities and feature analysis](20261025_dewey_capabilities.md), deployed release `11.0.10`. Requirements below describe the desired product, including changes to existing behavior. They do not assert that the features already work.
 
 ## Approved execution decisions — 2026-10-26
 
-The user approved **Dewey 12.0.0 + Login 4.1.0**, scoped Dayhoff ingress and preserving conversion. The [controlling ledger](../plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) owns validation/deployment status. Deployment preparation required immutable corrective patches: **12.0.1** preserves the existing logout service query; **12.0.2** limits template comparison and native export to the explicitly selected release templates. Login remains 4.1.0. Requirement IDs below remain stable; earlier proposed choices are superseded as follows:
+The user approved **Dewey 12.0.0 + Login 4.1.0**, scoped Dayhoff ingress and preserving conversion. The [controlling ledger](../plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) owns validation/deployment status. Deployment preparation required immutable corrective patches: **12.0.1** preserves the existing logout service query; **12.0.2** limits template comparison and native export to the explicitly selected release templates. **12.0.3** reduces the browser session payload to avoid cookie rejection after real sign-in. Login remains 4.1.0. Requirement IDs below remain stable; earlier proposed choices are superseded as follows:
 
 - Canonical fetch identity is the share EUID; aliases are global atomic claims with permanent tombstones.
 - Creator delegation authorizes verified recipients without independent artifact ACLs. Named recipients and Public with registration never permit anonymous access. New external users are share-only, without automatic domain tenant membership.

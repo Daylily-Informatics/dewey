@@ -1,0 +1,24 @@
+{
+  "observed_at": "2026-10-26T03:36:16.595830+00:00",
+  "unchanged_siblings": [
+    "dayhoff-day-atlas-1",
+    "dayhoff-day-bloom-1",
+    "dayhoff-day-kahlo-1",
+    "dayhoff-day-qeo-1",
+    "dayhoff-day-ursa-1",
+    "dayhoff-day-ursa-cluster-sweeper-1",
+    "dayhoff-day-ursa-cost-guardrail-scheduler-1",
+    "dayhoff-day-ursa-placement-scheduler-1",
+    "dayhoff-day-ursa-v2-run-monitor-1",
+    "dayhoff-day-ursa-v2-run-worker-1",
+    "dayhoff-day-zebra-day-1"
+  ],
+  "count": 11,
+  "keys": [
+    "id",
+    "image_id",
+    "started_at",
+    "restart_count",
+    "repo_digests"
+  ]
+}

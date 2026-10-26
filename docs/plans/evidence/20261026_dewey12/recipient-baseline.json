@@ -1,0 +1,20 @@
+{
+  "identities": [
+    {
+      "recipient_label": "internal",
+      "existing": false,
+      "enabled": null,
+      "provider_status": null,
+      "email_verified": null
+    },
+    {
+      "recipient_label": "external",
+      "existing": true,
+      "enabled": true,
+      "provider_status": "EXTERNAL_PROVIDER",
+      "email_verified": true
+    }
+  ],
+  "personal_addresses_excluded": true,
+  "source": "read-only Cognito list_users with exact approved mailbox filters"
+}

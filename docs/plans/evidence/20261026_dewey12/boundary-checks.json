@@ -1,0 +1,130 @@
+{
+  "observed_at": "2026-10-26T03:33:19.167992+00:00",
+  "source": "deployment EC2 outside approved management IP conditions",
+  "load_balancer": "Dayhof-LoadB-yTZ2WPqXCI1t-291525477.us-west-2.elb.amazonaws.com",
+  "tls_verification": true,
+  "checks": [
+    {
+      "name": "login-recipient",
+      "host": "login.day.lsmc.bio",
+      "path": "/auth/share?state=boundary-check",
+      "method": "GET",
+      "status": "200",
+      "expected": 200,
+      "exit_code": 0,
+      "pass": true,
+      "error": ""
+    },
+    {
+      "name": "machine-auth",
+      "host": "dewey.day.lsmc.bio",
+      "path": "/fetch/boundary-probe",
+      "method": "GET",
+      "status": "401",
+      "expected": 401,
+      "exit_code": 0,
+      "pass": true,
+      "error": ""
+    },
+    {
+      "name": "browser-auth",
+      "host": "dewey.day.lsmc.bio",
+      "path": "/fetch/boundary-probe",
+      "method": "GET",
+      "status": "303",
+      "expected": 303,
+      "exit_code": 0,
+      "pass": true,
+      "error": ""
+    },
+    {
+      "name": "recipient-tokens-auth",
+      "host": "dewey.day.lsmc.bio",
+      "path": "/api/v2/recipient/tokens",
+      "method": "GET",
+      "status": "401",
+      "expected": 401,
+      "exit_code": 0,
+      "pass": true,
+      "error": ""
+    },
+    {
+      "name": "management-denied",
+      "host": "dewey.day.lsmc.bio",
+      "path": "/api/v1/records",
+      "method": "GET",
+      "status": "403",
+      "expected": 403,
+      "exit_code": 0,
+      "pass": true,
+      "error": ""
+    },
+    {
+      "name": "general-login-denied",
+      "host": "login.day.lsmc.bio",
+      "path": "/auth/login",
+      "method": "GET",
+      "status": "403",
+      "expected": 403,
+      "exit_code": 0,
+      "pass": true,
+      "error": ""
+    },
+    {
+      "name": "backchannel-denied",
+      "host": "login.day.lsmc.bio",
+      "path": "/api/v1/dewey/identity/introspect",
+      "method": "POST",
+      "status": "403",
+      "expected": 403,
+      "exit_code": 0,
+      "pass": true,
+      "error": ""
+    },
+    {
+      "name": "fetch-method-denied",
+      "host": "dewey.day.lsmc.bio",
+      "path": "/fetch/boundary-probe",
+      "method": "POST",
+      "status": "403",
+      "expected": 403,
+      "exit_code": 0,
+      "pass": true,
+      "error": ""
+    },
+    {
+      "name": "forged-headers-denied",
+      "host": "dewey.day.lsmc.bio",
+      "path": "/api/v1/records",
+      "method": "GET",
+      "status": "403",
+      "expected": 403,
+      "exit_code": 0,
+      "pass": true,
+      "error": ""
+    },
+    {
+      "name": "invalid-content-host",
+      "host": "probe.dewey-content.day.lsmc.bio",
+      "path": "/__dewey_preview/challenge",
+      "method": "GET",
+      "status": "421",
+      "expected": 403,
+      "exit_code": 0,
+      "pass": false,
+      "error": ""
+    },
+    {
+      "name": "nonexistent-content-context",
+      "host": "pv-00000000000000000000000000000000.dewey-content.day.lsmc.bio",
+      "path": "/__dewey_preview/assets/report.html",
+      "method": "GET",
+      "status": "421",
+      "expected": 404,
+      "exit_code": 0,
+      "pass": false,
+      "error": ""
+    }
+  ],
+  "ok": false
+}

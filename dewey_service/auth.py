@@ -386,7 +386,10 @@ def resolve_external_broker_principal(user: dict[str, Any], request: Request) ->
         roles=list(profile["roles"]),
         cognito_groups=list(profile["groups"]),
         auth_mode="external_broker",
-        app_context={"canonical_user": dict(user), "recipient_identity": binding,
+        # The broker record can contain many providers, service entitlements and
+        # audit fields. Cookie sessions retain only the canonical binding used
+        # below, plus one current recipient proof; the broker owns the full user.
+        app_context={"canonical_user": {"canonical_user_id": subject}, "recipient_identity": binding,
                      "recipient_only": binding["recipient_only"] if binding is not None else False},
     )
 
