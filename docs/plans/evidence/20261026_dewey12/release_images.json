@@ -63,7 +63,7 @@
       "commit": "a5d6c05df2337a9b87dff1ab19c0b109f910a986",
       "tag_object": "adfef391571b1f7a47ea76f967f9e3282716df95",
       "digest": "sha256:0885649fb6a2aad1352db6cf1a21e2034f4f7120d25087bc00d7d2c0b5a4a79d",
-      "disposition": "deployed and ready; real manager browser sign-in successful",
+      "disposition": "deployed then superseded by isolated report attribution/handoff correction",
       "packages": {
         "daylily-tapdb": "11.0.9",
         "daylily-auth-cognito": "2.1.5"
@@ -78,6 +78,18 @@
       "disposition": "deployed and ready; authenticated parallel assets and Sharing UI pass",
       "packages": {
         "daylily-auth-cognito": "2.1.9"
+      }
+    },
+    {
+      "service": "dewey",
+      "version": "12.0.4",
+      "commit": "482c8013a8e0946376cb7565ec381a0eb7836065",
+      "tag_object": "17aac2848427fe94b60c558c97e5fdde67f15e0b",
+      "digest": "sha256:e4e43c72f33d110e4b2f4c61526cf60377e97bc2351ea4a210effe6a2f5739cb",
+      "disposition": "deployed and ready; external named report and authenticated file/recursive/TAR browser checks pass",
+      "packages": {
+        "daylily-tapdb": "11.0.9",
+        "daylily-auth-cognito": "2.1.5"
       }
     }
   ],
@@ -106,6 +118,15 @@
     "exit_code": 0,
     "selected": [
       "lsmc-oauth-login"
+    ],
+    "cache_mode": "off"
+  },
+  "report_corrective_build": {
+    "started_at": "2026-10-26T04:47:05.718583+00:00",
+    "finished_at": "2026-10-26T04:48:35.908236+00:00",
+    "exit_code": 0,
+    "selected": [
+      "dewey"
     ],
     "cache_mode": "off"
   }

@@ -1,0 +1,22 @@
+{
+  "version": "12.0.4",
+  "browser_profile": "authorized external recipient profile",
+  "canonical_share_euid": "M-DGX-14D1F",
+  "entry_path": "/fetch/M-DGX-14D1F/multiqc.html",
+  "observed_flow": [
+    "share deep link",
+    "Login /auth/share",
+    "Continue with Google using existing signed-in profile",
+    "same canonical deep link",
+    "isolated report rendering"
+  ],
+  "actual_identity_verified_by_recipient_preflight": true,
+  "context_origin": "https://pv-7a7afaaff6f102f90e78ec3ff40be013.dewey-content.day.lsmc.bio",
+  "context_expires_at": "2026-10-26T05:09:19.756537+00:00",
+  "visible_multiqc": true,
+  "visible_sidecar_css_nested_js_json_pass": true,
+  "screenshot": "external-multiqc-12.0.4.png",
+  "screenshot_sha256": "8b0271b7fdbe7bc91193165ed1260ac6d2c41db96f2442bc1a4f951715114d07",
+  "credential_exported": false,
+  "new_external_registration_exercised": false
+}

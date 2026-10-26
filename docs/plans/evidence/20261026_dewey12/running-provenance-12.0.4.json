@@ -1,0 +1,47 @@
+{
+  "dewey": {
+    "container": {
+      "name": "dayhoff-day-dewey-1",
+      "id": "30d7a09c8d5a036878bfa66778e22841b7f4d4b96405322503c3c5c1cd597654",
+      "image_id": "sha256:e4e43c72f33d110e4b2f4c61526cf60377e97bc2351ea4a210effe6a2f5739cb",
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:e4e43c72f33d110e4b2f4c61526cf60377e97bc2351ea4a210effe6a2f5739cb",
+      "repo_digests": [
+        "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:e4e43c72f33d110e4b2f4c61526cf60377e97bc2351ea4a210effe6a2f5739cb"
+      ],
+      "started_at": "2026-10-26T04:49:27.740703989Z",
+      "restart_count": 0,
+      "version": "12.0.4",
+      "source_revision": "482c8013a8e0946376cb7565ec381a0eb7836065"
+    },
+    "packages": {
+      "dewey-service": "12.0.4",
+      "daylily-tapdb": "11.0.9",
+      "daylily-auth-cognito": "2.1.5"
+    },
+    "ready": true,
+    "health_build": {
+      "version": "12.0.4",
+      "sha": "482c8013a8e0946376cb7565ec381a0eb7836065"
+    }
+  },
+  "login": {
+    "container": {
+      "name": "dayhoff-day-login-1",
+      "id": "bfe936144539aed8fa5f993b38e38b83b82b2abe0e58bef54dbc6c7526e2d3b6",
+      "image_id": "sha256:82985b4c51c2f397d1e2a209c3e43f06b7328eca56f0bc4d618c3316cd41c355",
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/lsmc-oauth-login@sha256:82985b4c51c2f397d1e2a209c3e43f06b7328eca56f0bc4d618c3316cd41c355",
+      "repo_digests": [
+        "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/lsmc-oauth-login@sha256:82985b4c51c2f397d1e2a209c3e43f06b7328eca56f0bc4d618c3316cd41c355"
+      ],
+      "started_at": "2026-10-26T04:19:39.235169785Z",
+      "restart_count": 0,
+      "version": "4.1.1",
+      "source_revision": "3a54d153c10193dda78e77a7c562529c2768ee45"
+    },
+    "packages": {
+      "lsmc-oauth-login": "4.1.1",
+      "daylily-auth-cognito": "2.1.9"
+    }
+  },
+  "observed_at": "2026-10-26T04:51:12.464194+00:00"
+}

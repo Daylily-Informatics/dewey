@@ -1,0 +1,71 @@
+{
+  "snapshot": "dewey12-acceptance-20261026-browser-read-2026-10-26T04-56-13-391Z.json",
+  "summary": {
+    "phase": "read",
+    "status": "stopped",
+    "requests": 9,
+    "http_expectations_passed": 9,
+    "identity_created": false,
+    "credentials_exported": false,
+    "storage_deleted": false
+  },
+  "verified_external_preflight_passed": true,
+  "checks": [
+    {
+      "label": "file-full",
+      "status": 200,
+      "headers": {
+        "accept-ranges": "bytes",
+        "cache-control": "no-store",
+        "connection": "Keep-Alive",
+        "content-disposition": "attachment; filename=\"readme.txt\"; filename*=UTF-8''readme.txt",
+        "content-encoding": "gzip",
+        "content-security-policy": "sandbox; default-src 'none'",
+        "content-type": "text/plain",
+        "date": "Mon, 26 Oct 2026 04:56:11 GMT",
+        "etag": "\"67ace7ed2966bf27fc36ec51cee35389-gzip\"",
+        "keep-alive": "timeout=5, max=95",
+        "last-modified": "Mon, 26 Oct 2026 03:25:16 GMT",
+        "referrer-policy": "no-referrer",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Cookie,Accept-Encoding",
+        "x-content-type-options": "nosniff",
+        "x-correlation-id": "6f7040473581f393",
+        "x-dewey-request-id": "239de433a5784bc689405874260f8283",
+        "x-request-id": "us7L_H7OQFaMieY31Jw6jvnb9k4LZLAC"
+      },
+      "bytes": 40,
+      "sha256": "e114395a773c9378e136625da541493b44db71e8d2ae0396e2d621a57ee63172"
+    },
+    {
+      "label": "file-head",
+      "status": 200,
+      "headers": {
+        "accept-ranges": "bytes",
+        "cache-control": "no-store",
+        "connection": "Keep-Alive",
+        "content-disposition": "attachment; filename=\"readme.txt\"; filename*=UTF-8''readme.txt",
+        "content-length": "40",
+        "content-security-policy": "sandbox; default-src 'none'",
+        "content-type": "text/plain",
+        "date": "Mon, 26 Oct 2026 04:56:12 GMT",
+        "etag": "\"67ace7ed2966bf27fc36ec51cee35389\"",
+        "keep-alive": "timeout=5, max=94",
+        "last-modified": "Mon, 26 Oct 2026 03:25:16 GMT",
+        "referrer-policy": "no-referrer",
+        "server": "uvicorn",
+        "vary": "Cookie",
+        "x-content-type-options": "nosniff",
+        "x-correlation-id": "b2bb150ee34cf4ad",
+        "x-dewey-request-id": "5761f9f8b98b4139a383ddfc47e742ba",
+        "x-request-id": "-MPVTxQVB9lVk95sgIGYUwgs79wb4VIC"
+      },
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "failure": "HEAD differs from GET: ingress gzip transforms GET representation and ETag",
+  "production_source_version": "12.0.4",
+  "next_action": "Scoped Apache no-gzip for authenticated delivery paths; retain original error; repeat affected delivery checks after correction"
+}
