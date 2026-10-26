@@ -1,0 +1,140 @@
+{
+  "observed_at": "2026-10-26T08:41:17.791179+00:00",
+  "status": "pass_for_export_delivery",
+  "scope": "Isolated local nonproduction real-Chrome export with unmodified synthetic MultiQC1.35 fixture",
+  "source_files": {
+    "dewey_service/report_preview.py": "b1167da482d78aa4e3bede6a928ee06836b4bc9cbdba9463424e7d1c420fed59",
+    "dewey_service/static/sharing.js": "66432fcdd84d0ec8c8e1bf86c138b13b60881147b50718ad5c0cb7c390ab8a94"
+  },
+  "policy": "Actual product report-content CSP and durable iframe sandbox tokens; separate loopback origins",
+  "png_count": 7,
+  "data_download_count": 7,
+  "valid_json_count": 6,
+  "files": [
+    {
+      "name": "general_stats_table.png",
+      "bytes": 35971,
+      "sha256": "b5872c864235d6c964f8862c2de17feb8aee2719ab62a9f77918645192c5e003",
+      "dimensions": [
+        1600,
+        800
+      ],
+      "png_valid": true
+    },
+    {
+      "name": "general_stats_table.json",
+      "bytes": 25966,
+      "sha256": "6dd71d47d6f50151217a384fd409af88baae29395022b9319d521375c53a5b6a",
+      "json_valid": true,
+      "json_type": "dict"
+    },
+    {
+      "name": "fastqc_sequence_counts_plot.png",
+      "bytes": 49434,
+      "sha256": "53c457ff5081f909713150044e9315d5a56ef3ae08ba4855e869ddfcbcbefd2d",
+      "dimensions": [
+        1600,
+        800
+      ],
+      "png_valid": true
+    },
+    {
+      "name": "fastqc_sequence_counts_plot.json",
+      "bytes": 8212,
+      "sha256": "4572ee18696037083445621c838073703aa5682fcc4ef9d733a6ebab30605356",
+      "json_valid": true,
+      "json_type": "dict"
+    },
+    {
+      "name": "fastqc_per_base_sequence_quality_plot.png",
+      "bytes": 72544,
+      "sha256": "952cf917ede0661c032fc25ddec5a17962d4571831b899e0b0fe67b0243f67ae",
+      "dimensions": [
+        1600,
+        800
+      ],
+      "png_valid": true
+    },
+    {
+      "name": "fastqc_per_base_sequence_quality_plot.json",
+      "bytes": 10779,
+      "sha256": "f8cec0953185d68b115a8c00332bdb93ae0e9b3571fa31557df840f2adf06642",
+      "json_valid": true,
+      "json_type": "dict"
+    },
+    {
+      "name": "fastqc_per_sequence_quality_scores_plot.png",
+      "bytes": 75973,
+      "sha256": "e8dc20f256b1aa53aee5a6938d207a31fc63feee08d517716c7b4cce678ff2b5",
+      "dimensions": [
+        1600,
+        800
+      ],
+      "png_valid": true
+    },
+    {
+      "name": "fastqc_per_sequence_quality_scores_plot.json",
+      "bytes": 10742,
+      "sha256": "dada98bd256cead0902d7444bfbb09cb280f95abf3c24b00733a9bc419e1aac2",
+      "json_valid": true,
+      "json_type": "dict"
+    },
+    {
+      "name": "fastqc_per_sequence_gc_content_plot.png",
+      "bytes": 77212,
+      "sha256": "eca4d93472c0109bb037f45642dcd6e54b7e717fc2bbae7a6b322e2d014de8e4",
+      "dimensions": [
+        1600,
+        800
+      ],
+      "png_valid": true
+    },
+    {
+      "name": "fastqc_per_sequence_gc_content_plot.json",
+      "bytes": 10997,
+      "sha256": "d8aa5adaa7eb8a2db6d5cef1d0bb87c8069d573914a963f993c2a44fa34751e5",
+      "json_valid": true,
+      "json_type": "dict"
+    },
+    {
+      "name": "fastqc-status-check-heatmap.png",
+      "bytes": 54010,
+      "sha256": "fce1088a13991e4a756103be907cf8b52c885feee34184fc6896746b2899d2fb",
+      "dimensions": [
+        1600,
+        800
+      ],
+      "png_valid": true
+    },
+    {
+      "name": "fastqc-status-check-heatmap.json",
+      "bytes": 9154,
+      "sha256": "4c8c38d562a7b8ad28dbfe8ed96fee22f1373683c16a10548a0e519e3d3ddf8f",
+      "json_valid": true,
+      "json_type": "dict"
+    },
+    {
+      "name": "table_scatter_plot.png",
+      "bytes": 35971,
+      "sha256": "b5872c864235d6c964f8862c2de17feb8aee2719ab62a9f77918645192c5e003",
+      "dimensions": [
+        1600,
+        800
+      ],
+      "png_valid": true
+    },
+    {
+      "name": "table_scatter_plot.json",
+      "bytes": 12,
+      "sha256": "8bf92e66e496beebe60916176eb37c0fa8ca4573d18d659a9a2a1842a0eb3cae",
+      "json_valid": false,
+      "native_uninitialized_scatter_placeholder": true
+    }
+  ],
+  "browser_prompt": "Chrome prompted to allow multiple downloads; allowed for this local synthetic export. One affected click repeated after the prompt.",
+  "limitations": [
+    "This verifies MultiQC export with patched report policy; deployed authentication/handoff remain separate acceptance",
+    "MultiQC exports its uninitialized optional table-scatter placeholder as undefined; the six populated plots export valid JSON. This fixture/native-report limitation is outside the sandbox fix",
+    "No report or S3 objects modified"
+  ]
+}

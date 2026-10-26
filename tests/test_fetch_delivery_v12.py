@@ -271,7 +271,8 @@ def test_www_entry_is_only_trusted_shell_on_application_origin(delivery):
     assert response.status_code == 200
     assert "untrusted-report()" not in response.text
     assert "&lt;script&gt;name&lt;/script&gt;" in response.text
-    assert "sandbox=\"allow-scripts allow-same-origin\"" in response.text
+    assert 'sandbox="allow-scripts allow-same-origin allow-forms allow-downloads"' in response.text
+    assert "allow-popups" not in response.text and "allow-top-navigation" not in response.text
     assert "frame-src https://*.content.example.test" in response.headers["content-security-policy"]
     assert "/api/v2/recipient/shares/share-fixture/preview" in response.text
     assert not service.storage.calls

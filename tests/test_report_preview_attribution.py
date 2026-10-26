@@ -9,6 +9,7 @@ from copy import deepcopy
 from dataclasses import asdict
 from datetime import datetime, timezone
 from hashlib import sha256
+from html.parser import HTMLParser
 from io import BytesIO
 from types import SimpleNamespace
 
@@ -35,6 +36,24 @@ ACTOR = Principal(subject="viewer-fixture", email="viewer@example.test", roles=(
     identity_revision=1, identity_expires_at="2099-01-01T00:00:00+00:00")
 HOST = "pv-" + "a" * 32 + ".content.example.test"
 FUTURE = "2099-01-01T00:00:00+00:00"
+
+
+class ReportShell(HTMLParser):
+    def __init__(self, content):
+        super().__init__()
+        self.frames, self.scripts = [], []
+        self.feed(content.decode())
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "iframe":
+            self.frames.append(dict(attrs))
+        elif tag == "script":
+            self.scripts.append(dict(attrs))
+
+
+def policy_directives(response):
+    return {parts[0]: set(parts[1:]) for directive in response.headers["content-security-policy"].split(";")
+            if (parts := directive.strip().split())}
 
 
 def _value(expression, instance, lineage):
@@ -270,6 +289,23 @@ def test_isolated_challenge_handoff_and_asset_audits_have_native_viewer_attribut
 
     report = p.client.get(accepted.headers["location"])
     assert report.status_code == 200 and report.content == b"<html>report</html>"
+    request = Request({"type": "http", "method": "GET", "path": "/fetch/fixture", "headers": [], "app": p.app})
+    wrapper = report_entry_page(request, {"share_euid": p.share.euid, "report_bundle_root": "report/"},
+        {"target_euid": "persisted-target-fixture", "relative_key": "report/multiqc.html"})
+    shell = ReportShell(wrapper.body)
+    assert len(shell.frames) == 1
+    iframe_permissions = set(shell.frames[0]["sandbox"].split())
+    content_policy = policy_directives(report)
+    export_permissions = {"allow-scripts", "allow-same-origin", "allow-forms", "allow-downloads"}
+    # Both enforced sandbox layers must permit the submit handler and blob save.
+    # Exact permission sets also exclude popup and top-navigation escape tokens.
+    assert iframe_permissions == content_policy["sandbox"] == export_permissions
+    assert iframe_permissions & content_policy["sandbox"] == export_permissions
+    for directive in ("default-src", "form-action", "worker-src", "object-src", "frame-src", "base-uri"):
+        assert content_policy[directive] == {"'none'"}
+    assert content_policy["connect-src"] == {"'self'"}
+    assert content_policy["frame-ancestors"] == {p.settings.share_application_origin}
+    assert "blob:" in content_policy["img-src"]
     sidecar = p.client.get("/__dewey_preview/assets/assets/style.css")
     assert sidecar.status_code == 200 and sidecar.headers["content-type"] == "text/css"
     head = p.client.head("/__dewey_preview/assets/assets/style.css")
@@ -315,3 +351,11 @@ def test_report_wrapper_preserves_exact_origin_for_native_handoff_form(preview):
     assert response.headers["referrer-policy"] == "strict-origin"
     assert b"form.method='POST'" in response.body
     assert b'referrerpolicy="no-referrer"' in response.body
+    shell = ReportShell(response.body)
+    assert len(shell.frames) == len(shell.scripts) == 1
+    assert shell.frames[0]["name"] == "dewey-isolated-report"
+    assert shell.scripts[0]["nonce"]
+    policy = policy_directives(response)
+    assert policy["script-src"] == {"'nonce-" + shell.scripts[0]["nonce"] + "'"}
+    assert policy["frame-src"] == policy["form-action"] == {"https://*." + p.settings.share_content_host_suffix}
+    assert policy["frame-ancestors"] == policy["base-uri"] == {"'none'"}

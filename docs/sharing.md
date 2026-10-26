@@ -35,7 +35,7 @@ Declare `content_mode: www`, `report_entrypoint` and `report_bundle_root`. `/fet
 
 Report HTML/CSS/JavaScript/data execute on a unique `pv-<context>.dewey-content.day.lsmc.bio` host. A one-use POST handoff and Secure HttpOnly host cookie bind the viewer and finite context. Every asset checks current identity/policy and stays within its bundle. Logout, expiry, revocation or session invalidation prevents subsequent assets.
 
-The isolated iframe allows scripts and same-origin within its separate content host. CSP excludes workers, nested frames and form submission. Application cookies/APIs are unavailable to report scripts. Reports requiring additional browser capabilities need a separate product decision.
+The isolated iframe allows scripts and same-origin within its separate content host. The iframe and content policy permit local form-driven exports and generated downloads. CSP still blocks network form submissions, workers and nested frames. Application cookies/APIs are unavailable to report scripts. Chrome may ask you to allow multiple downloads when MultiQC saves one file per selected plot. Reports requiring additional browser capabilities need a separate product decision.
 
 ## Credentials and invitations
 

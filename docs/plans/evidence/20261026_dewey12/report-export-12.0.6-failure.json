@@ -1,0 +1,20 @@
+{
+  "recorded_at": "2026-10-26T08:29:38.341336+00:00",
+  "status": "confirmed_fail",
+  "release": "12.0.6",
+  "share_euid": "M-DGX-14D1F",
+  "journey": "MultiQC toolbox Export > all plots selected > Download Plot Images",
+  "browser": "Chrome, existing verified external recipient profile",
+  "observation": "No downloaded file; browser blocks sandboxed form submission because allow-forms is absent",
+  "source_findings": [
+    "Durable report iframe omits allow-forms/allow-downloads",
+    "Management preview iframe omits allow-forms/allow-downloads",
+    "Isolated content response CSP sandbox omits allow-forms/allow-downloads"
+  ],
+  "intended_fix": "Enable local export submit handlers and generated downloads in all three sandbox layers; keep form-action none, isolated content origins and navigation/object/worker restrictions",
+  "unshared_google_rejection": {
+    "status": "user_reported_pass",
+    "method": "User message; not independently automated",
+    "account_identity_recorded": false
+  }
+}

@@ -134,7 +134,9 @@ def _report_csp(settings, *, nonce=None):
         return (f"default-src 'none'; script-src 'nonce-{nonce}'; "
             f"frame-ancestors {settings.share_application_origin}; base-uri 'none'; form-action 'none'; "
             "object-src 'none'; worker-src 'none'")
-    return ("sandbox allow-scripts allow-same-origin; default-src 'none'; "
+    # Report export handlers need submit events and blob downloads. Actual form
+    # navigation remains blocked by form-action below.
+    return ("sandbox allow-scripts allow-same-origin allow-forms allow-downloads; default-src 'none'; "
         "script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; "
         "img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; "
         "worker-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; "
@@ -210,7 +212,7 @@ async function post(path, body) {
         f'<title>{title} · Dewey</title><style nonce="{nonce}">body{{margin:0;font:15px system-ui}}header{{padding:12px 18px}}'
         'h1{font-size:18px;margin:0}iframe{display:block;width:100%;height:calc(100vh - 110px);border:0}</style>'
         f'<header><h1>{title}</h1><p id="status" role="status">Opening your authorized report…</p></header>'
-        '<iframe id="report" name="dewey-isolated-report" title="Shared report" sandbox="allow-scripts allow-same-origin" '
+        '<iframe id="report" name="dewey-isolated-report" title="Shared report" sandbox="allow-scripts allow-same-origin allow-forms allow-downloads" '
         f'referrerpolicy="no-referrer"></iframe><script nonce="{nonce}">{script}</script></html>')
     content_origin = "https://*." + settings.share_content_host_suffix
     # A native cross-origin POST form needs the real application Origin for

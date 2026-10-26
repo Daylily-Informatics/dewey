@@ -228,6 +228,72 @@ test('share pages render indefinite/public and expired policies without treating
   assert.match(env.node('content').innerHTML, /no longer grants access/);
 });
 
+async function managerReportPreview(changes = {}) {
+  const origin = 'https://pv-' + 'a'.repeat(32) + '.content.example.test';
+  const view = {preview_origin: origin, challenge_url: origin + '/__dewey_preview/challenge',
+    handoff_endpoint: '/api/v1/registry/shares/share-fixture/preview/context-fixture/handoff',
+    context_euid: 'context-fixture', expires_at: '2099-01-01T00:00:00Z', ...changes};
+  const env = sharingFixture({api: (path, method) => {
+    if (path.includes('/contents?')) return {items: [{target_euid: 'target-fixture', name: 'report.html',
+      relative_key: 'nested/report.html', size: 123}], incomplete: false, continuation_token: null};
+    if (method === 'GET') return share();
+    if (path.endsWith('/preview')) return view;
+    if (path.endsWith('/handoff')) return {token: 'one-use-handoff-fixture'};
+    throw Error('Unexpected report request');
+  }});
+  await env.sharing.page('share-fixture');
+  await env.sharing.handle('sharing-report', '0');
+  await env.submit('report-root-form');
+  return {env, view};
+}
+
+test('manager report preview permits local form-driven downloads while keeping isolated one-use handoff', async () => {
+  const {env, view} = await managerReportPreview();
+  assert.deepEqual(env.errors, []);
+  const frame = env.node('share-report-frame');
+  assert.deepEqual(frame.getAttribute('sandbox').split(/\s+/).sort(),
+    ['allow-downloads', 'allow-forms', 'allow-same-origin', 'allow-scripts']);
+  assert.equal(frame.getAttribute('referrerpolicy'), 'no-referrer');
+  assert.equal(frame.src, view.challenge_url);
+  assert.deepEqual(env.apiCalls.find(call => call.path.endsWith('/preview')).body,
+    {target_euid: 'target-fixture', relative_key: 'nested/report.html', bundle_root: 'nested/'});
+  const listener = env.windows.message[0];
+  const challenge = {origin: view.preview_origin, source: frame.contentWindow,
+    data: {type: 'dewey-preview-challenge', context_euid: view.context_euid, challenge: 'b'.repeat(64)}};
+  for (const invalid of [
+    {...challenge, origin: env.location.origin},
+    {...challenge, source: {}},
+    {...challenge, data: {...challenge.data, type: 'unrelated'}},
+    {...challenge, data: {...challenge.data, context_euid: 'other-context-fixture'}},
+    {...challenge, data: {...challenge.data, challenge: 42}},
+  ]) listener(invalid);
+  await flush();
+  assert.equal(env.apiCalls.filter(call => call.path.endsWith('/handoff')).length, 0);
+  listener(challenge); listener(challenge); await flush();
+  const handoffs = env.apiCalls.filter(call => call.path.endsWith('/handoff'));
+  assert.equal(handoffs.length, 1);
+  assert.equal(handoffs[0].path, view.handoff_endpoint);
+  assert.deepEqual(handoffs[0].body, {challenge: challenge.data.challenge});
+  assert.equal(env.document.submissions.length, 1);
+  const form = env.document.submissions[0];
+  assert.equal(form.action, view.preview_origin + '/__dewey_preview/handoff');
+  assert.equal(form.method, 'POST');
+  assert.equal(form.target, frame.name);
+  assert.equal(form.children[0].name, 'token');
+  assert.equal(form.children[0].value, 'one-use-handoff-fixture');
+  assert.equal(form.removed, true);
+  assert.deepEqual(env.assigned, []);
+  env.node('editor').close();
+  assert.equal(env.windows.message.length, 0);
+});
+
+test('manager report preview rejects a handoff endpoint outside the application origin', async () => {
+  const {env} = await managerReportPreview({handoff_endpoint: 'https://outside.example.test/handoff'});
+  assert.deepEqual(env.errors, ['Invalid isolated report handoff configuration.']);
+  assert.equal(env.node('share-report-frame'), null);
+  assert.equal(env.document.submissions.length, 0);
+});
+
 test('alias claim, copied report URL, permanent retirement and grant revoke carry reviewed revision', async () => {
   const env = sharingFixture(); await env.sharing.page('share-fixture');
   await env.sharing.handle('sharing-alias-add');

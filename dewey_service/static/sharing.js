@@ -109,7 +109,7 @@ window.DeweySharing = (() => {
     const origin=new URL(result.preview_origin),challenge=new URL(result.challenge_url),endpoint=new URL(result.handoff_endpoint,location.origin);
     if(origin.protocol!=="https:"||origin.origin===location.origin||origin.href!==origin.origin+"/"||challenge.origin!==origin.origin||challenge.pathname!=="/__dewey_preview/challenge"||endpoint.origin!==location.origin) throw Error("Invalid isolated report handoff configuration.");
     if(reportCleanup) reportCleanup();
-    h.modal(`<h2>Report preview</h2><p class="muted">Current viewer · expires ${esc(stamp(result.expires_at))}. Each linked asset is authorized within the selected report root.</p><iframe id="share-report-frame" name="dewey-report-${esc(crypto.randomUUID())}" title="Isolated shared report" sandbox="allow-scripts allow-same-origin" referrerpolicy="no-referrer" class="share-report-frame"></iframe>`);
+    h.modal(`<h2>Report preview</h2><p class="muted">Current viewer · expires ${esc(stamp(result.expires_at))}. Each linked asset is authorized within the selected report root.</p><iframe id="share-report-frame" name="dewey-report-${esc(crypto.randomUUID())}" title="Isolated shared report" sandbox="allow-scripts allow-same-origin allow-forms allow-downloads" referrerpolicy="no-referrer" class="share-report-frame"></iframe>`);
     const iframe=$("#share-report-frame"); let used=false;
     const listener=event=>{if(used||event.origin!==origin.origin||event.source!==iframe.contentWindow||event.data?.type!=="dewey-preview-challenge"||event.data.context_euid!==result.context_euid||typeof event.data.challenge!=="string") return;used=true;h.safe(async()=>{
       const handoff=await h.api(endpoint.pathname+endpoint.search,"POST",{challenge:event.data.challenge});
