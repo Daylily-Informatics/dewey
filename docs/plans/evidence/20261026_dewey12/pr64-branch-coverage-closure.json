@@ -1,0 +1,93 @@
+{
+  "recorded_at": "2026-10-26T16:29:18.119380+00:00",
+  "repository": "Daylily-Informatics/dewey",
+  "pull_request": 64,
+  "source_head": "8a6f0ca5011118d7bcd18c68b1bf1fed9e8f9619",
+  "retained_ci": {
+    "run_id": 40355054827,
+    "artifact_id": 12664814605,
+    "passed": 1194,
+    "failed": 3,
+    "skipped": 2,
+    "native_postgresql_passed": 5,
+    "skips": "Cognito E2E pool not configured"
+  },
+  "residual_assertions": {
+    "status": "All three pass in focused tests",
+    "ui": "Legacy set-share payload rejected403 with no share created; bulk/set/search/export assertions retained",
+    "backend": "Exact native envelope assertions retained; outer recipient audit-context isolation and restoration verified"
+  },
+  "new_tests": [
+    {
+      "owner": "A",
+      "test_file": "tests/test_sharing_policy_branch_coverage_v12.py",
+      "passing_cases": 25,
+      "new_changed_branch_alternatives": 31,
+      "final_file_sha256": "9d86db4094003190ab8b77b93ea08591b17aab0490e5c10f4ca809e5bcbb9120"
+    },
+    {
+      "owner": "B",
+      "test_file": "tests/test_registry_branch_coverage_v12.py",
+      "passing_cases": 56,
+      "new_changed_branch_alternatives": 33,
+      "final_file_sha256": "594c11ab245c1230bbd6a8050f50d544eac889aa7086a4cdcfcd38e877d94545"
+    },
+    {
+      "owner": "C",
+      "test_file": "tests/test_delivery_report_branch_coverage_v12.py",
+      "passing_cases": 18,
+      "new_changed_branch_alternatives": 22,
+      "final_file_sha256": "1f3970c3aaf923a61607abcc142ad595bb343b7a14de034cc679a0f6f3d9d6d8"
+    }
+  ],
+  "new_passing_cases": 99,
+  "new_changed_branch_alternatives": 86,
+  "diagnostic_coverage": {
+    "status": "pass",
+    "coverage_version": "7.14.1",
+    "inputs": [
+      {
+        "file": "8a6f0ca-coverage.json",
+        "sha256": "b9ab3d7abfa03d134912c639af41394d3993c982260576a196f7646f42edab62"
+      },
+      {
+        "file": "coverage-a-v12.json",
+        "sha256": "503c2c239902c5603508432de1d55ffdfd6686a4de19e939dc56bc2c3f0ab75c"
+      },
+      {
+        "file": "coverage-b-v12.json",
+        "sha256": "9ca38e55940a9111066318cb73b9f310f5e51cfb89233110359cae011ac0ed92"
+      },
+      {
+        "file": "coverage-c-v12.json",
+        "sha256": "4925d42f75112b34c8faddd477b8fab33f5a253b17ac818111e17d59594bcd3b"
+      }
+    ],
+    "totals": {
+      "covered_lines": 2304,
+      "total_lines": 2755,
+      "covered_branches": 887,
+      "total_branches": 1076,
+      "line_percent": 83.62976406533575,
+      "branch_percent": 82.43494423791822
+    },
+    "thresholds": {
+      "changed_lines": 80,
+      "changed_branch_origins": 80
+    },
+    "unmeasured_files": [],
+    "interpretation": "Retained CI plus focused new-test coverage union; source, statement universes, branch universes and exclusions verified equal. Fresh full CI required; this is not a full-suite pass."
+  },
+  "unchanged": [
+    "Runtime source since8a6f0ca",
+    "Baseline11.0.10",
+    "80 percent line and branch gates",
+    "Coverage exclusions",
+    "Pinned Dayhoff schemas/provenance",
+    "Dependency versions",
+    "Production12.0.7/4.1.1"
+  ],
+  "container_builds": 0,
+  "production_changes": false,
+  "next": "Commit/push test-only additions and documentation; await fresh full CI, coverage gates and package build"
+}

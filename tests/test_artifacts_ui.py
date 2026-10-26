@@ -431,10 +431,12 @@ def test_artifacts_bulk_directory_limit_and_artifact_set_routes(
             ),
         },
     )
-    assert set_share.status_code == 200
-    assert "Latest Set Share" in set_share.text
-    assert "artifact-set-share" in set_share.text
-    assert len(fake_service.shares) == 1
+    assert set_share.status_code == 403
+    assert "current verified-email identity" in set_share.text
+    assert "Latest Set Share" not in set_share.text
+    assert fake_service.shares == {}
+    assert fake_service.artifact_sets[created_set["artifact_set_euid"]] == created_set
+    assert len(fake_service.artifacts) == 2
 
 
 def test_artifact_detail_external_reference_validate_and_create(

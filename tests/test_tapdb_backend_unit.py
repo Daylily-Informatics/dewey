@@ -7,6 +7,10 @@ from types import SimpleNamespace
 import pytest
 
 import dewey_service.tapdb_backend as backend_mod
+from dewey_service.audit import (
+    authenticated_user_email_context,
+    current_authenticated_user_email,
+)
 from dewey_service.registry_access import Principal, principal_context
 
 _FakeGenericInstanceModel = backend_mod.generic_instance
@@ -98,8 +102,13 @@ def _backend() -> backend_mod.TapDBBackend:
 
 @pytest.fixture(autouse=True)
 def verified_backend_actor():
-    with principal_context(Principal(subject="fixture-operator", roles=("ADMIN",), internal=True)):
+    outer_email = current_authenticated_user_email()
+    with (
+        principal_context(Principal(subject="fixture-operator", roles=("ADMIN",), internal=True)),
+        authenticated_user_email_context(None),
+    ):
         yield
+    assert current_authenticated_user_email() == outer_email
 
 
 @pytest.fixture
