@@ -2,6 +2,22 @@
 
 These workflows describe release 12.0.8. The day service uses shared Login; management remains on approved-network ingress, while verified recipients use the explicit public fetch/auth/content surfaces. See [Managed sharing](sharing.md) for the full contract and [the release ledger](plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) for acceptance status.
 
+## Recover Management Access After a Shared Link
+
+Sharing sign-in creates a session restricted to shared content, including for
+an existing manager. Visiting the console with that session can return
+`This credential is limited to shared content`. From an approved management
+network, open [normal Dewey sign-in](https://dewey.day.lsmc.bio/auth/login?next=%2Fui)
+and authenticate with your management account. This replaces the restricted
+browser session; management remains governed by existing Login entitlement and
+domain policies. It does not widen the share grant. Separate browser profiles
+keep manager and recipient sessions independent.
+
+The controlled 12.0.8 closeout verified normal management recovery, native
+recipient sign-in with exact report return, isolated CSS/JavaScript/JSON sidecars,
+a complete five-file shared set, and management denial in the restricted session.
+See the [acceptance receipt](plans/evidence/20261026_dewey12/internal-acceptance-12.0.8.json).
+
 ## Activate And Inspect The Repo Environment
 
 Use the supported environment and CLI:

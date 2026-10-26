@@ -1,0 +1,35 @@
+{
+  "observed_at": "2026-10-26T22:01:48.061Z",
+  "release": "12.0.8",
+  "source_commit": "c8a73360fcb6b908c2e575cb381e359dd425f838",
+  "production_objective_complete": true,
+  "source_release": "verified",
+  "running_image": "verified",
+  "functional_acceptance": "passed",
+  "user_acceptance": "not_recorded_separately",
+  "original_release_rows": {
+    "SUCCESS": 15
+  },
+  "main_integration_rows": {
+    "SUCCESS": 9
+  },
+  "final_patch_rows": {
+    "SUCCESS": 5
+  },
+  "requirements_satisfied": 20,
+  "new_tests_builds_deployments_for_this_browser_closeout": 0,
+  "prior_blocker_superseded": "final-acceptance-disposition-12.0.8.json",
+  "internal_receipt": "internal-acceptance-12.0.8.json",
+  "manager_recovery": {
+    "cause": "The release operator left the LSMC browser profile in the recipient-only flow during prior sharing checks.",
+    "resolution": "Normal management sign-in restored the existing manager account and root Library/Admin navigation.",
+    "entry": "/auth/login?next=%2Fui",
+    "permission_or_configuration_changes": false
+  },
+  "evidence_limits": [
+    "Registration/confirmation was completed by the user earlier; this pass observed the confirmed account, fresh native share sign-in and exact deep return.",
+    "The management denial was observed in the browser;403 is the bound source contract, not a captured network status.",
+    "Ordinary internal management access remains governed by existing Login policies; explicit share login is a separate restricted session.",
+    "Formal user acceptance remains independent of the completed functional acceptance."
+  ]
+}

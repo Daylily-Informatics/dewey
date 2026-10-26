@@ -22,9 +22,11 @@ The recorded production release is **Dewey 12.0.8** with **Login 4.1.1**. All 11
 installed Dewey application files and assets match the published `12.0.8` tag
 and merged `main`; the [running-source receipt](docs/plans/evidence/20261026_dewey12/running-source-binding-12.0.8.json)
 binds that source to the deployed image. The final patch deploys the tested search
-validation and canonical readiness-schema corrections. Internal registration is confirmed.
-Internal first-use/scoped-access verification and final acceptance remain open in
-the ledger.
+validation and canonical readiness-schema corrections. Internal and external
+functional acceptance now pass, including recipient report/sidecars, shared-set
+access and management denial. Formal user acceptance remains a separate record;
+the [closeout receipt](docs/plans/evidence/20261026_dewey12/release-closeout-12.0.8.json)
+records the completed production objective.
 
 Dewey management remains on approved networks. The scoped recipient ingress exposes authenticated fetch, report and recipient-account routes to external users.
 

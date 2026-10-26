@@ -281,9 +281,9 @@ subset routes retain their declared auth requirements. Access packages now retur
 authenticated `/fetch/` paths for gateway/manifest/TAR; they do not return S3
 presigns or CloudFront cookies. Removed delivery modes fail explicitly.
 
-See [Managed sharing](sharing.md) for limits and examples. This API description
-does not close the remaining internal scoped-access or final user-acceptance gates
-in the [release ledger](plans/20261026T010947Z_dewey_12_sharing_release_ledger.md).
+See [Managed sharing](sharing.md) for limits and examples. The internal and external functional journeys now pass, including restricted
+management denial. The [release ledger](plans/20261026T010947Z_dewey_12_sharing_release_ledger.md)
+records functional completion separately from formal user signoff.
 
 ## Search API
 

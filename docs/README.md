@@ -19,7 +19,7 @@ external broker. Keep service runtime code out of `daylily_auth_cognito.cli`.
 - [gui.md](gui.md): current Library, Sharing, recipient, report-export and account controls
 - [sharing.md](sharing.md): authenticated internal/external sharing, EUID/slug URLs, recursive delivery, isolated reports, lifecycle audit and rebind
 - [dev-docs/20261026_sharing_test_coverage.md](dev-docs/20261026_sharing_test_coverage.md): changed-code line/branch coverage contract and recorded results
-- [plans/20261026T010947Z_dewey_12_sharing_release_ledger.md](plans/20261026T010947Z_dewey_12_sharing_release_ledger.md): deployed provenance and exact remaining acceptance; internal signup is confirmed, while internal scoped-access proof and user acceptance remain open
+- [plans/20261026T010947Z_dewey_12_sharing_release_ledger.md](plans/20261026T010947Z_dewey_12_sharing_release_ledger.md): completed production release and functional acceptance; formal user signoff remains a separate record
 - [becoming_a_discoverable_service.md](becoming_a_discoverable_service.md): how Dewey fits the Dayhoff-managed service contract
 
 ## Best Historical References

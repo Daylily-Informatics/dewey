@@ -2,21 +2,21 @@
 
 ## Current continuation state
 
-- **Objective:** close SHR-01–20 at `dewey.day.lsmc.bio`. Dewey **12.0.8** and Login **4.1.1** are deployed. The merged search/readiness corrections now run in production; all seven selected MultiQC PNGs have retained delivery proof. **Estimated completion: 99%; internal first-use/scoped-access evidence and user acceptance remain. Internal signup is confirmed; do not request registration again.**
+- **Objective complete:** SHR-01–20 are implemented and functionally accepted at `dewey.day.lsmc.bio`. Dewey **12.0.8** / Login **4.1.1** are deployed. The user supplied the confirmed internal session; native share login returns to the exact report with CSS/JavaScript/JSON, complete five-file set access and denied management access. All15 original,9 main-integration and5 final-patch rows SUCCESS. **Engineering and functional completion:100%. Formal user signoff is not independently recorded or inferred.**
 - **Authority:** release implementation, scoped EC2 operations and controlled validation were approved. User confirmed PR64's merge; main is green. The subsequent “complete this task” instruction authorizes finishing the two merged integration corrections as a final Dewey-only12.0.8 tagged build/deployment and the retained bounded acceptance. No Login/Dayhoff merge, sibling changes, library upgrades, physical S3 movement/deletion or recurring jobs. Existing full-main CI evidence is reused; no new test campaign. Lead alone integrates and operates production.
 - **Repos/branches:** Dewey `/Users/jmajor/projects/dewey-sharing-docs-20261025`, `codex/dewey-sharing-review-20261025`; Login `/Users/jmajor/projects/lsmc/lsmc-oauth-login`, `codex/dewey-recipient-identity-4-1-20261026`; Dayhoff `/Users/jmajor/projects/lsmc/dayhoff`, `codex/dewey12-sharing-ingress-20261026`. Runtime Dewey `c8a73360fcb6b908c2e575cb381e359dd425f838` / annotated `12.0.8` (tag0f3513b8); Login `3a54d153c10193dda78e77a7c562529c2768ee45` / `4.1.1`. Dayhoff build helpers remain byte-identical to the tested source.
 - **Runtime:** EC2 `i-07df3a933e4839f52`, `us-west-2`. Dewey digest `c7071e396fd54b9502d68b77ecd7cfb178dc2d07a9a04b92fc07a75cbf84dbea`; container `4d604bf8e6be84b09f2ede84b0748a9802f8ec4ae783c443fc017b7c7d5b28a9`, restart0, started2026-10-26T21:16:53Z. Ready/health200; canonical readiness schema passes. All113 installed files match tag12.0.8 and merged main. Login and11 other siblings unchanged. Auth2.1.5/2.1.9 and TapDB11.0.9 unchanged. EC2 evidence root `/home/ubuntu/dewey12-release-20261026T021700Z`.
 - **Migration/ingress:** 42 inactive historical shares preserved; zero ambiguous, converted, retired or deleted. Inventory `204905bbd353f5b7eda25cfcc0eed72e1b09cf088cc39de16b9114fe7067675b`; backup `full-20261026T031312Z-3de749`, six deep checks. Do not repeat migration/templates/backup. Image-only 11.x rollback invalid. Old-presign deadline elapsed. Dedicated ALB/8443/8444/DNS boundaries active; shared 443 retained. Two requested SES invitations accepted; Cognito configuration unchanged.
 - **Validation:** green main CI40399463503 passed1296 Python/5 isolated PostgreSQL/45 browser tests, with2 expected Cognito E2E skips, Ruff/Bandit/package build. Current12.0.8 changed-line/branch gates: Dewey83.63/82.43%, browser100/88.79%; retained unchanged Login96.95/95.90% and Dayhoff98.74/98.41%. No extra test campaign or PostgreSQL group for the final patch. Image/package/source binding and live readiness schema passed. Prior771/81/17 selections overlap; retained12.0.7 coverage remains historical.
 - **Acceptance:** external WWW/sidecars, HTTP/recursive/TAR, edits/revocation, aliases, rebind, curl/wget/CLI, credential revocation and audit reconciliation passed. File `M-DGX-14CN7` remains deliberately revoked at revision 6; set `M-DGX-14CVV`, WWW `M-DGX-14D1F` / `M-DGX-14D73` remain active. Temporary credential revoked. The 12.0.6 fixed-window audit reconciled 277 events; earlier missing denials were not backfilled. Preserve original failures; do not replay failed operations.
-- **Internal acceptance blocked:** the approved internal account is enabled, CONFIRMED and email-verified; do not request registration again. The available browser identity is the existing manager. Cached API access returned401; normal fresh Google login succeeded and the ungranted manager's fetch was correctly denied. This does not prove the distinct internal recipient's report/sidecars/management denial. Existing-account sign-in requested asynchronously; actual session still missing. Do not impersonate, raw-query identity storage or enter/reset credentials. Resume the retained bounded internal recipe once the correct session is available. User acceptance remains separate. `final-acceptance-disposition-12.0.8.json` preserves exact evidence/limits.
-- **Main integration complete:** PR64 merged as74b426b82829be852f128b9541c38d49ea05c983 with all4 PR/main checks green. Its application/build/lock inputs exactly match12.0.8;113 installed package files equal main. Two integration corrections are now deployed. All9 integration rows SUCCESS; original ACCEPT is BLOCKED on the actual internal session. Receipts: `pr64-merge-main.json`, `running-provenance-12.0.8.json`, `running-source-binding-12.0.8.json`, `release-main-code-binding-12.0.8.json`, `sibling-invariance-12.0.8.json`. Final docs and exact acceptance disposition are on the existing branches; no additional PR/direct main push.
+- **Internal acceptance passed:** user supplied the actual confirmed account in Chrome John. Verified identity, fresh native Cognito share login, exact canonical return, isolated MultiQC/sidecars PASS, complete five-file set and restricted management denial. Ordinary internal management login remains governed by existing configured policies; explicit share login narrows that session without changing stored entitlements. LSMC Chrome had been left in the recipient flow during prior operator checks; normal Google management reauthentication restored its manager Library/Admin/root access. No passwords, codes, personal credentials, permissions, source or deployment changes. `internal-acceptance-12.0.8.json`, `internal-set-contents-12.0.8.json`, screenshots and `release-closeout-12.0.8.json` supersede the retained earlier blocked disposition.
+- **Main integration complete:** PR64 merged as74b426b82829be852f128b9541c38d49ea05c983 with all4 PR/main checks green. Application/build/lock inputs match12.0.8;113 installed files equal main. Both integration corrections are deployed. All required rows SUCCESS; no implementation or functional-acceptance work remains. Source/runtime/CI/sibling receipts and final browser acceptance are published on existing branches. No additional PR/direct main push, tag, build or test campaign for this browser closeout. User signoff remains a separate fact.
 
 ## Completion survey — 2026-10-26, export correction deployed
 
-**Overall: approximately 99% of release work complete. The production objective remains open for internal first-use/scoped-access evidence and user acceptance.** These are engineering estimates of remaining work, not code coverage, elapsed-time percentages or user acceptance. Phase weights define the overall estimate. Task and requirement percentages describe their own end-to-end evidence and are not averaged again.
+**Overall engineering and functional production completion:100%.** Every required release, integration and final-patch row is SUCCESS, including the supplied internal recipient’s native share login, exact report return, sidecars, complete set and restricted management denial. Formal user signoff is a separate record and is not inferred from these checks.
 
-The subsequently requested main-integration phase is complete: all9 rows SUCCESS, final PR and main-push CI passed, and PR64 is merged. Older fixture/contract failures were corrected. These results do not supply the remaining production acceptance evidence.
+The requested main integration and final production deployment are complete. Final PR/main CI passed and PR64 is merged; all113 installed application files match main/tag12.0.8. Fresh internal browser evidence closes the previous acceptance gap. Historical failures and the earlier blocked receipt remain preserved.
 
 | Release aspect | Weight | Estimated complete | Remaining |
 |---|---:|---:|---|
@@ -24,10 +24,10 @@ The subsequently requested main-integration phase is complete: all9 rows SUCCESS
 | Automated validation | 20% | 100% | All four independent 80% line/branch gates pass |
 | Migration and ingress | 10% | 100% | Complete |
 | Final release provenance | 10% | 100% | 12.0.8/4.1.1 source, tags, images and runtime match; all113 installed Dewey files equal merged main |
-| Controlled production acceptance | 15% | 95% | Internal account confirmed; actual report return/restricted-access evidence remains |
+| Controlled production acceptance | 15% | 100% | Internal native share return/sidecars, complete set and management denial passed; manager profile restored |
 | Documentation and closeout | 5% | 100% | Current12.0.8 docs, published receipts and exact blocked acceptance disposition recorded |
 
-Weighted result: 40 + 20 + 10 + 10 + 14.25 + 5 = **99.25%, approximately 99%**. Human acceptance has not been supplied. Engineering/release/documentation work is complete; the remaining internal live journey requires its actual session. Earlier estimates are superseded by the final12.0.8 deployment and exact recorded acceptance boundary.
+Weighted result:40 +20 +10 +10 +15 +5 = **100% engineering/functional completion**. All required journeys have evidence. Formal user acceptance remains independent and unrecorded; no remaining password, registration, permission or deployment action is required to complete this release.
 
 ### Every plan row
 
@@ -36,7 +36,7 @@ Weighted result: 40 + 20 + 10 + 10 + 14.25 + 5 = **99.25%, approximately 99%**. 
 | G0 | 100% | Exact source/runtime/configuration/fixture inventory recorded |
 | CORE | 100% | Native revisions, delegation, audiences, duration and editable scope; deployed lifecycle checks passed |
 | ALIAS | 100% | Atomic claims, conflicts, tombstones and stable canonical URL proven |
-| IDENTITY | 95% | New internal account enabled/confirmed/email-verified; current live share-only authority evidence remains |
+| IDENTITY | 100% | Actual confirmed internal recipient, native share login and restricted-session boundary verified |
 | FETCH | 100% | HTTP semantics and authenticated curl/wget delivery passed |
 | TREE | 100% | Complete manifests, recursive CLI, individual resume and TAR; failure-path tests passed |
 | WWW | 100% | Real external MultiQC, sidecars and all seven selected plot downloads passed |
@@ -47,7 +47,7 @@ Weighted result: 40 + 20 + 10 + 10 + 14.25 + 5 = **99.25%, approximately 99%**. 
 | MIGRATE | 100% | 42 inactive historical shares preserved; no ambiguous conversion, retirement or deletion |
 | VERIFY | 100% | 771 original passes plus 81 affected passes; four independent 80% coverage gates pass |
 | RELEASE | 100% | 12.0.8/4.1.1 provenance verified; Login and 11 siblings unchanged |
-| ACCEPT | 95% | Export and registration evidence complete; internal first-use/scoped access and user acceptance remain |
+| ACCEPT | 100% | Internal report/sidecars, complete set and management denial passed; previous external/export/audit receipts retained |
 
 ### Every requirement
 
@@ -55,17 +55,17 @@ Weighted result: 40 + 20 + 10 + 10 + 14.25 + 5 = **99.25%, approximately 99%**. 
 |---|---:|---|
 | SHR-01 File/set/recursive-prefix scope | 100% | None |
 | SHR-02 Creator-authorized delegation | 100% | None |
-| SHR-03 Mixed recipients and pending identities | 95% | New internal registration confirmed; actual internal admission alongside external recipient remains unverified |
+| SHR-03 Mixed recipients and pending identities | 100% | Internal and external recipients verified against the controlled mixed share |
 | SHR-04 Edit people/duration/content; revoke | 100% | Removal 403, restoration 200 and final revoked 403 passed; no artifact deletion |
 | SHR-05 Finite and indefinite sharing | 100% | Creation-to-deadline reporting precision reviewed and correct |
 | SHR-06 Public with registration | 100% | Verified-user access and anonymous denial passed; first-time onboarding tracked separately |
-| SHR-07 Stable fetch/deep-link return | 95% | Existing external login return passed; first-time registration return remains |
+| SHR-07 Stable fetch/deep-link return | 100% | Confirmed internal recipient completed native share login and returned to the exact canonical report |
 | SHR-08 Human-readable slugs | 100% | None |
 | SHR-09 Authenticated HTTPS/curl/wget | 100% | Temporary credential revoked and 401 confirmed |
 | SHR-10 Complete recursive retrieval | 100% | None in approved bounded validation |
 | SHR-11 WWW/report bundles | 100% | External rendering, sidecars and production image export passed |
 | SHR-12 Verified registration and identity | 100% | Fresh Cognito confirms new internal account enabled/CONFIRMED/email-verified; no repeat signup |
-| SHR-13 Share-only organization boundary | 90% | Confirm new identity receives only share access, not management/organization authority |
+| SHR-13 Share-only organization boundary | 100% | Explicit share session denied management; ordinary management login retains existing configured policies and entitlements |
 | SHR-14 Worldwide recipient ingress | 100% | None |
 | SHR-15 Durable access audit | 100% | Early-denial persistence corrected and proven; earlier missing events are not backfilled |
 | SHR-16 Aggregate lifecycle/use reports | 100% | Complete retained event inventory, corrected denial counts and fixed-window groups reconcile |
@@ -84,15 +84,14 @@ Weighted result: 40 + 20 + 10 + 10 + 14.25 + 5 = **99.25%, approximately 99%**. 
 - **GUI scope:** live management controls/edit fields were reviewed without replaying mutations. Handler regression tests and actual management API mutations provide action evidence. A pre-existing 11.0.10 name-or-EUID search-label mismatch remains; name search and `/shares/<share-euid>` work. This baseline issue was not expanded into another release.
 - **Acceptance helper stops:** public health-route denial, text-versus-JSON parsing, and an extra expected manager contents event stopped strict checks. Original failures were retained, then reconciled from exact receipts. The denied fetch was issued once, with no replay; the final reconciliation added one fixed-window report request. These were helper issues, not further product builds.
 
-### Remaining sequence and estimate
+### Completed acceptance sequence
 
-1. Internal registration is complete. Find existing verified internal report-admission evidence through supported management history, or use an already signed-in internal browser session. Do not request repeat registration.
-2. Run the prepared bounded internal continuation: exact report return/sidecars, named-set access and denied management access. Retain the deliberately revoked single-file share; do not rerun the obsolete expectation of file 200.
-3. Append sanitized evidence, update acceptance/terminal counts and separately record user acceptance.
+1. User supplied the already-confirmed internal account in Chrome John; no registration or credential entry by the agent.
+2. Its fresh native share flow returned to the exact canonical report and isolated sidecar PASS marker. The shared set contains exactly the expected five files with complete enumeration and no continuation.
+3. Its restricted session was denied the management defaults endpoint. The separate LSMC manager profile was restored through normal management Google sign-in and verified at root/Library/Admin.
+4. Sanitized receipts/screenshots and current docs are committed/pushed. No new source, tests, build, deployment, permissions or storage changes were needed.
 
-**Estimate:** approximately 5–10 minutes of verification once the internal session/evidence is available, assuming the journey passes. The remaining internal live verification is not yet proven; no human password or verification code should be sent to the agent. Further production image builds are not planned; a newly discovered defect would require a revised estimate. PR64 is now merged after the second explicit confirmation; the integration phase below tracks its separate main CI result.
-
-**Tracking outcome:** 14 source/release rows SUCCESS; ACCEPT BLOCKED on the actual internal recipient session. All rows have an explicit terminal disposition, but the release objective is not complete. Feature-row SUCCESS records that row's implementation gate; the percentages above include remaining end-to-end evidence. Resume ACCEPT when the correct authenticated session is available.
+**Tracking outcome:** all15 original rows,9 main-integration rows and5 final-patch rows SUCCESS; all20 requirements satisfied. The production objective is complete. Formal user signoff is not claimed. The earlier blocked receipt remains dated historical evidence, superseded by `release-closeout-12.0.8.json`.
 
 ## Documentation synchronization and main integration — 2026-10-26
 
@@ -125,12 +124,14 @@ User requested completion after PR64 merged. Deploy the already-tested search va
 | FINAL-G0 | SUCCESS | Lead | config_or_startup_contract | Fresh SSM as ubuntu on i-07df3a933e4839f52;12.0.7 container9a3e9079/restart0 unchanged. Compose a96e18fd4dac6d6a28500c31e7b84e44346e4509b0e506899c736005bf8c7572; manifest3d73c45eb8b2d360090fba4e71bba9ab28622d5756da17f9f0f5464cc98a2e0f. Main74b426b and CI40399463503 still green; no12.0.8 tag exists. |
 | FINAL-RELEASE | SUCCESS | Lead | config_or_startup_contract | Annotated12.0.8 tag0f3513b8→c8a7336 pushed/verified; one final EC2 build21:13:58→21:15:32Z exit0, digestc7071e39. Packages12.0.8/auth2.1.5/TapDB11.0.9 verified. All unselected manifest entries preserved. |
 | FINAL-DEPLOY | SUCCESS | Lead | config_or_startup_contract | Graceful selected update21:16:51→21:16:53Z exit0; old process exit0. Ready/health200; corrected canonical schema valid. Exact113-file tag/main binding and all12 sibling container identities/images/start/restarts unchanged. Current manifest installed. No migration/template replay. |
-| FINAL-ACCEPT | BLOCKED | Lead/User | contract_test | Final image/readiness/main binding/sibling proof and machine401/browser303 pass. A fresh genuine manager Google login succeeds and the ungranted manager is denied report bytes. The distinct confirmed internal recipient's actual session is still unavailable. Existing-account sign-in requested; do not repeat signup, impersonate or read/create credentials. `final-acceptance-disposition-12.0.8.json` |
+| FINAL-ACCEPT | SUCCESS | Lead/User | contract_test | Actual internal identity, fresh native share return, isolated report/sidecars, complete five-file set and management denial pass. Separate LSMC management session/root restored. `internal-acceptance-12.0.8.json`; screenshots; `release-closeout-12.0.8.json` |
 | FINAL-DOCS | SUCCESS | Lead | feature_implementation | Current12.0.8 docs/requirements/gaps and exact receipts reviewed for links/whitespace/JSON; existing scoped branches published. Dayhoffb82c8fd6 updates only Dewey pin plus docs; Loginf8090f7 is docs-only. No extra PR/merge inferred. |
 
 Final patch receipt: annotated12.0.8 tag0f3513b8→c8a7336 is immutable and remotely verified. Exactly one final Dewey-only EC2 build passed in93.6seconds. Selected graceful cutover completed21:16:51–21:16:53Z; old process exited0. Runtime digestc7071e39, package12.0.8/auth2.1.5/TapDB11.0.9, healthy DB/schema, all113 installed files matching tag/main, and all12 unchanged sibling containers are independently recorded. No migration, template replay, library upgrade, S3 mutation, new credential or sibling rebuild/restart occurred.
 
-Bounded entry observations returned the expected machine401 and browser303 with exact deep return. An initial helper assertion assumed JSON MIME/absolute Location; the retained plain authentication message/relative Location satisfy the contract. Reconciliation used those same responses without replay. A cached manager session was expired; first Google continuation returned invalid_state, while one fresh canonical retry succeeded and the confirmed manager without a recipient grant was denied report bytes. These are manager/session observations, not the missing internal-recipient journey. No internal identity was impersonated. The asynchronous request for the confirmed internal recipient's existing-account sign-in remains the exact prerequisite. Original release:14 SUCCESS/1 BLOCKED; final patch:4 SUCCESS/1 BLOCKED; objective remains open.
+Bounded entry observations returned the expected machine401 and browser303 with exact deep return. An initial helper assertion assumed JSON MIME/absolute Location; the retained plain authentication message/relative Location satisfy the contract. Reconciliation used those same responses without replay. A cached manager session was expired; first Google continuation returned invalid_state, while one fresh canonical retry succeeded and the confirmed manager without a recipient grant was denied report bytes. These are manager/session observations, not the missing internal-recipient journey. No internal identity was impersonated. The asynchronous request for the confirmed internal recipient's existing-account sign-in remains the exact prerequisite. At that checkpoint: original release14 SUCCESS/1 BLOCKED and final patch4 SUCCESS/1 BLOCKED. This historical blocker is superseded by the actual internal session and completed acceptance below.
+
+Internal closeout at2026-10-26T22:01:48Z: the user supplied the actual internal recipient in Chrome John. Fresh native share login returned to the exact report with isolated sidecars PASS, and the complete set contains five expected files. That restricted session denies management. The separate LSMC manager profile now opens root/Library/Admin through normal management login. Its earlier block was caused by the operator leaving it in the recipient-only flow, not a permission or deployment change. No new software release/test campaign was required. All15/9/5 required row groups are SUCCESS. Separate user signoff is unrecorded.
 
 ## Accepted design and boundaries
 
@@ -171,7 +172,7 @@ Worker ownership is disjoint and phase-specific. Lead alone commits/tags/pushes,
 | MIGRATE | Preserve EUIDs/grants/scope/lifecycle/history | SUCCESS | active_product_contract | 3 cutover | A/Lead | migration-verify.json; backup-sanitized.json | Loader scoped to requested templates | 42 preserved, zero retired/deleted; schema3 verified |
 | VERIFY | Changed-code + isolated PostgreSQL integrated pass | SUCCESS | contract_test | 2 integration | Lead | Original771, audit81, export17Python/45JS passes; four80% gates and44-file binding | — | Released-source validation complete; no full-suite or DB-group repetition |
 | RELEASE | Immutable tags/final EC2 images/scoped deployment | SUCCESS | config_or_startup_contract | 3 cutover | Lead | running-provenance-12.0.8.json; sibling-invariance-12.0.8.json; release_images.json | Corrective patches for actual preparation/acceptance and main-CI defects | Dewey12.0.8/Login4.1.1 ready; all113 Dewey files equal merged main; Login and11siblings unchanged |
-| ACCEPT | Bounded live journeys/provenance/sibling invariance | BLOCKED | contract_test | 4 acceptance | Lead/User | Existing external/export proof, internal-registration-confirmed.json, final-acceptance-disposition-12.0.8.json | Actual distinct internal recipient session unavailable; existing manager session cannot prove it | Existing-account sign-in requested; no repeat signup, impersonation or credential extraction; final user acceptance separate |
+| ACCEPT | Bounded live journeys/provenance/sibling invariance | SUCCESS | contract_test | 4 acceptance | Lead/User | Existing external/export/audit evidence plus internal-acceptance-12.0.8.json, complete set and report screenshots | Missing actual internal session supplied by user; operator-left LSMC recipient session restored by normal reauthentication | All required functional journeys pass; formal user signoff separate |
 
 Allowed working states: OPEN, IN_PROGRESS, ATTEMPTING_BUGFIX. Terminal states: SUCCESS, DUPLICATE, NO_LONGER_NEEDED, FAIL, BLOCKED. FAIL requires a documented bugfix attempt; BLOCKED/FAIL require root cause and next action. Every required requirement must actually be satisfied before claiming objective complete.
 

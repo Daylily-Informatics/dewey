@@ -3,8 +3,15 @@
 This is the schema-3 source contract. The [release ledger](plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) separates implementation, tests, tagged images, deployment and acceptance. The [11.0.10 analysis](dev-docs/20261025_dewey_capabilities.md) remains a historical baseline.
 
 The recorded deployed versions are **Dewey 12.0.8 / Login 4.1.1**. All 113 application
-files match the published Dewey tag and merged main byte-for-byte. Internal registration is
-confirmed; internal first-use/scoped-access proof and final acceptance remain open.
+files match the published Dewey tag and merged main byte-for-byte. Internal and
+external functional acceptance pass; formal user signoff is recorded separately.
+The [closeout receipt](plans/evidence/20261026_dewey12/release-closeout-12.0.8.json)
+includes internal report return, sidecars, complete set access and management denial.
+
+A sharing session is restricted even when the account also has ordinary management
+rights. An entitled manager can use [normal management sign-in](https://dewey.day.lsmc.bio/auth/login?next=%2Fui)
+from an approved network to restore console access. This replaces that profile's
+session without widening any share grant; separate profiles keep the two sessions independent.
 
 ## Authority, recipients and selection
 
