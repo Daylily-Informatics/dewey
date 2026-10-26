@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
-from contextlib import contextmanager
-from contextvars import ContextVar
 
 _STORAGE_AUTHORIZATION: ContextVar[Any] = ContextVar("dewey_storage_authorization", default=None)
 
@@ -90,10 +90,17 @@ class S3StorageClient:
         )
         self._client_error = ClientError
         # Separate interactive listing client keeps upload/download timeout contracts intact.
-        self._listing_client = session.client("s3", config=Config(
-            s3={"use_accelerate_endpoint": False}, connect_timeout=2, read_timeout=5,
-            retries={"total_max_attempts": 1}))
+        self._listing_client = session.client(
+            "s3",
+            config=Config(
+                s3={"use_accelerate_endpoint": False},
+                connect_timeout=2,
+                read_timeout=5,
+                retries={"total_max_attempts": 1},
+            ),
+        )
         from dewey_service.listing_cache import ListingCache
+
         self.listing_cache = ListingCache()
 
     def head_object(
@@ -122,15 +129,29 @@ class S3StorageClient:
             raise self._translate_error(exc, bucket=bucket, key=key) from exc
         return self._to_storage_object(bucket=bucket, key=key, response=response)
 
-    def list_buckets(self, *, continuation_token: str | None = None, cache_ttl: int, refresh: bool = False) -> dict[str, Any]:
+    def list_buckets(
+        self, *, continuation_token: str | None = None, cache_ttl: int, refresh: bool = False
+    ) -> dict[str, Any]:
         params: dict[str, Any] = {"MaxBuckets": 100}
         if continuation_token:
             params["ContinuationToken"] = continuation_token
-        response = self.listing_cache.get(("buckets", tuple(sorted(params.items()))), ttl=cache_ttl, refresh=refresh,
-            fetch=lambda: self._listing_client.list_buckets(**params))
-        return {"items": [{"name": item["Name"], "region": item.get("BucketRegion"),
-                           "created_at": item["CreationDate"].isoformat()} for item in response.get("Buckets", [])],
-                "next_continuation_token": response.get("ContinuationToken")}
+        response = self.listing_cache.get(
+            ("buckets", tuple(sorted(params.items()))),
+            ttl=cache_ttl,
+            refresh=refresh,
+            fetch=lambda: self._listing_client.list_buckets(**params),
+        )
+        return {
+            "items": [
+                {
+                    "name": item["Name"],
+                    "region": item.get("BucketRegion"),
+                    "created_at": item["CreationDate"].isoformat(),
+                }
+                for item in response.get("Buckets", [])
+            ],
+            "next_continuation_token": response.get("ContinuationToken"),
+        }
 
     def open_object(self, *, bucket: str, key: str, version_id: str | None = None):
         self._check(bucket, key, "download")
@@ -143,12 +164,20 @@ class S3StorageClient:
             raise self._translate_error(exc, bucket=bucket, key=key) from exc
         return result["Body"], result.get("ContentType")
 
-    def object_response(self, *, bucket: str, key: str, version_id: str | None = None,
-                        head: bool = False, byte_range: str | None = None,
-                        request_payer: str | None = None,
-                        if_match: str | None = None, if_none_match: str | None = None,
-                        if_modified_since: datetime | None = None,
-                        if_unmodified_since: datetime | None = None) -> dict[str, Any]:
+    def object_response(
+        self,
+        *,
+        bucket: str,
+        key: str,
+        version_id: str | None = None,
+        head: bool = False,
+        byte_range: str | None = None,
+        request_payer: str | None = None,
+        if_match: str | None = None,
+        if_none_match: str | None = None,
+        if_modified_since: datetime | None = None,
+        if_unmodified_since: datetime | None = None,
+    ) -> dict[str, Any]:
         """Return S3 response metadata and its bounded-readable body.
 
         GET supplies validators atomically to S3; callers do not race a HEAD
@@ -162,8 +191,12 @@ class S3StorageClient:
             params["RequestPayer"] = request_payer
         if byte_range:
             params["Range"] = byte_range
-        for name, value in (("IfMatch", if_match), ("IfNoneMatch", if_none_match),
-                            ("IfModifiedSince", if_modified_since), ("IfUnmodifiedSince", if_unmodified_since)):
+        for name, value in (
+            ("IfMatch", if_match),
+            ("IfNoneMatch", if_none_match),
+            ("IfModifiedSince", if_modified_since),
+            ("IfUnmodifiedSince", if_unmodified_since),
+        ):
             if value is not None:
                 params[name] = value
         try:
@@ -171,26 +204,56 @@ class S3StorageClient:
         except self._client_error as exc:
             code = str(exc.response.get("Error", {}).get("Code", ""))
             from fastapi import HTTPException
+
             http = int(exc.response.get("ResponseMetadata", {}).get("HTTPStatusCode", 0))
-            if http in {304, 412, 416} or code in {"NotModified", "PreconditionFailed", "InvalidRange"}:
-                raise HTTPException(http if http in {304, 412, 416} else {"NotModified": 304, "PreconditionFailed": 412, "InvalidRange": 416}[code], "Object condition was not satisfied") from exc
+            if http in {304, 412, 416} or code in {
+                "NotModified",
+                "PreconditionFailed",
+                "InvalidRange",
+            }:
+                raise HTTPException(
+                    http
+                    if http in {304, 412, 416}
+                    else {"NotModified": 304, "PreconditionFailed": 412, "InvalidRange": 416}[code],
+                    "Object condition was not satisfied",
+                ) from exc
             raise self._translate_error(exc, bucket=bucket, key=key) from exc
 
-    def begin_multipart(self, *, bucket: str, key: str, content_type: str, metadata: dict | None = None) -> str:
+    def begin_multipart(
+        self, *, bucket: str, key: str, content_type: str, metadata: dict | None = None
+    ) -> str:
         self._check(bucket, key, "upload")
-        return self._client.create_multipart_upload(Bucket=bucket, Key=key, ContentType=content_type, Metadata=metadata or {})["UploadId"]
+        return self._client.create_multipart_upload(
+            Bucket=bucket, Key=key, ContentType=content_type, Metadata=metadata or {}
+        )["UploadId"]
 
-    def upload_part(self, *, bucket: str, key: str, upload_id: str, part_number: int, body: bytes) -> str:
+    def upload_part(
+        self, *, bucket: str, key: str, upload_id: str, part_number: int, body: bytes
+    ) -> str:
         self._check(bucket, key, "upload")
-        return self._client.upload_part(Bucket=bucket, Key=key, UploadId=upload_id,
-            PartNumber=part_number, Body=body)["ETag"]
+        return self._client.upload_part(
+            Bucket=bucket, Key=key, UploadId=upload_id, PartNumber=part_number, Body=body
+        )["ETag"]
 
-    def complete_multipart(self, *, bucket: str, key: str, upload_id: str, parts: list[dict], replace_etag: str | None = None):
+    def complete_multipart(
+        self,
+        *,
+        bucket: str,
+        key: str,
+        upload_id: str,
+        parts: list[dict],
+        replace_etag: str | None = None,
+    ):
         self._check(bucket, key, "upload")
         condition = {"IfMatch": replace_etag} if replace_etag else {"IfNoneMatch": "*"}
         try:
-            return self._client.complete_multipart_upload(Bucket=bucket, Key=key,
-                UploadId=upload_id, MultipartUpload={"Parts": parts}, **condition)
+            return self._client.complete_multipart_upload(
+                Bucket=bucket,
+                Key=key,
+                UploadId=upload_id,
+                MultipartUpload={"Parts": parts},
+                **condition,
+            )
         finally:
             self.listing_cache.invalidate()
 
@@ -201,10 +264,16 @@ class S3StorageClient:
     def delete_reviewed_objects(self, *, bucket: str, objects: list[dict]):
         for item in objects:
             self._check(bucket, item["Key"], "delete")
-        if not objects or len(objects) > 1000 or any(not o.get("Key") or not o.get("ETag") for o in objects):
+        if (
+            not objects
+            or len(objects) > 1000
+            or any(not o.get("Key") or not o.get("ETag") for o in objects)
+        ):
             raise ValueError("Deletion requires 1..1000 exact keys with reviewed ETags")
         try:
-            return self._client.delete_objects(Bucket=bucket, Delete={"Objects": objects, "Quiet": False})
+            return self._client.delete_objects(
+                Bucket=bucket, Delete={"Objects": objects, "Quiet": False}
+            )
         finally:
             self.listing_cache.invalidate()
 
@@ -230,6 +299,7 @@ class S3StorageClient:
             for page in pages:
                 for item in page.get("Contents", []):
                     from fastapi import HTTPException
+
                     try:
                         self._check(bucket, str(item.get("Key") or ""), "metadata")
                     except HTTPException as exc:
@@ -253,8 +323,15 @@ class S3StorageClient:
             raise self._translate_error(exc, bucket=bucket, key=prefix) from exc
         return rows
 
-    def list_share_candidates(self, *, bucket: str, prefix: str, limit: int = 1000,
-                              continuation_token: str | None = None, request_payer: str | None = None):
+    def list_share_candidates(
+        self,
+        *,
+        bucket: str,
+        prefix: str,
+        limit: int = 1000,
+        continuation_token: str | None = None,
+        request_payer: str | None = None,
+    ):
         """Bounded raw candidates; the canonical caller must filter disclosure."""
         self._check(bucket, prefix, "metadata")
         params = {"Bucket": bucket, "Prefix": prefix, "MaxKeys": max(1, min(int(limit), 1000))}
@@ -266,11 +343,22 @@ class S3StorageClient:
             response = self._listing_client.list_objects_v2(**params)
         except self._client_error as exc:
             raise self._translate_error(exc, bucket=bucket, key=prefix) from exc
-        return {"objects": [StorageObject(bucket=bucket, key=item["Key"], size=item.get("Size"),
-            etag=item.get("ETag"), storage_class=item.get("StorageClass"),
-            last_modified=item["LastModified"].isoformat() if item.get("LastModified") else None)
-            for item in response.get("Contents", ())],
-            "next_continuation_token": response.get("NextContinuationToken")}
+        return {
+            "objects": [
+                StorageObject(
+                    bucket=bucket,
+                    key=item["Key"],
+                    size=item.get("Size"),
+                    etag=item.get("ETag"),
+                    storage_class=item.get("StorageClass"),
+                    last_modified=item["LastModified"].isoformat()
+                    if item.get("LastModified")
+                    else None,
+                )
+                for item in response.get("Contents", ())
+            ],
+            "next_continuation_token": response.get("NextContinuationToken"),
+        }
 
     def browse_prefix(
         self,
@@ -295,8 +383,12 @@ class S3StorageClient:
         if str(request_payer or "").strip():
             params["RequestPayer"] = str(request_payer).strip()
         try:
-            response = self.listing_cache.get(("objects", tuple(sorted(params.items()))), ttl=cache_ttl, refresh=refresh,
-                fetch=lambda: self._listing_client.list_objects_v2(**params))
+            response = self.listing_cache.get(
+                ("objects", tuple(sorted(params.items()))),
+                ttl=cache_ttl,
+                refresh=refresh,
+                fetch=lambda: self._listing_client.list_objects_v2(**params),
+            )
         except self._client_error as exc:
             raise self._translate_error(exc, bucket=bucket, key=prefix) from exc
         prefixes = [
@@ -318,8 +410,7 @@ class S3StorageClient:
                 etag=str(item.get("ETag") or "").strip('"') or None,
             )
             for item in response.get("Contents", [])
-            if item.get("Key") is not None
-            and str(item["Key"]) != prefix
+            if item.get("Key") is not None and str(item["Key"]) != prefix
         ]
         return {
             "prefixes": prefixes,
@@ -362,23 +453,43 @@ class S3StorageClient:
         self._check(dest_bucket, dest_key, "upload")
         source = self.head_object(bucket=source_bucket, key=source_key)
         if source.size == 0:
-            return self.put_bytes(bucket=dest_bucket, key=dest_key, body=b"", content_type=source.content_type)
+            return self.put_bytes(
+                bucket=dest_bucket, key=dest_key, body=b"", content_type=source.content_type
+            )
         if source.size is None or not source.etag:
             raise StorageError("Copy requires an observed source size and ETag")
         copy_source = {"Bucket": source_bucket, "Key": source_key}
         if source.version_id:
             copy_source["VersionId"] = source.version_id
-        upload_id = self.begin_multipart(bucket=dest_bucket, key=dest_key, content_type=source.content_type or "application/octet-stream", metadata=source.metadata)
+        upload_id = self.begin_multipart(
+            bucket=dest_bucket,
+            key=dest_key,
+            content_type=source.content_type or "application/octet-stream",
+            metadata=source.metadata,
+        )
         parts = []
         try:
             chunk_size = max(512 * 1024**2, (source.size + 9999) // 10000)
             for number, offset in enumerate(range(0, source.size, chunk_size), 1):
-                response = self._client.upload_part_copy(Bucket=dest_bucket, Key=dest_key,
-                    UploadId=upload_id, PartNumber=number, CopySource=copy_source,
+                response = self._client.upload_part_copy(
+                    Bucket=dest_bucket,
+                    Key=dest_key,
+                    UploadId=upload_id,
+                    PartNumber=number,
+                    CopySource=copy_source,
                     CopySourceIfMatch=source.etag,
-                    **({"CopySourceRange": f"bytes={offset}-{min(offset + chunk_size, source.size) - 1}"} if source.size > chunk_size else {}))
+                    **(
+                        {
+                            "CopySourceRange": f"bytes={offset}-{min(offset + chunk_size, source.size) - 1}"
+                        }
+                        if source.size > chunk_size
+                        else {}
+                    ),
+                )
                 parts.append({"PartNumber": number, "ETag": response["CopyPartResult"]["ETag"]})
-            self.complete_multipart(bucket=dest_bucket, key=dest_key, upload_id=upload_id, parts=parts)
+            self.complete_multipart(
+                bucket=dest_bucket, key=dest_key, upload_id=upload_id, parts=parts
+            )
         except self._client_error as exc:
             # Abort only this operation's incomplete upload; never retry an overwrite.
             self.abort_multipart(bucket=dest_bucket, key=dest_key, upload_id=upload_id)
@@ -471,7 +582,11 @@ class S3StorageClient:
         request_payer: str | None = None,
     ) -> str:
         self._check(bucket, key, "download")
-        params: dict[str, Any] = {"Bucket": bucket, "Key": key, "ResponseContentDisposition": "attachment"}
+        params: dict[str, Any] = {
+            "Bucket": bucket,
+            "Key": key,
+            "ResponseContentDisposition": "attachment",
+        }
         if version_id:
             params["VersionId"] = version_id
         if str(request_payer or "").strip():
@@ -533,7 +648,9 @@ class S3StorageClient:
             sha256=str(response.get("ChecksumSHA256") or "").strip() or None,
             checksum_type=str(response.get("ChecksumType") or "").strip() or None,
             metadata=dict(response.get("Metadata") or {}),
-            last_modified=response["LastModified"].isoformat() if response.get("LastModified") else None,
+            last_modified=response["LastModified"].isoformat()
+            if response.get("LastModified")
+            else None,
         )
 
     def _translate_error(self, exc: Exception, *, bucket: str, key: str) -> StorageError:

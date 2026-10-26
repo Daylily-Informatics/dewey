@@ -77,15 +77,13 @@ def test_dag_session_auth_projects_stable_subject(monkeypatch, test_settings):
 
     profile = {"service_principal": False, "profile": {"sub": "test-subject"}}
     monkeypatch.setattr(
-        tapdb_ui, "require_session_or_api_auth",
+        tapdb_ui,
+        "require_session_or_api_auth",
         lambda settings: lambda request, credentials: profile,
     )
     dependency = tapdb_ui.build_dag_auth_dependency(test_settings)
-    request = Request({"type": "http", "method": "GET", "path": "/api/dag/manifest",
-                       "headers": []})
-    result = asyncio.run(
-        dependency(request, None)
-    )
+    request = Request({"type": "http", "method": "GET", "path": "/api/dag/manifest", "headers": []})
+    result = asyncio.run(dependency(request, None))
     assert result == {"sub": "test-subject"}
     profile["profile"] = {"email": "operator@example.test"}
     with pytest.raises(HTTPException):
@@ -102,17 +100,15 @@ def test_dag_read_credential_is_limited_to_native_get_routes(test_settings):
     assert token not in test_settings.api_tokens()
     dependency = tapdb_ui.build_dag_auth_dependency(test_settings)
     credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=token)
-    request = Request({"type": "http", "method": "GET", "path": "/api/dag/manifest",
-                       "headers": []})
-    assert asyncio.run(dependency(request, credentials)) == {
-        "username": "dewey-dag-reader-test"
-    }
+    request = Request({"type": "http", "method": "GET", "path": "/api/dag/manifest", "headers": []})
+    assert asyncio.run(dependency(request, credentials)) == {"username": "dewey-dag-reader-test"}
     bad = HTTPAuthorizationCredentials(scheme="Bearer", credentials="dewey_dag_wrong")
     with pytest.raises(HTTPException) as error:
         asyncio.run(dependency(request, bad))
     assert error.value.status_code == 401
-    write_request = Request({"type": "http", "method": "POST", "path": "/api/v1/objects",
-                             "headers": []})
+    write_request = Request(
+        {"type": "http", "method": "POST", "path": "/api/v1/objects", "headers": []}
+    )
     with pytest.raises(HTTPException) as error:
         asyncio.run(dependency(write_request, credentials))
     assert error.value.status_code == 403

@@ -1,4 +1,5 @@
 """Offline middleware/dependency boundary checks; no TapDB or service requests."""
+
 from hashlib import sha256
 from types import SimpleNamespace
 
@@ -21,7 +22,9 @@ def boundary(monkeypatch):
     settings = SimpleNamespace(
         dag_read_token_sha256=sha256(TOKEN.encode()).hexdigest(),
         dag_read_actor="dewey-dag-reader-offline",
-        registry_internal_domains=[], registry_service_principals={}, api_tokens=lambda: set(),
+        registry_internal_domains=[],
+        registry_service_principals={},
+        api_tokens=lambda: set(),
     )
     app.state.settings = settings
     dependency = build_dag_auth_dependency(settings)
@@ -31,7 +34,12 @@ def boundary(monkeypatch):
         reached.append(request.url.path)
         return {"actor": actor, "registry_principal": request.state.registry_principal is not None}
 
-    for path in ("/api/dag/manifest", "/api/dag/v2/data", "/api/dag/v2/search", "/api/dag/v2/object/{euid}"):
+    for path in (
+        "/api/dag/manifest",
+        "/api/dag/v2/data",
+        "/api/dag/v2/search",
+        "/api/dag/v2/object/{euid}",
+    ):
         app.add_api_route(path, dag, methods=["GET", "POST"])
     app.add_api_route("/admin", dag, methods=["GET"])
     app.add_api_route("/api/v1/objects", dag, methods=["POST"])
@@ -42,12 +50,19 @@ def boundary(monkeypatch):
 
 def test_verified_reader_reaches_all_canonical_get_dependencies_without_registry_role(boundary):
     client, reached, _ = boundary
-    paths = ("/api/dag/manifest", "/api/dag/v2/data", "/api/dag/v2/search",
-             "/api/dag/v2/object/persisted-object-fixture")
+    paths = (
+        "/api/dag/manifest",
+        "/api/dag/v2/data",
+        "/api/dag/v2/search",
+        "/api/dag/v2/object/persisted-object-fixture",
+    )
     for path in paths:
         response = client.get(path, headers={"Authorization": f"Bearer {TOKEN}"})
         assert response.status_code == 200
-        assert response.json() == {"actor": {"username": "dewey-dag-reader-offline"}, "registry_principal": False}
+        assert response.json() == {
+            "actor": {"username": "dewey-dag-reader-offline"},
+            "registry_principal": False,
+        }
     assert reached == list(paths)
 
 
@@ -70,7 +85,12 @@ def test_reader_does_not_gain_write_admin_or_legacy_route_admission(boundary):
 
 def test_existing_human_admin_admission_is_preserved(boundary):
     client, reached, profile = boundary
-    profile["value"] = {"sub": "offline-admin", "email": "admin@example.test", "roles": ["ADMIN"], "groups": []}
+    profile["value"] = {
+        "sub": "offline-admin",
+        "email": "admin@example.test",
+        "roles": ["ADMIN"],
+        "groups": [],
+    }
     response = client.get("/api/dag/manifest")
     assert response.status_code == 200
     assert response.json() == {"actor": {"sub": "offline-admin"}, "registry_principal": True}

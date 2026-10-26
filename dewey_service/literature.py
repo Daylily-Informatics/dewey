@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import os
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -13,9 +11,11 @@ from urllib.parse import urlparse
 def _load_metapub():
     try:
         from dewey_service.ncbi_config import load_ncbi_key
+
         load_ncbi_key()
         from metapub import PubMedFetcher
         from metapub.findit import FindIt
+
         return PubMedFetcher, FindIt, None
     except Exception as exc:
         return None, None, exc

@@ -96,7 +96,9 @@ def is_allowed_origin(
     host = _normalize_host(candidate)
     if not host:
         return False
-    if excluded_host_suffix and (host == excluded_host_suffix or host.endswith("." + excluded_host_suffix)):
+    if excluded_host_suffix and (
+        host == excluded_host_suffix or host.endswith("." + excluded_host_suffix)
+    ):
         return False
     if is_local_host(host):
         return allow_local or _is_configured_host(host, additional_hosts)
@@ -140,5 +142,7 @@ def build_allowed_origin_regex(
             patterns.append(pattern)
     exclusion = ""
     if excluded_host_suffix:
-        exclusion = rf"(?!https?://(?:[A-Za-z0-9-]+\.)*{re.escape(excluded_host_suffix)}(?::\d+)?(?:/|$))"
+        exclusion = (
+            rf"(?!https?://(?:[A-Za-z0-9-]+\.)*{re.escape(excluded_host_suffix)}(?::\d+)?(?:/|$))"
+        )
     return rf"^{exclusion}(?:{'|'.join(patterns)})$"

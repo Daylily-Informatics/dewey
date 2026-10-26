@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from dewey_service.deletion_policy import reject_deletion
-
 from typing import Any
 from urllib.parse import urlsplit
 
+from dewey_service.deletion_policy import reject_deletion
 from dewey_service.qeo_package_contract import PackageRegistration
 from dewey_service.services.base import DeweyConflictError, DeweyNotFoundError
 from dewey_service.tapdb_backend import (
@@ -71,11 +70,15 @@ class ArtifactSetServiceMixin:
                 raise DeweyConflictError("Manifest checksum disagrees with registered artifact")
             version_id = artifact.get("version_id")
             if version_id is not None and (
-                not isinstance(version_id, str) or not version_id or version_id != version_id.strip()
+                not isinstance(version_id, str)
+                or not version_id
+                or version_id != version_id.strip()
                 or any(ord(char) < 32 for char in version_id)
             ):
                 raise DeweyConflictError("Registered artifact has an invalid exact S3 version")
-            files.append({**item.model_dump(), "url": artifact["storage_uri"], "version_id": version_id})
+            files.append(
+                {**item.model_dump(), "url": artifact["storage_uri"], "version_id": version_id}
+            )
         return {
             "contract": "dewey.multiqc-package/v1",
             "artifact_set_euid": package.euid,
@@ -91,7 +94,9 @@ class ArtifactSetServiceMixin:
         idempotency_key: str | None = None,
     ):
         """Explicit operator write; all artifacts must already exist. No identity invention."""
-        request = request.model_copy(update={"files": sorted(request.files, key=lambda item: item.relative_path)})
+        request = request.model_copy(
+            update={"files": sorted(request.files, key=lambda item: item.relative_path)}
+        )
         payload = request.model_dump()
         fingerprint = self._fingerprint(payload)
         computed_key = f"qeo.package.register:{fingerprint}"
@@ -101,7 +106,9 @@ class ArtifactSetServiceMixin:
                 "Idempotency-Key does not match deterministic QEO package request hash"
             )
         with self.backend.session_scope(commit=True) as session:
-            self.backend.lock_external_key(session, operation="qeo.package.register", key=computed_key)
+            self.backend.lock_external_key(
+                session, operation="qeo.package.register", key=computed_key
+            )
             replay = self._idempotency_replay(
                 session,
                 operation="qeo.package.register",

@@ -8,7 +8,7 @@ import pytest
 from fastapi import HTTPException
 
 from dewey_service.tapdb_backend import TapDBBackend, normalize_instance_payload
-from tests.support.sharing_v12_fakes import Harness, READER, actor, row
+from tests.support.sharing_v12_fakes import READER, Harness, actor, row
 
 
 @pytest.fixture
@@ -20,8 +20,10 @@ def native_resolution(monkeypatch):
     connection = SimpleNamespace(app_username=None, attribution=None, session_scope=h.scope)
     h.backend.config_path = "/fixture/explicit-tapdb.yaml"
     h.backend.connection = SimpleNamespace(app_username="fixture-dewey")
-    h.backend.settings = SimpleNamespace(auth_mode="external_broker",
-        external_broker_handoff_exchange_url="https://login.example.test/auth/handoff/consume")
+    h.backend.settings = SimpleNamespace(
+        auth_mode="external_broker",
+        external_broker_handoff_exchange_url="https://login.example.test/auth/handoff/consume",
+    )
     h.backend.observability = None
     h.session.get_bind = lambda: None
     monkeypatch.setattr("dewey_service.tapdb_backend.get_db", lambda path: connection)
@@ -44,30 +46,47 @@ def alias_for(h, share, *, status="active"):
 
 
 @pytest.mark.parametrize("via_alias", [False, True])
-@pytest.mark.parametrize(("failure", "detail"), [
-    ("revoked", "Share is not available"),
-    ("expired", "Share is not available"),
-    ("denied_email", "Share is not available"),
-    ("removed_grant", "No current recipient grant"),
-    ("expired_grant", "No current recipient grant"),
-    ("old_revision_grant", "No current recipient grant"),
-])
-def test_known_share_denial_commits_once_before_403(native_resolution, monkeypatch, via_alias, failure, detail):
+@pytest.mark.parametrize(
+    ("failure", "detail"),
+    [
+        ("revoked", "Share is not available"),
+        ("expired", "Share is not available"),
+        ("denied_email", "Share is not available"),
+        ("removed_grant", "No current recipient grant"),
+        ("expired_grant", "No current recipient grant"),
+        ("old_revision_grant", "No current recipient grant"),
+    ],
+)
+def test_known_share_denial_commits_once_before_403(
+    native_resolution, monkeypatch, via_alias, failure, detail
+):
     h, share = native_resolution.h, native_resolution.share
     grant = h.service._share_grants(h.session, share)[0]
-    if failure == "revoked": share.json_addl["status"] = "revoked"
-    elif failure == "expired": share.json_addl["expires_at"] = "2020-01-01T00:00:00Z"
-    elif failure == "denied_email": share.json_addl["denied_emails"] = [READER.email]
-    elif failure == "removed_grant": grant.json_addl["status"] = "revoked"
-    elif failure == "expired_grant": grant.json_addl["expires_at"] = "2020-01-01T00:00:00Z"
-    else: grant.json_addl["policy_revision"] = 0
+    if failure == "revoked":
+        share.json_addl["status"] = "revoked"
+    elif failure == "expired":
+        share.json_addl["expires_at"] = "2020-01-01T00:00:00Z"
+    elif failure == "denied_email":
+        share.json_addl["denied_emails"] = [READER.email]
+    elif failure == "removed_grant":
+        grant.json_addl["status"] = "revoked"
+    elif failure == "expired_grant":
+        grant.json_addl["expires_at"] = "2020-01-01T00:00:00Z"
+    else:
+        grant.json_addl["policy_revision"] = 0
     identifier = alias_for(h, share) if via_alias else share.euid
     originals = [(instance, deepcopy(vars(instance))) for instance in h.rows]
     old_edges, commits, rollbacks = list(h.edges), h.commits, h.rollbacks
-    monkeypatch.setattr(h.service, "authorize_share_object",
-        lambda *a, **k: pytest.fail("A resolution denial must not reach object authorization"))
-    monkeypatch.setattr(h.service, "_artifact_member_from_instance",
-        lambda *a, **k: pytest.fail("A resolution denial must not disclose target metadata"))
+    monkeypatch.setattr(
+        h.service,
+        "authorize_share_object",
+        lambda *a, **k: pytest.fail("A resolution denial must not reach object authorization"),
+    )
+    monkeypatch.setattr(
+        h.service,
+        "_artifact_member_from_instance",
+        lambda *a, **k: pytest.fail("A resolution denial must not disclose target metadata"),
+    )
 
     with actor(READER):
         with pytest.raises(HTTPException) as denied:
@@ -94,18 +113,32 @@ def test_known_share_denial_commits_once_before_403(native_resolution, monkeypat
     assert attribution.service_identity == "dewey"
 
 
-@pytest.mark.parametrize(("failure", "status"), [
-    ("unknown", 404), ("retired_alias", 404), ("unlinked_alias", 503),
-    ("ambiguous_alias", 503), ("old_schema", 503), ("archived", 410),
-])
-def test_unresolved_or_noncanonical_identifier_does_not_invent_audit_lineage(native_resolution, failure, status):
+@pytest.mark.parametrize(
+    ("failure", "status"),
+    [
+        ("unknown", 404),
+        ("retired_alias", 404),
+        ("unlinked_alias", 503),
+        ("ambiguous_alias", 503),
+        ("old_schema", 503),
+        ("archived", 410),
+    ],
+)
+def test_unresolved_or_noncanonical_identifier_does_not_invent_audit_lineage(
+    native_resolution, failure, status
+):
     h, share = native_resolution.h, native_resolution.share
     identifier = share.euid
-    if failure == "unknown": identifier = "unknown-share"
-    elif failure == "old_schema": share.json_addl["schema_version"] = 2
-    elif failure == "archived": share.bstatus = "archived"
+    if failure == "unknown":
+        identifier = "unknown-share"
+    elif failure == "old_schema":
+        share.json_addl["schema_version"] = 2
+    elif failure == "archived":
+        share.bstatus = "archived"
     else:
-        identifier = alias_for(h, share, status="retired" if failure == "retired_alias" else "active")
+        identifier = alias_for(
+            h, share, status="retired" if failure == "retired_alias" else "active"
+        )
         if failure == "unlinked_alias":
             h.edges[:] = [edge for edge in h.edges if edge[2] != "share_alias_target"]
         elif failure == "ambiguous_alias":
@@ -120,7 +153,9 @@ def test_unresolved_or_noncanonical_identifier_does_not_invent_audit_lineage(nat
 
 
 @pytest.mark.parametrize("identifier", ["", "bad/path", "a" * 129, None])
-def test_invalid_identifier_is_rejected_without_opening_native_transaction(native_resolution, identifier):
+def test_invalid_identifier_is_rejected_without_opening_native_transaction(
+    native_resolution, identifier
+):
     h = native_resolution.h
     commits, rollbacks = h.commits, h.rollbacks
     with actor(READER), pytest.raises(ValueError, match="exact share EUID or slug"):
@@ -130,7 +165,9 @@ def test_invalid_identifier_is_rejected_without_opening_native_transaction(nativ
 
 
 @pytest.mark.parametrize("excluded", [False, True])
-def test_admitted_resolution_leaves_object_authorizer_as_single_event_writer(native_resolution, excluded):
+def test_admitted_resolution_leaves_object_authorizer_as_single_event_writer(
+    native_resolution, excluded
+):
     h, share = native_resolution.h, native_resolution.share
     if excluded:
         share.json_addl["exclude_patterns"] = ["stable.txt"]
@@ -152,20 +189,26 @@ def test_admitted_resolution_leaves_object_authorizer_as_single_event_writer(nat
 
 
 @pytest.mark.parametrize("failure", ["write", "commit"])
-def test_failed_native_denial_write_never_claims_a_committed_receipt(native_resolution, monkeypatch, failure):
+def test_failed_native_denial_write_never_claims_a_committed_receipt(
+    native_resolution, monkeypatch, failure
+):
     h, share = native_resolution.h, native_resolution.share
     share.json_addl["status"] = "revoked"
     originals, edges, commits = list(h.rows), list(h.edges), h.commits
     if failure == "write":
+
         def fail_create(**kwargs):
             raise RuntimeError("injected native write failure")
+
         monkeypatch.setattr(h.backend.factory, "create_instance", fail_create)
     else:
+
         @contextmanager
         def fail_commit(*, commit):
             with h.scope(commit=commit) as session:
                 yield session
                 raise RuntimeError("injected native commit failure")
+
         native_resolution.connection.session_scope = fail_commit
     with actor(READER), pytest.raises(RuntimeError, match="injected native"):
         h.service.resolve_share_identifier(share.euid)
@@ -175,8 +218,10 @@ def test_failed_native_denial_write_never_claims_a_committed_receipt(native_reso
 
 def test_nonpermission_failure_is_not_misreported_as_access_denial(native_resolution, monkeypatch):
     h, share = native_resolution.h, native_resolution.share
+
     def unavailable(*args):
         raise HTTPException(503, "injected identity outage")
+
     monkeypatch.setattr(h.service, "_require_recipient", unavailable)
     commits = h.commits
     with actor(READER), pytest.raises(HTTPException) as rejected:

@@ -3,18 +3,18 @@
 Policies are typed TapDB objects attached by lineage. Policy subjects are verified
 identity predicates, never client-supplied EUID relationships.
 """
+
 from __future__ import annotations
 
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass
-from datetime import datetime, timezone
 from hashlib import sha256
 from typing import Any
 
 from fastapi import HTTPException, Request
 from fastapi.security.utils import get_authorization_scheme_param
-from sqlalchemy import DateTime, and_, cast, exists, false, func, literal, or_, select, true
+from sqlalchemy import and_, exists, false, func, literal, or_, select, true
 from sqlalchemy.orm import aliased
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse, RedirectResponse
@@ -109,6 +109,7 @@ def owner_clause(data, actor: Principal):
 def share_clause(data, actor: Principal, *, active_only: bool = True):
     """SQL discovery exposes management rights only; recipients use canonical evaluation."""
     from dewey_service.share_context import share_context_available
+
     if not share_context_available():
         return false()
     return owner_clause(data, actor)
@@ -134,23 +135,33 @@ def direct_record_clause(session, model, action: str = "metadata"):
     if action in {"metadata", "download"}:
         allowed = or_(allowed, audience_clause(data[action], actor))
         if action == "metadata" and actor.email:
-            allowed = or_(allowed, data["edit_users"].contains([actor.email]), data["share_users"].contains([actor.email]))
+            allowed = or_(
+                allowed,
+                data["edit_users"].contains([actor.email]),
+                data["share_users"].contains([actor.email]),
+            )
     elif actor.email:
         allowed = or_(allowed, data[f"{action}_users"].contains([actor.email]))
-    policy_grant = exists(select(literal(1)).select_from(edge).join(
-        policy, policy.uid == edge.child_instance_uid
-    ).where(
-        edge.parent_instance_uid == model.uid,
-        edge.relationship_type == "registry_policy",
-        edge.is_deleted.is_(False), policy.is_deleted.is_(False),
-        policy.type == "registry_policy", allowed,
-    )).correlate(model)
+    policy_grant = exists(
+        select(literal(1))
+        .select_from(edge)
+        .join(policy, policy.uid == edge.child_instance_uid)
+        .where(
+            edge.parent_instance_uid == model.uid,
+            edge.relationship_type == "registry_policy",
+            edge.is_deleted.is_(False),
+            policy.is_deleted.is_(False),
+            policy.type == "registry_policy",
+            allowed,
+        )
+    ).correlate(model)
     return and_(model.bstatus != "archived", policy_grant)
 
 
 def record_clause(session, model, action: str = "metadata"):
     """A child cannot bypass a protected ancestor through another registration."""
     from daylily_tapdb import generic_instance, generic_instance_lineage
+
     actor = _PRINCIPAL.get()
     direct = direct_record_clause(session, model, action)
     if maintenance_mode() or (actor is not None and actor.admin):
@@ -159,43 +170,82 @@ def record_clause(session, model, action: str = "metadata"):
         grant_parent = aliased(generic_instance)
         own_policy = aliased(generic_instance)
         own_edge = aliased(generic_instance_lineage)
-        explicitly_restricted = exists(select(literal(1)).select_from(own_edge).join(
-            own_policy, own_policy.uid == own_edge.child_instance_uid).where(
-            own_edge.parent_instance_uid == model.uid, own_edge.relationship_type == "registry_policy",
-            own_edge.is_deleted.is_(False), own_policy.is_deleted.is_(False),
-            own_policy.json_addl["explicit_restriction"].astext == "true",
-        )).correlate(model)
-        inherited = exists(select(literal(1)).select_from(grant_parent).where(
-            grant_parent.uid != model.uid, grant_parent.type == "artifact", grant_parent.is_deleted.is_(False),
-            grant_parent.domain_code == model.domain_code, grant_parent.issuer_app_code == model.issuer_app_code,
-            grant_parent.json_addl["storage_kind"].astext == "prefix",
-            grant_parent.json_addl["storage_backend"].astext == "s3", model.json_addl["storage_backend"].astext == "s3",
-            grant_parent.json_addl["bucket"].astext == model.json_addl["bucket"].astext,
-            func.left(model.json_addl["key"].astext, func.length(grant_parent.json_addl["key"].astext)) == grant_parent.json_addl["key"].astext,
-            direct_record_clause(session, grant_parent, action),
-        )).correlate(model)
+        explicitly_restricted = exists(
+            select(literal(1))
+            .select_from(own_edge)
+            .join(own_policy, own_policy.uid == own_edge.child_instance_uid)
+            .where(
+                own_edge.parent_instance_uid == model.uid,
+                own_edge.relationship_type == "registry_policy",
+                own_edge.is_deleted.is_(False),
+                own_policy.is_deleted.is_(False),
+                own_policy.json_addl["explicit_restriction"].astext == "true",
+            )
+        ).correlate(model)
+        inherited = exists(
+            select(literal(1))
+            .select_from(grant_parent)
+            .where(
+                grant_parent.uid != model.uid,
+                grant_parent.type == "artifact",
+                grant_parent.is_deleted.is_(False),
+                grant_parent.domain_code == model.domain_code,
+                grant_parent.issuer_app_code == model.issuer_app_code,
+                grant_parent.json_addl["storage_kind"].astext == "prefix",
+                grant_parent.json_addl["storage_backend"].astext == "s3",
+                model.json_addl["storage_backend"].astext == "s3",
+                grant_parent.json_addl["bucket"].astext == model.json_addl["bucket"].astext,
+                func.left(
+                    model.json_addl["key"].astext, func.length(grant_parent.json_addl["key"].astext)
+                )
+                == grant_parent.json_addl["key"].astext,
+                direct_record_clause(session, grant_parent, action),
+            )
+        ).correlate(model)
         direct = or_(direct, and_(model.bstatus != "archived", ~explicitly_restricted, inherited))
     parent = aliased(generic_instance)
     policy = aliased(generic_instance)
     edge = aliased(generic_instance_lineage)
-    restricted = exists(select(literal(1)).select_from(edge).join(policy, policy.uid == edge.child_instance_uid).where(
-        edge.parent_instance_uid == parent.uid, edge.relationship_type == "registry_policy",
-        edge.is_deleted.is_(False), policy.is_deleted.is_(False),
-        policy.json_addl["explicit_restriction"].astext == "true",
-    )).correlate(parent)
-    ancestor_denied = exists(select(literal(1)).select_from(parent).where(
-        parent.type == "artifact", parent.uid != model.uid,
-        parent.domain_code == model.domain_code, parent.issuer_app_code == model.issuer_app_code,
-        parent.is_deleted.is_(False),
-        or_(parent.bstatus == "archived", restricted),
-        parent.json_addl["storage_backend"].astext == "s3",
-        model.json_addl["storage_backend"].astext == "s3",
-        parent.json_addl["bucket"].astext == model.json_addl["bucket"].astext,
-        or_(parent.json_addl["key"].astext == model.json_addl["key"].astext,
-            and_(parent.json_addl["storage_kind"].astext == "prefix",
-                func.left(model.json_addl["key"].astext, func.length(parent.json_addl["key"].astext)) == parent.json_addl["key"].astext)),
-        ~direct_record_clause(session, parent, "download" if action == "download" else "metadata"),
-    )).correlate(model)
+    restricted = exists(
+        select(literal(1))
+        .select_from(edge)
+        .join(policy, policy.uid == edge.child_instance_uid)
+        .where(
+            edge.parent_instance_uid == parent.uid,
+            edge.relationship_type == "registry_policy",
+            edge.is_deleted.is_(False),
+            policy.is_deleted.is_(False),
+            policy.json_addl["explicit_restriction"].astext == "true",
+        )
+    ).correlate(parent)
+    ancestor_denied = exists(
+        select(literal(1))
+        .select_from(parent)
+        .where(
+            parent.type == "artifact",
+            parent.uid != model.uid,
+            parent.domain_code == model.domain_code,
+            parent.issuer_app_code == model.issuer_app_code,
+            parent.is_deleted.is_(False),
+            or_(parent.bstatus == "archived", restricted),
+            parent.json_addl["storage_backend"].astext == "s3",
+            model.json_addl["storage_backend"].astext == "s3",
+            parent.json_addl["bucket"].astext == model.json_addl["bucket"].astext,
+            or_(
+                parent.json_addl["key"].astext == model.json_addl["key"].astext,
+                and_(
+                    parent.json_addl["storage_kind"].astext == "prefix",
+                    func.left(
+                        model.json_addl["key"].astext, func.length(parent.json_addl["key"].astext)
+                    )
+                    == parent.json_addl["key"].astext,
+                ),
+            ),
+            ~direct_record_clause(
+                session, parent, "download" if action == "download" else "metadata"
+            ),
+        )
+    ).correlate(model)
     return and_(direct, ~ancestor_denied)
 
 
@@ -204,7 +254,14 @@ def visibility_clause(session, model, *, types=None):
     if maintenance_mode():
         return true()
     from dewey_service.share_context import share_context_available
-    protected_types = {"share_grant", "share_event", "share_revision", "share_alias", "artifact_location_revision"}
+
+    protected_types = {
+        "share_grant",
+        "share_event",
+        "share_revision",
+        "share_alias",
+        "artifact_location_revision",
+    }
     if not share_context_available():
         protected_types.add("share")
     visible_type = ~model.type.in_(protected_types)
@@ -214,54 +271,102 @@ def visibility_clause(session, model, *, types=None):
         return false()
     if types and set(types) <= REGISTRY_TYPES:
         return record_clause(session, model)
-    if types and not set(types) & {*REGISTRY_TYPES, "share", "external_object", "external_object_relation"}:
+    if types and not set(types) & {
+        *REGISTRY_TYPES,
+        "share",
+        "external_object",
+        "external_object_relation",
+    }:
         return visible_type
     from daylily_tapdb import generic_instance, generic_instance_lineage
+
     target = aliased(generic_instance)
     edge = aliased(generic_instance_lineage)
-    can_manage_share = exists(select(literal(1)).select_from(edge).join(target,
-        target.uid == edge.parent_instance_uid).where(edge.child_instance_uid == model.uid,
-        edge.relationship_type == "has_share", edge.is_deleted.is_(False), target.is_deleted.is_(False),
-        record_clause(session, target, "share"))).correlate(model)
+    can_manage_share = exists(
+        select(literal(1))
+        .select_from(edge)
+        .join(target, target.uid == edge.parent_instance_uid)
+        .where(
+            edge.child_instance_uid == model.uid,
+            edge.relationship_type == "has_share",
+            edge.is_deleted.is_(False),
+            target.is_deleted.is_(False),
+            record_clause(session, target, "share"),
+        )
+    ).correlate(model)
     source = aliased(generic_instance)
     source_edge = aliased(generic_instance_lineage)
     external_edge = aliased(generic_instance_lineage)
-    readable_relation = exists(select(literal(1)).select_from(source_edge).join(source,
-        source.uid == source_edge.parent_instance_uid).where(
-        source_edge.child_instance_uid == model.uid,
-        source_edge.relationship_type == "has_external_relation",
-        source_edge.is_deleted.is_(False), source.is_deleted.is_(False),
-        source.type.in_(REGISTRY_TYPES), record_clause(session, source))).correlate(model)
-    readable_external = exists(select(literal(1)).select_from(external_edge).join(source_edge,
-        source_edge.child_instance_uid == external_edge.child_instance_uid).join(source,
-        source.uid == source_edge.parent_instance_uid).where(
-        external_edge.parent_instance_uid == model.uid,
-        external_edge.relationship_type == "is_external_relation_for",
-        source_edge.relationship_type == "has_external_relation",
-        external_edge.is_deleted.is_(False), source_edge.is_deleted.is_(False),
-        source.is_deleted.is_(False), source.type.in_(REGISTRY_TYPES),
-        record_clause(session, source))).correlate(model)
-    any_external_link = exists(select(literal(1)).select_from(external_edge).where(
-        external_edge.parent_instance_uid == model.uid,
-        external_edge.relationship_type == "is_external_relation_for",
-        external_edge.is_deleted.is_(False))).correlate(model)
-    return and_(visible_type, or_(
-        and_(model.type.in_(REGISTRY_TYPES), record_clause(session, model)),
-        and_(model.type == "share", or_(share_clause(model.json_addl, actor), can_manage_share)),
-        and_(model.type == "external_object_relation", readable_relation),
-        and_(model.type == "external_object", or_(readable_external, and_(~any_external_link, literal(actor.internal)))),
-        ~model.type.in_([*REGISTRY_TYPES, "share", "external_object", "external_object_relation"]),
-    ))
+    readable_relation = exists(
+        select(literal(1))
+        .select_from(source_edge)
+        .join(source, source.uid == source_edge.parent_instance_uid)
+        .where(
+            source_edge.child_instance_uid == model.uid,
+            source_edge.relationship_type == "has_external_relation",
+            source_edge.is_deleted.is_(False),
+            source.is_deleted.is_(False),
+            source.type.in_(REGISTRY_TYPES),
+            record_clause(session, source),
+        )
+    ).correlate(model)
+    readable_external = exists(
+        select(literal(1))
+        .select_from(external_edge)
+        .join(source_edge, source_edge.child_instance_uid == external_edge.child_instance_uid)
+        .join(source, source.uid == source_edge.parent_instance_uid)
+        .where(
+            external_edge.parent_instance_uid == model.uid,
+            external_edge.relationship_type == "is_external_relation_for",
+            source_edge.relationship_type == "has_external_relation",
+            external_edge.is_deleted.is_(False),
+            source_edge.is_deleted.is_(False),
+            source.is_deleted.is_(False),
+            source.type.in_(REGISTRY_TYPES),
+            record_clause(session, source),
+        )
+    ).correlate(model)
+    any_external_link = exists(
+        select(literal(1))
+        .select_from(external_edge)
+        .where(
+            external_edge.parent_instance_uid == model.uid,
+            external_edge.relationship_type == "is_external_relation_for",
+            external_edge.is_deleted.is_(False),
+        )
+    ).correlate(model)
+    return and_(
+        visible_type,
+        or_(
+            and_(model.type.in_(REGISTRY_TYPES), record_clause(session, model)),
+            and_(
+                model.type == "share", or_(share_clause(model.json_addl, actor), can_manage_share)
+            ),
+            and_(model.type == "external_object_relation", readable_relation),
+            and_(
+                model.type == "external_object",
+                or_(readable_external, and_(~any_external_link, literal(actor.internal))),
+            ),
+            ~model.type.in_(
+                [*REGISTRY_TYPES, "share", "external_object", "external_object_relation"]
+            ),
+        ),
+    )
 
 
 def require_record(backend, session, record, action: str):
     from daylily_tapdb import generic_instance
+
     if record.bstatus == "archived" and not maintenance_mode():
         raise HTTPException(410, "This Dewey registration is archived")
-    allowed = session.query(generic_instance.uid).filter(
-        generic_instance.uid == record.uid,
-        record_clause(session, generic_instance, action),
-    ).first()
+    allowed = (
+        session.query(generic_instance.uid)
+        .filter(
+            generic_instance.uid == record.uid,
+            record_clause(session, generic_instance, action),
+        )
+        .first()
+    )
     if not allowed:
         raise HTTPException(403, f"Dewey {action} permission is required")
 
@@ -269,9 +374,13 @@ def require_record(backend, session, record, action: str):
 def default_policy(actor: Principal) -> dict[str, Any]:
     audience = {"scope": "internal", "users": [], "domains": [], "groups": []}
     return {
-        "owner_subject": actor.subject, "owner_email": actor.email,
-        "metadata": dict(audience), "download": dict(audience),
-        "edit_users": [], "share_users": [], "explicit_restriction": False,
+        "owner_subject": actor.subject,
+        "owner_email": actor.email,
+        "metadata": dict(audience),
+        "download": dict(audience),
+        "edit_users": [],
+        "share_users": [],
+        "explicit_restriction": False,
     }
 
 
@@ -282,7 +391,9 @@ def validate_policy(value: dict[str, Any]) -> dict[str, Any]:
     out: dict[str, Any] = {}
     for field, rule in value.items():
         if field in {"edit_users", "share_users"}:
-            if not isinstance(rule, list) or any(not isinstance(v, str) or "@" not in v for v in rule):
+            if not isinstance(rule, list) or any(
+                not isinstance(v, str) or "@" not in v for v in rule
+            ):
                 raise ValueError(f"{field} must contain email addresses")
             out[field] = sorted({v.strip().lower() for v in rule})
             continue
@@ -293,14 +404,20 @@ def validate_policy(value: dict[str, Any]) -> dict[str, Any]:
         normalized = {"scope": rule["scope"]}
         for key in ("users", "domains", "groups"):
             items = rule.get(key, [])
-            if not isinstance(items, list) or any(not isinstance(v, str) or not v.strip() for v in items):
+            if not isinstance(items, list) or any(
+                not isinstance(v, str) or not v.strip() for v in items
+            ):
                 raise ValueError(f"{field}.{key} must be a list of nonempty strings")
-            normalized[key] = sorted({v.strip().lower() if key != "groups" else v.strip() for v in items})
+            normalized[key] = sorted(
+                {v.strip().lower() if key != "groups" else v.strip() for v in items}
+            )
         if any("@" not in v for v in normalized["users"]):
             raise ValueError("Audience users must be email addresses")
         if any("." not in v or any(c in v for c in "/*@ ") for v in normalized["domains"]):
             raise ValueError("Audience domains must be explicit DNS suffixes")
-        if normalized["scope"] == "private" and any(normalized[key] for key in ("users", "domains", "groups")):
+        if normalized["scope"] == "private" and any(
+            normalized[key] for key in ("users", "domains", "groups")
+        ):
             raise ValueError("A private audience cannot include additional recipients")
         out[field] = normalized
     return out
@@ -308,33 +425,50 @@ def validate_policy(value: dict[str, Any]) -> dict[str, Any]:
 
 class RegistryPrincipalMiddleware(BaseHTTPMiddleware):
     """Runs inside SessionMiddleware, before route dependencies and worker threads."""
+
     async def dispatch(self, request: Request, call_next):
         from dewey_service.auth import _load_ui_profile
+
         settings = request.app.state.settings
         actor = None
         try:
             # An expired credential must not prevent a new OAuth flow or logout.
             # These endpoints establish/clear identity and never consume a share.
             auth_path = request.url.path in {
-                "/login", "/auth/login", "/auth/callback", "/auth/lsmc/callback",
-                "/auth/error", "/auth/logout", "/logout",
+                "/login",
+                "/auth/login",
+                "/auth/callback",
+                "/auth/lsmc/callback",
+                "/auth/error",
+                "/auth/logout",
+                "/logout",
             }
             profile = None if auth_path else _load_ui_profile(request)
             if profile:
                 email = profile["email"].lower()
                 binding = {}
                 if profile.get("identity_grant_id"):
-                    from dewey_service.recipient_identity import verify_recipient_binding
                     from starlette.concurrency import run_in_threadpool
-                    binding = await run_in_threadpool(verify_recipient_binding, settings,
-                        grant_id=profile["identity_grant_id"], revision=profile["identity_revision"])
+
+                    from dewey_service.recipient_identity import verify_recipient_binding
+
+                    binding = await run_in_threadpool(
+                        verify_recipient_binding,
+                        settings,
+                        grant_id=profile["identity_grant_id"],
+                        revision=profile["identity_revision"],
+                    )
                     if binding["email"] != email or binding["canonical_user_id"] != profile["sub"]:
                         raise HTTPException(401, "Recipient identity changed; sign in again")
                 actor = Principal(
-                    subject=profile["sub"], email=email,
-                    roles=tuple(profile["roles"]), groups=tuple(profile["groups"]),
-                    internal=("lsmc:internal-user" in profile["groups"] or
-                              email.rpartition("@")[2] in settings.registry_internal_domains),
+                    subject=profile["sub"],
+                    email=email,
+                    roles=tuple(profile["roles"]),
+                    groups=tuple(profile["groups"]),
+                    internal=(
+                        "lsmc:internal-user" in profile["groups"]
+                        or email.rpartition("@")[2] in settings.registry_internal_domains
+                    ),
                     identity_grant_id=binding.get("grant_id", ""),
                     identity_revision=binding.get("revision", 0),
                     identity_expires_at=binding.get("expires_at", ""),
@@ -345,26 +479,51 @@ class RegistryPrincipalMiddleware(BaseHTTPMiddleware):
             if actor is None and authorization.startswith("Bearer "):
                 token = authorization[7:].strip()
                 if token in settings.api_tokens():
-                    identity = settings.registry_service_principals.get(sha256(token.encode()).hexdigest())
+                    identity = settings.registry_service_principals.get(
+                        sha256(token.encode()).hexdigest()
+                    )
                     if not identity or not identity.get("subject"):
-                        return JSONResponse({"detail": "Service credential has no configured registry identity"}, status_code=503)
-                    actor = Principal(subject=identity["subject"], roles=tuple(identity["roles"]), internal=True, service=True)
+                        return JSONResponse(
+                            {"detail": "Service credential has no configured registry identity"},
+                            status_code=503,
+                        )
+                    actor = Principal(
+                        subject=identity["subject"],
+                        roles=tuple(identity["roles"]),
+                        internal=True,
+                        service=True,
+                    )
                 elif token.startswith("dewey_user_"):
                     from starlette.concurrency import run_in_threadpool
-                    actor = await run_in_threadpool(request.app.state.service.authenticate_registry_token, token)
+
+                    actor = await run_in_threadpool(
+                        request.app.state.service.authenticate_registry_token, token
+                    )
             path = request.url.path
             if actor is not None and actor.recipient_only:
                 from dewey_service.share_routing import public_recipient_route
-                if not public_recipient_route(request.method, path) and not path.startswith("/__dewey_preview/"):
-                    return JSONResponse({"detail": "This credential is limited to shared content"}, status_code=403)
+
+                if not public_recipient_route(request.method, path) and not path.startswith(
+                    "/__dewey_preview/"
+                ):
+                    return JSONResponse(
+                        {"detail": "This credential is limited to shared content"}, status_code=403
+                    )
             dag_reader = None
             if is_canonical_dag_get(request):
                 scheme, token = get_authorization_scheme_param(authorization)
                 if scheme.lower() == "bearer":
                     dag_reader = dedicated_dag_actor(request, settings, token)
-            admin_path = path.startswith(("/tapdb", "/api/dag", "/admin", "/ui/anomalies", "/ui/observability")) or path == "/graph"
+            admin_path = (
+                path.startswith(
+                    ("/tapdb", "/api/dag", "/admin", "/ui/anomalies", "/ui/observability")
+                )
+                or path == "/graph"
+            )
             if path.startswith("/tapdb/change-password"):
-                return JSONResponse({"detail": "Credentials are managed by shared LSMC login"}, status_code=410)
+                return JSONResponse(
+                    {"detail": "Credentials are managed by shared LSMC login"}, status_code=410
+                )
             if admin_path and dag_reader is None and (actor is None or not actor.admin):
                 if actor is None and not path.startswith("/api/"):
                     return RedirectResponse("/login", status_code=303)
@@ -373,6 +532,7 @@ class RegistryPrincipalMiddleware(BaseHTTPMiddleware):
             context = _PRINCIPAL.set(actor)
             request.state.registry_principal = actor
             from dewey_service.audit import authenticated_user_email_context
+
             try:
                 with authenticated_user_email_context(actor.email if actor else None):
                     return await call_next(request)

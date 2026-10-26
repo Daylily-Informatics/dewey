@@ -38,6 +38,7 @@ class ArtifactServiceMixin:
     @staticmethod
     def _parse_s3_uri(uri: str) -> tuple[str, str]:
         from dewey_service.services.registry_storage import parse_s3_uri
+
         bucket, key, _ = parse_s3_uri(uri)
         if not bucket or not key:
             raise ValueError("source_uri must include bucket and key")
@@ -190,6 +191,7 @@ class ArtifactServiceMixin:
     @staticmethod
     def _normalize_s3_browse_uri(uri: str) -> tuple[str, str, str]:
         from dewey_service.services.registry_storage import parse_s3_uri
+
         return parse_s3_uri(uri, prefix=True)
 
     @staticmethod
@@ -368,24 +370,44 @@ class ArtifactServiceMixin:
         refresh_existing: bool = False,
     ) -> tuple[int, dict[str, Any]]:
         from daylily_tapdb import generic_instance
+
         from dewey_service.registry_access import require_record
+
         if payload["storage_kind"] not in {"object", "prefix"}:
             raise ValueError("storage_kind must be object or prefix")
         if payload["storage_kind"] == "prefix" and payload["storage_backend"] != "s3":
             raise ValueError("Prefixes require explicit S3 storage")
-        if payload["storage_kind"] == "object" and payload.get("node_kind") in {"folder", "prefix", "directory", "run_folder", "sample_folder", "analysis_result_folder"}:
+        if payload["storage_kind"] == "object" and payload.get("node_kind") in {
+            "folder",
+            "prefix",
+            "directory",
+            "run_folder",
+            "sample_folder",
+            "analysis_result_folder",
+        }:
             raise ValueError("Object storage_kind contradicts a directory declaration")
-        payload = {**payload, "node_kind": "folder" if payload["storage_kind"] == "prefix" else "file",
-            "is_terminal": payload["storage_kind"] == "object"}
+        payload = {
+            **payload,
+            "node_kind": "folder" if payload["storage_kind"] == "prefix" else "file",
+            "is_terminal": payload["storage_kind"] == "object",
+        }
         if payload["storage_backend"] == "s3":
             self.require_storage_access(payload["bucket"], payload["key"], action="metadata")
         if payload["storage_backend"] == "s3":
             from dewey_service.services.share_rebind import lock_storage_coordinate
+
             lock_storage_coordinate(session, payload["storage_uri"], payload.get("version_id"))
-        self.backend.lock_external_key(session, operation="artifact.identity", key=payload["artifact_identity_key"])
-        existing = self._registry_query(session, scopes=("artifact",), authorize=False).filter(
-            generic_instance.json_addl["artifact_identity_key"].astext == payload["artifact_identity_key"]
-        ).first()
+        self.backend.lock_external_key(
+            session, operation="artifact.identity", key=payload["artifact_identity_key"]
+        )
+        existing = (
+            self._registry_query(session, scopes=("artifact",), authorize=False)
+            .filter(
+                generic_instance.json_addl["artifact_identity_key"].astext
+                == payload["artifact_identity_key"]
+            )
+            .first()
+        )
         if existing is not None:
             require_record(self.backend, session, existing, "metadata")
             if refresh_existing:
@@ -610,9 +632,24 @@ class ArtifactServiceMixin:
         continuation_token: str | None = None,
         refresh: bool = False,
     ) -> dict[str, Any]:
-        result = self.registry_browse(root_uri, limit=limit, continuation_token=continuation_token, refresh=refresh)
-        result["prefixes"] = [{**item, "storage_uri": item["uri"], "prefix": item["key"], "artifact_euid": item["euid"]} for item in result["items"] if item["kind"] == "prefix"]
-        result["objects"] = [{**item, "storage_uri": item["uri"], "artifact_euid": item["euid"]} for item in result["items"] if item["kind"] == "object"]
+        result = self.registry_browse(
+            root_uri, limit=limit, continuation_token=continuation_token, refresh=refresh
+        )
+        result["prefixes"] = [
+            {
+                **item,
+                "storage_uri": item["uri"],
+                "prefix": item["key"],
+                "artifact_euid": item["euid"],
+            }
+            for item in result["items"]
+            if item["kind"] == "prefix"
+        ]
+        result["objects"] = [
+            {**item, "storage_uri": item["uri"], "artifact_euid": item["euid"]}
+            for item in result["items"]
+            if item["kind"] == "object"
+        ]
         return result
 
     @staticmethod
@@ -1404,6 +1441,7 @@ class ArtifactServiceMixin:
         annotation_recovery: bool = False,
     ) -> tuple[int, dict[str, Any]]:
         from dewey_service.registry_access import principal
+
         if annotation_recovery and not principal().annotation_upload:
             raise ValueError("Annotation recovery requires scoped human authorization")
         try:
@@ -1617,7 +1655,10 @@ class ArtifactServiceMixin:
 
             # Preserve the established request fingerprint and historical receipt.
             # The declared OWY sequencing-directory contract owns this classification.
-            if payload["artifact_type"] == "sequencing_run_dir" and payload["producer_system"] in {"offwithyou", "owy"}:
+            if payload["artifact_type"] == "sequencing_run_dir" and payload["producer_system"] in {
+                "offwithyou",
+                "owy",
+            }:
                 payload.update(storage_kind="prefix", node_kind="folder", is_terminal=False)
             status_code, body = self._upsert_artifact_record(
                 session,

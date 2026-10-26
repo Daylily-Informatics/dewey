@@ -1,4 +1,5 @@
 """Non-configurable prohibition of deletion through Dewey web surfaces."""
+
 from __future__ import annotations
 
 from fastapi import HTTPException
@@ -22,20 +23,22 @@ class DeletionProhibitionMiddleware:
             method = scope["method"]
             path = scope["path"].rstrip("/")
             segments = path.split("/")
-            destructive = (
-                method == "DELETE"
-                or (method not in {"GET", "HEAD", "OPTIONS"} and (
+            destructive = method == "DELETE" or (
+                method not in {"GET", "HEAD", "OPTIONS"}
+                and (
                     # Generic object edits and backup restoration can erase data.
-                    path == "/tapdb" or path.startswith("/tapdb/")
+                    path == "/tapdb"
+                    or path.startswith("/tapdb/")
                     or path == "/api/v1/storage/deletions"
                     or path.startswith("/api/v1/storage/deletions/")
                     or (path.startswith("/api/v1/records/") and segments[-1] == "archive")
                     or (path.startswith("/api/v1/storage/uploads/") and segments[-1] == "abort")
-                ))
+                )
             )
             if destructive:
                 response = JSONResponse(
-                    {"detail": DELETION_DISABLED}, status_code=403,
+                    {"detail": DELETION_DISABLED},
+                    status_code=403,
                     headers={"Cache-Control": "no-store"},
                 )
                 await response(scope, receive, send)

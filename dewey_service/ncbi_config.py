@@ -1,4 +1,5 @@
 """Load the explicitly configured NCBI key before importing Metapub."""
+
 import os
 from pathlib import Path
 

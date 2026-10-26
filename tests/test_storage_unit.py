@@ -132,9 +132,12 @@ def _client(backend: _FakeS3Backend) -> storage_mod.S3StorageClient:
     client._listing_client = backend
     client._client_error = FakeClientError
     from dewey_service.listing_cache import ListingCache
+
     client.listing_cache = ListingCache()
     client.authorizations = []
-    client.authorization = lambda bucket, key, *, action: client.authorizations.append((bucket, key, action))
+    client.authorization = lambda bucket, key, *, action: client.authorizations.append(
+        (bucket, key, action)
+    )
     return client
 
 
@@ -174,8 +177,12 @@ def test_s3_storage_client_init_builds_session_from_profile_and_region(
     assert set(seen["client_kwargs"]) == {"config"}
     assert seen["configs"] == [
         {"signature_version": "s3v4", "s3": {"use_accelerate_endpoint": False}},
-        {"s3": {"use_accelerate_endpoint": False}, "connect_timeout": 2, "read_timeout": 5,
-         "retries": {"total_max_attempts": 1}},
+        {
+            "s3": {"use_accelerate_endpoint": False},
+            "connect_timeout": 2,
+            "read_timeout": 5,
+            "retries": {"total_max_attempts": 1},
+        },
     ]
 
 
@@ -301,8 +308,9 @@ def test_s3_storage_client_write_tag_retention_and_presign_paths() -> None:
 
     def fake_head_object(*, bucket: str, key: str, version_id: str | None = None):
         head_calls.append((bucket, key))
-        return storage_mod.StorageObject(bucket=bucket, key=key, etag="copied",
-            size=42 if bucket == "source-bucket" else None)
+        return storage_mod.StorageObject(
+            bucket=bucket, key=key, etag="copied", size=42 if bucket == "source-bucket" else None
+        )
 
     client.head_object = fake_head_object  # type: ignore[method-assign]
 
@@ -348,7 +356,11 @@ def test_s3_storage_client_write_tag_retention_and_presign_paths() -> None:
     assert uploaded == storage_mod.StorageObject(
         bucket="dest-bucket", key="dest-key", etag="copied"
     )
-    assert head_calls == [("source-bucket", "source-key"), ("dest-bucket", "dest-key"), ("dest-bucket", "dest-key")]
+    assert head_calls == [
+        ("source-bucket", "source-key"),
+        ("dest-bucket", "dest-key"),
+        ("dest-bucket", "dest-key"),
+    ]
     assert tags == {"zeta": "keep"}
     assert get_url == "https://signed.example.com/object"
     assert upload == {
@@ -405,10 +417,24 @@ def test_s3_storage_client_write_tag_retention_and_presign_paths() -> None:
         payload for name, payload in backend.calls if name == "generate_presigned_url"
     ]
     assert presigned_calls == [
-        ("get_object", {"Bucket": "dest-bucket", "Key": "dest-key", "VersionId": "ver-2", "ResponseContentDisposition": "attachment"}, 30),
+        (
+            "get_object",
+            {
+                "Bucket": "dest-bucket",
+                "Key": "dest-key",
+                "VersionId": "ver-2",
+                "ResponseContentDisposition": "attachment",
+            },
+            30,
+        ),
         (
             "put_object",
-            {"Bucket": "dest-bucket", "Key": "upload-key", "ContentType": "application/pdf", "IfNoneMatch": "*"},
+            {
+                "Bucket": "dest-bucket",
+                "Key": "upload-key",
+                "ContentType": "application/pdf",
+                "IfNoneMatch": "*",
+            },
             45,
         ),
     ]

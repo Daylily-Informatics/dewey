@@ -1,0 +1,15 @@
+{
+  "run_id": 40343492094,
+  "url": "https://github.com/Daylily-Informatics/dewey/actions/runs/40343492094",
+  "head_commit": "44ad68015e4d641796403d8011dcb151c1223a7c",
+  "conclusion": "failure",
+  "jobs": {
+    "Code Quality (Ruff)": "failure",
+    "Security Scanning (Bandit)": "success",
+    "Tests and Build": "skipped",
+    "Isolated PostgreSQL sharing contracts": "skipped"
+  },
+  "ruff_count": 308,
+  "root_cause": "Existing unnormalized style/imports on full deployed source line; main-target CI first run",
+  "resolution": "Mechanical formatting/import cleanup and preserved fixture/public reexports; pending fresh CI"
+}

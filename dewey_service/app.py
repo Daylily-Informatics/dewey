@@ -21,9 +21,9 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Resp
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, ConfigDict, Field
+from starlette.concurrency import run_in_threadpool
 from starlette.datastructures import UploadFile as StarletteUploadFile
 from starlette.middleware.trustedhost import TrustedHostMiddleware
-from starlette.concurrency import run_in_threadpool
 
 from dewey_service.artifact_ui import (
     ARTIFACT_SET_TYPES,
@@ -368,6 +368,7 @@ def _access_log_payload(
     route_template: str,
 ) -> dict[str, object]:
     from dewey_service.report_preview import redacted_path
+
     actor = (
         getattr(request.state, "authorized_by_email", None)
         or getattr(request.state, "authorizing_human", None)
@@ -412,6 +413,7 @@ def create_app(
 ) -> FastAPI:
     settings = settings or get_settings()
     from dewey_service.share_routing import validate_sharing_configuration
+
     validate_sharing_configuration(settings)
     allow_local_domain_access = not settings.is_production
     configured_allowed_hosts = settings.network_allowed_hosts
@@ -504,6 +506,7 @@ def create_app(
     app.state.web_session_config = web_session_config
     app.state.server_instance_id = web_session_config.server_instance_id
     from dewey_service.registry_access import RegistryPrincipalMiddleware
+
     app.add_middleware(RegistryPrincipalMiddleware)
     configure_session_middleware(app, web_session_config)
 
@@ -516,8 +519,10 @@ def create_app(
 
     templates.env.globals["static_url"] = _static_url
     from dewey_service.registry_api import attach_registry_api
+
     attach_registry_api(app, templates=templates)
     from dewey_service.annotation_api import attach_annotation_api
+
     attach_annotation_api(app)
     static_dir = Path(__file__).resolve().parent / "static"
     if static_dir.exists():
@@ -539,6 +544,7 @@ def create_app(
         )
 
     from dewey_service.registry_access import principal as managed_share_auth_dep
+
     api_auth_dep = require_api_auth(settings)
     observability_auth_dep = require_observability_access(settings)
     session_or_api_auth_dep = require_session_or_api_auth(settings)
@@ -744,9 +750,13 @@ def create_app(
                     f"external_reference_targets[{index}].headers is not a native DAG read credential"
                 )
             dag_read_token = raw.get("dag_read_token")
-            if (not isinstance(dag_read_token, str) or not dag_read_token or
-                    dag_read_token != dag_read_token.strip() or
-                    "\n" in dag_read_token or "\r" in dag_read_token):
+            if (
+                not isinstance(dag_read_token, str)
+                or not dag_read_token
+                or dag_read_token != dag_read_token.strip()
+                or "\n" in dag_read_token
+                or "\r" in dag_read_token
+            ):
                 raise ValueError(
                     f"external_reference_targets[{index}].dag_read_token is required and must be exact"
                 )
@@ -785,7 +795,9 @@ def create_app(
                         f"{target['base_url']}/api/dag/manifest", headers=target["headers"]
                     )
                     if manifest_response.status_code != 200:
-                        errors.append(f"{target['service_id']}: native manifest HTTP {manifest_response.status_code}")
+                        errors.append(
+                            f"{target['service_id']}: native manifest HTTP {manifest_response.status_code}"
+                        )
                         continue
                     from daylily_tapdb.web.dag_v2 import validate_dag_v2_manifest
 
@@ -793,7 +805,9 @@ def create_app(
                         manifest_response.json(), expected_service_id=target["service_id"]
                     )
                     if reason is not None:
-                        errors.append(f"{target['service_id']}: native manifest rejected: {reason.value}")
+                        errors.append(
+                            f"{target['service_id']}: native manifest rejected: {reason.value}"
+                        )
                         continue
                     response = await client.get(url, headers=target["headers"])
             except httpx.HTTPError as exc:
@@ -1356,6 +1370,7 @@ def create_app(
     @app.middleware("http")
     async def _reset_audit_principal(request: Request, call_next):
         from dewey_service.audit import request_audit_context
+
         token = set_current_authenticated_user_email(None)
         try:
             with request_audit_context():
@@ -1383,6 +1398,7 @@ def create_app(
     @app.middleware("http")
     async def _capture_observability(request: Request, call_next):
         from dewey_service.report_preview import redacted_path
+
         request_id = str(request.headers.get("x-request-id") or "").strip() or generate_state()
         correlation_source = (
             str(request.headers.get("x-correlation-id") or "").strip()
@@ -1563,15 +1579,21 @@ def create_app(
 
     async def _logout_response(request: Request) -> RedirectResponse:
         session_principal = load_session_principal(request)
-        binding = (session_principal.app_context.get("recipient_identity")
-                   if session_principal is not None else None)
+        binding = (
+            session_principal.app_context.get("recipient_identity")
+            if session_principal is not None
+            else None
+        )
         clear_ui_session(request)
         request.session.clear()
         if isinstance(binding, dict) and binding.get("kind") == "browser":
             from dewey_service.recipient_identity import revoke_recipient_identity
+
             await run_in_threadpool(
-                revoke_recipient_identity, settings,
-                grant_id=binding["grant_id"], revision=binding["revision"],
+                revoke_recipient_identity,
+                settings,
+                grant_id=binding["grant_id"],
+                revision=binding["revision"],
             )
         if settings.auth_mode == "external_broker":
             if not settings.external_broker_logout_url:
@@ -2245,8 +2267,11 @@ def create_app(
                 external_uri=candidate["external_uri"],
                 reference_target={
                     "kind": "tapdb_object",
-                    **({"target_tenant_id": candidate["target_tenant_id"]}
-                       if candidate["target_tenant_id"] is not None else {}),
+                    **(
+                        {"target_tenant_id": candidate["target_tenant_id"]}
+                        if candidate["target_tenant_id"] is not None
+                        else {}
+                    ),
                 },
                 metadata={
                     "validated_by": "dewey.artifact_detail",
@@ -3072,7 +3097,9 @@ def create_app(
                 share_euid,
                 revoked_by=str(profile.get("email") or "").strip(),
                 reason=str(form.get("reason") or "").strip() or None,
-                policy_revision=int(form["policy_revision"]) if form.get("policy_revision") else None,
+                policy_revision=int(form["policy_revision"])
+                if form.get("policy_revision")
+                else None,
             )
             return templates.TemplateResponse(
                 request,
@@ -3951,7 +3978,10 @@ def create_app(
     async def resolve_multiqc(body: ResolveMultiqcRequest) -> dict[str, Any]:
         try:
             from dewey_service.registry_access import Principal, principal_context
-            with principal_context(Principal(subject="qeo", roles=("READ_ONLY",), internal=True, service=True)):
+
+            with principal_context(
+                Principal(subject="qeo", roles=("READ_ONLY",), internal=True, service=True)
+            ):
                 return service.resolve_qeo_package(kind=body.kind, euid=body.euid)
         except DeweyNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -4018,7 +4048,7 @@ def create_app(
         request: Request,
         share_euid: str,
         body: ShareAccessPackageRequest,
-        actor = Depends(managed_share_auth_dep),
+        actor=Depends(managed_share_auth_dep),
     ) -> dict[str, Any]:
         try:
             return service.create_share_access_package(
@@ -4044,8 +4074,12 @@ def create_app(
     )
     async def revoke_share(share_euid: str, body: ShareRevokeRequest) -> dict[str, Any]:
         try:
-            return service.revoke_share(share_euid, revoked_by="api", reason=body.reason,
-                                        policy_revision=body.policy_revision)
+            return service.revoke_share(
+                share_euid,
+                revoked_by="api",
+                reason=body.reason,
+                policy_revision=body.policy_revision,
+            )
         except DeweyNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
@@ -4094,10 +4128,19 @@ def create_app(
         try:
             if body.target_euid is not None:
                 raise ValueError("A share-root subset requires explicit targets")
-            changes = {"targets": [], "name": None, "purpose": None, "owner_email": None,
-                       "allowed_users": None, "allowed_domains": None,
-                       "allowed_groups": None, "delivery_modes": None}
-            changes.update(body.model_dump(exclude_unset=True, exclude={"target_kind", "target_euid"}))
+            changes = {
+                "targets": [],
+                "name": None,
+                "purpose": None,
+                "owner_email": None,
+                "allowed_users": None,
+                "allowed_domains": None,
+                "allowed_groups": None,
+                "delivery_modes": None,
+            }
+            changes.update(
+                body.model_dump(exclude_unset=True, exclude={"target_kind", "target_euid"})
+            )
             status_code, payload = service.create_share_root_subset(
                 share_root_euid,
                 **changes,
@@ -4180,21 +4223,25 @@ def create_app(
     ) -> dict[str, Any]:
         try:
             from daylily_tapdb.external_references import TapDBObjectTarget
+
             from dewey_service.integrations.tapdb_external_references import build_external_target
 
-            target = build_external_target({
-                "external_system": body.external_system.strip().lower(),
-                "external_object_type": body.external_object_type.strip().lower(),
-                "external_object_id": body.external_object_id.strip(),
-                "reference_target": body.reference_target,
-            })
+            target = build_external_target(
+                {
+                    "external_system": body.external_system.strip().lower(),
+                    "external_object_type": body.external_object_type.strip().lower(),
+                    "external_object_id": body.external_object_id.strip(),
+                    "reference_target": body.reference_target,
+                }
+            )
             if isinstance(target, TapDBObjectTarget):
                 owner = await _validate_external_reference_euid(
                     target.target_object_euid,
                     expected_service_id=target.target_service_id,
                 )
-                declared_tenant = (str(target.target_tenant_id)
-                                   if target.target_tenant_id is not None else None)
+                declared_tenant = (
+                    str(target.target_tenant_id) if target.target_tenant_id is not None else None
+                )
                 if declared_tenant != owner["target_tenant_id"]:
                     raise ValueError("Native target tenant scope differs from owner receipt")
                 if body.external_object_type.strip().lower() != owner["external_object_type"]:
@@ -4263,13 +4310,16 @@ def create_app(
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     from dewey_service.performance import PerformanceMiddleware
+
     app.add_middleware(PerformanceMiddleware)
-    from dewey_service.share_routing import ShareHostBoundaryMiddleware
     from dewey_service.share_context import ManagedShareIngressMiddleware
+    from dewey_service.share_routing import ShareHostBoundaryMiddleware
+
     app.add_middleware(ShareHostBoundaryMiddleware, settings=settings)
     # Inspect the real ASGI transport peer before sessions and forwarded headers.
     # The outer deletion prohibition rejects without examining identity or bodies.
     app.add_middleware(ManagedShareIngressMiddleware, settings=settings)
     from dewey_service.deletion_policy import DeletionProhibitionMiddleware
+
     app.add_middleware(DeletionProhibitionMiddleware)
     return app

@@ -218,7 +218,10 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
     def _write(prefix: str, payload: dict[str, Any]) -> None:
         for key, value in payload.items():
             merged = f"{prefix}_{key}" if prefix else str(key)
-            if merged in {"auth_cognito_group_role_map", "registry_service_principals"} and isinstance(value, dict):
+            if merged in {
+                "auth_cognito_group_role_map",
+                "registry_service_principals",
+            } and isinstance(value, dict):
                 out[merged] = value
             elif isinstance(value, dict):
                 _write(merged, value)
@@ -579,16 +582,30 @@ class Settings(BaseSettings):
         if not value:
             return value
         parsed = urlsplit(value)
-        if (parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password
-                or parsed.path or parsed.query or parsed.fragment or parsed.port not in {None, 443}):
+        if (
+            parsed.scheme != "https"
+            or not parsed.hostname
+            or parsed.username
+            or parsed.password
+            or parsed.path
+            or parsed.query
+            or parsed.fragment
+            or parsed.port not in {None, 443}
+        ):
             raise ValueError("share_application_origin must be an exact HTTPS origin without path")
         return value
 
     @field_validator("share_content_host_suffix")
     @classmethod
     def validate_content_suffix(cls, value: str) -> str:
-        if value and (len(value) > 220 or not all(re.fullmatch(r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?", label)
-                                                for label in value.split(".")) or "." not in value):
+        if value and (
+            len(value) > 220
+            or not all(
+                re.fullmatch(r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?", label)
+                for label in value.split(".")
+            )
+            or "." not in value
+        ):
             raise ValueError("share_content_host_suffix must be an explicit lowercase DNS suffix")
         return value
 
@@ -791,10 +808,19 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def validate_cognito_contract(self) -> "Settings":
         for fingerprint, identity in self.registry_service_principals.items():
-            if not re.fullmatch(r"[0-9a-f]{64}", fingerprint) or not str(identity.get("subject", "")).strip():
-                raise ValueError("Registry service principals require a SHA256 fingerprint and explicit subject")
+            if (
+                not re.fullmatch(r"[0-9a-f]{64}", fingerprint)
+                or not str(identity.get("subject", "")).strip()
+            ):
+                raise ValueError(
+                    "Registry service principals require a SHA256 fingerprint and explicit subject"
+                )
             roles = identity.get("roles")
-            if not isinstance(roles, list) or not roles or set(roles) - {"ADMIN", "READ_WRITE", "READ_ONLY"}:
+            if (
+                not isinstance(roles, list)
+                or not roles
+                or set(roles) - {"ADMIN", "READ_WRITE", "READ_ONLY"}
+            ):
                 raise ValueError("Registry service principals require explicit valid roles")
         if self.auth_mode == "external_broker":
             missing = [
@@ -907,9 +933,17 @@ class Settings(BaseSettings):
             if cleaned:
                 tokens.add(cleaned)
         # Resolver-only credentials cannot become write credentials by misconfiguration.
-        return {item for item in tokens if item and not item.startswith((
-            "dewey_qeo_resolver_", "dewey_dag_",
-        ))}
+        return {
+            item
+            for item in tokens
+            if item
+            and not item.startswith(
+                (
+                    "dewey_qeo_resolver_",
+                    "dewey_dag_",
+                )
+            )
+        }
 
     @property
     def is_production(self) -> bool:

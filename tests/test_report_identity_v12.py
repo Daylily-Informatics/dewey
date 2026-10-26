@@ -1,4 +1,5 @@
 """Finite isolated report contexts require current verified recipient identity."""
+
 from dataclasses import asdict
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
@@ -22,15 +23,31 @@ def test_indefinite_share_still_has_finite_report_context():
 
 def test_report_asset_refreshes_external_guest_identity(monkeypatch):
     from dewey_service import recipient_identity
-    actor = Principal(subject="recipient-fixture", email="recipient@example.test", roles=("READ_ONLY",),
-        email_verified=True, recipient_only=True, identity_grant_id="binding-fixture", identity_revision=2,
-        identity_expires_at="2099-01-01T00:00:00+00:00")
+
+    actor = Principal(
+        subject="recipient-fixture",
+        email="recipient@example.test",
+        roles=("READ_ONLY",),
+        email_verified=True,
+        recipient_only=True,
+        identity_grant_id="binding-fixture",
+        identity_revision=2,
+        identity_expires_at="2099-01-01T00:00:00+00:00",
+    )
     calls = []
+
     def verify(settings, **kwargs):
         calls.append(kwargs)
-        return {"canonical_user_id": actor.subject, "email": actor.email, "email_verified": True,
-            "grant_id": actor.identity_grant_id, "revision": actor.identity_revision,
-            "expires_at": actor.identity_expires_at, "kind": "browser"}
+        return {
+            "canonical_user_id": actor.subject,
+            "email": actor.email,
+            "email_verified": True,
+            "grant_id": actor.identity_grant_id,
+            "revision": actor.identity_revision,
+            "expires_at": actor.identity_expires_at,
+            "kind": "browser",
+        }
+
     monkeypatch.setattr(recipient_identity, "verify_recipient_binding", verify)
     settings = SimpleNamespace(cognito_group_role_map={}, registry_internal_domains={"lsmc.bio"})
     current = binding_principal({"principal": asdict(actor)}, settings)
@@ -40,6 +57,7 @@ def test_report_asset_refreshes_external_guest_identity(monkeypatch):
 
     def disabled(settings, **kwargs):
         raise HTTPException(401, "Provider disabled identity")
+
     monkeypatch.setattr(recipient_identity, "verify_recipient_binding", disabled)
     with pytest.raises(HTTPException) as failure:
         binding_principal({"principal": asdict(actor)}, settings)
@@ -48,10 +66,24 @@ def test_report_asset_refreshes_external_guest_identity(monkeypatch):
 
 def test_report_asset_rejects_changed_verified_email(monkeypatch):
     from dewey_service import recipient_identity
-    actor = Principal(subject="recipient-fixture", email="recipient@example.test", recipient_only=True,
-        email_verified=True, identity_grant_id="binding-fixture", identity_revision=2)
-    monkeypatch.setattr(recipient_identity, "verify_recipient_binding", lambda *args, **kwargs: {
-        "canonical_user_id": actor.subject, "email": "other@example.test", "email_verified": True})
+
+    actor = Principal(
+        subject="recipient-fixture",
+        email="recipient@example.test",
+        recipient_only=True,
+        email_verified=True,
+        identity_grant_id="binding-fixture",
+        identity_revision=2,
+    )
+    monkeypatch.setattr(
+        recipient_identity,
+        "verify_recipient_binding",
+        lambda *args, **kwargs: {
+            "canonical_user_id": actor.subject,
+            "email": "other@example.test",
+            "email_verified": True,
+        },
+    )
     with pytest.raises(HTTPException) as failure:
         binding_principal({"principal": asdict(actor)}, SimpleNamespace())
     assert failure.value.status_code == 401

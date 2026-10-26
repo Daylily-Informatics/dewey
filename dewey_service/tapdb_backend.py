@@ -15,21 +15,31 @@ from daylily_tapdb import (
     generic_instance,
     generic_instance_lineage,
 )
+from daylily_tapdb.revisions import RevisionConflict
+from daylily_tapdb.services.object_operations import (
+    ObjectSelector,
+    soft_delete_object,
+    update_object,
+)
 from daylily_tapdb.web.runtime import get_db
+from fastapi import HTTPException
 from sqlalchemy import and_, text
 from sqlalchemy.orm import Session
 
-from dewey_service.audit import creation_audit_fields, update_audit_fields, transaction_attribution
-from daylily_tapdb.revisions import RevisionConflict
-from daylily_tapdb.services.object_operations import ObjectSelector, update_object, soft_delete_object
-from fastapi import HTTPException
+from dewey_service.audit import creation_audit_fields, transaction_attribution, update_audit_fields
 from dewey_service.integrations.tapdb_runtime import ensure_tapdb_version, load_runtime_config
+from dewey_service.registry_access import (
+    OPERATION_TEMPLATE,
+    POLICY_TEMPLATE,
+    TOKEN_TEMPLATE,
+    default_policy,
+    maintenance_mode,
+    principal,
+    require_record,
+    visibility_clause,
+)
 from dewey_service.settings import get_settings
 from dewey_service.ui_metadata import resolve_package_version
-from dewey_service.registry_access import (
-    POLICY_TEMPLATE, TOKEN_TEMPLATE, OPERATION_TEMPLATE, default_policy,
-    maintenance_mode, principal, require_record, visibility_clause,
-)
 
 SERVICE_VERSION = resolve_package_version()
 
@@ -86,14 +96,18 @@ OUTBOX_EVENT_TEMPLATE = "system/outbox_event/generic/1.0/"
 
 
 TEMPLATE_DEFINITIONS: tuple[str, ...] = (
-    POLICY_TEMPLATE, TOKEN_TEMPLATE, OPERATION_TEMPLATE,
+    POLICY_TEMPLATE,
+    TOKEN_TEMPLATE,
+    OPERATION_TEMPLATE,
     ARTIFACT_TEMPLATE,
     ARTIFACT_SET_TEMPLATE,
     SHARE_TEMPLATE,
     SHARE_GRANT_TEMPLATE,
     SHARE_EVENT_TEMPLATE,
     SHARE_ROOT_TEMPLATE,
-    SHARE_REVISION_TEMPLATE, SHARE_ALIAS_TEMPLATE, ARTIFACT_LOCATION_REVISION_TEMPLATE,
+    SHARE_REVISION_TEMPLATE,
+    SHARE_ALIAS_TEMPLATE,
+    ARTIFACT_LOCATION_REVISION_TEMPLATE,
     EXTERNAL_OBJECT_TEMPLATE,
     EXTERNAL_OBJECT_RELATION_TEMPLATE,
     LITERATURE_SAVE_TEMPLATE,
@@ -103,14 +117,18 @@ TEMPLATE_DEFINITIONS: tuple[str, ...] = (
     OUTBOX_EVENT_TEMPLATE,
 )
 BOOT_TEMPLATE_DEFINITIONS: tuple[str, ...] = (
-    POLICY_TEMPLATE, TOKEN_TEMPLATE, OPERATION_TEMPLATE,
+    POLICY_TEMPLATE,
+    TOKEN_TEMPLATE,
+    OPERATION_TEMPLATE,
     ARTIFACT_TEMPLATE,
     ARTIFACT_SET_TEMPLATE,
     SHARE_TEMPLATE,
     SHARE_GRANT_TEMPLATE,
     SHARE_EVENT_TEMPLATE,
     SHARE_ROOT_TEMPLATE,
-    SHARE_REVISION_TEMPLATE, SHARE_ALIAS_TEMPLATE, ARTIFACT_LOCATION_REVISION_TEMPLATE,
+    SHARE_REVISION_TEMPLATE,
+    SHARE_ALIAS_TEMPLATE,
+    ARTIFACT_LOCATION_REVISION_TEMPLATE,
     EXTERNAL_OBJECT_TEMPLATE,
     EXTERNAL_OBJECT_RELATION_TEMPLATE,
     LITERATURE_SAVE_TEMPLATE,
@@ -145,14 +163,19 @@ class TapDBBackend:
         try:
             connection = get_db(self.config_path)
             connection.app_username = self.connection.app_username
-            connection.attribution = transaction_attribution(self.settings, self._operation_label(), commit=commit)
+            connection.attribution = transaction_attribution(
+                self.settings, self._operation_label(), commit=commit
+            )
             with connection.session_scope(commit=commit) as session:
                 from dewey_service.performance import instrument_engine
+
                 instrument_engine(session.get_bind())
                 yield session
                 success = True
         except RevisionConflict as exc:
-            raise HTTPException(409, "TapDB revision conflict; reread and explicitly reconcile the change") from exc
+            raise HTTPException(
+                409, "TapDB revision conflict; reread and explicitly reconcile the change"
+            ) from exc
         finally:
             if self.observability is not None:
                 self.observability.record_db_operation(
@@ -163,7 +186,9 @@ class TapDBBackend:
 
     def lock_external_key(self, session: Session, *, operation: str, key: str) -> None:
         """Serialize one canonical operation key across service processes."""
-        value = int.from_bytes(sha256(f"{operation}:{key}".encode()).digest()[:8], "big", signed=True)
+        value = int.from_bytes(
+            sha256(f"{operation}:{key}".encode()).digest()[:8], "big", signed=True
+        )
         session.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": value})
 
     def _operation_label(self) -> str:
@@ -234,16 +259,23 @@ class TapDBBackend:
         self.update_persisted_fields(session, instance, {"json_addl": payload, "bstatus": status})
         if template_code in {ARTIFACT_TEMPLATE, ARTIFACT_SET_TEMPLATE} and not maintenance_mode():
             actor = principal()
-            managed_annotation = (actor.annotation_upload and template_code == ARTIFACT_TEMPLATE
-                                  and json_addl.get("metadata", {}).get("annotation_owner_subject") == actor.subject
-                                  and json_addl.get("producer_system") == "kahlo")
+            managed_annotation = (
+                actor.annotation_upload
+                and template_code == ARTIFACT_TEMPLATE
+                and json_addl.get("metadata", {}).get("annotation_owner_subject") == actor.subject
+                and json_addl.get("producer_system") == "kahlo"
+            )
             if not actor.writable and not managed_annotation:
                 raise PermissionError("Registry write permission is required")
             policy = self.create_instance(
-                session, template_code=POLICY_TEMPLATE,
-                name=f"Access for {instance.euid}", json_addl=default_policy(actor),
+                session,
+                template_code=POLICY_TEMPLATE,
+                name=f"Access for {instance.euid}",
+                json_addl=default_policy(actor),
             )
-            self.create_lineage(session, parent=instance, child=policy, relationship_type="registry_policy")
+            self.create_lineage(
+                session, parent=instance, child=policy, relationship_type="registry_policy"
+            )
         return instance
 
     def claim_global_instance(
@@ -277,32 +309,61 @@ class TapDBBackend:
         return claim.instance, created
 
     def update_instance_json(
-        self, session: Session, instance: generic_instance, updates: dict[str, Any],
-        *, expected_revision: int | None = None,
+        self,
+        session: Session,
+        instance: generic_instance,
+        updates: dict[str, Any],
+        *,
+        expected_revision: int | None = None,
     ) -> None:
         if instance.type in {"artifact", "artifact_set"} and not maintenance_mode():
             derived = {"share_status", "share_last_issued_at"}
-            require_record(self, session, instance, "metadata" if set(updates) <= derived else "edit")
+            require_record(
+                self, session, instance, "metadata" if set(updates) <= derived else "edit"
+            )
         payload = validate_instance_envelope(instance.json_addl)
         payload.update(updates)
         payload.update(update_audit_fields())
         self.update_persisted_fields(
-            session, instance, {"json_addl": validate_instance_envelope(payload)},
+            session,
+            instance,
+            {"json_addl": validate_instance_envelope(payload)},
             expected_revision=expected_revision,
         )
 
-    def update_persisted_fields(self, session, instance, changes, *, expected_revision: int | None = None):
+    def update_persisted_fields(
+        self, session, instance, changes, *, expected_revision: int | None = None
+    ):
         """Apply the proposal against the revision observed before native locking."""
         expected = instance.record_revision if expected_revision is None else expected_revision
-        update_object(session, ObjectSelector(euid=instance.euid,
-            record_type="lineage" if isinstance(instance, generic_instance_lineage) else "instance"),
-            changes, actor=self.connection.app_username, dry_run=False, expected_revision=expected)
+        update_object(
+            session,
+            ObjectSelector(
+                euid=instance.euid,
+                record_type="lineage"
+                if isinstance(instance, generic_instance_lineage)
+                else "instance",
+            ),
+            changes,
+            actor=self.connection.app_username,
+            dry_run=False,
+            expected_revision=expected,
+        )
 
     def delete_persisted(self, session, instance):
         expected = instance.record_revision
-        soft_delete_object(session, ObjectSelector(euid=instance.euid,
-            record_type="lineage" if isinstance(instance, generic_instance_lineage) else "instance"),
-            actor=self.connection.app_username, dry_run=False, expected_revision=expected)
+        soft_delete_object(
+            session,
+            ObjectSelector(
+                euid=instance.euid,
+                record_type="lineage"
+                if isinstance(instance, generic_instance_lineage)
+                else "instance",
+            ),
+            actor=self.connection.app_username,
+            dry_run=False,
+            expected_revision=expected,
+        )
 
     def _template_query(
         self,

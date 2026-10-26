@@ -1,4 +1,5 @@
 """Own-account credential operations; public ingress never exposes admin token lists."""
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, ConfigDict, Field
@@ -14,8 +15,11 @@ class RecipientTokenRequest(BaseModel):
 
 
 def attach_recipient_account(app, service, templates):
-    router = APIRouter(prefix="/api/v2/recipient/tokens", tags=["Recipient credentials"],
-                       dependencies=[Depends(principal), Depends(require_share_context)])
+    router = APIRouter(
+        prefix="/api/v2/recipient/tokens",
+        tags=["Recipient credentials"],
+        dependencies=[Depends(principal), Depends(require_share_context)],
+    )
 
     @router.get("")
     def tokens():
@@ -23,8 +27,9 @@ def attach_recipient_account(app, service, templates):
 
     @router.post("", status_code=201)
     def create_token(data: RecipientTokenRequest):
-        return service.issue_registry_token(name=data.name, lifetime_days=data.lifetime_days,
-                                            role="READ_ONLY", recipient_only=True)
+        return service.issue_registry_token(
+            name=data.name, lifetime_days=data.lifetime_days, role="READ_ONLY", recipient_only=True
+        )
 
     @router.post("/{token_euid}/revoke")
     def revoke_token(token_euid: str):
@@ -40,4 +45,6 @@ def attach_recipient_account(app, service, templates):
             return RedirectResponse("/auth/login?next=%2Frecipient%2Faccount", status_code=303)
         if actor.service:
             raise HTTPException(403, "A registered recipient is required")
-        return templates.TemplateResponse(request=request, name="recipient_account.html", context={"email": actor.email})
+        return templates.TemplateResponse(
+            request=request, name="recipient_account.html", context={"email": actor.email}
+        )

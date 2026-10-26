@@ -1,4 +1,5 @@
 """Transport and origin boundaries around the managed-share surfaces."""
+
 from __future__ import annotations
 
 import ipaddress
@@ -7,7 +8,6 @@ from urllib.parse import urlsplit
 
 from starlette.datastructures import Headers
 from starlette.responses import JSONResponse
-
 
 # Closed application-side counterpart to the public proxy allowlist.
 PUBLIC_RECIPIENT_ROUTES = (
@@ -20,24 +20,35 @@ PUBLIC_RECIPIENT_ROUTES = (
     ({"POST"}, r"/api/v2/recipient/tokens/[^/]+/revoke"),
     ({"GET"}, r"/(?:login|auth/login|auth/lsmc/callback|auth/error)"),
     ({"GET", "POST"}, r"/auth/logout"),
-    ({"GET", "HEAD"}, r"/static/(?:favicon\.svg|console\.css|lsmc_ui\.js|recipient\.js|recipient\.css|recipient-account\.js)"),
+    (
+        {"GET", "HEAD"},
+        r"/static/(?:favicon\.svg|console\.css|lsmc_ui\.js|recipient\.js|recipient\.css|recipient-account\.js)",
+    ),
 )
 
 
 def public_recipient_route(method: str, path: str) -> bool:
-    return any(method in methods and re.fullmatch(pattern, path) for methods, pattern in PUBLIC_RECIPIENT_ROUTES)
+    return any(
+        method in methods and re.fullmatch(pattern, path)
+        for methods, pattern in PUBLIC_RECIPIENT_ROUTES
+    )
 
 
 def validate_sharing_configuration(settings):
     from dewey_service.preview_sessions import require_preview_configuration
+
     require_preview_configuration(settings)
     if not settings.share_ingress_assertion or len(settings.share_ingress_assertion) < 32:
         raise RuntimeError("Sharing requires a private proxy assertion of at least 32 characters")
-    if not settings.share_ingress_assertion.isascii() or any(c.isspace() for c in settings.share_ingress_assertion):
+    if not settings.share_ingress_assertion.isascii() or any(
+        c.isspace() for c in settings.share_ingress_assertion
+    ):
         raise RuntimeError("The private proxy assertion must be an ASCII token")
     public = settings.share_public_ingress_assertion
     if not public or len(public) < 32 or not public.isascii() or any(c.isspace() for c in public):
-        raise RuntimeError("Public sharing requires an explicit ASCII proxy assertion of at least 32 characters")
+        raise RuntimeError(
+            "Public sharing requires an explicit ASCII proxy assertion of at least 32 characters"
+        )
     if public == settings.share_ingress_assertion:
         raise RuntimeError("Public and private sharing assertions must differ")
     try:
@@ -52,7 +63,9 @@ class ShareHostBoundaryMiddleware:
     def __init__(self, app, *, settings):
         self.app, self.settings = app, settings
         self.application_host = urlsplit(settings.share_application_origin).netloc
-        self.content_pattern = re.compile(r"pv-[0-9a-f]{32}\." + re.escape(settings.share_content_host_suffix))
+        self.content_pattern = re.compile(
+            r"pv-[0-9a-f]{32}\." + re.escape(settings.share_content_host_suffix)
+        )
 
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http":
@@ -67,24 +80,35 @@ class ShareHostBoundaryMiddleware:
         trusted = bool(state.get("trusted_tailnet"))
         public = bool(state.get("public_recipient"))
         content_path = path.startswith("/__dewey_preview/")
-        managed = (path == "/shares" or path.startswith("/shares/")
-            or path.startswith("/api/v1/shares") or path.startswith("/api/v1/registry/shares")
-            or path.startswith("/api/v1/share-roots") or path.startswith("/share-roots")
+        managed = (
+            path == "/shares"
+            or path.startswith("/shares/")
+            or path.startswith("/api/v1/shares")
+            or path.startswith("/api/v1/registry/shares")
+            or path.startswith("/api/v1/share-roots")
+            or path.startswith("/share-roots")
             or path.startswith(("/fetch/", "/api/v2/recipient/", "/recipient/"))
-            or re.fullmatch(r"/api/v1/records/[^/]+/shares(?:/preview)?", path) is not None)
+            or re.fullmatch(r"/api/v1/records/[^/]+/shares(?:/preview)?", path) is not None
+        )
 
         async def deny(status, detail):
-            await JSONResponse({"detail": detail}, status_code=status,
-                headers={"Cache-Control": "no-store"})(scope, receive, send)
+            await JSONResponse(
+                {"detail": detail}, status_code=status, headers={"Cache-Control": "no-store"}
+            )(scope, receive, send)
 
         if content_host:
             if authority != host or not self.content_pattern.fullmatch(host) or not content_path:
                 return await deny(404, "Preview context unavailable")
             if not (trusted or public):
                 return await deny(403, "Verified sharing ingress is required")
-            content_allowed = ((scope["method"] == "GET" and path == "/__dewey_preview/challenge")
+            content_allowed = (
+                (scope["method"] == "GET" and path == "/__dewey_preview/challenge")
                 or (scope["method"] == "POST" and path == "/__dewey_preview/handoff")
-                or (scope["method"] in {"GET", "HEAD"} and path.startswith("/__dewey_preview/assets/")))
+                or (
+                    scope["method"] in {"GET", "HEAD"}
+                    and path.startswith("/__dewey_preview/assets/")
+                )
+            )
             if not content_allowed:
                 return await deny(404, "Preview context unavailable")
             # Same-origin report fetches and the exact application handoff are
@@ -94,14 +118,18 @@ class ShareHostBoundaryMiddleware:
                 return await deny(403, "Preview origin not allowed")
         elif content_path:
             return await deny(404, "Preview context unavailable")
-        elif public and (authority != self.application_host or not public_recipient_route(scope["method"], path)):
+        elif public and (
+            authority != self.application_host or not public_recipient_route(scope["method"], path)
+        ):
             return await deny(404, "Recipient route unavailable")
         elif managed:
             if authority != self.application_host:
                 return await deny(404, "Managed shares require the configured Dewey host")
             if not (trusted or public):
                 return await deny(403, "Verified sharing ingress is required")
-            if (scope["method"] not in {"GET", "HEAD", "OPTIONS"}
-                    and headers.get("origin") not in {None, self.settings.share_application_origin}):
+            if scope["method"] not in {"GET", "HEAD", "OPTIONS"} and headers.get("origin") not in {
+                None,
+                self.settings.share_application_origin,
+            }:
                 return await deny(403, "Share changes must originate from Dewey")
         await self.app(scope, receive, send)

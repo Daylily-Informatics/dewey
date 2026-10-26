@@ -13,8 +13,8 @@ import typer
 from cli_core_yo import ccyo_out
 from cli_core_yo.spec import CommandPolicy
 
-from dewey_service.cli._registry_v2 import REQUIRED_JSON, REQUIRED_MUTATING
 from dewey_service.audit import explicit_attribution_context, qeo_dispatch_attribution_context
+from dewey_service.cli._registry_v2 import REQUIRED_JSON, REQUIRED_MUTATING
 from dewey_service.cli._service import build_cli_service
 from dewey_service.qeo_package_contract import PackageRegistration
 from dewey_service.qeo_resolver_auth import issue_resolver_credential
@@ -37,7 +37,9 @@ def _resolver_credential_create(
 
 
 def _package_register(
-    attribution: Path = typer.Option(..., help="Absolute native Attribution JSON for the initiating actor."),
+    attribution: Path = typer.Option(
+        ..., help="Absolute native Attribution JSON for the initiating actor."
+    ),
     manifest: Path = typer.Option(..., help="Absolute JSON manifest of existing artifact EUIDs."),
     idempotency_key: str | None = typer.Option(
         None,

@@ -78,15 +78,9 @@ OWNER_KIND_COORDINATES = {
             ("analysis", "run", "generic", "1.0"),
         }
     ),
-    ("ursa", "analysis_job"): frozenset(
-        {("analysis", "submission-request", "generic", "1.0")}
-    ),
-    ("ursa", "analysis_execution"): frozenset(
-        {("analysis", "execution", "generic", "2.0")}
-    ),
-    ("ursa", "analysis_unit"): frozenset(
-        {("analysis", "unit", "generic", "1.0")}
-    ),
+    ("ursa", "analysis_job"): frozenset({("analysis", "submission-request", "generic", "1.0")}),
+    ("ursa", "analysis_execution"): frozenset({("analysis", "execution", "generic", "2.0")}),
+    ("ursa", "analysis_unit"): frozenset({("analysis", "unit", "generic", "1.0")}),
 }
 
 
@@ -101,9 +95,7 @@ def _require(condition: bool, message: str) -> None:
 
 def owner_business_kind(service_id: str, owner: dict[str, Any]) -> str:
     """Classify only reviewed owner-issued native template coordinates."""
-    coordinates = tuple(
-        owner.get(field) for field in ("category", "type", "subtype", "version")
-    )
+    coordinates = tuple(owner.get(field) for field in ("category", "type", "subtype", "version"))
     _require(
         all(isinstance(value, str) and value for value in coordinates),
         f"Native {service_id} owner template coordinates are missing or invalid",
@@ -353,16 +345,23 @@ def build_external_link_spec(relation, endpoints: RelationEndpoints) -> External
 def attach_observed_reference(session, source, spec):
     """Observe an exact native edge before attach acquires and checks its locks."""
     source_revision = source.record_revision
-    edge = (session.query(generic_instance_lineage)
+    edge = (
+        session.query(generic_instance_lineage)
         .join(generic_instance, generic_instance.uid == generic_instance_lineage.child_instance_uid)
-        .filter(generic_instance_lineage.parent_instance_uid == source.uid,
+        .filter(
+            generic_instance_lineage.parent_instance_uid == source.uid,
             generic_instance_lineage.relationship_type == spec.relationship_type,
             generic_instance.identity_key == spec.target.identity_key,
-            generic_instance.category == "reference")
-        .one_or_none())
-    return ExternalReferenceService(session).attach(source, spec,
+            generic_instance.category == "reference",
+        )
+        .one_or_none()
+    )
+    return ExternalReferenceService(session).attach(
+        source,
+        spec,
         expected_source_revision=source_revision,
-        expected_lineage_revision=None if edge is None else edge.record_revision)
+        expected_lineage_revision=None if edge is None else edge.record_revision,
+    )
 
 
 def attach_external_relation(session, relation):

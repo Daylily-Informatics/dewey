@@ -1,16 +1,18 @@
 """Bounded raw S3 listing cache. Authorization never lives in this cache."""
+
 from collections import OrderedDict
 from concurrent.futures import Future
 from copy import deepcopy
+from sys import getsizeof
 from threading import RLock
 from time import monotonic
-from sys import getsizeof
 
 from dewey_service.performance import measure, metric
 
 
 def _size(value):
     seen = set()
+
     def visit(item):
         if id(item) in seen:
             return 0
@@ -21,6 +23,7 @@ def _size(value):
         elif isinstance(item, (list, tuple)):
             result += sum(visit(v) for v in item)
         return result
+
     return visit(value)
 
 
@@ -68,6 +71,7 @@ class ListingCache:
         if ttl and not owner:
             metric("cache_coalesced", 1)
             from dewey_service.performance import remaining_seconds
+
             return deepcopy(flight.result(timeout=remaining_seconds()))
         metric("cache_misses", 1)
         try:
@@ -77,7 +81,9 @@ class ListingCache:
                 size = _size((key, result)) + 256
                 with self._lock:
                     if flight_key[0] == self._generation and size <= 64 * 1024 * 1024:
-                        while self._entries and (len(self._entries) >= 256 or self._bytes + size > 64 * 1024 * 1024):
+                        while self._entries and (
+                            len(self._entries) >= 256 or self._bytes + size > 64 * 1024 * 1024
+                        ):
                             _, (_, removed_size, _) = self._entries.popitem(last=False)
                             self._bytes -= removed_size
                         self._entries[key] = (monotonic(), size, deepcopy(result))

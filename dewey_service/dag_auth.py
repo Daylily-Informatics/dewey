@@ -1,4 +1,5 @@
 """Dedicated reader admission shared by Dewey's middleware and native DAG auth."""
+
 from __future__ import annotations
 
 import hashlib

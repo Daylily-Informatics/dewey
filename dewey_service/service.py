@@ -10,11 +10,11 @@ from dewey_service.services.external_objects import ExternalObjectServiceMixin
 from dewey_service.services.labcore_owner import LabcoreOwnerServiceMixin
 from dewey_service.services.literature import LiteratureServiceMixin
 from dewey_service.services.outbox import OutboxServiceMixin
+from dewey_service.services.registry import RegistryServiceMixin
+from dewey_service.services.registry_storage import RegistryStorageServiceMixin
 from dewey_service.services.search import SearchServiceMixin
 from dewey_service.services.sequencer_runs import SequencerRunRegistrationServiceMixin
 from dewey_service.services.sharing import SharingServiceMixin
-from dewey_service.services.registry import RegistryServiceMixin
-from dewey_service.services.registry_storage import RegistryStorageServiceMixin
 
 
 class DeweyService(

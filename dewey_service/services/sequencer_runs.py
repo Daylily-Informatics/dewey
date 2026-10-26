@@ -24,7 +24,7 @@ from dewey_service.sequencer_run_contracts import (
     parse_pipeline_order_tsv,
 )
 from dewey_service.services.base import DeweyConflictError, DeweyNotFoundError
-from dewey_service.storage import StorageObject, StorageObjectNotFoundError
+from dewey_service.storage import StorageObject
 from dewey_service.tapdb_backend import (
     ARTIFACT_SET_TEMPLATE,
     ARTIFACT_TEMPLATE,
@@ -117,7 +117,9 @@ class SequencerRunRegistrationServiceMixin:
             "artifact_manifest_rows",
         }
         if not contract_fields.issubset(metadata):
-            raise ValueError("New analysis registrations require the complete native scoped manifest and owner contract")
+            raise ValueError(
+                "New analysis registrations require the complete native scoped manifest and owner contract"
+            )
         if metadata.get("registration_contract") != "analysis_results.v1":
             raise ValueError("Native artifact metadata requires analysis_results.v1")
         rows = metadata.get("artifact_manifest_rows")
@@ -135,8 +137,10 @@ class SequencerRunRegistrationServiceMixin:
             if not isinstance(row, dict):
                 raise ValueError("artifact_manifest_rows entries must be objects")
             path = cls._exact_native_text(row.get("relative_path"), "manifest relative_path")
-            if path.startswith("/") or "\\" in path or any(
-                part in {"", ".", ".."} for part in path.split("/")
+            if (
+                path.startswith("/")
+                or "\\" in path
+                or any(part in {"", ".", ".."} for part in path.split("/"))
             ):
                 raise ValueError("manifest relative_path must be a safe exact member path")
             if path in rows_by_path:
@@ -144,7 +148,9 @@ class SequencerRunRegistrationServiceMixin:
             if not isinstance(row.get("importable"), bool):
                 raise ValueError("manifest importable must be an explicit boolean")
             if row.get("size_bytes") is not None and (
-                isinstance(row["size_bytes"], bool) or not isinstance(row["size_bytes"], int) or row["size_bytes"] < 0
+                isinstance(row["size_bytes"], bool)
+                or not isinstance(row["size_bytes"], int)
+                or row["size_bytes"] < 0
             ):
                 raise ValueError("manifest size_bytes must be an exact nonnegative integer")
             rows_by_path[path] = row
@@ -155,9 +161,7 @@ class SequencerRunRegistrationServiceMixin:
             if path in artifacts_by_path:
                 raise ValueError("request artifact paths must be unique")
             artifacts_by_path[path] = artifact
-        importable_paths = {
-            path for path, row in rows_by_path.items() if row["importable"] is True
-        }
+        importable_paths = {path for path, row in rows_by_path.items() if row["importable"] is True}
         if set(artifacts_by_path) != importable_paths:
             raise ValueError(
                 "request artifacts must match all and only importable artifact_manifest_rows"
@@ -233,7 +237,10 @@ class SequencerRunRegistrationServiceMixin:
                 item.model_dump(mode="json", exclude_none=True)
                 for item in artifact.sample_identifiers
             ]
-            canonical = lambda value: json.dumps(value, sort_keys=True, separators=(",", ":"))
+
+            def canonical(value):
+                return json.dumps(value, sort_keys=True, separators=(",", ":"))
+
             if sorted(actual_identifiers, key=canonical) != sorted(
                 expected_identifiers, key=canonical
             ):
@@ -246,13 +253,25 @@ class SequencerRunRegistrationServiceMixin:
                 identifier = {f"{edge.entity_type}_euid": edge.entity_euid}
                 if identifier not in expected_run_identifiers:
                     expected_run_identifiers.append(identifier)
-        actual_run_identifiers = [item.model_dump(mode="json", exclude_none=True)
-                                  for item in request_body.sample_identifiers]
-        canonical = lambda value: json.dumps(value, sort_keys=True, separators=(",", ":"))
-        if sorted(actual_run_identifiers, key=canonical) != sorted(expected_run_identifiers, key=canonical):
-            raise ValueError("request biological identifiers disagree with the declared plural lineage")
-        directory_paths = {"/".join(path.split("/")[:index])
-                           for path in importable_paths for index in range(1, len(path.split("/")))}
+        actual_run_identifiers = [
+            item.model_dump(mode="json", exclude_none=True)
+            for item in request_body.sample_identifiers
+        ]
+
+        def canonical(value):
+            return json.dumps(value, sort_keys=True, separators=(",", ":"))
+
+        if sorted(actual_run_identifiers, key=canonical) != sorted(
+            expected_run_identifiers, key=canonical
+        ):
+            raise ValueError(
+                "request biological identifiers disagree with the declared plural lineage"
+            )
+        directory_paths = {
+            "/".join(path.split("/")[:index])
+            for path in importable_paths
+            for index in range(1, len(path.split("/")))
+        }
         if importable_paths.intersection(directory_paths):
             raise ValueError("a declared file cannot also be an artifact hierarchy directory")
         return normalized_edges
@@ -881,34 +900,53 @@ class SequencerRunRegistrationServiceMixin:
         # Successful replays own their original exact object-version receipt and
         # do not depend on current S3 visibility or storage availability.
         with self.backend.session_scope(commit=True) as session:
-            self.backend.lock_external_key(session, operation="analysis_results.register", key=clean_idempotency_key)
-            replay = self._idempotency_replay(session, operation="analysis_results.register",
-                idempotency_key=clean_idempotency_key, fingerprint=fingerprint)
+            self.backend.lock_external_key(
+                session, operation="analysis_results.register", key=clean_idempotency_key
+            )
+            replay = self._idempotency_replay(
+                session,
+                operation="analysis_results.register",
+                idempotency_key=clean_idempotency_key,
+                fingerprint=fingerprint,
+            )
             if replay is not None:
                 return replay.status_code, replay.response
         native_associations = self._native_artifact_associations(request_body)
-        bucket, root_prefix, normalized_root_uri = self._normalize_s3_prefix_uri(request_body.result_root_uri)
+        bucket, root_prefix, normalized_root_uri = self._normalize_s3_prefix_uri(
+            request_body.result_root_uri
+        )
         for artifact in request_body.artifacts:
             if artifact.storage_uri != normalized_root_uri + artifact.relative_path:
-                raise ValueError("native artifact must name its exact member path under the result root")
+                raise ValueError(
+                    "native artifact must name its exact member path under the result root"
+                )
         storage = self._require_storage()
         preflight: list[tuple[Any, StorageObject, str, str]] = []
         for artifact in request_body.artifacts:
             item_bucket, item_key, normalized_uri = self._parse_s3_uri_strict(
-                artifact.storage_uri, field_name="storage_uri")
-            obj = storage.head_object(bucket=item_bucket, key=item_key, version_id=artifact.version_id)
+                artifact.storage_uri, field_name="storage_uri"
+            )
+            obj = storage.head_object(
+                bucket=item_bucket, key=item_key, version_id=artifact.version_id
+            )
             if artifact.size_bytes is not None and (
                 obj.size is None or int(obj.size) != artifact.size_bytes
             ):
                 raise ValueError(f"size mismatch for {artifact.logical_name}")
             if obj.bucket != item_bucket or obj.key != item_key:
-                raise ValueError(f"storage returned a different object identity for {artifact.logical_name}")
+                raise ValueError(
+                    f"storage returned a different object identity for {artifact.logical_name}"
+                )
             if artifact.version_id is not None and obj.version_id != artifact.version_id:
-                raise ValueError(f"storage returned a different object version for {artifact.logical_name}")
+                raise ValueError(
+                    f"storage returned a different object version for {artifact.logical_name}"
+                )
             if obj.version_id is not None:
                 self._exact_native_text(obj.version_id, "observed S3 version_id")
             if isinstance(obj.size, bool) or not isinstance(obj.size, int) or obj.size < 0:
-                raise ValueError(f"storage omitted an exact nonnegative object size for {artifact.logical_name}")
+                raise ValueError(
+                    f"storage omitted an exact nonnegative object size for {artifact.logical_name}"
+                )
             observed_sha = str(getattr(obj, "sha256", "") or "").strip().lower()
             if artifact.sha256 and observed_sha and observed_sha != artifact.sha256:
                 raise ValueError(f"checksum mismatch for {artifact.logical_name}")
@@ -916,7 +954,9 @@ class SequencerRunRegistrationServiceMixin:
             preflight.append((artifact, obj, normalized_uri, relative_path))
 
         with self.backend.session_scope(commit=True) as session:
-            self.backend.lock_external_key(session, operation="analysis_results.register", key=clean_idempotency_key)
+            self.backend.lock_external_key(
+                session, operation="analysis_results.register", key=clean_idempotency_key
+            )
             self.backend.ensure_templates(session)
             replay = self._idempotency_replay(
                 session,
@@ -983,44 +1023,87 @@ class SequencerRunRegistrationServiceMixin:
             # Prefix records preserve the exact declared path hierarchy, while the
             # public receipt and artifact set remain root plus requested files only.
             directory_artifacts = {"": root_artifact}
-            directory_paths = sorted({"/".join(relative.split("/")[:index])
-                for _artifact, _obj, _uri, relative in preflight
-                for index in range(1, len(relative.split("/")))}, key=lambda path: (path.count("/"), path))
+            directory_paths = sorted(
+                {
+                    "/".join(relative.split("/")[:index])
+                    for _artifact, _obj, _uri, relative in preflight
+                    for index in range(1, len(relative.split("/")))
+                },
+                key=lambda path: (path.count("/"), path),
+            )
             for relative in directory_paths:
                 prefix_key = root_prefix + relative + "/"
                 directory_payload = self._artifact_payload(
-                    artifact_type="folder", storage_backend="s3", bucket=bucket, key=prefix_key,
-                    version_id=None, size=None, checksums={}, content_type=None,
-                    original_filename=relative.rsplit("/", 1)[-1], producer_system="ursa",
-                    producer_object_euid=request_body.analysis_euid, storage_class=None,
-                    availability_status="available", metadata={"artifact_role": "analysis_result_directory",
-                        "relative_path": relative + "/", "analysis_euid": request_body.analysis_euid,
-                        "registration_contract": "analysis_results.v1"},
-                    source_uri=f"s3://{bucket}/{prefix_key}", import_mode="register",
-                    storage_status="registered", storage_kind="prefix", node_kind="folder", is_terminal=False,
+                    artifact_type="folder",
+                    storage_backend="s3",
+                    bucket=bucket,
+                    key=prefix_key,
+                    version_id=None,
+                    size=None,
+                    checksums={},
+                    content_type=None,
+                    original_filename=relative.rsplit("/", 1)[-1],
+                    producer_system="ursa",
+                    producer_object_euid=request_body.analysis_euid,
+                    storage_class=None,
+                    availability_status="available",
+                    metadata={
+                        "artifact_role": "analysis_result_directory",
+                        "relative_path": relative + "/",
+                        "analysis_euid": request_body.analysis_euid,
+                        "registration_contract": "analysis_results.v1",
+                    },
+                    source_uri=f"s3://{bucket}/{prefix_key}",
+                    import_mode="register",
+                    storage_status="registered",
+                    storage_kind="prefix",
+                    node_kind="folder",
+                    is_terminal=False,
                 )
-                directory_artifact = self._assert_no_conflicting_artifact(session, payload=directory_payload)
+                directory_artifact = self._assert_no_conflicting_artifact(
+                    session, payload=directory_payload
+                )
                 if directory_artifact is None:
-                    _status, directory_artifact = self._upsert_artifact_record(session, payload=directory_payload,
-                        created_at=utc_now_iso(), refresh_existing=False)
+                    _status, directory_artifact = self._upsert_artifact_record(
+                        session,
+                        payload=directory_payload,
+                        created_at=utc_now_iso(),
+                        refresh_existing=False,
+                    )
                 directory_artifacts[relative] = directory_artifact
                 parent = relative.rpartition("/")[0]
-                self._create_artifact_lineage(session,
+                self._create_artifact_lineage(
+                    session,
                     parent_euid=directory_artifacts[parent]["artifact_euid"],
-                    child_euid=directory_artifact["artifact_euid"])
-                directory_instance = self.backend.find_by_euid(session, template_code=ARTIFACT_TEMPLATE,
-                    euid=directory_artifact["artifact_euid"])
+                    child_euid=directory_artifact["artifact_euid"],
+                )
+                directory_instance = self.backend.find_by_euid(
+                    session,
+                    template_code=ARTIFACT_TEMPLATE,
+                    euid=directory_artifact["artifact_euid"],
+                )
                 if directory_instance is None:
-                    raise DeweyNotFoundError("Analysis result directory disappeared during registration")
-                self._attach_native_owner_reference(session, artifact_instance=directory_instance, path=relative + "/",
-                    owner_system="ursa", entity_type="analysis_execution", entity_euid=request_body.analysis_euid,
-                    relationship="produced_by_analysis_execution", source="native_analysis_results_request")
+                    raise DeweyNotFoundError(
+                        "Analysis result directory disappeared during registration"
+                    )
+                self._attach_native_owner_reference(
+                    session,
+                    artifact_instance=directory_instance,
+                    path=relative + "/",
+                    owner_system="ursa",
+                    entity_type="analysis_execution",
+                    entity_euid=request_body.analysis_euid,
+                    relationship="produced_by_analysis_execution",
+                    source="native_analysis_results_request",
+                )
 
             for artifact, obj, _normalized_uri, relative_path in preflight:
                 checksums = {"sha256": artifact.sha256} if artifact.sha256 else {}
                 storage_status = (
                     "verified"
-                    if artifact.sha256 and obj.sha256 == artifact.sha256 and obj.version_id is not None
+                    if artifact.sha256
+                    and obj.sha256 == artifact.sha256
+                    and obj.version_id is not None
                     else "observed"
                 )
                 payload = self._artifact_payload(
@@ -1047,7 +1130,11 @@ class SequencerRunRegistrationServiceMixin:
                         "command_id": request_body.command_id,
                         "result_status": request_body.result_status,
                         "parser_hint": artifact.parser_hint,
-                        "sha256_evidence": "s3_head_matches_request" if artifact.sha256 and obj.sha256 == artifact.sha256 else "request_only" if artifact.sha256 else "unavailable",
+                        "sha256_evidence": "s3_head_matches_request"
+                        if artifact.sha256 and obj.sha256 == artifact.sha256
+                        else "request_only"
+                        if artifact.sha256
+                        else "unavailable",
                         "sample_identifiers": [
                             item.model_dump(mode="json", exclude_none=True)
                             for item in artifact.sample_identifiers
@@ -1086,7 +1173,9 @@ class SequencerRunRegistrationServiceMixin:
                 artifact_instances_by_path[relative_path] = result_instance
                 self._create_artifact_lineage(
                     session,
-                    parent_euid=directory_artifacts[relative_path.rpartition("/")[0]]["artifact_euid"],
+                    parent_euid=directory_artifacts[relative_path.rpartition("/")[0]][
+                        "artifact_euid"
+                    ],
                     child_euid=result_artifact["artifact_euid"],
                 )
 
@@ -1095,10 +1184,14 @@ class SequencerRunRegistrationServiceMixin:
                 *sorted(artifact_instances_by_path.items()),
             ]:
                 self._attach_native_owner_reference(
-                    session, artifact_instance=artifact_instance, path=path,
-                    owner_system="ursa", entity_type="analysis_execution",
+                    session,
+                    artifact_instance=artifact_instance,
+                    path=path,
+                    owner_system="ursa",
+                    entity_type="analysis_execution",
                     entity_euid=request_body.analysis_euid,
-                    relationship="produced_by_analysis_execution", source="native_analysis_results_request",
+                    relationship="produced_by_analysis_execution",
+                    source="native_analysis_results_request",
                 )
             for association in native_associations:
                 artifact_instance = artifact_instances_by_path.get(association.path)

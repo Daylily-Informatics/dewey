@@ -363,8 +363,13 @@ class BaseDeweyService:
             "access_count": int(payload.get("access_count") or 0),
         }
         from dewey_service.registry_access import principal
+
         actor = principal()
-        manager = actor.admin or payload.get("owner_subject") == actor.subject or bool(actor.email and payload.get("owner_email") == actor.email)
+        manager = (
+            actor.admin
+            or payload.get("owner_subject") == actor.subject
+            or bool(actor.email and payload.get("owner_email") == actor.email)
+        )
         if not manager:
             with self.backend.session_scope(commit=False) as session:
                 manager = self._registry_share_manager(session, instance)
@@ -411,7 +416,12 @@ class BaseDeweyService:
         idempotency_key: str,
         fingerprint: str,
     ) -> IdempotencyReplay | None:
-        from dewey_service.tapdb_backend import SHARE_TEMPLATE, EXTERNAL_OBJECT_TEMPLATE, EXTERNAL_OBJECT_RELATION_TEMPLATE
+        from dewey_service.tapdb_backend import (
+            EXTERNAL_OBJECT_RELATION_TEMPLATE,
+            EXTERNAL_OBJECT_TEMPLATE,
+            SHARE_TEMPLATE,
+        )
+
         clean_key = str(idempotency_key or "").strip()
         if not clean_key:
             raise ValueError("Idempotency-Key is required")
@@ -432,6 +442,7 @@ class BaseDeweyService:
         response = payload.get("response")
         if not isinstance(response, dict):
             raise DeweyConflictError("Invalid stored idempotent response payload")
+
         # Cached receipts keep their historical bytes but never bypass current access.
         def authorize_receipt(value):
             if isinstance(value, dict):
@@ -439,17 +450,33 @@ class BaseDeweyService:
                     if key in {"artifact_euid", "artifact_set_euid"} and isinstance(item, str):
                         self._registry_record(session, item)
                     elif key == "share_euid" and isinstance(item, str):
-                        if self.backend.find_by_euid(session, template_code=SHARE_TEMPLATE, euid=item) is None:
+                        if (
+                            self.backend.find_by_euid(
+                                session, template_code=SHARE_TEMPLATE, euid=item
+                            )
+                            is None
+                        ):
                             raise DeweyNotFoundError("Receipt target is not visible")
-                    elif key in {"external_object_euid", "external_object_relation_euid"} and isinstance(item, str):
-                        code = EXTERNAL_OBJECT_TEMPLATE if key == "external_object_euid" else EXTERNAL_OBJECT_RELATION_TEMPLATE
-                        if self.backend.find_by_euid(session, template_code=code, euid=item) is None:
+                    elif key in {
+                        "external_object_euid",
+                        "external_object_relation_euid",
+                    } and isinstance(item, str):
+                        code = (
+                            EXTERNAL_OBJECT_TEMPLATE
+                            if key == "external_object_euid"
+                            else EXTERNAL_OBJECT_RELATION_TEMPLATE
+                        )
+                        if (
+                            self.backend.find_by_euid(session, template_code=code, euid=item)
+                            is None
+                        ):
                             raise DeweyNotFoundError("Receipt external reference is not visible")
                     elif isinstance(item, (dict, list)):
                         authorize_receipt(item)
             elif isinstance(value, list):
                 for item in value:
                     authorize_receipt(item)
+
         authorize_receipt(response)
         return IdempotencyReplay(status_code=status_code, response=dict(response))
 

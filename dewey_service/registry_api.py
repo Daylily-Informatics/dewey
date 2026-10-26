@@ -1,4 +1,5 @@
 """Public EUID registry and storage operations; every client calls these services."""
+
 from __future__ import annotations
 
 from typing import Any, Literal
@@ -112,12 +113,16 @@ def attach_registry_api(app, *, templates):
     service = app.state.service
     router = APIRouter(prefix="/api/v1", tags=["EUID registry"], dependencies=[Depends(principal)])
     from dewey_service.report_preview import attach_report_preview
+
     attach_report_preview(app, router, service)
     from dewey_service.share_gateway import attach_share_gateway
+
     attach_share_gateway(app, router, service)
     from dewey_service.fetch import attach_fetch_routes
+
     attach_fetch_routes(app, service)
     from dewey_service.recipient_api import attach_recipient_account
+
     attach_recipient_account(app, service, templates)
 
     @app.middleware("http")
@@ -136,35 +141,67 @@ def attach_registry_api(app, *, templates):
         return service.transfer_registry_owner(euid, data["email"])
 
     from botocore.exceptions import ClientError
-    from dewey_service.storage import StorageError, StorageObjectNotFoundError, StoragePermissionError
+
+    from dewey_service.storage import (
+        StorageError,
+        StorageObjectNotFoundError,
+        StoragePermissionError,
+    )
 
     @app.exception_handler(ClientError)
     async def provider_error(request, exc):
         code = exc.response.get("Error", {}).get("Code", "Unknown")
-        status = 403 if code in {"403", "AccessDenied"} else 404 if code in {"404", "NoSuchKey", "NoSuchBucket", "NotFound"} else 409 if code in {"PreconditionFailed", "ConditionalRequestConflict", "412"} else 502
-        detail = "The object changed or already exists; review the target again" if status == 409 else f"S3 returned {code}; check the selected location and server permissions"
+        status = (
+            403
+            if code in {"403", "AccessDenied"}
+            else 404
+            if code in {"404", "NoSuchKey", "NoSuchBucket", "NotFound"}
+            else 409
+            if code in {"PreconditionFailed", "ConditionalRequestConflict", "412"}
+            else 502
+        )
+        detail = (
+            "The object changed or already exists; review the target again"
+            if status == 409
+            else f"S3 returned {code}; check the selected location and server permissions"
+        )
         return JSONResponse({"detail": detail}, status_code=status)
 
+    from botocore.exceptions import ConnectTimeoutError, EndpointConnectionError, ReadTimeoutError
     from sqlalchemy.exc import DBAPIError
-    from botocore.exceptions import ConnectTimeoutError, ReadTimeoutError, EndpointConnectionError
 
     @app.exception_handler(DBAPIError)
     async def database_error(request, exc):
         code = getattr(exc.orig, "pgcode", None) or getattr(exc.orig, "sqlstate", None)
         timeout = code in {"57014", "55P03"}
-        return JSONResponse({"detail": "Database read deadline exceeded; narrow the query or retry" if timeout
-            else "Dewey database operation failed; inspect service diagnostics"}, status_code=504 if timeout else 503)
+        return JSONResponse(
+            {
+                "detail": "Database read deadline exceeded; narrow the query or retry"
+                if timeout
+                else "Dewey database operation failed; inspect service diagnostics"
+            },
+            status_code=504 if timeout else 503,
+        )
 
     @app.exception_handler(TimeoutError)
     @app.exception_handler(ConnectTimeoutError)
     @app.exception_handler(ReadTimeoutError)
     @app.exception_handler(EndpointConnectionError)
     async def read_timeout(request, exc):
-        return JSONResponse({"detail": "Storage read did not complete within its deadline; retry explicitly"}, status_code=504)
+        return JSONResponse(
+            {"detail": "Storage read did not complete within its deadline; retry explicitly"},
+            status_code=504,
+        )
 
     @app.exception_handler(StorageError)
     async def storage_error(request, exc):
-        status = 403 if isinstance(exc, StoragePermissionError) else 404 if isinstance(exc, StorageObjectNotFoundError) else 502
+        status = (
+            403
+            if isinstance(exc, StoragePermissionError)
+            else 404
+            if isinstance(exc, StorageObjectNotFoundError)
+            else 502
+        )
         return JSONResponse({"detail": str(exc)}, status_code=status)
 
     @app.exception_handler(PermissionError)
@@ -186,7 +223,9 @@ def attach_registry_api(app, *, templates):
 
     @router.post("/records", status_code=201)
     def register(data: Registration, idempotency_key: str = Header(alias="Idempotency-Key")):
-        code, result = service.register_registry(data.model_dump(exclude_none=True), idempotency_key=idempotency_key)
+        code, result = service.register_registry(
+            data.model_dump(exclude_none=True), idempotency_key=idempotency_key
+        )
         return JSONResponse(result, status_code=code)
 
     @router.get("/records/{euid}")
@@ -198,7 +237,9 @@ def attach_registry_api(app, *, templates):
         return service.registry_section(euid, "metadata")
 
     @router.get("/records/{euid}/activity")
-    def record_activity(euid: str, page: int = Query(1, ge=1), limit: int = Query(25, ge=1, le=100)):
+    def record_activity(
+        euid: str, page: int = Query(1, ge=1), limit: int = Query(25, ge=1, le=100)
+    ):
         return service.registry_section(euid, "activity", page=page, limit=limit)
 
     @router.get("/records/{euid}/members")
@@ -222,18 +263,41 @@ def attach_registry_api(app, *, templates):
         return service.update_registry_permissions(euid, data)
 
     @router.get("/records/{euid}/contents")
-    def contents(euid: str, relative_prefix: str = "", continuation_token: str | None = None,
-                 limit: int = Query(100, ge=1, le=1000), refresh: bool = False):
-        return service.registry_contents(euid, relative_prefix=relative_prefix, continuation_token=continuation_token, limit=limit, refresh=refresh)
+    def contents(
+        euid: str,
+        relative_prefix: str = "",
+        continuation_token: str | None = None,
+        limit: int = Query(100, ge=1, le=1000),
+        refresh: bool = False,
+    ):
+        return service.registry_contents(
+            euid,
+            relative_prefix=relative_prefix,
+            continuation_token=continuation_token,
+            limit=limit,
+            refresh=refresh,
+        )
 
     @router.post("/records/{euid}/members")
-    def add_member(euid: str, data: dict[str, str] = Body(...), idempotency_key: str = Header(alias="Idempotency-Key")):
-        code, result = service.add_artifact_set_member(artifact_set_euid=euid, artifact_euid=data["artifact_euid"], idempotency_key=idempotency_key)
+    def add_member(
+        euid: str,
+        data: dict[str, str] = Body(...),
+        idempotency_key: str = Header(alias="Idempotency-Key"),
+    ):
+        code, result = service.add_artifact_set_member(
+            artifact_set_euid=euid,
+            artifact_euid=data["artifact_euid"],
+            idempotency_key=idempotency_key,
+        )
         return JSONResponse(result, status_code=code)
 
     @router.delete("/records/{euid}/members/{member_euid}")
-    def remove_member(euid: str, member_euid: str, idempotency_key: str = Header(alias="Idempotency-Key")):
-        code, result = service.remove_artifact_set_member(artifact_set_euid=euid, artifact_euid=member_euid, idempotency_key=idempotency_key)
+    def remove_member(
+        euid: str, member_euid: str, idempotency_key: str = Header(alias="Idempotency-Key")
+    ):
+        code, result = service.remove_artifact_set_member(
+            artifact_set_euid=euid, artifact_euid=member_euid, idempotency_key=idempotency_key
+        )
         return JSONResponse(result, status_code=code)
 
     @router.post("/records/{euid}/access")
@@ -241,8 +305,12 @@ def attach_registry_api(app, *, templates):
         return service.registry_download(euid=euid, **data.model_dump())
 
     @router.post("/records/{euid}/shares", status_code=201)
-    def share(euid: str, data: ShareRequest, idempotency_key: str = Header(alias="Idempotency-Key")):
-        code, result = service.share_registry(euid, data.model_dump(exclude_unset=True), idempotency_key=idempotency_key)
+    def share(
+        euid: str, data: ShareRequest, idempotency_key: str = Header(alias="Idempotency-Key")
+    ):
+        code, result = service.share_registry(
+            euid, data.model_dump(exclude_unset=True), idempotency_key=idempotency_key
+        )
         return JSONResponse(result, status_code=code)
 
     @router.post("/records/{euid}/shares/preview")
@@ -258,8 +326,12 @@ def attach_registry_api(app, *, templates):
         return service.search_registry(data, counts_only=True)
 
     @router.get("/registry/shares")
-    def share_index(page: int = Query(1, ge=1), page_size: int = Query(25, ge=1, le=100),
-            q: str = "", sort: Literal["created_at", "name"] = "created_at"):
+    def share_index(
+        page: int = Query(1, ge=1),
+        page_size: int = Query(25, ge=1, le=100),
+        q: str = "",
+        sort: Literal["created_at", "name"] = "created_at",
+    ):
         return service.list_registry_shares(page=page, page_size=page_size, q=q, sort=sort)
 
     @router.get("/registry/shares/{euid}")
@@ -279,39 +351,88 @@ def attach_registry_api(app, *, templates):
         return service.revoke_share_slug(euid, slug, policy_revision=data.policy_revision)
 
     @router.get("/registry/sharing-report")
-    def sharing_report(starts_at: str, ends_at: str | None = None, owner_subject: str | None = None,
-                       status: str | None = None, audience: str | None = None, content_mode: str | None = None,
-                       created_from: str | None = None, created_before: str | None = None,
-                       older_than_days: int | None = Query(None, ge=0), never_accessed: bool = False):
-        return service.sharing_report(starts_at=starts_at, ends_at=ends_at, owner_subject=owner_subject,
-            status=status, audience=audience, content_mode=content_mode, created_from=created_from,
-            created_before=created_before, older_than_days=older_than_days, never_accessed=never_accessed)
+    def sharing_report(
+        starts_at: str,
+        ends_at: str | None = None,
+        owner_subject: str | None = None,
+        status: str | None = None,
+        audience: str | None = None,
+        content_mode: str | None = None,
+        created_from: str | None = None,
+        created_before: str | None = None,
+        older_than_days: int | None = Query(None, ge=0),
+        never_accessed: bool = False,
+    ):
+        return service.sharing_report(
+            starts_at=starts_at,
+            ends_at=ends_at,
+            owner_subject=owner_subject,
+            status=status,
+            audience=audience,
+            content_mode=content_mode,
+            created_from=created_from,
+            created_before=created_before,
+            older_than_days=older_than_days,
+            never_accessed=never_accessed,
+        )
 
     @router.get("/registry/sharing-inventory")
-    def sharing_inventory(owner_subject: str | None = None,
-                       status: str | None = None, audience: str | None = None, content_mode: str | None = None,
-                       created_from: str | None = None, created_before: str | None = None,
-                       older_than_days: int | None = Query(None, ge=0), never_accessed: bool = False,
-                       page: int = Query(1, ge=1), page_size: int = Query(100, ge=1, le=200),
-                       observed_at: str | None = None, expected_inventory_sha256: str | None = None):
-        return service.sharing_inventory(owner_subject=owner_subject,
-            status=status, audience=audience, content_mode=content_mode, created_from=created_from,
-            created_before=created_before, older_than_days=older_than_days, never_accessed=never_accessed,
-            page=page, page_size=page_size, observed_at=observed_at, expected_inventory_sha256=expected_inventory_sha256)
+    def sharing_inventory(
+        owner_subject: str | None = None,
+        status: str | None = None,
+        audience: str | None = None,
+        content_mode: str | None = None,
+        created_from: str | None = None,
+        created_before: str | None = None,
+        older_than_days: int | None = Query(None, ge=0),
+        never_accessed: bool = False,
+        page: int = Query(1, ge=1),
+        page_size: int = Query(100, ge=1, le=200),
+        observed_at: str | None = None,
+        expected_inventory_sha256: str | None = None,
+    ):
+        return service.sharing_inventory(
+            owner_subject=owner_subject,
+            status=status,
+            audience=audience,
+            content_mode=content_mode,
+            created_from=created_from,
+            created_before=created_before,
+            older_than_days=older_than_days,
+            never_accessed=never_accessed,
+            page=page,
+            page_size=page_size,
+            observed_at=observed_at,
+            expected_inventory_sha256=expected_inventory_sha256,
+        )
 
     @router.get("/registry/shares/{euid}/contents")
-    def share_contents(euid: str, target_euid: str | None = None, prefix: str = "",
-                       limit: int = Query(200, ge=1, le=1000), continuation_token: str | None = None):
-        return service.list_share_contents(euid, target_euid=target_euid, prefix=prefix,
-            limit=limit, continuation_token=continuation_token)
+    def share_contents(
+        euid: str,
+        target_euid: str | None = None,
+        prefix: str = "",
+        limit: int = Query(200, ge=1, le=1000),
+        continuation_token: str | None = None,
+    ):
+        return service.list_share_contents(
+            euid,
+            target_euid=target_euid,
+            prefix=prefix,
+            limit=limit,
+            continuation_token=continuation_token,
+        )
 
     @router.get("/registry/shares/{euid}/activity")
-    def share_activity(euid: str, limit: int = Query(100, ge=1, le=200), continuation_token: str | None = None):
+    def share_activity(
+        euid: str, limit: int = Query(100, ge=1, le=200), continuation_token: str | None = None
+    ):
         return service.list_share_audit(euid, limit=limit, continuation_token=continuation_token)
 
     @router.post("/registry/shares/{euid}/grants/{grant_euid}/revoke")
     def revoke_grant(euid: str, grant_euid: str, data: GrantRevocationRequest):
-        return service.revoke_share_grant(euid, grant_euid, policy_revision=data.policy_revision, reason=data.reason)
+        return service.revoke_share_grant(
+            euid, grant_euid, policy_revision=data.policy_revision, reason=data.reason
+        )
 
     @router.patch("/registry/shares/{euid}")
     def share_edit(euid: str, data: dict[str, Any] = Body(...)):
@@ -319,8 +440,12 @@ def attach_registry_api(app, *, templates):
 
     @router.post("/registry/shares/{euid}/revoke")
     def share_revoke(euid: str, data: GrantRevocationRequest):
-        return service.revoke_share(euid, revoked_by=principal().subject, reason=data.reason,
-                                    policy_revision=data.policy_revision)
+        return service.revoke_share(
+            euid,
+            revoked_by=principal().subject,
+            reason=data.reason,
+            policy_revision=data.policy_revision,
+        )
 
     @router.post("/registry/shares/{euid}/invite")
     def invite(euid: str, data: dict[str, str] = Body(...)):
@@ -329,8 +454,14 @@ def attach_registry_api(app, *, templates):
         return service.invite_registry_recipient(euid, data["email"])
 
     @router.get("/storage/buckets", tags=["S3 storage"])
-    def buckets(continuation_token: str | None = None, locations_page: int = Query(default=1, ge=1), refresh: bool = False):
-        return service.registry_buckets(continuation_token, locations_page=locations_page, refresh=refresh)
+    def buckets(
+        continuation_token: str | None = None,
+        locations_page: int = Query(default=1, ge=1),
+        refresh: bool = False,
+    ):
+        return service.registry_buckets(
+            continuation_token, locations_page=locations_page, refresh=refresh
+        )
 
     @router.get("/storage/object", tags=["S3 storage"])
     def object_detail(uri: str):
@@ -347,6 +478,7 @@ def attach_registry_api(app, *, templates):
     @router.put("/storage/uploads/{euid}/parts/{number}", tags=["S3 storage"])
     async def part(euid: str, number: int, request: Request):
         from starlette.concurrency import run_in_threadpool
+
         # Reject an oversized part before buffering it; never accept an unbounded body.
         with service.backend.session_scope(commit=False) as session:
             _, operation = service._storage_operation(session, euid)
@@ -378,7 +510,14 @@ def attach_registry_api(app, *, templates):
     def operation(euid: str):
         with service.backend.session_scope(commit=False) as session:
             _, data = service._storage_operation(session, euid)
-            return {"operation_euid": euid, **{k: v for k, v in data.items() if k not in {"upload_id", "properties", "principal", "token_sha256"}}}
+            return {
+                "operation_euid": euid,
+                **{
+                    k: v
+                    for k, v in data.items()
+                    if k not in {"upload_id", "properties", "principal", "token_sha256"}
+                },
+            }
 
     @router.get("/account/tokens")
     def tokens():
@@ -389,10 +528,16 @@ def attach_registry_api(app, *, templates):
         if not principal().admin:
             raise HTTPException(403, "Admin access required")
         from dewey_service.settings import build_effective_config_rows, get_config_file_path
-        return {"version": app.version, "git": app.state.git_metadata,
-            "config": build_effective_config_rows(app.state.settings, config_path=get_config_file_path()),
+
+        return {
+            "version": app.version,
+            "git": app.state.git_metadata,
+            "config": build_effective_config_rows(
+                app.state.settings, config_path=get_config_file_path()
+            ),
             **service.registry_defaults(),
-            "tokens": service.registry_tokens()}
+            "tokens": service.registry_tokens(),
+        }
 
     @router.get("/registry/defaults")
     def defaults():
@@ -404,7 +549,11 @@ def attach_registry_api(app, *, templates):
 
     @router.post("/account/tokens", status_code=201)
     def token_create(data: dict[str, Any] = Body(...)):
-        return service.issue_registry_token(name=data["name"], lifetime_days=int(data.get("lifetime_days", 30)), role=data.get("role"))
+        return service.issue_registry_token(
+            name=data["name"],
+            lifetime_days=int(data.get("lifetime_days", 30)),
+            role=data.get("role"),
+        )
 
     @router.post("/account/tokens/{euid}/revoke")
     def token_revoke(euid: str):
@@ -415,6 +564,7 @@ def attach_registry_api(app, *, templates):
     def page(request: Request, section: str, *, euid=""):
         if section in {"Sharing", "Share"}:
             from dewey_service.share_context import require_trusted_tailnet
+
             require_trusted_tailnet(request)
         actor = getattr(request.state, "registry_principal", None)
         if actor is None:
@@ -422,8 +572,11 @@ def attach_registry_api(app, *, templates):
             if request.url.query:
                 next_path += "?" + request.url.query
             return RedirectResponse("/login?" + urlencode({"next": next_path}), status_code=303)
-        return templates.TemplateResponse(request=request, name="registry.html", context={
-            "section": section, "euid": euid, "actor": actor, "version": app.version})
+        return templates.TemplateResponse(
+            request=request,
+            name="registry.html",
+            context={"section": section, "euid": euid, "actor": actor, "version": app.version},
+        )
 
     @app.get("/ui", include_in_schema=False)
     @app.get("/search", include_in_schema=False)
@@ -456,8 +609,11 @@ def attach_registry_api(app, *, templates):
     @app.get("/shares/{euid}", include_in_schema=False)
     def recipient_page(request: Request, euid: str):
         actor = getattr(request.state, "registry_principal", None)
-        if getattr(request.state, "public_recipient", False) or (actor is not None and actor.recipient_only):
+        if getattr(request.state, "public_recipient", False) or (
+            actor is not None and actor.recipient_only
+        ):
             from urllib.parse import quote
+
             return RedirectResponse("/fetch/" + quote(euid, safe=""), status_code=303)
         return page(request, "Share", euid=euid)
 

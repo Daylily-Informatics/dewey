@@ -154,6 +154,7 @@ def _normalize_option_default(value):
 
 def _maybe_set_ncbi_api_key() -> None:
     from dewey_service.ncbi_config import load_ncbi_key
+
     load_ncbi_key()
 
 

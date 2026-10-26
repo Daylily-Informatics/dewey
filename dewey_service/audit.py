@@ -81,6 +81,7 @@ _REQUEST_ID: ContextVar[str | None] = ContextVar("dewey_audit_request_id", defau
 @contextmanager
 def request_audit_context():
     from uuid import uuid4
+
     token = _REQUEST_ID.set(str(uuid4()))
     try:
         yield
@@ -91,7 +92,13 @@ def request_audit_context():
 @contextmanager
 def explicit_attribution_context(path):
     import json
-    from daylily_tapdb.security_context import Attribution, set_invocation_attribution, reset_invocation_attribution
+
+    from daylily_tapdb.security_context import (
+        Attribution,
+        reset_invocation_attribution,
+        set_invocation_attribution,
+    )
+
     envelope = Attribution(**json.loads(path.read_text()))
     local_token = _EXPLICIT_ATTRIBUTION.set(envelope)
     token = set_invocation_attribution(envelope)
@@ -103,9 +110,11 @@ def explicit_attribution_context(path):
 
 
 def transaction_attribution(settings, operation: str, *, commit: bool):
-    from uuid import uuid4
     from dataclasses import replace
+    from uuid import uuid4
+
     from daylily_tapdb.security_context import Attribution
+
     from dewey_service.registry_access import current_principal
 
     explicit = _EXPLICIT_ATTRIBUTION.get()
@@ -115,25 +124,39 @@ def transaction_attribution(settings, operation: str, *, commit: bool):
     invocation = _REQUEST_ID.get() or str(uuid4())
     if actor is None:
         if commit:
-            raise ValueError("Dewey writes require a verified actor or explicit attribution envelope")
+            raise ValueError(
+                "Dewey writes require a verified actor or explicit attribution envelope"
+            )
         return None
     else:
         kind = "service" if actor.service else "human"
         issuer = "dewey" if actor.service else human_issuer(settings)
         subject = actor.subject
-    return Attribution(actor_kind=kind, actor_issuer=issuer, actor_subject=subject,
-        service_identity="dewey", request_id=invocation,
-        operation_id=f"{operation}:{uuid4()}")
+    return Attribution(
+        actor_kind=kind,
+        actor_issuer=issuer,
+        actor_subject=subject,
+        service_identity="dewey",
+        request_id=invocation,
+        operation_id=f"{operation}:{uuid4()}",
+    )
 
 
 @contextmanager
 def qeo_dispatch_attribution_context():
     """The unattended outbox dispatch entrypoint explicitly acts as Dewey."""
     from uuid import uuid4
+
     from daylily_tapdb.security_context import Attribution
-    envelope = Attribution(actor_kind="service", actor_issuer="dewey",
-        actor_subject="dewey:qeo-dispatch", service_identity="dewey",
-        request_id=str(uuid4()), operation_id=str(uuid4()))
+
+    envelope = Attribution(
+        actor_kind="service",
+        actor_issuer="dewey",
+        actor_subject="dewey:qeo-dispatch",
+        service_identity="dewey",
+        request_id=str(uuid4()),
+        operation_id=str(uuid4()),
+    )
     token = _EXPLICIT_ATTRIBUTION.set(envelope)
     try:
         yield envelope

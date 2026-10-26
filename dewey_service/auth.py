@@ -108,7 +108,9 @@ def build_cognito_web_session_config(
         redirect_uri=settings.cognito_redirect_uri,
         logout_uri=settings.cognito_logout_url,
         session_secret_key=settings.session_secret_key,
-        session_cookie_name="__Host-dewey_session" if _origin(settings.cognito_redirect_uri).startswith("https://") else "dewey_session",
+        session_cookie_name="__Host-dewey_session"
+        if _origin(settings.cognito_redirect_uri).startswith("https://")
+        else "dewey_session",
         public_base_url=_origin(settings.cognito_redirect_uri),
         client_secret=settings.cognito_app_client_secret or None,
         allow_insecure_http=_origin(settings.cognito_redirect_uri).startswith("http://"),
@@ -139,7 +141,9 @@ def build_web_session_config(
         redirect_uri=settings.external_broker_callback_url,
         logout_uri=public_base_url,
         session_secret_key=settings.session_secret_key,
-        session_cookie_name="__Host-dewey_session" if public_base_url.startswith("https://") else "dewey_session",
+        session_cookie_name="__Host-dewey_session"
+        if public_base_url.startswith("https://")
+        else "dewey_session",
         public_base_url=public_base_url,
         allow_insecure_http=public_base_url.startswith("http://"),
         server_instance_id=server_instance_id or secrets.token_urlsafe(16),
@@ -215,7 +219,11 @@ def start_browser_login(
 
 def _safe_next_path(value: str | None) -> str:
     cleaned = str(value or "").strip()
-    return cleaned if cleaned.startswith("/") and not cleaned.startswith("//") and "\\" not in cleaned else "/ui"
+    return (
+        cleaned
+        if cleaned.startswith("/") and not cleaned.startswith("//") and "\\" not in cleaned
+        else "/ui"
+    )
 
 
 def start_external_broker_login(
@@ -228,9 +236,15 @@ def start_external_broker_login(
     target = _safe_next_path(next_path or "/ui")
     request.session[_EXTERNAL_BROKER_STATE_KEY] = state
     request.session[_EXTERNAL_BROKER_NEXT_KEY] = target
-    recipient = urlsplit(target).path.startswith(("/fetch/", "/shares/", "/api/v2/recipient/", "/recipient/"))
+    recipient = urlsplit(target).path.startswith(
+        ("/fetch/", "/shares/", "/api/v2/recipient/", "/recipient/")
+    )
     request.session[_EXTERNAL_BROKER_RECIPIENT_KEY] = recipient
-    login_url = settings.external_broker_share_login_url if recipient else settings.external_broker_login_url
+    login_url = (
+        settings.external_broker_share_login_url
+        if recipient
+        else settings.external_broker_login_url
+    )
     if recipient and not login_url:
         raise HTTPException(503, "Recipient login is not configured")
     query = urlencode(
@@ -272,6 +286,7 @@ async def complete_browser_login(
 
     if load_session_principal(request) is not None:
         from dewey_service.preview_sessions import establish_session_binding
+
         establish_session_binding(request, config, previous_user=previous_user)
     return response
 
@@ -333,9 +348,7 @@ def _service_entitlement_roles(user: dict[str, Any], *, service_id: str) -> list
 def resolve_external_broker_principal(user: dict[str, Any], request: Request) -> SessionPrincipal:
     settings: Settings = request.app.state.settings
     email = str(user.get("email") or "").strip().lower()
-    subject = str(
-        user.get("canonical_user_id") or ""
-    ).strip()
+    subject = str(user.get("canonical_user_id") or "").strip()
     name = str(user.get("display_name") or user.get("name") or "").strip() or None
     if not email or not subject:
         raise CognitoWebAuthError(
@@ -349,15 +362,24 @@ def resolve_external_broker_principal(user: dict[str, Any], request: Request) ->
     binding = user.get("recipient_identity")
     if binding is not None:
         from dewey_service.recipient_identity import _binding
+
         try:
             binding = _binding(binding)
-            if (user.get("email_verified") is not True or user.get("verification_state") != "verified"
-                    or binding["canonical_user_id"] != subject or binding["email"] != email
-                    or binding["kind"] != "browser"):
+            if (
+                user.get("email_verified") is not True
+                or user.get("verification_state") != "verified"
+                or binding["canonical_user_id"] != subject
+                or binding["email"] != email
+                or binding["kind"] != "browser"
+            ):
                 raise HTTPException(401, "Recipient identity does not match the handoff")
         except HTTPException as exc:
-            raise CognitoWebAuthError("not_authorized", "Verified recipient identity is required",
-                                     status_code=401, redirect_to_error=True) from exc
+            raise CognitoWebAuthError(
+                "not_authorized",
+                "Verified recipient identity is required",
+                status_code=401,
+                redirect_to_error=True,
+            ) from exc
         if binding["recipient_only"]:
             groups = ["lsmc:external-share-user", "dewey-readonly"]
     # This callback consumes a verified broker handoff, not user-supplied claims.
@@ -389,8 +411,11 @@ def resolve_external_broker_principal(user: dict[str, Any], request: Request) ->
         # The broker record can contain many providers, service entitlements and
         # audit fields. Cookie sessions retain only the canonical binding used
         # below, plus one current recipient proof; the broker owns the full user.
-        app_context={"canonical_user": {"canonical_user_id": subject}, "recipient_identity": binding,
-                     "recipient_only": binding["recipient_only"] if binding is not None else False},
+        app_context={
+            "canonical_user": {"canonical_user_id": subject},
+            "recipient_identity": binding,
+            "recipient_only": binding["recipient_only"] if binding is not None else False,
+        },
     )
 
 
@@ -428,13 +453,18 @@ async def complete_external_broker_login(
             )
         binding = payload.get("recipient_identity")
         if request.session.get(_EXTERNAL_BROKER_RECIPIENT_KEY) and not isinstance(binding, dict):
-            raise CognitoWebAuthError("not_authorized", "Recipient handoff omitted verified identity",
-                                     status_code=401, redirect_to_error=True)
+            raise CognitoWebAuthError(
+                "not_authorized",
+                "Recipient handoff omitted verified identity",
+                status_code=401,
+                redirect_to_error=True,
+            )
         if binding is not None:
             user = {**user, "recipient_identity": binding}
         principal = resolve_external_broker_principal(user, request)
         store_session_principal(request, config, principal)
         from dewey_service.preview_sessions import establish_session_binding
+
         establish_session_binding(request, config, previous_user=previous_user)
     except CognitoWebAuthError as exc:
         clear_ui_session(request)
@@ -453,6 +483,7 @@ async def complete_external_broker_login(
 
 def clear_ui_session(request: Request) -> None:
     from dewey_service.preview_sessions import revoke_session_binding
+
     revoke_session_binding(request)
     clear_session_principal(request)
     config = getattr(getattr(request.app, "state", None), "web_session_config", None)
@@ -519,7 +550,9 @@ def require_api_auth(settings: Settings):
             )
         token = str(credentials.credentials or "").strip()
         registry_actor = getattr(request.state, "registry_principal", None)
-        if token not in settings.api_tokens() and not (registry_actor and token.startswith("dewey_user_")):
+        if token not in settings.api_tokens() and not (
+            registry_actor and token.startswith("dewey_user_")
+        ):
             set_current_authenticated_user_email(None)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -527,10 +560,17 @@ def require_api_auth(settings: Settings):
                 headers={"WWW-Authenticate": "Bearer"},
             )
         read_post = request.method == "POST" and request.url.path in {
-            "/api/v1/resolve/artifact", "/api/v1/resolve/artifact-set",
-            "/api/search/v2/query", "/api/search/v2/export",
+            "/api/v1/resolve/artifact",
+            "/api/v1/resolve/artifact-set",
+            "/api/search/v2/query",
+            "/api/search/v2/export",
         }
-        if registry_actor is not None and not registry_actor.writable and request.method not in {"GET", "HEAD"} and not read_post:
+        if (
+            registry_actor is not None
+            and not registry_actor.writable
+            and request.method not in {"GET", "HEAD"}
+            and not read_post
+        ):
             raise HTTPException(403, "Dewey write permission is required")
         set_current_authenticated_user_email(registry_actor.email if registry_actor else None)
         return token
@@ -544,6 +584,7 @@ def _load_ui_profile(request: Request) -> dict[str, Any] | None:
         settings: Settings = request.app.state.settings
         if settings.share_session_generation:
             from dewey_service.preview_sessions import current_session_binding
+
             try:
                 current_session_binding(request, request.app.state.service)
             except HTTPException as exc:
@@ -557,7 +598,9 @@ def _load_ui_profile(request: Request) -> dict[str, Any] | None:
         if principal.auth_mode == "external_broker":
             canonical = principal.app_context.get("canonical_user", {}).get("canonical_user_id")
             if not canonical or canonical != principal.user_sub:
-                raise HTTPException(401, "Dewey session requires a canonical broker identity; sign in again")
+                raise HTTPException(
+                    401, "Dewey session requires a canonical broker identity; sign in again"
+                )
         profile = normalize_session_profile(
             email=principal.email,
             sub=principal.user_sub,
@@ -566,13 +609,15 @@ def _load_ui_profile(request: Request) -> dict[str, Any] | None:
         )
         binding = principal.app_context.get("recipient_identity")
         if isinstance(binding, dict):
-            profile.update({
-                "identity_grant_id": binding.get("grant_id", ""),
-                "identity_revision": binding.get("revision", 0),
-                "identity_expires_at": binding.get("expires_at", ""),
-                "email_verified": binding.get("email_verified") is True,
-                "recipient_only": binding["recipient_only"],
-            })
+            profile.update(
+                {
+                    "identity_grant_id": binding.get("grant_id", ""),
+                    "identity_revision": binding.get("revision", 0),
+                    "identity_expires_at": binding.get("expires_at", ""),
+                    "email_verified": binding.get("email_verified") is True,
+                    "recipient_only": binding["recipient_only"],
+                }
+            )
         email = str(profile.get("email") or "").strip().lower()
         if not email:
             set_current_authenticated_user_email(None)
@@ -741,10 +786,16 @@ def require_session_or_api_auth(settings: Settings):
     ) -> dict[str, Any]:
         registry_actor = getattr(request.state, "registry_principal", None)
         if registry_actor is not None and not registry_actor.service:
-            return {"auth_mode": "registry", "service_principal": False, "profile": {
-                "email": registry_actor.email, "sub": registry_actor.subject,
-                "roles": list(registry_actor.roles), "groups": list(registry_actor.groups),
-            }}
+            return {
+                "auth_mode": "registry",
+                "service_principal": False,
+                "profile": {
+                    "email": registry_actor.email,
+                    "sub": registry_actor.subject,
+                    "roles": list(registry_actor.roles),
+                    "groups": list(registry_actor.groups),
+                },
+            }
         profile = _load_ui_profile(request)
         if isinstance(profile, dict):
             auth_mode = str(getattr(request.state, "auth_mode", "cognito") or "cognito")

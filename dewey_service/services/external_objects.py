@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from typing import Any
-from dewey_service.registry_access import require_record
 
 from dewey_service.integrations.tapdb_external_references import (
     attach_external_relation,
@@ -11,6 +10,7 @@ from dewey_service.integrations.tapdb_external_references import (
     lock_external_relation_source,
     resolve_relation_endpoints,
 )
+from dewey_service.registry_access import require_record
 from dewey_service.services.base import DeweyConflictError, DeweyNotFoundError
 from dewey_service.tapdb_backend import (
     ARTIFACT_SET_TEMPLATE,
@@ -138,9 +138,7 @@ class ExternalObjectServiceMixin:
         )
         if artifact_instance.type not in {"artifact", "artifact_set"}:
             raise ValueError("External relation source must be an artifact or set")
-        relation_identity = (
-            f"{artifact_instance.type}:{artifact_instance.euid}:{external_object.euid}:{relation_type}"
-        )
+        relation_identity = f"{artifact_instance.type}:{artifact_instance.euid}:{external_object.euid}:{relation_type}"
         existing = self.backend.find_by_json_field(
             session,
             template_code=EXTERNAL_OBJECT_RELATION_TEMPLATE,

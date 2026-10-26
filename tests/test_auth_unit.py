@@ -123,7 +123,9 @@ def test_exchange_code_success_and_error_wrapping(monkeypatch: pytest.MonkeyPatc
 
 def test_require_api_auth_validates_tokens() -> None:
     dependency = auth_mod.require_api_auth(_settings())
-    request = SimpleNamespace(state=SimpleNamespace(), method="GET", url=SimpleNamespace(path="/api/v1/records"))
+    request = SimpleNamespace(
+        state=SimpleNamespace(), method="GET", url=SimpleNamespace(path="/api/v1/records")
+    )
     good = HTTPAuthorizationCredentials(scheme="Bearer", credentials="dewey-dev-token")
     bad = HTTPAuthorizationCredentials(scheme="Bearer", credentials="wrong-token")
 

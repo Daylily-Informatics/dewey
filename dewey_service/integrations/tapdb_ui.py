@@ -15,12 +15,12 @@ from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from dewey_service.audit import human_issuer
-from dewey_service.dag_auth import dedicated_dag_actor
 from dewey_service.auth import (
     build_browser_login_href,
     require_session_or_api_auth,
     require_ui_session,
 )
+from dewey_service.dag_auth import dedicated_dag_actor
 from dewey_service.integrations.tapdb_runtime import (
     _resolve_tapdb_config_path,
     ensure_tapdb_version,

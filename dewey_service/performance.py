@@ -1,11 +1,12 @@
 """Request-local read budgets and bounded, payload-free performance evidence."""
+
 from collections import deque
 from contextlib import contextmanager
 from contextvars import ContextVar
+from datetime import datetime, timezone
 from threading import Lock
 from time import monotonic
 from uuid import uuid4
-from datetime import datetime, timezone
 
 from fastapi import HTTPException
 
@@ -21,6 +22,7 @@ _completed = 0
 def instrument_engine(engine):
     """Use the public Session bind; TapDB's runtime wrapper is not an Engine."""
     from sqlalchemy import event
+
     with _instrument_lock:
         if not event.contains(engine, "before_cursor_execute", before_query):
             event.listen(engine, "before_cursor_execute", before_query)
@@ -60,7 +62,10 @@ def before_query(conn, cursor, statement, parameters, context, executemany):
     context._dewey_query_started = monotonic()
     if state["interactive_read"]:
         milliseconds = max(1, min(10000, int(remaining_seconds() * 1000)))
-        cursor.execute("SELECT set_config('statement_timeout', %s, true), set_config('lock_timeout', '1000', true)", (str(milliseconds),))
+        cursor.execute(
+            "SELECT set_config('statement_timeout', %s, true), set_config('lock_timeout', '1000', true)",
+            (str(milliseconds),),
+        )
     metric("query_count", 1)
 
 
@@ -80,12 +85,20 @@ def query_error(exception_context):
 
 def snapshot():
     with _lock:
-        return {"started": _started, "completed": _completed,
-                "active_count": _started - _completed,
-                "active": [{"request_id": key, "route": value["route"],
-                            "elapsed_ms": round((monotonic() - value["started"]) * 1000, 2)}
-                           for key, value in _active.items()],
-                "recent": list(_recent)}
+        return {
+            "started": _started,
+            "completed": _completed,
+            "active_count": _started - _completed,
+            "active": [
+                {
+                    "request_id": key,
+                    "route": value["route"],
+                    "elapsed_ms": round((monotonic() - value["started"]) * 1000, 2),
+                }
+                for key, value in _active.items()
+            ],
+            "recent": list(_recent),
+        }
 
 
 class PerformanceMiddleware:
@@ -97,18 +110,34 @@ class PerformanceMiddleware:
         if scope["type"] != "http":
             return await self.app(scope, receive, send)
         from dewey_service.report_preview import redacted_path
+
         path = redacted_path(scope["path"])
-        read = (scope["method"] == "GET" and path.startswith(("/api/v1/storage/", "/api/v1/records/", "/api/v1/registry/"))) or (
-            scope["method"] == "POST" and path in {"/api/v1/registry/search", "/api/v1/registry/search/counts"})
+        read = (
+            scope["method"] == "GET"
+            and path.startswith(("/api/v1/storage/", "/api/v1/records/", "/api/v1/registry/"))
+        ) or (
+            scope["method"] == "POST"
+            and path in {"/api/v1/registry/search", "/api/v1/registry/search/counts"}
+        )
         request_id = uuid4().hex
         # Before routing, redact object identities; query strings are never stored.
         route = "/api/v1/records/:euid" if path.startswith("/api/v1/records/") else path
         if path.startswith(("/records/", "/shares/")):
             route = path.split("/")[1] + "/:euid"
-        state = {"started": monotonic(), "route": route, "method": scope["method"],
-                 "interactive_read": read, "query_count": 0, "sql_ms": 0,
-                 "s3_ms": 0, "cache_hits": 0, "cache_misses": 0, "response_bytes": 0,
-                 "status": 500, "response_complete": False}
+        state = {
+            "started": monotonic(),
+            "route": route,
+            "method": scope["method"],
+            "interactive_read": read,
+            "query_count": 0,
+            "sql_ms": 0,
+            "s3_ms": 0,
+            "cache_hits": 0,
+            "cache_misses": 0,
+            "response_bytes": 0,
+            "status": 500,
+            "response_complete": False,
+        }
         token = _current.set(state)
         with _lock:
             _started += 1
@@ -118,7 +147,10 @@ class PerformanceMiddleware:
         async def observed_send(message):
             if message["type"] == "http.response.start":
                 state["status"] = message["status"]
-                message["headers"] = [*message.get("headers", []), (b"x-dewey-request-id", request_id.encode())]
+                message["headers"] = [
+                    *message.get("headers", []),
+                    (b"x-dewey-request-id", request_id.encode()),
+                ]
             elif message["type"] == "http.response.body":
                 metric("response_bytes", len(message.get("body", b"")))
                 if not message.get("more_body", False):
@@ -128,10 +160,17 @@ class PerformanceMiddleware:
         try:
             await self.app(scope, receive, observed_send)
         finally:
-            record = {key: value for key, value in state.items() if key not in {"started", "interactive_read"}}
-            record.update(request_id=request_id, duration_ms=round((monotonic() - state["started"]) * 1000, 2),
-                          route=redacted_path(getattr(scope.get("route"), "path", route)),
-                          observed_at=datetime.now(timezone.utc).isoformat())
+            record = {
+                key: value
+                for key, value in state.items()
+                if key not in {"started", "interactive_read"}
+            }
+            record.update(
+                request_id=request_id,
+                duration_ms=round((monotonic() - state["started"]) * 1000, 2),
+                route=redacted_path(getattr(scope.get("route"), "path", route)),
+                observed_at=datetime.now(timezone.utc).isoformat(),
+            )
             with _lock:
                 _active.pop(request_id, None)
                 _recent.appendleft(record)

@@ -24,17 +24,23 @@ Managed shares no longer issue raw S3/CloudFront presigns or accept obsolete own
 | Complete installed application binding | 113/113 tagged package files/assets match running bytes; no source override mounts |
 | Shared libraries | TapDB 11.0.9; Dewey auth 2.1.5; Login auth 2.1.9 retained |
 
-The [running-source receipt](https://github.com/Daylily-Informatics/dewey/blob/codex/dewey-sharing-review-20261025/docs/plans/evidence/20261026_dewey12/running-source-pr-binding-12.0.7.json) binds the complete installed application package to the tag. Runtime code, configuration sources, Dockerfile, dependency locks and operator scripts on this branch also match that release; subsequent changes in this documentation phase affect documentation/evidence only.
+The [running-source receipt](https://github.com/Daylily-Informatics/dewey/blob/codex/dewey-sharing-review-20261025/docs/plans/evidence/20261026_dewey12/running-source-pr-binding-12.0.7.json) binds the complete installed application package to the tag. At documentation checkpoint `44ad680`, runtime code, configuration sources, Dockerfile, dependency locks and operator scripts also matched that release. The PR retains that full release ancestry. The subsequent CI-only normalization below is additional to the deployed source; it does not move the tag or deploy another image.
 
 The scoped EC2 deployment preserved Login and all 11 other sibling containers. The 42 inactive historical shares were preserved without retirement/deletion. Dedicated recipient ALB/8443 and trusted-source management/8444 ingress are recorded in the [release ledger](https://github.com/Daylily-Informatics/dewey/blob/codex/dewey-sharing-review-20261025/docs/plans/20261026T010947Z_dewey_12_sharing_release_ledger.md). Login and Dayhoff changes belong to their own repositories and published release inputs.
 
 ## Validation
 
 - Expanded release selection: 771 passing cases at 12.0.5; audit correction: 81 affected cases; export correction: 17 Python and 45 browser-script cases. These selections overlap.
-- Current changed executable line/branch gates: Dewey Python **95.96%/89.67%**, browser JavaScript **100%/88.79%**. Login and scoped Dayhoff tooling also exceed their independent 80% gates.
+- Retained 12.0.7 changed executable line/branch gates: Dewey Python **95.96%/89.67%**, browser JavaScript **100%/88.79%**. Login and scoped Dayhoff tooling also exceed their independent 80% gates.
 - Original isolated PostgreSQL claims/revisions/lineage/migration group retained. No production database was used for contract tests.
 - Controlled deployed evidence covers external login, report/sidecar rendering, all seven selected MultiQC PNG downloads, HTTP/ranges/conditions, curl/wget/recursive CLI, manifests/TAR, recipient/target edits, aliases, revocation, rebind and native audit reconciliation.
 - Documentation synchronization passed whitespace and local file-link review. Main-target CI is tracked on this PR separately from those retained release receipts.
+
+## Main CI integration cleanup
+
+The first main-target run failed Ruff with 308 style/import diagnostics; Bandit passed, and dependent test jobs were skipped. The formatter changed 89 files while strict AST hashes remained identical across all 194 Python files. Import ordering and narrow unused-name cleanup preserve intentional public exports and imported pytest fixtures. Two assigned canonicalization lambdas became same-scope return-only functions, and an unused test assignment retains its original call.
+
+Local `ruff check` and `ruff format --check` now pass. After the documented import/helper normalizations, all 194 files retain equivalent non-import ASTs. Import initialization remains subject to full PR CI. The retained production-tag coverage percentages above are separate from the normalized PR head's forthcoming CI measurements. See [cleanup review](https://github.com/Daylily-Informatics/dewey/blob/codex/dewey-sharing-review-20261025/docs/plans/evidence/20261026_dewey12/pr64-quality-cleanup-review.json).
 
 ## Remaining acceptance boundary
 
