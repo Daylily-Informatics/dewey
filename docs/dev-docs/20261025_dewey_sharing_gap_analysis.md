@@ -23,6 +23,8 @@ The original comparison below is the **11.0.10 baseline**, preserved for traceab
 
 The final audit receipt preserves earlier helper stops and reconciles the exact retained responses without repeating the denied fetch. Report completeness covers retained inventory/events; it does not reconstruct historical denials omitted before 12.0.6. The original dated baseline below remains unchanged.
 
+The later requested [full-source PR64](https://github.com/Daylily-Informatics/dewey/pull/64) includes the complete deployed release ancestry and synchronized documentation. Full CI at 220f02b passes 1,296 Python tests, 5 PostgreSQL contracts and 45 browser-script tests plus quality/security/package-build checks; 2 Cognito E2E cases require a separate pool. Fresh Python coverage of 83.63% lines/82.43% branches and browser coverage of 100%/88.79% exceed their independent 80% gates. The PR also corrects empty-scope validation and the readiness diagnostic's canonical-schema location; these 2 corrections are additional to deployed 12.0.7. Merge confirmation and the live acceptance limits above remain separate. [Full CI receipt](../plans/evidence/20261026_dewey12/pr64-full-ci-success.json).
+
 ## Historical 11.0.10 comparison
 
 Sections 1–6 retain the findings and open questions as observed on 2026-10-25. The current 12.x disposition above supersedes their implementation-status statements; their baseline evidence remains unchanged.

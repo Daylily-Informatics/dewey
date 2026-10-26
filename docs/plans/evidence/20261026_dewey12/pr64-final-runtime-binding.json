@@ -1,0 +1,27 @@
+{
+  "observed_at": "2026-10-26T16:36:57.445Z",
+  "instance": "i-07df3a933e4839f52",
+  "region": "us-west-2",
+  "inspection": "Read-only interactive SSM as ubuntu; session exited",
+  "container_id": "9a3e9079db4675d3cbf680c2c170a43d093d1a8298f68066b3214ef3a945825a",
+  "container_name": "dayhoff-day-dewey-1",
+  "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:fdf49285e8884894c6f0ee5ce72b6bda61bfd9f6e7ead31990c6e52bc2d64e41",
+  "source_revision": "3adc81c622d3a8e81fa31b91a2d3ce43690c8202",
+  "version": "12.0.7",
+  "state": "running",
+  "restart_count": 0,
+  "started_at": "2026-10-26T10:21:44.372292325Z",
+  "same_container_and_image_as_original_113_file_binding": true,
+  "pr": 64,
+  "pr_head": "220f02b42a5180b25d0a48cc3d05f6af7c37018e",
+  "release_tag_ancestor_of_pr_head": true,
+  "browser_entry": {
+    "url": "https://dewey.day.lsmc.bio/fetch/M-DGX-14D1F/multiqc.html",
+    "accept": "text/html",
+    "status": 303,
+    "location": "https://dewey.day.lsmc.bio/auth/login?next=%2Ffetch%2FM-DGX-14D1F%2Fmultiqc.html",
+    "interpretation": "Unauthenticated availability/deep-link observation; not authenticated report acceptance"
+  },
+  "production_changes": false,
+  "container_builds": 0
+}

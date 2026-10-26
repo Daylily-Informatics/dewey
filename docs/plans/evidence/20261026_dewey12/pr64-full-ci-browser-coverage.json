@@ -1,0 +1,152 @@
+{
+  "status": "pass",
+  "thresholds": {
+    "changed_lines": 80,
+    "changed_branch_origins": 80
+  },
+  "totals": {
+    "covered_lines": 109,
+    "total_lines": 109,
+    "covered_branches": 190,
+    "total_branches": 214,
+    "line_percent": 100.0,
+    "branch_percent": 88.78504672897196
+  },
+  "unmeasured_files": [],
+  "files": {
+    "dewey_service/static/recipient-account.js": {
+      "covered_lines": 45,
+      "total_lines": 45,
+      "missing_lines": [],
+      "covered_branches": 16,
+      "total_branches": 16,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/static/registry.js": {
+      "covered_lines": 9,
+      "total_lines": 9,
+      "missing_lines": [],
+      "covered_branches": 41,
+      "total_branches": 43,
+      "missing_branches": [
+        [
+          209,
+          "146:0"
+        ],
+        [
+          209,
+          "147:0"
+        ]
+      ],
+      "excluded_changed_lines": []
+    },
+    "dewey_service/static/sharing.js": {
+      "covered_lines": 55,
+      "total_lines": 55,
+      "missing_lines": [],
+      "covered_branches": 133,
+      "total_branches": 155,
+      "missing_branches": [
+        [
+          42,
+          "56:0"
+        ],
+        [
+          42,
+          "61:0"
+        ],
+        [
+          42,
+          "62:0"
+        ],
+        [
+          52,
+          "82:0"
+        ],
+        [
+          77,
+          "159:0"
+        ],
+        [
+          90,
+          "172:0"
+        ],
+        [
+          91,
+          "175:0"
+        ],
+        [
+          91,
+          "180:0"
+        ],
+        [
+          92,
+          "186:0"
+        ],
+        [
+          92,
+          "191:0"
+        ],
+        [
+          93,
+          "194:0"
+        ],
+        [
+          93,
+          "195:0"
+        ],
+        [
+          105,
+          "199:0"
+        ],
+        [
+          105,
+          "200:0"
+        ],
+        [
+          105,
+          "201:0"
+        ],
+        [
+          105,
+          "202:0"
+        ],
+        [
+          105,
+          "204:0"
+        ],
+        [
+          105,
+          "205:0"
+        ],
+        [
+          105,
+          "206:0"
+        ],
+        [
+          105,
+          "207:0"
+        ],
+        [
+          124,
+          "224:0"
+        ],
+        [
+          156,
+          "251:0"
+        ]
+      ],
+      "excluded_changed_lines": []
+    }
+  },
+  "baseline_commit": "7f6fde5429741780517cf461a615e5b3e5f102f2",
+  "head_commit": "8b163c9e090faf149b0983fccf11beeb1a0071a8",
+  "working_tree_changes": false,
+  "source_paths": [
+    "dewey_service/static"
+  ],
+  "coverage_timestamp": null,
+  "format": "istanbul",
+  "metric": "Executable added/modified lines and branches whose source line changed"
+}

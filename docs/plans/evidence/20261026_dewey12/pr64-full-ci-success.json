@@ -1,0 +1,117 @@
+{
+  "recorded_at": "2026-10-26T16:41:13.013Z",
+  "repository": "Daylily-Informatics/dewey",
+  "pull_request": 64,
+  "workflow_run": {
+    "id": 40359932597,
+    "url": "https://github.com/Daylily-Informatics/dewey/actions/runs/40359932597",
+    "status": "completed",
+    "conclusion": "success",
+    "head_sha": "220f02b42a5180b25d0a48cc3d05f6af7c37018e",
+    "completed_at": "2026-10-26T16:37:54Z"
+  },
+  "tested_checkout": {
+    "sha": "8b163c9e090faf149b0983fccf11beeb1a0071a8",
+    "parents": [
+      "818bf15c7cfd65a351acf6816293057ee2ba8bf6",
+      "220f02b42a5180b25d0a48cc3d05f6af7c37018e"
+    ],
+    "tree": "10f02c18d4276e01f39a1e5f7a6a91d6992b1fb1",
+    "tree_equals_feature_head": true
+  },
+  "jobs": [
+    {
+      "name": "Code Quality (Ruff)",
+      "id": 121702311269,
+      "conclusion": "success"
+    },
+    {
+      "name": "Security Scanning (Bandit)",
+      "id": 121702311901,
+      "conclusion": "success"
+    },
+    {
+      "name": "Isolated PostgreSQL sharing contracts",
+      "id": 121702491496,
+      "conclusion": "success"
+    },
+    {
+      "name": "Tests and Build",
+      "id": 121702491568,
+      "conclusion": "success"
+    }
+  ],
+  "results": {
+    "unit": {
+      "passed": 1296,
+      "failed": 0,
+      "skipped": 2,
+      "seconds": 270.84,
+      "skip_reason": "Cognito E2E requires a separately configured pool"
+    },
+    "native_postgresql": {
+      "passed": 5
+    },
+    "browser_script": {
+      "passed": 45,
+      "failed": 0
+    },
+    "python_changed": {
+      "lines": {
+        "covered": 2304,
+        "total": 2755,
+        "percent": 83.62976406533575
+      },
+      "branches": {
+        "covered": 887,
+        "total": 1076,
+        "percent": 82.43494423791822
+      }
+    },
+    "browser_changed": {
+      "lines": {
+        "covered": 109,
+        "total": 109,
+        "percent": 100
+      },
+      "branches": {
+        "covered": 190,
+        "total": 214,
+        "percent": 88.78504672897196
+      }
+    },
+    "thresholds": {
+      "line": 80,
+      "branch": 80
+    },
+    "unmeasured_files": 0,
+    "package_build": {
+      "status": "success",
+      "sdist": "dewey_service-12.0.8.dev7.tar.gz",
+      "wheel": "dewey_service-12.0.8.dev7-py3-none-any.whl",
+      "interpretation": "CI development package only; not a release tag or production container"
+    }
+  },
+  "artifacts": [
+    {
+      "id": 12668800290,
+      "name": "sharing-coverage",
+      "digest": "sha256:edf0ede1c2991ec0f9141516e42ec3ec15b01e87431ccf35e43cf08f01ef4982"
+    },
+    {
+      "id": 12667382690,
+      "name": "native-sharing-contracts",
+      "digest": "sha256:eb6549ed6de2b620cefd75fd51bb7dbd12e2b234062e3dc821c22a9c50644fe3"
+    }
+  ],
+  "runtime": {
+    "tag": "12.0.7",
+    "source": "3adc81c622d3a8e81fa31b91a2d3ce43690c8202",
+    "new_image_build": false,
+    "deployment_changed": false
+  },
+  "remaining": {
+    "merge": "Second explicit user confirmation pending",
+    "live_acceptance": "Internal first-use/scoped-access proof and user acceptance remain open"
+  }
+}
