@@ -1,0 +1,9 @@
+{
+  "started_at": "2026-10-26T03:01:27.104890+00:00",
+  "finished_at": "2026-10-26T03:01:28.697342+00:00",
+  "container_id": "e93242d4bb25627acfa02cefd9d6634cee3bc08939cfbba7c671da6c85ee44df",
+  "exit_code": 0,
+  "running": false,
+  "container_exit_code": 0,
+  "forced_timeout": false
+}

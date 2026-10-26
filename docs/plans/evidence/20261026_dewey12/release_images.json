@@ -1,0 +1,50 @@
+{
+  "instance": "i-07df3a933e4839f52",
+  "region": "us-west-2",
+  "build_location": "EC2 only",
+  "initial_build": {
+    "started_at": "2026-10-26T02:26:10.585755+00:00",
+    "finished_at": "2026-10-26T02:27:59.964633+00:00",
+    "exit_code": 0
+  },
+  "corrective_build": {
+    "started_at": "2026-10-26T02:41:57.857735+00:00",
+    "finished_at": "2026-10-26T02:43:30.088463+00:00",
+    "exit_code": 0,
+    "selected": [
+      "dewey"
+    ]
+  },
+  "images": [
+    {
+      "service": "dewey",
+      "version": "12.0.0",
+      "commit": "7c6ff8aebf69db1b46f386f3f79f58d8e648f54c",
+      "digest": "sha256:a4270eda22764fb6ef843c583a150970defa23396dff54b7604c012122003a3f",
+      "disposition": "superseded before deployment by preserving config correction",
+      "packages": {
+        "daylily-tapdb": "11.0.9",
+        "daylily-auth-cognito": "2.1.5"
+      }
+    },
+    {
+      "service": "dewey",
+      "version": "12.0.1",
+      "commit": "bb86e2a22c90337fc35d171722d50a88423ca9a3",
+      "tag_object": "8827dea839fcdae68aa2911dd802b1643ef2d2fa",
+      "digest": "sha256:4fb83bf514425218d1154e5b21b8308d6564c6ef12d7291c6af9e3626640d7cf",
+      "disposition": "selected for deployment"
+    },
+    {
+      "service": "login",
+      "version": "4.1.0",
+      "commit": "4836f1581b309176bdf1706cdb9eabbf4b4ea4b4",
+      "digest": "sha256:675b378414f04d173c01475ba1624abb1f3325b0fe49ea96e2b55e473c0ff516",
+      "disposition": "deployed and ready",
+      "packages": {
+        "daylily-auth-cognito": "2.1.9"
+      }
+    }
+  ],
+  "private_evidence_root": "/home/ubuntu/dewey12-release-20261026T021700Z"
+}

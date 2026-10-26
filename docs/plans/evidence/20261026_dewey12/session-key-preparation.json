@@ -1,0 +1,9 @@
+{
+  "original_sha256": "c77cba418c716e36d4664171fa3dcec25ee34531a600187b4533a2606965490e",
+  "explicit_source_sha256": "a4b4229f2d4b73c6c4f4670cf973fa20c21f68fdd20f772d41551e35dfc1ddd6",
+  "changed_fields": [
+    "application.session_secret_key"
+  ],
+  "reason": "Replace confirmed package-default session key before public recipient exposure",
+  "existing_browser_sessions_require_login": true
+}

@@ -81,23 +81,27 @@ def registry_conversion(
 def registry_templates(
     operator_config: Path = typer.Option(..., exists=True, dir_okay=False),
     repository_pack: Path = typer.Option(..., exists=True, dir_okay=False),
-    receipt_pack: Path = typer.Option(...),
+    receipt_pack: Path = typer.Option(..., help="Absolute new .json basename for per-template native exports and receipts."),
     actor: str = typer.Option(...),
     attribution: Path = typer.Option(..., exists=True, dir_okay=False),
 ) -> None:
-    """Create only the three new Dewey templates through TapDB's governed loader."""
+    """Seed the exact release pack and export each selected template with native provenance."""
     from dataclasses import asdict
+    from types import SimpleNamespace
+    from sqlalchemy import tuple_
     from daylily_tapdb import TAPDBConnection, generic_template
     from daylily_tapdb.cli.db_config import get_db_config
     from daylily_tapdb.templates.loader import find_tapdb_core_config_dir, seed_templates
-    from daylily_tapdb.templates.repository import read_repository_pack, export_repository_pack, serialize_template, template_key
+    from daylily_tapdb.templates.repository import read_repository_pack, export_repository_pack, receipt_path, serialize_template, template_key
     from dewey_service.settings import get_settings
     from dewey_service.integrations.tapdb_runtime import load_runtime_config
     import json
     from daylily_tapdb.security_context import Attribution
     envelope = Attribution(**json.loads(attribution.read_text()))
-    if any(not p.is_absolute() for p in (operator_config, repository_pack, receipt_pack, attribution)) or receipt_pack.exists():
+    if any(not p.is_absolute() for p in (operator_config, repository_pack, receipt_pack, attribution)) or receipt_pack.exists() or receipt_pack.is_symlink():
         raise typer.BadParameter("Use absolute paths and a new export receipt pack")
+    if receipt_pack.suffix.lower() != ".json" or not receipt_pack.parent.is_dir():
+        raise typer.BadParameter("Receipt pack must use a .json basename in an existing directory")
     runtime = load_runtime_config(get_settings())
     cfg = get_db_config(config_path=str(operator_config))
     for key in ("database", "host", "port", "schema_name", "domain_code", "owner_repo_name"):
@@ -114,6 +118,18 @@ def registry_templates(
     keys = {template_key(t) for t in pack["templates"]}
     if keys not in (expected, sharing, sharing3) or len(pack["templates"]) != len(keys):
         raise typer.BadParameter("This operation accepts only the exact registry10, sharing2 or sharing3 release pack")
+    requested = {template_key(item): serialize_template(SimpleNamespace(**item)) for item in pack["templates"]}
+    export_paths = {
+        key: receipt_pack.with_name(f"{receipt_pack.stem}.{'.'.join(key)}.json")
+        for key in sorted(keys)
+    }
+    for path in export_paths.values():
+        for candidate in (path, receipt_path(path)):
+            if candidate.exists() or candidate.is_symlink():
+                raise typer.BadParameter("Refusing to overwrite an existing template export or receipt: " + str(candidate))
+    selected_key = tuple_(generic_template.category, generic_template.type,
+        generic_template.subtype, generic_template.version).in_(sorted(keys))
+    exports = []
     with TAPDBConnection(db_hostname=f"{cfg['host']}:{cfg['port']}", db_hostaddr=cfg.get("hostaddr"),
         db_user=cfg["operator_user"], db_pass=cfg.get("operator_password"),
         secret_arn=cfg.get("operator_secret_arn"), db_name=cfg["database"], engine_type=cfg["engine_type"],
@@ -124,20 +140,35 @@ def registry_templates(
         sslrootcert=cfg.get("sslrootcert"), echo_sql=False) as connection:
         connection.engine.update_execution_options(isolation_level="REPEATABLE READ")
         with connection.session_scope(commit=True) as session:
-            existing = {template_key(serialize_template(t)): serialize_template(t) for t in session.query(generic_template).filter(
-                generic_template.domain_code == cfg["domain_code"], generic_template.issuer_app_code == cfg["owner_repo_name"]).all()}
-            for item in pack["templates"]:
-                if template_key(item) in existing and existing[template_key(item)] != item:
+            existing = session.query(generic_template).filter(
+                generic_template.domain_code == cfg["domain_code"],
+                generic_template.issuer_app_code == cfg["owner_repo_name"], selected_key).all()
+            for row in existing:
+                item = serialize_template(row)
+                if row.is_deleted:
+                    raise ValueError("A requested release template is deleted; historical definitions cannot be reactivated")
+                if requested[template_key(item)] != item:
                     raise ValueError("An existing template conflicts with the release pack")
             result = seed_templates(session, pack["templates"], overwrite=False,
                 core_config_dir=find_tapdb_core_config_dir(), domain_code=cfg["domain_code"],
                 owner_repo_name=cfg["owner_repo_name"], domain_registry_path=Path(cfg["domain_registry_path"]),
                 prefix_registry_path=Path(cfg["prefix_ownership_registry_path"]))
         with connection.session_scope(commit=False) as session:
-            receipt = export_repository_pack(session, receipt_pack, domain_code=cfg["domain_code"],
-                issuer_app_code=cfg["owner_repo_name"], prefix_registry_path=cfg["prefix_ownership_registry_path"], actor=actor)
+            rows = session.query(generic_template).filter(
+                generic_template.domain_code == cfg["domain_code"],
+                generic_template.issuer_app_code == cfg["owner_repo_name"],
+                generic_template.is_deleted.is_(False), selected_key).all()
+            selected = {template_key(serialize_template(row)): row for row in rows}
+            if set(selected) != keys or len(rows) != len(keys):
+                raise ValueError("Seeded release templates do not match the requested pack")
+            for key, path in export_paths.items():
+                receipt = export_repository_pack(session, path, domain_code=cfg["domain_code"],
+                    issuer_app_code=cfg["owner_repo_name"], prefix_registry_path=cfg["prefix_ownership_registry_path"],
+                    actor=actor, template_euid=selected[key].euid)
+                exports.append({"template_key": list(key), "export_sha256": receipt["content_sha256"],
+                    "export_pack": str(path), "receipt": str(receipt_path(path))})
     ccyo_out.print_text(json.dumps({"status": "created", "summary": asdict(result),
-        "export_sha256": receipt["content_sha256"], "export_pack": str(receipt_pack)}))
+        "exports": exports}))
 
 
 def initialize_performance_settings(

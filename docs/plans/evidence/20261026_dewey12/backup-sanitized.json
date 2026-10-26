@@ -1,0 +1,54 @@
+{
+  "backup_id": "full-20261026T031312Z-3de749",
+  "status": "complete",
+  "receipt_id": "000027-20261026T031800Z",
+  "assets": [
+    {
+      "bytes": 21550276,
+      "content_type": "application/octet-stream",
+      "name": "tapdb.dump",
+      "sha256": "4b5f2730ec96a9dda24587a48e2d3b4c000717d004449777303109265ed3684a"
+    },
+    {
+      "bytes": 723340486,
+      "content_type": "application/json",
+      "name": "identity-inventory.json",
+      "sha256": "6b19df3c8f42f1129f1bc5eedb273e42b19d6990cacafcbb84e8a13f10f8e47d"
+    }
+  ],
+  "tool": {
+    "package_version": "11.0.9",
+    "pg_dump_version": "pg_dump (PostgreSQL) 16.15 (Debian 16.15-1.pgdg12+2)",
+    "pg_restore_version": "pg_restore (PostgreSQL) 16.15 (Debian 16.15-1.pgdg12+2)"
+  },
+  "deep_verify": {
+    "ok": true,
+    "level": "deep",
+    "checks": [
+      {
+        "id": "manifest.checksum",
+        "status": "pass"
+      },
+      {
+        "id": "manifest.signature",
+        "status": "pass"
+      },
+      {
+        "id": "asset.checksum:tapdb.dump",
+        "status": "pass"
+      },
+      {
+        "id": "archive.toc",
+        "status": "pass"
+      },
+      {
+        "id": "archive.deep_read",
+        "status": "pass"
+      },
+      {
+        "id": "asset.checksum:identity-inventory.json",
+        "status": "pass"
+      }
+    ]
+  }
+}

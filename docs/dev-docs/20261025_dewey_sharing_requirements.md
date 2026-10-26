@@ -6,7 +6,7 @@ Baseline: [Dewey capabilities and feature analysis](20261025_dewey_capabilities.
 
 ## Approved execution decisions — 2026-10-26
 
-The user approved **Dewey 12.0.0 + Login 4.1.0**, scoped Dayhoff ingress and preserving conversion. The [controlling ledger](../plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) owns validation/deployment status. Deployment preparation required the immutable corrective patch **12.0.1** to preserve the existing logout service query; Login remains 4.1.0. Requirement IDs below remain stable; earlier proposed choices are superseded as follows:
+The user approved **Dewey 12.0.0 + Login 4.1.0**, scoped Dayhoff ingress and preserving conversion. The [controlling ledger](../plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) owns validation/deployment status. Deployment preparation required immutable corrective patches: **12.0.1** preserves the existing logout service query; **12.0.2** limits template comparison and native export to the explicitly selected release templates. Login remains 4.1.0. Requirement IDs below remain stable; earlier proposed choices are superseded as follows:
 
 - Canonical fetch identity is the share EUID; aliases are global atomic claims with permanent tombstones.
 - Creator delegation authorizes verified recipients without independent artifact ACLs. Named recipients and Public with registration never permit anonymous access. New external users are share-only, without automatic domain tenant membership.

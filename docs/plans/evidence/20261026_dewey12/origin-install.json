@@ -1,0 +1,22 @@
+{
+  "installed": "/etc/apache2/sites-available/dewey12-recipient.conf",
+  "private_login": "/etc/apache2/sites-available/lsmc-oauth-login-day.conf",
+  "new_listeners": [
+    8443,
+    8444
+  ],
+  "shared_443_retained": true,
+  "unchanged_other_site_configs": [
+    "/etc/apache2/sites-enabled/kahlo-day.conf",
+    "/etc/apache2/sites-enabled/bloom-day.conf",
+    "/etc/apache2/sites-enabled/zebra_day-day.conf",
+    "/etc/apache2/sites-enabled/qeo-day.conf",
+    "/etc/apache2/sites-enabled/ursa-day.conf",
+    "/etc/apache2/sites-enabled/dewey-content-day.conf",
+    "/etc/apache2/sites-enabled/000-redirect-http.conf",
+    "/etc/apache2/sites-enabled/atlas-day.conf",
+    "/etc/apache2/sites-enabled/dewey-day.conf"
+  ],
+  "configtest": "pass",
+  "reload": "graceful"
+}

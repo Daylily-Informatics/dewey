@@ -18,6 +18,8 @@ def main():
     parser.add_argument("--service", choices=("dewey", "login"), required=True)
     parser.add_argument("--prepared", action="store_true")
     parser.add_argument("--operator", action="store_true")
+    parser.add_argument("--postgres-tools", type=Path)
+    parser.add_argument("--memory", choices=("10g",))
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("command", nargs=argparse.REMAINDER)
     args = parser.parse_args()
@@ -40,6 +42,8 @@ def main():
         env_file.open("x").write("\n".join(environment) + "\n")
     command = ["docker", "run", "--rm", "--pull=never", "--network=host", "--user=0:0",
                "--env-file", str(env_file), "--entrypoint", "/app/.venv/bin/" + args.command[0]]
+    if args.memory:
+        command += ["--memory", args.memory, "--memory-swap", args.memory]
     mounts = {item["Destination"]: (item["Source"], not item["RW"]) for item in snapshot["Mounts"]}
     assert all(item["Type"] == "bind" for item in snapshot["Mounts"])
     mounts[str(args.root)] = (str(args.root), False)
@@ -55,6 +59,13 @@ def main():
             ("/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/final-native-journal", False),
         ):
             mounts[path] = (path, readonly)
+    if args.postgres_tools is not None:
+        assert args.operator and args.postgres_tools.is_absolute()
+        for name in ("pg_dump", "pg_restore"):
+            assert (args.postgres_tools / "usr/lib/postgresql/16/bin" / name).is_file()
+        mounts["/opt/dewey12-pgtools"] = (str(args.postgres_tools), True)
+        command += ["--env", "PATH=/opt/dewey12-pgtools/usr/lib/postgresql/16/bin:/app/.venv/bin:/usr/local/bin:/usr/bin:/bin",
+                    "--env", "LD_LIBRARY_PATH=/opt/dewey12-pgtools/usr/lib/x86_64-linux-gnu"]
     for target, (source, readonly) in mounts.items():
         assert Path(source).exists(), "Required binding missing: " + source
         command += ["--mount", "type=bind,src=" + source + ",dst=" + target + (",readonly" if readonly else "")]
