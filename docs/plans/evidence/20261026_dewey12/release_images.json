@@ -51,7 +51,19 @@
       "commit": "0a85f9ed959b7486b8a1ecc7b545ab103a53d917",
       "tag_object": "ff022991befa125a3463eeb35f4c96e94d25d540",
       "digest": "sha256:0a65ed288bbd6b52c32ed6205ec478f052134534c43208a66b3f27f88951bc0a",
-      "disposition": "deployed and ready",
+      "disposition": "deployed then superseded by browser cookie correction",
+      "packages": {
+        "daylily-tapdb": "11.0.9",
+        "daylily-auth-cognito": "2.1.5"
+      }
+    },
+    {
+      "service": "dewey",
+      "version": "12.0.3",
+      "commit": "a5d6c05df2337a9b87dff1ab19c0b109f910a986",
+      "tag_object": "adfef391571b1f7a47ea76f967f9e3282716df95",
+      "digest": "sha256:0885649fb6a2aad1352db6cf1a21e2034f4f7120d25087bc00d7d2c0b5a4a79d",
+      "disposition": "deployed and ready; real manager browser sign-in successful",
       "packages": {
         "daylily-tapdb": "11.0.9",
         "daylily-auth-cognito": "2.1.5"
@@ -62,6 +74,15 @@
   "template_scope_corrective_build": {
     "started_at": "2026-10-26T03:29:41.430189+00:00",
     "finished_at": "2026-10-26T03:31:11.439821+00:00",
+    "exit_code": 0,
+    "selected": [
+      "dewey"
+    ],
+    "cache_mode": "off"
+  },
+  "cookie_corrective_build": {
+    "started_at": "2026-10-26T03:57:42.342982+00:00",
+    "finished_at": "2026-10-26T03:59:11.746086+00:00",
     "exit_code": 0,
     "selected": [
       "dewey"

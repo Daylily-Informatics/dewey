@@ -19,7 +19,7 @@ The original comparison below is the **11.0.10 baseline**, preserved for traceab
 | SHR-17 | Qualified-equivalence rebind, collision checks, native location revisions | Rebind contracts passed; preserved deployed URLs pending |
 | SHR-18,20 | Management/recipient API, GUI/CLI, README and sharing guide | Focused source checks passed; authenticated interface acceptance pending |
 
-Dewey **12.0.2** and Login **4.1.0** are deployed with verified image/package provenance. The native conversion preserved all 42 historical shares without retiring or deleting any. All 11 unselected containers retain baseline identity, image, start time and restart count. Source tests and ingress boundaries passed; authenticated acceptance found an oversized-cookie sign-in defect; the focused 12.0.3 correction is being released. See [current sharing behavior](../sharing.md) and the ledger for subsequent receipts, limitations and terminal status.
+Dewey **12.0.3** and Login **4.1.0** are deployed with verified image/package provenance. The native conversion preserved all 42 historical shares without retiring or deleting any. All 11 unselected containers retain baseline identity, image, start time and restart count. Source tests and ingress boundaries passed; the oversized-cookie sign-in defect is corrected and real manager browser login succeeds. Controlled recipient and report acceptance remains in progress. See [current sharing behavior](../sharing.md) and the ledger for subsequent receipts, limitations and terminal status.
 
 ## 1. Finding
 
