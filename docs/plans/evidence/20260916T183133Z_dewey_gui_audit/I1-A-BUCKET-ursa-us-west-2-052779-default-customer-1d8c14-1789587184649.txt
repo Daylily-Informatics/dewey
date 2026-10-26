@@ -1,0 +1,90 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / S3 BROWSER
+  - heading "S3 Browser" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - textbox "S3 URI":
+    - /placeholder: s3://bucket/exact/prefix/
+    - text: s3://ursa-us-west-2-052779-default-customer-1d8c14/
+  - button "Go"
+  - link "All buckets":
+    - /url: /storage
+  - generic: s3://ursa-us-west-2-052779-default-customer-1d8c14/
+  - button "Upload files"
+  - link "Register this folder":
+    - /url: /add?kind=prefix&uri=s3%3A%2F%2Fursa-us-west-2-052779-default-customer-1d8c14%2F
+  - link "ursa-us-west-2-052779-default-customer-1d8c14":
+    - /url: /storage?uri=s3%3A%2F%2Fursa-us-west-2-052779-default-customer-1d8c14%2F
+  - searchbox "Filter names on this page"
+  - button "Register selection as a set"
+  - table:
+    - rowgroup:
+      - row "Kind Name Size Registration":
+        - columnheader "Kind"
+        - columnheader "Name"
+        - columnheader "Size"
+        - columnheader "Registration"
+    - rowgroup:
+      - row "Select tmp/ prefix tmp/ — Register":
+        - cell "Select tmp/ prefix":
+          - checkbox "Select tmp/"
+          - generic: prefix
+        - cell "tmp/":
+          - link "tmp/":
+            - /url: /storage?uri=s3%3A%2F%2Fursa-us-west-2-052779-default-customer-1d8c14%2Ftmp%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fursa-us-west-2-052779-default-customer-1d8c14%2Ftmp%2F&kind=prefix
+      - row "Select RIH0_ANA0-HG002_DBC0_0.R1.fastq.gz object RIH0_ANA0-HG002_DBC0_0.R1.fastq.gz 14.1M B Register":
+        - cell "Select RIH0_ANA0-HG002_DBC0_0.R1.fastq.gz object":
+          - checkbox "Select RIH0_ANA0-HG002_DBC0_0.R1.fastq.gz"
+          - generic: object
+        - cell "RIH0_ANA0-HG002_DBC0_0.R1.fastq.gz":
+          - button "RIH0_ANA0-HG002_DBC0_0.R1.fastq.gz"
+        - cell "14.1M B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fursa-us-west-2-052779-default-customer-1d8c14%2FRIH0_ANA0-HG002_DBC0_0.R1.fastq.gz&kind=object
+      - row "Select RIH0_ANA0-HG002_DBC0_0.R2.fastq.gz object RIH0_ANA0-HG002_DBC0_0.R2.fastq.gz 15.2M B Register":
+        - cell "Select RIH0_ANA0-HG002_DBC0_0.R2.fastq.gz object":
+          - checkbox "Select RIH0_ANA0-HG002_DBC0_0.R2.fastq.gz"
+          - generic: object
+        - cell "RIH0_ANA0-HG002_DBC0_0.R2.fastq.gz":
+          - button "RIH0_ANA0-HG002_DBC0_0.R2.fastq.gz"
+        - cell "15.2M B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Fursa-us-west-2-052779-default-customer-1d8c14%2FRIH0_ANA0-HG002_DBC0_0.R2.fastq.gz&kind=object
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

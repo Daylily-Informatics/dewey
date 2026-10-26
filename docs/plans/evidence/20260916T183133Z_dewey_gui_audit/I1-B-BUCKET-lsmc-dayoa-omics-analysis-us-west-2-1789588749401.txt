@@ -1,0 +1,852 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / S3 BROWSER
+  - heading "S3 Browser" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - textbox "S3 URI":
+    - /placeholder: s3://bucket/exact/prefix/
+    - text: s3://lsmc-dayoa-omics-analysis-us-west-2/
+  - button "Go"
+  - link "All buckets":
+    - /url: /storage
+  - generic: s3://lsmc-dayoa-omics-analysis-us-west-2/
+  - button "Upload files"
+  - link "Register this folder":
+    - /url: /add?kind=prefix&uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2F
+  - link "lsmc-dayoa-omics-analysis-us-west-2":
+    - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2F
+  - searchbox "Filter names on this page"
+  - button "Register selection as a set"
+  - table:
+    - rowgroup:
+      - row "Kind Name Size Registration":
+        - columnheader "Kind"
+        - columnheader "Name"
+        - columnheader "Size"
+        - columnheader "Registration"
+    - rowgroup:
+      - row "Select / prefix / — Register":
+        - cell "Select / prefix":
+          - checkbox "Select /"
+          - generic: prefix
+        - cell /:
+          - link /:
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2F%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2F%2F&kind=prefix
+      - row "Select 20260325/ prefix 20260325/ — Register":
+        - cell "Select 20260325/ prefix":
+          - checkbox "Select 20260325/"
+          - generic: prefix
+        - cell "20260325/":
+          - link "20260325/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2F20260325%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2F20260325%2F&kind=prefix
+      - row "Select 20260325_bam_cram_fq/ prefix 20260325_bam_cram_fq/ — Register":
+        - cell "Select 20260325_bam_cram_fq/ prefix":
+          - checkbox "Select 20260325_bam_cram_fq/"
+          - generic: prefix
+        - cell "20260325_bam_cram_fq/":
+          - link "20260325_bam_cram_fq/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2F20260325_bam_cram_fq%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2F20260325_bam_cram_fq%2F&kind=prefix
+      - row "Select 20260422_MK/ prefix 20260422_MK/ — Register":
+        - cell "Select 20260422_MK/ prefix":
+          - checkbox "Select 20260422_MK/"
+          - generic: prefix
+        - cell "20260422_MK/":
+          - link "20260422_MK/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2F20260422_MK%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2F20260422_MK%2F&kind=prefix
+      - row "Select FSxLustre20250223T055927Z/ prefix FSxLustre20250223T055927Z/ — Register":
+        - cell "Select FSxLustre20250223T055927Z/ prefix":
+          - checkbox "Select FSxLustre20250223T055927Z/"
+          - generic: prefix
+        - cell "FSxLustre20250223T055927Z/":
+          - link "FSxLustre20250223T055927Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250223T055927Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250223T055927Z%2F&kind=prefix
+      - row "Select FSxLustre20250401T025234Z/ prefix FSxLustre20250401T025234Z/ — Register":
+        - cell "Select FSxLustre20250401T025234Z/ prefix":
+          - checkbox "Select FSxLustre20250401T025234Z/"
+          - generic: prefix
+        - cell "FSxLustre20250401T025234Z/":
+          - link "FSxLustre20250401T025234Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250401T025234Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250401T025234Z%2F&kind=prefix
+      - row "Select FSxLustre20250428T182818Z/ prefix FSxLustre20250428T182818Z/ — Register":
+        - cell "Select FSxLustre20250428T182818Z/ prefix":
+          - checkbox "Select FSxLustre20250428T182818Z/"
+          - generic: prefix
+        - cell "FSxLustre20250428T182818Z/":
+          - link "FSxLustre20250428T182818Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250428T182818Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250428T182818Z%2F&kind=prefix
+      - row "Select FSxLustre20250504T091617Z/ prefix FSxLustre20250504T091617Z/ — Register":
+        - cell "Select FSxLustre20250504T091617Z/ prefix":
+          - checkbox "Select FSxLustre20250504T091617Z/"
+          - generic: prefix
+        - cell "FSxLustre20250504T091617Z/":
+          - link "FSxLustre20250504T091617Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250504T091617Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250504T091617Z%2F&kind=prefix
+      - row "Select FSxLustre20250506T040642Z/ prefix FSxLustre20250506T040642Z/ — Register":
+        - cell "Select FSxLustre20250506T040642Z/ prefix":
+          - checkbox "Select FSxLustre20250506T040642Z/"
+          - generic: prefix
+        - cell "FSxLustre20250506T040642Z/":
+          - link "FSxLustre20250506T040642Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250506T040642Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250506T040642Z%2F&kind=prefix
+      - row "Select FSxLustre20250508T003049Z/ prefix FSxLustre20250508T003049Z/ — Register":
+        - cell "Select FSxLustre20250508T003049Z/ prefix":
+          - checkbox "Select FSxLustre20250508T003049Z/"
+          - generic: prefix
+        - cell "FSxLustre20250508T003049Z/":
+          - link "FSxLustre20250508T003049Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250508T003049Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250508T003049Z%2F&kind=prefix
+      - row "Select FSxLustre20250508T023948Z/ prefix FSxLustre20250508T023948Z/ — Register":
+        - cell "Select FSxLustre20250508T023948Z/ prefix":
+          - checkbox "Select FSxLustre20250508T023948Z/"
+          - generic: prefix
+        - cell "FSxLustre20250508T023948Z/":
+          - link "FSxLustre20250508T023948Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250508T023948Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250508T023948Z%2F&kind=prefix
+      - row "Select FSxLustre20250510T081601Z/ prefix FSxLustre20250510T081601Z/ — Register":
+        - cell "Select FSxLustre20250510T081601Z/ prefix":
+          - checkbox "Select FSxLustre20250510T081601Z/"
+          - generic: prefix
+        - cell "FSxLustre20250510T081601Z/":
+          - link "FSxLustre20250510T081601Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250510T081601Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250510T081601Z%2F&kind=prefix
+      - row "Select FSxLustre20250512T092432Z/ prefix FSxLustre20250512T092432Z/ — Register":
+        - cell "Select FSxLustre20250512T092432Z/ prefix":
+          - checkbox "Select FSxLustre20250512T092432Z/"
+          - generic: prefix
+        - cell "FSxLustre20250512T092432Z/":
+          - link "FSxLustre20250512T092432Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250512T092432Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250512T092432Z%2F&kind=prefix
+      - row "Select FSxLustre20250515T180654Z/ prefix FSxLustre20250515T180654Z/ — Register":
+        - cell "Select FSxLustre20250515T180654Z/ prefix":
+          - checkbox "Select FSxLustre20250515T180654Z/"
+          - generic: prefix
+        - cell "FSxLustre20250515T180654Z/":
+          - link "FSxLustre20250515T180654Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250515T180654Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250515T180654Z%2F&kind=prefix
+      - row "Select FSxLustre20250518T004721Z/ prefix FSxLustre20250518T004721Z/ — Register":
+        - cell "Select FSxLustre20250518T004721Z/ prefix":
+          - checkbox "Select FSxLustre20250518T004721Z/"
+          - generic: prefix
+        - cell "FSxLustre20250518T004721Z/":
+          - link "FSxLustre20250518T004721Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250518T004721Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250518T004721Z%2F&kind=prefix
+      - row "Select FSxLustre20250626T085056Z/ prefix FSxLustre20250626T085056Z/ — Register":
+        - cell "Select FSxLustre20250626T085056Z/ prefix":
+          - checkbox "Select FSxLustre20250626T085056Z/"
+          - generic: prefix
+        - cell "FSxLustre20250626T085056Z/":
+          - link "FSxLustre20250626T085056Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250626T085056Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250626T085056Z%2F&kind=prefix
+      - row "Select FSxLustre20250727T103924Z/ prefix FSxLustre20250727T103924Z/ — Register":
+        - cell "Select FSxLustre20250727T103924Z/ prefix":
+          - checkbox "Select FSxLustre20250727T103924Z/"
+          - generic: prefix
+        - cell "FSxLustre20250727T103924Z/":
+          - link "FSxLustre20250727T103924Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250727T103924Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250727T103924Z%2F&kind=prefix
+      - row "Select FSxLustre20250806T060610Z/ prefix FSxLustre20250806T060610Z/ — Register":
+        - cell "Select FSxLustre20250806T060610Z/ prefix":
+          - checkbox "Select FSxLustre20250806T060610Z/"
+          - generic: prefix
+        - cell "FSxLustre20250806T060610Z/":
+          - link "FSxLustre20250806T060610Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250806T060610Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250806T060610Z%2F&kind=prefix
+      - row "Select FSxLustre20250818T075823Z/ prefix FSxLustre20250818T075823Z/ — Register":
+        - cell "Select FSxLustre20250818T075823Z/ prefix":
+          - checkbox "Select FSxLustre20250818T075823Z/"
+          - generic: prefix
+        - cell "FSxLustre20250818T075823Z/":
+          - link "FSxLustre20250818T075823Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250818T075823Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20250818T075823Z%2F&kind=prefix
+      - row "Select FSxLustre20251015T090232Z/ prefix FSxLustre20251015T090232Z/ — Register":
+        - cell "Select FSxLustre20251015T090232Z/ prefix":
+          - checkbox "Select FSxLustre20251015T090232Z/"
+          - generic: prefix
+        - cell "FSxLustre20251015T090232Z/":
+          - link "FSxLustre20251015T090232Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20251015T090232Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20251015T090232Z%2F&kind=prefix
+      - row "Select FSxLustre20251214T104213Z/ prefix FSxLustre20251214T104213Z/ — Register":
+        - cell "Select FSxLustre20251214T104213Z/ prefix":
+          - checkbox "Select FSxLustre20251214T104213Z/"
+          - generic: prefix
+        - cell "FSxLustre20251214T104213Z/":
+          - link "FSxLustre20251214T104213Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20251214T104213Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20251214T104213Z%2F&kind=prefix
+      - row "Select FSxLustre20260122T043503Z/ prefix FSxLustre20260122T043503Z/ — Register":
+        - cell "Select FSxLustre20260122T043503Z/ prefix":
+          - checkbox "Select FSxLustre20260122T043503Z/"
+          - generic: prefix
+        - cell "FSxLustre20260122T043503Z/":
+          - link "FSxLustre20260122T043503Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260122T043503Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260122T043503Z%2F&kind=prefix
+      - row "Select FSxLustre20260122T112533Z/ prefix FSxLustre20260122T112533Z/ — Register":
+        - cell "Select FSxLustre20260122T112533Z/ prefix":
+          - checkbox "Select FSxLustre20260122T112533Z/"
+          - generic: prefix
+        - cell "FSxLustre20260122T112533Z/":
+          - link "FSxLustre20260122T112533Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260122T112533Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260122T112533Z%2F&kind=prefix
+      - row "Select FSxLustre20260122T113142Z/ prefix FSxLustre20260122T113142Z/ — Register":
+        - cell "Select FSxLustre20260122T113142Z/ prefix":
+          - checkbox "Select FSxLustre20260122T113142Z/"
+          - generic: prefix
+        - cell "FSxLustre20260122T113142Z/":
+          - link "FSxLustre20260122T113142Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260122T113142Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260122T113142Z%2F&kind=prefix
+      - row "Select FSxLustre20260211T122354Z/ prefix FSxLustre20260211T122354Z/ — Register":
+        - cell "Select FSxLustre20260211T122354Z/ prefix":
+          - checkbox "Select FSxLustre20260211T122354Z/"
+          - generic: prefix
+        - cell "FSxLustre20260211T122354Z/":
+          - link "FSxLustre20260211T122354Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260211T122354Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260211T122354Z%2F&kind=prefix
+      - row "Select FSxLustre20260213T142513Z/ prefix FSxLustre20260213T142513Z/ — Register":
+        - cell "Select FSxLustre20260213T142513Z/ prefix":
+          - checkbox "Select FSxLustre20260213T142513Z/"
+          - generic: prefix
+        - cell "FSxLustre20260213T142513Z/":
+          - link "FSxLustre20260213T142513Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260213T142513Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260213T142513Z%2F&kind=prefix
+      - row "Select FSxLustre20260216T130001Z/ prefix FSxLustre20260216T130001Z/ — Register":
+        - cell "Select FSxLustre20260216T130001Z/ prefix":
+          - checkbox "Select FSxLustre20260216T130001Z/"
+          - generic: prefix
+        - cell "FSxLustre20260216T130001Z/":
+          - link "FSxLustre20260216T130001Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260216T130001Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260216T130001Z%2F&kind=prefix
+      - row "Select FSxLustre20260309T122755Z/ prefix FSxLustre20260309T122755Z/ — Register":
+        - cell "Select FSxLustre20260309T122755Z/ prefix":
+          - checkbox "Select FSxLustre20260309T122755Z/"
+          - generic: prefix
+        - cell "FSxLustre20260309T122755Z/":
+          - link "FSxLustre20260309T122755Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260309T122755Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260309T122755Z%2F&kind=prefix
+      - row "Select FSxLustre20260412T103705Z/ prefix FSxLustre20260412T103705Z/ — Register":
+        - cell "Select FSxLustre20260412T103705Z/ prefix":
+          - checkbox "Select FSxLustre20260412T103705Z/"
+          - generic: prefix
+        - cell "FSxLustre20260412T103705Z/":
+          - link "FSxLustre20260412T103705Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260412T103705Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260412T103705Z%2F&kind=prefix
+      - row "Select FSxLustre20260421T065118Z/ prefix FSxLustre20260421T065118Z/ — Register":
+        - cell "Select FSxLustre20260421T065118Z/ prefix":
+          - checkbox "Select FSxLustre20260421T065118Z/"
+          - generic: prefix
+        - cell "FSxLustre20260421T065118Z/":
+          - link "FSxLustre20260421T065118Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260421T065118Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260421T065118Z%2F&kind=prefix
+      - row "Select FSxLustre20260428T032603Z/ prefix FSxLustre20260428T032603Z/ — Register":
+        - cell "Select FSxLustre20260428T032603Z/ prefix":
+          - checkbox "Select FSxLustre20260428T032603Z/"
+          - generic: prefix
+        - cell "FSxLustre20260428T032603Z/":
+          - link "FSxLustre20260428T032603Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260428T032603Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260428T032603Z%2F&kind=prefix
+      - row "Select FSxLustre20260503T104054Z/ prefix FSxLustre20260503T104054Z/ — Register":
+        - cell "Select FSxLustre20260503T104054Z/ prefix":
+          - checkbox "Select FSxLustre20260503T104054Z/"
+          - generic: prefix
+        - cell "FSxLustre20260503T104054Z/":
+          - link "FSxLustre20260503T104054Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260503T104054Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260503T104054Z%2F&kind=prefix
+      - row "Select FSxLustre20260504T060248Z/ prefix FSxLustre20260504T060248Z/ — Register":
+        - cell "Select FSxLustre20260504T060248Z/ prefix":
+          - checkbox "Select FSxLustre20260504T060248Z/"
+          - generic: prefix
+        - cell "FSxLustre20260504T060248Z/":
+          - link "FSxLustre20260504T060248Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260504T060248Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260504T060248Z%2F&kind=prefix
+      - row "Select FSxLustre20260509T075828Z/ prefix FSxLustre20260509T075828Z/ — Register":
+        - cell "Select FSxLustre20260509T075828Z/ prefix":
+          - checkbox "Select FSxLustre20260509T075828Z/"
+          - generic: prefix
+        - cell "FSxLustre20260509T075828Z/":
+          - link "FSxLustre20260509T075828Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260509T075828Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260509T075828Z%2F&kind=prefix
+      - row "Select FSxLustre20260509T194813Z/ prefix FSxLustre20260509T194813Z/ — Register":
+        - cell "Select FSxLustre20260509T194813Z/ prefix":
+          - checkbox "Select FSxLustre20260509T194813Z/"
+          - generic: prefix
+        - cell "FSxLustre20260509T194813Z/":
+          - link "FSxLustre20260509T194813Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260509T194813Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260509T194813Z%2F&kind=prefix
+      - row "Select FSxLustre20260509T204833Z/ prefix FSxLustre20260509T204833Z/ — Register":
+        - cell "Select FSxLustre20260509T204833Z/ prefix":
+          - checkbox "Select FSxLustre20260509T204833Z/"
+          - generic: prefix
+        - cell "FSxLustre20260509T204833Z/":
+          - link "FSxLustre20260509T204833Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260509T204833Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260509T204833Z%2F&kind=prefix
+      - row "Select FSxLustre20260510T013752Z/ prefix FSxLustre20260510T013752Z/ — Register":
+        - cell "Select FSxLustre20260510T013752Z/ prefix":
+          - checkbox "Select FSxLustre20260510T013752Z/"
+          - generic: prefix
+        - cell "FSxLustre20260510T013752Z/":
+          - link "FSxLustre20260510T013752Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260510T013752Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260510T013752Z%2F&kind=prefix
+      - row "Select FSxLustre20260512T045524Z/ prefix FSxLustre20260512T045524Z/ — Register":
+        - cell "Select FSxLustre20260512T045524Z/ prefix":
+          - checkbox "Select FSxLustre20260512T045524Z/"
+          - generic: prefix
+        - cell "FSxLustre20260512T045524Z/":
+          - link "FSxLustre20260512T045524Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260512T045524Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260512T045524Z%2F&kind=prefix
+      - row "Select FSxLustre20260515T103052Z/ prefix FSxLustre20260515T103052Z/ — Register":
+        - cell "Select FSxLustre20260515T103052Z/ prefix":
+          - checkbox "Select FSxLustre20260515T103052Z/"
+          - generic: prefix
+        - cell "FSxLustre20260515T103052Z/":
+          - link "FSxLustre20260515T103052Z/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260515T103052Z%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FFSxLustre20260515T103052Z%2F&kind=prefix
+      - row "Select _dyec_candidate_patches/ prefix _dyec_candidate_patches/ — Register":
+        - cell "Select _dyec_candidate_patches/ prefix":
+          - checkbox "Select _dyec_candidate_patches/"
+          - generic: prefix
+        - cell "_dyec_candidate_patches/":
+          - link "_dyec_candidate_patches/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2F_dyec_candidate_patches%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2F_dyec_candidate_patches%2F&kind=prefix
+      - row "Select agent-staging/ prefix agent-staging/ — Register":
+        - cell "Select agent-staging/ prefix":
+          - checkbox "Select agent-staging/"
+          - generic: prefix
+        - cell "agent-staging/":
+          - link "agent-staging/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fagent-staging%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fagent-staging%2F&kind=prefix
+      - row "Select analysis_results/ prefix analysis_results/ — Register":
+        - cell "Select analysis_results/ prefix":
+          - checkbox "Select analysis_results/"
+          - generic: prefix
+        - cell "analysis_results/":
+          - link "analysis_results/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fanalysis_results%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fanalysis_results%2F&kind=prefix
+      - row "Select archived/ prefix archived/ — Register":
+        - cell "Select archived/ prefix":
+          - checkbox "Select archived/"
+          - generic: prefix
+        - cell "archived/":
+          - link "archived/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Farchived%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Farchived%2F&kind=prefix
+      - row "Select cluster_boot_config/ prefix cluster_boot_config/ — Register":
+        - cell "Select cluster_boot_config/ prefix":
+          - checkbox "Select cluster_boot_config/"
+          - generic: prefix
+        - cell "cluster_boot_config/":
+          - link "cluster_boot_config/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fcluster_boot_config%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fcluster_boot_config%2F&kind=prefix
+      - row "Select codex-patches/ prefix codex-patches/ — Register":
+        - cell "Select codex-patches/ prefix":
+          - checkbox "Select codex-patches/"
+          - generic: prefix
+        - cell "codex-patches/":
+          - link "codex-patches/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fcodex-patches%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fcodex-patches%2F&kind=prefix
+      - row "Select codex-staging/ prefix codex-staging/ — Register":
+        - cell "Select codex-staging/ prefix":
+          - checkbox "Select codex-staging/"
+          - generic: prefix
+        - cell "codex-staging/":
+          - link "codex-staging/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fcodex-staging%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fcodex-staging%2F&kind=prefix
+      - row "Select codex-transfer/ prefix codex-transfer/ — Register":
+        - cell "Select codex-transfer/ prefix":
+          - checkbox "Select codex-transfer/"
+          - generic: prefix
+        - cell "codex-transfer/":
+          - link "codex-transfer/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fcodex-transfer%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fcodex-transfer%2F&kind=prefix
+      - row "Select data/ prefix data/ — Register":
+        - cell "Select data/ prefix":
+          - checkbox "Select data/"
+          - generic: prefix
+        - cell "data/":
+          - link "data/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fdata%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fdata%2F&kind=prefix
+      - row "Select daylily-monitor/ prefix daylily-monitor/ — Register":
+        - cell "Select daylily-monitor/ prefix":
+          - checkbox "Select daylily-monitor/"
+          - generic: prefix
+        - cell "daylily-monitor/":
+          - link "daylily-monitor/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fdaylily-monitor%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fdaylily-monitor%2F&kind=prefix
+      - row "Select daylily_monitoring/ prefix daylily_monitoring/ — Register":
+        - cell "Select daylily_monitoring/ prefix":
+          - checkbox "Select daylily_monitoring/"
+          - generic: prefix
+        - cell "daylily_monitoring/":
+          - link "daylily_monitoring/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fdaylily_monitoring%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fdaylily_monitoring%2F&kind=prefix
+      - row "Select dragen20250619/ prefix dragen20250619/ — Register":
+        - cell "Select dragen20250619/ prefix":
+          - checkbox "Select dragen20250619/"
+          - generic: prefix
+        - cell "dragen20250619/":
+          - link "dragen20250619/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fdragen20250619%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fdragen20250619%2F&kind=prefix
+      - row "Select dragen_results/ prefix dragen_results/ — Register":
+        - cell "Select dragen_results/ prefix":
+          - checkbox "Select dragen_results/"
+          - generic: prefix
+        - cell "dragen_results/":
+          - link "dragen_results/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fdragen_results%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fdragen_results%2F&kind=prefix
+      - row "Select first_round_results/ prefix first_round_results/ — Register":
+        - cell "Select first_round_results/ prefix":
+          - checkbox "Select first_round_results/"
+          - generic: prefix
+        - cell "first_round_results/":
+          - link "first_round_results/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Ffirst_round_results%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Ffirst_round_results%2F&kind=prefix
+      - row "Select fsx/ prefix fsx/ — Register":
+        - cell "Select fsx/ prefix":
+          - checkbox "Select fsx/"
+          - generic: prefix
+        - cell "fsx/":
+          - link "fsx/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Ffsx%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Ffsx%2F&kind=prefix
+      - row "Select lsmc_results/ prefix lsmc_results/ — Register":
+        - cell "Select lsmc_results/ prefix":
+          - checkbox "Select lsmc_results/"
+          - generic: prefix
+        - cell "lsmc_results/":
+          - link "lsmc_results/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Flsmc_results%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Flsmc_results%2F&kind=prefix
+      - row "Select monitoring/ prefix monitoring/ — Register":
+        - cell "Select monitoring/ prefix":
+          - checkbox "Select monitoring/"
+          - generic: prefix
+        - cell "monitoring/":
+          - link "monitoring/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fmonitoring%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fmonitoring%2F&kind=prefix
+      - row "Select multiqc/ prefix multiqc/ — Register":
+        - cell "Select multiqc/ prefix":
+          - checkbox "Select multiqc/"
+          - generic: prefix
+        - cell "multiqc/":
+          - link "multiqc/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fmultiqc%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fmultiqc%2F&kind=prefix
+      - row "Select shared_models/ prefix shared_models/ — Register":
+        - cell "Select shared_models/ prefix":
+          - checkbox "Select shared_models/"
+          - generic: prefix
+        - cell "shared_models/":
+          - link "shared_models/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fshared_models%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fshared_models%2F&kind=prefix
+      - row "Select staged_data_archive/ prefix staged_data_archive/ — Register":
+        - cell "Select staged_data_archive/ prefix":
+          - checkbox "Select staged_data_archive/"
+          - generic: prefix
+        - cell "staged_data_archive/":
+          - link "staged_data_archive/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fstaged_data_archive%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fstaged_data_archive%2F&kind=prefix
+      - row "Select staged_data_management/ prefix staged_data_management/ — Register":
+        - cell "Select staged_data_management/ prefix":
+          - checkbox "Select staged_data_management/"
+          - generic: prefix
+        - cell "staged_data_management/":
+          - link "staged_data_management/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fstaged_data_management%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fstaged_data_management%2F&kind=prefix
+      - row "Select tmp/ prefix tmp/ — Register":
+        - cell "Select tmp/ prefix":
+          - checkbox "Select tmp/"
+          - generic: prefix
+        - cell "tmp/":
+          - link "tmp/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Ftmp%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Ftmp%2F&kind=prefix
+      - row "Select tmp_hold/ prefix tmp_hold/ — Register":
+        - cell "Select tmp_hold/ prefix":
+          - checkbox "Select tmp_hold/"
+          - generic: prefix
+        - cell "tmp_hold/":
+          - link "tmp_hold/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Ftmp_hold%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Ftmp_hold%2F&kind=prefix
+      - row "Select worksets/ prefix worksets/ — Register":
+        - cell "Select worksets/ prefix":
+          - checkbox "Select worksets/"
+          - generic: prefix
+        - cell "worksets/":
+          - link "worksets/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fworksets%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fworksets%2F&kind=prefix
+      - row "Select RIH0_ANA0-HG002_DBC0_0.R1.fastq.gz object RIH0_ANA0-HG002_DBC0_0.R1.fastq.gz 14.1M B Register":
+        - cell "Select RIH0_ANA0-HG002_DBC0_0.R1.fastq.gz object":
+          - checkbox "Select RIH0_ANA0-HG002_DBC0_0.R1.fastq.gz"
+          - generic: object
+        - cell "RIH0_ANA0-HG002_DBC0_0.R1.fastq.gz":
+          - button "RIH0_ANA0-HG002_DBC0_0.R1.fastq.gz"
+        - cell "14.1M B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FRIH0_ANA0-HG002_DBC0_0.R1.fastq.gz&kind=object
+      - row "Select RIH0_ANA0-HG002_DBC0_0.R2.fastq.gz object RIH0_ANA0-HG002_DBC0_0.R2.fastq.gz 15.2M B Register":
+        - cell "Select RIH0_ANA0-HG002_DBC0_0.R2.fastq.gz object":
+          - checkbox "Select RIH0_ANA0-HG002_DBC0_0.R2.fastq.gz"
+          - generic: object
+        - cell "RIH0_ANA0-HG002_DBC0_0.R2.fastq.gz":
+          - button "RIH0_ANA0-HG002_DBC0_0.R2.fastq.gz"
+        - cell "15.2M B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FRIH0_ANA0-HG002_DBC0_0.R2.fastq.gz&kind=object
+      - row "Select Screenshot 2026-02-24 at 4.20.55 AM.png object Screenshot 2026-02-24 at 4.20.55 AM.png 112.2K B Register":
+        - cell "Select Screenshot 2026-02-24 at 4.20.55 AM.png object":
+          - checkbox "Select Screenshot 2026-02-24 at 4.20.55 AM.png"
+          - generic: object
+        - cell "Screenshot 2026-02-24 at 4.20.55 AM.png":
+          - button "Screenshot 2026-02-24 at 4.20.55 AM.png"
+        - cell "112.2K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2FScreenshot%202026-02-24%20at%204.20.55%E2%80%AFAM.png&kind=object
+      - row "Select aws-programmatic-access-test-object object aws-programmatic-access-test-object 4 B Register":
+        - cell "Select aws-programmatic-access-test-object object":
+          - checkbox "Select aws-programmatic-access-test-object"
+          - generic: object
+        - cell "aws-programmatic-access-test-object":
+          - button "aws-programmatic-access-test-object"
+        - cell "4 B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Faws-programmatic-access-test-object&kind=object
+      - row "Select hyb.sh object hyb.sh 956 B Register":
+        - cell "Select hyb.sh object":
+          - checkbox "Select hyb.sh"
+          - generic: object
+        - cell "hyb.sh":
+          - button "hyb.sh"
+        - cell "956 B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fhyb.sh&kind=object
+      - row "Select ont_analysis_manifest.csv object ont_analysis_manifest.csv 6.1K B Register":
+        - cell "Select ont_analysis_manifest.csv object":
+          - checkbox "Select ont_analysis_manifest.csv"
+          - generic: object
+        - cell "ont_analysis_manifest.csv":
+          - button "ont_analysis_manifest.csv"
+        - cell "6.1K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Font_analysis_manifest.csv&kind=object
+      - row "Select ont_example.csv object ont_example.csv 5.7K B Register":
+        - cell "Select ont_example.csv object":
+          - checkbox "Select ont_example.csv"
+          - generic: object
+        - cell "ont_example.csv":
+          - button "ont_example.csv"
+        - cell "5.7K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Font_example.csv&kind=object
+      - row "Select s3_reference_data_version.info object s3_reference_data_version.info 9 B Register":
+        - cell "Select s3_reference_data_version.info object":
+          - checkbox "Select s3_reference_data_version.info"
+          - generic: object
+        - cell "s3_reference_data_version.info":
+          - button "s3_reference_data_version.info"
+        - cell "9 B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fs3_reference_data_version.info&kind=object
+      - row "Select ultima_analysis_manifest.csv object ultima_analysis_manifest.csv 4.1K B Register":
+        - cell "Select ultima_analysis_manifest.csv object":
+          - checkbox "Select ultima_analysis_manifest.csv"
+          - generic: object
+        - cell "ultima_analysis_manifest.csv":
+          - button "ultima_analysis_manifest.csv"
+        - cell "4.1K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fultima_analysis_manifest.csv&kind=object
+      - row "Select ultima_new_new_chemistry_202508_hg002_all.tsv object ultima_new_new_chemistry_202508_hg002_all.tsv 343K B Register":
+        - cell "Select ultima_new_new_chemistry_202508_hg002_all.tsv object":
+          - checkbox "Select ultima_new_new_chemistry_202508_hg002_all.tsv"
+          - generic: object
+        - cell "ultima_new_new_chemistry_202508_hg002_all.tsv":
+          - button "ultima_new_new_chemistry_202508_hg002_all.tsv"
+        - cell "343K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2Fultima_new_new_chemistry_202508_hg002_all.tsv&kind=object
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

@@ -1,0 +1,236 @@
+{
+  "snapshot": "dewey12-acceptance-20261026-browser-read-after-compression-2026-10-26T05-05-27-427Z.json",
+  "summary": {
+    "phase": "read-after-compression",
+    "status": "complete",
+    "requests": 38,
+    "http_expectations_passed": 38,
+    "identity_created": false,
+    "credentials_exported": false,
+    "storage_deleted": false
+  },
+  "http_status_counts": {
+    "200": 30,
+    "401": 2,
+    "206": 2,
+    "304": 1,
+    "412": 1,
+    "416": 2
+  },
+  "expectations": [
+    {
+      "label": "external-verified-account",
+      "status": 200,
+      "bytes": 1214
+    },
+    {
+      "label": "file-recipient-metadata",
+      "status": 200,
+      "bytes": 236
+    },
+    {
+      "label": "set-recipient-metadata",
+      "status": 200,
+      "bytes": 264
+    },
+    {
+      "label": "www-recipient-metadata",
+      "status": 200,
+      "bytes": 240
+    },
+    {
+      "label": "public-recipient-metadata",
+      "status": 200,
+      "bytes": 243
+    },
+    {
+      "label": "anonymous-machine-denied",
+      "status": 401,
+      "bytes": 50
+    },
+    {
+      "label": "anonymous-public-denied",
+      "status": 401,
+      "bytes": 50
+    },
+    {
+      "label": "file-full",
+      "status": 200,
+      "bytes": 40
+    },
+    {
+      "label": "file-head",
+      "status": 200,
+      "bytes": 0
+    },
+    {
+      "label": "file-range",
+      "status": 206,
+      "bytes": 8
+    },
+    {
+      "label": "file-not-modified",
+      "status": 304,
+      "bytes": 0
+    },
+    {
+      "label": "file-precondition",
+      "status": 412,
+      "bytes": 34
+    },
+    {
+      "label": "file-resume",
+      "status": 206,
+      "bytes": 32
+    },
+    {
+      "label": "file-if-range-mismatch",
+      "status": 200,
+      "bytes": 40
+    },
+    {
+      "label": "set-manifest-0",
+      "status": 200,
+      "bytes": 542
+    },
+    {
+      "label": "set-manifest-1",
+      "status": 200,
+      "bytes": 583
+    },
+    {
+      "label": "set-manifest-2",
+      "status": 200,
+      "bytes": 619
+    },
+    {
+      "label": "set-manifest-3",
+      "status": 200,
+      "bytes": 623
+    },
+    {
+      "label": "set-manifest-4",
+      "status": 200,
+      "bytes": 554
+    },
+    {
+      "label": "set-recursive-file",
+      "status": 200,
+      "bytes": 40
+    },
+    {
+      "label": "set-recursive-file",
+      "status": 200,
+      "bytes": 561
+    },
+    {
+      "label": "set-recursive-file",
+      "status": 200,
+      "bytes": 211
+    },
+    {
+      "label": "set-recursive-file",
+      "status": 200,
+      "bytes": 1168
+    },
+    {
+      "label": "set-recursive-file",
+      "status": 200,
+      "bytes": 2193966
+    },
+    {
+      "label": "set-tar",
+      "status": 200,
+      "bytes": 2201600
+    },
+    {
+      "label": "set-tar-range-denied",
+      "status": 416,
+      "bytes": 84
+    },
+    {
+      "label": "public-manifest-0",
+      "status": 200,
+      "bytes": 559
+    },
+    {
+      "label": "public-manifest-1",
+      "status": 200,
+      "bytes": 595
+    },
+    {
+      "label": "public-manifest-2",
+      "status": 200,
+      "bytes": 599
+    },
+    {
+      "label": "public-manifest-3",
+      "status": 200,
+      "bytes": 530
+    },
+    {
+      "label": "public-recursive-file",
+      "status": 200,
+      "bytes": 561
+    },
+    {
+      "label": "public-recursive-file",
+      "status": 200,
+      "bytes": 211
+    },
+    {
+      "label": "public-recursive-file",
+      "status": 200,
+      "bytes": 1168
+    },
+    {
+      "label": "public-recursive-file",
+      "status": 200,
+      "bytes": 2193966
+    },
+    {
+      "label": "public-tar",
+      "status": 200,
+      "bytes": 2200576
+    },
+    {
+      "label": "public-tar-range-denied",
+      "status": 416,
+      "bytes": 84
+    },
+    {
+      "label": "www-deep-shell",
+      "status": 200,
+      "bytes": 3402
+    },
+    {
+      "label": "www-download",
+      "status": 200,
+      "bytes": 2193966
+    }
+  ],
+  "acceptance": {
+    "transport": "browser_fetch",
+    "recipient": "external",
+    "archives": {
+      "set": {
+        "object_count": 5,
+        "transport_bytes": 2201600,
+        "transport_sha256": "89912adb9f27c3d1d7666fc51a7c6e0a4d6d26512146d667f989be4c6f211d67",
+        "inventory_sha256": "6e84f2835bd41ad03783ed5ce6e5043b5e160d8fcfcad91bc494f5e5b0097628"
+      },
+      "public": {
+        "object_count": 4,
+        "transport_bytes": 2200576,
+        "transport_sha256": "cfa22e42bf1240cfa1cd095d69b867ed8fbd55ec4ff0247044f4d0c5f00ba726",
+        "inventory_sha256": "748fe84dc1920744939b4148878df08acce0c34c8039de692ec1b085d459bd3d"
+      }
+    },
+    "exact_file_sha256": "e114395a773c9378e136625da541493b44db71e8d2ae0396e2d621a57ee63172",
+    "covers_curl_wget": false,
+    "covers_browser_report_execution": false,
+    "anonymous_html_redirect_not_asserted": true
+  },
+  "prior_failure_preserved": "fetch-compression-failure.json",
+  "curl_wget_cli_tested": false
+}

@@ -1,0 +1,6 @@
+{
+  "admin": "true",
+  "destructiveControls": [],
+  "dialog": "×\nCopyComplete.txt\n\ns3://lsmc-ssf-sequencing-data/basecalls/lsmc/ssf-hq/LH01106/2026/20261009_LH01106_0022_A22LCLWLT1/CopyComplete.txt\n\nDownload\nRegister\n{\n  \"bucket\": \"lsmc-ssf-sequencing-data\",\n  \"key\": \"basecalls/lsmc/ssf-hq/LH01106/2026/20261009_LH01106_0022_A22LCLWLT1/CopyComplete.txt\",\n  \"version_id\": null,\n  \"size\": 0,\n  \"content_type\": \"text/plain; charset=utf-8\",\n  \"storage_class\": null,\n  \"etag\": \"d41d8cd98f00b204e9800998ecf8427e\",\n  \"sha256\": null,\n  \"metadata\": {\n    \"mtime\": \"1791666475.811893369\"\n  },\n  \"last_modified\": \"2026-10-10T21:47:26+00:00\",\n  \"registered_artifact\": null,\n  \"uri\": \"s3://lsmc-ssf-sequencing-data/basecalls/lsmc/ssf-hq/LH01106/2026/20261009_LH01106_0022_A22LCLWLT1/CopyComplete.txt\"\n}",
+  "version": "Dewey 11.0.3 · One EUID per object, prefix, or set\nAPI reference\nCLI access\nSign out"
+}

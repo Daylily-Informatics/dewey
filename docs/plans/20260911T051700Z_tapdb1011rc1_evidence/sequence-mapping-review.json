@@ -1,0 +1,46 @@
+{
+  "all_unmapped_generators_covered": true,
+  "comparisons": [
+    {
+      "complete_definition_matches": true,
+      "observed_state_matches": true,
+      "physical_catalog_matches": true,
+      "prefix": "AY",
+      "sequence": "ay_instance_seq",
+      "source_line": 13
+    },
+    {
+      "complete_definition_matches": true,
+      "observed_state_matches": true,
+      "physical_catalog_matches": true,
+      "prefix": "WSX",
+      "sequence": "wsx_instance_seq",
+      "source_line": 11
+    },
+    {
+      "complete_definition_matches": true,
+      "observed_state_matches": true,
+      "physical_catalog_matches": true,
+      "prefix": "WX",
+      "sequence": "wx_instance_seq",
+      "source_line": 10
+    },
+    {
+      "complete_definition_matches": true,
+      "observed_state_matches": true,
+      "physical_catalog_matches": true,
+      "prefix": "XX",
+      "sequence": "xx_instance_seq",
+      "source_line": 12
+    }
+  ],
+  "disposition": "accepted as the exact explicit historical mapping input; native later source capture validates the live catalog and strict complete source contract",
+  "historical_commit": "52d5f498dc4751b7e42d346bee2811a14080e5a5",
+  "historical_schema_file_sha256": "64362e2882a7b424f6bf3c6b3d9c21d1e859ec98d4ee61ca2a728cecfd134584",
+  "limits": "Static source and complete native sequence subreceipt validation only. No DB access, no state mutation, no synthesized identity receipt, no omission of the other sixteen generators.",
+  "mapping_count": 4,
+  "mapping_file_sha256": "5b69e68dea09d25bb18e0b3383e96c0250848c8c6eba5ccba8ec42658e862bf8",
+  "mapping_path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-data-migration-20260911/docs/plans/evidence/20260911T053316Z_dewey_source_sequence_mappings.json",
+  "native_sequence_inventory_sha256": "7dc63a2ae200cb19aa027994ee9a354be8108fe40c1ea9d478216f287ab4e1fc",
+  "source_file_sha256": "45776ac58ee2e9889a5590490a8a75d59c9745bca5dcc40ca982f0d75364a937"
+}

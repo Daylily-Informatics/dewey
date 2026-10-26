@@ -1,0 +1,74 @@
+{
+  "recorded_at": "2026-10-04T03:12:13.387097+00:00",
+  "observation_scope": "Read-only host and AWS inspection during this implementation session; refresh volatile state before cutover.",
+  "production_changed": false,
+  "instance_id": "i-07df3a933e4839f52",
+  "tailnet_ip": "100.71.233.11",
+  "private_ip": "10.0.0.222",
+  "public_ip": "52.89.110.76",
+  "dewey_port": 8914,
+  "current_bind": "0.0.0.0",
+  "planned_bind": "127.0.0.1",
+  "dns_service": "dayhoff-day-lsmc-bio-dnsmasq",
+  "dns_config": "/etc/dnsmasq.d/dayhoff-day-lsmc-bio.conf",
+  "dns_listener": "100.71.233.11",
+  "dns_interface": "tailscale0",
+  "existing_exact_dns_names": [
+    "login.day.lsmc.bio",
+    "atlas.day.lsmc.bio",
+    "dewey.day.lsmc.bio",
+    "ursa.day.lsmc.bio",
+    "kahlo.day.lsmc.bio",
+    "bloom.day.lsmc.bio",
+    "zebra-day.day.lsmc.bio",
+    "qeo.day.lsmc.bio"
+  ],
+  "planned_dns_addition": "address=/dewey-content.day.lsmc.bio/100.71.233.11",
+  "current_certificate": "/etc/letsencrypt/live/dayhoff-day-primary",
+  "content_wildcard_currently_covered": false,
+  "planned_content_certificate": "*.dewey-content.day.lsmc.bio",
+  "security_groups": [
+    {
+      "id": "sg-01439b28585f4a617",
+      "https_ipv4_sources": [
+        "152.44.152.3/32"
+      ]
+    },
+    {
+      "id": "sg-0516a6da8fe443299",
+      "http_https_ipv4_sources": [
+        "12.201.135.248/32"
+      ],
+      "https_security_group_sources": [
+        "sg-09b840d3d62e5884f",
+        "sg-0c771f72cfe0c29ad"
+      ]
+    },
+    {
+      "id": "sg-0860b90837ee8753c",
+      "ssh_ipv4_sources": [
+        "96.224.65.45/32"
+      ]
+    }
+  ],
+  "security_group_changes_planned": false,
+  "ingress_design": "Retain existing approved-source application listener for scoped machine contracts; managed shares require exact application origin, current human session and private attestation based on actual Tailscale listener/connection. Content virtual host separately requires the same trusted connection and exposes content paths only.",
+  "official_configuration_references": [
+    "https://httpd.apache.org/docs/2.4/mod/mod_rewrite.html",
+    "https://httpd.apache.org/docs/2.4/expr.html",
+    "https://httpd.apache.org/docs/2.4/mod/mod_headers.html"
+  ],
+  "executed": [
+    "Private operator capsule/source staging",
+    "Native read-only share inventory"
+  ],
+  "not_executed": [
+    "Image build",
+    "Certificate issuance",
+    "DNS or proxy changes",
+    "Template population",
+    "Conversion apply/verify",
+    "Worker drain",
+    "Deployment"
+  ]
+}

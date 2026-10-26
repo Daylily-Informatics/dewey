@@ -1,0 +1,54 @@
+{
+  "observed_at": "2026-10-26T07:18:41.449699+00:00",
+  "unchanged_sibling_count": 11,
+  "unchanged_siblings": [
+    "dayhoff-day-atlas-1",
+    "dayhoff-day-bloom-1",
+    "dayhoff-day-kahlo-1",
+    "dayhoff-day-qeo-1",
+    "dayhoff-day-ursa-1",
+    "dayhoff-day-ursa-cluster-sweeper-1",
+    "dayhoff-day-ursa-cost-guardrail-scheduler-1",
+    "dayhoff-day-ursa-placement-scheduler-1",
+    "dayhoff-day-ursa-v2-run-monitor-1",
+    "dayhoff-day-ursa-v2-run-worker-1",
+    "dayhoff-day-zebra-day-1"
+  ],
+  "compared_fields": [
+    "id",
+    "image_id",
+    "configured_image",
+    "repo_digests",
+    "started_at",
+    "restart_count",
+    "version",
+    "source_revision"
+  ],
+  "differences": {
+    "dayhoff-day-atlas-1": [],
+    "dayhoff-day-bloom-1": [],
+    "dayhoff-day-kahlo-1": [],
+    "dayhoff-day-qeo-1": [],
+    "dayhoff-day-ursa-1": [],
+    "dayhoff-day-ursa-cluster-sweeper-1": [],
+    "dayhoff-day-ursa-cost-guardrail-scheduler-1": [],
+    "dayhoff-day-ursa-placement-scheduler-1": [],
+    "dayhoff-day-ursa-v2-run-monitor-1": [],
+    "dayhoff-day-ursa-v2-run-worker-1": [],
+    "dayhoff-day-zebra-day-1": []
+  },
+  "login_unchanged_since_12_0_5": true,
+  "dewey": {
+    "name": "dayhoff-day-dewey-1",
+    "id": "ebb22ba30aaeba369859af8bcbc71e628b7bc22fed2c6ac6142d08a9dab7c55a",
+    "image_id": "sha256:05652be69cfabc252eeb331e6c16b023536da474de9ac5cdb73f53249b076fa1",
+    "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:05652be69cfabc252eeb331e6c16b023536da474de9ac5cdb73f53249b076fa1",
+    "repo_digests": [
+      "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:05652be69cfabc252eeb331e6c16b023536da474de9ac5cdb73f53249b076fa1"
+    ],
+    "started_at": "2026-10-26T07:16:51.987998758Z",
+    "restart_count": 0,
+    "version": "12.0.6",
+    "source_revision": "25ec6c9d19ebbe32ef445aa348b2287aff89781f"
+  }
+}

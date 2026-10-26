@@ -153,19 +153,9 @@ def _normalize_option_default(value):
 
 
 def _maybe_set_ncbi_api_key() -> None:
-    if os.environ.get("NCBI_API_KEY", "").strip():
-        return
-    key_file = Path(
-        os.environ.get("DEWEY_NCBI_API_KEY_FILE", "").strip() or str(NCBI_API_KEY_FILE)
-    ).expanduser()
-    try:
-        key = key_file.read_text(encoding="utf-8").strip()
-    except FileNotFoundError:
-        return
-    except OSError:
-        return
-    if key:
-        os.environ["NCBI_API_KEY"] = key
+    from dewey_service.ncbi_config import load_ncbi_key
+
+    load_ncbi_key()
 
 
 def _status_bind() -> tuple[str, str]:
@@ -341,6 +331,7 @@ def _start_server(
             host,
             "--port",
             str(port),
+            "--no-proxy-headers",
         ]
         if ssl_enabled:
             cmd.extend(
@@ -386,6 +377,9 @@ def _start_server(
         "host": host,
         "port": port,
         "reload": reload,
+        # Share ingress attestation checks the actual proxy transport peer.
+        # Forwarded headers must not replace it with caller-controlled addresses.
+        "proxy_headers": False,
     }
     if ssl_enabled:
         uvicorn_kwargs["ssl_certfile"] = str(resolved_cert)

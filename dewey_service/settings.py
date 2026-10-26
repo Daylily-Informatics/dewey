@@ -19,7 +19,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from dewey_service.defaults import (
     DEFAULT_APP_PORT,
     DEFAULT_COGNITO_ALLOWED_EMAIL_DOMAINS,
-    DEFAULT_TAPDB_CONFIG_DIR,
     DEFAULT_TAPDB_DOMAIN_REGISTRY_PATH,
     DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH,
     build_default_config_template,
@@ -49,6 +48,7 @@ SENSITIVE_CONFIG_KEY_PARTS = {
     "api_key",
     "access_key",
     "secret_key",
+    "assertion",
 }
 
 
@@ -218,7 +218,10 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
     def _write(prefix: str, payload: dict[str, Any]) -> None:
         for key, value in payload.items():
             merged = f"{prefix}_{key}" if prefix else str(key)
-            if merged == "auth_cognito_group_role_map" and isinstance(value, dict):
+            if merged in {
+                "auth_cognito_group_role_map",
+                "registry_service_principals",
+            } and isinstance(value, dict):
                 out[merged] = value
             elif isinstance(value, dict):
                 _write(merged, value)
@@ -230,6 +233,8 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
     remap = {
         "application_api_bearer_token": "api_bearer_token",
         "application_api_bearer_tokens": "api_bearer_tokens",
+        "application_dag_read_token_sha256": "dag_read_token_sha256",
+        "application_dag_read_actor": "dag_read_actor",
         "application_session_secret_key": "session_secret_key",
         "application_host": "host",
         "application_port": "port",
@@ -260,6 +265,14 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "share_approved_origins": "share_approved_origins",
         "share_default_signed_ttl_seconds": "share_default_signed_ttl_seconds",
         "share_max_lifetime_days": "share_max_lifetime_days",
+        "share_trusted_proxy_peer": "share_trusted_proxy_peer",
+        "share_ingress_assertion_header": "share_ingress_assertion_header",
+        "share_ingress_assertion": "share_ingress_assertion",
+        "share_public_ingress_assertion_header": "share_public_ingress_assertion_header",
+        "share_public_ingress_assertion": "share_public_ingress_assertion",
+        "share_application_origin": "share_application_origin",
+        "share_content_host_suffix": "share_content_host_suffix",
+        "share_session_generation": "share_session_generation",
         "auth_cognito_domain": "cognito_domain",
         "auth_cognito_app_client_id": "cognito_app_client_id",
         "auth_cognito_app_client_secret": "cognito_app_client_secret",
@@ -279,6 +292,10 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "auth_external_broker_callback_url": "external_broker_callback_url",
         "auth_external_broker_logout_url": "external_broker_logout_url",
         "auth_external_broker_ca_bundle": "external_broker_ca_bundle",
+        "auth_external_broker_share_login_url": "external_broker_share_login_url",
+        "auth_external_broker_identity_url": "external_broker_identity_url",
+        "auth_external_broker_identity_mint_url": "external_broker_identity_mint_url",
+        "auth_external_broker_identity_revoke_url": "external_broker_identity_revoke_url",
         "qeo_ingest_url": "qeo_ingest_url",
         "qeo_api_token": "qeo_api_token",
         "qeo_consumer_group": "qeo_consumer_group",
@@ -329,6 +346,19 @@ def _require_absolute_path(value: str, *, field_name: str) -> str:
     return str(resolved.resolve())
 
 
+def redact_config(value: Any, path: str = "") -> Any:
+    """Redact secrets recursively before formatting, including nested lists."""
+    if _is_sensitive_config_path(path):
+        return "<redacted>"
+    if isinstance(value, dict):
+        return {key: redact_config(item, f"{path}.{key}") for key, item in value.items()}
+    if isinstance(value, (list, tuple, set)):
+        return [redact_config(item, path) for item in value]
+    if isinstance(value, str) and value.lower().startswith(("bearer ", "basic ")):
+        return "<redacted>"
+    return value
+
+
 def _display_config_path(path: str) -> str:
     mapping = {
         "show_environment_chrome": "ui.show_environment_chrome",
@@ -361,6 +391,10 @@ def _display_config_path(path: str) -> str:
         "external_broker_callback_url": "auth.external_broker.callback_url",
         "external_broker_logout_url": "auth.external_broker.logout_url",
         "external_broker_ca_bundle": "auth.external_broker.ca_bundle",
+        "external_broker_share_login_url": "auth.external_broker.share_login_url",
+        "external_broker_identity_url": "auth.external_broker.identity_url",
+        "external_broker_identity_mint_url": "auth.external_broker.identity_mint_url",
+        "external_broker_identity_revoke_url": "auth.external_broker.identity_revoke_url",
         "qeo_ingest_url": "qeo.ingest_url",
         "qeo_api_token": "qeo.api_token",
         "qeo_consumer_group": "qeo.consumer_group",
@@ -419,7 +453,7 @@ def build_effective_config_rows(settings: "Settings", *, config_path: Path) -> l
                 "path": display_path,
                 "value": "<redacted>"
                 if _is_sensitive_config_path(display_path)
-                else _display_config_value(value),
+                else _display_config_value(redact_config(value, display_path)),
             }
         )
 
@@ -440,6 +474,15 @@ class Settings(BaseSettings):
     environment: str = "development"
     api_bearer_token: str = "dewey-dev-token"
     api_bearer_tokens: str = ""
+    # Native DAG-v2 GET routes only. Keep this hash outside api_bearer_tokens.
+    dag_read_token_sha256: str = ""
+    dag_read_actor: str = ""
+    registry_internal_domains: list[str] = Field(default_factory=lambda: ["lsmc.com"])
+    registry_service_principals: dict[str, dict[str, Any]] = Field(default_factory=dict)
+    registry_default_share_lifetime_days: int = 30
+    # Dedicated read-only QEO resolver. Never add this token to api_bearer_tokens.
+    qeo_resolver_token_sha256: str = ""
+    qeo_resolver_token_expires_at: str = ""
     session_secret_key: str = "dewey-session-secret-change-me"
     host: str = "127.0.0.1"
     port: int = DEFAULT_APP_PORT
@@ -472,6 +515,10 @@ class Settings(BaseSettings):
     external_broker_callback_url: str = ""
     external_broker_logout_url: str = ""
     external_broker_ca_bundle: str = ""
+    external_broker_share_login_url: str = ""
+    external_broker_identity_url: str = ""
+    external_broker_identity_mint_url: str = ""
+    external_broker_identity_revoke_url: str = ""
 
     # Explicit Dewey -> QEO outbox dispatch. Empty values disable dispatch by failing hard.
     qeo_ingest_url: str = ""
@@ -495,7 +542,7 @@ class Settings(BaseSettings):
     tapdb_domain_code: str = "Z"
     tapdb_domain_registry_path: str = str(DEFAULT_TAPDB_DOMAIN_REGISTRY_PATH)
     tapdb_prefix_ownership_registry_path: str = str(DEFAULT_TAPDB_PREFIX_OWNERSHIP_REGISTRY_PATH)
-    tapdb_config_path: str = str(DEFAULT_TAPDB_CONFIG_DIR / "dewey" / "dewey" / "tapdb-config.yaml")
+    tapdb_config_path: str = ""
     tapdb_strict_namespace: int = 1
 
     # AWS defaults for TapDB wrappers
@@ -520,6 +567,54 @@ class Settings(BaseSettings):
     share_approved_origins: list[str] = Field(default_factory=list)
     share_default_signed_ttl_seconds: int = 900
     share_max_lifetime_days: int = 3650
+    share_trusted_proxy_peer: str = ""
+    share_ingress_assertion_header: str = "X-Dewey-Tailnet-Assertion"
+    share_ingress_assertion: str = ""
+    share_public_ingress_assertion_header: str = "X-Dewey-Recipient-Assertion"
+    share_public_ingress_assertion: str = ""
+    share_application_origin: str = ""
+    share_content_host_suffix: str = ""
+    share_session_generation: str = ""
+
+    @field_validator("share_application_origin")
+    @classmethod
+    def validate_share_origin(cls, value: str) -> str:
+        if not value:
+            return value
+        parsed = urlsplit(value)
+        if (
+            parsed.scheme != "https"
+            or not parsed.hostname
+            or parsed.username
+            or parsed.password
+            or parsed.path
+            or parsed.query
+            or parsed.fragment
+            or parsed.port not in {None, 443}
+        ):
+            raise ValueError("share_application_origin must be an exact HTTPS origin without path")
+        return value
+
+    @field_validator("share_content_host_suffix")
+    @classmethod
+    def validate_content_suffix(cls, value: str) -> str:
+        if value and (
+            len(value) > 220
+            or not all(
+                re.fullmatch(r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?", label)
+                for label in value.split(".")
+            )
+            or "." not in value
+        ):
+            raise ValueError("share_content_host_suffix must be an explicit lowercase DNS suffix")
+        return value
+
+    @field_validator("share_ingress_assertion_header", "share_public_ingress_assertion_header")
+    @classmethod
+    def validate_ingress_header(cls, value: str) -> str:
+        if not re.fullmatch(r"[A-Za-z0-9-]+", value):
+            raise ValueError("share_ingress_assertion_header must be an HTTP header name")
+        return value
 
     # Literature integration
     literature_managed_copy_allowed_domains: str = "europepmc.org,ncbi.nlm.nih.gov"
@@ -540,6 +635,10 @@ class Settings(BaseSettings):
         "external_broker_handoff_exchange_url",
         "external_broker_callback_url",
         "external_broker_logout_url",
+        "external_broker_share_login_url",
+        "external_broker_identity_url",
+        "external_broker_identity_mint_url",
+        "external_broker_identity_revoke_url",
     )
     @classmethod
     def validate_external_broker_urls(cls, value: str, info):
@@ -695,7 +794,34 @@ class Settings(BaseSettings):
         return normalized
 
     @model_validator(mode="after")
+    def validate_dag_read_credential(self) -> "Settings":
+        fingerprint = self.dag_read_token_sha256
+        actor = self.dag_read_actor
+        if bool(fingerprint) != bool(actor):
+            raise ValueError("Dewey DAG read token hash and actor must be configured together")
+        if fingerprint and not re.fullmatch(r"[0-9a-f]{64}", fingerprint):
+            raise ValueError("Dewey DAG read token hash must be lowercase SHA256")
+        if actor and (actor != actor.strip() or len(actor) > 128):
+            raise ValueError("Dewey DAG read actor must be exact and at most 128 characters")
+        return self
+
+    @model_validator(mode="after")
     def validate_cognito_contract(self) -> "Settings":
+        for fingerprint, identity in self.registry_service_principals.items():
+            if (
+                not re.fullmatch(r"[0-9a-f]{64}", fingerprint)
+                or not str(identity.get("subject", "")).strip()
+            ):
+                raise ValueError(
+                    "Registry service principals require a SHA256 fingerprint and explicit subject"
+                )
+            roles = identity.get("roles")
+            if (
+                not isinstance(roles, list)
+                or not roles
+                or set(roles) - {"ADMIN", "READ_WRITE", "READ_ONLY"}
+            ):
+                raise ValueError("Registry service principals require explicit valid roles")
         if self.auth_mode == "external_broker":
             missing = [
                 field_name
@@ -806,7 +932,18 @@ class Settings(BaseSettings):
             cleaned = str(item).strip()
             if cleaned:
                 tokens.add(cleaned)
-        return {item for item in tokens if item}
+        # Resolver-only credentials cannot become write credentials by misconfiguration.
+        return {
+            item
+            for item in tokens
+            if item
+            and not item.startswith(
+                (
+                    "dewey_qeo_resolver_",
+                    "dewey_dag_",
+                )
+            )
+        }
 
     @property
     def is_production(self) -> bool:

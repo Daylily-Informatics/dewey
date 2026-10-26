@@ -1,0 +1,16 @@
+{
+  "audit_actor_matches": true,
+  "audit_before_uid": 66696,
+  "audit_columns": [
+    "created_dt",
+    "json_addl",
+    "modified_dt"
+  ],
+  "audit_count": 3,
+  "creation_audit_same_instant": true,
+  "plan_file_sha256": "056d3036ab5f03e47b0c5c4360aa28d1c4fd8bd1460f1b6fe81ec08598bbdafd",
+  "planned_json_matches": true,
+  "rollback_acknowledged": true,
+  "transaction_timestamp_matches": true,
+  "uid": 1
+}

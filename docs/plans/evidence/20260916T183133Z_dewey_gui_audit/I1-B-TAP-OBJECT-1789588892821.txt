@@ -1,0 +1,224 @@
+- banner:
+  - link "Dewey / TapDB":
+    - /url: /tapdb/
+  - navigation:
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Admin":
+      - /url: /admin
+    - link "Overview":
+      - /url: /tapdb/admin/overview
+    - link "Search":
+      - /url: /tapdb/search
+    - link "Graph":
+      - /url: /tapdb/graph
+    - link "Templates":
+      - /url: /tapdb/templates
+    - link "Audit":
+      - /url: /tapdb/audit
+    - link "Help":
+      - /url: /tapdb/help
+    - link "Readiness":
+      - /url: /tapdb/admin/readiness
+    - link "Inventory":
+      - /url: /tapdb/admin/inventory
+    - link "Meridian":
+      - /url: /tapdb/admin/meridian
+    - link "Metrics":
+      - /url: /tapdb/admin/metrics
+    - link "Runtime":
+      - /url: /tapdb/admin/runtime
+    - link "Backups":
+      - /url: /tapdb/admin/backups
+    - link "Sign out":
+      - /url: /auth/logout
+  - generic: johnm@lsmc.com · admin
+- main:
+  - heading "M-DGX-TST9" [level=1]:
+    - link "M-DGX-TST9":
+      - /url: /tapdb/object/M-DGX-TST9
+  - link "Graph":
+    - /url: /tapdb/object/M-DGX-TST9/graph
+  - table:
+    - rowgroup:
+      - row "UID 17737":
+        - rowheader "UID"
+        - cell "17737"
+      - row "Kind instance":
+        - rowheader "Kind"
+        - cell "instance"
+      - row "Name Dewey GUI audit 20260916 I1-B prefix":
+        - rowheader "Name"
+        - cell "Dewey GUI audit 20260916 I1-B prefix"
+      - row "Type data/artifact/generic/1.0":
+        - rowheader "Type"
+        - cell "data/artifact/generic/1.0"
+      - row "Status active":
+        - rowheader "Status"
+        - cell "active"
+      - row "Created 2026-09-16 19:50:29.644814+00:00":
+        - rowheader "Created"
+        - cell "2026-09-16 19:50:29.644814+00:00"
+      - row "Modified 2026-09-16 19:50:29.644814+00:00":
+        - rowheader "Modified"
+        - cell "2026-09-16 19:50:29.644814+00:00"
+  - heading "Validation" [level=2]
+  - table:
+    - rowgroup:
+      - row "Validator UNIVERSAL_PASS@1":
+        - rowheader "Validator"
+        - cell "UNIVERSAL_PASS@1":
+          - code: UNIVERSAL_PASS@1
+      - row "State valid_current":
+        - rowheader "State"
+        - cell "valid_current"
+      - row "Subject Mutated False":
+        - rowheader "Subject Mutated"
+        - cell "False"
+      - row "Persistence Ephemeral assessment; repair evidence is explicit.":
+        - rowheader "Persistence"
+        - cell "Ephemeral assessment; repair evidence is explicit."
+  - heading "Edit" [level=2]
+  - textbox "name": Dewey GUI audit 20260916 I1-B prefix
+  - button "Set Name (Apply)"
+  - textbox "status": active
+  - button "Set Status (Apply)"
+  - textbox "related EUID"
+  - combobox:
+    - option "related is parent" [selected]
+    - option "related is child"
+  - textbox: generic
+  - textbox "v0 evidence EUIDs"
+  - textbox "v0 correlation ID"
+  - textbox "v0 causation ID"
+  - textbox "v0 edge state": active
+  - button "Add Lineage"
+  - textbox "repair reason"
+  - generic: Repair JSON payload
+  - button "Format JSON data, with proper indentation and line feeds (Ctrl+I)"
+  - button "Compact JSON data, remove all whitespaces (Ctrl+Shift+I)"
+  - button "Sort contents"
+  - button "Filter, sort, or transform contents"
+  - 'button "Repair JSON: fix quotes and escape characters, remove comments and JSONP notation, turn JavaScript objects into JSON."'
+  - button "Text ▾"
+  - textbox: "{ \"action_groups\": {}, \"artifact_identity_key\": \"dewey::prefix:prefix:folder:s3:lsmc-dewey-0:gui-audit/20260916T183133Z/I1-B/::\", \"artifact_type\": \"prefix\", \"audit_log\": [], \"bucket\": \"lsmc-dewey-0\", \"checksums\": {}, \"created_at\": \"2026-09-16T19:50:29.688835Z\", \"created_by_email\": \"johnm@lsmc.com\", \"description\": \"\", \"import_mode\": \"register\", \"is_terminal\": false, \"key\": \"gui-audit/20260916T183133Z/I1-B/\", \"metadata\": {}, \"node_kind\": \"folder\", \"original_filename\": \"Dewey GUI audit 20260916 I1-B prefix\", \"producer_system\": \"dewey\", \"properties\": {}, \"source_uri\": \"s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-B/\", \"storage_backend\": \"s3\", \"storage_kind\": \"prefix\", \"storage_status\": \"registered\", \"storage_uri\": \"s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-B/\", \"updated_by_email\": \"johnm@lsmc.com\", \"version_id\": null }"
+  - generic: Ln:1Col:1
+  - button "Create repair (Apply)"
+  - heading "Children" [level=2]
+  - table:
+    - rowgroup:
+      - row "Lineage Object Relationship":
+        - columnheader "Lineage"
+        - columnheader "Object"
+        - columnheader "Relationship"
+    - rowgroup:
+      - row "M-EDG-G3A7 M-DGX-TSV7 Access for M-DGX-TST9 registry_policy generic":
+        - cell "M-EDG-G3A7":
+          - link "M-EDG-G3A7":
+            - /url: /tapdb/object/M-EDG-G3A7
+        - cell "M-DGX-TSV7 Access for M-DGX-TST9":
+          - link "M-DGX-TSV7":
+            - /url: /tapdb/object/M-DGX-TSV7
+          - text: Access for M-DGX-TST9
+        - cell "registry_policy generic"
+  - heading "Parents" [level=2]
+  - table:
+    - rowgroup:
+      - row "Lineage Object Relationship":
+        - columnheader "Lineage"
+        - columnheader "Object"
+        - columnheader "Relationship"
+    - rowgroup:
+      - row "M-EDG-G3D1 M-DGX-TT2S Dewey GUI audit 20260916 I1-B library set artifact_set_member generic":
+        - cell "M-EDG-G3D1":
+          - link "M-EDG-G3D1":
+            - /url: /tapdb/object/M-EDG-G3D1
+        - cell "M-DGX-TT2S Dewey GUI audit 20260916 I1-B library set":
+          - link "M-DGX-TT2S":
+            - /url: /tapdb/object/M-DGX-TT2S
+          - text: Dewey GUI audit 20260916 I1-B library set
+        - cell "artifact_set_member generic"
+  - heading "Federated TapDB References" [level=2]
+  - table:
+    - rowgroup:
+      - row "Service Target EUID Relationship Authority Assertion":
+        - columnheader "Service"
+        - columnheader "Target EUID"
+        - columnheader "Relationship"
+        - columnheader "Authority"
+        - columnheader "Assertion"
+    - rowgroup:
+      - row "No canonical federated references.":
+        - cell "No canonical federated references."
+  - heading "Opaque External Identifiers" [level=2]
+  - table:
+    - rowgroup:
+      - row "Namespace Kind Value Scope Relationship Canonical URI":
+        - columnheader "Namespace"
+        - columnheader "Kind"
+        - columnheader "Value"
+        - columnheader "Scope"
+        - columnheader "Relationship"
+        - columnheader "Canonical URI"
+    - rowgroup:
+      - row "No canonical opaque identifiers.":
+        - cell "No canonical opaque identifiers."
+  - heading "Audit" [level=2]
+  - table:
+    - rowgroup:
+      - row "When Who Operation Column New":
+        - columnheader "When"
+        - columnheader "Who"
+        - columnheader "Operation"
+        - columnheader "Column"
+        - columnheader "New"
+    - rowgroup:
+      - row "2026-09-16 19:50:29.644814+00:00 dewey INSERT None None":
+        - cell "2026-09-16 19:50:29.644814+00:00"
+        - cell "dewey"
+        - cell "INSERT"
+        - cell "None"
+        - cell "None"
+      - 'row "2026-09-16 19:50:29.644814+00:00 dewey UPDATE json_addl {\"key\": \"gui-audit/20260916T183133Z/I1-B/\", \"bucket\": \"lsmc-dewey-0\", \"metadata\": {}, \"audit_log\": [], \"checksums\": {}, \"node_kind\": \"folder\", \"created_at\": \"2026-09-16T19:50:29.688835Z\", \"properties\": {}, \"source_uri\": \"s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-B/\", \"version_id\": null, \"description\": \"\", \"import_mode\": \"register\", \"is_terminal\": false, \"storage_uri\": \"s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-B/\", \"storage_kind\": \"prefix\", \"action_groups\": {}, \"artifact_type\": \"prefix\", \"storage_status\": \"registered\", \"producer_system\": \"dewey\", \"storage_backend\": \"s3\", \"created_by_email\": \"johnm@lsmc.com\", \"updated_by_email\": \"johnm@lsmc.com\", \"original_filename\": \"Dewey GUI audit 20260916 I1-B prefix\", \"artifact_identity_key\": \"dewey::prefix:prefix:folder:s3:lsmc-dewey-0:gui-audit/20260916T183133Z/I1-B/::\"}"':
+        - cell "2026-09-16 19:50:29.644814+00:00"
+        - cell "dewey"
+        - cell "UPDATE"
+        - cell "json_addl"
+        - 'cell "{\"key\": \"gui-audit/20260916T183133Z/I1-B/\", \"bucket\": \"lsmc-dewey-0\", \"metadata\": {}, \"audit_log\": [], \"checksums\": {}, \"node_kind\": \"folder\", \"created_at\": \"2026-09-16T19:50:29.688835Z\", \"properties\": {}, \"source_uri\": \"s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-B/\", \"version_id\": null, \"description\": \"\", \"import_mode\": \"register\", \"is_terminal\": false, \"storage_uri\": \"s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-B/\", \"storage_kind\": \"prefix\", \"action_groups\": {}, \"artifact_type\": \"prefix\", \"storage_status\": \"registered\", \"producer_system\": \"dewey\", \"storage_backend\": \"s3\", \"created_by_email\": \"johnm@lsmc.com\", \"updated_by_email\": \"johnm@lsmc.com\", \"original_filename\": \"Dewey GUI audit 20260916 I1-B prefix\", \"artifact_identity_key\": \"dewey::prefix:prefix:folder:s3:lsmc-dewey-0:gui-audit/20260916T183133Z/I1-B/::\"}"'
+      - row "2026-09-16 19:50:29.644814+00:00 dewey UPDATE bstatus active":
+        - cell "2026-09-16 19:50:29.644814+00:00"
+        - cell "dewey"
+        - cell "UPDATE"
+        - cell "bstatus"
+        - cell "active"
+      - row "2026-09-16 19:50:29.644814+00:00 dewey UPDATE created_dt 2026-09-16T19:50:29.644814+00:00":
+        - cell "2026-09-16 19:50:29.644814+00:00"
+        - cell "dewey"
+        - cell "UPDATE"
+        - cell "created_dt"
+        - cell "2026-09-16T19:50:29.644814+00:00"
+      - row "2026-09-16 19:50:29.644814+00:00 dewey UPDATE modified_dt 2026-09-16T19:50:29.644814+00:00":
+        - cell "2026-09-16 19:50:29.644814+00:00"
+        - cell "dewey"
+        - cell "UPDATE"
+        - cell "modified_dt"
+        - cell "2026-09-16T19:50:29.644814+00:00"
+- contentinfo: TapDB 10.1.1rc1
+- text: Theme
+- combobox "Theme":
+  - option "original" [selected]
+  - option "light"
+  - option "dark"
+  - option "CBF"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

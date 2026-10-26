@@ -1,0 +1,142 @@
+[
+  {
+    "attempt": "I1-A",
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/ursa-final-gap-dewey-20260913/docs/plans/evidence/20260916T183133Z_dewey_gui_audit/fixtures/I1-A/hello world ü.txt",
+    "size": 80,
+    "sha256": "19dba8113384fee2dfce211f1ac2642fcc381ef92abcc684535eff73ece7abbf",
+    "destination": "s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-A/hello world ü.txt"
+  },
+  {
+    "attempt": "I1-A",
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/ursa-final-gap-dewey-20260913/docs/plans/evidence/20260916T183133Z_dewey_gui_audit/fixtures/I1-A/fixture.json",
+    "size": 64,
+    "sha256": "e566115140b002aad963e1d0812f41f7a93dc0cedeba1556fc372e397aab2cd0",
+    "destination": "s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-A/fixture.json"
+  },
+  {
+    "attempt": "I1-A",
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/ursa-final-gap-dewey-20260913/docs/plans/evidence/20260916T183133Z_dewey_gui_audit/fixtures/I1-A/index.html",
+    "size": 176,
+    "sha256": "50f481ff7aba66faaf44555b92a399fb1157249012a69088070a1d0579ae7647",
+    "destination": "s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-A/index.html"
+  },
+  {
+    "attempt": "I1-A",
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/ursa-final-gap-dewey-20260913/docs/plans/evidence/20260916T183133Z_dewey_gui_audit/fixtures/I1-A/asset.svg",
+    "size": 111,
+    "sha256": "c763668ac86f122c1288f6d007cdd61a306958e7720247ced00650822a78d5de",
+    "destination": "s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-A/asset.svg"
+  },
+  {
+    "attempt": "I1-A",
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/ursa-final-gap-dewey-20260913/docs/plans/evidence/20260916T183133Z_dewey_gui_audit/fixtures/I1-A/multipart-17MiB.txt",
+    "size": 17825792,
+    "sha256": "4c1e65ad2ad479377d351b7b62ce8c775324d77552f74e4fac42300382f18e6e",
+    "destination": "s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-A/multipart-17MiB.txt"
+  },
+  {
+    "attempt": "I1-B",
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/ursa-final-gap-dewey-20260913/docs/plans/evidence/20260916T183133Z_dewey_gui_audit/fixtures/I1-B/hello world ü.txt",
+    "size": 80,
+    "sha256": "19dba8113384fee2dfce211f1ac2642fcc381ef92abcc684535eff73ece7abbf",
+    "destination": "s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-B/hello world ü.txt"
+  },
+  {
+    "attempt": "I1-B",
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/ursa-final-gap-dewey-20260913/docs/plans/evidence/20260916T183133Z_dewey_gui_audit/fixtures/I1-B/fixture.json",
+    "size": 64,
+    "sha256": "e566115140b002aad963e1d0812f41f7a93dc0cedeba1556fc372e397aab2cd0",
+    "destination": "s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-B/fixture.json"
+  },
+  {
+    "attempt": "I1-B",
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/ursa-final-gap-dewey-20260913/docs/plans/evidence/20260916T183133Z_dewey_gui_audit/fixtures/I1-B/index.html",
+    "size": 176,
+    "sha256": "50f481ff7aba66faaf44555b92a399fb1157249012a69088070a1d0579ae7647",
+    "destination": "s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-B/index.html"
+  },
+  {
+    "attempt": "I1-B",
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/ursa-final-gap-dewey-20260913/docs/plans/evidence/20260916T183133Z_dewey_gui_audit/fixtures/I1-B/asset.svg",
+    "size": 111,
+    "sha256": "c763668ac86f122c1288f6d007cdd61a306958e7720247ced00650822a78d5de",
+    "destination": "s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-B/asset.svg"
+  },
+  {
+    "attempt": "I1-B",
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/ursa-final-gap-dewey-20260913/docs/plans/evidence/20260916T183133Z_dewey_gui_audit/fixtures/I1-B/multipart-17MiB.txt",
+    "size": 17825792,
+    "sha256": "4c1e65ad2ad479377d351b7b62ce8c775324d77552f74e4fac42300382f18e6e",
+    "destination": "s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-B/multipart-17MiB.txt"
+  },
+  {
+    "attempt": "I2-A",
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/ursa-final-gap-dewey-20260913/docs/plans/evidence/20260916T183133Z_dewey_gui_audit/fixtures/I2-A/hello world ü.txt",
+    "size": 80,
+    "sha256": "19dba8113384fee2dfce211f1ac2642fcc381ef92abcc684535eff73ece7abbf",
+    "destination": "s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I2-A/hello world ü.txt"
+  },
+  {
+    "attempt": "I2-A",
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/ursa-final-gap-dewey-20260913/docs/plans/evidence/20260916T183133Z_dewey_gui_audit/fixtures/I2-A/fixture.json",
+    "size": 64,
+    "sha256": "e566115140b002aad963e1d0812f41f7a93dc0cedeba1556fc372e397aab2cd0",
+    "destination": "s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I2-A/fixture.json"
+  },
+  {
+    "attempt": "I2-A",
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/ursa-final-gap-dewey-20260913/docs/plans/evidence/20260916T183133Z_dewey_gui_audit/fixtures/I2-A/index.html",
+    "size": 176,
+    "sha256": "50f481ff7aba66faaf44555b92a399fb1157249012a69088070a1d0579ae7647",
+    "destination": "s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I2-A/index.html"
+  },
+  {
+    "attempt": "I2-A",
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/ursa-final-gap-dewey-20260913/docs/plans/evidence/20260916T183133Z_dewey_gui_audit/fixtures/I2-A/asset.svg",
+    "size": 111,
+    "sha256": "c763668ac86f122c1288f6d007cdd61a306958e7720247ced00650822a78d5de",
+    "destination": "s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I2-A/asset.svg"
+  },
+  {
+    "attempt": "I2-A",
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/ursa-final-gap-dewey-20260913/docs/plans/evidence/20260916T183133Z_dewey_gui_audit/fixtures/I2-A/multipart-17MiB.txt",
+    "size": 17825792,
+    "sha256": "4c1e65ad2ad479377d351b7b62ce8c775324d77552f74e4fac42300382f18e6e",
+    "destination": "s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I2-A/multipart-17MiB.txt"
+  },
+  {
+    "attempt": "I2-B",
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/ursa-final-gap-dewey-20260913/docs/plans/evidence/20260916T183133Z_dewey_gui_audit/fixtures/I2-B/hello world ü.txt",
+    "size": 80,
+    "sha256": "19dba8113384fee2dfce211f1ac2642fcc381ef92abcc684535eff73ece7abbf",
+    "destination": "s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I2-B/hello world ü.txt"
+  },
+  {
+    "attempt": "I2-B",
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/ursa-final-gap-dewey-20260913/docs/plans/evidence/20260916T183133Z_dewey_gui_audit/fixtures/I2-B/fixture.json",
+    "size": 64,
+    "sha256": "e566115140b002aad963e1d0812f41f7a93dc0cedeba1556fc372e397aab2cd0",
+    "destination": "s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I2-B/fixture.json"
+  },
+  {
+    "attempt": "I2-B",
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/ursa-final-gap-dewey-20260913/docs/plans/evidence/20260916T183133Z_dewey_gui_audit/fixtures/I2-B/index.html",
+    "size": 176,
+    "sha256": "50f481ff7aba66faaf44555b92a399fb1157249012a69088070a1d0579ae7647",
+    "destination": "s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I2-B/index.html"
+  },
+  {
+    "attempt": "I2-B",
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/ursa-final-gap-dewey-20260913/docs/plans/evidence/20260916T183133Z_dewey_gui_audit/fixtures/I2-B/asset.svg",
+    "size": 111,
+    "sha256": "c763668ac86f122c1288f6d007cdd61a306958e7720247ced00650822a78d5de",
+    "destination": "s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I2-B/asset.svg"
+  },
+  {
+    "attempt": "I2-B",
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/ursa-final-gap-dewey-20260913/docs/plans/evidence/20260916T183133Z_dewey_gui_audit/fixtures/I2-B/multipart-17MiB.txt",
+    "size": 17825792,
+    "sha256": "4c1e65ad2ad479377d351b7b62ce8c775324d77552f74e4fac42300382f18e6e",
+    "destination": "s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I2-B/multipart-17MiB.txt"
+  }
+]

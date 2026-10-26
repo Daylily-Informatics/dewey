@@ -1,0 +1,21 @@
+{
+  "schema": "ursa-owy-kahlo.final-image/v1",
+  "service": "dewey",
+  "source_tag": "10.0.7",
+  "source_commit": "8d04719a6ad82a6808bf38933b39cadb210b43d0",
+  "source_branch": "codex/dewey-gui-performance-20260919",
+  "source_tag_object": "77be87d92ae3f4f6dd217f88cdc31013a8125246",
+  "source_url": "https://github.com/lsmc-bio/dewey.git",
+  "dockerfile_sha256": "c1bff4721e975e0756f7f243f8477c233a36d759cef37bec817d0223694c621d",
+  "builder_instance": "i-07df3a933e4839f52",
+  "builder_region": "us-west-2",
+  "builder_aws_profile": "lsmc",
+  "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:50ef1ba6922be663e7c88839849b4a1649590ae8674c819dc8862e695055b7ac",
+  "image_tag": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey:10.0.7",
+  "build_root": "/home/ubuntu/dewey-10.0.7-20260919T100009Z",
+  "build_log": "/home/ubuntu/dewey-10.0.7-20260919T100009Z/build.log",
+  "build_log_sha256": "075ea469b7b6de7da6e64a1edfe45e47f1ba3499621b33ad133077d9ec7e0f5e",
+  "completed_at": "2026-09-19T10:01:42.399768+00:00",
+  "tests_run": false,
+  "deployed": false
+}

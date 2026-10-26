@@ -1,0 +1,124 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / SETS
+  - heading "Sets" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - searchbox "Search library"
+  - combobox "Sort":
+    - option "Newest first" [selected]
+    - option "Name"
+  - button "Search"
+  - button "Filters"
+  - generic: 10 accessible records
+  - link "New set":
+    - /url: /add?kind=set
+  - table:
+    - rowgroup:
+      - row "Name / EUID Visible members Created":
+        - columnheader "Name / EUID"
+        - columnheader "Visible members"
+        - columnheader "Created"
+    - rowgroup:
+      - row "Dewey 9.0.0 production acceptance M-DGX-NP19 1 9/11/2026":
+        - cell "Dewey 9.0.0 production acceptance M-DGX-NP19":
+          - link "Dewey 9.0.0 production acceptance":
+            - /url: /records/M-DGX-NP19
+          - generic: M-DGX-NP19
+        - cell "1"
+        - cell "9/11/2026"
+      - row "Illumina run QC 20260815 LH01121 full MultiQC package M-DGX-NNSS 20 9/9/2026":
+        - cell "Illumina run QC 20260815 LH01121 full MultiQC package M-DGX-NNSS":
+          - link "Illumina run QC 20260815 LH01121 full MultiQC package":
+            - /url: /records/M-DGX-NNSS
+          - generic: M-DGX-NNSS
+        - cell "20"
+        - cell "9/9/2026"
+      - row "HG003 1x HIOMRS kitchen-sink MultiQC M-DGX-K2G2 2 7/13/2026":
+        - cell "HG003 1x HIOMRS kitchen-sink MultiQC M-DGX-K2G2":
+          - link "HG003 1x HIOMRS kitchen-sink MultiQC":
+            - /url: /records/M-DGX-K2G2
+          - generic: M-DGX-K2G2
+        - cell "2"
+        - cell "7/13/2026"
+      - row "multiqc_artifact_set:M-RGX-B10A:run_qc_illumina M-DGX-AT3R 9 7/4/2026":
+        - cell "multiqc_artifact_set:M-RGX-B10A:run_qc_illumina M-DGX-AT3R":
+          - link "multiqc_artifact_set:M-RGX-B10A:run_qc_illumina":
+            - /url: /records/M-DGX-AT3R
+          - generic: M-DGX-AT3R
+        - cell "9"
+        - cell "7/4/2026"
+      - row "analysis_artifact_set:M-RGX-B10A M-DGX-ASMP 11 7/4/2026":
+        - cell "analysis_artifact_set:M-RGX-B10A M-DGX-ASMP":
+          - link "analysis_artifact_set:M-RGX-B10A":
+            - /url: /records/M-DGX-ASMP
+          - generic: M-DGX-ASMP
+        - cell "11"
+        - cell "7/4/2026"
+      - row "multiqc_artifact_set:M-RGX-B07X:run_qc_illumina M-DGX-ARV9 9 7/4/2026":
+        - cell "multiqc_artifact_set:M-RGX-B07X:run_qc_illumina M-DGX-ARV9":
+          - link "multiqc_artifact_set:M-RGX-B07X:run_qc_illumina":
+            - /url: /records/M-DGX-ARV9
+          - generic: M-DGX-ARV9
+        - cell "9"
+        - cell "7/4/2026"
+      - row "analysis_artifact_set:M-RGX-B07X M-DGX-ARC8 11 7/4/2026":
+        - cell "analysis_artifact_set:M-RGX-B07X M-DGX-ARC8":
+          - link "analysis_artifact_set:M-RGX-B07X":
+            - /url: /records/M-DGX-ARC8
+          - generic: M-DGX-ARC8
+        - cell "11"
+        - cell "7/4/2026"
+      - row "multiqc_artifact_set:M-RGX-AZFG:run_qc_illumina M-DGX-AQKT 9 7/4/2026":
+        - cell "multiqc_artifact_set:M-RGX-AZFG:run_qc_illumina M-DGX-AQKT":
+          - link "multiqc_artifact_set:M-RGX-AZFG:run_qc_illumina":
+            - /url: /records/M-DGX-AQKT
+          - generic: M-DGX-AQKT
+        - cell "9"
+        - cell "7/4/2026"
+      - row "analysis_artifact_set:M-RGX-AZFG M-DGX-AQF3 11 7/4/2026":
+        - cell "analysis_artifact_set:M-RGX-AZFG M-DGX-AQF3":
+          - link "analysis_artifact_set:M-RGX-AZFG":
+            - /url: /records/M-DGX-AQF3
+          - generic: M-DGX-AQF3
+        - cell "11"
+        - cell "7/4/2026"
+      - row "analysis_artifact_set:M-RGX-AZFG M-DGX-AQ01 11 7/4/2026":
+        - cell "analysis_artifact_set:M-RGX-AZFG M-DGX-AQ01":
+          - link "analysis_artifact_set:M-RGX-AZFG":
+            - /url: /records/M-DGX-AQ01
+          - generic: M-DGX-AQ01
+        - cell "11"
+        - cell "7/4/2026"
+  - generic: Page 1 · 25 per page
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

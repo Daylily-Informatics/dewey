@@ -1,0 +1,21 @@
+{
+  "observed_at": "2026-10-26T05:01:51.653348+00:00",
+  "configtest_exit": 0,
+  "graceful_exit": 0,
+  "added_directive_count": 4,
+  "containers_restarted": false,
+  "images_built": false,
+  "only_change": "Disable Apache gzip for Dewey managed byte-delivery paths",
+  "files": [
+    {
+      "path": "/etc/apache2/sites-available/dewey12-recipient.conf",
+      "before_sha256": "3524aff880c885e9835727b7d5a0d4d75c43d84f7efc698ce4f76a5f64f8d9a3",
+      "after_sha256": "d951924fbb3aac9eabea27cfef3237a5fa851584d0b8eb63689190876a8b9aea"
+    },
+    {
+      "path": "/etc/apache2/sites-available/dewey-day.conf",
+      "before_sha256": "9e3c9fd7b7a34c009a0134e09a7db66ba2ee27ca27862a524559271d40ce96a9",
+      "after_sha256": "389e6b980bf48ee2e276c770ff116833459f2108794b74a1a0e3b9e416eacc1d"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+# Combined performance release implementation
+
+## Interfaces and behavior
+- POST registry/search accepts include_totals (boolean; true preserves existing contract). False returns null total/facets and page-size-plus-one has_more. POST registry/search/counts uses the same filter and authorization builder without hydrating results.
+- GET records/{euid}?projection=summary excludes metadata, members and activity. Existing full projection remains the default. Authenticated metadata, activity and members subresources reauthorize each request; activity/members accept page and limit (25 by default, maximum 100).
+- Storage browse/contents accept refresh and limit; buckets accept refresh. S3 continuation tokens remain opaque, including on permission-filtered empty pages. GUI starts with 25 raw entries and appends one requested page at a time.
+- Registry defaults adds listing_cache_ttl_seconds (0..300). No runtime guessed value: the approved native CLI explicitly initializes 15 while preserving sharing settings. Admin updates are transactional and invalidate listings.
+- Cache is local to each configured storage client (credential/config context), keys include all provider listing parameters. At most 256 entries / 64 MiB estimated deep Python object size. Global invalidation is conservative on Refresh, TTL change and storage writes; generation fencing prevents late refill. No permission, response, session, signed URL or error caching.
+- Worker-pool routes retain context variables. Database readiness/health probes and personal-token lookup also leave the event loop free. Storage policies and registrations are loaded once per batch and original record_clause semantics remain authoritative. Returned registration EUIDs come only from persisted authorized objects. Bucket roots are batched too.
+- S3 listing/head client uses 2s connect / 5s read, one total attempt. Interactive SQL uses a 15s request budget checked at SQL boundaries, maximum 10s statements and 1s locks. This is not a hard end-to-end connection-pool/network cancellation guarantee. Pool acquisition retains the native configured bound. Browser abort does not kill running backend work.
+- /endpoint_health adds payload-free performance evidence: bounded active and recent requests, query count/time, S3 time, cache behavior, status, bytes, completed response and timestamps. Proxy arrival logs remain needed for latency before application entry. No route query strings or credentials recorded.
+
+## Verification disposition
+Source/diff inspection and Python/JavaScript syntax parsing only. No tests, lint, coverage, CI or controlled benchmark authorized or run. Local installed CLI references an older worktree; help does not expose the new command there. The exact final tagged container packages and runs the owning CLI; no raw database workaround.
+
+Deferred automated scenarios require two explicit scoped approvals: inherited/exact restrictions, revocation/expiry on warm cache, empty filtered S3 pages, refresh/invalidation races, concurrent readers, storage mutation invalidation, bounded cache eviction/TTL zero, optional/exact total consistency, stale UI response suppression, and query-count growth. Human two-user acceptance and measured 50%/p95 targets remain independent pending gates. One combined release cannot establish a separate incremental repair-only comparison.

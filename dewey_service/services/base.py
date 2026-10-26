@@ -104,10 +104,9 @@ class BaseDeweyService:
             salt="dewey-upload-session-v1",
         )
 
-    def bootstrap(self) -> None:
-        with self.backend.session_scope(commit=True) as session:
+    def verify_existing(self) -> None:
+        with self.backend.session_scope(commit=False) as session:
             self.backend.ensure_templates(session, BOOT_TEMPLATE_DEFINITIONS)
-            self._seed_default_anomalies(session)
 
     @staticmethod
     def _fingerprint(payload: dict[str, Any]) -> str:
@@ -124,7 +123,7 @@ class BaseDeweyService:
     ) -> tuple[str, str, str, str | None, str]:
         backend = str(storage_backend or "s3").strip().lower() or "s3"
         bucket_value = str(bucket or "").strip()
-        key_value = str(key or "").strip().lstrip("/")
+        key_value = str(key or "")
         version_value = str(version_id or "").strip() or None
         if not bucket_value:
             raise ValueError("bucket is required")
@@ -136,6 +135,7 @@ class BaseDeweyService:
     def _require_storage(self) -> S3StorageClient:
         if self.storage is None:
             raise RuntimeError("Storage operations are not configured for Dewey")
+        self.storage.authorization = self.require_storage_access
         return self.storage
 
     def _require_literature(self):
@@ -154,87 +154,6 @@ class BaseDeweyService:
         if not cleaned:
             raise ValueError(f"artifact filename {value!r} has no safe characters")
         return cleaned
-
-    def _seed_default_anomalies(self, session) -> None:
-        for payload in self._default_anomaly_payloads():
-            existing = self.backend.find_by_json_field(
-                session,
-                template_code=ANOMALY_TEMPLATE,
-                field="anomaly_identity_key",
-                value=str(payload.get("anomaly_identity_key") or ""),
-            )
-            if existing is None:
-                self.backend.create_instance(
-                    session,
-                    template_code=ANOMALY_TEMPLATE,
-                    name=str(payload.get("title") or payload["anomaly_identity_key"]),
-                    json_addl=payload,
-                )
-
-    def _default_anomaly_payloads(self) -> list[dict[str, Any]]:
-        now_iso = utc_now_iso()
-        return [
-            {
-                "anomaly_identity_key": "dewey.readiness.bootstrap_gap",
-                "category": "readiness",
-                "severity": "medium",
-                "status": "open",
-                "title": "Readiness probe observed a bootstrap gap",
-                "summary": (
-                    "The local readiness surface recorded a brief backend-unavailable "
-                    "state during bootstrap."
-                ),
-                "source": "readyz",
-                "first_seen_at": now_iso,
-                "last_seen_at": now_iso,
-                "occurrence_count": 1,
-                "redacted_context": {"database_status": "unknown"},
-                "recommended_action": "Review readiness and database startup timing.",
-                "created_at": now_iso,
-                "updated_at": now_iso,
-            },
-            {
-                "anomaly_identity_key": "dewey.auth.session_activity_low",
-                "category": "auth",
-                "severity": "low",
-                "status": "monitoring",
-                "title": "Operator session activity is sparse",
-                "summary": (
-                    "No recent browser-session auth events are present in the local anomaly record."
-                ),
-                "source": "auth_health",
-                "first_seen_at": now_iso,
-                "last_seen_at": now_iso,
-                "occurrence_count": 1,
-                "redacted_context": {"recent_successes": 0},
-                "recommended_action": (
-                    "Confirm an operator can complete browser login during smoke testing."
-                ),
-                "created_at": now_iso,
-                "updated_at": now_iso,
-            },
-            {
-                "anomaly_identity_key": "dewey.storage.review_pending",
-                "category": "storage",
-                "severity": "high",
-                "status": "open",
-                "title": "Artifact storage review is pending",
-                "summary": (
-                    "This local anomaly record tracks artifacts that need a storage "
-                    "verification review."
-                ),
-                "source": "storage",
-                "first_seen_at": now_iso,
-                "last_seen_at": now_iso,
-                "occurrence_count": 1,
-                "redacted_context": {"scope": "local demo record"},
-                "recommended_action": (
-                    "Inspect storage verification and retention status for recent artifacts."
-                ),
-                "created_at": now_iso,
-                "updated_at": now_iso,
-            },
-        ]
 
     def list_anomalies(self, *, limit: int = 200) -> list[dict[str, Any]]:
         with self.backend.session_scope(commit=False) as session:
@@ -321,7 +240,7 @@ class BaseDeweyService:
     def _artifact_response(self, artifact_instance) -> dict[str, Any]:
         payload = normalize_instance_payload(artifact_instance)
         storage_kind = str(payload.get("storage_kind") or "object").strip().lower() or "object"
-        node_kind = str(payload.get("node_kind") or "file").strip().lower() or "file"
+        node_kind = "folder" if storage_kind == "prefix" else "file"
         is_terminal_raw = payload.get("is_terminal")
         is_terminal = bool(is_terminal_raw) if storage_kind == "prefix" else True
         return {
@@ -333,6 +252,7 @@ class BaseDeweyService:
             "bucket": str(payload.get("bucket") or ""),
             "key": str(payload.get("key") or ""),
             "version_id": payload.get("version_id"),
+            "location_revision": int(payload.get("location_revision", 1)),
             "size": payload.get("size"),
             "checksums": dict(payload.get("checksums") or {}),
             "content_type": payload.get("content_type"),
@@ -391,12 +311,15 @@ class BaseDeweyService:
         }
 
     def _artifact_set_response(self, session, artifact_set_instance) -> dict[str, Any]:
-        payload = normalize_instance_payload(artifact_set_instance)
         members = self.backend.list_children(
             session,
             parent=artifact_set_instance,
             relationship_type="artifact_set_member",
         )
+        return self._artifact_set_response_with_members(artifact_set_instance, members)
+
+    def _artifact_set_response_with_members(self, artifact_set_instance, members) -> dict[str, Any]:
+        payload = normalize_instance_payload(artifact_set_instance)
         artifact_euids = [member.euid for member in members]
         return {
             "artifact_set_euid": artifact_set_instance.euid,
@@ -412,8 +335,9 @@ class BaseDeweyService:
 
     def _share_response(self, instance) -> dict[str, Any]:
         payload = normalize_instance_payload(instance)
-        return {
+        result = {
             "share_euid": instance.euid,
+            "audience": payload.get("audience"),
             "target_kind": payload.get("target_kind"),
             "target_euid": payload.get("target_euid"),
             "targets": list(payload.get("targets") or []),
@@ -438,6 +362,24 @@ class BaseDeweyService:
             "last_accessed_by": payload.get("last_accessed_by"),
             "access_count": int(payload.get("access_count") or 0),
         }
+        from dewey_service.registry_access import principal
+
+        actor = principal()
+        manager = (
+            actor.admin
+            or payload.get("owner_subject") == actor.subject
+            or bool(actor.email and payload.get("owner_email") == actor.email)
+        )
+        if not manager:
+            with self.backend.session_scope(commit=False) as session:
+                manager = self._registry_share_manager(session, instance)
+        if not manager:
+            for field in ("allowed_users", "allowed_domains", "allowed_groups"):
+                result[field] = []
+            for field in ("last_accessed_by", "revoked_by", "revocation_reason"):
+                result[field] = None
+            result["cloudfront"] = {}
+        return result
 
     def _share_root_response(self, instance) -> dict[str, Any]:
         payload = normalize_instance_payload(instance)
@@ -466,18 +408,6 @@ class BaseDeweyService:
             "created_at": payload.get("created_at"),
         }
 
-    def _external_object_relation_response(self, instance) -> dict[str, Any]:
-        payload = normalize_instance_payload(instance)
-        return {
-            "external_object_relation_euid": instance.euid,
-            "target_type": payload.get("target_type"),
-            "target_euid": payload.get("target_euid"),
-            "external_object_euid": payload.get("external_object_euid"),
-            "relation_type": payload.get("relation_type"),
-            "metadata": dict(payload.get("metadata") or {}),
-            "created_at": payload.get("created_at"),
-        }
-
     def _idempotency_replay(
         self,
         session,
@@ -486,6 +416,12 @@ class BaseDeweyService:
         idempotency_key: str,
         fingerprint: str,
     ) -> IdempotencyReplay | None:
+        from dewey_service.tapdb_backend import (
+            EXTERNAL_OBJECT_RELATION_TEMPLATE,
+            EXTERNAL_OBJECT_TEMPLATE,
+            SHARE_TEMPLATE,
+        )
+
         clean_key = str(idempotency_key or "").strip()
         if not clean_key:
             raise ValueError("Idempotency-Key is required")
@@ -506,6 +442,42 @@ class BaseDeweyService:
         response = payload.get("response")
         if not isinstance(response, dict):
             raise DeweyConflictError("Invalid stored idempotent response payload")
+
+        # Cached receipts keep their historical bytes but never bypass current access.
+        def authorize_receipt(value):
+            if isinstance(value, dict):
+                for key, item in value.items():
+                    if key in {"artifact_euid", "artifact_set_euid"} and isinstance(item, str):
+                        self._registry_record(session, item)
+                    elif key == "share_euid" and isinstance(item, str):
+                        if (
+                            self.backend.find_by_euid(
+                                session, template_code=SHARE_TEMPLATE, euid=item
+                            )
+                            is None
+                        ):
+                            raise DeweyNotFoundError("Receipt target is not visible")
+                    elif key in {
+                        "external_object_euid",
+                        "external_object_relation_euid",
+                    } and isinstance(item, str):
+                        code = (
+                            EXTERNAL_OBJECT_TEMPLATE
+                            if key == "external_object_euid"
+                            else EXTERNAL_OBJECT_RELATION_TEMPLATE
+                        )
+                        if (
+                            self.backend.find_by_euid(session, template_code=code, euid=item)
+                            is None
+                        ):
+                            raise DeweyNotFoundError("Receipt external reference is not visible")
+                    elif isinstance(item, (dict, list)):
+                        authorize_receipt(item)
+            elif isinstance(value, list):
+                for item in value:
+                    authorize_receipt(item)
+
+        authorize_receipt(response)
         return IdempotencyReplay(status_code=status_code, response=dict(response))
 
     def _store_idempotency(

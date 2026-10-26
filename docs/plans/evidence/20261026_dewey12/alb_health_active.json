@@ -1,0 +1,26 @@
+[
+  {
+    "group": "Dayhof-Dewey-SBMRZXCBX9YC",
+    "port": 8444,
+    "target": "i-07df3a933e4839f52",
+    "health": "healthy"
+  },
+  {
+    "group": "Dayhof-Dewey-U6YML1JNMPQB",
+    "port": 8443,
+    "target": "i-07df3a933e4839f52",
+    "health": "healthy"
+  },
+  {
+    "group": "Dayhof-Login-IEU0QWHJ8TC7",
+    "port": 8443,
+    "target": "i-07df3a933e4839f52",
+    "health": "healthy"
+  },
+  {
+    "group": "Dayhof-Login-ZH4Z8QI46TST",
+    "port": 8444,
+    "target": "i-07df3a933e4839f52",
+    "health": "healthy"
+  }
+]

@@ -11,7 +11,7 @@ from dewey_service.defaults import build_default_config_template
 from dewey_service.services.base import BaseDeweyService
 
 
-def _login_operator(monkeypatch, client) -> None:
+def _login_operator(monkeypatch, client, *, groups=None) -> None:
     monkeypatch.setattr(
         "daylily_auth_cognito.browser.session.exchange_authorization_code_async",
         lambda **kwargs: asyncio.sleep(0, result={"id_token": "header.payload.sig"}),
@@ -21,7 +21,7 @@ def _login_operator(monkeypatch, client) -> None:
         lambda token: {
             "email": "operator@lsmc.bio",
             "sub": "sub-1",
-            "cognito:groups": ["operators"],
+            "cognito:groups": groups or ["operators"],
         },
     )
 
@@ -46,7 +46,9 @@ def test_anomaly_api_requires_bearer_token(client) -> None:
 
 def test_anomaly_ui_requires_login(client) -> None:
     response = client.get("/ui/anomalies", follow_redirects=False)
-    assert response.status_code == 401
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login"
+    assert "Readiness probe" not in response.text
 
 
 def test_anomaly_api_and_ui_view_round_trip(monkeypatch, client) -> None:
@@ -68,6 +70,10 @@ def test_anomaly_api_and_ui_view_round_trip(monkeypatch, client) -> None:
     assert detail.status_code == 200
     assert detail.json()["anomaly_id"] == anomaly["anomaly_id"]
 
+    denied = client.get("/ui/anomalies")
+    assert denied.status_code == 403
+    assert anomaly["title"] not in denied.text
+    _login_operator(monkeypatch, client, groups=["platform-admin"])
     view = client.get("/ui/anomalies")
     assert view.status_code == 200
     assert "Anomalies" in view.text
@@ -91,6 +97,7 @@ def test_base_service_anomaly_response_includes_canonical_and_legacy_fields(monk
         created_dt=datetime.now(UTC),
         modified_dt=datetime.now(UTC),
         json_addl={
+            "properties": {},
             "anomaly_identity_key": "dewey.readiness.bootstrap_gap",
             "category": "readiness",
             "severity": "medium",
@@ -141,8 +148,12 @@ def test_admin_page_links_to_anomaly_view(monkeypatch, client) -> None:
 
     response = client.get("/admin")
     assert response.status_code == 200
-    assert "/ui/anomalies" in response.text
-    assert "Operator Anomalies" in response.text
+    assert 'data-section="Admin"' in response.text
+    assert 'data-admin="true"' in response.text
+    assert "/static/registry.js" in response.text
+    script = client.get("/static/registry.js")
+    assert script.status_code == 200
+    assert 'href="/ui/anomalies">Anomalies</a>' in script.text
 
 
 def test_admin_page_updates_managed_artifact_bucket(monkeypatch, client, tmp_path) -> None:

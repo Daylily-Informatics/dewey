@@ -1,0 +1,68 @@
+{
+  "applied_asset_hash_count": 5,
+  "checks": {
+    "advance_covers_all_generators": true,
+    "allocator_family_state_sha": true,
+    "allocator_plan_seal": true,
+    "allocator_state_sha": true,
+    "empty_recovery_history": true,
+    "family_seal": true,
+    "no_missing_generators": true,
+    "same_family_everywhere": true,
+    "same_inventory_everywhere": true,
+    "same_physical_targets": true,
+    "sequence_seal": true,
+    "source_seals_match": true,
+    "strict_plan_advances": true
+  },
+  "family_sha256": "a6defebdfce4fa923ba64e67f35a742c0859239ac90e2ee82664b26a521cfc9b",
+  "native_completed_at": "2026-09-11T07:19:05.789959+00:00",
+  "native_plan_evidence_sha256": "099586c0fb5477dc59ec67cef5916fb8e1981d5262b84daa0be017e3257b5702",
+  "native_plan_file_sha256": "395433c166eda38dc8b7fa1828426377f3e74032884ff221ddb688bae86d9964",
+  "native_rc": 0,
+  "pending_migration_checks": [
+    {
+      "all_native_fields_match": true,
+      "expanded_sha256": "587ad63ac6b30a6dfc3ab3d65fe07255fd5bfc9a0feb7951629c204a116d6fc9",
+      "filename": "20260902_010000_natural_identity_and_owner_uniqueness.sql"
+    },
+    {
+      "all_native_fields_match": true,
+      "expanded_sha256": "d1823c4c32cbc2e7c652d14a6d935550a62c0fc9a6492a6cc3f15208d6f68f34",
+      "filename": "20260902_010100_legacy_outbox_message_conversion.sql"
+    },
+    {
+      "all_native_fields_match": true,
+      "expanded_sha256": "3544621af48f0ccb33d0066a9304c9a102bc212aa6dd3517b4319697e123e1ee",
+      "filename": "20260902_020000_force_rls_and_audit_attribution.sql"
+    },
+    {
+      "all_native_fields_match": true,
+      "expanded_sha256": "b307e07e955779e0185b778fb7b5d142cc0f42967df78dfdd2bd86afc6f46b03",
+      "filename": "20260903_031820_runtime_ddl_guard.sql"
+    },
+    {
+      "all_native_fields_match": true,
+      "expanded_sha256": "61bbe0fd833575c8074f8ff00ff1bc2726bf026b687040f4966474f658b51cb3",
+      "filename": "20260904_061819_tenant_scoped_natural_identity.sql"
+    },
+    {
+      "all_native_fields_match": true,
+      "expanded_sha256": "1aa727a13da865a37e87d71338a52ba93f5fc3c574cd66b85c0aaa887090123c",
+      "filename": "20260910_203200_aurora_operator_principals.sql"
+    },
+    {
+      "all_native_fields_match": true,
+      "expanded_sha256": "99329ae1bb85e0bfff071ef68b3bce87e75d186f79601338dfdb9447ab6ca3fc",
+      "filename": "20260910_220000_sequence_prefix_bindings.sql"
+    },
+    {
+      "all_native_fields_match": true,
+      "expanded_sha256": "dbf4a84e00530f31305aa7981a823db2d66133bf0c0b10bc786223a7ad37d01e",
+      "filename": "20260910_233000_pin_managed_allocator_resolution.sql"
+    }
+  ],
+  "review_kind": "independent_static_actual_receipt_acceptance",
+  "review_projection_sha256": "7f6a72742e229492363502288f9d909e1ab42336bc1c33e8d9c4740e4b2f96f4",
+  "sequence_sha256": "2add38618cd555a4b23a17f3ace437a2730df6040e3414f4947fadce0d1add85"
+}

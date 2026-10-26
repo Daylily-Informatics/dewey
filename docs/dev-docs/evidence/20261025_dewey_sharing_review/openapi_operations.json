@@ -1,0 +1,929 @@
+{
+  "info": {
+    "title": "Dewey Artifact Service",
+    "description": "Canonical artifact registry and resolver for LSMC",
+    "version": "11.0.10"
+  },
+  "path_count": 105,
+  "operation_count": 114,
+  "operations": [
+    {
+      "method": "HEAD",
+      "path": "/shares/{share_euid}/files/{target_euid}",
+      "summary": "Share File",
+      "operation_id": "share_file_shares__share_euid__files__target_euid__head",
+      "tags": [
+        "Managed sharing"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/shares/{share_euid}/files/{target_euid}",
+      "summary": "Share File",
+      "operation_id": "share_file_shares__share_euid__files__target_euid__head",
+      "tags": [
+        "Managed sharing"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/records/{euid}/preview",
+      "summary": "Retired Record Preview",
+      "operation_id": "retired_record_preview_api_v1_records__euid__preview_post",
+      "tags": [
+        "EUID registry",
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/registry/shares/{share_euid}/preview",
+      "summary": "Create Preview",
+      "operation_id": "create_preview_api_v1_registry_shares__share_euid__preview_post",
+      "tags": [
+        "EUID registry",
+        "Managed sharing"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/registry/shares/{share_euid}/preview/{context_euid}/handoff",
+      "summary": "Issue Handoff",
+      "operation_id": "issue_handoff_api_v1_registry_shares__share_euid__preview__context_euid__handoff_post",
+      "tags": [
+        "EUID registry",
+        "Managed sharing"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/registry/shares/{share_euid}/presign",
+      "summary": "Share Presign",
+      "operation_id": "share_presign_api_v1_registry_shares__share_euid__presign_post",
+      "tags": [
+        "EUID registry",
+        "Managed sharing"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/records/{euid}/owner",
+      "summary": "Owner",
+      "operation_id": "owner_api_v1_records__euid__owner_patch",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/records",
+      "summary": "Register",
+      "operation_id": "register_api_v1_records_post",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/records/{euid}",
+      "summary": "Resolve",
+      "operation_id": "resolve_api_v1_records__euid__get",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/records/{euid}",
+      "summary": "Edit",
+      "operation_id": "edit_api_v1_records__euid__patch",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/records/{euid}/metadata",
+      "summary": "Record Metadata",
+      "operation_id": "record_metadata_api_v1_records__euid__metadata_get",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/records/{euid}/activity",
+      "summary": "Record Activity",
+      "operation_id": "record_activity_api_v1_records__euid__activity_get",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/records/{euid}/members",
+      "summary": "Record Members",
+      "operation_id": "record_members_api_v1_records__euid__members_get",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/records/{euid}/members",
+      "summary": "Add Member",
+      "operation_id": "add_member_api_v1_records__euid__members_post",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/records/{euid}/archive",
+      "summary": "Archive",
+      "operation_id": "archive_api_v1_records__euid__archive_post",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/records/{euid}/permissions",
+      "summary": "Permissions",
+      "operation_id": "permissions_api_v1_records__euid__permissions_patch",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/records/{euid}/contents",
+      "summary": "Contents",
+      "operation_id": "contents_api_v1_records__euid__contents_get",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/records/{euid}/members/{member_euid}",
+      "summary": "Remove Member",
+      "operation_id": "remove_member_api_v1_records__euid__members__member_euid__delete",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/records/{euid}/access",
+      "summary": "Access",
+      "operation_id": "access_api_v1_records__euid__access_post",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/records/{euid}/shares",
+      "summary": "Share",
+      "operation_id": "share_api_v1_records__euid__shares_post",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/records/{euid}/shares/preview",
+      "summary": "Preview Selection",
+      "operation_id": "preview_selection_api_v1_records__euid__shares_preview_post",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/registry/search",
+      "summary": "Search",
+      "operation_id": "search_api_v1_registry_search_post",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/registry/search/counts",
+      "summary": "Search Counts",
+      "operation_id": "search_counts_api_v1_registry_search_counts_post",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/registry/shares",
+      "summary": "Share Index",
+      "operation_id": "share_index_api_v1_registry_shares_get",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/registry/shares/{euid}",
+      "summary": "Share Detail",
+      "operation_id": "share_detail_api_v1_registry_shares__euid__get",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/registry/shares/{euid}",
+      "summary": "Share Edit",
+      "operation_id": "share_edit_api_v1_registry_shares__euid__patch",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/registry/shares/{euid}/contents",
+      "summary": "Share Contents",
+      "operation_id": "share_contents_api_v1_registry_shares__euid__contents_get",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/registry/shares/{euid}/activity",
+      "summary": "Share Activity",
+      "operation_id": "share_activity_api_v1_registry_shares__euid__activity_get",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/registry/shares/{euid}/grants/{grant_euid}/revoke",
+      "summary": "Revoke Grant",
+      "operation_id": "revoke_grant_api_v1_registry_shares__euid__grants__grant_euid__revoke_post",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/registry/shares/{euid}/revoke",
+      "summary": "Share Revoke",
+      "operation_id": "share_revoke_api_v1_registry_shares__euid__revoke_post",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/registry/shares/{euid}/invite",
+      "summary": "Invite",
+      "operation_id": "invite_api_v1_registry_shares__euid__invite_post",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/storage/buckets",
+      "summary": "Buckets",
+      "operation_id": "buckets_api_v1_storage_buckets_get",
+      "tags": [
+        "EUID registry",
+        "S3 storage"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/storage/object",
+      "summary": "Object Detail",
+      "operation_id": "object_detail_api_v1_storage_object_get",
+      "tags": [
+        "EUID registry",
+        "S3 storage"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/storage/access",
+      "summary": "Storage Access",
+      "operation_id": "storage_access_api_v1_storage_access_post",
+      "tags": [
+        "EUID registry",
+        "S3 storage"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/storage/uploads",
+      "summary": "Upload",
+      "operation_id": "upload_api_v1_storage_uploads_post",
+      "tags": [
+        "EUID registry",
+        "S3 storage"
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/storage/uploads/{euid}/parts/{number}",
+      "summary": "Part",
+      "operation_id": "part_api_v1_storage_uploads__euid__parts__number__put",
+      "tags": [
+        "EUID registry",
+        "S3 storage"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/storage/uploads/{euid}/complete",
+      "summary": "Complete",
+      "operation_id": "complete_api_v1_storage_uploads__euid__complete_post",
+      "tags": [
+        "EUID registry",
+        "S3 storage"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/storage/uploads/{euid}/abort",
+      "summary": "Abort",
+      "operation_id": "abort_api_v1_storage_uploads__euid__abort_post",
+      "tags": [
+        "EUID registry",
+        "S3 storage"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/storage/deletions/preview",
+      "summary": "Deletion Preview",
+      "operation_id": "deletion_preview_api_v1_storage_deletions_preview_post",
+      "tags": [
+        "EUID registry",
+        "S3 storage"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/storage/deletions/{euid}/execute",
+      "summary": "Deletion Execute",
+      "operation_id": "deletion_execute_api_v1_storage_deletions__euid__execute_post",
+      "tags": [
+        "EUID registry",
+        "S3 storage"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/storage/operations/{euid}",
+      "summary": "Operation",
+      "operation_id": "operation_api_v1_storage_operations__euid__get",
+      "tags": [
+        "EUID registry",
+        "S3 storage"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/account/tokens",
+      "summary": "Tokens",
+      "operation_id": "tokens_api_v1_account_tokens_get",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/account/tokens",
+      "summary": "Token Create",
+      "operation_id": "token_create_api_v1_account_tokens_post",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/registry/admin",
+      "summary": "Administration",
+      "operation_id": "administration_api_v1_registry_admin_get",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/registry/defaults",
+      "summary": "Defaults",
+      "operation_id": "defaults_api_v1_registry_defaults_get",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/registry/defaults",
+      "summary": "Change Defaults",
+      "operation_id": "change_defaults_api_v1_registry_defaults_patch",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/account/tokens/{euid}/revoke",
+      "summary": "Token Revoke",
+      "operation_id": "token_revoke_api_v1_account_tokens__euid__revoke_post",
+      "tags": [
+        "EUID registry"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/annotations/uploads/{operation_id}",
+      "summary": "Create",
+      "operation_id": "create_api_v1_annotations_uploads__operation_id__post",
+      "tags": [
+        "annotations"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/annotations/uploads/{operation_id}/resume",
+      "summary": "Resume",
+      "operation_id": "resume_api_v1_annotations_uploads__operation_id__resume_post",
+      "tags": [
+        "annotations"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/annotations/uploads/{operation_id}/complete",
+      "summary": "Complete",
+      "operation_id": "complete_api_v1_annotations_uploads__operation_id__complete_post",
+      "tags": [
+        "annotations"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/annotations/artifacts/{euid}/context",
+      "summary": "Context",
+      "operation_id": "context_api_v1_annotations_artifacts__euid__context_post",
+      "tags": [
+        "annotations"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/annotations/artifacts/{euid}",
+      "summary": "Resolve",
+      "operation_id": "resolve_api_v1_annotations_artifacts__euid__get",
+      "tags": [
+        "annotations"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/annotations/artifacts/{euid}/access",
+      "summary": "Access",
+      "operation_id": "access_api_v1_annotations_artifacts__euid__access_post",
+      "tags": [
+        "annotations"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v2/sequencer-runs/register",
+      "summary": "Register",
+      "operation_id": "register_api_v2_sequencer_runs_register_post",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/dag/manifest",
+      "summary": "Dag V2 Manifest",
+      "operation_id": "dag_v2_manifest_api_dag_manifest_get",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/dag/v2/object/{euid}",
+      "summary": "Dag V2 Object",
+      "operation_id": "dag_v2_object_api_dag_v2_object__euid__get",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/dag/v2/data",
+      "summary": "Dag V2 Data",
+      "operation_id": "dag_v2_data_api_dag_v2_data_get",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/dag/v2/search",
+      "summary": "Dag V2 Search",
+      "operation_id": "dag_v2_search_api_dag_v2_search_get",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/healthz",
+      "summary": "Healthz",
+      "operation_id": "healthz_healthz_get",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/readyz",
+      "summary": "Readyz",
+      "operation_id": "readyz_readyz_get",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/health",
+      "summary": "Health",
+      "operation_id": "health_health_get",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/obs_services",
+      "summary": "Obs Services",
+      "operation_id": "obs_services_obs_services_get",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/api_health",
+      "summary": "Api Health",
+      "operation_id": "api_health_api_health_get",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/endpoint_health",
+      "summary": "Endpoint Health",
+      "operation_id": "endpoint_health_endpoint_health_get",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/db_health",
+      "summary": "Db Health",
+      "operation_id": "db_health_db_health_get",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/my_health",
+      "summary": "My Health",
+      "operation_id": "my_health_my_health_get",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/preferences",
+      "summary": "Current User Preferences",
+      "operation_id": "current_user_preferences_api_v1_me_preferences_get",
+      "tags": []
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/me/preferences",
+      "summary": "Update Current User Preferences",
+      "operation_id": "update_current_user_preferences_api_v1_me_preferences_put",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/auth_health",
+      "summary": "Auth Health",
+      "operation_id": "auth_health_auth_health_get",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/anomalies",
+      "summary": "List Anomalies",
+      "operation_id": "list_anomalies_api_anomalies_get",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/anomalies/{anomaly_id}",
+      "summary": "Get Anomaly",
+      "operation_id": "get_anomaly_api_anomalies__anomaly_id__get",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/literature/search",
+      "summary": "Literature Search",
+      "operation_id": "literature_search_api_v1_literature_search_post",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/literature/save",
+      "summary": "Literature Save",
+      "operation_id": "literature_save_api_v1_literature_save_post",
+      "tags": []
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/literature/saves/{literature_save_euid}",
+      "summary": "Literature Save Visibility",
+      "operation_id": "literature_save_visibility_api_v1_literature_saves__literature_save_euid__patch",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/literature/saves/mine",
+      "summary": "My Literature Saves",
+      "operation_id": "my_literature_saves_api_v1_literature_saves_mine_get",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/artifacts/{artifact_euid}",
+      "summary": "Get Artifact",
+      "operation_id": "get_artifact_api_v1_artifacts__artifact_euid__get",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/artifacts/{artifact_euid}/children",
+      "summary": "Get Artifact Children",
+      "operation_id": "get_artifact_children_api_v1_artifacts__artifact_euid__children_get",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/artifacts/{artifact_euid}/parents",
+      "summary": "Get Artifact Parents",
+      "operation_id": "get_artifact_parents_api_v1_artifacts__artifact_euid__parents_get",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/artifacts/{artifact_euid}/graph",
+      "summary": "Get Artifact Graph",
+      "operation_id": "get_artifact_graph_api_v1_artifacts__artifact_euid__graph_get",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/storage/browse",
+      "summary": "Browse Storage Prefix",
+      "operation_id": "browse_storage_prefix_api_v1_storage_browse_get",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/artifacts/{artifact_euid}/storage/verify",
+      "summary": "Verify Artifact Storage",
+      "operation_id": "verify_artifact_storage_api_v1_artifacts__artifact_euid__storage_verify_post",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/artifacts/{artifact_euid}/storage/lock",
+      "summary": "Lock Artifact Storage",
+      "operation_id": "lock_artifact_storage_api_v1_artifacts__artifact_euid__storage_lock_post",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/artifacts",
+      "summary": "List Artifacts",
+      "operation_id": "list_artifacts_api_v1_artifacts_get",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/artifacts",
+      "summary": "Register Artifact",
+      "operation_id": "register_artifact_api_v1_artifacts_post",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/artifacts/import",
+      "summary": "Import Artifact",
+      "operation_id": "import_artifact_api_v1_artifacts_import_post",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/artifact-prefixes",
+      "summary": "Register Artifact Prefix",
+      "operation_id": "register_artifact_prefix_api_v1_artifact_prefixes_post",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/artifacts/import-run-prefix",
+      "summary": "Import Run Prefix",
+      "operation_id": "import_run_prefix_api_v1_artifacts_import_run_prefix_post",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/sequencer-runs/register",
+      "summary": "Register Sequencer Run",
+      "operation_id": "register_sequencer_run_api_v1_sequencer_runs_register_post",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/analysis-results/register",
+      "summary": "Register Analysis Results",
+      "operation_id": "register_analysis_results_api_v1_analysis_results_register_post",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/artifacts/upload-sessions",
+      "summary": "Create Upload Session",
+      "operation_id": "create_upload_session_api_v1_artifacts_upload_sessions_post",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/artifacts/upload-sessions/{upload_token}/complete",
+      "summary": "Complete Upload Session",
+      "operation_id": "complete_upload_session_api_v1_artifacts_upload_sessions__upload_token__complete_post",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/artifact-sets/{artifact_set_euid}",
+      "summary": "Get Artifact Set",
+      "operation_id": "get_artifact_set_api_v1_artifact_sets__artifact_set_euid__get",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/artifact-sets",
+      "summary": "List Artifact Sets",
+      "operation_id": "list_artifact_sets_api_v1_artifact_sets_get",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/artifact-sets",
+      "summary": "Create Artifact Set",
+      "operation_id": "create_artifact_set_api_v1_artifact_sets_post",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/artifact-sets/analysis/register",
+      "summary": "Register Analysis Artifact Set",
+      "operation_id": "register_analysis_artifact_set_api_v1_artifact_sets_analysis_register_post",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/artifact-sets/multiqc/register",
+      "summary": "Register Multiqc Artifact Set",
+      "operation_id": "register_multiqc_artifact_set_api_v1_artifact_sets_multiqc_register_post",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/artifact-sets/{artifact_set_euid}/members",
+      "summary": "Add Artifact Set Member",
+      "operation_id": "add_artifact_set_member_api_v1_artifact_sets__artifact_set_euid__members_post",
+      "tags": []
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/artifact-sets/{artifact_set_euid}/members/{artifact_euid}",
+      "summary": "Remove Artifact Set Member",
+      "operation_id": "remove_artifact_set_member_api_v1_artifact_sets__artifact_set_euid__members__artifact_euid__delete",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/resolve/multiqc",
+      "summary": "Resolve Multiqc",
+      "operation_id": "resolve_multiqc_api_v1_resolve_multiqc_post",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/resolve/artifact",
+      "summary": "Resolve Artifact",
+      "operation_id": "resolve_artifact_api_v1_resolve_artifact_post",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/resolve/artifact-set",
+      "summary": "Resolve Artifact Set",
+      "operation_id": "resolve_artifact_set_api_v1_resolve_artifact_set_post",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/shares",
+      "summary": "Create Share",
+      "operation_id": "create_share_api_v1_shares_post",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/shares/{share_euid}",
+      "summary": "Get Share",
+      "operation_id": "get_share_api_v1_shares__share_euid__get",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/shares/{share_euid}/access-package",
+      "summary": "Create Share Access Package",
+      "operation_id": "create_share_access_package_api_v1_shares__share_euid__access_package_post",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/shares/{share_euid}/revoke",
+      "summary": "Revoke Share",
+      "operation_id": "revoke_share_api_v1_shares__share_euid__revoke_post",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/shares/{share_euid}/audit",
+      "summary": "List Share Audit",
+      "operation_id": "list_share_audit_api_v1_shares__share_euid__audit_get",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/share-roots",
+      "summary": "Create Share Root",
+      "operation_id": "create_share_root_api_v1_share_roots_post",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/share-roots/{share_root_euid}/subsets",
+      "summary": "Create Share Root Subset",
+      "operation_id": "create_share_root_subset_api_v1_share_roots__share_root_euid__subsets_post",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/artifacts/{artifact_euid}/shares",
+      "summary": "List Artifact Shares",
+      "operation_id": "list_artifact_shares_api_v1_artifacts__artifact_euid__shares_get",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/search/v2/query",
+      "summary": "Search V2 Query",
+      "operation_id": "search_v2_query_api_search_v2_query_post",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/search/v2/export",
+      "summary": "Search V2 Export",
+      "operation_id": "search_v2_export_api_search_v2_export_post",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/external-objects",
+      "summary": "Create External Object",
+      "operation_id": "create_external_object_api_v1_external_objects_post",
+      "tags": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/external-object-relations",
+      "summary": "Attach External Object Relation",
+      "operation_id": "attach_external_object_relation_api_v1_external_object_relations_post",
+      "tags": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/{target_type}/{target_euid}/external-object-relations",
+      "summary": "List External Object Relations",
+      "operation_id": "list_external_object_relations_api_v1__target_type___target_euid__external_object_relations_get",
+      "tags": []
+    }
+  ]
+}

@@ -1,0 +1,210 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / LITERATURE
+  - heading "Literature" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - heading "Search PubMed" [level=2]
+  - searchbox "PubMed query": genomics
+  - button "Search"
+  - paragraph: Register papers as ordinary Dewey artifacts with a PMID and rich metadata.
+  - table:
+    - rowgroup:
+      - row "Paper PMID Dewey":
+        - columnheader "Paper"
+        - columnheader "PMID"
+        - columnheader "Dewey"
+    - rowgroup:
+      - 'row "Plant pan-genomics: recent advances, new challenges, and roads ahead. J Genet Genomics · 2022 Li W, Liu J, Zhang H, Liu Z, Wang Y, Xing L, He Q, Du H 35750315 Open in Dewey"':
+        - 'cell "Plant pan-genomics: recent advances, new challenges, and roads ahead. J Genet Genomics · 2022 Li W, Liu J, Zhang H, Liu Z, Wang Y, Xing L, He Q, Du H"':
+          - generic: "Plant pan-genomics: recent advances, new challenges, and roads ahead."
+          - generic: J Genet Genomics · 2022
+          - generic: Li W, Liu J, Zhang H, Liu Z, Wang Y, Xing L, He Q, Du H
+        - cell "35750315"
+        - cell "Open in Dewey":
+          - link "Open in Dewey":
+            - /url: /records/M-DGX-TRF1
+      - row "Computational Genomics and Its Applications to Anthropological Questions. Am J Biol Anthropol · 2024 Witt KE, Villanea FA 40071816 Register paper":
+        - cell "Computational Genomics and Its Applications to Anthropological Questions. Am J Biol Anthropol · 2024 Witt KE, Villanea FA":
+          - generic: Computational Genomics and Its Applications to Anthropological Questions.
+          - generic: Am J Biol Anthropol · 2024
+          - generic: Witt KE, Villanea FA
+        - cell "40071816"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "Ancestral Population Genomics. Methods Mol Biol · 2019 Dutheil JY, Hobolth A 31278677 Register paper":
+        - cell "Ancestral Population Genomics. Methods Mol Biol · 2019 Dutheil JY, Hobolth A":
+          - generic: Ancestral Population Genomics.
+          - generic: Methods Mol Biol · 2019
+          - generic: Dutheil JY, Hobolth A
+        - cell "31278677"
+        - cell "Register paper":
+          - button "Register paper"
+      - 'row "Insect Mitochondrial Genomics: A Decade of Progress. Annu Rev Entomol · 2025 Cameron SL 39259965 Register paper"':
+        - 'cell "Insect Mitochondrial Genomics: A Decade of Progress. Annu Rev Entomol · 2025 Cameron SL"':
+          - generic: "Insect Mitochondrial Genomics: A Decade of Progress."
+          - generic: Annu Rev Entomol · 2025
+          - generic: Cameron SL
+        - cell "39259965"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "The Genomics Revolution Drives a New Era in Entomology. Annu Rev Entomol · 2025 Li F, Wang X, Zhou X 39874145 Register paper":
+        - cell "The Genomics Revolution Drives a New Era in Entomology. Annu Rev Entomol · 2025 Li F, Wang X, Zhou X":
+          - generic: The Genomics Revolution Drives a New Era in Entomology.
+          - generic: Annu Rev Entomol · 2025
+          - generic: Li F, Wang X, Zhou X
+        - cell "39874145"
+        - cell "Register paper":
+          - button "Register paper"
+      - 'row "Genomics in wheat improvement: Progress and perspectives. Plant Genome · 2026 Liu S, Geng S, Dreisigacker S 41845915 Register paper"':
+        - 'cell "Genomics in wheat improvement: Progress and perspectives. Plant Genome · 2026 Liu S, Geng S, Dreisigacker S"':
+          - generic: "Genomics in wheat improvement: Progress and perspectives."
+          - generic: Plant Genome · 2026
+          - generic: Liu S, Geng S, Dreisigacker S
+        - cell "41845915"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "A phylogenetic approach to comparative genomics. Nat Rev Genet · 2025 Dewar AE, Belcher LJ, West SA 39779997 Register paper":
+        - cell "A phylogenetic approach to comparative genomics. Nat Rev Genet · 2025 Dewar AE, Belcher LJ, West SA":
+          - generic: A phylogenetic approach to comparative genomics.
+          - generic: Nat Rev Genet · 2025
+          - generic: Dewar AE, Belcher LJ, West SA
+        - cell "39779997"
+        - cell "Register paper":
+          - button "Register paper"
+      - 'row "Blowfly genomics: current insights, knowledge gaps, and future perspectives. Curr Opin Insect Sci · 2025 Parmar DR, Johnston NP, Wallman JF, Szpila K 39581345 Register paper"':
+        - 'cell "Blowfly genomics: current insights, knowledge gaps, and future perspectives. Curr Opin Insect Sci · 2025 Parmar DR, Johnston NP, Wallman JF, Szpila K"':
+          - generic: "Blowfly genomics: current insights, knowledge gaps, and future perspectives."
+          - generic: Curr Opin Insect Sci · 2025
+          - generic: Parmar DR, Johnston NP, Wallman JF, Szpila K
+        - cell "39581345"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "A decade of dinoflagellate genomics illuminating an enigmatic eukaryote cell. BMC Genomics · 2024 Lin S 39367346 Register paper":
+        - cell "A decade of dinoflagellate genomics illuminating an enigmatic eukaryote cell. BMC Genomics · 2024 Lin S":
+          - generic: A decade of dinoflagellate genomics illuminating an enigmatic eukaryote cell.
+          - generic: BMC Genomics · 2024
+          - generic: Lin S
+        - cell "39367346"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "Comparative Genomics of Microsporidia. Exp Suppl · 2022 Williams BAP, Williams TA, Trew J 35543998 Register paper":
+        - cell "Comparative Genomics of Microsporidia. Exp Suppl · 2022 Williams BAP, Williams TA, Trew J":
+          - generic: Comparative Genomics of Microsporidia.
+          - generic: Exp Suppl · 2022
+          - generic: Williams BAP, Williams TA, Trew J
+        - cell "35543998"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "Topological Approaches in Animal Comparative Genomics. Annu Rev Anim Biosci · 2026 Schultz DT, Simakov O 41714124 Register paper":
+        - cell "Topological Approaches in Animal Comparative Genomics. Annu Rev Anim Biosci · 2026 Schultz DT, Simakov O":
+          - generic: Topological Approaches in Animal Comparative Genomics.
+          - generic: Annu Rev Anim Biosci · 2026
+          - generic: Schultz DT, Simakov O
+        - cell "41714124"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "Comparative genomics of microsporidia. Folia Parasitol · 2005 Keeling PJ, Fast NM, Law JS, Williams BA, Slamovits CH 16004359 Register paper":
+        - cell "Comparative genomics of microsporidia. Folia Parasitol · 2005 Keeling PJ, Fast NM, Law JS, Williams BA, Slamovits CH":
+          - generic: Comparative genomics of microsporidia.
+          - generic: Folia Parasitol · 2005
+          - generic: Keeling PJ, Fast NM, Law JS, Williams BA, Slamovits CH
+        - cell "16004359"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "(Post-)genomics approaches in fungal research. Brief Funct Genomics · 2014 Aguilar-Pontes MV, de Vries RP, Zhou M 25037051 Register paper":
+        - cell "(Post-)genomics approaches in fungal research. Brief Funct Genomics · 2014 Aguilar-Pontes MV, de Vries RP, Zhou M":
+          - generic: (Post-)genomics approaches in fungal research.
+          - generic: Brief Funct Genomics · 2014
+          - generic: Aguilar-Pontes MV, de Vries RP, Zhou M
+        - cell "25037051"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "Cotton functional genomics reveals global insight into genome evolution and fiber development. J Genet Genomics · 2017 Wu Z, Yang Y, Huang G, Lin J, Xia Y, Zhu Y 29169921 Register paper":
+        - cell "Cotton functional genomics reveals global insight into genome evolution and fiber development. J Genet Genomics · 2017 Wu Z, Yang Y, Huang G, Lin J, Xia Y, Zhu Y":
+          - generic: Cotton functional genomics reveals global insight into genome evolution and fiber development.
+          - generic: J Genet Genomics · 2017
+          - generic: Wu Z, Yang Y, Huang G, Lin J, Xia Y, Zhu Y
+        - cell "29169921"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "The role of phenomics and genomics in delineating the genetic basis of complex traits in millets. Physiol Plant · 2024 Jadhav Y, Thakur NR, Ingle KP, Ceasar SA 38783512 Register paper":
+        - cell "The role of phenomics and genomics in delineating the genetic basis of complex traits in millets. Physiol Plant · 2024 Jadhav Y, Thakur NR, Ingle KP, Ceasar SA":
+          - generic: The role of phenomics and genomics in delineating the genetic basis of complex traits in millets.
+          - generic: Physiol Plant · 2024
+          - generic: Jadhav Y, Thakur NR, Ingle KP, Ceasar SA
+        - cell "38783512"
+        - cell "Register paper":
+          - button "Register paper"
+      - 'row "RefSeq microbial genomes database: new representation and annotation strategy. Nucleic Acids Res · 2014 Tatusova T, Ciufo S, Fedorov B, O''Neill K, Tolstoy I 24316578 Register paper"':
+        - 'cell "RefSeq microbial genomes database: new representation and annotation strategy. Nucleic Acids Res · 2014 Tatusova T, Ciufo S, Fedorov B, O''Neill K, Tolstoy I"':
+          - generic: "RefSeq microbial genomes database: new representation and annotation strategy."
+          - generic: Nucleic Acids Res · 2014
+          - generic: Tatusova T, Ciufo S, Fedorov B, O'Neill K, Tolstoy I
+        - cell "24316578"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "Microbial population genomics and ecology. Curr Opin Microbiol · 2002 DeLong EF 12354561 Register paper":
+        - cell "Microbial population genomics and ecology. Curr Opin Microbiol · 2002 DeLong EF":
+          - generic: Microbial population genomics and ecology.
+          - generic: Curr Opin Microbiol · 2002
+          - generic: DeLong EF
+        - cell "12354561"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "A Practical Guide for Comparative Genomics of Mobile Genetic Elements in Prokaryotic Genomes. Methods Mol Biol · 2018 Oliveira Alvarenga D, Moreira LM, Chandler M, Varani AM 29277867 Register paper":
+        - cell "A Practical Guide for Comparative Genomics of Mobile Genetic Elements in Prokaryotic Genomes. Methods Mol Biol · 2018 Oliveira Alvarenga D, Moreira LM, Chandler M, Varani AM":
+          - generic: A Practical Guide for Comparative Genomics of Mobile Genetic Elements in Prokaryotic Genomes.
+          - generic: Methods Mol Biol · 2018
+          - generic: Oliveira Alvarenga D, Moreira LM, Chandler M, Varani AM
+        - cell "29277867"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "Comparative genomics reveals environmental adaptation differences between Cronobacter species. Food Res Int · 2021 Qin X, Wang H, Miao C, Yang X, Zhang Y, Feng J, Forsythe SJ, Man C, Jiang Y 34399518 Register paper":
+        - cell "Comparative genomics reveals environmental adaptation differences between Cronobacter species. Food Res Int · 2021 Qin X, Wang H, Miao C, Yang X, Zhang Y, Feng J, Forsythe SJ, Man C, Jiang Y":
+          - generic: Comparative genomics reveals environmental adaptation differences between Cronobacter species.
+          - generic: Food Res Int · 2021
+          - generic: Qin X, Wang H, Miao C, Yang X, Zhang Y, Feng J, Forsythe SJ, Man C, Jiang Y
+        - cell "34399518"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "Phylogenomics. Methods Mol Biol · 2018 Patané JSL, Martins J, Setubal JC 29277865 Register paper":
+        - cell "Phylogenomics. Methods Mol Biol · 2018 Patané JSL, Martins J, Setubal JC":
+          - generic: Phylogenomics.
+          - generic: Methods Mol Biol · 2018
+          - generic: Patané JSL, Martins J, Setubal JC
+        - cell "29277865"
+        - cell "Register paper":
+          - button "Register paper"
+  - button "Next page"
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

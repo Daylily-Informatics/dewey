@@ -1,0 +1,39 @@
+{
+  "snapshot": "dewey12-acceptance-20261026-browser-www-observed-external-check-2026-10-26T05-04-36-720Z.json",
+  "summary": {
+    "phase": "www-observed-external-check",
+    "status": "complete",
+    "requests": 1,
+    "http_expectations_passed": 1,
+    "identity_created": false,
+    "credentials_exported": false,
+    "storage_deleted": false
+  },
+  "observation": {
+    "observed_at": "2026-10-26T05:04:14.615Z",
+    "context_origin": "https://pv-7a7afaaff6f102f90e78ec3ff40be013.dewey-content.day.lsmc.bio",
+    "report_path": "/__dewey_preview/assets/multiqc.html",
+    "marker_state": "ready",
+    "sibling_css": true,
+    "nested_script": true,
+    "nested_json": true,
+    "multiqc_title": true,
+    "browser_frame_source_matched": true
+  },
+  "provenance": {
+    "evidence_kind": "lead_observed_existing_native_browser_journey",
+    "recorded_after_navigation": true,
+    "navigation_started_by_helper": false,
+    "original_prepare_operation_asserted": false,
+    "source": "Release lead native Chrome observation",
+    "canonical_path": "/fetch/M-DGX-14D1F/multiqc.html",
+    "context_origin": "https://pv-7a7afaaff6f102f90e78ec3ff40be013.dewey-content.day.lsmc.bio",
+    "context_expires_at": "2026-10-26T05:09:19.756537Z",
+    "screenshot": "/tmp/dewey12-acceptance-20261026/external-multiqc-12.0.4.png",
+    "lead_observed_auth_entry": "/auth/share",
+    "lead_observed_provider": "Continue with Google / existing Google SSO",
+    "lead_observed_deep_return_preserved": true,
+    "new_user_registration_proven": false,
+    "recorded_at": "2026-10-26T05:03:04.304Z"
+  }
+}

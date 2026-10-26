@@ -1,0 +1,65 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / RECORD
+  - heading "literature:40071816" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - generic: object
+  - code: M-DGX-TT5K
+  - button "Download / open"
+  - button "Share"
+  - button "Edit metadata"
+  - heading "Object" [level=2]
+  - paragraph: — · literature
+  - heading "Metadata" [level=2]
+  - generic: "{ \"doi\": \"10.1002/ajpa.70010\", \"pmid\": \"40071816\", \"year\": \"2024\", \"pmcid\": \"PMC11898561\", \"title\": \"Computational Genomics and Its Applications to Anthropological Questions.\", \"authors\": [ \"Witt KE\", \"Villanea FA\" ], \"journal\": \"Am J Biol Anthropol\", \"abstract\": \"The advent of affordable genome sequencing and the development of new computational tools have established a new era of genomic knowledge. Sequenced human genomes number in the tens of thousands, including thousands of ancient human genomes. The abundance of data has been met with new analysis tools that can be used to understand populations' demographic and evolutionary histories. Thus, a variety of computational methods now exist that can be leveraged to answer anthropological questions. This includes novel likelihood and Bayesian methods, machine learning techniques, and a vast array of population simulators. These computational tools provide powerful insights gained from genomic datasets, although they are generally inaccessible to those with less computational experience. Here, we outline the theoretical workings behind computational genomics methods, limitations and other considerations when applying these computational methods, and examples of how computational methods have already been applied to anthropological questions. We hope this review will empower other anthropologists to utilize these powerful tools in their own research.\", \"source_urls\": [ \"https://ncbi.nlm.nih.gov/pubmed/40071816\", \"https://doi.org/10.1002/ajpa.70010\", \"https://pmc.ncbi.nlm.nih.gov/articles/PMC11898561/\" ], \"storage_mode\": \"external_reference\", \"findit_reason\": \"NOFORMAT: No handler found for journal 'Am J Biol Anthropol'. Report with sample PMID at https://github.com/metapub/metapub/issues\", \"record_family\": \"literature\", \"fulltext_status\": \"unavailable\", \"abstract_snippet\": \"The advent of affordable genome sequencing and the development of new computational tools have established a new era of genomic knowledge. Sequenced human genomes number in the tens of thousands, including thousands of ancient human genomes. The abundance of data has been met with new analysis tools that can be used t…\", \"acquisition_mode\": \"external_reference\", \"best_fulltext_url\": null }"
+  - complementary:
+    - heading "Details" [level=2]
+    - term: EUID
+    - definition: M-DGX-TT5K
+    - term: Owner
+    - definition: johnm@lsmc.com
+    - term: Created
+    - definition: 9/16/2026
+    - term: Producer
+    - definition: pubmed
+    - term: Location
+    - definition: https://ncbi.nlm.nih.gov/pubmed/40071816
+    - heading "Access" [level=2]
+    - paragraph: Metadata visibility and download access are managed independently.
+    - button "Manage permissions"
+    - button "Transfer ownership"
+    - generic "Registration lifecycle"
+    - generic "Recent activity"
+    - generic "Technical details"
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

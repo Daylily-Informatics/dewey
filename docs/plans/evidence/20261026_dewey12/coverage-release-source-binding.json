@@ -1,0 +1,96 @@
+{
+  "observed_at": "2026-10-26T06:40:51.531698+00:00",
+  "status": "pass",
+  "method": "SHA256 of each measured file from exact Git release object; existing coverage reused, no tests rerun",
+  "total_verified_files": 44,
+  "groups": {
+    "dewey": {
+      "receipt": "dewey-changed-coverage.json",
+      "release_ref": "12.0.5",
+      "release_commit": "79d2889c71fab3bda87f676d40bcbbc613d4cdda",
+      "verified_file_count": 30,
+      "measured_source_sha256": {
+        "dewey_service/app.py": "2332ac0f0111106601915c05569685c5cda6d352babdb2447ac45123ccf4ba10",
+        "dewey_service/auth.py": "6d6da26376fdc62349474dc6dc44f93445bc6971572f3d23d41910e2176217da",
+        "dewey_service/cli/config_extra.py": "381548ebfe5062fb6fae1f61479105051465b2538d889dad1680a34def904385",
+        "dewey_service/cli/db.py": "3a420eca9ae1e11995d0a571a16f38042539b886ba94bde4f3f7659f124ce830",
+        "dewey_service/cli/registry.py": "3a4dcb45ddf60907568f9fe52ec4dda86cfa7778055512afd70c62ac2fb2d9b0",
+        "dewey_service/cli/share_fetch.py": "e0aface3b001c0cbc72f3ed4b47cc50d1b17b8dcca000961357fda83f1b29333",
+        "dewey_service/defaults.py": "b34a1e8eddd897d5c80f515d05bb6ace40d32bbfa5f844a967af8c5536e1047a",
+        "dewey_service/fetch.py": "cf24da9551511d84dff8d81aaefbd86786f700ee0f2a90163c72bf9aba7580a8",
+        "dewey_service/preview_sessions.py": "4633625a8586d59e4054d2ce2ad065740dafa0f0dc237e711c38bc3f3d1272ca",
+        "dewey_service/recipient_api.py": "251bc4cf310a79bdfa8f3e1269e884fb7344cb7cc7ce54cbd22d3a59ccee9982",
+        "dewey_service/recipient_identity.py": "17de0cb567cc856d8e047b00fa92018107fff55f9a5522deb42ff8473ce988a0",
+        "dewey_service/registry_access.py": "02282c14bf60d050b98ca5d4b79d465f7f6dfa53b0f50e522b8c502e3b119b8c",
+        "dewey_service/registry_api.py": "8f75fc051c42dfdacd760628df9b8326c26ccd93de5072f2e3a0617762124a26",
+        "dewey_service/report_preview.py": "d42e8c17ec6a4cf18f4ec1b6fd61a5e2df662a876c0331c5b8ef54a50dd26103",
+        "dewey_service/services/artifacts.py": "55bd775d2758883c94950cbc405b9ac578ce486de1da16cdf29ca62d57e97b8b",
+        "dewey_service/services/base.py": "68f3a7b86f22c3d1ed83bf62ff79ed84c21647189e3d70e16682c7483855df71",
+        "dewey_service/services/registry.py": "14f67b4ef9d3a9c75102d7445dc0fbcb7dcf51d011955b8e0a917091e06b4980",
+        "dewey_service/services/share_policy.py": "35a12fbd7a263effbcd8abf90f202b3e17d20033663716f75d9edb6775424a09",
+        "dewey_service/services/share_rebind.py": "69f504e8ac170d3418e6b865db6484ad0b2f15cb8a5eda454a03e94d535382fd",
+        "dewey_service/services/share_reports.py": "3be2e6a4858495302a991caa7372ffad250f795fd16fe9e11eb6ddc201080744",
+        "dewey_service/services/share_revisions.py": "308308578d5724be10584cc8d605482a8b2992523b9a0dc870b151d01daf1e06",
+        "dewey_service/services/sharing.py": "687efef0959a4d66bf156e8ece7e1d2a4a140f34d54a7d0f252a88c2e39e8888",
+        "dewey_service/settings.py": "7f8b38393ed5e17959b1f89f0c6949c072b02c53bf7627cd4f8dbcb605827121",
+        "dewey_service/share_context.py": "c91a10d430c28103792ccd2c3f831e9b9f5dd3cb16288612cba4161b3883ec5b",
+        "dewey_service/share_exports.py": "5d8b994560f0d01e810706a56c90ae79fbecd7a7c0094fa639d514acb9b66715",
+        "dewey_service/share_gateway.py": "ea587f0ce356201b1e9d6596e77e417fc9fe5534c0a4662fd22dfd2ac2d5f579",
+        "dewey_service/share_routing.py": "f5636beb5fa9961a3ae3e0ce1a325561708567120fe9a2f527a056414b27c824",
+        "dewey_service/share_upgrade_v3.py": "29c53ff23d366c3d6a33bc109e5b34ca7749386a6821c8f07cb1a5a4c9df1531",
+        "dewey_service/storage.py": "f715311553ecabc0e3bcd56729fa329d3aef524f67ea3f42a6836f8c0e85cfe6",
+        "dewey_service/tapdb_backend.py": "a96bf6a6ddf74458b5a2e28ef858c41958814ca53b5b21e39d77f2aa3831c10c"
+      },
+      "coverage_result": "pass",
+      "coverage_timestamp": "2026-10-26T02:06:14.008402",
+      "original_measurement_head": "9ae11e4ca0f2ad5abe2b026d0189e62adf53b01a"
+    },
+    "dewey-ui": {
+      "receipt": "dewey-ui-changed-coverage.json",
+      "release_ref": "12.0.5",
+      "release_commit": "79d2889c71fab3bda87f676d40bcbbc613d4cdda",
+      "verified_file_count": 3,
+      "measured_source_sha256": {
+        "dewey_service/static/recipient-account.js": "5a011ddc3dcf3b9cba451f465b2db2fb8db1a19645bbba3358d975361653f2f9",
+        "dewey_service/static/registry.js": "2de83bbf77be201adad0ee53ffa7800d76239c2bc9066f9663b03390971ac79d",
+        "dewey_service/static/sharing.js": "02ed8e539cc470f4fd8c84f166fbbe83c5ff1f25d5a23d0444fb0bc2d8cb6b88"
+      },
+      "coverage_result": "pass",
+      "coverage_timestamp": null,
+      "original_measurement_head": "9ae11e4ca0f2ad5abe2b026d0189e62adf53b01a"
+    },
+    "login": {
+      "receipt": "login-changed-coverage.json",
+      "release_ref": "4.1.1",
+      "release_commit": "3a54d153c10193dda78e77a7c562529c2768ee45",
+      "verified_file_count": 9,
+      "measured_source_sha256": {
+        "lsmc_oauth_login/cli/plugins/state.py": "5147d28007f16ef394fbea4ed31367d0a84f6b3c28c3964121b3fa5bcc69dccd",
+        "lsmc_oauth_login/handoff.py": "bf759fb3ad411becade1de687b6feb05c0669f387ab5c39ce71c0d1da9de725d",
+        "lsmc_oauth_login/identity_store.py": "05cea8c168f0fb31f9e0de0c6713aa8179718d1b238964b2f64845a74fe86d9c",
+        "lsmc_oauth_login/invites.py": "847028411ea60827120b9eb247da549f2078f3835996dbe47b8c8955b252b587",
+        "lsmc_oauth_login/postgres_state.py": "41ca3c1edb8922be98eede74434a107352d59f715eb454d472085598083e91b0",
+        "lsmc_oauth_login/recipient_identity.py": "cc78429d67ff005fadb3a51677cdb3c5b217765fc74e78aa6db47e29ccc5128f",
+        "lsmc_oauth_login/recipient_store.py": "69523ae58d98b5dbe1cc10cc93e3713650cda319d1f2e3d0a8c80cce16d8a279",
+        "lsmc_oauth_login/settings.py": "168fb2eb03a96d5139fe86e5c504059675d8be6bcb2feb172ae0e59faab7f1cf",
+        "lsmc_oauth_login/web.py": "a395f0c5b88dc7ab453a2e41c463cbd911fb793310379ad2ed3654798ceef989"
+      },
+      "coverage_result": "pass",
+      "coverage_timestamp": "2026-10-26T02:06:11.316770",
+      "original_measurement_head": "3a54d153c10193dda78e77a7c562529c2768ee45"
+    },
+    "dayhoff": {
+      "receipt": "dayhoff-changed-coverage.json",
+      "release_ref": "4a1bf52aa3f822c18b0c2a9cccdf72b129f054cd",
+      "release_commit": "4a1bf52aa3f822c18b0c2a9cccdf72b129f054cd",
+      "verified_file_count": 2,
+      "measured_source_sha256": {
+        "scripts/build_push_container_release_manifest.py": "ccc7ed249a72f3d938eb4b6351b4512cbe6a26245fc3875f34685750279766b2",
+        "scripts/dewey_recipient_ingress.py": "4de26c023f3f9c26c8bb3d93a6dcac29b868c9de2436751270393d275259476a"
+      },
+      "coverage_result": "pass",
+      "coverage_timestamp": "2026-10-26T02:06:04.966603",
+      "original_measurement_head": "3606b09efeebaab291dda200177a86ab93d97947"
+    }
+  }
+}

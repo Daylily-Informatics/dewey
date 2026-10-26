@@ -1,0 +1,28 @@
+{
+  "observed_at": "2026-10-26T04:12:03.186863+00:00",
+  "dewey_version": "12.0.3",
+  "login_version": "4.1.0",
+  "browser_route": "/shares",
+  "failed_assets": [
+    "/static/registry.js",
+    "/static/registry.css"
+  ],
+  "dewey_status": 503,
+  "dewey_detail": "Current recipient identity is unavailable",
+  "login_route": "/api/v1/dewey/identity/introspect",
+  "login_statuses": [
+    200,
+    500
+  ],
+  "exception": "RuntimeError: broker state operation requires an active database transaction",
+  "stack": [
+    "web.py:724 introspect_recipient",
+    "web.py:1029 _current_recipient_identity",
+    "postgres_state.py:35 get_user",
+    "postgres_state.py:104 _with_locked_state",
+    "postgres_state.py:137 _load",
+    "postgres_state.py:186 _require_active_conn"
+  ],
+  "scope": "shared PostgresIdentityStore transaction state during concurrent requests",
+  "raw_log_retained_privately": true
+}

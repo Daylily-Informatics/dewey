@@ -50,7 +50,7 @@ def build_cli_service() -> DeweyService:
         share_default_signed_ttl_seconds=settings.share_default_signed_ttl_seconds,
         share_max_lifetime_days=settings.share_max_lifetime_days,
     )
-    service.bootstrap()
+    service.verify_existing()
     return service
 
 

@@ -1,0 +1,29 @@
+{
+  "observed_at": "2026-10-26T04:25:43.668254+00:00",
+  "transport": "real curl without credentials",
+  "cases": [
+    {
+      "case": "named-machine",
+      "url": "https://dewey.day.lsmc.bio/fetch/M-DGX-14CN7",
+      "status": 401,
+      "redirect": "",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "case": "registered-public-machine",
+      "url": "https://dewey.day.lsmc.bio/fetch/M-DGX-14D73/multiqc.html",
+      "status": 401,
+      "redirect": "",
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "case": "www-browser",
+      "url": "https://dewey.day.lsmc.bio/fetch/M-DGX-14D1F/multiqc.html",
+      "status": 303,
+      "redirect": "https://dewey.day.lsmc.bio/auth/login?next=%2Ffetch%2FM-DGX-14D1F%2Fmultiqc.html",
+      "content_type": "text/html"
+    }
+  ],
+  "status": "pass",
+  "authenticated_curl_acceptance": false
+}

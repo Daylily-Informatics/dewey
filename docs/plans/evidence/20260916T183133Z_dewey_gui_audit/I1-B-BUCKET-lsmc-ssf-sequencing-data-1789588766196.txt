@@ -1,0 +1,256 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / S3 BROWSER
+  - heading "S3 Browser" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - textbox "S3 URI":
+    - /placeholder: s3://bucket/exact/prefix/
+    - text: s3://lsmc-ssf-sequencing-data/
+  - button "Go"
+  - link "All buckets":
+    - /url: /storage
+  - generic: s3://lsmc-ssf-sequencing-data/
+  - button "Upload files"
+  - link "Register this folder":
+    - /url: /add?kind=prefix&uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2F
+  - link "lsmc-ssf-sequencing-data":
+    - /url: /storage?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2F
+  - searchbox "Filter names on this page"
+  - button "Register selection as a set"
+  - table:
+    - rowgroup:
+      - row "Kind Name Size Registration":
+        - columnheader "Kind"
+        - columnheader "Name"
+        - columnheader "Size"
+        - columnheader "Registration"
+    - rowgroup:
+      - row "Select .test_only/ prefix .test_only/ — Register":
+        - cell "Select .test_only/ prefix":
+          - checkbox "Select .test_only/"
+          - generic: prefix
+        - cell ".test_only/":
+          - link ".test_only/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2F.test_only%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2F.test_only%2F&kind=prefix
+      - row "Select _codex_report_previews/ prefix _codex_report_previews/ — Register":
+        - cell "Select _codex_report_previews/ prefix":
+          - checkbox "Select _codex_report_previews/"
+          - generic: prefix
+        - cell "_codex_report_previews/":
+          - link "_codex_report_previews/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2F_codex_report_previews%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2F_codex_report_previews%2F&kind=prefix
+      - row "Select _daylily_headnode_transfer/ prefix _daylily_headnode_transfer/ — Register":
+        - cell "Select _daylily_headnode_transfer/ prefix":
+          - checkbox "Select _daylily_headnode_transfer/"
+          - generic: prefix
+        - cell "_daylily_headnode_transfer/":
+          - link "_daylily_headnode_transfer/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2F_daylily_headnode_transfer%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2F_daylily_headnode_transfer%2F&kind=prefix
+      - row "Select _lsmc_owy_dashboard/ prefix _lsmc_owy_dashboard/ — Register":
+        - cell "Select _lsmc_owy_dashboard/ prefix":
+          - checkbox "Select _lsmc_owy_dashboard/"
+          - generic: prefix
+        - cell "_lsmc_owy_dashboard/":
+          - link "_lsmc_owy_dashboard/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2F_lsmc_owy_dashboard%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2F_lsmc_owy_dashboard%2F&kind=prefix
+      - row "Select _lsmc_owy_deployments/ prefix _lsmc_owy_deployments/ — Register":
+        - cell "Select _lsmc_owy_deployments/ prefix":
+          - checkbox "Select _lsmc_owy_deployments/"
+          - generic: prefix
+        - cell "_lsmc_owy_deployments/":
+          - link "_lsmc_owy_deployments/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2F_lsmc_owy_deployments%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2F_lsmc_owy_deployments%2F&kind=prefix
+      - row "Select _lsmc_owy_experiments/ prefix _lsmc_owy_experiments/ — Register":
+        - cell "Select _lsmc_owy_experiments/ prefix":
+          - checkbox "Select _lsmc_owy_experiments/"
+          - generic: prefix
+        - cell "_lsmc_owy_experiments/":
+          - link "_lsmc_owy_experiments/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2F_lsmc_owy_experiments%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2F_lsmc_owy_experiments%2F&kind=prefix
+      - row "Select _lsmc_ursa_deployments/ prefix _lsmc_ursa_deployments/ — Register":
+        - cell "Select _lsmc_ursa_deployments/ prefix":
+          - checkbox "Select _lsmc_ursa_deployments/"
+          - generic: prefix
+        - cell "_lsmc_ursa_deployments/":
+          - link "_lsmc_ursa_deployments/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2F_lsmc_ursa_deployments%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2F_lsmc_ursa_deployments%2F&kind=prefix
+      - row "Select _lsmc_ursa_runtime/ prefix _lsmc_ursa_runtime/ — Register":
+        - cell "Select _lsmc_ursa_runtime/ prefix":
+          - checkbox "Select _lsmc_ursa_runtime/"
+          - generic: prefix
+        - cell "_lsmc_ursa_runtime/":
+          - link "_lsmc_ursa_runtime/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2F_lsmc_ursa_runtime%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2F_lsmc_ursa_runtime%2F&kind=prefix
+      - row "Select basecalls/ prefix basecalls/ — Register":
+        - cell "Select basecalls/ prefix":
+          - checkbox "Select basecalls/"
+          - generic: prefix
+        - cell "basecalls/":
+          - link "basecalls/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2Fbasecalls%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2Fbasecalls%2F&kind=prefix
+      - row "Select codex-relay/ prefix codex-relay/ — Register":
+        - cell "Select codex-relay/ prefix":
+          - checkbox "Select codex-relay/"
+          - generic: prefix
+        - cell "codex-relay/":
+          - link "codex-relay/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2Fcodex-relay%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2Fcodex-relay%2F&kind=prefix
+      - row "Select data/ prefix data/ — Register":
+        - cell "Select data/ prefix":
+          - checkbox "Select data/"
+          - generic: prefix
+        - cell "data/":
+          - link "data/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2Fdata%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2Fdata%2F&kind=prefix
+      - row "Select derived/ prefix derived/ — Register":
+        - cell "Select derived/ prefix":
+          - checkbox "Select derived/"
+          - generic: prefix
+        - cell "derived/":
+          - link "derived/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2Fderived%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2Fderived%2F&kind=prefix
+      - row "Select raw/ prefix raw/ — Register":
+        - cell "Select raw/ prefix":
+          - checkbox "Select raw/"
+          - generic: prefix
+        - cell "raw/":
+          - link "raw/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2Fraw%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2Fraw%2F&kind=prefix
+      - row "Select reference/ prefix reference/ — Register":
+        - cell "Select reference/ prefix":
+          - checkbox "Select reference/"
+          - generic: prefix
+        - cell "reference/":
+          - link "reference/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2Freference%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2Freference%2F&kind=prefix
+      - row "Select staged_external_data/ prefix staged_external_data/ — Register":
+        - cell "Select staged_external_data/ prefix":
+          - checkbox "Select staged_external_data/"
+          - generic: prefix
+        - cell "staged_external_data/":
+          - link "staged_external_data/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2Fstaged_external_data%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2Fstaged_external_data%2F&kind=prefix
+      - row "Select tmp/ prefix tmp/ — Register":
+        - cell "Select tmp/ prefix":
+          - checkbox "Select tmp/"
+          - generic: prefix
+        - cell "tmp/":
+          - link "tmp/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2Ftmp%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2Ftmp%2F&kind=prefix
+      - row "Select ubuntu/ prefix ubuntu/ — Register":
+        - cell "Select ubuntu/ prefix":
+          - checkbox "Select ubuntu/"
+          - generic: prefix
+        - cell "ubuntu/":
+          - link "ubuntu/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2Fubuntu%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2Fubuntu%2F&kind=prefix
+      - row "Select README.md object README.md 7.6K B Register":
+        - cell "Select README.md object":
+          - checkbox "Select README.md"
+          - generic: object
+        - cell "README.md":
+          - button "README.md"
+        - cell "7.6K B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2FREADME.md&kind=object
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

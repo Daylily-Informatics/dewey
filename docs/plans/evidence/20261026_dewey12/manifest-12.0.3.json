@@ -1,0 +1,54 @@
+{
+  "deploy_name": "day",
+  "images": {
+    "atlas": {
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/atlas@sha256:9f52170c56568ac8ef8b914233476471c999ab23fc3188fcb44c71c384d00037",
+      "repository": "dayhoff/day/atlas",
+      "source_commit": "3babdb3a5cb4d933a6371a0441b506ebd7fea31a",
+      "source_tag": "7.2.12"
+    },
+    "bloom": {
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/bloom@sha256:888b5c887f4c4c9d307069bfbe902f3b80b5305e953a3bf82c76c06485df96dc",
+      "repository": "dayhoff/day/bloom",
+      "source_commit": "e7821bef2851f0c5b8e54d1871c9396609f25e64",
+      "source_tag": "10.1.1"
+    },
+    "dewey": {
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:0885649fb6a2aad1352db6cf1a21e2034f4f7120d25087bc00d7d2c0b5a4a79d",
+      "repository": "dayhoff/day/dewey",
+      "source_commit": "a5d6c05df2337a9b87dff1ab19c0b109f910a986",
+      "source_tag": "12.0.3"
+    },
+    "kahlo": {
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/kahlo@sha256:b39683585b750b3dbc43b908a640030e8c5c941eebbd383d3e345b93532f2acb",
+      "repository": "dayhoff/day/kahlo",
+      "source_commit": "2a058076b70514482f7ca0881d2c5ff6aea99a15",
+      "source_tag": "9.0.47"
+    },
+    "lsmc-oauth-login": {
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/lsmc-oauth-login@sha256:675b378414f04d173c01475ba1624abb1f3325b0fe49ea96e2b55e473c0ff516",
+      "repository": "dayhoff/day/lsmc-oauth-login",
+      "source_commit": "4836f1581b309176bdf1706cdb9eabbf4b4ea4b4",
+      "source_tag": "4.1.0"
+    },
+    "qeo": {
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/qeo@sha256:bcb1ddbaee37c44f9a3c332908112eccfa5273f87c0ffc9437291051e7cada0a",
+      "repository": "dayhoff/day/qeo",
+      "source_commit": "b6d22d2c0657328a08b56d4b5cbb62cbb898e8fa",
+      "source_tag": "2.7.7"
+    },
+    "ursa": {
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/ursa@sha256:f07753715297b870d225bd021c38549d725e172db0eff05014a64df2945dbe3d",
+      "repository": "dayhoff/day/ursa",
+      "source_commit": "f272799584ee91e4ee157e498f484144a1a04581",
+      "source_tag": "14.1.98"
+    },
+    "zebra_day": {
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/zebra-day@sha256:aa0383ca291f735357ae7754651d10e825d5f1b7bc81659c04a0018991bcc7d1",
+      "repository": "dayhoff/day/zebra-day",
+      "source_commit": "3b18ad182612be5c5fadb56b5ba07fa977569302",
+      "source_tag": "9.0.2"
+    }
+  },
+  "version": 1
+}

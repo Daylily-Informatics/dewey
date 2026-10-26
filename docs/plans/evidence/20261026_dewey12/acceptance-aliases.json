@@ -1,0 +1,475 @@
+{
+  "assertion_count": 7,
+  "assertions": [
+    {
+      "assertion": "alias-claim-created201",
+      "http_status": 201,
+      "passed": true
+    },
+    {
+      "assertion": "conflicting-alias-claim-rejected409",
+      "http_status": 409,
+      "passed": true
+    },
+    {
+      "assertion": "alias-served-exact-report",
+      "passed": true,
+      "sha256": "b715dc98b3095ab1f4d466ca65a1635746c999b7c9a5d5e6b46b07688165c626"
+    },
+    {
+      "assertion": "alias-retired-and-not-reassignable",
+      "passed": true,
+      "reassignable": false,
+      "status": "retired"
+    },
+    {
+      "assertion": "retired-slug-reassignment-rejected409",
+      "http_status": 409,
+      "passed": true
+    },
+    {
+      "assertion": "retired-alias-fetch-denied404",
+      "http_status": 404,
+      "passed": true
+    },
+    {
+      "assertion": "canonical-fetch-survives-alias-retirement",
+      "passed": true,
+      "sha256": "b715dc98b3095ab1f4d466ca65a1635746c999b7c9a5d5e6b46b07688165c626"
+    }
+  ],
+  "assertions_passed": 7,
+  "evidence_kind": "projection-of-existing-completed-browser-phase-receipts",
+  "format": "dewey12-sanitized-acceptance-receipt-v1",
+  "http_expectations_passed": 18,
+  "http_status_counts": {
+    "200": 14,
+    "201": 1,
+    "404": 1,
+    "409": 2
+  },
+  "identities": {
+    "alias_euid": "M-DGX-14E80",
+    "conflict_share_euid": "M-DGX-14D73",
+    "share_euid": "M-DGX-14D1F",
+    "slug": "dewey12-acceptance-20261026-report"
+  },
+  "limitations": [
+    "Counts describe these retained HTTP expectations and explicit evidence assertions; they are not code-coverage percentages.",
+    "This receipt does not establish unperformed recipient or machine-client checks."
+  ],
+  "new_network_requests": 0,
+  "phase_count": 4,
+  "phases": [
+    {
+      "http_expectations_passed": 7,
+      "http_status_counts": {
+        "200": 5,
+        "201": 1,
+        "409": 1
+      },
+      "phase": "alias-claim",
+      "request_count": 7,
+      "requests": [
+        {
+          "http_status": 200,
+          "label": "manager-verified-account",
+          "method": "GET",
+          "observed_at": "2026-10-26T04:29:59.240Z",
+          "path": "/recipient/account",
+          "response_bytes": 1201,
+          "response_headers": {},
+          "response_sha256": "6e4187027c8084b7ab9f023266e9b23c7c44e641f7275d70db7028c3d9715ef1"
+        },
+        {
+          "http_status": 200,
+          "label": "manager-private-api",
+          "method": "GET",
+          "observed_at": "2026-10-26T04:29:59.817Z",
+          "path": "/api/v1/registry/defaults",
+          "response_bytes": 89,
+          "response_fields": {},
+          "response_headers": {
+            "content-length": "89"
+          },
+          "response_sha256": "a82038dc3bcca804bf82940dc381e8b72992a75d05e448ddd9ffde91a8194284"
+        },
+        {
+          "http_status": 200,
+          "label": "current-www",
+          "method": "GET",
+          "observed_at": "2026-10-26T04:30:00.343Z",
+          "path": "/api/v1/registry/shares/M-DGX-14D1F",
+          "response_bytes": 2493,
+          "response_fields": {
+            "euid": "M-DGX-14D1F",
+            "fetch_path": "/fetch/M-DGX-14D1F",
+            "member_count": 1,
+            "members": [
+              {
+                "artifact_euid": "M-DGX-14CDR",
+                "location_revision": 1,
+                "size": null,
+                "target_kind": "artifact_prefix"
+              }
+            ],
+            "policy_revision": 1,
+            "share_euid": "M-DGX-14D1F",
+            "status": "active",
+            "target_euid": "M-DGX-14CDR",
+            "target_kind": "artifact_prefix",
+            "targets": [
+              {
+                "euid": "M-DGX-14CDR"
+              }
+            ]
+          },
+          "response_headers": {
+            "content-length": "2493"
+          },
+          "response_sha256": "d93c29c03e500ebd63365e3eadc53dd289458b520020b05128014fb3e49d8a43"
+        },
+        {
+          "http_status": 201,
+          "label": "claim-alias",
+          "method": "POST",
+          "observed_at": "2026-10-26T04:30:00.744Z",
+          "path": "/api/v1/registry/shares/M-DGX-14D1F/aliases",
+          "request_fields": {
+            "policy_revision": 1,
+            "slug": "dewey12-acceptance-20261026-report"
+          },
+          "response_bytes": 200,
+          "response_fields": {
+            "alias_euid": "M-DGX-14E80",
+            "fetch_path": "/fetch/dewey12-acceptance-20261026-report",
+            "share_euid": "M-DGX-14D1F",
+            "slug": "dewey12-acceptance-20261026-report"
+          },
+          "response_headers": {
+            "content-length": "200"
+          },
+          "response_sha256": "efb277ee8075463f8e7c081c3ac794e15c135dcd15deea894ce9362926062c47"
+        },
+        {
+          "http_status": 200,
+          "label": "current-public",
+          "method": "GET",
+          "observed_at": "2026-10-26T04:30:01.104Z",
+          "path": "/api/v1/registry/shares/M-DGX-14D73",
+          "response_bytes": 1950,
+          "response_fields": {
+            "euid": "M-DGX-14D73",
+            "fetch_path": "/fetch/M-DGX-14D73",
+            "member_count": 1,
+            "members": [
+              {
+                "artifact_euid": "M-DGX-14CDR",
+                "location_revision": 1,
+                "size": null,
+                "target_kind": "artifact_prefix"
+              }
+            ],
+            "policy_revision": 1,
+            "share_euid": "M-DGX-14D73",
+            "status": "active",
+            "target_euid": "M-DGX-14CDR",
+            "target_kind": "artifact_prefix",
+            "targets": [
+              {
+                "euid": "M-DGX-14CDR"
+              }
+            ]
+          },
+          "response_headers": {
+            "content-length": "1950"
+          },
+          "response_sha256": "8add4e8e475b16dee9bc9f7bfa01b6730562c8a0e444c4c656239f833effeb29"
+        },
+        {
+          "http_status": 409,
+          "label": "alias-conflict",
+          "method": "POST",
+          "observed_at": "2026-10-26T04:30:01.415Z",
+          "path": "/api/v1/registry/shares/M-DGX-14D73/aliases",
+          "request_fields": {
+            "policy_revision": 1,
+            "slug": "dewey12-acceptance-20261026-report"
+          },
+          "response_bytes": 59,
+          "response_fields": {},
+          "response_headers": {
+            "content-length": "59"
+          },
+          "response_sha256": "ffb465f8860c70ba691c33170282125eaca12affefdbc5c23ce245896a9db9a0"
+        },
+        {
+          "http_status": 200,
+          "label": "alias-list-active",
+          "method": "GET",
+          "observed_at": "2026-10-26T04:30:01.746Z",
+          "path": "/api/v1/registry/shares/M-DGX-14D1F/aliases",
+          "response_bytes": 149,
+          "response_fields": [
+            {
+              "alias_euid": "M-DGX-14E80",
+              "fetch_path": "/fetch/dewey12-acceptance-20261026-report",
+              "slug": "dewey12-acceptance-20261026-report",
+              "status": "active"
+            }
+          ],
+          "response_headers": {
+            "content-length": "149"
+          },
+          "response_sha256": "2e594533fbf88d7823bbeba55a7b1046e7fb9f5a2da4c6b5f409b383d985a866"
+        }
+      ],
+      "source_exported_at": "2026-10-26T04:30:01.749Z",
+      "source_snapshot": "dewey12-acceptance-20261026-browser-alias-claim-2026-10-26T04-30-01-752Z.json",
+      "source_snapshot_sha256": "eddaf1e0f20de6b616f9fb6c933ffdb4a2ec62af6f417d15e6c8657b098e17c6",
+      "status": "complete"
+    },
+    {
+      "http_expectations_passed": 2,
+      "http_status_counts": {
+        "200": 2
+      },
+      "phase": "alias-check",
+      "request_count": 2,
+      "requests": [
+        {
+          "http_status": 200,
+          "label": "external-verified-account",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:14:24.705Z",
+          "path": "/recipient/account",
+          "response_bytes": 1214,
+          "response_headers": {},
+          "response_sha256": "957f5a39029f2721ccebd25f1f2b2defab2665d5260befb8623be535e88b602b"
+        },
+        {
+          "http_status": 200,
+          "label": "alias-download",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:14:31.179Z",
+          "path": "/fetch/dewey12-acceptance-20261026-report/multiqc.html?download=true",
+          "response_bytes": 2193966,
+          "response_headers": {
+            "content-length": "2193966",
+            "etag": "\"f68472ae9196c2eb5bdff0a4bfcafaef\""
+          },
+          "response_sha256": "b715dc98b3095ab1f4d466ca65a1635746c999b7c9a5d5e6b46b07688165c626"
+        }
+      ],
+      "source_exported_at": "2026-10-26T05:14:31.182Z",
+      "source_snapshot": "dewey12-acceptance-20261026-browser-alias-check-2026-10-26T05-14-31-186Z.json",
+      "source_snapshot_sha256": "6adca24716e3ba31c963acb85ff3b0532305d0ace1d12d68d23e4ad63d9dbfcd",
+      "status": "complete"
+    },
+    {
+      "http_expectations_passed": 6,
+      "http_status_counts": {
+        "200": 5,
+        "409": 1
+      },
+      "phase": "alias-retire",
+      "request_count": 6,
+      "requests": [
+        {
+          "http_status": 200,
+          "label": "manager-verified-account",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:15:36.905Z",
+          "path": "/recipient/account",
+          "response_bytes": 1201,
+          "response_headers": {},
+          "response_sha256": "6e4187027c8084b7ab9f023266e9b23c7c44e641f7275d70db7028c3d9715ef1"
+        },
+        {
+          "http_status": 200,
+          "label": "manager-private-api",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:15:37.186Z",
+          "path": "/api/v1/registry/defaults",
+          "response_bytes": 89,
+          "response_fields": {},
+          "response_headers": {
+            "content-length": "89"
+          },
+          "response_sha256": "a82038dc3bcca804bf82940dc381e8b72992a75d05e448ddd9ffde91a8194284"
+        },
+        {
+          "http_status": 200,
+          "label": "current-www",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:15:37.523Z",
+          "path": "/api/v1/registry/shares/M-DGX-14D1F",
+          "response_bytes": 2640,
+          "response_fields": {
+            "euid": "M-DGX-14D1F",
+            "fetch_path": "/fetch/M-DGX-14D1F",
+            "member_count": 1,
+            "members": [
+              {
+                "artifact_euid": "M-DGX-14CDR",
+                "location_revision": 1,
+                "size": null,
+                "target_kind": "artifact_prefix"
+              }
+            ],
+            "policy_revision": 1,
+            "share_euid": "M-DGX-14D1F",
+            "status": "active",
+            "target_euid": "M-DGX-14CDR",
+            "target_kind": "artifact_prefix",
+            "targets": [
+              {
+                "euid": "M-DGX-14CDR"
+              }
+            ]
+          },
+          "response_headers": {
+            "content-length": "2640"
+          },
+          "response_sha256": "4d7207c9529625ba217f2069db3d0cca0816f16197ae014163cba1412cfadefe"
+        },
+        {
+          "http_status": 200,
+          "label": "retire-alias",
+          "method": "POST",
+          "observed_at": "2026-10-26T05:15:37.864Z",
+          "path": "/api/v1/registry/shares/M-DGX-14D1F/aliases/dewey12-acceptance-20261026-report/revoke",
+          "request_fields": {
+            "policy_revision": 1
+          },
+          "response_bytes": 85,
+          "response_fields": {
+            "reassignable": false,
+            "slug": "dewey12-acceptance-20261026-report",
+            "status": "retired"
+          },
+          "response_headers": {
+            "content-length": "85"
+          },
+          "response_sha256": "7407b9800f5964d741817493bf4bc2d44e0e8fb59816bc1f7319980d805cf1db"
+        },
+        {
+          "http_status": 200,
+          "label": "current-public",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:15:38.194Z",
+          "path": "/api/v1/registry/shares/M-DGX-14D73",
+          "response_bytes": 1955,
+          "response_fields": {
+            "euid": "M-DGX-14D73",
+            "fetch_path": "/fetch/M-DGX-14D73",
+            "member_count": 1,
+            "members": [
+              {
+                "artifact_euid": "M-DGX-14CDR",
+                "location_revision": 1,
+                "size": null,
+                "target_kind": "artifact_prefix"
+              }
+            ],
+            "policy_revision": 2,
+            "share_euid": "M-DGX-14D73",
+            "status": "active",
+            "target_euid": "M-DGX-14CDR",
+            "target_kind": "artifact_prefix",
+            "targets": [
+              {
+                "euid": "M-DGX-14CDR"
+              }
+            ]
+          },
+          "response_headers": {
+            "content-length": "1955"
+          },
+          "response_sha256": "fac1b1f531799a226985bc8f00fc9459cb3dd308c91f05ee4542dc5dd916ad0a"
+        },
+        {
+          "http_status": 409,
+          "label": "alias-reassignment-denied",
+          "method": "POST",
+          "observed_at": "2026-10-26T05:15:38.572Z",
+          "path": "/api/v1/registry/shares/M-DGX-14D73/aliases",
+          "request_fields": {
+            "policy_revision": 2,
+            "slug": "dewey12-acceptance-20261026-report"
+          },
+          "response_bytes": 59,
+          "response_fields": {},
+          "response_headers": {
+            "content-length": "59"
+          },
+          "response_sha256": "ffb465f8860c70ba691c33170282125eaca12affefdbc5c23ce245896a9db9a0"
+        }
+      ],
+      "source_exported_at": "2026-10-26T05:15:38.573Z",
+      "source_snapshot": "dewey12-acceptance-20261026-browser-alias-retire-2026-10-26T05-15-38-577Z.json",
+      "source_snapshot_sha256": "8345bf7bb7d45cac302933a62106377c57eed960d02e66a364b914e06c1893b2",
+      "status": "complete"
+    },
+    {
+      "http_expectations_passed": 3,
+      "http_status_counts": {
+        "200": 2,
+        "404": 1
+      },
+      "phase": "alias-check-retired",
+      "request_count": 3,
+      "requests": [
+        {
+          "http_status": 200,
+          "label": "external-verified-account",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:16:46.015Z",
+          "path": "/recipient/account",
+          "response_bytes": 1214,
+          "response_headers": {},
+          "response_sha256": "957f5a39029f2721ccebd25f1f2b2defab2665d5260befb8623be535e88b602b"
+        },
+        {
+          "http_status": 404,
+          "label": "retired-alias-denied",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:16:46.308Z",
+          "path": "/fetch/dewey12-acceptance-20261026-report/multiqc.html",
+          "response_bytes": 15,
+          "response_headers": {
+            "content-length": "15"
+          },
+          "response_sha256": "6ca1b618a9b9bc0c3fc27a97b367591c63a0e34ec0c610b8c68bed583ba9e548"
+        },
+        {
+          "http_status": 200,
+          "label": "canonical-after-alias-retire",
+          "method": "GET",
+          "observed_at": "2026-10-26T05:16:49.435Z",
+          "path": "/fetch/M-DGX-14D1F/multiqc.html?download=true",
+          "response_bytes": 2193966,
+          "response_headers": {
+            "content-length": "2193966",
+            "etag": "\"f68472ae9196c2eb5bdff0a4bfcafaef\""
+          },
+          "response_sha256": "b715dc98b3095ab1f4d466ca65a1635746c999b7c9a5d5e6b46b07688165c626"
+        }
+      ],
+      "source_exported_at": "2026-10-26T05:16:49.437Z",
+      "source_snapshot": "dewey12-acceptance-20261026-browser-alias-check-retired-2026-10-26T05-16-49-441Z.json",
+      "source_snapshot_sha256": "16048a568097f5e436670335160a68bc2e0cfd95b81da7e179a9e7ee0c8506de",
+      "status": "complete"
+    }
+  ],
+  "request_count": 18,
+  "sanitization": {
+    "authentication_material_removed": true,
+    "continuation_values_omitted": true,
+    "personal_identity_values_omitted": true,
+    "raw_state_and_response_blobs_removed": true,
+    "recipient_emails_removed": true
+  },
+  "scope": "aliases",
+  "review": "Lead verified retained phase completion, assertion counts, source snapshot hashes and sanitization."
+}

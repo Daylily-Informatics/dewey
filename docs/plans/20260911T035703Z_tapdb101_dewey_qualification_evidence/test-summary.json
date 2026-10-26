@@ -1,0 +1,76 @@
+{
+  "results": {
+    "runtime.qualification.published-harness.tests.test_identity_inventory_pg": {
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "runtime.qualification.published-harness.tests.test_identity_inventory_cli": {
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "runtime.qualification.published-harness.tests.test_sequence_protection": {
+      "tests": 54,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "runtime.qualification.published-harness.tests.test_sequence_protection_pg": {
+      "tests": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "runtime.qualification.published-harness.tests.test_sequence_protection_restart_pg": {
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "runtime.qualification.published-harness.tests.test_sequence_protection_cli": {
+      "tests": 28,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "runtime.qualification.published-harness.tests.test_runtime_principal_pg": {
+      "tests": 38,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "runtime.qualification.published-harness.tests.test_runtime_principal": {
+      "tests": 96,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "runtime.qualification.published-harness.tests.test_backup_source_contract": {
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "runtime.qualification.published-harness.tests.test_recovery_floor_pg": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "runtime.qualification.published-harness.tests.test_backup_historical_pg": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "total": 301,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "elapsed_seconds": 20.0,
+  "scope": "Focused local published-package qualification. Not upstream full CI, not Aurora or production Dewey acceptance."
+}

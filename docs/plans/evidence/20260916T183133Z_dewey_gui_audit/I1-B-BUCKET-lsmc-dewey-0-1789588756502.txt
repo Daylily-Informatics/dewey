@@ -1,0 +1,125 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / S3 BROWSER
+  - heading "S3 Browser" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - textbox "S3 URI":
+    - /placeholder: s3://bucket/exact/prefix/
+    - text: s3://lsmc-dewey-0/
+  - button "Go"
+  - link "All buckets":
+    - /url: /storage
+  - generic: s3://lsmc-dewey-0/
+  - button "Upload files"
+  - link "Register this folder":
+    - /url: /add?kind=prefix&uri=s3%3A%2F%2Flsmc-dewey-0%2F
+  - link "lsmc-dewey-0":
+    - /url: /storage?uri=s3%3A%2F%2Flsmc-dewey-0%2F
+  - searchbox "Filter names on this page"
+  - button "Register selection as a set"
+  - table:
+    - rowgroup:
+      - row "Kind Name Size Registration":
+        - columnheader "Kind"
+        - columnheader "Name"
+        - columnheader "Size"
+        - columnheader "Registration"
+    - rowgroup:
+      - row "Select 0/ prefix 0/ — Register":
+        - cell "Select 0/ prefix":
+          - checkbox "Select 0/"
+          - generic: prefix
+        - cell "0/":
+          - link "0/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dewey-0%2F0%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dewey-0%2F0%2F&kind=prefix
+      - row "Select artifacts/ prefix artifacts/ — Register":
+        - cell "Select artifacts/ prefix":
+          - checkbox "Select artifacts/"
+          - generic: prefix
+        - cell "artifacts/":
+          - link "artifacts/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dewey-0%2Fartifacts%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dewey-0%2Fartifacts%2F&kind=prefix
+      - row "Select dayec-transient/ prefix dayec-transient/ — Register":
+        - cell "Select dayec-transient/ prefix":
+          - checkbox "Select dayec-transient/"
+          - generic: prefix
+        - cell "dayec-transient/":
+          - link "dayec-transient/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dewey-0%2Fdayec-transient%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dewey-0%2Fdayec-transient%2F&kind=prefix
+      - row "Select external-smoke/ prefix external-smoke/ — Register":
+        - cell "Select external-smoke/ prefix":
+          - checkbox "Select external-smoke/"
+          - generic: prefix
+        - cell "external-smoke/":
+          - link "external-smoke/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dewey-0%2Fexternal-smoke%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dewey-0%2Fexternal-smoke%2F&kind=prefix
+      - row "Select functional-tests/ prefix functional-tests/ — Register":
+        - cell "Select functional-tests/ prefix":
+          - checkbox "Select functional-tests/"
+          - generic: prefix
+        - cell "functional-tests/":
+          - link "functional-tests/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dewey-0%2Ffunctional-tests%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dewey-0%2Ffunctional-tests%2F&kind=prefix
+      - row "Select gui-audit/ prefix gui-audit/ — Register":
+        - cell "Select gui-audit/ prefix":
+          - checkbox "Select gui-audit/"
+          - generic: prefix
+        - cell "gui-audit/":
+          - link "gui-audit/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dewey-0%2Fgui-audit%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dewey-0%2Fgui-audit%2F&kind=prefix
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

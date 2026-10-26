@@ -70,6 +70,7 @@ def run_command(
             profile=resolved_profile,
             region=resolved_region,
             namespace=resolved_namespace,
+            config_path=settings.tapdb_config_path,
             cwd=PROJECT_ROOT,
             check=False,
         )

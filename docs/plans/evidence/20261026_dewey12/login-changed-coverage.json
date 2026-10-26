@@ -1,0 +1,158 @@
+{
+  "status": "pass",
+  "thresholds": {
+    "changed_lines": 80,
+    "changed_branch_origins": 80
+  },
+  "totals": {
+    "covered_lines": 476,
+    "total_lines": 491,
+    "covered_branches": 117,
+    "total_branches": 122,
+    "line_percent": 96.94501018329939,
+    "branch_percent": 95.90163934426229
+  },
+  "unmeasured_files": [],
+  "files": {
+    "lsmc_oauth_login/cli/plugins/state.py": {
+      "covered_lines": 12,
+      "total_lines": 12,
+      "missing_lines": [],
+      "covered_branches": 4,
+      "total_branches": 4,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    },
+    "lsmc_oauth_login/handoff.py": {
+      "covered_lines": 2,
+      "total_lines": 2,
+      "missing_lines": [],
+      "covered_branches": 0,
+      "total_branches": 0,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    },
+    "lsmc_oauth_login/identity_store.py": {
+      "covered_lines": 15,
+      "total_lines": 15,
+      "missing_lines": [],
+      "covered_branches": 6,
+      "total_branches": 6,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    },
+    "lsmc_oauth_login/invites.py": {
+      "covered_lines": 27,
+      "total_lines": 27,
+      "missing_lines": [],
+      "covered_branches": 6,
+      "total_branches": 6,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    },
+    "lsmc_oauth_login/postgres_state.py": {
+      "covered_lines": 16,
+      "total_lines": 20,
+      "missing_lines": [
+        72,
+        114,
+        115,
+        116
+      ],
+      "covered_branches": 0,
+      "total_branches": 0,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    },
+    "lsmc_oauth_login/recipient_identity.py": {
+      "covered_lines": 174,
+      "total_lines": 174,
+      "missing_lines": [],
+      "covered_branches": 44,
+      "total_branches": 44,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    },
+    "lsmc_oauth_login/recipient_store.py": {
+      "covered_lines": 82,
+      "total_lines": 82,
+      "missing_lines": [],
+      "covered_branches": 12,
+      "total_branches": 12,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    },
+    "lsmc_oauth_login/settings.py": {
+      "covered_lines": 27,
+      "total_lines": 27,
+      "missing_lines": [],
+      "covered_branches": 2,
+      "total_branches": 2,
+      "missing_branches": [],
+      "excluded_changed_lines": []
+    },
+    "lsmc_oauth_login/web.py": {
+      "covered_lines": 121,
+      "total_lines": 132,
+      "missing_lines": [
+        407,
+        408,
+        463,
+        470,
+        471,
+        489,
+        490,
+        493,
+        494,
+        526,
+        1039
+      ],
+      "covered_branches": 43,
+      "total_branches": 48,
+      "missing_branches": [
+        [
+          406,
+          407
+        ],
+        [
+          462,
+          463
+        ],
+        [
+          485,
+          489
+        ],
+        [
+          525,
+          526
+        ],
+        [
+          1038,
+          1039
+        ]
+      ],
+      "excluded_changed_lines": []
+    }
+  },
+  "baseline_commit": "d3d76d9f1eb91a8e8f7ede73c37ca93b172ec258",
+  "head_commit": "3a54d153c10193dda78e77a7c562529c2768ee45",
+  "working_tree_changes": false,
+  "source_paths": [
+    "lsmc_oauth_login"
+  ],
+  "coverage_timestamp": "2026-10-26T02:06:11.316770",
+  "format": "python",
+  "metric": "Executable added/modified lines and branches whose source line changed",
+  "measured_source_sha256": {
+    "lsmc_oauth_login/cli/plugins/state.py": "5147d28007f16ef394fbea4ed31367d0a84f6b3c28c3964121b3fa5bcc69dccd",
+    "lsmc_oauth_login/handoff.py": "bf759fb3ad411becade1de687b6feb05c0669f387ab5c39ce71c0d1da9de725d",
+    "lsmc_oauth_login/identity_store.py": "05cea8c168f0fb31f9e0de0c6713aa8179718d1b238964b2f64845a74fe86d9c",
+    "lsmc_oauth_login/invites.py": "847028411ea60827120b9eb247da549f2078f3835996dbe47b8c8955b252b587",
+    "lsmc_oauth_login/postgres_state.py": "41ca3c1edb8922be98eede74434a107352d59f715eb454d472085598083e91b0",
+    "lsmc_oauth_login/recipient_identity.py": "cc78429d67ff005fadb3a51677cdb3c5b217765fc74e78aa6db47e29ccc5128f",
+    "lsmc_oauth_login/recipient_store.py": "69523ae58d98b5dbe1cc10cc93e3713650cda319d1f2e3d0a8c80cce16d8a279",
+    "lsmc_oauth_login/settings.py": "168fb2eb03a96d5139fe86e5c504059675d8be6bcb2feb172ae0e59faab7f1cf",
+    "lsmc_oauth_login/web.py": "a395f0c5b88dc7ab453a2e41c463cbd911fb793310379ad2ed3654798ceef989"
+  },
+  "evidence_note": "Fresh coverage data from the final fully passing combined selection. Repository HEAD precedes the final source/test/evidence commit; file SHA256 values bind the exact measured source."
+}

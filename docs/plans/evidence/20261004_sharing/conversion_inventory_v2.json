@@ -1,0 +1,1879 @@
+{
+  "ambiguous_count": 23,
+  "command_id": "c4b56f6d-503b-4401-b0a8-235821334a1f",
+  "inventory_sha256": "7517b3e05d41190e96f64f7f75f7f9b05db80180f1dbbf21a84afac6bebc0892",
+  "observed_at": "2026-10-04T03:08:11.441771+00:00",
+  "private_inventory_path": "/home/ubuntu/dewey-sharing-20261004T000136Z/disposition-inventory-v2.json",
+  "production_changed": false,
+  "retrieved_at": "2026-10-04T03:11:03.006341+00:00",
+  "share_count": 42,
+  "shares": [
+    {
+      "artifact_set_parent_membership": [],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [],
+      "delivery_modes_invalid_type": true,
+      "euid": "M-DGX-9YHS",
+      "expires_at": "2026-06-03T10:55:12.137999+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 0,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 0,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": null,
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-9TWT",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-9XX2",
+          "parent_type": "artifact",
+          "relationship_type": "has_share_reference",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "428f6ae7687ad00f8f1fd58dbcc50400856334a6537f04b4a83daed7ec6aed0d",
+      "reason": "No persisted artifact member lineage; explicit disposition required",
+      "record_revision": 0,
+      "status": null,
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "artifact_set_parent_membership": [],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [],
+      "delivery_modes_invalid_type": true,
+      "euid": "M-DGX-9YKN",
+      "expires_at": "2026-06-03T10:55:12.300264+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 0,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 0,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": null,
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-9TXR",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-9XKP",
+          "parent_type": "artifact",
+          "relationship_type": "has_share_reference",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "72d7d2f822664d01f2f26b893cf05401c17d1d22be6e595b326a86df8e321894",
+      "reason": "No persisted artifact member lineage; explicit disposition required",
+      "record_revision": 0,
+      "status": null,
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "artifact_set_parent_membership": [],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [],
+      "delivery_modes_invalid_type": true,
+      "euid": "M-DGX-A1PA",
+      "expires_at": "2026-06-09T18:38:40.527846+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 0,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 0,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": null,
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-9W9Z",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-9S3V",
+          "parent_type": "artifact",
+          "relationship_type": "has_share_reference",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "edac97efd83fc67f9023ffac29a9f75381dd7959b490d68ee2c979710214d5a0",
+      "reason": "No persisted artifact member lineage; explicit disposition required",
+      "record_revision": 0,
+      "status": "active",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "artifact_set_parent_membership": [
+        {
+          "complete": true,
+          "items": [
+            {
+              "child_bstatus": "active",
+              "child_created_at": "2026-07-13T20:59:59.381573+00:00",
+              "child_deleted": false,
+              "child_euid": "M-DGX-K2BD",
+              "child_missing": false,
+              "child_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "child_record_revision": 0,
+              "child_type": "artifact",
+              "coordinates_sha256": "1fb5a1f9821c8ed1b026415f4cf47150041c589d1270931c4a7d90ceee17d573",
+              "lineage_created_at": "2026-07-13T20:59:59.965329+00:00",
+              "lineage_deleted": false,
+              "lineage_euid": "M-EDG-A9F4",
+              "lineage_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "lineage_record_revision": 0,
+              "relationship_type": "artifact_set_member",
+              "same_domain_as_set": true,
+              "same_issuer_as_set": true,
+              "storage_backend": "s3",
+              "storage_kind": "object",
+              "unknown_child_type_sha256": null,
+              "unknown_storage_backend_sha256": null,
+              "unknown_storage_kind_sha256": null
+            },
+            {
+              "child_bstatus": "active",
+              "child_created_at": "2026-07-13T20:59:59.757424+00:00",
+              "child_deleted": false,
+              "child_euid": "M-DGX-K2E7",
+              "child_missing": false,
+              "child_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "child_record_revision": 0,
+              "child_type": "artifact",
+              "coordinates_sha256": "be431070361c679dc232116228c9f33a897cb0d6c5c8535c1b9c1e1491dfab93",
+              "lineage_created_at": "2026-07-13T21:00:00.042801+00:00",
+              "lineage_deleted": false,
+              "lineage_euid": "M-EDG-A9G1",
+              "lineage_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "lineage_record_revision": 0,
+              "relationship_type": "artifact_set_member",
+              "same_domain_as_set": true,
+              "same_issuer_as_set": true,
+              "storage_backend": "s3",
+              "storage_kind": "object",
+              "unknown_child_type_sha256": null,
+              "unknown_storage_backend_sha256": null,
+              "unknown_storage_kind_sha256": null
+            }
+          ],
+          "member_limit": 1000,
+          "observed_edge_count": 2,
+          "read_limit": 1001,
+          "recursive": false,
+          "relationship_type": "artifact_set_member",
+          "returned_edge_count": 2,
+          "set_created_at": "2026-07-13T20:59:59.890492+00:00",
+          "set_deleted": false,
+          "set_euid": "M-DGX-K2G2",
+          "set_modified_at": "2026-09-11T10:50:02.438993+00:00",
+          "set_record_revision": 0,
+          "share_parent_edges": [
+            {
+              "lineage_created_at": "2026-07-13T21:00:00.186574+00:00",
+              "lineage_deleted": false,
+              "lineage_euid": "M-EDG-A9JX",
+              "lineage_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "lineage_record_revision": 0,
+              "relationship_type": "has_share",
+              "unknown_relationship_type_sha256": null
+            }
+          ]
+        }
+      ],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3_manifest"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K2PP",
+      "expires_at": "2031-07-13T23:59:59+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 2,
+      "legacy_recipient_counts": {
+        "domain": 1,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_set",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-A9JX",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2G2",
+          "parent_type": "artifact_set",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "cb96897df4ebfb7111323fa6468c95c4563abda0b2c40b2293ad731b231d50ef",
+      "reason": "No persisted artifact member lineage; explicit disposition required",
+      "record_revision": 0,
+      "status": "active",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "artifact_set_parent_membership": [],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3",
+        "presigned_s3_manifest",
+        "cloudfront_signed_url",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K3NQ",
+      "expires_at": "2026-07-14T22:44:33.943450+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 6,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_object",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AA01",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2BD",
+          "parent_type": "artifact",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "754dff14cd61fb4a9fdab6da5eb69cb5734be84fdb0aba8cfe883b693083ba49",
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "record_revision": 0,
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "artifact_set_parent_membership": [
+        {
+          "complete": true,
+          "items": [
+            {
+              "child_bstatus": "active",
+              "child_created_at": "2026-07-13T20:59:59.381573+00:00",
+              "child_deleted": false,
+              "child_euid": "M-DGX-K2BD",
+              "child_missing": false,
+              "child_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "child_record_revision": 0,
+              "child_type": "artifact",
+              "coordinates_sha256": "1fb5a1f9821c8ed1b026415f4cf47150041c589d1270931c4a7d90ceee17d573",
+              "lineage_created_at": "2026-07-13T20:59:59.965329+00:00",
+              "lineage_deleted": false,
+              "lineage_euid": "M-EDG-A9F4",
+              "lineage_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "lineage_record_revision": 0,
+              "relationship_type": "artifact_set_member",
+              "same_domain_as_set": true,
+              "same_issuer_as_set": true,
+              "storage_backend": "s3",
+              "storage_kind": "object",
+              "unknown_child_type_sha256": null,
+              "unknown_storage_backend_sha256": null,
+              "unknown_storage_kind_sha256": null
+            },
+            {
+              "child_bstatus": "active",
+              "child_created_at": "2026-07-13T20:59:59.757424+00:00",
+              "child_deleted": false,
+              "child_euid": "M-DGX-K2E7",
+              "child_missing": false,
+              "child_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "child_record_revision": 0,
+              "child_type": "artifact",
+              "coordinates_sha256": "be431070361c679dc232116228c9f33a897cb0d6c5c8535c1b9c1e1491dfab93",
+              "lineage_created_at": "2026-07-13T21:00:00.042801+00:00",
+              "lineage_deleted": false,
+              "lineage_euid": "M-EDG-A9G1",
+              "lineage_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "lineage_record_revision": 0,
+              "relationship_type": "artifact_set_member",
+              "same_domain_as_set": true,
+              "same_issuer_as_set": true,
+              "storage_backend": "s3",
+              "storage_kind": "object",
+              "unknown_child_type_sha256": null,
+              "unknown_storage_backend_sha256": null,
+              "unknown_storage_kind_sha256": null
+            }
+          ],
+          "member_limit": 1000,
+          "observed_edge_count": 2,
+          "read_limit": 1001,
+          "recursive": false,
+          "relationship_type": "artifact_set_member",
+          "returned_edge_count": 2,
+          "set_created_at": "2026-07-13T20:59:59.890492+00:00",
+          "set_deleted": false,
+          "set_euid": "M-DGX-K2G2",
+          "set_modified_at": "2026-09-11T10:50:02.438993+00:00",
+          "set_record_revision": 0,
+          "share_parent_edges": [
+            {
+              "lineage_created_at": "2026-07-14T22:34:34.038425+00:00",
+              "lineage_deleted": false,
+              "lineage_euid": "M-EDG-AA1Z",
+              "lineage_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "lineage_record_revision": 0,
+              "relationship_type": "has_share",
+              "unknown_relationship_type_sha256": null
+            }
+          ]
+        }
+      ],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3",
+        "presigned_s3_manifest",
+        "cloudfront_signed_url",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K3QK",
+      "expires_at": "2026-07-14T22:44:34.037574+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 6,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_set",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AA1Z",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2G2",
+          "parent_type": "artifact_set",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "21ab663fdc8153ffac190bf11bf94bb8a48cc98b0af3c9baf3d8a6b0196d6393",
+      "reason": "No persisted artifact member lineage; explicit disposition required",
+      "record_revision": 0,
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "artifact_set_parent_membership": [],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3_manifest",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K3SF",
+      "expires_at": "2026-07-14T22:44:34.109573+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 4,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_prefix",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AA2X",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K3KV",
+          "parent_type": "artifact",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "d89e63513baa747d3113ee82ce3c73aaa62ef043f6747fe010d247cad0dcd8c8",
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "record_revision": 0,
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "artifact_set_parent_membership": [
+        {
+          "complete": true,
+          "items": [
+            {
+              "child_bstatus": "active",
+              "child_created_at": "2026-07-13T20:59:59.381573+00:00",
+              "child_deleted": false,
+              "child_euid": "M-DGX-K2BD",
+              "child_missing": false,
+              "child_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "child_record_revision": 0,
+              "child_type": "artifact",
+              "coordinates_sha256": "1fb5a1f9821c8ed1b026415f4cf47150041c589d1270931c4a7d90ceee17d573",
+              "lineage_created_at": "2026-07-13T20:59:59.965329+00:00",
+              "lineage_deleted": false,
+              "lineage_euid": "M-EDG-A9F4",
+              "lineage_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "lineage_record_revision": 0,
+              "relationship_type": "artifact_set_member",
+              "same_domain_as_set": true,
+              "same_issuer_as_set": true,
+              "storage_backend": "s3",
+              "storage_kind": "object",
+              "unknown_child_type_sha256": null,
+              "unknown_storage_backend_sha256": null,
+              "unknown_storage_kind_sha256": null
+            },
+            {
+              "child_bstatus": "active",
+              "child_created_at": "2026-07-13T20:59:59.757424+00:00",
+              "child_deleted": false,
+              "child_euid": "M-DGX-K2E7",
+              "child_missing": false,
+              "child_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "child_record_revision": 0,
+              "child_type": "artifact",
+              "coordinates_sha256": "be431070361c679dc232116228c9f33a897cb0d6c5c8535c1b9c1e1491dfab93",
+              "lineage_created_at": "2026-07-13T21:00:00.042801+00:00",
+              "lineage_deleted": false,
+              "lineage_euid": "M-EDG-A9G1",
+              "lineage_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "lineage_record_revision": 0,
+              "relationship_type": "artifact_set_member",
+              "same_domain_as_set": true,
+              "same_issuer_as_set": true,
+              "storage_backend": "s3",
+              "storage_kind": "object",
+              "unknown_child_type_sha256": null,
+              "unknown_storage_backend_sha256": null,
+              "unknown_storage_kind_sha256": null
+            }
+          ],
+          "member_limit": 1000,
+          "observed_edge_count": 2,
+          "read_limit": 1001,
+          "recursive": false,
+          "relationship_type": "artifact_set_member",
+          "returned_edge_count": 2,
+          "set_created_at": "2026-07-13T20:59:59.890492+00:00",
+          "set_deleted": false,
+          "set_euid": "M-DGX-K2G2",
+          "set_modified_at": "2026-09-11T10:50:02.438993+00:00",
+          "set_record_revision": 0,
+          "share_parent_edges": [
+            {
+              "lineage_created_at": "2026-07-14T22:34:34.180697+00:00",
+              "lineage_deleted": false,
+              "lineage_euid": "M-EDG-AA4S",
+              "lineage_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "lineage_record_revision": 0,
+              "relationship_type": "has_share",
+              "unknown_relationship_type_sha256": null
+            }
+          ]
+        }
+      ],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3",
+        "presigned_s3_manifest",
+        "cloudfront_signed_url",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K3VB",
+      "expires_at": "2026-07-14T22:44:34.179936+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 6,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": false,
+        "target_kind": "mixed_set",
+        "targets_count": 2
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AA3V",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2BD",
+          "parent_type": "artifact",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        },
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AA4S",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2G2",
+          "parent_type": "artifact_set",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "fc9b9fcf6b0bd3a6f57055fb9a2a8ec317875a05776989d1470985decc81680b",
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "record_revision": 0,
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "artifact_set_parent_membership": [],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3",
+        "presigned_s3_manifest",
+        "cloudfront_signed_url",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K3Z3",
+      "expires_at": "2026-07-14T23:06:31.862298+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 3,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_object",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AA6N",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2BD",
+          "parent_type": "artifact",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "6d007407b83a9d7d4a0ee8852945b2223cbb5604bed4e183f61607d211b31ded",
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "record_revision": 0,
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "artifact_set_parent_membership": [
+        {
+          "complete": true,
+          "items": [
+            {
+              "child_bstatus": "active",
+              "child_created_at": "2026-07-13T20:59:59.381573+00:00",
+              "child_deleted": false,
+              "child_euid": "M-DGX-K2BD",
+              "child_missing": false,
+              "child_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "child_record_revision": 0,
+              "child_type": "artifact",
+              "coordinates_sha256": "1fb5a1f9821c8ed1b026415f4cf47150041c589d1270931c4a7d90ceee17d573",
+              "lineage_created_at": "2026-07-13T20:59:59.965329+00:00",
+              "lineage_deleted": false,
+              "lineage_euid": "M-EDG-A9F4",
+              "lineage_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "lineage_record_revision": 0,
+              "relationship_type": "artifact_set_member",
+              "same_domain_as_set": true,
+              "same_issuer_as_set": true,
+              "storage_backend": "s3",
+              "storage_kind": "object",
+              "unknown_child_type_sha256": null,
+              "unknown_storage_backend_sha256": null,
+              "unknown_storage_kind_sha256": null
+            },
+            {
+              "child_bstatus": "active",
+              "child_created_at": "2026-07-13T20:59:59.757424+00:00",
+              "child_deleted": false,
+              "child_euid": "M-DGX-K2E7",
+              "child_missing": false,
+              "child_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "child_record_revision": 0,
+              "child_type": "artifact",
+              "coordinates_sha256": "be431070361c679dc232116228c9f33a897cb0d6c5c8535c1b9c1e1491dfab93",
+              "lineage_created_at": "2026-07-13T21:00:00.042801+00:00",
+              "lineage_deleted": false,
+              "lineage_euid": "M-EDG-A9G1",
+              "lineage_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "lineage_record_revision": 0,
+              "relationship_type": "artifact_set_member",
+              "same_domain_as_set": true,
+              "same_issuer_as_set": true,
+              "storage_backend": "s3",
+              "storage_kind": "object",
+              "unknown_child_type_sha256": null,
+              "unknown_storage_backend_sha256": null,
+              "unknown_storage_kind_sha256": null
+            }
+          ],
+          "member_limit": 1000,
+          "observed_edge_count": 2,
+          "read_limit": 1001,
+          "recursive": false,
+          "relationship_type": "artifact_set_member",
+          "returned_edge_count": 2,
+          "set_created_at": "2026-07-13T20:59:59.890492+00:00",
+          "set_deleted": false,
+          "set_euid": "M-DGX-K2G2",
+          "set_modified_at": "2026-09-11T10:50:02.438993+00:00",
+          "set_record_revision": 0,
+          "share_parent_edges": [
+            {
+              "lineage_created_at": "2026-07-14T22:56:31.962330+00:00",
+              "lineage_deleted": false,
+              "lineage_euid": "M-EDG-AA7K",
+              "lineage_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "lineage_record_revision": 0,
+              "relationship_type": "has_share",
+              "unknown_relationship_type_sha256": null
+            }
+          ]
+        }
+      ],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3",
+        "presigned_s3_manifest",
+        "cloudfront_signed_url",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K41Z",
+      "expires_at": "2026-07-14T23:06:31.961582+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 2,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_set",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AA7K",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2G2",
+          "parent_type": "artifact_set",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "b69f65442cec59a00a9e992ccf50ed7706032940c00fe89abb26f0532d1f50f2",
+      "reason": "No persisted artifact member lineage; explicit disposition required",
+      "record_revision": 0,
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "artifact_set_parent_membership": [],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3_manifest",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K43V",
+      "expires_at": "2026-07-14T23:06:32.033277+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 2,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_prefix",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AA8H",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K3KV",
+          "parent_type": "artifact",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "938b265a6cc91de1553541dcb7d306b7be06bd35a3470444d4d3e2165ffa85bb",
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "record_revision": 0,
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "artifact_set_parent_membership": [
+        {
+          "complete": true,
+          "items": [
+            {
+              "child_bstatus": "active",
+              "child_created_at": "2026-07-13T20:59:59.381573+00:00",
+              "child_deleted": false,
+              "child_euid": "M-DGX-K2BD",
+              "child_missing": false,
+              "child_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "child_record_revision": 0,
+              "child_type": "artifact",
+              "coordinates_sha256": "1fb5a1f9821c8ed1b026415f4cf47150041c589d1270931c4a7d90ceee17d573",
+              "lineage_created_at": "2026-07-13T20:59:59.965329+00:00",
+              "lineage_deleted": false,
+              "lineage_euid": "M-EDG-A9F4",
+              "lineage_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "lineage_record_revision": 0,
+              "relationship_type": "artifact_set_member",
+              "same_domain_as_set": true,
+              "same_issuer_as_set": true,
+              "storage_backend": "s3",
+              "storage_kind": "object",
+              "unknown_child_type_sha256": null,
+              "unknown_storage_backend_sha256": null,
+              "unknown_storage_kind_sha256": null
+            },
+            {
+              "child_bstatus": "active",
+              "child_created_at": "2026-07-13T20:59:59.757424+00:00",
+              "child_deleted": false,
+              "child_euid": "M-DGX-K2E7",
+              "child_missing": false,
+              "child_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "child_record_revision": 0,
+              "child_type": "artifact",
+              "coordinates_sha256": "be431070361c679dc232116228c9f33a897cb0d6c5c8535c1b9c1e1491dfab93",
+              "lineage_created_at": "2026-07-13T21:00:00.042801+00:00",
+              "lineage_deleted": false,
+              "lineage_euid": "M-EDG-A9G1",
+              "lineage_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "lineage_record_revision": 0,
+              "relationship_type": "artifact_set_member",
+              "same_domain_as_set": true,
+              "same_issuer_as_set": true,
+              "storage_backend": "s3",
+              "storage_kind": "object",
+              "unknown_child_type_sha256": null,
+              "unknown_storage_backend_sha256": null,
+              "unknown_storage_kind_sha256": null
+            }
+          ],
+          "member_limit": 1000,
+          "observed_edge_count": 2,
+          "read_limit": 1001,
+          "recursive": false,
+          "relationship_type": "artifact_set_member",
+          "returned_edge_count": 2,
+          "set_created_at": "2026-07-13T20:59:59.890492+00:00",
+          "set_deleted": false,
+          "set_euid": "M-DGX-K2G2",
+          "set_modified_at": "2026-09-11T10:50:02.438993+00:00",
+          "set_record_revision": 0,
+          "share_parent_edges": [
+            {
+              "lineage_created_at": "2026-07-14T22:56:32.102395+00:00",
+              "lineage_deleted": false,
+              "lineage_euid": "M-EDG-AAAD",
+              "lineage_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "lineage_record_revision": 0,
+              "relationship_type": "has_share",
+              "unknown_relationship_type_sha256": null
+            }
+          ]
+        }
+      ],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3",
+        "presigned_s3_manifest",
+        "cloudfront_signed_url",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K45Q",
+      "expires_at": "2026-07-14T23:06:32.101637+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 2,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": false,
+        "target_kind": "mixed_set",
+        "targets_count": 2
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AA9F",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2BD",
+          "parent_type": "artifact",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        },
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AAAD",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2G2",
+          "parent_type": "artifact_set",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "24621a896d2d1ab3610761d967b6659b375380646a19ab4395e0179f9b98c9ee",
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "record_revision": 0,
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "artifact_set_parent_membership": [],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3",
+        "presigned_s3_manifest",
+        "cloudfront_signed_url",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K47K",
+      "expires_at": "2026-07-14T23:16:00.682508+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 8,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_object",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AABB",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2BD",
+          "parent_type": "artifact",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "06cb84d7b22dabfb75a4878a61f83f591a1d56052cb0e1e03e969205adba1ddd",
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "record_revision": 0,
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "artifact_set_parent_membership": [
+        {
+          "complete": true,
+          "items": [
+            {
+              "child_bstatus": "active",
+              "child_created_at": "2026-07-13T20:59:59.381573+00:00",
+              "child_deleted": false,
+              "child_euid": "M-DGX-K2BD",
+              "child_missing": false,
+              "child_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "child_record_revision": 0,
+              "child_type": "artifact",
+              "coordinates_sha256": "1fb5a1f9821c8ed1b026415f4cf47150041c589d1270931c4a7d90ceee17d573",
+              "lineage_created_at": "2026-07-13T20:59:59.965329+00:00",
+              "lineage_deleted": false,
+              "lineage_euid": "M-EDG-A9F4",
+              "lineage_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "lineage_record_revision": 0,
+              "relationship_type": "artifact_set_member",
+              "same_domain_as_set": true,
+              "same_issuer_as_set": true,
+              "storage_backend": "s3",
+              "storage_kind": "object",
+              "unknown_child_type_sha256": null,
+              "unknown_storage_backend_sha256": null,
+              "unknown_storage_kind_sha256": null
+            },
+            {
+              "child_bstatus": "active",
+              "child_created_at": "2026-07-13T20:59:59.757424+00:00",
+              "child_deleted": false,
+              "child_euid": "M-DGX-K2E7",
+              "child_missing": false,
+              "child_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "child_record_revision": 0,
+              "child_type": "artifact",
+              "coordinates_sha256": "be431070361c679dc232116228c9f33a897cb0d6c5c8535c1b9c1e1491dfab93",
+              "lineage_created_at": "2026-07-13T21:00:00.042801+00:00",
+              "lineage_deleted": false,
+              "lineage_euid": "M-EDG-A9G1",
+              "lineage_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "lineage_record_revision": 0,
+              "relationship_type": "artifact_set_member",
+              "same_domain_as_set": true,
+              "same_issuer_as_set": true,
+              "storage_backend": "s3",
+              "storage_kind": "object",
+              "unknown_child_type_sha256": null,
+              "unknown_storage_backend_sha256": null,
+              "unknown_storage_kind_sha256": null
+            }
+          ],
+          "member_limit": 1000,
+          "observed_edge_count": 2,
+          "read_limit": 1001,
+          "recursive": false,
+          "relationship_type": "artifact_set_member",
+          "returned_edge_count": 2,
+          "set_created_at": "2026-07-13T20:59:59.890492+00:00",
+          "set_deleted": false,
+          "set_euid": "M-DGX-K2G2",
+          "set_modified_at": "2026-09-11T10:50:02.438993+00:00",
+          "set_record_revision": 0,
+          "share_parent_edges": [
+            {
+              "lineage_created_at": "2026-07-14T23:06:00.780491+00:00",
+              "lineage_deleted": false,
+              "lineage_euid": "M-EDG-AAC9",
+              "lineage_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "lineage_record_revision": 0,
+              "relationship_type": "has_share",
+              "unknown_relationship_type_sha256": null
+            }
+          ]
+        }
+      ],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3",
+        "presigned_s3_manifest",
+        "cloudfront_signed_url",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K49F",
+      "expires_at": "2026-07-14T23:16:00.779559+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 7,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_set",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AAC9",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2G2",
+          "parent_type": "artifact_set",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "1da7f8bb6d0804ba263a14ceffac2ec35f47273643ae430fb6245169c1b33d4e",
+      "reason": "No persisted artifact member lineage; explicit disposition required",
+      "record_revision": 0,
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "artifact_set_parent_membership": [],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3_manifest",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K4BB",
+      "expires_at": "2026-07-14T23:16:00.853926+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 5,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_prefix",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AAD7",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K3KV",
+          "parent_type": "artifact",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "b6d82eb1dffc61ce3923219c72d9b11f2432706c187436fc53991612f7436426",
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "record_revision": 0,
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "artifact_set_parent_membership": [
+        {
+          "complete": true,
+          "items": [
+            {
+              "child_bstatus": "active",
+              "child_created_at": "2026-07-13T20:59:59.381573+00:00",
+              "child_deleted": false,
+              "child_euid": "M-DGX-K2BD",
+              "child_missing": false,
+              "child_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "child_record_revision": 0,
+              "child_type": "artifact",
+              "coordinates_sha256": "1fb5a1f9821c8ed1b026415f4cf47150041c589d1270931c4a7d90ceee17d573",
+              "lineage_created_at": "2026-07-13T20:59:59.965329+00:00",
+              "lineage_deleted": false,
+              "lineage_euid": "M-EDG-A9F4",
+              "lineage_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "lineage_record_revision": 0,
+              "relationship_type": "artifact_set_member",
+              "same_domain_as_set": true,
+              "same_issuer_as_set": true,
+              "storage_backend": "s3",
+              "storage_kind": "object",
+              "unknown_child_type_sha256": null,
+              "unknown_storage_backend_sha256": null,
+              "unknown_storage_kind_sha256": null
+            },
+            {
+              "child_bstatus": "active",
+              "child_created_at": "2026-07-13T20:59:59.757424+00:00",
+              "child_deleted": false,
+              "child_euid": "M-DGX-K2E7",
+              "child_missing": false,
+              "child_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "child_record_revision": 0,
+              "child_type": "artifact",
+              "coordinates_sha256": "be431070361c679dc232116228c9f33a897cb0d6c5c8535c1b9c1e1491dfab93",
+              "lineage_created_at": "2026-07-13T21:00:00.042801+00:00",
+              "lineage_deleted": false,
+              "lineage_euid": "M-EDG-A9G1",
+              "lineage_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "lineage_record_revision": 0,
+              "relationship_type": "artifact_set_member",
+              "same_domain_as_set": true,
+              "same_issuer_as_set": true,
+              "storage_backend": "s3",
+              "storage_kind": "object",
+              "unknown_child_type_sha256": null,
+              "unknown_storage_backend_sha256": null,
+              "unknown_storage_kind_sha256": null
+            }
+          ],
+          "member_limit": 1000,
+          "observed_edge_count": 2,
+          "read_limit": 1001,
+          "recursive": false,
+          "relationship_type": "artifact_set_member",
+          "returned_edge_count": 2,
+          "set_created_at": "2026-07-13T20:59:59.890492+00:00",
+          "set_deleted": false,
+          "set_euid": "M-DGX-K2G2",
+          "set_modified_at": "2026-09-11T10:50:02.438993+00:00",
+          "set_record_revision": 0,
+          "share_parent_edges": [
+            {
+              "lineage_created_at": "2026-07-14T23:06:00.938358+00:00",
+              "lineage_deleted": false,
+              "lineage_euid": "M-EDG-AAF3",
+              "lineage_modified_at": "2026-09-11T10:50:02.438993+00:00",
+              "lineage_record_revision": 0,
+              "relationship_type": "has_share",
+              "unknown_relationship_type_sha256": null
+            }
+          ]
+        }
+      ],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "presigned_s3",
+        "presigned_s3_manifest",
+        "cloudfront_signed_url",
+        "cloudfront_signed_cookie",
+        "dewey_html_browser"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K4D7",
+      "expires_at": "2026-07-14T23:16:00.937454+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 7,
+      "legacy_recipient_counts": {
+        "domain": 0,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": false,
+        "target_kind": "mixed_set",
+        "targets_count": 2
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AAE5",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2BD",
+          "parent_type": "artifact",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        },
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-AAF3",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K2G2",
+          "parent_type": "artifact_set",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "8b7eceb31f0ea49d641f30782f6179acef5165c0906b6d5ea6006ce99f574e54",
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "record_revision": 0,
+      "status": "revoked",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "artifact_set_parent_membership": [],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "cloudfront_signed_url"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K8ZY",
+      "expires_at": "2026-07-18T15:26:40.734667+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 1,
+      "legacy_recipient_counts": {
+        "domain": 1,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_object",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-ACHW",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K8T8",
+          "parent_type": "artifact",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "809b09678e9496c838ed3018adbdf691c41824cf0ec1d1a5db28b6041bc78941",
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "record_revision": 0,
+      "status": "active",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "artifact_set_parent_membership": [],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "cloudfront_signed_url"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-K91T",
+      "expires_at": "2026-07-18T15:26:41.014693+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 1,
+      "legacy_recipient_counts": {
+        "domain": 1,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_object",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-ACJT",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-K8X2",
+          "parent_type": "artifact",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "1e2217a3c39ad0faea0428e0f5d89b8becee783b2353df90e53e4a572e1edfe9",
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "record_revision": 0,
+      "status": "active",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "artifact_set_parent_membership": [],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "cloudfront_signed_url"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-M61V",
+      "expires_at": "2026-07-18T21:13:45.608592+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 1,
+      "legacy_recipient_counts": {
+        "domain": 1,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_object",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-ACKR",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-M5W5",
+          "parent_type": "artifact",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "d8a47a50760cb8fe701bd1c8eadb2f18b7a3c419a5e93ee804863f298e5d75db",
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "record_revision": 0,
+      "status": "active",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "artifact_set_parent_membership": [],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "cloudfront_signed_url"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-M63Q",
+      "expires_at": "2026-07-18T21:13:45.836191+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 1,
+      "legacy_recipient_counts": {
+        "domain": 1,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_object",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-ACMP",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-M5ZZ",
+          "parent_type": "artifact",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "4e4ee8a407b7537168c18ff867dec2c28396daa487dc2995c91a233de4dcd7d2",
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "record_revision": 0,
+      "status": "active",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "artifact_set_parent_membership": [],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "cloudfront_signed_url"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-MDQ7",
+      "expires_at": "2026-07-19T14:59:11.577443+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 0,
+      "legacy_recipient_counts": {
+        "domain": 1,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_object",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-ACSC",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-MDNB",
+          "parent_type": "artifact",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "0f63a37b8aec5543a82c8147ae99ec807de0a3ea710783534c414a0c90536ed6",
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "record_revision": 0,
+      "status": "active",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "artifact_set_parent_membership": [],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "cloudfront_signed_url"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-MDWX",
+      "expires_at": "2026-07-31T21:30:59.250742+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 1,
+      "legacy_recipient_counts": {
+        "domain": 1,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_object",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-ACTA",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-MDT1",
+          "parent_type": "artifact",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "392f7c7cb1e318631c389216a218f0351046ee8d41360d1beb4dae1a64b0b62b",
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "record_revision": 0,
+      "status": "active",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    },
+    {
+      "artifact_set_parent_membership": [],
+      "audience": null,
+      "bstatus": "active",
+      "delivery_modes": [
+        "cloudfront_signed_url"
+      ],
+      "delivery_modes_invalid_type": false,
+      "euid": "M-DGX-ME1K",
+      "expires_at": "2026-07-31T21:31:00.129877+00:00",
+      "expires_at_invalid": false,
+      "grant_count": 0,
+      "grant_recipient_type_counts": {
+        "domain": 0,
+        "email": 0,
+        "other": 0
+      },
+      "grant_status_counts": {
+        "active": 0,
+        "other": 0,
+        "revoked": 0,
+        "superseded": 0
+      },
+      "legacy_audit_event_count": 1,
+      "legacy_recipient_counts": {
+        "domain": 1,
+        "email": 1,
+        "group": 0
+      },
+      "metadata_reference_evidence": {
+        "authoritative": false,
+        "target_euid_present": true,
+        "target_kind": "artifact_object",
+        "targets_count": 0
+      },
+      "parent_lineage": [
+        {
+          "lineage_deleted": false,
+          "lineage_euid": "M-EDG-ACV8",
+          "parent_bstatus": "active",
+          "parent_deleted": false,
+          "parent_euid": "M-DGX-MDZQ",
+          "parent_type": "artifact",
+          "relationship_type": "has_share",
+          "unknown_parent_type_sha256": null,
+          "unknown_relationship_type_sha256": null
+        }
+      ],
+      "payload_sha256": "2850420e908d850ee943517e1ea9b9656e0b37ab654d323c28211fc57608bfd0",
+      "reason": "CloudFront or unknown delivery needs explicit disposition",
+      "record_revision": 0,
+      "status": "active",
+      "typed_audit_event_count": 0,
+      "unknown_delivery_mode_sha256": []
+    }
+  ],
+  "source_file_sha256": "86542f3bf822088fe6e505d4d351ee5a577e6406af998250274c7aca9a1312a1"
+}

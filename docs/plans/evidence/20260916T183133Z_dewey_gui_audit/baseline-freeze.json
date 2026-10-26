@@ -1,0 +1,18 @@
+{
+  "frozen_at": "2026-09-16T20:08:29.177423+00:00",
+  "source_head": "df6d4d0646fc1385c35ff2b6353478a46b4587ac",
+  "source_changes": [],
+  "features": 189,
+  "bugs": [
+    "D01",
+    "D02",
+    "D04",
+    "D05",
+    "D06"
+  ],
+  "withdrawn": [
+    "D03"
+  ],
+  "observations_sha256": "464eea577daca1b8f4a4ad8a991bfce37d64293528e47aeb58ca4ff672296ef8",
+  "baseline_results_complete": true
+}

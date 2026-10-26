@@ -1,0 +1,1159 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / S3 BROWSER
+  - heading "S3 Browser" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - textbox "S3 URI":
+    - /placeholder: s3://bucket/exact/prefix/
+    - text: s3://lsmc-dayoa-references-usw2/
+  - button "Go"
+  - link "All buckets":
+    - /url: /storage
+  - generic: s3://lsmc-dayoa-references-usw2/
+  - button "Upload files"
+  - link "Register this folder":
+    - /url: /add?kind=prefix&uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2F
+  - link "lsmc-dayoa-references-usw2":
+    - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2F
+  - searchbox "Filter names on this page"
+  - button "Register selection as a set"
+  - table:
+    - rowgroup:
+      - row "Kind Name Size Registration":
+        - columnheader "Kind"
+        - columnheader "Name"
+        - columnheader "Size"
+        - columnheader "Registration"
+    - rowgroup:
+      - row "Select dayec-transient/ prefix dayec-transient/ — Register":
+        - cell "Select dayec-transient/ prefix":
+          - checkbox "Select dayec-transient/"
+          - generic: prefix
+        - cell "dayec-transient/":
+          - link "dayec-transient/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Fdayec-transient%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Fdayec-transient%2F&kind=prefix
+      - row "Select dyec-headnode-upload/ prefix dyec-headnode-upload/ — Register":
+        - cell "Select dyec-headnode-upload/ prefix":
+          - checkbox "Select dyec-headnode-upload/"
+          - generic: prefix
+        - cell "dyec-headnode-upload/":
+          - link "dyec-headnode-upload/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Fdyec-headnode-upload%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Fdyec-headnode-upload%2F&kind=prefix
+      - row "Select dyec-transient/ prefix dyec-transient/ — Register":
+        - cell "Select dyec-transient/ prefix":
+          - checkbox "Select dyec-transient/"
+          - generic: prefix
+        - cell "dyec-transient/":
+          - link "dyec-transient/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Fdyec-transient%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Fdyec-transient%2F&kind=prefix
+      - row "Select dyec_headnode_transfers/ prefix dyec_headnode_transfers/ — Register":
+        - cell "Select dyec_headnode_transfers/ prefix":
+          - checkbox "Select dyec_headnode_transfers/"
+          - generic: prefix
+        - cell "dyec_headnode_transfers/":
+          - link "dyec_headnode_transfers/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Fdyec_headnode_transfers%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Fdyec_headnode_transfers%2F&kind=prefix
+      - row "Select genomic_annotations/ prefix genomic_annotations/ — Register":
+        - cell "Select genomic_annotations/ prefix":
+          - checkbox "Select genomic_annotations/"
+          - generic: prefix
+        - cell "genomic_annotations/":
+          - link "genomic_annotations/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Fgenomic_annotations%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Fgenomic_annotations%2F&kind=prefix
+      - row "Select genomic_data/ prefix genomic_data/ — Register":
+        - cell "Select genomic_data/ prefix":
+          - checkbox "Select genomic_data/"
+          - generic: prefix
+        - cell "genomic_data/":
+          - link "genomic_data/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Fgenomic_data%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Fgenomic_data%2F&kind=prefix
+      - row "Select runtime_assets/ prefix runtime_assets/ — Register":
+        - cell "Select runtime_assets/ prefix":
+          - checkbox "Select runtime_assets/"
+          - generic: prefix
+        - cell "runtime_assets/":
+          - link "runtime_assets/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Fruntime_assets%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Fruntime_assets%2F&kind=prefix
+      - row "Select task-0008eef365e342035/ prefix task-0008eef365e342035/ — Register":
+        - cell "Select task-0008eef365e342035/ prefix":
+          - checkbox "Select task-0008eef365e342035/"
+          - generic: prefix
+        - cell "task-0008eef365e342035/":
+          - link "task-0008eef365e342035/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0008eef365e342035%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0008eef365e342035%2F&kind=prefix
+      - row "Select task-00140922c020e6444/ prefix task-00140922c020e6444/ — Register":
+        - cell "Select task-00140922c020e6444/ prefix":
+          - checkbox "Select task-00140922c020e6444/"
+          - generic: prefix
+        - cell "task-00140922c020e6444/":
+          - link "task-00140922c020e6444/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-00140922c020e6444%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-00140922c020e6444%2F&kind=prefix
+      - row "Select task-0018ccea0cd5467f6/ prefix task-0018ccea0cd5467f6/ — Register":
+        - cell "Select task-0018ccea0cd5467f6/ prefix":
+          - checkbox "Select task-0018ccea0cd5467f6/"
+          - generic: prefix
+        - cell "task-0018ccea0cd5467f6/":
+          - link "task-0018ccea0cd5467f6/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0018ccea0cd5467f6%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0018ccea0cd5467f6%2F&kind=prefix
+      - row "Select task-00290880a59a4f2ee/ prefix task-00290880a59a4f2ee/ — Register":
+        - cell "Select task-00290880a59a4f2ee/ prefix":
+          - checkbox "Select task-00290880a59a4f2ee/"
+          - generic: prefix
+        - cell "task-00290880a59a4f2ee/":
+          - link "task-00290880a59a4f2ee/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-00290880a59a4f2ee%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-00290880a59a4f2ee%2F&kind=prefix
+      - row "Select task-00301036ec76c7963/ prefix task-00301036ec76c7963/ — Register":
+        - cell "Select task-00301036ec76c7963/ prefix":
+          - checkbox "Select task-00301036ec76c7963/"
+          - generic: prefix
+        - cell "task-00301036ec76c7963/":
+          - link "task-00301036ec76c7963/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-00301036ec76c7963%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-00301036ec76c7963%2F&kind=prefix
+      - row "Select task-003a225a000a9d244/ prefix task-003a225a000a9d244/ — Register":
+        - cell "Select task-003a225a000a9d244/ prefix":
+          - checkbox "Select task-003a225a000a9d244/"
+          - generic: prefix
+        - cell "task-003a225a000a9d244/":
+          - link "task-003a225a000a9d244/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-003a225a000a9d244%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-003a225a000a9d244%2F&kind=prefix
+      - row "Select task-0056f3865b54f61aa/ prefix task-0056f3865b54f61aa/ — Register":
+        - cell "Select task-0056f3865b54f61aa/ prefix":
+          - checkbox "Select task-0056f3865b54f61aa/"
+          - generic: prefix
+        - cell "task-0056f3865b54f61aa/":
+          - link "task-0056f3865b54f61aa/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0056f3865b54f61aa%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0056f3865b54f61aa%2F&kind=prefix
+      - row "Select task-005ffb49b2f98b1a3/ prefix task-005ffb49b2f98b1a3/ — Register":
+        - cell "Select task-005ffb49b2f98b1a3/ prefix":
+          - checkbox "Select task-005ffb49b2f98b1a3/"
+          - generic: prefix
+        - cell "task-005ffb49b2f98b1a3/":
+          - link "task-005ffb49b2f98b1a3/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-005ffb49b2f98b1a3%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-005ffb49b2f98b1a3%2F&kind=prefix
+      - row "Select task-007d4fcb31c35e7a0/ prefix task-007d4fcb31c35e7a0/ — Register":
+        - cell "Select task-007d4fcb31c35e7a0/ prefix":
+          - checkbox "Select task-007d4fcb31c35e7a0/"
+          - generic: prefix
+        - cell "task-007d4fcb31c35e7a0/":
+          - link "task-007d4fcb31c35e7a0/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-007d4fcb31c35e7a0%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-007d4fcb31c35e7a0%2F&kind=prefix
+      - row "Select task-008c95bdbdb5fc00f/ prefix task-008c95bdbdb5fc00f/ — Register":
+        - cell "Select task-008c95bdbdb5fc00f/ prefix":
+          - checkbox "Select task-008c95bdbdb5fc00f/"
+          - generic: prefix
+        - cell "task-008c95bdbdb5fc00f/":
+          - link "task-008c95bdbdb5fc00f/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-008c95bdbdb5fc00f%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-008c95bdbdb5fc00f%2F&kind=prefix
+      - row "Select task-00d35c10c716e4650/ prefix task-00d35c10c716e4650/ — Register":
+        - cell "Select task-00d35c10c716e4650/ prefix":
+          - checkbox "Select task-00d35c10c716e4650/"
+          - generic: prefix
+        - cell "task-00d35c10c716e4650/":
+          - link "task-00d35c10c716e4650/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-00d35c10c716e4650%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-00d35c10c716e4650%2F&kind=prefix
+      - row "Select task-011f53f2935ff50f2/ prefix task-011f53f2935ff50f2/ — Register":
+        - cell "Select task-011f53f2935ff50f2/ prefix":
+          - checkbox "Select task-011f53f2935ff50f2/"
+          - generic: prefix
+        - cell "task-011f53f2935ff50f2/":
+          - link "task-011f53f2935ff50f2/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-011f53f2935ff50f2%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-011f53f2935ff50f2%2F&kind=prefix
+      - row "Select task-013815f80a7c90ec2/ prefix task-013815f80a7c90ec2/ — Register":
+        - cell "Select task-013815f80a7c90ec2/ prefix":
+          - checkbox "Select task-013815f80a7c90ec2/"
+          - generic: prefix
+        - cell "task-013815f80a7c90ec2/":
+          - link "task-013815f80a7c90ec2/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-013815f80a7c90ec2%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-013815f80a7c90ec2%2F&kind=prefix
+      - row "Select task-0157d11e4c8158df7/ prefix task-0157d11e4c8158df7/ — Register":
+        - cell "Select task-0157d11e4c8158df7/ prefix":
+          - checkbox "Select task-0157d11e4c8158df7/"
+          - generic: prefix
+        - cell "task-0157d11e4c8158df7/":
+          - link "task-0157d11e4c8158df7/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0157d11e4c8158df7%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0157d11e4c8158df7%2F&kind=prefix
+      - row "Select task-0195226bb7c131539/ prefix task-0195226bb7c131539/ — Register":
+        - cell "Select task-0195226bb7c131539/ prefix":
+          - checkbox "Select task-0195226bb7c131539/"
+          - generic: prefix
+        - cell "task-0195226bb7c131539/":
+          - link "task-0195226bb7c131539/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0195226bb7c131539%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0195226bb7c131539%2F&kind=prefix
+      - row "Select task-01b7b51548cce4e7b/ prefix task-01b7b51548cce4e7b/ — Register":
+        - cell "Select task-01b7b51548cce4e7b/ prefix":
+          - checkbox "Select task-01b7b51548cce4e7b/"
+          - generic: prefix
+        - cell "task-01b7b51548cce4e7b/":
+          - link "task-01b7b51548cce4e7b/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-01b7b51548cce4e7b%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-01b7b51548cce4e7b%2F&kind=prefix
+      - row "Select task-01d2d69093a2b3837/ prefix task-01d2d69093a2b3837/ — Register":
+        - cell "Select task-01d2d69093a2b3837/ prefix":
+          - checkbox "Select task-01d2d69093a2b3837/"
+          - generic: prefix
+        - cell "task-01d2d69093a2b3837/":
+          - link "task-01d2d69093a2b3837/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-01d2d69093a2b3837%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-01d2d69093a2b3837%2F&kind=prefix
+      - row "Select task-01f0e32616e2c5918/ prefix task-01f0e32616e2c5918/ — Register":
+        - cell "Select task-01f0e32616e2c5918/ prefix":
+          - checkbox "Select task-01f0e32616e2c5918/"
+          - generic: prefix
+        - cell "task-01f0e32616e2c5918/":
+          - link "task-01f0e32616e2c5918/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-01f0e32616e2c5918%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-01f0e32616e2c5918%2F&kind=prefix
+      - row "Select task-02349ff7241d417a2/ prefix task-02349ff7241d417a2/ — Register":
+        - cell "Select task-02349ff7241d417a2/ prefix":
+          - checkbox "Select task-02349ff7241d417a2/"
+          - generic: prefix
+        - cell "task-02349ff7241d417a2/":
+          - link "task-02349ff7241d417a2/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-02349ff7241d417a2%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-02349ff7241d417a2%2F&kind=prefix
+      - row "Select task-02388774f356aa20f/ prefix task-02388774f356aa20f/ — Register":
+        - cell "Select task-02388774f356aa20f/ prefix":
+          - checkbox "Select task-02388774f356aa20f/"
+          - generic: prefix
+        - cell "task-02388774f356aa20f/":
+          - link "task-02388774f356aa20f/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-02388774f356aa20f%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-02388774f356aa20f%2F&kind=prefix
+      - row "Select task-0272882300de481de/ prefix task-0272882300de481de/ — Register":
+        - cell "Select task-0272882300de481de/ prefix":
+          - checkbox "Select task-0272882300de481de/"
+          - generic: prefix
+        - cell "task-0272882300de481de/":
+          - link "task-0272882300de481de/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0272882300de481de%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0272882300de481de%2F&kind=prefix
+      - row "Select task-027f89a71edbf15a6/ prefix task-027f89a71edbf15a6/ — Register":
+        - cell "Select task-027f89a71edbf15a6/ prefix":
+          - checkbox "Select task-027f89a71edbf15a6/"
+          - generic: prefix
+        - cell "task-027f89a71edbf15a6/":
+          - link "task-027f89a71edbf15a6/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-027f89a71edbf15a6%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-027f89a71edbf15a6%2F&kind=prefix
+      - row "Select task-028a93eb4d8f4c728/ prefix task-028a93eb4d8f4c728/ — Register":
+        - cell "Select task-028a93eb4d8f4c728/ prefix":
+          - checkbox "Select task-028a93eb4d8f4c728/"
+          - generic: prefix
+        - cell "task-028a93eb4d8f4c728/":
+          - link "task-028a93eb4d8f4c728/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-028a93eb4d8f4c728%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-028a93eb4d8f4c728%2F&kind=prefix
+      - row "Select task-02b39b34ba1969f00/ prefix task-02b39b34ba1969f00/ — Register":
+        - cell "Select task-02b39b34ba1969f00/ prefix":
+          - checkbox "Select task-02b39b34ba1969f00/"
+          - generic: prefix
+        - cell "task-02b39b34ba1969f00/":
+          - link "task-02b39b34ba1969f00/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-02b39b34ba1969f00%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-02b39b34ba1969f00%2F&kind=prefix
+      - row "Select task-02ffc47bfbf090c9a/ prefix task-02ffc47bfbf090c9a/ — Register":
+        - cell "Select task-02ffc47bfbf090c9a/ prefix":
+          - checkbox "Select task-02ffc47bfbf090c9a/"
+          - generic: prefix
+        - cell "task-02ffc47bfbf090c9a/":
+          - link "task-02ffc47bfbf090c9a/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-02ffc47bfbf090c9a%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-02ffc47bfbf090c9a%2F&kind=prefix
+      - row "Select task-0304fad8b374a916d/ prefix task-0304fad8b374a916d/ — Register":
+        - cell "Select task-0304fad8b374a916d/ prefix":
+          - checkbox "Select task-0304fad8b374a916d/"
+          - generic: prefix
+        - cell "task-0304fad8b374a916d/":
+          - link "task-0304fad8b374a916d/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0304fad8b374a916d%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0304fad8b374a916d%2F&kind=prefix
+      - row "Select task-0312f5e303b342d5f/ prefix task-0312f5e303b342d5f/ — Register":
+        - cell "Select task-0312f5e303b342d5f/ prefix":
+          - checkbox "Select task-0312f5e303b342d5f/"
+          - generic: prefix
+        - cell "task-0312f5e303b342d5f/":
+          - link "task-0312f5e303b342d5f/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0312f5e303b342d5f%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0312f5e303b342d5f%2F&kind=prefix
+      - row "Select task-032995a1be46e73a5/ prefix task-032995a1be46e73a5/ — Register":
+        - cell "Select task-032995a1be46e73a5/ prefix":
+          - checkbox "Select task-032995a1be46e73a5/"
+          - generic: prefix
+        - cell "task-032995a1be46e73a5/":
+          - link "task-032995a1be46e73a5/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-032995a1be46e73a5%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-032995a1be46e73a5%2F&kind=prefix
+      - row "Select task-032dc7afcd300890a/ prefix task-032dc7afcd300890a/ — Register":
+        - cell "Select task-032dc7afcd300890a/ prefix":
+          - checkbox "Select task-032dc7afcd300890a/"
+          - generic: prefix
+        - cell "task-032dc7afcd300890a/":
+          - link "task-032dc7afcd300890a/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-032dc7afcd300890a%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-032dc7afcd300890a%2F&kind=prefix
+      - row "Select task-033f04b753eae26bd/ prefix task-033f04b753eae26bd/ — Register":
+        - cell "Select task-033f04b753eae26bd/ prefix":
+          - checkbox "Select task-033f04b753eae26bd/"
+          - generic: prefix
+        - cell "task-033f04b753eae26bd/":
+          - link "task-033f04b753eae26bd/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-033f04b753eae26bd%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-033f04b753eae26bd%2F&kind=prefix
+      - row "Select task-03594deccb4d82150/ prefix task-03594deccb4d82150/ — Register":
+        - cell "Select task-03594deccb4d82150/ prefix":
+          - checkbox "Select task-03594deccb4d82150/"
+          - generic: prefix
+        - cell "task-03594deccb4d82150/":
+          - link "task-03594deccb4d82150/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-03594deccb4d82150%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-03594deccb4d82150%2F&kind=prefix
+      - row "Select task-0359c7f4f8e66597e/ prefix task-0359c7f4f8e66597e/ — Register":
+        - cell "Select task-0359c7f4f8e66597e/ prefix":
+          - checkbox "Select task-0359c7f4f8e66597e/"
+          - generic: prefix
+        - cell "task-0359c7f4f8e66597e/":
+          - link "task-0359c7f4f8e66597e/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0359c7f4f8e66597e%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0359c7f4f8e66597e%2F&kind=prefix
+      - row "Select task-038f44ff289ca1f9e/ prefix task-038f44ff289ca1f9e/ — Register":
+        - cell "Select task-038f44ff289ca1f9e/ prefix":
+          - checkbox "Select task-038f44ff289ca1f9e/"
+          - generic: prefix
+        - cell "task-038f44ff289ca1f9e/":
+          - link "task-038f44ff289ca1f9e/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-038f44ff289ca1f9e%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-038f44ff289ca1f9e%2F&kind=prefix
+      - row "Select task-03b5d1518a9641adf/ prefix task-03b5d1518a9641adf/ — Register":
+        - cell "Select task-03b5d1518a9641adf/ prefix":
+          - checkbox "Select task-03b5d1518a9641adf/"
+          - generic: prefix
+        - cell "task-03b5d1518a9641adf/":
+          - link "task-03b5d1518a9641adf/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-03b5d1518a9641adf%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-03b5d1518a9641adf%2F&kind=prefix
+      - row "Select task-03c4b6a7cc1c017bc/ prefix task-03c4b6a7cc1c017bc/ — Register":
+        - cell "Select task-03c4b6a7cc1c017bc/ prefix":
+          - checkbox "Select task-03c4b6a7cc1c017bc/"
+          - generic: prefix
+        - cell "task-03c4b6a7cc1c017bc/":
+          - link "task-03c4b6a7cc1c017bc/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-03c4b6a7cc1c017bc%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-03c4b6a7cc1c017bc%2F&kind=prefix
+      - row "Select task-03cfbd6108407abe2/ prefix task-03cfbd6108407abe2/ — Register":
+        - cell "Select task-03cfbd6108407abe2/ prefix":
+          - checkbox "Select task-03cfbd6108407abe2/"
+          - generic: prefix
+        - cell "task-03cfbd6108407abe2/":
+          - link "task-03cfbd6108407abe2/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-03cfbd6108407abe2%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-03cfbd6108407abe2%2F&kind=prefix
+      - row "Select task-03ee25a226f11c3fc/ prefix task-03ee25a226f11c3fc/ — Register":
+        - cell "Select task-03ee25a226f11c3fc/ prefix":
+          - checkbox "Select task-03ee25a226f11c3fc/"
+          - generic: prefix
+        - cell "task-03ee25a226f11c3fc/":
+          - link "task-03ee25a226f11c3fc/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-03ee25a226f11c3fc%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-03ee25a226f11c3fc%2F&kind=prefix
+      - row "Select task-041c74edbf00cdb96/ prefix task-041c74edbf00cdb96/ — Register":
+        - cell "Select task-041c74edbf00cdb96/ prefix":
+          - checkbox "Select task-041c74edbf00cdb96/"
+          - generic: prefix
+        - cell "task-041c74edbf00cdb96/":
+          - link "task-041c74edbf00cdb96/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-041c74edbf00cdb96%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-041c74edbf00cdb96%2F&kind=prefix
+      - row "Select task-041da5c940123fbb3/ prefix task-041da5c940123fbb3/ — Register":
+        - cell "Select task-041da5c940123fbb3/ prefix":
+          - checkbox "Select task-041da5c940123fbb3/"
+          - generic: prefix
+        - cell "task-041da5c940123fbb3/":
+          - link "task-041da5c940123fbb3/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-041da5c940123fbb3%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-041da5c940123fbb3%2F&kind=prefix
+      - row "Select task-042de2bc38b6b777d/ prefix task-042de2bc38b6b777d/ — Register":
+        - cell "Select task-042de2bc38b6b777d/ prefix":
+          - checkbox "Select task-042de2bc38b6b777d/"
+          - generic: prefix
+        - cell "task-042de2bc38b6b777d/":
+          - link "task-042de2bc38b6b777d/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-042de2bc38b6b777d%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-042de2bc38b6b777d%2F&kind=prefix
+      - row "Select task-04bda75df550ddfe4/ prefix task-04bda75df550ddfe4/ — Register":
+        - cell "Select task-04bda75df550ddfe4/ prefix":
+          - checkbox "Select task-04bda75df550ddfe4/"
+          - generic: prefix
+        - cell "task-04bda75df550ddfe4/":
+          - link "task-04bda75df550ddfe4/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-04bda75df550ddfe4%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-04bda75df550ddfe4%2F&kind=prefix
+      - row "Select task-04d1074a4f5ddf106/ prefix task-04d1074a4f5ddf106/ — Register":
+        - cell "Select task-04d1074a4f5ddf106/ prefix":
+          - checkbox "Select task-04d1074a4f5ddf106/"
+          - generic: prefix
+        - cell "task-04d1074a4f5ddf106/":
+          - link "task-04d1074a4f5ddf106/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-04d1074a4f5ddf106%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-04d1074a4f5ddf106%2F&kind=prefix
+      - row "Select task-04f4f15e1e5618275/ prefix task-04f4f15e1e5618275/ — Register":
+        - cell "Select task-04f4f15e1e5618275/ prefix":
+          - checkbox "Select task-04f4f15e1e5618275/"
+          - generic: prefix
+        - cell "task-04f4f15e1e5618275/":
+          - link "task-04f4f15e1e5618275/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-04f4f15e1e5618275%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-04f4f15e1e5618275%2F&kind=prefix
+      - row "Select task-0503c073b542cd0c1/ prefix task-0503c073b542cd0c1/ — Register":
+        - cell "Select task-0503c073b542cd0c1/ prefix":
+          - checkbox "Select task-0503c073b542cd0c1/"
+          - generic: prefix
+        - cell "task-0503c073b542cd0c1/":
+          - link "task-0503c073b542cd0c1/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0503c073b542cd0c1%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0503c073b542cd0c1%2F&kind=prefix
+      - row "Select task-0504bcf243063d1f6/ prefix task-0504bcf243063d1f6/ — Register":
+        - cell "Select task-0504bcf243063d1f6/ prefix":
+          - checkbox "Select task-0504bcf243063d1f6/"
+          - generic: prefix
+        - cell "task-0504bcf243063d1f6/":
+          - link "task-0504bcf243063d1f6/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0504bcf243063d1f6%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0504bcf243063d1f6%2F&kind=prefix
+      - row "Select task-052293d999af0b2c1/ prefix task-052293d999af0b2c1/ — Register":
+        - cell "Select task-052293d999af0b2c1/ prefix":
+          - checkbox "Select task-052293d999af0b2c1/"
+          - generic: prefix
+        - cell "task-052293d999af0b2c1/":
+          - link "task-052293d999af0b2c1/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-052293d999af0b2c1%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-052293d999af0b2c1%2F&kind=prefix
+      - row "Select task-052d8ed9c167bf64b/ prefix task-052d8ed9c167bf64b/ — Register":
+        - cell "Select task-052d8ed9c167bf64b/ prefix":
+          - checkbox "Select task-052d8ed9c167bf64b/"
+          - generic: prefix
+        - cell "task-052d8ed9c167bf64b/":
+          - link "task-052d8ed9c167bf64b/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-052d8ed9c167bf64b%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-052d8ed9c167bf64b%2F&kind=prefix
+      - row "Select task-052f4be7e6b128d62/ prefix task-052f4be7e6b128d62/ — Register":
+        - cell "Select task-052f4be7e6b128d62/ prefix":
+          - checkbox "Select task-052f4be7e6b128d62/"
+          - generic: prefix
+        - cell "task-052f4be7e6b128d62/":
+          - link "task-052f4be7e6b128d62/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-052f4be7e6b128d62%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-052f4be7e6b128d62%2F&kind=prefix
+      - row "Select task-053c31a4821f1781a/ prefix task-053c31a4821f1781a/ — Register":
+        - cell "Select task-053c31a4821f1781a/ prefix":
+          - checkbox "Select task-053c31a4821f1781a/"
+          - generic: prefix
+        - cell "task-053c31a4821f1781a/":
+          - link "task-053c31a4821f1781a/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-053c31a4821f1781a%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-053c31a4821f1781a%2F&kind=prefix
+      - row "Select task-05417914e51a0e3c8/ prefix task-05417914e51a0e3c8/ — Register":
+        - cell "Select task-05417914e51a0e3c8/ prefix":
+          - checkbox "Select task-05417914e51a0e3c8/"
+          - generic: prefix
+        - cell "task-05417914e51a0e3c8/":
+          - link "task-05417914e51a0e3c8/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-05417914e51a0e3c8%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-05417914e51a0e3c8%2F&kind=prefix
+      - row "Select task-056afe775cf667f98/ prefix task-056afe775cf667f98/ — Register":
+        - cell "Select task-056afe775cf667f98/ prefix":
+          - checkbox "Select task-056afe775cf667f98/"
+          - generic: prefix
+        - cell "task-056afe775cf667f98/":
+          - link "task-056afe775cf667f98/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-056afe775cf667f98%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-056afe775cf667f98%2F&kind=prefix
+      - row "Select task-057af9b3b337fff06/ prefix task-057af9b3b337fff06/ — Register":
+        - cell "Select task-057af9b3b337fff06/ prefix":
+          - checkbox "Select task-057af9b3b337fff06/"
+          - generic: prefix
+        - cell "task-057af9b3b337fff06/":
+          - link "task-057af9b3b337fff06/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-057af9b3b337fff06%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-057af9b3b337fff06%2F&kind=prefix
+      - row "Select task-058720e90d34b60f8/ prefix task-058720e90d34b60f8/ — Register":
+        - cell "Select task-058720e90d34b60f8/ prefix":
+          - checkbox "Select task-058720e90d34b60f8/"
+          - generic: prefix
+        - cell "task-058720e90d34b60f8/":
+          - link "task-058720e90d34b60f8/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-058720e90d34b60f8%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-058720e90d34b60f8%2F&kind=prefix
+      - row "Select task-05b6dbc85289db336/ prefix task-05b6dbc85289db336/ — Register":
+        - cell "Select task-05b6dbc85289db336/ prefix":
+          - checkbox "Select task-05b6dbc85289db336/"
+          - generic: prefix
+        - cell "task-05b6dbc85289db336/":
+          - link "task-05b6dbc85289db336/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-05b6dbc85289db336%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-05b6dbc85289db336%2F&kind=prefix
+      - row "Select task-05d8f7303823858a2/ prefix task-05d8f7303823858a2/ — Register":
+        - cell "Select task-05d8f7303823858a2/ prefix":
+          - checkbox "Select task-05d8f7303823858a2/"
+          - generic: prefix
+        - cell "task-05d8f7303823858a2/":
+          - link "task-05d8f7303823858a2/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-05d8f7303823858a2%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-05d8f7303823858a2%2F&kind=prefix
+      - row "Select task-05e4d38414e1a30a0/ prefix task-05e4d38414e1a30a0/ — Register":
+        - cell "Select task-05e4d38414e1a30a0/ prefix":
+          - checkbox "Select task-05e4d38414e1a30a0/"
+          - generic: prefix
+        - cell "task-05e4d38414e1a30a0/":
+          - link "task-05e4d38414e1a30a0/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-05e4d38414e1a30a0%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-05e4d38414e1a30a0%2F&kind=prefix
+      - row "Select task-05fc820d507383a15/ prefix task-05fc820d507383a15/ — Register":
+        - cell "Select task-05fc820d507383a15/ prefix":
+          - checkbox "Select task-05fc820d507383a15/"
+          - generic: prefix
+        - cell "task-05fc820d507383a15/":
+          - link "task-05fc820d507383a15/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-05fc820d507383a15%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-05fc820d507383a15%2F&kind=prefix
+      - row "Select task-061b36925917ea146/ prefix task-061b36925917ea146/ — Register":
+        - cell "Select task-061b36925917ea146/ prefix":
+          - checkbox "Select task-061b36925917ea146/"
+          - generic: prefix
+        - cell "task-061b36925917ea146/":
+          - link "task-061b36925917ea146/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-061b36925917ea146%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-061b36925917ea146%2F&kind=prefix
+      - row "Select task-0620217dd99d0fc50/ prefix task-0620217dd99d0fc50/ — Register":
+        - cell "Select task-0620217dd99d0fc50/ prefix":
+          - checkbox "Select task-0620217dd99d0fc50/"
+          - generic: prefix
+        - cell "task-0620217dd99d0fc50/":
+          - link "task-0620217dd99d0fc50/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0620217dd99d0fc50%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0620217dd99d0fc50%2F&kind=prefix
+      - row "Select task-0626ddc1cd78db41b/ prefix task-0626ddc1cd78db41b/ — Register":
+        - cell "Select task-0626ddc1cd78db41b/ prefix":
+          - checkbox "Select task-0626ddc1cd78db41b/"
+          - generic: prefix
+        - cell "task-0626ddc1cd78db41b/":
+          - link "task-0626ddc1cd78db41b/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0626ddc1cd78db41b%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0626ddc1cd78db41b%2F&kind=prefix
+      - row "Select task-065c30531d53aa3f5/ prefix task-065c30531d53aa3f5/ — Register":
+        - cell "Select task-065c30531d53aa3f5/ prefix":
+          - checkbox "Select task-065c30531d53aa3f5/"
+          - generic: prefix
+        - cell "task-065c30531d53aa3f5/":
+          - link "task-065c30531d53aa3f5/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-065c30531d53aa3f5%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-065c30531d53aa3f5%2F&kind=prefix
+      - row "Select task-065eaa67671d90b66/ prefix task-065eaa67671d90b66/ — Register":
+        - cell "Select task-065eaa67671d90b66/ prefix":
+          - checkbox "Select task-065eaa67671d90b66/"
+          - generic: prefix
+        - cell "task-065eaa67671d90b66/":
+          - link "task-065eaa67671d90b66/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-065eaa67671d90b66%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-065eaa67671d90b66%2F&kind=prefix
+      - row "Select task-06629bf7008fd4adc/ prefix task-06629bf7008fd4adc/ — Register":
+        - cell "Select task-06629bf7008fd4adc/ prefix":
+          - checkbox "Select task-06629bf7008fd4adc/"
+          - generic: prefix
+        - cell "task-06629bf7008fd4adc/":
+          - link "task-06629bf7008fd4adc/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-06629bf7008fd4adc%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-06629bf7008fd4adc%2F&kind=prefix
+      - row "Select task-06804777983683d18/ prefix task-06804777983683d18/ — Register":
+        - cell "Select task-06804777983683d18/ prefix":
+          - checkbox "Select task-06804777983683d18/"
+          - generic: prefix
+        - cell "task-06804777983683d18/":
+          - link "task-06804777983683d18/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-06804777983683d18%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-06804777983683d18%2F&kind=prefix
+      - row "Select task-068a1a72aa6ee4d5e/ prefix task-068a1a72aa6ee4d5e/ — Register":
+        - cell "Select task-068a1a72aa6ee4d5e/ prefix":
+          - checkbox "Select task-068a1a72aa6ee4d5e/"
+          - generic: prefix
+        - cell "task-068a1a72aa6ee4d5e/":
+          - link "task-068a1a72aa6ee4d5e/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-068a1a72aa6ee4d5e%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-068a1a72aa6ee4d5e%2F&kind=prefix
+      - row "Select task-068c85d39a20649c3/ prefix task-068c85d39a20649c3/ — Register":
+        - cell "Select task-068c85d39a20649c3/ prefix":
+          - checkbox "Select task-068c85d39a20649c3/"
+          - generic: prefix
+        - cell "task-068c85d39a20649c3/":
+          - link "task-068c85d39a20649c3/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-068c85d39a20649c3%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-068c85d39a20649c3%2F&kind=prefix
+      - row "Select task-06cfd246dc0fa4d85/ prefix task-06cfd246dc0fa4d85/ — Register":
+        - cell "Select task-06cfd246dc0fa4d85/ prefix":
+          - checkbox "Select task-06cfd246dc0fa4d85/"
+          - generic: prefix
+        - cell "task-06cfd246dc0fa4d85/":
+          - link "task-06cfd246dc0fa4d85/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-06cfd246dc0fa4d85%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-06cfd246dc0fa4d85%2F&kind=prefix
+      - row "Select task-06df19639f6e97d0b/ prefix task-06df19639f6e97d0b/ — Register":
+        - cell "Select task-06df19639f6e97d0b/ prefix":
+          - checkbox "Select task-06df19639f6e97d0b/"
+          - generic: prefix
+        - cell "task-06df19639f6e97d0b/":
+          - link "task-06df19639f6e97d0b/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-06df19639f6e97d0b%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-06df19639f6e97d0b%2F&kind=prefix
+      - row "Select task-071424df70275ddb3/ prefix task-071424df70275ddb3/ — Register":
+        - cell "Select task-071424df70275ddb3/ prefix":
+          - checkbox "Select task-071424df70275ddb3/"
+          - generic: prefix
+        - cell "task-071424df70275ddb3/":
+          - link "task-071424df70275ddb3/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-071424df70275ddb3%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-071424df70275ddb3%2F&kind=prefix
+      - row "Select task-0714d195813292ec3/ prefix task-0714d195813292ec3/ — Register":
+        - cell "Select task-0714d195813292ec3/ prefix":
+          - checkbox "Select task-0714d195813292ec3/"
+          - generic: prefix
+        - cell "task-0714d195813292ec3/":
+          - link "task-0714d195813292ec3/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0714d195813292ec3%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0714d195813292ec3%2F&kind=prefix
+      - row "Select task-079eb92d3a611a11b/ prefix task-079eb92d3a611a11b/ — Register":
+        - cell "Select task-079eb92d3a611a11b/ prefix":
+          - checkbox "Select task-079eb92d3a611a11b/"
+          - generic: prefix
+        - cell "task-079eb92d3a611a11b/":
+          - link "task-079eb92d3a611a11b/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-079eb92d3a611a11b%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-079eb92d3a611a11b%2F&kind=prefix
+      - row "Select task-07b7350a7c3468f34/ prefix task-07b7350a7c3468f34/ — Register":
+        - cell "Select task-07b7350a7c3468f34/ prefix":
+          - checkbox "Select task-07b7350a7c3468f34/"
+          - generic: prefix
+        - cell "task-07b7350a7c3468f34/":
+          - link "task-07b7350a7c3468f34/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-07b7350a7c3468f34%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-07b7350a7c3468f34%2F&kind=prefix
+      - row "Select task-081278489583baec2/ prefix task-081278489583baec2/ — Register":
+        - cell "Select task-081278489583baec2/ prefix":
+          - checkbox "Select task-081278489583baec2/"
+          - generic: prefix
+        - cell "task-081278489583baec2/":
+          - link "task-081278489583baec2/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-081278489583baec2%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-081278489583baec2%2F&kind=prefix
+      - row "Select task-084db24ea47736453/ prefix task-084db24ea47736453/ — Register":
+        - cell "Select task-084db24ea47736453/ prefix":
+          - checkbox "Select task-084db24ea47736453/"
+          - generic: prefix
+        - cell "task-084db24ea47736453/":
+          - link "task-084db24ea47736453/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-084db24ea47736453%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-084db24ea47736453%2F&kind=prefix
+      - row "Select task-0886cc38645244c1a/ prefix task-0886cc38645244c1a/ — Register":
+        - cell "Select task-0886cc38645244c1a/ prefix":
+          - checkbox "Select task-0886cc38645244c1a/"
+          - generic: prefix
+        - cell "task-0886cc38645244c1a/":
+          - link "task-0886cc38645244c1a/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0886cc38645244c1a%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0886cc38645244c1a%2F&kind=prefix
+      - row "Select task-089260ae0c9d12357/ prefix task-089260ae0c9d12357/ — Register":
+        - cell "Select task-089260ae0c9d12357/ prefix":
+          - checkbox "Select task-089260ae0c9d12357/"
+          - generic: prefix
+        - cell "task-089260ae0c9d12357/":
+          - link "task-089260ae0c9d12357/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-089260ae0c9d12357%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-089260ae0c9d12357%2F&kind=prefix
+      - row "Select task-08c4b2a4aa4a7abb9/ prefix task-08c4b2a4aa4a7abb9/ — Register":
+        - cell "Select task-08c4b2a4aa4a7abb9/ prefix":
+          - checkbox "Select task-08c4b2a4aa4a7abb9/"
+          - generic: prefix
+        - cell "task-08c4b2a4aa4a7abb9/":
+          - link "task-08c4b2a4aa4a7abb9/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-08c4b2a4aa4a7abb9%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-08c4b2a4aa4a7abb9%2F&kind=prefix
+      - row "Select task-08d421c1e02c1f8d7/ prefix task-08d421c1e02c1f8d7/ — Register":
+        - cell "Select task-08d421c1e02c1f8d7/ prefix":
+          - checkbox "Select task-08d421c1e02c1f8d7/"
+          - generic: prefix
+        - cell "task-08d421c1e02c1f8d7/":
+          - link "task-08d421c1e02c1f8d7/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-08d421c1e02c1f8d7%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-08d421c1e02c1f8d7%2F&kind=prefix
+      - row "Select task-08eb9d5881f8fd5ee/ prefix task-08eb9d5881f8fd5ee/ — Register":
+        - cell "Select task-08eb9d5881f8fd5ee/ prefix":
+          - checkbox "Select task-08eb9d5881f8fd5ee/"
+          - generic: prefix
+        - cell "task-08eb9d5881f8fd5ee/":
+          - link "task-08eb9d5881f8fd5ee/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-08eb9d5881f8fd5ee%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-08eb9d5881f8fd5ee%2F&kind=prefix
+      - row "Select task-0904e79f430dab6cd/ prefix task-0904e79f430dab6cd/ — Register":
+        - cell "Select task-0904e79f430dab6cd/ prefix":
+          - checkbox "Select task-0904e79f430dab6cd/"
+          - generic: prefix
+        - cell "task-0904e79f430dab6cd/":
+          - link "task-0904e79f430dab6cd/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0904e79f430dab6cd%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0904e79f430dab6cd%2F&kind=prefix
+      - row "Select task-09087359eaf94a624/ prefix task-09087359eaf94a624/ — Register":
+        - cell "Select task-09087359eaf94a624/ prefix":
+          - checkbox "Select task-09087359eaf94a624/"
+          - generic: prefix
+        - cell "task-09087359eaf94a624/":
+          - link "task-09087359eaf94a624/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-09087359eaf94a624%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-09087359eaf94a624%2F&kind=prefix
+      - row "Select task-0916cb53567772bdc/ prefix task-0916cb53567772bdc/ — Register":
+        - cell "Select task-0916cb53567772bdc/ prefix":
+          - checkbox "Select task-0916cb53567772bdc/"
+          - generic: prefix
+        - cell "task-0916cb53567772bdc/":
+          - link "task-0916cb53567772bdc/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0916cb53567772bdc%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0916cb53567772bdc%2F&kind=prefix
+      - row "Select task-092da296f65fa70c2/ prefix task-092da296f65fa70c2/ — Register":
+        - cell "Select task-092da296f65fa70c2/ prefix":
+          - checkbox "Select task-092da296f65fa70c2/"
+          - generic: prefix
+        - cell "task-092da296f65fa70c2/":
+          - link "task-092da296f65fa70c2/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-092da296f65fa70c2%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-092da296f65fa70c2%2F&kind=prefix
+      - row "Select task-0946c91fdecf0b4e2/ prefix task-0946c91fdecf0b4e2/ — Register":
+        - cell "Select task-0946c91fdecf0b4e2/ prefix":
+          - checkbox "Select task-0946c91fdecf0b4e2/"
+          - generic: prefix
+        - cell "task-0946c91fdecf0b4e2/":
+          - link "task-0946c91fdecf0b4e2/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0946c91fdecf0b4e2%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0946c91fdecf0b4e2%2F&kind=prefix
+      - row "Select task-095be31844f2dbebb/ prefix task-095be31844f2dbebb/ — Register":
+        - cell "Select task-095be31844f2dbebb/ prefix":
+          - checkbox "Select task-095be31844f2dbebb/"
+          - generic: prefix
+        - cell "task-095be31844f2dbebb/":
+          - link "task-095be31844f2dbebb/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-095be31844f2dbebb%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-095be31844f2dbebb%2F&kind=prefix
+      - row "Select task-09abbab5ebdf770be/ prefix task-09abbab5ebdf770be/ — Register":
+        - cell "Select task-09abbab5ebdf770be/ prefix":
+          - checkbox "Select task-09abbab5ebdf770be/"
+          - generic: prefix
+        - cell "task-09abbab5ebdf770be/":
+          - link "task-09abbab5ebdf770be/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-09abbab5ebdf770be%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-09abbab5ebdf770be%2F&kind=prefix
+      - row "Select task-09cc7293a2f114850/ prefix task-09cc7293a2f114850/ — Register":
+        - cell "Select task-09cc7293a2f114850/ prefix":
+          - checkbox "Select task-09cc7293a2f114850/"
+          - generic: prefix
+        - cell "task-09cc7293a2f114850/":
+          - link "task-09cc7293a2f114850/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-09cc7293a2f114850%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-09cc7293a2f114850%2F&kind=prefix
+      - row "Select task-09ce728311bf65170/ prefix task-09ce728311bf65170/ — Register":
+        - cell "Select task-09ce728311bf65170/ prefix":
+          - checkbox "Select task-09ce728311bf65170/"
+          - generic: prefix
+        - cell "task-09ce728311bf65170/":
+          - link "task-09ce728311bf65170/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-09ce728311bf65170%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-09ce728311bf65170%2F&kind=prefix
+      - row "Select task-09dfcbd41861f9b3d/ prefix task-09dfcbd41861f9b3d/ — Register":
+        - cell "Select task-09dfcbd41861f9b3d/ prefix":
+          - checkbox "Select task-09dfcbd41861f9b3d/"
+          - generic: prefix
+        - cell "task-09dfcbd41861f9b3d/":
+          - link "task-09dfcbd41861f9b3d/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-09dfcbd41861f9b3d%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-09dfcbd41861f9b3d%2F&kind=prefix
+      - row "Select task-09fd8d1a327ce02c6/ prefix task-09fd8d1a327ce02c6/ — Register":
+        - cell "Select task-09fd8d1a327ce02c6/ prefix":
+          - checkbox "Select task-09fd8d1a327ce02c6/"
+          - generic: prefix
+        - cell "task-09fd8d1a327ce02c6/":
+          - link "task-09fd8d1a327ce02c6/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-09fd8d1a327ce02c6%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-09fd8d1a327ce02c6%2F&kind=prefix
+      - row "Select task-0a052f69a5cd9cd5f/ prefix task-0a052f69a5cd9cd5f/ — Register":
+        - cell "Select task-0a052f69a5cd9cd5f/ prefix":
+          - checkbox "Select task-0a052f69a5cd9cd5f/"
+          - generic: prefix
+        - cell "task-0a052f69a5cd9cd5f/":
+          - link "task-0a052f69a5cd9cd5f/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0a052f69a5cd9cd5f%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0a052f69a5cd9cd5f%2F&kind=prefix
+      - row "Select task-0a08c1dc6c2902cd3/ prefix task-0a08c1dc6c2902cd3/ — Register":
+        - cell "Select task-0a08c1dc6c2902cd3/ prefix":
+          - checkbox "Select task-0a08c1dc6c2902cd3/"
+          - generic: prefix
+        - cell "task-0a08c1dc6c2902cd3/":
+          - link "task-0a08c1dc6c2902cd3/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0a08c1dc6c2902cd3%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Ftask-0a08c1dc6c2902cd3%2F&kind=prefix
+      - row "Select s3_reference_data_version.info object s3_reference_data_version.info 9 B Register":
+        - cell "Select s3_reference_data_version.info object":
+          - checkbox "Select s3_reference_data_version.info"
+          - generic: object
+        - cell "s3_reference_data_version.info":
+          - button "s3_reference_data_version.info"
+        - cell "9 B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2Fs3_reference_data_version.info&kind=object
+  - button "Next page"
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

@@ -1,0 +1,61 @@
+{
+  "recorded_at": "2026-09-11T06:19:33Z",
+  "source": {
+    "commit": "c484c95768a4147acdcabd12a2da0332c4c750dc",
+    "tree": "b765812bcd8d41222e373d8a16b028a4cbba6f06",
+    "repository": "https://github.com/lsmc-bio/dewey.git",
+    "branch_at_capture": "codex/dewey-packaging-20260911"
+  },
+  "context": {
+    "archive": "dewey-9.0.0-c484c95768a4-source-context.tar.gz",
+    "sha256": "78b70410759ab4abc08e17da962f77fbcda638a920a4b80b4fc88c1caf0cbefe",
+    "compressed_bytes": 314972,
+    "tracked_files": 79,
+    "contents": [
+      ".dockerignore",
+      "Dockerfile",
+      "README.md",
+      "config/",
+      "dewey_service/",
+      "docker/entrypoint.sh",
+      "pyproject.toml",
+      "uv.lock"
+    ]
+  },
+  "build": {
+    "target_platform": "linux/amd64",
+    "python_build_arg": "3.12",
+    "version_build_arg": "9.0.0",
+    "release_dockerfile": "Dockerfile.release",
+    "release_dockerfile_sha256": "16b4ec188bde0070ce47610a1364d92942f9a2f8dc51a22b5bf0b93fd22ed93e",
+    "source_dockerfile_sha256": "221fe0a763e07973c6b7b02f099ce96de7ab49d826bd0c84ec2fe5e5df1d3318",
+    "pyproject_sha256": "a2a67b3f5c47b9de0271c47527c0fa52514f4bd91b961f1dcb78a53d7cdb3d98",
+    "uv_lock_sha256": "43c88b3d5ab9950bcdba2c7f0b3158900584424fbc21192dd0e695ffe899c094",
+    "builder_base_index_digest": "sha256:31c96c071fe7d89af0f35a174582d4b9ffbdec99e0f1eada7e692d8c7000f6ee",
+    "builder_base_linux_amd64_digest": "sha256:dae7f9060850980a52f1c629f2e94024c7d267f506dbc465c170553200e19d9f",
+    "runtime_base_index_digest": "sha256:782412e85d0f0984994c290652577d4018aff08145c85b262bb63dc0c7522254",
+    "runtime_base_linux_amd64_digest": "sha256:9c47360a2a0355e2da18516d0b1c2126ec22c195d2185e97347c9d98398c5bef"
+  },
+  "image": {
+    "candidate_tag": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey:9.0.0-c484c95768a4",
+    "labels": {
+      "org.opencontainers.image.version": "9.0.0",
+      "org.opencontainers.image.revision": "c484c95768a4147acdcabd12a2da0332c4c750dc",
+      "org.opencontainers.image.source": "https://github.com/lsmc-bio/dewey.git"
+    },
+    "required_packages": {
+      "dewey-service": "9.0.0",
+      "daylily-tapdb": "10.1.1rc1",
+      "meridian-euid": "0.4.8"
+    }
+  },
+  "local_build": {
+    "status": "not_run",
+    "reason": "Docker client is installed but neither the default nor Colima engine is running; no engine was started."
+  },
+  "production": {
+    "image_published": false,
+    "deployment_changed": false,
+    "database_changed": false
+  }
+}

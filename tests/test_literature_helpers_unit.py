@@ -8,19 +8,15 @@ import pytest
 import dewey_service.literature as literature
 
 
-def test_metapub_site_packages_discovers_conda_site_packages(
+def test_metapub_load_rejects_unreadable_explicit_key(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    site_packages = tmp_path / "lib" / "python3.13" / "site-packages"
-    site_packages.mkdir(parents=True)
-    (tmp_path / "lib" / "python3.13" / "not-a-dir.txt").write_text("", encoding="utf-8")
-
-    monkeypatch.setenv("CONDA_PREFIX", str(tmp_path))
-    assert literature._metapub_site_packages() == [str(site_packages)]
-
-    monkeypatch.setenv("CONDA_PREFIX", str(tmp_path / "missing"))
-    assert literature._metapub_site_packages() == []
+    monkeypatch.setenv("DEWEY_NCBI_API_KEY_FILE", str(tmp_path / "missing-key"))
+    fetcher, findit, error = literature._load_metapub()
+    assert fetcher is None and findit is None
+    assert isinstance(error, RuntimeError)
+    assert str(error) == "Dewey cannot read its configured NCBI key file"
 
 
 def test_identifier_normalizers_cover_common_inputs() -> None:

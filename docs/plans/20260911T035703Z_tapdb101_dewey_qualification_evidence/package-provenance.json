@@ -1,0 +1,13 @@
+{
+  "version": "10.1.0",
+  "wheel_sha256": "f46cb2abfccb3000b9f9443ea00045e83fb96f6b320d2aeac0ad800ea47e8801",
+  "wheel_path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/tapdb101-dewey-qualification-20260911/runtime/qualification/packages/daylily_tapdb-10.1.0-py3-none-any.whl",
+  "module_path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/tapdb101-dewey-qualification-20260911/.venv/lib/python3.13/site-packages/daylily_tapdb/__init__.py",
+  "editable": false,
+  "python": "3.13.13 | packaged by Anaconda, Inc. | (main, Apr 14 2026, 06:14:06) [Clang 20.1.8 ]",
+  "git_commit": "9db1abb4525f2594ebdbf2a307eb8b49aa51883d",
+  "postgres_binary": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/tapdb-service-readiness-20260910/runtime/postgres-16.13/bin/postgres",
+  "postgres_version": "postgres (PostgreSQL) 16.13",
+  "test_port": 15449,
+  "production_access": false
+}

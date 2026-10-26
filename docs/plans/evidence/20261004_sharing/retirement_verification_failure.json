@@ -1,0 +1,18 @@
+{
+  "recorded_at": "2026-10-04T05:21:57.418865+00:00",
+  "failed_tag": "11.0.0",
+  "phase": "verify",
+  "applied_status": "applied",
+  "share_count": 42,
+  "retired_count": 42,
+  "changed_invariant_only": "payload_sha256 from derived display updated_at",
+  "raw_native_invariant_matches": 42,
+  "historical_audit_matches": 42,
+  "applied_native_hash_matches": 42,
+  "worker_state": "predecessor_gracefully_drained; new_worker_not_started",
+  "root_cause": "Normalized display payload derives missing updated_at from modified_dt, which archive legitimately changes",
+  "fix": "Reconstruct reviewed original synthetic updated_at for projection comparison only; retain every native integrity guard",
+  "retirement_reapply_required": false,
+  "corrected_release": "11.0.1",
+  "tests_run": false
+}

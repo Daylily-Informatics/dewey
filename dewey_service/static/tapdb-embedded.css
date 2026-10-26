@@ -1,0 +1,4 @@
+/* Shared login owns credentials; the corresponding Dewey route returns 410. */
+a[href$="/change-password"] {
+  display: none !important;
+}

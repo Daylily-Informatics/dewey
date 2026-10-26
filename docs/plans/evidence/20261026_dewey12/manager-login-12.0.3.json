@@ -1,0 +1,15 @@
+{
+  "observed_at": "2026-10-26T04:08:30.574004+00:00",
+  "method": "Native Chrome UI; user supplied existing LSMC profile sign-in",
+  "url": "https://dewey.day.lsmc.bio/ui",
+  "title": "Library \u00b7 Dewey",
+  "version": "12.0.3",
+  "authenticated_account_visible": true,
+  "admin_link_visible": true,
+  "cookie_exported": false,
+  "callback_loop_resolved": true,
+  "current_cookie_name_value_bytes": 1588,
+  "current_set_cookie_header_bytes": 1643,
+  "native_binding_checks": "all passed",
+  "limitation": "Manager login only; recipient journeys remain pending"
+}

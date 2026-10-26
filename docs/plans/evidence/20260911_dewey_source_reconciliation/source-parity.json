@@ -1,0 +1,1174 @@
+{
+  "application_package_lock_entries_identical": 73,
+  "claim": "Local Git source and mode parity; not fresh live runtime or migration acceptance",
+  "exact_imported_documents": [
+    {
+      "exact_source_bytes": true,
+      "git_blob": "0605836c16e46971174d82f655206a60650109e1",
+      "path": "docs/plans/20260910T005100Z_complete_multiqc_package.json",
+      "source_commit": "598be4d5f31525e982de01b36a284704fa603042"
+    },
+    {
+      "exact_source_bytes": true,
+      "git_blob": "0900275d89d2dddd6d8c719f9dbf9ab208734fc9",
+      "path": "docs/plans/evidence/20260910_dewey_container_cli/github/base.json",
+      "source_commit": "598be4d5f31525e982de01b36a284704fa603042"
+    },
+    {
+      "exact_source_bytes": true,
+      "git_blob": "3a5c20e6ead42aecc14e3cac5a96dc593126ed37",
+      "path": "docs/plans/evidence/20260910_dewey_container_cli/github/candidate.json",
+      "source_commit": "598be4d5f31525e982de01b36a284704fa603042"
+    },
+    {
+      "exact_source_bytes": true,
+      "git_blob": "e200246f390f8d97f457543734102d989e045c06",
+      "path": "docs/plans/evidence/20260910_dewey_container_cli/github/receipt.json",
+      "source_commit": "598be4d5f31525e982de01b36a284704fa603042"
+    },
+    {
+      "exact_source_bytes": true,
+      "git_blob": "d91106a2eede3f2a26eafc7a075ad601566a0b28",
+      "path": "docs/plans/evidence/20260910_dewey_container_cli/package-registration.json",
+      "source_commit": "598be4d5f31525e982de01b36a284704fa603042"
+    },
+    {
+      "exact_source_bytes": true,
+      "git_blob": "1a93a73b27e7620e91eb38cbcad1dd20370196a6",
+      "path": "docs/evidence/production_template_snapshots/20260719T044748Z/README.md",
+      "source_commit": "ef7f5412b5c7a4d3a8c47fb55500fa66f165b0ca"
+    },
+    {
+      "exact_source_bytes": true,
+      "git_blob": "f36197e5e438c4b117f07d88a97dccfa234aaa36",
+      "path": "docs/evidence/production_template_snapshots/20260719T044748Z/generic_templates.json",
+      "source_commit": "ef7f5412b5c7a4d3a8c47fb55500fa66f165b0ca"
+    },
+    {
+      "exact_source_bytes": true,
+      "git_blob": "aee0182f81c1b26ec60a526f0bec6c5f7f501b99",
+      "path": "docs/plans/20260901T064703Z_dewey_prod_reconciliation_capabilities_ledger.md",
+      "source_commit": "ef7f5412b5c7a4d3a8c47fb55500fa66f165b0ca"
+    }
+  ],
+  "jemdev10_is_ancestor": false,
+  "main_is_ancestor": true,
+  "manifest_hash_serialization": "SHA-256 of UTF-8 json.dumps(non_documentation_entries,sort_keys=True,separators=(comma,colon)) with no newline",
+  "non_documentation_entries": [
+    {
+      "git_object": "934d9aae0f2045ebdb04a975a6f286482d70847a",
+      "mode": "100644",
+      "path": ".dockerignore",
+      "type": "blob"
+    },
+    {
+      "git_object": "4ebf0380ab94154b7d0ffd2500cd04fc784cec96",
+      "mode": "100644",
+      "path": ".github/workflows/ci.yml",
+      "type": "blob"
+    },
+    {
+      "git_object": "6532618c8b2e9e24585c17dd0b856292dc592c51",
+      "mode": "100644",
+      "path": ".github/workflows/dewey-qeo-resolver.yml",
+      "type": "blob"
+    },
+    {
+      "git_object": "8d6bf2cb498df3054f36cd25d4d49678a490d38e",
+      "mode": "100644",
+      "path": ".github/workflows/verify-dewey-qeo-resolver.yml",
+      "type": "blob"
+    },
+    {
+      "git_object": "2559a55f60bbd170a333f58dd2643a09897d26a9",
+      "mode": "100644",
+      "path": ".gitignore",
+      "type": "blob"
+    },
+    {
+      "git_object": "4905a28e90f57046261c4c3977c73405b560b321",
+      "mode": "100644",
+      "path": ".playwright-cli/page-2026-03-31T11-25-35-150Z.yml",
+      "type": "blob"
+    },
+    {
+      "git_object": "81c4fae976b6b2d17b3b3b27ce563cb43e503027",
+      "mode": "100644",
+      "path": ".playwright-cli/page-2026-03-31T11-25-54-583Z.yml",
+      "type": "blob"
+    },
+    {
+      "git_object": "9c064d90ecc58698d08c86b0d8267bf6dc21258c",
+      "mode": "100644",
+      "path": ".playwright-cli/page-2026-03-31T11-26-15-044Z.yml",
+      "type": "blob"
+    },
+    {
+      "git_object": "0a1d32c8daacf35f96486c954fc2ed05ca77d0be",
+      "mode": "100644",
+      "path": ".playwright-cli/page-2026-03-31T11-26-25-259Z.yml",
+      "type": "blob"
+    },
+    {
+      "git_object": "451f39abf34816b7531f49bce5e385db5d061ff6",
+      "mode": "100644",
+      "path": ".pre-commit-config.yaml",
+      "type": "blob"
+    },
+    {
+      "git_object": "32a2c4d4133279edcfbaf6faa1abba7ee856a1d6",
+      "mode": "100644",
+      "path": "AGENTS.md",
+      "type": "blob"
+    },
+    {
+      "git_object": "fcb0816e2f5fa4de74790763d4ca8730c03c2393",
+      "mode": "100644",
+      "path": "Dockerfile",
+      "type": "blob"
+    },
+    {
+      "git_object": "b99cc1a9c0f1b659efd354d77c6c0246b2a0b99f",
+      "mode": "100644",
+      "path": "LICENSE",
+      "type": "blob"
+    },
+    {
+      "git_object": "c08c2db0a5aaa900ec257252b7c75e1eee273668",
+      "mode": "100644",
+      "path": "README.md",
+      "type": "blob"
+    },
+    {
+      "git_object": "fb0af1036c06468daf64893335cdfe2e8f97864b",
+      "mode": "100644",
+      "path": "README.md.old",
+      "type": "blob"
+    },
+    {
+      "git_object": "c95413301bfe9f9ef532867e40c69604564860ac",
+      "mode": "100755",
+      "path": "activate",
+      "type": "blob"
+    },
+    {
+      "git_object": "a3f2cd6e110e629df8077bc114b7ac3ea88e015f",
+      "mode": "100644",
+      "path": "config/dewey-config.example.yaml",
+      "type": "blob"
+    },
+    {
+      "git_object": "e53e3258c37e0d071c44efaf889038a5a448eb0c",
+      "mode": "100644",
+      "path": "config/tapdb-config-dewey.yaml",
+      "type": "blob"
+    },
+    {
+      "git_object": "733a6b474b9835dd6e998f95a40fc1fd78915e54",
+      "mode": "100644",
+      "path": "config/tapdb_templates/dewey/templates.json",
+      "type": "blob"
+    },
+    {
+      "git_object": "23389c89e358141d6d3a7c7b2e02c3100bed00f3",
+      "mode": "100644",
+      "path": "container_tests/test_container_runtime.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "94243c2d8db477430e7162c33e30184064a9d170",
+      "mode": "100644",
+      "path": "contracts/observability/api_health.schema.json",
+      "type": "blob"
+    },
+    {
+      "git_object": "42c3c0818828f848a6eac0c77cfb123f020ae694",
+      "mode": "100644",
+      "path": "contracts/observability/auth_health.schema.json",
+      "type": "blob"
+    },
+    {
+      "git_object": "a5b1667ccd01286ad621d00af0af74952ec88043",
+      "mode": "100644",
+      "path": "contracts/observability/db_health.schema.json",
+      "type": "blob"
+    },
+    {
+      "git_object": "ec658dc799b7dff929122de42b2aff1296ac13ec",
+      "mode": "100644",
+      "path": "contracts/observability/endpoint_health.schema.json",
+      "type": "blob"
+    },
+    {
+      "git_object": "f3ffa43d30d4ccd10445d01be37b85dc344e29da",
+      "mode": "100644",
+      "path": "contracts/observability/health.schema.json",
+      "type": "blob"
+    },
+    {
+      "git_object": "3a6042e407dbf2b17517178a9fa5549dcd08f055",
+      "mode": "100644",
+      "path": "contracts/observability/healthz.schema.json",
+      "type": "blob"
+    },
+    {
+      "git_object": "0bcbb10571a40ecf2686fec070c3472a3ad795d6",
+      "mode": "100644",
+      "path": "contracts/observability/my_health.schema.json",
+      "type": "blob"
+    },
+    {
+      "git_object": "f478af37d05ccb9092f2bec1cf3853ffa59d4918",
+      "mode": "100644",
+      "path": "contracts/observability/obs_services.schema.json",
+      "type": "blob"
+    },
+    {
+      "git_object": "511840d5e731863c2a5e89bfbf22d1b53cfb98b8",
+      "mode": "100644",
+      "path": "contracts/observability/readyz.schema.json",
+      "type": "blob"
+    },
+    {
+      "git_object": "2354fdf8897d3baa087c48299e3700c7fb8db082",
+      "mode": "100644",
+      "path": "dewey_deactivate",
+      "type": "blob"
+    },
+    {
+      "git_object": "edde5422e4f7a9568504f5ead7929f59b1dc1688",
+      "mode": "100644",
+      "path": "dewey_service/__init__.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "dac7539a366557871e1d653855b719a222990e03",
+      "mode": "100644",
+      "path": "dewey_service/ai_agent_access.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "ba113edffc9ceab8c091ddba243752d4bbecef52",
+      "mode": "100644",
+      "path": "dewey_service/app.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "019044c2cd0765d5036a9f8e9a9d4a886510972d",
+      "mode": "100644",
+      "path": "dewey_service/artifact_ui.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "fa29291c38b3ce03cf4bef5c88098256d51eeef0",
+      "mode": "100644",
+      "path": "dewey_service/audit.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "30bae4bc3e457fac3ec8274c27d95f312b4252b0",
+      "mode": "100644",
+      "path": "dewey_service/auth.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "0dd073bceb293719aa87ba6a4116346b168e8e34",
+      "mode": "100644",
+      "path": "dewey_service/cli/__init__.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "8182ecc4733e72e968c8334deb73f9a8847de3a2",
+      "mode": "100644",
+      "path": "dewey_service/cli/_registry_v2.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "2d7d9b1488a7944323149c87647e1600d3502c42",
+      "mode": "100644",
+      "path": "dewey_service/cli/_service.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "ad178c660c5724f0fbe0bd5fc5350b201180b88c",
+      "mode": "100644",
+      "path": "dewey_service/cli/cognito.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "eba6a8e1d0c6b7d566d568ce24388c95e29ebf8b",
+      "mode": "100644",
+      "path": "dewey_service/cli/common.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "bb964851bca6ec6b546864d63e935a1ae62c6bf5",
+      "mode": "100644",
+      "path": "dewey_service/cli/config_extra.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "2c963a512036259900b244a19b1f1fc6941ab9b2",
+      "mode": "100644",
+      "path": "dewey_service/cli/db.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "96b1d17d4863348a9acf042f585521f79ffc3758",
+      "mode": "100644",
+      "path": "dewey_service/cli/qeo.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "92846643112fe52d94867410211469598e2b1767",
+      "mode": "100644",
+      "path": "dewey_service/cli/quality.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "22d0138da98db73e6302be74d831c8ee8d41b496",
+      "mode": "100644",
+      "path": "dewey_service/cli/server.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "d67494a80ce99f870a44c89e08cb5c94af8aa601",
+      "mode": "100644",
+      "path": "dewey_service/cli/tapdb.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "8fa60f2e1886c29c69e93cbcb242d05aecdd61d2",
+      "mode": "100644",
+      "path": "dewey_service/cli/test.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "95edb269c1d96df2aadaf9acd041bb617c0a24a5",
+      "mode": "100644",
+      "path": "dewey_service/cloudfront.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "d777452ea6ec44d080b03b0d3de5c5a69889d803",
+      "mode": "100644",
+      "path": "dewey_service/container_entry.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "ac134e29375feb3866c2583304762465c7fa35f3",
+      "mode": "100644",
+      "path": "dewey_service/db_seed.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "a30e9a0bc17903f738bfd355e13ba4d97b1f46e7",
+      "mode": "100644",
+      "path": "dewey_service/defaults.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "02eef94cea76cab3e95d7423db978cc8a0c50e90",
+      "mode": "100644",
+      "path": "dewey_service/domain_access.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "ddc70ffa491c74fe0e2328056960621b0d8a8846",
+      "mode": "100644",
+      "path": "dewey_service/etc/dewey-config-template.yaml",
+      "type": "blob"
+    },
+    {
+      "git_object": "4ef2be376656c8e8a46e6d3287035008b66bbf63",
+      "mode": "100644",
+      "path": "dewey_service/etc/domain_code_registry.json",
+      "type": "blob"
+    },
+    {
+      "git_object": "c56731b3039ccd19bb7d2f231eab6b1c44114b7c",
+      "mode": "100644",
+      "path": "dewey_service/etc/prefix_ownership_registry.json",
+      "type": "blob"
+    },
+    {
+      "git_object": "fee6d6037a2bb211c87958ced0c1980d6729e851",
+      "mode": "100644",
+      "path": "dewey_service/integrations/__init__.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "d435e3a70d5f76d1341644ba1618ec81a0a172e7",
+      "mode": "100644",
+      "path": "dewey_service/integrations/tapdb_runtime.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "432021f08ba3dc88d9e6278340e91e600d91ad5d",
+      "mode": "100644",
+      "path": "dewey_service/integrations/tapdb_ui.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "e58b5d5d9d4341b239925d1376a45df0d333e710",
+      "mode": "100644",
+      "path": "dewey_service/literature.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "2baeddf6b42a55e96e971ec069bc39a730d5eeb9",
+      "mode": "100644",
+      "path": "dewey_service/observability.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "d16f73012b5fae3c53dd16aa98e3d0d9f95ebb62",
+      "mode": "100644",
+      "path": "dewey_service/qeo_package_contract.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "720d2a74e82f6f16e88082fe3d50cd5786123a9f",
+      "mode": "100644",
+      "path": "dewey_service/qeo_resolver_auth.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "8fe7c75dbe4653036ea1b14acf9fcbc7d757becd",
+      "mode": "100644",
+      "path": "dewey_service/rbac.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "f7c1c8209b7f794c18d1dbf6cdd4aa6e1c53870d",
+      "mode": "100644",
+      "path": "dewey_service/registration_contracts.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "7ab255c6a7c05e7d96eb8455484ffb90a8f663c4",
+      "mode": "100644",
+      "path": "dewey_service/schema_drift.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "3f3bdc6b0185c2911ca1838124ad601dc40f7e23",
+      "mode": "100644",
+      "path": "dewey_service/sequencer_run_contracts.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "0909c9aaf4bc4fec6911e9e9d67106a2b7ed7f06",
+      "mode": "100644",
+      "path": "dewey_service/service.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "6c30ac1e665a1a67347153cee65822970e797544",
+      "mode": "100644",
+      "path": "dewey_service/services/__init__.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "f0258ac3bfdac7202bdb3083d254927eced5552d",
+      "mode": "100644",
+      "path": "dewey_service/services/artifact_set_registration.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "83b4617dd6f79d9c2319e7e0c222fe24c0433b69",
+      "mode": "100644",
+      "path": "dewey_service/services/artifact_sets.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "4310b9e4458dfb50f7ecbf6628d0352555baebec",
+      "mode": "100644",
+      "path": "dewey_service/services/artifacts.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "7cb8a6599f3df8d42a731d92ca5db1463e5553e8",
+      "mode": "100644",
+      "path": "dewey_service/services/base.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "e5c404a3f7dfd854f05d05cd1c1506b6a8f8e27d",
+      "mode": "100644",
+      "path": "dewey_service/services/external_objects.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "cadfe84596246b826dbd3ad84eff83c4af99240c",
+      "mode": "100644",
+      "path": "dewey_service/services/literature.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "7fc4a1e6176706be0361c0d39c6f3c26c53173e1",
+      "mode": "100644",
+      "path": "dewey_service/services/outbox.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "145a4874a85b5d316faf21108de7b462a30d94b0",
+      "mode": "100644",
+      "path": "dewey_service/services/search.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "5357087e01a287fb80e5adf18c98aeab9290aca8",
+      "mode": "100644",
+      "path": "dewey_service/services/sequencer_runs.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "ae21eeee3669be0f30453eeea5e7e80c9dc02248",
+      "mode": "100644",
+      "path": "dewey_service/services/sharing.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "8310c8aa61b20880e8de5724a74d5d92598a355d",
+      "mode": "100644",
+      "path": "dewey_service/settings.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "218ca6922c22a2f8f90c846f63c2e5b579754aef",
+      "mode": "100644",
+      "path": "dewey_service/static/console.css",
+      "type": "blob"
+    },
+    {
+      "git_object": "186faa3c6e1cc2e4ba97c4609971fb6bd647b27b",
+      "mode": "100644",
+      "path": "dewey_service/static/favicon.svg",
+      "type": "blob"
+    },
+    {
+      "git_object": "08c109ff10a50cb5de33887726da0119091cd9cb",
+      "mode": "100644",
+      "path": "dewey_service/static/lsmc_ui.js",
+      "type": "blob"
+    },
+    {
+      "git_object": "5442dcc58b1181424d891a76f1faf0914ef96c47",
+      "mode": "100644",
+      "path": "dewey_service/storage.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "804e006fb6d33e3faed0af07a3a0f5e2f302a0a8",
+      "mode": "100644",
+      "path": "dewey_service/tapdb_backend.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "49a46ea2e33a235ab0af202bd229d071f934fa94",
+      "mode": "100644",
+      "path": "dewey_service/templates/_artifact_links.html",
+      "type": "blob"
+    },
+    {
+      "git_object": "31c1053f817ed0e7dd22b10286fddeb0db13d160",
+      "mode": "100644",
+      "path": "dewey_service/templates/_chrome.html",
+      "type": "blob"
+    },
+    {
+      "git_object": "3a7d137dde8ec09e5686e1903d91dbc05ccb9968",
+      "mode": "100644",
+      "path": "dewey_service/templates/admin.html",
+      "type": "blob"
+    },
+    {
+      "git_object": "483eda1a635d973b5c13a56fce5bc054aef04330",
+      "mode": "100644",
+      "path": "dewey_service/templates/anomalies.html",
+      "type": "blob"
+    },
+    {
+      "git_object": "6734a1981e506bb67ebf0263d1e6e79034305182",
+      "mode": "100644",
+      "path": "dewey_service/templates/anomaly_detail.html",
+      "type": "blob"
+    },
+    {
+      "git_object": "d014954223d61cab43f004b191bf655d7fa5ff65",
+      "mode": "100644",
+      "path": "dewey_service/templates/artifact_dag.html",
+      "type": "blob"
+    },
+    {
+      "git_object": "85a9a477e5fdd2ea665034496a6a123fb8792d75",
+      "mode": "100644",
+      "path": "dewey_service/templates/artifact_detail.html",
+      "type": "blob"
+    },
+    {
+      "git_object": "459ea1fe8c88315feb9bf6853d1056c75c543282",
+      "mode": "100644",
+      "path": "dewey_service/templates/artifacts.html",
+      "type": "blob"
+    },
+    {
+      "git_object": "7b3fcb2c058de6dcf0223d951044a9706d4132ac",
+      "mode": "100644",
+      "path": "dewey_service/templates/literature.html",
+      "type": "blob"
+    },
+    {
+      "git_object": "df70c83da81367e851e20f1313cecc0deffa8e86",
+      "mode": "100644",
+      "path": "dewey_service/templates/login.html",
+      "type": "blob"
+    },
+    {
+      "git_object": "e9a892b5ac59f37d336059543c924ad5750d091a",
+      "mode": "100644",
+      "path": "dewey_service/templates/observability.html",
+      "type": "blob"
+    },
+    {
+      "git_object": "2c126fc93e4e11f97885d9cc138ca34b0e3d4181",
+      "mode": "100644",
+      "path": "dewey_service/templates/search.html",
+      "type": "blob"
+    },
+    {
+      "git_object": "7cc1b9061698fecb3b51c9e05e466c44fc06e874",
+      "mode": "100644",
+      "path": "dewey_service/templates/shares.html",
+      "type": "blob"
+    },
+    {
+      "git_object": "d455f9065e58960bd76bbc97844325b1425e1245",
+      "mode": "100644",
+      "path": "dewey_service/templates/tapdb_graph.html",
+      "type": "blob"
+    },
+    {
+      "git_object": "503d71302f51da4ec27033e2576046a5cae1f0ee",
+      "mode": "100644",
+      "path": "dewey_service/templates/ui_home.html",
+      "type": "blob"
+    },
+    {
+      "git_object": "f6d33a2e58a5afd08b81357d0bf6df1be2cbb353",
+      "mode": "100644",
+      "path": "dewey_service/ui_metadata.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "43032f3e319ab20775bb7b1d5ffe26febc0a5057",
+      "mode": "100755",
+      "path": "docker/entrypoint.sh",
+      "type": "blob"
+    },
+    {
+      "git_object": "a3ba97104a8451be57e122331a5640ca54922237",
+      "mode": "100644",
+      "path": "docker/qeo-resolver.Dockerfile",
+      "type": "blob"
+    },
+    {
+      "git_object": "d6da619cf24bd4c33b238526649eb1ba0f436f07",
+      "mode": "100644",
+      "path": "environment.yaml",
+      "type": "blob"
+    },
+    {
+      "git_object": "f2777c07f2953952c9ed526a098f1792cfe1d74f",
+      "mode": "100644",
+      "path": "output/playwright/artifacts-smoke.png",
+      "type": "blob"
+    },
+    {
+      "git_object": "8543b3d21834ae9e5fa3ab2b21f6fcc04d41ac34",
+      "mode": "100644",
+      "path": "prompts/dewey_metapub_codex_implementation_plan.md",
+      "type": "blob"
+    },
+    {
+      "git_object": "b81fd19b5641c38b17541d2ad18cae9df4c69340",
+      "mode": "100644",
+      "path": "prompts/dewey_metapub_codex_spec_prompt.md",
+      "type": "blob"
+    },
+    {
+      "git_object": "fa4d00f79ee6b5e89501e485107e7f348eb19632",
+      "mode": "100644",
+      "path": "prompts/dewey_metapub_literature_spec_and_codex_prompt.md",
+      "type": "blob"
+    },
+    {
+      "git_object": "7936c305885973aa018a0d49177aec0b8d721904",
+      "mode": "100644",
+      "path": "prompts/metapub_dewey_spec_prompt.md",
+      "type": "blob"
+    },
+    {
+      "git_object": "04e840d076b70a628bff4488d50fb38f7556fbd0",
+      "mode": "100644",
+      "path": "pyproject.toml",
+      "type": "blob"
+    },
+    {
+      "git_object": "960e7886a9a4151aabc10ae2b4752057b49d9e08",
+      "mode": "100644",
+      "path": "scripts/check_pre_commit_hooks.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "52df372e2bfbabee9dd15b82d9ec4499b819cdaa",
+      "mode": "100644",
+      "path": "scripts/deploy_qeo_resolver.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "de412ca3e172210bd612e8429dc637fac7b2525f",
+      "mode": "100644",
+      "path": "scripts/prod_share_delivery_acceptance.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "mode": "100644",
+      "path": "tests/__init__.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "acc54ab7c7adb078bf5f70632d28a7b695bb9942",
+      "mode": "100644",
+      "path": "tests/conftest.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "7b81ab8f62b94e624de21ec694294bc59a7bd5de",
+      "mode": "100644",
+      "path": "tests/e2e/README.md",
+      "type": "blob"
+    },
+    {
+      "git_object": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "mode": "100644",
+      "path": "tests/e2e/__init__.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "9379e6d0dbd4b24089e8ef81f881f13bd3aacede",
+      "mode": "100644",
+      "path": "tests/e2e/auth_helpers.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "ddb0eb925eb8fa6e5aa7714550a858310da26d9c",
+      "mode": "100644",
+      "path": "tests/e2e/cognito_test_user.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "4581ca2815ccb2a720f53d1b0aa1f3b204065127",
+      "mode": "100644",
+      "path": "tests/e2e/conftest.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "374543f005e04c46e249519552d953fa293e582d",
+      "mode": "100644",
+      "path": "tests/e2e/test_auth_e2e.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "b202569b2ac607eb72aa894b91de40d91424ac87",
+      "mode": "100644",
+      "path": "tests/support/__init__.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "5294304e10edf7eaff80d37e8fcb64a61b395608",
+      "mode": "100644",
+      "path": "tests/support/service_fakes.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "01319723b02a46a6991ec5ab123d3ed37f6f8f21",
+      "mode": "100644",
+      "path": "tests/test_activate_script.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "72369929173a9db9bcdfc3b636918c0d7084b055",
+      "mode": "100644",
+      "path": "tests/test_activation_metadata.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "7ff7b6e6c25a659c6e94315a99a8b1e2c4d95752",
+      "mode": "100644",
+      "path": "tests/test_anomaly_routes.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "9b11452c62e3f53e73c2cbc3ce408a584a87b3eb",
+      "mode": "100644",
+      "path": "tests/test_app_boot.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "26bf24d3acd5e776d21793a51944cc169c18b104",
+      "mode": "100644",
+      "path": "tests/test_artifact_registration.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "8a1adb8a835e79c6a40b2b8758a193c99cb7963f",
+      "mode": "100644",
+      "path": "tests/test_artifact_resolution.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "75dbc85f66ed406c734c65855d264b158845ef02",
+      "mode": "100644",
+      "path": "tests/test_artifact_set_membership.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "edeb013f057c9035b3d8d2128b4e21b1d5c4f1ce",
+      "mode": "100644",
+      "path": "tests/test_artifact_ui_unit.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "f947b9b97d7d43c261ee3084d2d2cf5f081ae98b",
+      "mode": "100644",
+      "path": "tests/test_artifacts_ui.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "e22b86052ddff3fb517c36daeb0233460e128f14",
+      "mode": "100644",
+      "path": "tests/test_audit_metadata.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "59c65e3e1f22997e991d1161571232b36d480cf0",
+      "mode": "100644",
+      "path": "tests/test_auth_enforcement.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "19c7df84eba5ab7befe803c1a6174c8739680d41",
+      "mode": "100644",
+      "path": "tests/test_auth_unit.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "9135d981d45e18d957bb6834c15b082c9cb52a29",
+      "mode": "100644",
+      "path": "tests/test_cli_auxiliary_unit.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "5a55d744f3df15b2a5ad1eddbb1c7b0ef14a77bb",
+      "mode": "100644",
+      "path": "tests/test_cli_boot.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "685b74d91abb9fc2abc8e95fe44f262d51978f0d",
+      "mode": "100644",
+      "path": "tests/test_cli_core_unit.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "06116d26c741d1c6f226adeda090a6ce8242cdf3",
+      "mode": "100644",
+      "path": "tests/test_cli_registry_v2.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "789d5e0c817b98dc2da881fbaf7c3a2481708dee",
+      "mode": "100644",
+      "path": "tests/test_cli_server_db_unit.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "27e0696c8b6656b3af9f509daa99db263becc2f2",
+      "mode": "100644",
+      "path": "tests/test_cli_test_unit.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "ae35aedb0e6453e8c810fe6e2f305cffd19fd4c7",
+      "mode": "100644",
+      "path": "tests/test_common_access_logging.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "87b3b7d48dcf2586f8c0f18677d6ee3147cadc58",
+      "mode": "100644",
+      "path": "tests/test_container_entry_runtime.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "02c9d142693f4489a688aa5c8fe086a668c57537",
+      "mode": "100644",
+      "path": "tests/test_db_seed_unit.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "97f073656b1b6e9804679b3e413ee3f16e7f148f",
+      "mode": "100644",
+      "path": "tests/test_dewey_resolver_deploy.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "a30cb20b96b32421850c64dc8075515ec8d70a55",
+      "mode": "100644",
+      "path": "tests/test_docs_smoke.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "011938c719e5e502b99429bd6eeae88a9ce81d8e",
+      "mode": "100644",
+      "path": "tests/test_domain_access.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "aea48f3e8df4d0c8a6a1c17b138f6a1eaa267a05",
+      "mode": "100644",
+      "path": "tests/test_env_contract.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "ec4b0a12e6abed0e7ec3c2adaa8a5db9cbe6d2e4",
+      "mode": "100644",
+      "path": "tests/test_external_object_links.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "4d28366ccc5c5692ca949bef035c071331177753",
+      "mode": "100644",
+      "path": "tests/test_helper_modules_unit.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "33012cf23033d4690327299a6030ffb6bec51d4f",
+      "mode": "100644",
+      "path": "tests/test_idempotency.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "fed3c90eaf598411cee3d8be360d25d3188b62b5",
+      "mode": "100644",
+      "path": "tests/test_literature_helpers_unit.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "2778fc12b5c0fa15d3123139755a48b6d60bc067",
+      "mode": "100644",
+      "path": "tests/test_literature_routes.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "2eeae47e4515761b19c7f14598b98a9dac064c75",
+      "mode": "100644",
+      "path": "tests/test_observability_contract.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "bb8f5898681d36c63e58d3f602afc75cfec494c4",
+      "mode": "100644",
+      "path": "tests/test_packaging_metadata.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "33dcd85d04bec1ff1649f04dcfed9a660f5e64d4",
+      "mode": "100644",
+      "path": "tests/test_qeo_artifact_set_registration.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "982143bf75a783c211cf3619e1156b0d854c7e12",
+      "mode": "100644",
+      "path": "tests/test_qeo_container_cli.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "ca2a96810a9d5a2c3ca65464bf907611e7ccca97",
+      "mode": "100644",
+      "path": "tests/test_qeo_multiqc_registration.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "be98aa55b78f6d197b1e85290fdaccdab02a9189",
+      "mode": "100644",
+      "path": "tests/test_qeo_package_resolver.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "77b273bba879a103193e86cbdeaa192a1e8df172",
+      "mode": "100644",
+      "path": "tests/test_qeo_registration_events.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "c767eb2874f518af7e75578be28aa3ec98206e40",
+      "mode": "100644",
+      "path": "tests/test_qeo_registration_security.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "782b0b27134260382bd1061eaabb1ee8529bfcd7",
+      "mode": "100644",
+      "path": "tests/test_rbac_unit.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "9378c42d3548aa36aedd40720cfacb0fed91eba9",
+      "mode": "100644",
+      "path": "tests/test_route_coverage_gaps.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "47d23aaf7cda4bd6a458d3d25a4b7fa7e1e9a265",
+      "mode": "100644",
+      "path": "tests/test_route_surface_coverage.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "6bd62b88790668da66d89e6d7cfefb37e582db8c",
+      "mode": "100644",
+      "path": "tests/test_run_prefix_ingest.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "9a22ffe9dfdc2039c4faf701aca69aaf78f44359",
+      "mode": "100644",
+      "path": "tests/test_search_and_storage.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "eb6109dccc240ab56ae84a85b1bb791703f8ea2e",
+      "mode": "100644",
+      "path": "tests/test_sequencer_run_registration.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "2a9169b553bb3e5b432651c30240ef51198a548d",
+      "mode": "100644",
+      "path": "tests/test_service_artifacts.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "440f4d2781f162ebe863b341438559c18a4b8d39",
+      "mode": "100644",
+      "path": "tests/test_service_literature.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "4d2e0db17e98b32914e7b5596d53e95ba7f65dad",
+      "mode": "100644",
+      "path": "tests/test_service_relationships.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "2e6b23267310d7487c18ca3c4ae44864fe8a6629",
+      "mode": "100644",
+      "path": "tests/test_service_search.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "92522ef206fb21ac684e4e7f7ea835360461b5e8",
+      "mode": "100644",
+      "path": "tests/test_settings.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "135921a61c4cecd869892d442e4f2e9130e99974",
+      "mode": "100644",
+      "path": "tests/test_share_management.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "67f4e6a9fe301585c24544e33284a28bc496eb1c",
+      "mode": "100644",
+      "path": "tests/test_storage_unit.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "1286ce4801b6359fb93cf24559ff1d4c9315aeb9",
+      "mode": "100644",
+      "path": "tests/test_tapdb_backend_unit.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "e6d0cf2f16b2782515ef071d4d67203884b8470c",
+      "mode": "100644",
+      "path": "tests/test_tapdb_bootstrap.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "6dd7748c26ecd4036db45d5de2ae2a6012bce3ee",
+      "mode": "100644",
+      "path": "tests/test_tapdb_runtime_unit.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "a8c5e812c4316778d184e3956bde12b945bb41e4",
+      "mode": "100644",
+      "path": "tests/test_tapdb_ui_integration.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "517275d02facec00600b19e51036e9c851aa9603",
+      "mode": "100644",
+      "path": "tests/test_ui_chrome.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "c3a5a75f3ceecc7a7b45eb710d93cc2754d4b8bd",
+      "mode": "100644",
+      "path": "tests/test_ui_session_auth.py",
+      "type": "blob"
+    },
+    {
+      "git_object": "f8a41cd519e7d947a149d88cfffbda7bf7db1686",
+      "mode": "100644",
+      "path": "uv.lock",
+      "type": "blob"
+    }
+  ],
+  "non_documentation_entries_identical": 181,
+  "non_documentation_manifest_sha256": "08005910797bd82c1c06c59962a8d617f00c5f867509687ad979d34bd4eb5558",
+  "normalized_imported_documents": [
+    {
+      "path": "docs/plans/evidence/20260910_dewey_container_cli/github/container-cli-runtime.txt",
+      "result_git_blob": "b572786df16780aef814f1ad2f548964fac88c13",
+      "source_commit": "598be4d5f31525e982de01b36a284704fa603042",
+      "source_git_blob": "0044095b8220b3911b6aac3c8c4c45dcae6612ad",
+      "transformation": "Trailing whitespace removed from three lines; otherwise unchanged"
+    }
+  ],
+  "reconciliation_ancestry_commit": "17a0edfe2a4655ce8183fa85d516b619a5506c96",
+  "reconciliation_ancestry_parents": [
+    "5c75e7b889ccb6136549500e7edb7519c0672449",
+    "ef7f5412b5c7a4d3a8c47fb55500fa66f165b0ca"
+  ],
+  "recorded_at": "2026-09-11T03:53:19Z",
+  "remote_default_branch": "jemdev10",
+  "resolver_non_documentation_delta_excluded": [
+    "scripts/deploy_qeo_resolver.py"
+  ],
+  "resolver_operator_evidence_helper_excluded": "docs/plans/20260910T005000Z_complete_package_source.py",
+  "schema": "dewey.source-reconciliation/v1",
+  "source_commit": "556dfcf936ea11e25f6126931fe1f655482d00a6",
+  "verified_remote_refs": {
+    "codex/dewey-qeo-resolver-20260909": "598be4d5f31525e982de01b36a284704fa603042",
+    "jemdev10": "6a0e86a14798997f22daa2aa381ba2946fd15766",
+    "main": "ef7f5412b5c7a4d3a8c47fb55500fa66f165b0ca"
+  }
+}

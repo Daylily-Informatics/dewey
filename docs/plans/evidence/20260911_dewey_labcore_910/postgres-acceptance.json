@@ -1,0 +1,28 @@
+{
+  "status": "passed",
+  "database": "dewey_tapdb10_rehearsal_20260911",
+  "fixture_prefix": "labcore-acceptance-0a5930d4a0f5462db12d87d0ce42ca03",
+  "cases": {
+    "identical_separate_sessions": [
+      200,
+      201
+    ],
+    "lineage_receipt_native_xrf": "passed",
+    "divergent": [
+      201,
+      409
+    ],
+    "cross_tenant_global_identity": [
+      201,
+      409
+    ],
+    "commit_waiter": "passed",
+    "rollback_waiter": "passed",
+    "independent_keys": [
+      201,
+      201
+    ],
+    "atomic_receipt_failure_retry": "passed",
+    "soft_deleted_identity_reserved": "passed"
+  }
+}

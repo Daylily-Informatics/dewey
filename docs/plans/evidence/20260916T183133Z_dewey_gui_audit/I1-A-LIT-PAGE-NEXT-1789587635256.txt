@@ -1,0 +1,209 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / LITERATURE
+  - heading "Literature" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - heading "Search PubMed" [level=2]
+  - searchbox "PubMed query": genomics
+  - button "Search"
+  - paragraph: Register papers as ordinary Dewey artifacts with a PMID and rich metadata.
+  - table:
+    - rowgroup:
+      - row "Paper PMID Dewey":
+        - columnheader "Paper"
+        - columnheader "PMID"
+        - columnheader "Dewey"
+    - rowgroup:
+      - 'row "The era of the ARG: An introduction to ancestral recombination graphs and their significance in empirical evolutionary genomics. PLoS Genet · 2024 Lewanski AL, Grundler MC, Bradburd GS 38236805 Register paper"':
+        - 'cell "The era of the ARG: An introduction to ancestral recombination graphs and their significance in empirical evolutionary genomics. PLoS Genet · 2024 Lewanski AL, Grundler MC, Bradburd GS"':
+          - generic: "The era of the ARG: An introduction to ancestral recombination graphs and their significance in empirical evolutionary genomics."
+          - generic: PLoS Genet · 2024
+          - generic: Lewanski AL, Grundler MC, Bradburd GS
+        - cell "38236805"
+        - cell "Register paper":
+          - button "Register paper"
+      - 'row "Small Genomes and Big Data: Adaptation of Plastid Genomics to the High-Throughput Era. Biomolecules · 2019 Klinger CM, Richardson E 31344945 Register paper"':
+        - 'cell "Small Genomes and Big Data: Adaptation of Plastid Genomics to the High-Throughput Era. Biomolecules · 2019 Klinger CM, Richardson E"':
+          - generic: "Small Genomes and Big Data: Adaptation of Plastid Genomics to the High-Throughput Era."
+          - generic: Biomolecules · 2019
+          - generic: Klinger CM, Richardson E
+        - cell "31344945"
+        - cell "Register paper":
+          - button "Register paper"
+      - 'row "Ten years of bacterial genome sequencing: comparative-genomics-based discoveries. Funct Integr Genomics · 2006 Binnewies TT, Motro Y, Hallin PF, Lund O, Dunn D, La T, Hampson DJ, Bellgard M, Wassenaar TM, Ussery DW 16773396 Register paper"':
+        - 'cell "Ten years of bacterial genome sequencing: comparative-genomics-based discoveries. Funct Integr Genomics · 2006 Binnewies TT, Motro Y, Hallin PF, Lund O, Dunn D, La T, Hampson DJ, Bellgard M, Wassenaar TM, Ussery DW"':
+          - generic: "Ten years of bacterial genome sequencing: comparative-genomics-based discoveries."
+          - generic: Funct Integr Genomics · 2006
+          - generic: Binnewies TT, Motro Y, Hallin PF, Lund O, Dunn D, La T, Hampson DJ, Bellgard M, Wassenaar TM, Ussery DW
+        - cell "16773396"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "Genomics of Parallel Experimental Evolution in Drosophila. Mol Biol Evol · 2017 Graves JL, Hertweck KL, Phillips MA, Han MV, Cabral LG, Barter TT, Greer LF, Burke MK, Mueller LD, Rose MR 28087779 Register paper":
+        - cell "Genomics of Parallel Experimental Evolution in Drosophila. Mol Biol Evol · 2017 Graves JL, Hertweck KL, Phillips MA, Han MV, Cabral LG, Barter TT, Greer LF, Burke MK, Mueller LD, Rose MR":
+          - generic: Genomics of Parallel Experimental Evolution in Drosophila.
+          - generic: Mol Biol Evol · 2017
+          - generic: Graves JL, Hertweck KL, Phillips MA, Han MV, Cabral LG, Barter TT, Greer LF, Burke MK, Mueller LD, Rose MR
+        - cell "28087779"
+        - cell "Register paper":
+          - button "Register paper"
+      - 'row "Evolutionary genomics of the Fox genes: origin of gene families and the ancestry of gene clusters. Genomics · 2010 Shimeld SM, Degnan B, Luke GN 19679177 Register paper"':
+        - 'cell "Evolutionary genomics of the Fox genes: origin of gene families and the ancestry of gene clusters. Genomics · 2010 Shimeld SM, Degnan B, Luke GN"':
+          - generic: "Evolutionary genomics of the Fox genes: origin of gene families and the ancestry of gene clusters."
+          - generic: Genomics · 2010
+          - generic: Shimeld SM, Degnan B, Luke GN
+        - cell "19679177"
+        - cell "Register paper":
+          - button "Register paper"
+      - 'row "Triticeae genomics: advances in sequence analysis of large genome cereal crops. Chromosome Res · 2007 Stein N 17295124 Register paper"':
+        - 'cell "Triticeae genomics: advances in sequence analysis of large genome cereal crops. Chromosome Res · 2007 Stein N"':
+          - generic: "Triticeae genomics: advances in sequence analysis of large genome cereal crops."
+          - generic: Chromosome Res · 2007
+          - generic: Stein N
+        - cell "17295124"
+        - cell "Register paper":
+          - button "Register paper"
+      - 'row "2026 Bundibugyo virus outbreak: the role of genomics in Orthoebolavirus outbreaks. Microb Genom · 2026 Houldcroft CJ 42246951 Register paper"':
+        - 'cell "2026 Bundibugyo virus outbreak: the role of genomics in Orthoebolavirus outbreaks. Microb Genom · 2026 Houldcroft CJ"':
+          - generic: "2026 Bundibugyo virus outbreak: the role of genomics in Orthoebolavirus outbreaks."
+          - generic: Microb Genom · 2026
+          - generic: Houldcroft CJ
+        - cell "42246951"
+        - cell "Register paper":
+          - button "Register paper"
+      - 'row "Evolutionary insights into the aphid genome: Aphid genomics between quality problems and intriguing perspectives. Int Rev Cell Mol Biol · 2020 Mandrioli M, Manicardi GC 32475474 Register paper"':
+        - 'cell "Evolutionary insights into the aphid genome: Aphid genomics between quality problems and intriguing perspectives. Int Rev Cell Mol Biol · 2020 Mandrioli M, Manicardi GC"':
+          - generic: "Evolutionary insights into the aphid genome: Aphid genomics between quality problems and intriguing perspectives."
+          - generic: Int Rev Cell Mol Biol · 2020
+          - generic: Mandrioli M, Manicardi GC
+        - cell "32475474"
+        - cell "Register paper":
+          - button "Register paper"
+      - 'row "Harvesting the genome''s bounty: integrative genomics. Cold Spring Harb Symp Quant Biol · 2003 Jorgensen P, Breitkreutz BJ, Breitkreutz K, Stark C, Liu G, Cook M, Sharom J, Nishikawa JL, Ketela T, Bellows D, Breitkreutz A, Rupes I, Boucher L, Dewar D, Vo M, Angeli M, Reguly T, Tong A, Andrews B, Boone C, Tyers M 15338646 Register paper"':
+        - 'cell "Harvesting the genome''s bounty: integrative genomics. Cold Spring Harb Symp Quant Biol · 2003 Jorgensen P, Breitkreutz BJ, Breitkreutz K, Stark C, Liu G, Cook M, Sharom J, Nishikawa JL, Ketela T, Bellows D, Breitkreutz A, Rupes I, Boucher L, Dewar D, Vo M, Angeli M, Reguly T, Tong A, Andrews B, Boone C, Tyers M"':
+          - generic: "Harvesting the genome's bounty: integrative genomics."
+          - generic: Cold Spring Harb Symp Quant Biol · 2003
+          - generic: Jorgensen P, Breitkreutz BJ, Breitkreutz K, Stark C, Liu G, Cook M, Sharom J, Nishikawa JL, Ketela T, Bellows D, Breitkreutz A, Rupes I, Boucher L, Dewar D, Vo M, Angeli M, Reguly T, Tong A, Andrews B, Boone C, Tyers M
+        - cell "15338646"
+        - cell "Register paper":
+          - button "Register paper"
+      - 'row "A new model army: Emerging fish models to study the genomics of vertebrate Evo-Devo. J Exp Zool B Mol Dev Evol · 2015 Braasch I, Peterson SM, Desvignes T, McCluskey BM, Batzel P, Postlethwait JH 25111899 Register paper"':
+        - 'cell "A new model army: Emerging fish models to study the genomics of vertebrate Evo-Devo. J Exp Zool B Mol Dev Evol · 2015 Braasch I, Peterson SM, Desvignes T, McCluskey BM, Batzel P, Postlethwait JH"':
+          - generic: "A new model army: Emerging fish models to study the genomics of vertebrate Evo-Devo."
+          - generic: J Exp Zool B Mol Dev Evol · 2015
+          - generic: Braasch I, Peterson SM, Desvignes T, McCluskey BM, Batzel P, Postlethwait JH
+        - cell "25111899"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "Comparative Genomics in Drosophila. Methods Mol Biol · 2018 Oti M, Pane A, Sammeth M 29277877 Register paper":
+        - cell "Comparative Genomics in Drosophila. Methods Mol Biol · 2018 Oti M, Pane A, Sammeth M":
+          - generic: Comparative Genomics in Drosophila.
+          - generic: Methods Mol Biol · 2018
+          - generic: Oti M, Pane A, Sammeth M
+        - cell "29277877"
+        - cell "Register paper":
+          - button "Register paper"
+      - 'row "Synthetic chromosomes for 3D functional genomics: from principles to AI-guided design. Curr Opin Genet Dev · 2026 Perrot M, Serizay J, Koszul R 41990516 Register paper"':
+        - 'cell "Synthetic chromosomes for 3D functional genomics: from principles to AI-guided design. Curr Opin Genet Dev · 2026 Perrot M, Serizay J, Koszul R"':
+          - generic: "Synthetic chromosomes for 3D functional genomics: from principles to AI-guided design."
+          - generic: Curr Opin Genet Dev · 2026
+          - generic: Perrot M, Serizay J, Koszul R
+        - cell "41990516"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "Comparative genomics reveals diversity and taxonomic relationships among Clostridioides difficile phages. Microbiol Spectr · 2025 Rolin MH, Mondal SI, Karim D, Jewel NA, Khan T, Rahman M, Akter A 41223028 Register paper":
+        - cell "Comparative genomics reveals diversity and taxonomic relationships among Clostridioides difficile phages. Microbiol Spectr · 2025 Rolin MH, Mondal SI, Karim D, Jewel NA, Khan T, Rahman M, Akter A":
+          - generic: Comparative genomics reveals diversity and taxonomic relationships among Clostridioides difficile phages.
+          - generic: Microbiol Spectr · 2025
+          - generic: Rolin MH, Mondal SI, Karim D, Jewel NA, Khan T, Rahman M, Akter A
+        - cell "41223028"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "A perfect genome annotation is within reach with the proteomics and genomics alliance. Curr Opin Microbiol · 2009 Armengaud J 19410500 Register paper":
+        - cell "A perfect genome annotation is within reach with the proteomics and genomics alliance. Curr Opin Microbiol · 2009 Armengaud J":
+          - generic: A perfect genome annotation is within reach with the proteomics and genomics alliance.
+          - generic: Curr Opin Microbiol · 2009
+          - generic: Armengaud J
+        - cell "19410500"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "Comparative genomics of Bacteria commonly identified in the built environment. BMC Genomics · 2019 Merino N, Zhang S, Tomita M, Suzuki H 30691394 Register paper":
+        - cell "Comparative genomics of Bacteria commonly identified in the built environment. BMC Genomics · 2019 Merino N, Zhang S, Tomita M, Suzuki H":
+          - generic: Comparative genomics of Bacteria commonly identified in the built environment.
+          - generic: BMC Genomics · 2019
+          - generic: Merino N, Zhang S, Tomita M, Suzuki H
+        - cell "30691394"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "Geography Shapes the Population Genomics of Salmonella enterica Dublin. Genome Biol Evol · 2019 Fenske GJ, Thachil A, McDonough PL, Glaser A, Scaria J 31329231 Register paper":
+        - cell "Geography Shapes the Population Genomics of Salmonella enterica Dublin. Genome Biol Evol · 2019 Fenske GJ, Thachil A, McDonough PL, Glaser A, Scaria J":
+          - generic: Geography Shapes the Population Genomics of Salmonella enterica Dublin.
+          - generic: Genome Biol Evol · 2019
+          - generic: Fenske GJ, Thachil A, McDonough PL, Glaser A, Scaria J
+        - cell "31329231"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "Comparative Genomics of Lentilactobacillus parabuchneri isolated from dairy, KEM complex, Makgeolli, and Saliva Microbiomes. BMC Genomics · 2022 Gumustop I, Ortakci F 36471243 Register paper":
+        - cell "Comparative Genomics of Lentilactobacillus parabuchneri isolated from dairy, KEM complex, Makgeolli, and Saliva Microbiomes. BMC Genomics · 2022 Gumustop I, Ortakci F":
+          - generic: Comparative Genomics of Lentilactobacillus parabuchneri isolated from dairy, KEM complex, Makgeolli, and Saliva Microbiomes.
+          - generic: BMC Genomics · 2022
+          - generic: Gumustop I, Ortakci F
+        - cell "36471243"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "The implications of genomics on the nursing care of adults with neuropsychiatric conditions. J Nurs Scholarsh · 2013 Schutte DL, Davies MA, Goris ED 23368536 Register paper":
+        - cell "The implications of genomics on the nursing care of adults with neuropsychiatric conditions. J Nurs Scholarsh · 2013 Schutte DL, Davies MA, Goris ED":
+          - generic: The implications of genomics on the nursing care of adults with neuropsychiatric conditions.
+          - generic: J Nurs Scholarsh · 2013
+          - generic: Schutte DL, Davies MA, Goris ED
+        - cell "23368536"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "Comparative genomics reveals high genetic similarity among strains of Salmonella enterica serovar Infantis isolated from multiple sources in Brazil. PeerJ · 2024 Vilela FP, Felice AG, Seribelli AA, Rodrigues DP, Soares SC, Allard MW, Falcão JP 38784399 Register paper":
+        - cell "Comparative genomics reveals high genetic similarity among strains of Salmonella enterica serovar Infantis isolated from multiple sources in Brazil. PeerJ · 2024 Vilela FP, Felice AG, Seribelli AA, Rodrigues DP, Soares SC, Allard MW, Falcão JP":
+          - generic: Comparative genomics reveals high genetic similarity among strains of Salmonella enterica serovar Infantis isolated from multiple sources in Brazil.
+          - generic: PeerJ · 2024
+          - generic: Vilela FP, Felice AG, Seribelli AA, Rodrigues DP, Soares SC, Allard MW, Falcão JP
+        - cell "38784399"
+        - cell "Register paper":
+          - button "Register paper"
+      - row "Tapping the promise of genomics in species with complex, nonmodel genomes. Annu Rev Plant Biol · 2013 Hirsch CN, Buell CR 23451780 Register paper":
+        - cell "Tapping the promise of genomics in species with complex, nonmodel genomes. Annu Rev Plant Biol · 2013 Hirsch CN, Buell CR":
+          - generic: Tapping the promise of genomics in species with complex, nonmodel genomes.
+          - generic: Annu Rev Plant Biol · 2013
+          - generic: Hirsch CN, Buell CR
+        - cell "23451780"
+        - cell "Register paper":
+          - button "Register paper"
+  - button "Next page"
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

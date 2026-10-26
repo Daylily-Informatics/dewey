@@ -1,0 +1,93 @@
+{
+  "dewey-prerelease-focused.log": {
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/tapdb-service-readiness-20260910/runtime/qualification/dewey-prerelease-focused.log",
+    "sha256": "6cdc13b7ba5bd8e11284cf2442d5dc68cce7b1ec10ab2a52af7168b0f01f3b80",
+    "bytes": 2167
+  },
+  "dewey-prerelease-focused.xml": {
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/tapdb-service-readiness-20260910/runtime/qualification/dewey-prerelease-focused.xml",
+    "sha256": "ba6b8a77fa39b0569297644caa36a6efb8314bebb84dced33ab771e3fb3cc377",
+    "bytes": 17698
+  },
+  "dewey-prerelease-local-census.json": {
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/tapdb-service-readiness-20260910/runtime/qualification/dewey-prerelease-local-census.json",
+    "sha256": "c54fcf2b0ae1d35b466fe3a837e3d59746a8489d4d9767e77856b054a13c4567",
+    "bytes": 63622
+  },
+  "dewey-prerelease-local-census.log": {
+    "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/tapdb-service-readiness-20260910/runtime/qualification/dewey-prerelease-local-census.log",
+    "sha256": "c54fcf2b0ae1d35b466fe3a837e3d59746a8489d4d9767e77856b054a13c4567",
+    "bytes": 63622
+  },
+  "testsuites": [
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "123",
+      "time": "3.368",
+      "timestamp": "2026-09-11T00:56:21.618318-04:00",
+      "hostname": "Mac"
+    }
+  ],
+  "test_counts": {
+    "tests.test_inventory_limits": 13,
+    "tests.test_principal_census": 4,
+    "tests.test_drift_json_output": 8,
+    "tests.test_identity_inventory": 29,
+    "tests.test_identity_inventory_cli": 15,
+    "tests.test_backup_source_contract": 19,
+    "tests.test_migration_identity_contract": 34,
+    "tests.test_ops_cli_db_branch_campaign": 1
+  },
+  "census_summary": {
+    "schema_version": "tapdb-principal-census/v1",
+    "target": {
+      "config_identity": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/tapdb-service-readiness-20260910/runtime/qualification/local16.13/tapdb-config.yaml",
+      "database": "tapdb_qualification_local",
+      "domain_code": "Z",
+      "engine_type": "local",
+      "host": "localhost",
+      "owner_repo_name": "daylily-tapdb",
+      "port": 15439,
+      "schema_name": "tapdb_qualification"
+    },
+    "physical_target": {
+      "database": "tapdb_qualification_local",
+      "database_oid": 16385,
+      "server_address": "::1/128",
+      "server_port": 15439
+    },
+    "authenticated_operator": {
+      "activity_complete": true,
+      "current_role": "tapdb_qualification_operator",
+      "observed_at": "2026-09-11 04:49:12.663665+00",
+      "operator": "tapdb_qualification_operator",
+      "read_only": "on",
+      "server_version": "16.13"
+    },
+    "database_checks": [
+      {
+        "name": "tapdb_qualification_local",
+        "exists": true
+      },
+      {
+        "name": "tapdb_prerelease_destination_probe",
+        "exists": false
+      },
+      {
+        "name": "tapdb_prerelease_control_probe",
+        "exists": false
+      }
+    ],
+    "roles": 16,
+    "objects": 173,
+    "scope_bindings_status": "available",
+    "limits": {
+      "max_catalog_rows": 100000,
+      "statement_timeout_ms": 10000
+    },
+    "sha256": "6e3cb9662507e30290b223b7e6f88acfcf528337635fad9b3cd796251b4838bf"
+  }
+}

@@ -143,6 +143,15 @@ class AnalysisResultArtifact(BaseModel):
             raise ValueError("sha256 must be a 64-character lowercase hex digest")
         return clean
 
+    @field_validator("version_id")
+    @classmethod
+    def _version_id(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        if not value or value != value.strip() or any(ord(char) < 32 for char in value):
+            raise ValueError("version_id must be explicit exact text")
+        return value
+
     @model_validator(mode="after")
     def _has_path(self) -> "AnalysisResultArtifact":
         if not str(self.relative_path or "").strip() and not str(self.storage_uri or "").strip():

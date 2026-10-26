@@ -1,0 +1,11 @@
+{
+  "outputs": {
+    "CertificateArn": "arn:aws:acm:us-west-2:108782052779:certificate/02086231-9b69-4b4d-98f2-b2f7e07719b6",
+    "LoadBalancerArn": "arn:aws:elasticloadbalancing:us-west-2:108782052779:loadbalancer/app/Dayhof-LoadB-yTZ2WPqXCI1t/01019100fb4ba3e0",
+    "LoadBalancerDnsName": "Dayhof-LoadB-yTZ2WPqXCI1t-291525477.us-west-2.elb.amazonaws.com",
+    "LoadBalancerZoneId": "Z1H1FL5HABSF5",
+    "OriginSecurityGroupId": "sg-0a032b52eff239628"
+  },
+  "stack_id": "arn:aws:cloudformation:us-west-2:108782052779:stack/Dayhoff-day-DeweyRecipientIngress-20261026/4d182e60-d0e3-11f1-9407-06204b47d0b3",
+  "status": "CREATE_COMPLETE"
+}

@@ -1,0 +1,17 @@
+{
+  "failure_status": 400,
+  "failure_detail": "TapDB owns instance action_groups and audit_log",
+  "failed_version": "12.0.4",
+  "operation": "Revoke one current controlled email grant",
+  "reconciliation": {
+    "status": 400,
+    "policy_revision": 3,
+    "current_email_grants": 2,
+    "selected_grant_active": true,
+    "reconciled_at": "2026-10-26T05:22:27.949Z",
+    "mutation_retried": false
+  },
+  "original_pending_operation_preserved": true,
+  "root_cause": "Full normalized grant copied into new native grant; adjacent policy edit already projects business fields",
+  "retry_authorized_only_after": "Corrected source deployed and current native state rechecked"
+}

@@ -1,0 +1,108 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / RECORD
+  - heading "Dewey GUI audit 20260916 I1-A storage set" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - generic: set
+  - code: M-DGX-TQRF
+  - button "Access manifest"
+  - button "Share"
+  - button "Edit metadata"
+  - heading "Members · 3 visible" [level=2]
+  - button "Add member EUID"
+  - table:
+    - rowgroup:
+      - row "Name / EUID Kind Producer Created":
+        - columnheader "Name / EUID"
+        - columnheader "Kind"
+        - columnheader "Producer"
+        - columnheader "Created"
+    - rowgroup:
+      - row "fixture.json M-DGX-TQ6M object dewey 9/16/2026":
+        - cell "fixture.json M-DGX-TQ6M":
+          - link "fixture.json":
+            - /url: /records/M-DGX-TQ6M
+          - generic: M-DGX-TQ6M
+        - cell "object":
+          - generic: object
+        - cell "dewey"
+        - cell "9/16/2026"
+      - row "index.html M-DGX-TQAC object dewey 9/16/2026":
+        - cell "index.html M-DGX-TQAC":
+          - link "index.html":
+            - /url: /records/M-DGX-TQAC
+          - generic: M-DGX-TQAC
+        - cell "object":
+          - generic: object
+        - cell "dewey"
+        - cell "9/16/2026"
+      - row "hello world ü.txt M-DGX-TQ2W object dewey 9/16/2026":
+        - cell "hello world ü.txt M-DGX-TQ2W":
+          - link "hello world ü.txt":
+            - /url: /records/M-DGX-TQ2W
+          - generic: M-DGX-TQ2W
+        - cell "object":
+          - generic: object
+        - cell "dewey"
+        - cell "9/16/2026"
+  - button "Remove M-DGX-TQ6M"
+  - button "Remove M-DGX-TQAC"
+  - button "Remove M-DGX-TQ2W"
+  - paragraph: Only members you can see are shown. Set membership does not grant access.
+  - heading "Metadata" [level=2]
+  - paragraph: Synthetic GUI audit; retained fixture; iteration 1 attempt A.
+  - generic: "{ \"gui_audit\": { \"run\": \"20260916T183133Z\", \"attempt\": \"I1-A\", \"retained\": true } }"
+  - complementary:
+    - heading "Details" [level=2]
+    - term: EUID
+    - definition: M-DGX-TQRF
+    - term: Owner
+    - definition: johnm+dewey-gui-20260916-i1a@lsmc.com
+    - term: Created
+    - definition: 9/16/2026
+    - term: Producer
+    - definition: —
+    - term: Location
+    - definition: Explicit set membership
+    - heading "Access" [level=2]
+    - paragraph: Metadata visibility and download access are managed independently.
+    - button "Manage permissions"
+    - button "Transfer ownership"
+    - generic "Registration lifecycle" [active]
+    - paragraph: Archiving removes Dewey access and revokes its shares. S3 bytes and audit history remain.
+    - button "Archive registration"
+    - generic "Recent activity"
+    - generic: "[ { \"euid\": \"M-DGX-TQY3\", \"operation\": \"ownership_transferred\", \"created_at\": \"2026-09-16T19:18:46.868242Z\", \"status\": \"complete\" }, { \"euid\": \"M-DGX-TQX5\", \"operation\": \"permissions_updated\", \"created_at\": \"2026-09-16T19:18:09.643613Z\", \"status\": \"complete\" }, { \"euid\": \"M-DGX-TQW7\", \"operation\": \"metadata_updated\", \"created_at\": \"2026-09-16T19:17:55.189182Z\", \"status\": \"complete\" } ]"
+    - generic "Technical details"
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

@@ -1,0 +1,20 @@
+{
+  "error_class": "IdentityInventoryError",
+  "frames": [
+    {
+      "file": "<string>",
+      "line": 7,
+      "function": "<module>"
+    },
+    {
+      "file": "/home/ubuntu/dewey_ops/tapdb101-20260911/dewey_xrf_template_setup.py",
+      "line": 141,
+      "function": "main"
+    },
+    {
+      "file": "/home/ubuntu/dewey_ops/tapdb101-20260911/venv/lib/python3.12/site-packages/daylily_tapdb/identity_inventory.py",
+      "line": 262,
+      "function": "physical_target"
+    }
+  ]
+}

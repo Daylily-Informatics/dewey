@@ -1,0 +1,111 @@
+- banner:
+  - link "Dewey / TapDB":
+    - /url: /tapdb/
+  - navigation:
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Admin":
+      - /url: /admin
+    - link "Overview":
+      - /url: /tapdb/admin/overview
+    - link "Search":
+      - /url: /tapdb/search
+    - link "Graph":
+      - /url: /tapdb/graph
+    - link "Templates":
+      - /url: /tapdb/templates
+    - link "Audit":
+      - /url: /tapdb/audit
+    - link "Help":
+      - /url: /tapdb/help
+    - link "Readiness":
+      - /url: /tapdb/admin/readiness
+    - link "Inventory":
+      - /url: /tapdb/admin/inventory
+    - link "Meridian":
+      - /url: /tapdb/admin/meridian
+    - link "Metrics":
+      - /url: /tapdb/admin/metrics
+    - link "Runtime":
+      - /url: /tapdb/admin/runtime
+    - link "Backups":
+      - /url: /tapdb/admin/backups
+    - link "Sign out":
+      - /url: /auth/logout
+  - generic: johnm@lsmc.com · admin
+- main:
+  - heading "Templates" [level=1]
+  - paragraph: Loaded templates are read-only.
+  - textbox "category": data
+  - button "Filter"
+  - textbox "Optional exact stored template EUID": M-DGX-1A
+  - button "Download Canonical Pack" [active]
+  - paragraph: The download returns an identity-free canonical JSON pack as an attachment and creates no server-side files.
+  - textbox "/absolute/path/to/template-pack.json"
+  - button "Inventory Repository Pack"
+  - textbox "/absolute/path/to/template-pack.json"
+  - button "Export New Repository Pack"
+  - paragraph: Server-side repository export requires an explicit absolute path and writes both the pack and its immutable provenance receipt. Existing files are never overwritten.
+  - table:
+    - rowgroup:
+      - row "EUID Name Code Instance Prefix Validator Repository":
+        - columnheader "EUID"
+        - columnheader "Name"
+        - columnheader "Code"
+        - columnheader "Instance Prefix"
+        - columnheader "Validator"
+        - columnheader "Repository"
+        - columnheader
+        - columnheader
+    - rowgroup:
+      - row "M-DGX-1A Dewey Artifact data/artifact/generic/1.0 DGX UNIVERSAL_PASS@1 pending Create Build New Template":
+        - cell "M-DGX-1A":
+          - link "M-DGX-1A":
+            - /url: /tapdb/object/M-DGX-1A
+        - cell "Dewey Artifact"
+        - cell "data/artifact/generic/1.0"
+        - cell "DGX"
+        - cell "UNIVERSAL_PASS@1":
+          - code: UNIVERSAL_PASS@1
+        - cell "pending"
+        - cell "Create":
+          - link "Create":
+            - /url: /tapdb/create/M-DGX-1A
+        - cell "Build New Template":
+          - link "Build New Template":
+            - /url: /tapdb/templates/new?seed_euid=M-DGX-1A
+      - row "M-DGX-28 Dewey Artifact Set data/artifact_set/generic/1.0 DGX UNIVERSAL_PASS@1 pending Create Build New Template":
+        - cell "M-DGX-28":
+          - link "M-DGX-28":
+            - /url: /tapdb/object/M-DGX-28
+        - cell "Dewey Artifact Set"
+        - cell "data/artifact_set/generic/1.0"
+        - cell "DGX"
+        - cell "UNIVERSAL_PASS@1":
+          - code: UNIVERSAL_PASS@1
+        - cell "pending"
+        - cell "Create":
+          - link "Create":
+            - /url: /tapdb/create/M-DGX-28
+        - cell "Build New Template":
+          - link "Build New Template":
+            - /url: /tapdb/templates/new?seed_euid=M-DGX-28
+- contentinfo: TapDB 10.1.1rc1
+- text: Theme
+- combobox "Theme":
+  - option "original" [selected]
+  - option "light"
+  - option "dark"
+  - option "CBF"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

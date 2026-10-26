@@ -1,0 +1,12 @@
+{
+  "recorded_at": "2026-10-04T05:13:04.355473+00:00",
+  "status": "applied_and_read_back",
+  "role_arn": "arn:aws:iam::108782052779:role/Dayhoff-day-Compute-InstanceRole3CCE2F1D-Nt0s1SL3rfbr",
+  "role_id": "AROARSU7KMWVUTDZNIAIW",
+  "policy_name": "DeweyContentCertificateChallenge20261004",
+  "policy_sha256": "63211b948862a1c43cff6ec843749681f03101eed8ab2f81a972d425514640c1",
+  "existing_default_policy_unchanged": true,
+  "scope": "one exact Dewey content TXT certificate challenge record",
+  "reason": "Required by authorized isolated content-subtree certificate; independent source review cleared",
+  "official_condition_reference": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/specifying-conditions-route53.html"
+}

@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 from typing import Any
+from urllib.parse import urlsplit
 
+from dewey_service.deletion_policy import reject_deletion
+from dewey_service.qeo_package_contract import PackageRegistration
 from dewey_service.services.base import DeweyConflictError, DeweyNotFoundError
 from dewey_service.tapdb_backend import (
     ARTIFACT_SET_TEMPLATE,
@@ -36,6 +39,164 @@ _QEO_RECEIPT_FIELDS = {
 
 
 class ArtifactSetServiceMixin:
+    def _qeo_package_response(self, session, package, manifest):
+        members = self.backend.list_children(
+            session, parent=package, relationship_type="artifact_set_member"
+        )
+        by_id = {member.euid: member for member in members}
+        if set(by_id) != {item.artifact_euid for item in manifest.files}:
+            raise DeweyConflictError("Package manifest does not match authoritative lineage")
+        files = []
+        for item in manifest.files:
+            artifact = self._artifact_response(by_id[item.artifact_euid])
+            location = urlsplit(artifact["storage_uri"])
+            if (
+                artifact["storage_backend"] != "s3"
+                or artifact["storage_kind"] != "object"
+                or artifact["node_kind"] != "file"
+                or not artifact["storage_uri"].startswith("s3://")
+                or not location.netloc
+                or not location.path.lstrip("/")
+                or location.query
+                or location.fragment
+                or location.username
+                or artifact["storage_uri"].endswith("/")
+            ):
+                raise DeweyConflictError("Package members must be exact S3 file artifacts")
+            if artifact["size"] is None or artifact["size"] != item.size_bytes:
+                raise DeweyConflictError("Manifest size disagrees with registered artifact")
+            checksum = artifact["checksums"].get("sha256")
+            if checksum != item.sha256:
+                raise DeweyConflictError("Manifest checksum disagrees with registered artifact")
+            version_id = artifact.get("version_id")
+            if version_id is not None and (
+                not isinstance(version_id, str)
+                or not version_id
+                or version_id != version_id.strip()
+                or any(ord(char) < 32 for char in version_id)
+            ):
+                raise DeweyConflictError("Registered artifact has an invalid exact S3 version")
+            files.append(
+                {**item.model_dump(), "url": artifact["storage_uri"], "version_id": version_id}
+            )
+        return {
+            "contract": "dewey.multiqc-package/v1",
+            "artifact_set_euid": package.euid,
+            "complete_data_package": True,
+            "label": manifest.label,
+            "files": files,
+        }
+
+    def register_qeo_package(
+        self,
+        request: PackageRegistration,
+        *,
+        idempotency_key: str | None = None,
+    ):
+        """Explicit operator write; all artifacts must already exist. No identity invention."""
+        request = request.model_copy(
+            update={"files": sorted(request.files, key=lambda item: item.relative_path)}
+        )
+        payload = request.model_dump()
+        fingerprint = self._fingerprint(payload)
+        computed_key = f"qeo.package.register:{fingerprint}"
+        supplied_key = str(idempotency_key or "").strip()
+        if supplied_key and supplied_key != computed_key:
+            raise DeweyConflictError(
+                "Idempotency-Key does not match deterministic QEO package request hash"
+            )
+        with self.backend.session_scope(commit=True) as session:
+            self.backend.lock_external_key(
+                session, operation="qeo.package.register", key=computed_key
+            )
+            replay = self._idempotency_replay(
+                session,
+                operation="qeo.package.register",
+                idempotency_key=computed_key,
+                fingerprint=fingerprint,
+            )
+            if replay is not None:
+                return replay.status_code, replay.response
+            artifacts = []
+            for item in request.files:
+                artifact = self.backend.find_by_euid(
+                    session,
+                    template_code=ARTIFACT_TEMPLATE,
+                    euid=item.artifact_euid,
+                )
+                if artifact is None:
+                    raise DeweyNotFoundError(f"Artifact not found: {item.artifact_euid}")
+                artifacts.append(artifact)
+            package = self.backend.create_instance(
+                session,
+                template_code=ARTIFACT_SET_TEMPLATE,
+                name=request.label,
+                json_addl={
+                    "artifact_set_type": "qeo_multiqc_package",
+                    "label": request.label,
+                    "metadata": {"qeo_package": payload},
+                    "created_at": utc_now_iso(),
+                },
+            )
+            for artifact in artifacts:
+                self.backend.create_lineage(
+                    session, parent=package, child=artifact, relationship_type="artifact_set_member"
+                )
+            body = self._qeo_package_response(session, package, request)
+            self._store_idempotency(
+                session,
+                operation="qeo.package.register",
+                idempotency_key=computed_key,
+                fingerprint=fingerprint,
+                status_code=201,
+                response=body,
+            )
+            return 201, body
+
+    def resolve_qeo_package(self, *, kind: str, euid: str):
+        """Read only: report-to-package selection uses persisted membership, never paths."""
+        with self.backend.session_scope() as session:
+            if kind == "artifact_set":
+                package = self.backend.find_by_euid(
+                    session, template_code=ARTIFACT_SET_TEMPLATE, euid=euid
+                )
+                candidates = [package] if package is not None else []
+            elif kind == "artifact":
+                report = self.backend.find_by_euid(
+                    session, template_code=ARTIFACT_TEMPLATE, euid=euid
+                )
+                candidates = (
+                    self.backend.list_parents(
+                        session, child=report, relationship_type="artifact_set_member"
+                    )
+                    if report is not None
+                    else []
+                )
+            else:
+                raise ValueError("Unsupported resolver kind")
+            packages = []
+            for candidate in candidates:
+                payload = normalize_instance_payload(candidate)
+                if payload.get("artifact_set_type") != "qeo_multiqc_package":
+                    continue
+                manifest = PackageRegistration.model_validate(
+                    (payload.get("metadata") or {}).get("qeo_package")
+                )
+                if kind == "artifact" and not any(
+                    f.role == "report" and f.artifact_euid == euid for f in manifest.files
+                ):
+                    continue
+                packages.append((candidate, manifest))
+            if not packages:
+                raise DeweyNotFoundError(
+                    "No explicitly registered MultiQC package for this reference"
+                )
+            if len(packages) != 1:
+                raise DeweyConflictError(
+                    "Multiple packages match; supply the exact artifact-set EUID"
+                )
+            return self._qeo_package_response(session, *packages[0])
+
     def create_artifact_set(
         self,
         *,
@@ -160,59 +321,7 @@ class ArtifactSetServiceMixin:
         artifact_euid: str,
         idempotency_key: str,
     ) -> tuple[int, dict[str, Any]]:
-        payload = {
-            "artifact_set_euid": str(artifact_set_euid or "").strip(),
-            "artifact_euid": str(artifact_euid or "").strip(),
-        }
-        if not payload["artifact_set_euid"]:
-            raise ValueError("artifact_set_euid is required")
-        if not payload["artifact_euid"]:
-            raise ValueError("artifact_euid is required")
-
-        fingerprint = self._fingerprint(payload)
-        with self.backend.session_scope(commit=True) as session:
-            replay = self._idempotency_replay(
-                session,
-                operation="artifact_set.member.remove",
-                idempotency_key=idempotency_key,
-                fingerprint=fingerprint,
-            )
-            if replay is not None:
-                return replay.status_code, replay.response
-
-            artifact_set = self.backend.find_by_euid(
-                session,
-                template_code=ARTIFACT_SET_TEMPLATE,
-                euid=payload["artifact_set_euid"],
-                for_update=True,
-            )
-            if artifact_set is None:
-                raise DeweyNotFoundError(f"Artifact set not found: {payload['artifact_set_euid']}")
-
-            artifact = self.backend.find_by_euid(
-                session,
-                template_code=ARTIFACT_TEMPLATE,
-                euid=payload["artifact_euid"],
-            )
-            if artifact is None:
-                raise DeweyNotFoundError(f"Artifact not found: {payload['artifact_euid']}")
-
-            self.backend.delete_lineage(
-                session,
-                parent=artifact_set,
-                child=artifact,
-                relationship_type="artifact_set_member",
-            )
-            body = self._artifact_set_response(session, artifact_set)
-            self._store_idempotency(
-                session,
-                operation="artifact_set.member.remove",
-                idempotency_key=idempotency_key,
-                fingerprint=fingerprint,
-                status_code=200,
-                response=body,
-            )
-            return 200, body
+        reject_deletion()
 
     def get_artifact_set(self, artifact_set_euid: str) -> dict[str, Any]:
         with self.backend.session_scope(commit=False) as session:

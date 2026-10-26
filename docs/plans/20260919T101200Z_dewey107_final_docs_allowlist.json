@@ -1,0 +1,58 @@
+{
+  "files": [
+    {
+      "bytes": 8592,
+      "path": "docs/plans/20260919T095100Z_dewey_gui_performance_ledger.md",
+      "sha256": "75a4c42443c327a0ffa9a12f30895cfc311472733ed959a47d6affaddf401f17"
+    },
+    {
+      "bytes": 9038,
+      "path": "docs/plans/20260919T100000Z_dewey_final_image.py",
+      "sha256": "71cb4ac362184270dec946a4d36eeba3994595170cad1615ae8eff6657441e4a"
+    },
+    {
+      "bytes": 1101,
+      "path": "docs/plans/20260919T100142Z_dewey107_image_receipt.json",
+      "sha256": "7463bd1fab97f1a6cf108c25923c3efe9fd58ec550fe32ba64ae8d9befa55560"
+    },
+    {
+      "bytes": 355,
+      "path": "docs/plans/20260919T100300Z_dewey107_helper_staging.json",
+      "sha256": "ab0232b409fc288a228e0cd2dbf222970046c785b69f6d3933af8bbf6eff5427"
+    },
+    {
+      "bytes": 11822,
+      "path": "docs/plans/20260919T100400Z_dewey107_selected_cutover.py",
+      "sha256": "eb3665d31ed66748b22ac03c16fce983a8b1c80db6439b87be9214bd0b13734d"
+    },
+    {
+      "bytes": 354,
+      "path": "docs/plans/20260919T100500Z_dewey107_cutover_staging.json",
+      "sha256": "c0383e9f6c812aa64c89a530d81f2c371bd5e8e2067c661c174f3cdcb38dfd6d"
+    },
+    {
+      "bytes": 17242,
+      "path": "docs/plans/20260919T100534Z_dewey107_deployment_receipt.json",
+      "sha256": "7d92be3bec61ab3e354d95d00c931045d7d0e9393580b330178c8d0ee9193c8a"
+    },
+    {
+      "bytes": 7870,
+      "path": "docs/plans/20260919T100800Z_dewey_summary_acceptance.json",
+      "sha256": "413b91f2d778b7a3c4c06264e6f080d60eb355af6d0dacccde5b963a25d11f53"
+    },
+    {
+      "bytes": 5098,
+      "path": "docs/plans/20260919T100800Z_dewey_summary_acceptance.py",
+      "sha256": "c7172d63dd8261dbede2c3a5b2050b572dcc56ba4e63d7609a9b6bde335f6bb0"
+    },
+    {
+      "bytes": 3327,
+      "path": "docs/plans/20260919T101000Z_dewey107_performance_comparison.json",
+      "sha256": "631c8433a22c3aabe86bf58b7ef0272f4a6d65b1ef7d4ab192023757a49289b6"
+    }
+  ],
+  "release_commit": "8d04719a6ad82a6808bf38933b39cadb210b43d0",
+  "release_tag": "10.0.7",
+  "schema": "dewey.performance-final-docs-allowlist/1",
+  "source_changes_after_release": false
+}

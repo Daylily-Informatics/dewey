@@ -1,0 +1,22 @@
+{
+  "canonical_user_json_bytes": 2113,
+  "current_cookie_name_value_bytes": 4344,
+  "current_set_cookie_header_bytes": 4399,
+  "current_session_json_bytes": 3215,
+  "current_exceeds_4096": true,
+  "minimal_cookie_name_value_bytes": 1588,
+  "minimal_set_cookie_header_bytes": 1643,
+  "minimal_session_json_bytes": 1147,
+  "minimal_below_4096": true,
+  "recipient_identity_json_bytes": 462,
+  "current_canonical_contains_duplicate_identity": true,
+  "group_count": 11,
+  "role_count": 2,
+  "native_active": true,
+  "native_generation_matches": true,
+  "native_grant_matches_handoff": true,
+  "native_subject_matches": true,
+  "native_unexpired": true,
+  "observed_at": "2026-10-26T03:56:15Z",
+  "method": "read-only retained consumed handoff and persisted binding; native session serialization; no identity values exported"
+}

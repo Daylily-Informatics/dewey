@@ -1,0 +1,198 @@
+{
+  "instance": "i-07df3a933e4839f52",
+  "region": "us-west-2",
+  "build_location": "EC2 only",
+  "initial_build": {
+    "started_at": "2026-10-26T02:26:10.585755+00:00",
+    "finished_at": "2026-10-26T02:27:59.964633+00:00",
+    "exit_code": 0
+  },
+  "corrective_build": {
+    "started_at": "2026-10-26T02:41:57.857735+00:00",
+    "finished_at": "2026-10-26T02:43:30.088463+00:00",
+    "exit_code": 0,
+    "selected": [
+      "dewey"
+    ]
+  },
+  "images": [
+    {
+      "service": "dewey",
+      "version": "12.0.0",
+      "commit": "7c6ff8aebf69db1b46f386f3f79f58d8e648f54c",
+      "digest": "sha256:a4270eda22764fb6ef843c583a150970defa23396dff54b7604c012122003a3f",
+      "disposition": "superseded before deployment by preserving config correction",
+      "packages": {
+        "daylily-tapdb": "11.0.9",
+        "daylily-auth-cognito": "2.1.5"
+      }
+    },
+    {
+      "service": "dewey",
+      "version": "12.0.1",
+      "commit": "bb86e2a22c90337fc35d171722d50a88423ca9a3",
+      "tag_object": "8827dea839fcdae68aa2911dd802b1643ef2d2fa",
+      "digest": "sha256:4fb83bf514425218d1154e5b21b8308d6564c6ef12d7291c6af9e3626640d7cf",
+      "disposition": "superseded before deployment by native template preparation correction"
+    },
+    {
+      "service": "login",
+      "version": "4.1.0",
+      "commit": "4836f1581b309176bdf1706cdb9eabbf4b4ea4b4",
+      "digest": "sha256:675b378414f04d173c01475ba1624abb1f3325b0fe49ea96e2b55e473c0ff516",
+      "disposition": "deployed then superseded by shared transaction concurrency correction",
+      "packages": {
+        "daylily-auth-cognito": "2.1.9"
+      }
+    },
+    {
+      "service": "dewey",
+      "version": "12.0.2",
+      "commit": "0a85f9ed959b7486b8a1ecc7b545ab103a53d917",
+      "tag_object": "ff022991befa125a3463eeb35f4c96e94d25d540",
+      "digest": "sha256:0a65ed288bbd6b52c32ed6205ec478f052134534c43208a66b3f27f88951bc0a",
+      "disposition": "deployed then superseded by browser cookie correction",
+      "packages": {
+        "daylily-tapdb": "11.0.9",
+        "daylily-auth-cognito": "2.1.5"
+      }
+    },
+    {
+      "service": "dewey",
+      "version": "12.0.3",
+      "commit": "a5d6c05df2337a9b87dff1ab19c0b109f910a986",
+      "tag_object": "adfef391571b1f7a47ea76f967f9e3282716df95",
+      "digest": "sha256:0885649fb6a2aad1352db6cf1a21e2034f4f7120d25087bc00d7d2c0b5a4a79d",
+      "disposition": "deployed then superseded by isolated report attribution/handoff correction",
+      "packages": {
+        "daylily-tapdb": "11.0.9",
+        "daylily-auth-cognito": "2.1.5"
+      }
+    },
+    {
+      "service": "login",
+      "version": "4.1.1",
+      "commit": "3a54d153c10193dda78e77a7c562529c2768ee45",
+      "tag_object": "f7a576557a66ccf2eae78f321bcdaff94eef8bb8",
+      "digest": "sha256:82985b4c51c2f397d1e2a209c3e43f06b7328eca56f0bc4d618c3316cd41c355",
+      "disposition": "deployed and ready; authenticated parallel assets and Sharing UI pass",
+      "packages": {
+        "daylily-auth-cognito": "2.1.9"
+      }
+    },
+    {
+      "service": "dewey",
+      "version": "12.0.4",
+      "commit": "482c8013a8e0946376cb7565ec381a0eb7836065",
+      "tag_object": "17aac2848427fe94b60c558c97e5fdde67f15e0b",
+      "digest": "sha256:e4e43c72f33d110e4b2f4c61526cf60377e97bc2351ea4a210effe6a2f5739cb",
+      "disposition": "deployed then superseded by native grant policy projection correction",
+      "packages": {
+        "daylily-tapdb": "11.0.9",
+        "daylily-auth-cognito": "2.1.5"
+      }
+    },
+    {
+      "service": "dewey",
+      "version": "12.0.5",
+      "commit": "79d2889c71fab3bda87f676d40bcbbc613d4cdda",
+      "tag_object": "2617281dd612c46919b4d68417dcac2e50223136",
+      "digest": "sha256:500ae751a29656c5f6f789bb1c4a1d92291de489057974f0001b91f45c9733c9",
+      "disposition": "deployed then superseded by durable early-recipient-denial audit correction",
+      "packages": {
+        "dewey-service": "12.0.5",
+        "daylily-tapdb": "11.0.9",
+        "daylily-auth-cognito": "2.1.5"
+      }
+    },
+    {
+      "service": "dewey",
+      "version": "12.0.6",
+      "commit": "25ec6c9d19ebbe32ef445aa348b2287aff89781f",
+      "tag_object": "d85c5e67c48b8acba74e8580b8c7f0f08d35b0bc",
+      "digest": "sha256:05652be69cfabc252eeb331e6c16b023536da474de9ac5cdb73f53249b076fa1",
+      "disposition": "deployed then superseded by MultiQC form/export sandbox correction; original audit acceptance remains valid for its fixed window",
+      "packages": {
+        "daylily-tapdb": "11.0.9",
+        "daylily-auth-cognito": "2.1.5"
+      }
+    },
+    {
+      "service": "dewey",
+      "version": "12.0.7",
+      "commit": "3adc81c622d3a8e81fa31b91a2d3ce43690c8202",
+      "tag_object": "898668b4b69925bc9631fa6f6325ebeb71102b6e",
+      "digest": "sha256:fdf49285e8884894c6f0ee5ce72b6bda61bfd9f6e7ead31990c6e52bc2d64e41",
+      "disposition": "deployed and ready;17affected Python and45browser-script tests passed; all7selected MultiQC PNGs downloaded through canonical authenticated share",
+      "packages": {
+        "dewey-service": "12.0.7",
+        "daylily-tapdb": "11.0.9",
+        "daylily-auth-cognito": "2.1.5"
+      }
+    }
+  ],
+  "private_evidence_root": "/home/ubuntu/dewey12-release-20261026T021700Z",
+  "template_scope_corrective_build": {
+    "started_at": "2026-10-26T03:29:41.430189+00:00",
+    "finished_at": "2026-10-26T03:31:11.439821+00:00",
+    "exit_code": 0,
+    "selected": [
+      "dewey"
+    ],
+    "cache_mode": "off"
+  },
+  "cookie_corrective_build": {
+    "started_at": "2026-10-26T03:57:42.342982+00:00",
+    "finished_at": "2026-10-26T03:59:11.746086+00:00",
+    "exit_code": 0,
+    "selected": [
+      "dewey"
+    ],
+    "cache_mode": "off"
+  },
+  "login_concurrency_corrective_build": {
+    "started_at": "2026-10-26T04:16:45.355722+00:00",
+    "finished_at": "2026-10-26T04:17:36.179455+00:00",
+    "exit_code": 0,
+    "selected": [
+      "lsmc-oauth-login"
+    ],
+    "cache_mode": "off"
+  },
+  "report_corrective_build": {
+    "started_at": "2026-10-26T04:47:05.718583+00:00",
+    "finished_at": "2026-10-26T04:48:35.908236+00:00",
+    "exit_code": 0,
+    "selected": [
+      "dewey"
+    ],
+    "cache_mode": "off"
+  },
+  "grant_corrective_build": {
+    "started_at": "2026-10-26T06:13:37.920217+00:00",
+    "finished_at": "2026-10-26T06:15:16.516913+00:00",
+    "exit_code": 0,
+    "selected": [
+      "dewey"
+    ],
+    "cache_mode": "off"
+  },
+  "audit_corrective_build": {
+    "started_at": "2026-10-26T07:14:14.224432+00:00",
+    "finished_at": "2026-10-26T07:15:50.954887+00:00",
+    "exit_code": 0,
+    "selected": [
+      "dewey"
+    ],
+    "cache_mode": "off"
+  },
+  "report_export_corrective_build": {
+    "started_at": "2026-10-26T10:15:06.777263+00:00",
+    "finished_at": "2026-10-26T10:16:39.078192+00:00",
+    "exit_code": 0,
+    "selected": [
+      "dewey"
+    ],
+    "cache_mode": "off"
+  }
+}

@@ -1,0 +1,63 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / SHARE
+  - heading "Dewey GUI audit 20260916 I1-A storage set" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - status: Share link copied. Recipients must log in.
+  - generic: active
+  - code: M-DGX-TQZ1
+  - button "Copy share link"
+  - heading "Shared artifact" [level=2]
+  - paragraph
+  - link "Open shared set":
+    - /url: /records/M-DGX-TQRF
+  - paragraph: Access to set members is checked independently.
+  - heading "Share policy" [level=2]
+  - term: Audience
+  - definition: recipients · login required
+  - term: Expires
+  - definition: 9/17/2026, 3:20:26 PM
+  - term: Owner
+  - definition: johnm@lsmc.com
+  - term: Recipients
+  - definition: johnm+dewey-gui-20260916-i1a@lsmc.com, johnm+dewey-gui-20260916-i1b@lsmc.com
+  - term: Domains
+  - definition: —
+  - paragraph: Issued delivery credentials may remain usable for up to 60 minutes after revocation. Credential issuance does not establish a completed download.
+  - button "Edit share"
+  - button "Send login invitation"
+  - button "Revoke share"
+  - heading "Activity" [level=2]
+  - generic: "[ { \"ip\": null, \"route\": \"modify\", \"target\": {}, \"decision\": \"change\", \"timestamp\": \"2026-09-16T19:21:23.899003Z\", \"user_agent\": null, \"actor_email\": \"johnm@lsmc.com\", \"actor_groups\": [ \"lsmc:atlas:admin\", \"lsmc:bloom:admin\", \"lsmc:dewey:admin\", \"lsmc:global-admin\", \"lsmc:internal-user\", \"lsmc:kahlo:admin\", \"lsmc:ursa:admin\", \"lsmc:zebra-day:admin\", \"us-west-2_dPYPLRKZe_Google\", \"dewey-admin\", \"dewey-readwrite\" ], \"delivery_mode\": null, \"denial_reason\": null } ]"
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

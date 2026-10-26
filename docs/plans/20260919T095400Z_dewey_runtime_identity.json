@@ -1,0 +1,25 @@
+{
+  "compose_config": "/opt/dayhoff/deployments/day/compose/docker-compose.yml",
+  "config_env_recorded": false,
+  "container_id": "5bdffcddb175153303344ef3ec1c30b41d5632362b80e7e8874e5f60fdc0f3ba",
+  "container_name": "dayhoff-day-dewey-1",
+  "image_id": "sha256:0af4bf5a62d2a35c0e3b9304a7da383b142aa45a89427a634774e65b90258315",
+  "instance_id": "i-07df3a933e4839f52",
+  "mutations": false,
+  "observation_precision": "Native docker inspect in this current SSM session; exact collection timestamp was not emitted.",
+  "observed_at": null,
+  "operator_profile": "lsmc",
+  "recorded_at": "2026-09-19T09:52:10Z",
+  "region": "us-west-2",
+  "restarting": false,
+  "schema": "dewey.runtime-identity/1",
+  "service_config_mount": {
+    "destination": "/opt/dewey/day/releases/10.0.2/dewey-config.yaml",
+    "source": "/home/ubuntu/dewey_ops/registry10-20260912/10.0.2/dewey-config.yaml"
+  },
+  "shell_user": "ubuntu",
+  "source_revision": "c98cbbbd5c5f7b1b622579923800e6ffa2f382e6",
+  "started_at": "2026-09-16T20:22:03.743868894Z",
+  "state": "running",
+  "version": "10.0.6"
+}

@@ -13,6 +13,5 @@ console = Console()
 
 def project_subprocess_env() -> dict[str, str]:
     env = os.environ.copy()
-    env["DAYHOFF_PROJECT_ROOT"] = str(PROJECT_ROOT)
     env["DEWEY_PROJECT_ROOT"] = str(PROJECT_ROOT)
     return env

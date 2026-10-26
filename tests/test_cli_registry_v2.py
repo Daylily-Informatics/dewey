@@ -56,14 +56,14 @@ def test_cli_registry_exposes_v2_command_tree_and_policies() -> None:
 
     assert registry.resolve_command_args(["version"]) is not None
     assert registry.resolve_command_args(["server", "status"]) is not None
-    assert registry.resolve_command_args(["db", "reset"]) is not None
+    assert registry.resolve_command_args(["db", "verify-templates"]) is not None
     assert registry.resolve_command_args(["test", "run"]) is not None
     assert registry.resolve_command_args(["tapdb", "run"]) is not None
     assert registry.resolve_command_args(["cognito", "status"]) is not None
 
     version_cmd = registry.get_command(("version",))
     server_status_cmd = registry.get_command(("server", "status"))
-    db_reset_cmd = registry.get_command(("db", "reset"))
+    db_verify_cmd = registry.get_command(("db", "verify-templates"))
     config_status_cmd = registry.get_command(("config", "status"))
     tapdb_run_cmd = registry.get_command(("tapdb", "run"))
     cognito_status_cmd = registry.get_command(("cognito", "status"))
@@ -75,9 +75,9 @@ def test_cli_registry_exposes_v2_command_tree_and_policies() -> None:
     assert server_status_cmd.policy.supports_json is True
     assert server_status_cmd.policy.prereq_tags == {"dewey-runtime"}
 
-    assert db_reset_cmd is not None
-    assert db_reset_cmd.policy.mutates_state is True
-    assert db_reset_cmd.policy.interactive is True
+    assert db_verify_cmd is not None
+    assert db_verify_cmd.policy.mutates_state is False
+    assert db_verify_cmd.policy.interactive is False
 
     assert config_status_cmd is not None
     assert config_status_cmd.policy.prereq_tags == {"dewey-runtime"}

@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "identity_inventory_error",
+    "details": null,
+    "message": "Identity receipt exceeds the declared size bound"
+  }
+}

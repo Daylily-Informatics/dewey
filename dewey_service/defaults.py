@@ -97,6 +97,10 @@ auth:
     callback_url: ""
     logout_url: ""
     ca_bundle: ""
+    share_login_url: ""
+    identity_url: ""
+    identity_mint_url: ""
+    identity_revoke_url: ""
   cognito:
     domain: dewey-auth.example.com
     app_client_id: dewey-client-id
@@ -123,6 +127,11 @@ auth:
       lsmc:dewey:admin: ADMIN
       lsmc:dewey:readwrite: READ_WRITE
       lsmc:dewey:readonly: READ_ONLY
+
+# Default-off; retain an empty allowlist until an approved service principal exists.
+labcore_owner:
+  api_enabled: false
+  service_principals: []
 
 qeo:
   ingest_url: ""
@@ -162,6 +171,18 @@ deployment:
 
 network:
   allowed_hosts: []
+
+# Explicit sharing authority must be prepared before starting recipient ingress.
+share:
+  approved_origins: []
+  trusted_proxy_peer: ""
+  ingress_assertion_header: X-Dewey-Tailnet-Assertion
+  ingress_assertion: ""
+  public_ingress_assertion_header: X-Dewey-Recipient-Assertion
+  public_ingress_assertion: ""
+  application_origin: ""
+  content_host_suffix: ""
+  session_generation: ""
 
 ui:
   show_environment_chrome: true

@@ -1,0 +1,8 @@
+{
+  "changed_field": "DEWEY_BUILD_BRANCH",
+  "before": "codex/graph-legacy-boundaries-20261015",
+  "after": "codex/dewey-sharing-review-20261025",
+  "compose_sha256": "74dc32111e0f1cc7840e82d1ba4fe8021498725bae0cb5b47392109d5c0dfe30",
+  "image_unchanged": true,
+  "exit_code": 0
+}

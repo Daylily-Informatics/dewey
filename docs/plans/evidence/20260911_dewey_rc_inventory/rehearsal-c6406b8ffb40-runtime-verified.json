@@ -1,0 +1,94 @@
+{
+  "ddl_denial": [
+    {
+      "probe": "temporary_table",
+      "sqlstate": "42501"
+    },
+    {
+      "probe": "managed_schema_table",
+      "sqlstate": "42501"
+    }
+  ],
+  "lane": "rehearsal",
+  "runtime_config_sha256": "a5ee191de51ae3912c96878ac92a3f80429888638d578ccb191f6cf1b6025117",
+  "session": {
+    "allow_global": "false",
+    "backend_pid": 21192,
+    "config_identity": "/opt/dewey/day/releases/tapdb10-rehearsal-20260911/tapdb-runtime.yaml",
+    "connect": true,
+    "database": "dewey_tapdb10_rehearsal_20260911",
+    "db_create": false,
+    "domain": "M",
+    "login": "dewey_rehearsal_9",
+    "owner": "dewey",
+    "rolbypassrls": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "role": "dewey_rehearsal_9",
+    "rolinherit": false,
+    "rolreplication": false,
+    "rolsuper": false,
+    "schema_create": false,
+    "temp": false,
+    "tenant": ""
+  },
+  "sha256": "20545b6d27c7183432cc419f3898664dabb31c8b4c9112c20363540cf6cce824",
+  "status": "verified",
+  "templates": [
+    {
+      "code": "data/artifact/generic/1.0/",
+      "euid": "M-DGX-1A",
+      "instance_prefix": "DGX"
+    },
+    {
+      "code": "data/artifact_set/generic/1.0/",
+      "euid": "M-DGX-28",
+      "instance_prefix": "DGX"
+    },
+    {
+      "code": "access/share/generic/1.0/",
+      "euid": "M-DGX-36",
+      "instance_prefix": "DGX"
+    },
+    {
+      "code": "access/share_root/generic/1.0/",
+      "euid": "M-DGX-AAM5",
+      "instance_prefix": "DGX"
+    },
+    {
+      "code": "integration/external_object/generic/1.0/",
+      "euid": "M-DGX-44",
+      "instance_prefix": "DGX"
+    },
+    {
+      "code": "integration/external_object_relation/generic/1.0/",
+      "euid": "M-DGX-52",
+      "instance_prefix": "DGX"
+    },
+    {
+      "code": "access/literature_save/generic/1.0/",
+      "euid": "M-DGX-60",
+      "instance_prefix": "DGX"
+    },
+    {
+      "code": "operational/anomaly/generic/1.0/",
+      "euid": "M-DGX-7Y",
+      "instance_prefix": "DGX"
+    },
+    {
+      "code": "system/idempotency_request/generic/1.0/",
+      "euid": "M-DGX-8W",
+      "instance_prefix": "DGX"
+    },
+    {
+      "code": "system/registration_receipt/generic/1.0/",
+      "euid": "M-DGX-9YNH",
+      "instance_prefix": "DGX"
+    },
+    {
+      "code": "system/outbox_event/generic/1.0/",
+      "euid": "M-DGX-9YPF",
+      "instance_prefix": "DGX"
+    }
+  ]
+}

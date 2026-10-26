@@ -1,0 +1,78 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / S3 BROWSER
+  - heading "S3 Browser" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - textbox "S3 URI":
+    - /placeholder: s3://bucket/exact/prefix/
+    - text: s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-B/nested/
+  - button "Go"
+  - link "All buckets":
+    - /url: /storage
+  - generic: s3://lsmc-dewey-0/gui-audit/20260916T183133Z/I1-B/nested/
+  - button "Upload files"
+  - link "Register this folder":
+    - /url: /add?kind=prefix&uri=s3%3A%2F%2Flsmc-dewey-0%2Fgui-audit%2F20260916T183133Z%2FI1-B%2Fnested%2F
+  - button "Delete folder…"
+  - link "lsmc-dewey-0":
+    - /url: /storage?uri=s3%3A%2F%2Flsmc-dewey-0%2F
+  - link "/gui-audit":
+    - /url: /storage?uri=s3%3A%2F%2Flsmc-dewey-0%2Fgui-audit%2F
+  - link "/20260916T183133Z":
+    - /url: /storage?uri=s3%3A%2F%2Flsmc-dewey-0%2Fgui-audit%2F20260916T183133Z%2F
+  - link "/I1-B":
+    - /url: /storage?uri=s3%3A%2F%2Flsmc-dewey-0%2Fgui-audit%2F20260916T183133Z%2FI1-B%2F
+  - link "/nested":
+    - /url: /storage?uri=s3%3A%2F%2Flsmc-dewey-0%2Fgui-audit%2F20260916T183133Z%2FI1-B%2Fnested%2F
+  - searchbox "Filter names on this page"
+  - button "Register selection as a set"
+  - table:
+    - rowgroup:
+      - row "Kind Name Size Registration":
+        - columnheader "Kind"
+        - columnheader "Name"
+        - columnheader "Size"
+        - columnheader "Registration"
+    - rowgroup:
+      - row "Select fixture.json object fixture.json 64 B Register":
+        - cell "Select fixture.json object":
+          - checkbox "Select fixture.json"
+          - generic: object
+        - cell "fixture.json":
+          - button "fixture.json"
+        - cell "64 B"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dewey-0%2Fgui-audit%2F20260916T183133Z%2FI1-B%2Fnested%2Ffixture.json&kind=object
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

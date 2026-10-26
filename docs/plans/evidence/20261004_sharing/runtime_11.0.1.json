@@ -1,0 +1,33 @@
+{
+  "observed_at": "2026-10-04T05:26:39.114412+00:00",
+  "container_id": "71902878e479f4c44a4951b31857166d6e6db235779ec4d8ec84e6264212bddf",
+  "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:31ed96826facacfa6230793a5e77e2f742185c058837f9960797c9133981bc30",
+  "running": true,
+  "started_at": "2026-10-04T05:25:07.059730205Z",
+  "restart_count": 0,
+  "runtime_env": {
+    "HOST": "127.0.0.1",
+    "PORT": "8914",
+    "DEWEY_HOST": "127.0.0.1",
+    "DEWEY_BUILD_SHA": "67b0f702b9daabfd2bb604c59ce1e2dff33f4ea4",
+    "LSMC_RELEASE_SHA": "67b0f702b9daabfd2bb604c59ce1e2dff33f4ea4",
+    "DEWEY_BUILD_BRANCH": "codex/dewey-tapdb-globaldag-20260926"
+  },
+  "maintenance_start": "2026-10-04T05:15:07.849151+00:00",
+  "deployment_finished": "2026-10-04T05:25:07.598613+00:00",
+  "maintenance_seconds_to_container_started": 599.749462,
+  "listener": [
+    "LISTEN 0      2048                              127.0.0.1:8914       0.0.0.0:*    users:((\"python\",pid=4179577,fd=12))                                                          "
+  ],
+  "services": [
+    "active",
+    "active",
+    "active"
+  ],
+  "certificate": [
+    "notBefore=Oct  4 04:15:35 2026 GMT",
+    "notAfter=Jan  2 04:15:34 2027 GMT",
+    "X509v3 Subject Alternative Name: ",
+    "    DNS:*.dewey-content.day.lsmc.bio"
+  ]
+}

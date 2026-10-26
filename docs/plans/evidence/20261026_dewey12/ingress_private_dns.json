@@ -1,0 +1,16 @@
+{
+  "existing_port_443_rules_unchanged": true,
+  "private_zones": [
+    {
+      "change_id": "/change/C03101482KQADBV4QI9P",
+      "host": "dewey.day.lsmc.bio",
+      "zone_id": "/hostedzone/Z1001843BCCC4YXWZZGH"
+    },
+    {
+      "change_id": "/change/C064412039CPZBKONNRZ",
+      "host": "login.day.lsmc.bio",
+      "zone_id": "/hostedzone/Z014148914V31O1QEA6QE"
+    }
+  ],
+  "public_dns_activated": false
+}

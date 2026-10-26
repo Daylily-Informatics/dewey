@@ -1,0 +1,98 @@
+- banner:
+  - link "Dewey / TapDB":
+    - /url: /tapdb/
+  - navigation:
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Admin":
+      - /url: /admin
+    - link "Overview":
+      - /url: /tapdb/admin/overview
+    - link "Search":
+      - /url: /tapdb/search
+    - link "Graph":
+      - /url: /tapdb/graph
+    - link "Templates":
+      - /url: /tapdb/templates
+    - link "Audit":
+      - /url: /tapdb/audit
+    - link "Help":
+      - /url: /tapdb/help
+    - link "Readiness":
+      - /url: /tapdb/admin/readiness
+    - link "Inventory":
+      - /url: /tapdb/admin/inventory
+    - link "Meridian":
+      - /url: /tapdb/admin/meridian
+    - link "Metrics":
+      - /url: /tapdb/admin/metrics
+    - link "Runtime":
+      - /url: /tapdb/admin/runtime
+    - link "Backups":
+      - /url: /tapdb/admin/backups
+    - link "Sign out":
+      - /url: /auth/logout
+  - generic: johnm@lsmc.com · admin
+- main:
+  - heading "Template Pack" [level=1]
+  - paragraph:
+    - text: "Seed:"
+    - link "M-DGX-1A":
+      - /url: /tapdb/object/M-DGX-1A
+    - text: · data/artifact/generic/1.0/
+  - paragraph: Validate JSON first, then save. Save is insert-only; existing templates remain read-only.
+  - heading "Builder" [level=2]
+  - text: Name
+  - textbox "Name": Dewey Artifact
+  - text: Category
+  - textbox "Category": data
+  - text: Type
+  - textbox "Type": artifact
+  - text: Subtype
+  - textbox "Subtype": generic
+  - text: Version
+  - textbox "Version": "1.0"
+  - text: Instance Prefix
+  - textbox "Instance Prefix": DGX
+  - heading "Properties" [level=3]
+  - textbox
+  - textbox
+  - button "Add Property"
+  - heading "Child Instantiation" [level=3]
+  - textbox
+  - spinbutton: "1"
+  - textbox: contains
+  - button "Add Child Rule"
+  - button "Build JSON" [active]
+  - generic: Template pack JSON
+  - button "Format JSON data, with proper indentation and line feeds (Ctrl+I)"
+  - button "Compact JSON data, remove all whitespaces (Ctrl+Shift+I)"
+  - button "Sort contents"
+  - button "Filter, sort, or transform contents"
+  - 'button "Repair JSON: fix quotes and escape characters, remove comments and JSONP notation, turn JavaScript objects into JSON."'
+  - button "Text ▾"
+  - textbox: "{ \"templates\": [ { \"name\": \"Dewey Artifact\", \"polymorphic_discriminator\": \"generic_template\", \"category\": \"data\", \"type\": \"artifact\", \"subtype\": \"generic\", \"version\": \"1.0\", \"instance_prefix\": \"DGX\", \"instance_polymorphic_identity\": \"generic_instance\", \"json_addl\": { \"properties\": {}, \"instantiation_layouts\": [] } } ] }"
+  - generic: Ln:1Col:1
+  - button "Validate"
+  - button "Save"
+  - link "Cancel":
+    - /url: /tapdb/templates
+- contentinfo: TapDB 10.1.1rc1
+- text: Theme
+- combobox "Theme":
+  - option "original" [selected]
+  - option "light"
+  - option "dark"
+  - option "CBF"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

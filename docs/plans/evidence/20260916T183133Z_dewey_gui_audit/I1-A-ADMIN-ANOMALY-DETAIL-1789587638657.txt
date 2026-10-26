@@ -1,0 +1,52 @@
+- generic: DAY
+- banner:
+  - generic: Dewey Operator Console
+  - heading "Anomaly Detail" [level=1]
+  - generic: johnm@lsmc.com
+  - link "Back to Anomalies":
+    - /url: /ui/anomalies
+  - link "Dashboard":
+    - /url: /ui
+  - link "Observability":
+    - /url: /ui/observability
+  - button "Logout"
+- main:
+  - generic: Local anomaly record
+  - heading "Artifact storage review is pending" [level=2]
+  - paragraph: This local anomaly record tracks artifacts that need a storage verification review.
+  - generic: high severity
+  - heading "Record" [level=3]
+  - generic: Immutable local anomaly metadata.
+  - text: ID
+  - generic: M-DGX-9RJX
+  - text: Category
+  - generic: storage
+  - text: Status
+  - generic: open
+  - text: Source
+  - generic: storage
+  - text: Source View
+  - generic: /ui/anomalies/M-DGX-9RJX
+  - heading "Operational Context" [level=3]
+  - generic: Redacted fields are kept local and read-only.
+  - generic: First seen 2026-05-20T09:40:36.224133Z
+  - generic: Last seen 2026-05-20T09:40:36.224133Z
+  - generic: Occurrences 1
+  - generic: Inspect storage verification and retention status for recent artifacts.
+  - generic: "{ \"scope\": \"local demo record\" }"
+- contentinfo:
+  - generic: Version 10.0.5
+  - generic: Branch codex/dewey-labcore-910
+  - generic: Tag 10.0.5
+  - generic: Commit df6d4d0646fc1385c35ff2b6353478a46b4587ac
+- text: Theme
+- combobox "Theme":
+  - option "original" [selected]
+  - option "light"
+  - option "dark"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

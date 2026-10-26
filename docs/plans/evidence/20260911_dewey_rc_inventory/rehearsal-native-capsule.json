@@ -1,0 +1,19 @@
+{
+  "control_config_sha256": "42491d0bf321d4d8027ef52918a1396e4e4c7f2c7bdecdabd82449b86b87686a",
+  "copy_config": "/home/ubuntu/dewey_ops/tapdb101-20260911/rehearsal-operator.yaml",
+  "copy_config_sha256": "9208dde2d25577ff06679e2bd19a37870ddc1c5d3039edc11dd31f3da8f53520",
+  "copy_receipt": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-copy-sop-result.json",
+  "copy_receipt_sha256": "2e477de116715b8c42c127618188d9607ac26826fb97453059b7921dd6c6ba7c",
+  "database": "dewey_tapdb10_rehearsal_20260911",
+  "extra_next_plans": [],
+  "family_id": "bfb30029-5dd1-42ec-8bf8-3094e78ae2f6",
+  "journal_dir": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native-journal",
+  "migration_manifest": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/native-migration-manifest-20260911.json",
+  "output_dir": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-native",
+  "provider_contract_sha256": "0700678f55acd55a39f2563b4ec73c4dbfba9876611644279ab3ad1d04abaa84",
+  "schema_version": "dewey-native-copy-capsule/v1",
+  "source_contract": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-cutoff.json",
+  "source_next_plan": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/rehearsal-source-next-plan.json",
+  "source_next_plan_sha256": "019284408c20d71c415550ed081c893549e6f407966dd9f4991cc2e6d62c495f",
+  "target_oid": 645854
+}

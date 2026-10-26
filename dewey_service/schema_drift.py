@@ -33,6 +33,7 @@ def load_schema_drift_payload(settings: Settings) -> dict[str, Any]:
             resolve_aws_profile(config_profile=settings.aws_profile),
             settings.aws_region,
             settings.tapdb_database_name,
+            settings.tapdb_config_path,
         )
     )
 
@@ -44,6 +45,7 @@ def _cached_schema_drift_payload(
     profile: str,
     region: str,
     namespace: str,
+    config_path: str,
 ) -> dict[str, Any]:
     try:
         return run_tapdb_schema_drift_check(
@@ -52,6 +54,7 @@ def _cached_schema_drift_payload(
             profile=profile,
             region=region,
             namespace=namespace,
+            config_path=config_path,
         )
     except Exception as exc:
         return {

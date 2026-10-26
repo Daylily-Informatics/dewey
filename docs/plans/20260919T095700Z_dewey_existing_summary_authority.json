@@ -1,0 +1,249 @@
+{
+  "credential_recorded": false,
+  "finished_at": "2026-09-19T09:55:20.672189+00:00",
+  "no_product_import_or_mutation": true,
+  "request": {
+    "page": 1,
+    "page_size": 25,
+    "property_filters": [],
+    "q": "",
+    "scopes": [
+      "artifact_set"
+    ],
+    "sort_dir": "desc",
+    "sort_field": "created_at"
+  },
+  "rows": [
+    {
+      "actual_member_count": 52,
+      "actual_unique_member_count": 52,
+      "created_at": "2026-09-19T07:15:30.510835Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-W091",
+      "member_count": 52,
+      "summary_field_sha256": "a1c1a13d53a8ca9d4bd6f3f9375e8275af964ab7ed8e59c45b96dfeebda865ea"
+    },
+    {
+      "actual_member_count": 33,
+      "actual_unique_member_count": 33,
+      "created_at": "2026-09-19T06:28:11.157242Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-VVW1",
+      "member_count": 33,
+      "summary_field_sha256": "dfd03d8fd2b53165e0a1b9207540a3ce6019425e6c057b02d8945909b5d61787"
+    },
+    {
+      "actual_member_count": 34,
+      "actual_unique_member_count": 34,
+      "created_at": "2026-09-18T13:36:43.704425Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-VR2S",
+      "member_count": 34,
+      "summary_field_sha256": "1b56d8002878d18bfd56b426006f14d6ab6df4c6a37f1595d06c15198d412a1b"
+    },
+    {
+      "actual_member_count": 34,
+      "actual_unique_member_count": 34,
+      "created_at": "2026-09-18T09:41:54.889093Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-VMRG",
+      "member_count": 34,
+      "summary_field_sha256": "b252d3e4c11c0a6dcf61541cb700debd5b7e331d15ce049ccdb785ac3f5ed8a3"
+    },
+    {
+      "actual_member_count": 52,
+      "actual_unique_member_count": 52,
+      "created_at": "2026-09-18T01:38:56.411562Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-VHE8",
+      "member_count": 52,
+      "summary_field_sha256": "04bf665a37fd63cc601a5f98e828f34efcb22a4624cf13d2c0601f8f10ac5777"
+    },
+    {
+      "actual_member_count": 33,
+      "actual_unique_member_count": 33,
+      "created_at": "2026-09-18T00:25:51.886709Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-VCTM",
+      "member_count": 33,
+      "summary_field_sha256": "c29eb4300d45c64ecd34f5cd70e959d4b6bd264519e884b1b3cfe8716a405014"
+    },
+    {
+      "actual_member_count": 34,
+      "actual_unique_member_count": 34,
+      "created_at": "2026-09-17T14:31:25.523491Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-V9J7",
+      "member_count": 34,
+      "summary_field_sha256": "50b6e9139d7c99ff969336d2137ae7492a57a55d01f8f3f4b30bc759589e1d07"
+    },
+    {
+      "actual_member_count": 34,
+      "actual_unique_member_count": 34,
+      "created_at": "2026-09-17T12:51:50.958702Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-V68Z",
+      "member_count": 34,
+      "summary_field_sha256": "49fd51690866950652eb67476792047100717cc90a688e6ff39b1cd3c3a69406"
+    },
+    {
+      "actual_member_count": 2,
+      "actual_unique_member_count": 2,
+      "created_at": "2026-09-16T20:49:29.411085Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-TXR9",
+      "member_count": 2,
+      "summary_field_sha256": "aeb8d0dc25b6d3b624cadf756c13e24f197f08cb5a97b58ef51715eac9c79a23"
+    },
+    {
+      "actual_member_count": 3,
+      "actual_unique_member_count": 3,
+      "created_at": "2026-09-16T20:45:27.230381Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-TWW2",
+      "member_count": 3,
+      "summary_field_sha256": "6cc90f7226bbbbd017bf8ec6be27f1e57fd1bcc65267bf7b82bdcff0cbe824f3"
+    },
+    {
+      "actual_member_count": 2,
+      "actual_unique_member_count": 2,
+      "created_at": "2026-09-16T20:36:11.356637Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-TW2Q",
+      "member_count": 2,
+      "summary_field_sha256": "bb34b6e40f9e563503ce9097b0aa2c2de4d6dacb48d124366bbcaa21890af9aa"
+    },
+    {
+      "actual_member_count": 3,
+      "actual_unique_member_count": 3,
+      "created_at": "2026-09-16T20:27:11.139474Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-TV6G",
+      "member_count": 3,
+      "summary_field_sha256": "0ffce6ab4d3752ed3d31eb9b40b74b952f42e835e03a9ae0f8194ccd1e9d3a2b"
+    },
+    {
+      "actual_member_count": 2,
+      "actual_unique_member_count": 2,
+      "created_at": "2026-09-16T19:52:18.897639Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-TT2S",
+      "member_count": 2,
+      "summary_field_sha256": "ef077b9c158cc2816ff65e3b198360fc493adba2cf2a8bc964ed11383d9af6db"
+    },
+    {
+      "actual_member_count": 3,
+      "actual_unique_member_count": 3,
+      "created_at": "2026-09-16T19:47:49.011612Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-TSE2",
+      "member_count": 3,
+      "summary_field_sha256": "98107fb0420d7f07369c0c4bb43a36f3ee061b228517523454fc1611da1e3891"
+    },
+    {
+      "actual_member_count": 2,
+      "actual_unique_member_count": 2,
+      "created_at": "2026-09-16T19:26:58.806368Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-TRC7",
+      "member_count": 2,
+      "summary_field_sha256": "06e54f5119da32b7f90161a4529c6890c846c330ed8ac791d47d85616413487a"
+    },
+    {
+      "actual_member_count": 3,
+      "actual_unique_member_count": 3,
+      "created_at": "2026-09-16T19:17:15.310901Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-TQRF",
+      "member_count": 3,
+      "summary_field_sha256": "507487fc65a9cec7b62106cd382d167ffc0b54ef630e8993b28729f4179aaf44"
+    },
+    {
+      "actual_member_count": 1,
+      "actual_unique_member_count": 1,
+      "created_at": "2026-09-11T11:06:08.720978Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-NP19",
+      "member_count": 1,
+      "summary_field_sha256": "f6e946862d79a5ae90dbf226b6963c258a0efac8804aa0d8061390753cee1f70"
+    },
+    {
+      "actual_member_count": 20,
+      "actual_unique_member_count": 20,
+      "created_at": "2026-09-10T00:50:35.087965Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-NNSS",
+      "member_count": 20,
+      "summary_field_sha256": "a1d34ab685b728dc497a9236d374898665114aaf24be1c5f6478af127c475339"
+    },
+    {
+      "actual_member_count": 2,
+      "actual_unique_member_count": 2,
+      "created_at": "2026-07-13T20:59:59.923363Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-K2G2",
+      "member_count": 2,
+      "summary_field_sha256": "8dcf36727319db58d752d21cb2804b476d12d09c04de426a43ba01c88e59c5aa"
+    },
+    {
+      "actual_member_count": 9,
+      "actual_unique_member_count": 9,
+      "created_at": "2026-07-04T04:55:02.972154Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-AT3R",
+      "member_count": 9,
+      "summary_field_sha256": "6c6ede84fc2576433dc47c3d8edef6d1543f424faac3055d5f333dbc3336f900"
+    },
+    {
+      "actual_member_count": 11,
+      "actual_unique_member_count": 11,
+      "created_at": "2026-07-04T04:55:02.598097Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-ASMP",
+      "member_count": 11,
+      "summary_field_sha256": "aadd14be4139033b33ef4713c1a7d8411f4684c30f1039c12e726c751a88b491"
+    },
+    {
+      "actual_member_count": 9,
+      "actual_unique_member_count": 9,
+      "created_at": "2026-07-04T04:17:02.307016Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-ARV9",
+      "member_count": 9,
+      "summary_field_sha256": "6b31d93d678f64bfa43055ab24dee1c32bc11397d203a60bfa6a19dedf810fc1"
+    },
+    {
+      "actual_member_count": 11,
+      "actual_unique_member_count": 11,
+      "created_at": "2026-07-04T04:17:01.968077Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-ARC8",
+      "member_count": 11,
+      "summary_field_sha256": "c2b0d6b8f869f06dbc19f98c41871ad55578847c2fbd3d6edad05a688c58c02e"
+    },
+    {
+      "actual_member_count": 9,
+      "actual_unique_member_count": 9,
+      "created_at": "2026-07-04T04:08:26.836428Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-AQKT",
+      "member_count": 9,
+      "summary_field_sha256": "cc00f26af75a32c7342dd7cc2ed693b4ec850aeb9a6a088d138af6904ffd68cc"
+    },
+    {
+      "actual_member_count": 11,
+      "actual_unique_member_count": 11,
+      "created_at": "2026-07-04T04:08:26.574470Z",
+      "creation_predates_current_request": true,
+      "euid": "M-DGX-AQF3",
+      "member_count": 11,
+      "summary_field_sha256": "4f3c61d9ec710a81c52931db0b0aed5b90c8140995eef00627494e306872448f"
+    }
+  ],
+  "schema": "dewey.existing-set-summary-field-authority/1",
+  "source_body_bytes": 1357675,
+  "source_body_sha256": "92a28006fe3a32a2db33a914a5752c84ccc7306b9688dedf8991512dd8fb918a",
+  "started_at": "2026-09-19T09:55:19.642504+00:00",
+  "status": 200,
+  "total": 26
+}

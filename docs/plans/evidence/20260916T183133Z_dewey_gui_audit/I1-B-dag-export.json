@@ -1,0 +1,237 @@
+{
+  "generated_at": "2026-09-16T20:03:14.512Z",
+  "request": {
+    "graph_page_path": "/tapdb/graph",
+    "start_euid": "M-DGX-TST9",
+    "depth": 4
+  },
+  "meta": {
+    "contract": "dag:v2",
+    "service_id": "dewey",
+    "graph_revision": "0bb576762c5111df1d9688afce082380880cd0b8f709181100cb2cd5e7cb18f3",
+    "snapshot_at": "2026-09-16T20:02:34.445318+00:00",
+    "truncated": false,
+    "truncation_reason": null,
+    "effective_limits": {
+      "max_depth": 4,
+      "max_nodes": 1000,
+      "max_edges": 500
+    },
+    "node_count": 6,
+    "edge_count": 5,
+    "visualized": true
+  },
+  "elements": {
+    "nodes": [
+      {
+        "data": {
+          "id": "M-DGX-TST9",
+          "euid": "M-DGX-TST9",
+          "display_label": "Dewey GUI audit 20260916 I1-B prefix",
+          "service_id": "dewey",
+          "record_type": "instance",
+          "category": "data",
+          "type": "artifact",
+          "subtype": "generic",
+          "version": "1.0",
+          "tenant_id": null,
+          "created_dt": "2026-09-16T19:50:29.644814+00:00",
+          "modified_dt": "2026-09-16T19:50:29.644814+00:00",
+          "properties": {},
+          "external_refs": [],
+          "external_identifiers": [],
+          "presentation": {},
+          "color": "#2563eb"
+        }
+      },
+      {
+        "data": {
+          "id": "M-DGX-TSV7",
+          "euid": "M-DGX-TSV7",
+          "display_label": "Access for M-DGX-TST9",
+          "service_id": "dewey",
+          "record_type": "instance",
+          "category": "access",
+          "type": "registry_policy",
+          "subtype": "generic",
+          "version": "1.0",
+          "tenant_id": null,
+          "created_dt": "2026-09-16T19:50:29.644814+00:00",
+          "modified_dt": "2026-09-16T19:50:29.644814+00:00",
+          "properties": {},
+          "external_refs": [],
+          "external_identifiers": [],
+          "presentation": {},
+          "color": "#db2777"
+        }
+      },
+      {
+        "data": {
+          "id": "M-DGX-TSY1",
+          "euid": "M-DGX-TSY1",
+          "display_label": "Dewey GUI audit 20260916 I1-B URL",
+          "service_id": "dewey",
+          "record_type": "instance",
+          "category": "data",
+          "type": "artifact",
+          "subtype": "generic",
+          "version": "1.0",
+          "tenant_id": null,
+          "created_dt": "2026-09-16T19:51:12.504443+00:00",
+          "modified_dt": "2026-09-16T19:51:12.504443+00:00",
+          "properties": {},
+          "external_refs": [],
+          "external_identifiers": [],
+          "presentation": {},
+          "color": "#2563eb"
+        }
+      },
+      {
+        "data": {
+          "id": "M-DGX-TSZZ",
+          "euid": "M-DGX-TSZZ",
+          "display_label": "Access for M-DGX-TSY1",
+          "service_id": "dewey",
+          "record_type": "instance",
+          "category": "access",
+          "type": "registry_policy",
+          "subtype": "generic",
+          "version": "1.0",
+          "tenant_id": null,
+          "created_dt": "2026-09-16T19:51:12.504443+00:00",
+          "modified_dt": "2026-09-16T19:51:12.504443+00:00",
+          "properties": {},
+          "external_refs": [],
+          "external_identifiers": [],
+          "presentation": {},
+          "color": "#db2777"
+        }
+      },
+      {
+        "data": {
+          "id": "M-DGX-TT2S",
+          "euid": "M-DGX-TT2S",
+          "display_label": "Dewey GUI audit 20260916 I1-B library set",
+          "service_id": "dewey",
+          "record_type": "instance",
+          "category": "data",
+          "type": "artifact_set",
+          "subtype": "generic",
+          "version": "1.0",
+          "tenant_id": null,
+          "created_dt": "2026-09-16T19:52:18.861510+00:00",
+          "modified_dt": "2026-09-16T19:52:18.861510+00:00",
+          "properties": {},
+          "external_refs": [],
+          "external_identifiers": [],
+          "presentation": {},
+          "color": "#2563eb"
+        }
+      },
+      {
+        "data": {
+          "id": "M-DGX-TT3Q",
+          "euid": "M-DGX-TT3Q",
+          "display_label": "Access for M-DGX-TT2S",
+          "service_id": "dewey",
+          "record_type": "instance",
+          "category": "access",
+          "type": "registry_policy",
+          "subtype": "generic",
+          "version": "1.0",
+          "tenant_id": null,
+          "created_dt": "2026-09-16T19:52:18.861510+00:00",
+          "modified_dt": "2026-09-16T19:52:18.861510+00:00",
+          "properties": {},
+          "external_refs": [],
+          "external_identifiers": [],
+          "presentation": {},
+          "color": "#db2777"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "data": {
+          "id": "M-EDG-G3A7",
+          "euid": "M-EDG-G3A7",
+          "source": "M-DGX-TST9",
+          "target": "M-DGX-TSV7",
+          "service_id": "dewey",
+          "relationship_type": "registry_policy",
+          "presentation": {
+            "semantics": "registry_policy",
+            "asserted_at": "2026-09-16T19:50:29.644814+00:00",
+            "assertion_provenance": "tapdb.lineage:M-EDG-G3A7",
+            "evidence_refs": []
+          }
+        }
+      },
+      {
+        "data": {
+          "id": "M-EDG-G3B5",
+          "euid": "M-EDG-G3B5",
+          "source": "M-DGX-TSY1",
+          "target": "M-DGX-TSZZ",
+          "service_id": "dewey",
+          "relationship_type": "registry_policy",
+          "presentation": {
+            "semantics": "registry_policy",
+            "asserted_at": "2026-09-16T19:51:12.504443+00:00",
+            "assertion_provenance": "tapdb.lineage:M-EDG-G3B5",
+            "evidence_refs": []
+          }
+        }
+      },
+      {
+        "data": {
+          "id": "M-EDG-G3C3",
+          "euid": "M-EDG-G3C3",
+          "source": "M-DGX-TT2S",
+          "target": "M-DGX-TT3Q",
+          "service_id": "dewey",
+          "relationship_type": "registry_policy",
+          "presentation": {
+            "semantics": "registry_policy",
+            "asserted_at": "2026-09-16T19:52:18.861510+00:00",
+            "assertion_provenance": "tapdb.lineage:M-EDG-G3C3",
+            "evidence_refs": []
+          }
+        }
+      },
+      {
+        "data": {
+          "id": "M-EDG-G3D1",
+          "euid": "M-EDG-G3D1",
+          "source": "M-DGX-TT2S",
+          "target": "M-DGX-TST9",
+          "service_id": "dewey",
+          "relationship_type": "artifact_set_member",
+          "presentation": {
+            "semantics": "artifact_set_member",
+            "asserted_at": "2026-09-16T19:52:18.861510+00:00",
+            "assertion_provenance": "tapdb.lineage:M-EDG-G3D1",
+            "evidence_refs": []
+          }
+        }
+      },
+      {
+        "data": {
+          "id": "M-EDG-G3EZ",
+          "euid": "M-EDG-G3EZ",
+          "source": "M-DGX-TT2S",
+          "target": "M-DGX-TSY1",
+          "service_id": "dewey",
+          "relationship_type": "artifact_set_member",
+          "presentation": {
+            "semantics": "artifact_set_member",
+            "asserted_at": "2026-09-16T19:52:18.861510+00:00",
+            "assertion_provenance": "tapdb.lineage:M-EDG-G3EZ",
+            "evidence_refs": []
+          }
+        }
+      }
+    ]
+  },
+  "mermaid": "flowchart TD\n  N1[\"M-DGX-TST9 | Dewey GUI audit 20260916 I1-B prefix\"]\n  N2[\"M-DGX-TSV7 | Access for M-DGX-TST9\"]\n  N3[\"M-DGX-TSY1 | Dewey GUI audit 20260916 I1-B URL\"]\n  N4[\"M-DGX-TSZZ | Access for M-DGX-TSY1\"]\n  N5[\"M-DGX-TT2S | Dewey GUI audit 20260916 I1-B library set\"]\n  N6[\"M-DGX-TT3Q | Access for M-DGX-TT2S\"]\n  N1 -->|registry_policy| N2\n  N3 -->|registry_policy| N4\n  N5 -->|registry_policy| N6\n  N5 -->|artifact_set_member| N1\n  N5 -->|artifact_set_member| N3"
+}

@@ -6,12 +6,13 @@ import json
 from time import perf_counter
 from typing import Any
 
+from dewey_service.integrations.tapdb_external_references import resolve_relation_endpoints_many
 from dewey_service.literature import ViewerContext
 from dewey_service.tapdb_backend import (
     ARTIFACT_SET_TEMPLATE,
     ARTIFACT_TEMPLATE,
-    EXTERNAL_OBJECT_TEMPLATE,
     SHARE_TEMPLATE,
+    normalize_instance_payload,
 )
 
 
@@ -22,44 +23,7 @@ class SearchServiceMixin:
         *,
         viewer_context: ViewerContext | None = None,
     ) -> dict[str, Any]:
-        started = perf_counter()
-        query = dict(request or {})
-        scopes = self._normalize_search_scopes(query.get("scopes"))
-        page = max(1, int(query.get("page") or 1))
-        page_size = max(1, min(int(query.get("page_size") or 25), self.search_export_max_rows))
-        sort_field = str(query.get("sort_field") or "created_at").strip() or "created_at"
-        sort_dir = str(query.get("sort_dir") or "desc").strip().lower() or "desc"
-
-        with self.backend.session_scope(commit=False) as session:
-            rows: list[dict[str, Any]] = []
-            if "artifact" in scopes:
-                rows.extend(self._search_artifact_items(session, viewer_context=viewer_context))
-            if "artifact_set" in scopes:
-                rows.extend(self._search_artifact_set_items(session))
-            if "share" in scopes:
-                rows.extend(self._search_share_items(session))
-
-        filtered = self._apply_search_filters(rows, query)
-        filtered = self._sort_search_rows(filtered, sort_field=sort_field, sort_dir=sort_dir)
-        total = len(filtered)
-        start = (page - 1) * page_size
-        end = start + page_size
-        items = filtered[start:end]
-        timing_ms = int((perf_counter() - started) * 1000)
-        facets = {
-            "artifact": sum(1 for row in filtered if row["record_type"] == "artifact"),
-            "artifact_set": sum(1 for row in filtered if row["record_type"] == "artifact_set"),
-            "share": sum(1 for row in filtered if row["record_type"] == "share"),
-        }
-        return {
-            "items": items,
-            "facets": facets,
-            "total": total,
-            "page": page,
-            "page_size": page_size,
-            "has_more": end < total,
-            "timing_ms": timing_ms,
-        }
+        return self.search_registry(request)
 
     def collect_search_export_rows(
         self,
@@ -91,9 +55,10 @@ class SearchServiceMixin:
         if raw is None:
             return ["artifact", "share"]
         values = raw if isinstance(raw, list) else [raw]
-        scopes = [str(item or "").strip().lower() for item in values if str(item or "").strip()]
-        normalized = [scope for scope in scopes if scope in allowed]
-        return normalized or ["artifact", "share"]
+        scopes = [str(item or "").strip().lower() for item in values]
+        if not scopes or any(scope not in allowed for scope in scopes):
+            raise ValueError("scopes must contain artifact, artifact_set, or share")
+        return scopes
 
     def _search_artifact_items(
         self,
@@ -102,10 +67,35 @@ class SearchServiceMixin:
         viewer_context: ViewerContext | None = None,
     ) -> list[dict[str, Any]]:
         rows = self.backend.list_by_template(session, template_code=ARTIFACT_TEMPLATE, limit=5000)
+        relations = self.backend.list_children_many(
+            session, parents=rows, relationship_type="has_external_relation"
+        )
+        endpoints = resolve_relation_endpoints_many(
+            session, [relation for children in relations.values() for relation in children]
+        )
+        literature_saves = (
+            self.backend.list_children_many(
+                session,
+                parents=[
+                    row
+                    for row in rows
+                    if normalize_instance_payload(row).get("artifact_type") == "literature"
+                ],
+                relationship_type="has_literature_save",
+            )
+            if viewer_context is not None
+            else {}
+        )
         items: list[dict[str, Any]] = []
         for row in rows:
             payload = self._artifact_response(row)
-            payload["external_objects"] = self._artifact_external_objects(session, row)
+            payload["external_objects"] = [
+                {
+                    **self._external_object_response(endpoints[relation.uid].external_object),
+                    "relation_type": normalize_instance_payload(relation).get("relation_type"),
+                }
+                for relation in relations[row.uid]
+            ]
             metadata = dict(payload.get("metadata") or {})
             if str(payload.get("artifact_type") or "") == "literature":
                 payload.update(
@@ -124,7 +114,7 @@ class SearchServiceMixin:
                 )
                 if viewer_context is not None:
                     payload.update(
-                        self._visible_literature_save_summary(session, row, viewer_context)
+                        self._literature_save_summary(literature_saves[row.uid], viewer_context)
                     )
                 else:
                     payload.update(
@@ -159,17 +149,12 @@ class SearchServiceMixin:
         )
         rows: list[dict[str, Any]] = []
         for relation in relations:
-            relation_payload = self._external_object_relation_response(relation)
-            external = self.backend.find_by_euid(
-                session,
-                template_code=EXTERNAL_OBJECT_TEMPLATE,
-                euid=str(relation_payload.get("external_object_euid") or ""),
+            relation_payload = self._external_object_relation_response_with_external(
+                session, relation
             )
-            if external is None:
-                continue
             rows.append(
                 {
-                    **self._external_object_response(external),
+                    **relation_payload["external_object"],
                     "relation_type": relation_payload.get("relation_type"),
                 }
             )
@@ -203,9 +188,12 @@ class SearchServiceMixin:
             template_code=ARTIFACT_SET_TEMPLATE,
             limit=5000,
         )
+        members = self.backend.list_children_many(
+            session, parents=rows, relationship_type="artifact_set_member"
+        )
         items: list[dict[str, Any]] = []
         for row in rows:
-            payload = self._artifact_set_response(session, row)
+            payload = self._artifact_set_response_with_members(row, members[row.uid])
             items.append(
                 {
                     "record_type": "artifact_set",
@@ -285,11 +273,32 @@ class SearchServiceMixin:
         bound = self._parse_iso8601(raw_value, field_name="created_at")
         return row_dt >= bound if is_start else row_dt <= bound
 
-    def _row_matches_property_filter(self, row: dict[str, Any], raw_filter: Any) -> bool:
+    @staticmethod
+    def _validate_property_filters(raw_filters: Any) -> None:
+        if raw_filters is None:
+            return
+        if not isinstance(raw_filters, list):
+            raise ValueError("property_filters must be a list")
+        for raw_filter in raw_filters:
+            SearchServiceMixin._validate_property_filter(raw_filter)
+
+    @staticmethod
+    def _validate_property_filter(raw_filter: Any) -> None:
         if not isinstance(raw_filter, dict):
-            return True
+            raise ValueError("property filter must be an object")
         path = str(raw_filter.get("path") or "").strip()
-        op = str(raw_filter.get("op") or "eq").strip().lower()
+        op = str(raw_filter.get("op", "eq")).strip().lower()
+        if not path:
+            raise ValueError("property filter path is required")
+        if op not in {"exists", "eq", "neq", "contains", "in", "gte", "lte"}:
+            raise ValueError(f"Unsupported property filter operator: {op}")
+        if any(not part for part in path.split(".")):
+            raise ValueError("property filter path must contain nonempty components")
+
+    def _row_matches_property_filter(self, row: dict[str, Any], raw_filter: Any) -> bool:
+        self._validate_property_filter(raw_filter)
+        path = str(raw_filter["path"]).strip()
+        op = str(raw_filter.get("op", "eq")).strip().lower()
         value = raw_filter.get("value")
         values = self._extract_path_values(row, path)
         if op == "exists":
@@ -320,7 +329,7 @@ class SearchServiceMixin:
                 except (TypeError, ValueError):
                     return False
             return left_value >= right_value if op == "gte" else left_value <= right_value
-        return True
+        raise ValueError(f"Unsupported property filter operator: {op}")
 
     @staticmethod
     def _looks_like_datetime(value: str) -> bool:
@@ -356,12 +365,12 @@ class SearchServiceMixin:
         sort_field: str,
         sort_dir: str,
     ) -> list[dict[str, Any]]:
-        reverse = sort_dir != "asc"
-        key_name = (
-            sort_field
-            if sort_field in {"created_at", "modified_at", "name", "euid"}
-            else "created_at"
-        )
+        if sort_dir not in {"asc", "desc"}:
+            raise ValueError("sort_dir must be asc or desc")
+        if sort_field not in {"created_at", "modified_at", "name", "euid"}:
+            raise ValueError("Unsupported sort_field")
+        reverse = sort_dir == "desc"
+        key_name = sort_field
         return sorted(
             rows,
             key=lambda item: (

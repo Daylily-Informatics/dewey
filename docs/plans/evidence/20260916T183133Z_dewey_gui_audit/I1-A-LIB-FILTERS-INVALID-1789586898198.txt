@@ -1,0 +1,347 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / LIBRARY
+  - heading "Library" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - status: Filters must be a JSON array
+  - searchbox "Search library"
+  - combobox "Kind":
+    - option "All kinds" [selected]
+    - option "Objects"
+    - option "Prefixes"
+  - combobox "Sort":
+    - option "Newest first" [selected]
+    - option "Name"
+  - button "Search"
+  - button "Filters"
+  - generic: 5,129 accessible records
+  - button "Create set from selection"
+  - link "New set":
+    - /url: /add?kind=set
+  - table:
+    - rowgroup:
+      - row "Name / EUID Kind Producer Created":
+        - columnheader
+        - columnheader "Name / EUID"
+        - columnheader "Kind"
+        - columnheader "Producer"
+        - columnheader "Created"
+    - rowgroup:
+      - row "Select M-DGX-NN36 interop-runmetrics-summary-table.txt M-DGX-NN36 object — 9/9/2026":
+        - cell "Select M-DGX-NN36":
+          - checkbox "Select M-DGX-NN36"
+        - cell "interop-runmetrics-summary-table.txt M-DGX-NN36":
+          - link "interop-runmetrics-summary-table.txt":
+            - /url: /records/M-DGX-NN36
+          - generic: M-DGX-NN36
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NN1A interop-runmetrics-detail-table.txt M-DGX-NN1A object — 9/9/2026":
+        - cell "Select M-DGX-NN1A":
+          - checkbox "Select M-DGX-NN1A"
+        - cell "interop-runmetrics-detail-table.txt M-DGX-NN1A":
+          - link "interop-runmetrics-detail-table.txt":
+            - /url: /records/M-DGX-NN1A
+          - generic: M-DGX-NN1A
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NMZE bclconvert_undetermined.txt M-DGX-NMZE object — 9/9/2026":
+        - cell "Select M-DGX-NMZE":
+          - checkbox "Select M-DGX-NMZE"
+        - cell "bclconvert_undetermined.txt M-DGX-NMZE":
+          - link "bclconvert_undetermined.txt":
+            - /url: /records/M-DGX-NMZE
+          - generic: M-DGX-NMZE
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NMXJ bclconvert_sample_counts_Index_mismatches.txt M-DGX-NMXJ object — 9/9/2026":
+        - cell "Select M-DGX-NMXJ":
+          - checkbox "Select M-DGX-NMXJ"
+        - cell "bclconvert_sample_counts_Index_mismatches.txt M-DGX-NMXJ":
+          - link "bclconvert_sample_counts_Index_mismatches.txt":
+            - /url: /records/M-DGX-NMXJ
+          - generic: M-DGX-NMXJ
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NMVP bclconvert_sample_counts_Counts_per_lane.txt M-DGX-NMVP object — 9/9/2026":
+        - cell "Select M-DGX-NMVP":
+          - checkbox "Select M-DGX-NMVP"
+        - cell "bclconvert_sample_counts_Counts_per_lane.txt M-DGX-NMVP":
+          - link "bclconvert_sample_counts_Counts_per_lane.txt":
+            - /url: /records/M-DGX-NMVP
+          - generic: M-DGX-NMVP
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NMST bclconvert_lane_counts.txt M-DGX-NMST object — 9/9/2026":
+        - cell "Select M-DGX-NMST":
+          - checkbox "Select M-DGX-NMST"
+        - cell "bclconvert_lane_counts.txt M-DGX-NMST":
+          - link "bclconvert_lane_counts.txt":
+            - /url: /records/M-DGX-NMST
+          - generic: M-DGX-NMST
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NMQY bclconvert-sample-stats-table.txt M-DGX-NMQY object — 9/9/2026":
+        - cell "Select M-DGX-NMQY":
+          - checkbox "Select M-DGX-NMQY"
+        - cell "bclconvert-sample-stats-table.txt M-DGX-NMQY":
+          - link "bclconvert-sample-stats-table.txt":
+            - /url: /records/M-DGX-NMQY
+          - generic: M-DGX-NMQY
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NMN2 bclconvert-lane-stats-table.txt M-DGX-NMN2 object — 9/9/2026":
+        - cell "Select M-DGX-NMN2":
+          - checkbox "Select M-DGX-NMN2"
+        - cell "bclconvert-lane-stats-table.txt M-DGX-NMN2":
+          - link "bclconvert-lane-stats-table.txt":
+            - /url: /records/M-DGX-NMN2
+          - generic: M-DGX-NMN2
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NMK6 summary.tsv M-DGX-NMK6 object — 9/9/2026":
+        - cell "Select M-DGX-NMK6":
+          - checkbox "Select M-DGX-NMK6"
+        - cell "summary.tsv M-DGX-NMK6":
+          - link "summary.tsv":
+            - /url: /records/M-DGX-NMK6
+          - generic: M-DGX-NMK6
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NMHA summary.html M-DGX-NMHA object — 9/9/2026":
+        - cell "Select M-DGX-NMHA":
+          - checkbox "Select M-DGX-NMHA"
+        - cell "summary.html M-DGX-NMHA":
+          - link "summary.html":
+            - /url: /records/M-DGX-NMHA
+          - generic: M-DGX-NMHA
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NMFF multiqc_data.json M-DGX-NMFF object — 9/9/2026":
+        - cell "Select M-DGX-NMFF":
+          - checkbox "Select M-DGX-NMFF"
+        - cell "multiqc_data.json M-DGX-NMFF":
+          - link "multiqc_data.json":
+            - /url: /records/M-DGX-NMFF
+          - generic: M-DGX-NMFF
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NMDK multiqc_report.html M-DGX-NMDK object — 9/9/2026":
+        - cell "Select M-DGX-NMDK":
+          - checkbox "Select M-DGX-NMDK"
+        - cell "multiqc_report.html M-DGX-NMDK":
+          - link "multiqc_report.html":
+            - /url: /records/M-DGX-NMDK
+          - generic: M-DGX-NMDK
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NMBQ illumina_run_qc_summary_mqc.tsv M-DGX-NMBQ object — 9/9/2026":
+        - cell "Select M-DGX-NMBQ":
+          - checkbox "Select M-DGX-NMBQ"
+        - cell "illumina_run_qc_summary_mqc.tsv M-DGX-NMBQ":
+          - link "illumina_run_qc_summary_mqc.tsv":
+            - /url: /records/M-DGX-NMBQ
+          - generic: M-DGX-NMBQ
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NM9V illumina_run_qc_multiqc_config.yaml M-DGX-NM9V object — 9/9/2026":
+        - cell "Select M-DGX-NM9V":
+          - checkbox "Select M-DGX-NM9V"
+        - cell "illumina_run_qc_multiqc_config.yaml M-DGX-NM9V":
+          - link "illumina_run_qc_multiqc_config.yaml":
+            - /url: /records/M-DGX-NM9V
+          - generic: M-DGX-NM9V
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NM7Z illumina_run_qc.json M-DGX-NM7Z object — 9/9/2026":
+        - cell "Select M-DGX-NM7Z":
+          - checkbox "Select M-DGX-NM7Z"
+        - cell "illumina_run_qc.json M-DGX-NM7Z":
+          - link "illumina_run_qc.json":
+            - /url: /records/M-DGX-NM7Z
+          - generic: M-DGX-NM7Z
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NM53 rulegraph_20260909T083128Z.txt M-DGX-NM53 object — 9/9/2026":
+        - cell "Select M-DGX-NM53":
+          - checkbox "Select M-DGX-NM53"
+        - cell "rulegraph_20260909T083128Z.txt M-DGX-NM53":
+          - link "rulegraph_20260909T083128Z.txt":
+            - /url: /records/M-DGX-NM53
+          - generic: M-DGX-NM53
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NM37 rulegraph_20260909T083128Z.png M-DGX-NM37 object — 9/9/2026":
+        - cell "Select M-DGX-NM37":
+          - checkbox "Select M-DGX-NM37"
+        - cell "rulegraph_20260909T083128Z.png M-DGX-NM37":
+          - link "rulegraph_20260909T083128Z.png":
+            - /url: /records/M-DGX-NM37
+          - generic: M-DGX-NM37
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NM1B rulegraph_20260909T083128Z.mmd M-DGX-NM1B object — 9/9/2026":
+        - cell "Select M-DGX-NM1B":
+          - checkbox "Select M-DGX-NM1B"
+        - cell "rulegraph_20260909T083128Z.mmd M-DGX-NM1B":
+          - link "rulegraph_20260909T083128Z.mmd":
+            - /url: /records/M-DGX-NM1B
+          - generic: M-DGX-NM1B
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NKZF runs.tsv M-DGX-NKZF object — 9/9/2026":
+        - cell "Select M-DGX-NKZF":
+          - checkbox "Select M-DGX-NKZF"
+        - cell "runs.tsv M-DGX-NKZF":
+          - link "runs.tsv":
+            - /url: /records/M-DGX-NKZF
+          - generic: M-DGX-NKZF
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NKXK 2026-09-09T083149.613788.snakemake.log M-DGX-NKXK object — 9/9/2026":
+        - cell "Select M-DGX-NKXK":
+          - checkbox "Select M-DGX-NKXK"
+        - cell "2026-09-09T083149.613788.snakemake.log M-DGX-NKXK":
+          - link "2026-09-09T083149.613788.snakemake.log":
+            - /url: /records/M-DGX-NKXK
+          - generic: M-DGX-NKXK
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NKVQ M-RGX-NWPD M-DGX-NKVQ prefix ursa 9/9/2026":
+        - cell "Select M-DGX-NKVQ":
+          - checkbox "Select M-DGX-NKVQ"
+        - cell "M-RGX-NWPD M-DGX-NKVQ":
+          - link "M-RGX-NWPD":
+            - /url: /records/M-DGX-NKVQ
+          - generic: M-DGX-NKVQ
+        - cell "prefix":
+          - generic: prefix
+        - cell "ursa"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NKN3 20260814_LH01121_0010_A255NKCLT4 M-DGX-NKN3 prefix offwithyou 9/9/2026":
+        - cell "Select M-DGX-NKN3":
+          - checkbox "Select M-DGX-NKN3"
+        - cell "20260814_LH01121_0010_A255NKCLT4 M-DGX-NKN3":
+          - link "20260814_LH01121_0010_A255NKCLT4":
+            - /url: /records/M-DGX-NKN3
+          - generic: M-DGX-NKN3
+        - cell "prefix":
+          - generic: prefix
+        - cell "offwithyou"
+        - cell "9/9/2026"
+      - row "Select M-DGX-NKK7 summary.tsv M-DGX-NKK7 object — 9/8/2026":
+        - cell "Select M-DGX-NKK7":
+          - checkbox "Select M-DGX-NKK7"
+        - cell "summary.tsv M-DGX-NKK7":
+          - link "summary.tsv":
+            - /url: /records/M-DGX-NKK7
+          - generic: M-DGX-NKK7
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/8/2026"
+      - row "Select M-DGX-NKHB summary.html M-DGX-NKHB object — 9/8/2026":
+        - cell "Select M-DGX-NKHB":
+          - checkbox "Select M-DGX-NKHB"
+        - cell "summary.html M-DGX-NKHB":
+          - link "summary.html":
+            - /url: /records/M-DGX-NKHB
+          - generic: M-DGX-NKHB
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/8/2026"
+      - row "Select M-DGX-NKFG multiqc_data.json M-DGX-NKFG object — 9/8/2026":
+        - cell "Select M-DGX-NKFG":
+          - checkbox "Select M-DGX-NKFG"
+        - cell "multiqc_data.json M-DGX-NKFG":
+          - link "multiqc_data.json":
+            - /url: /records/M-DGX-NKFG
+          - generic: M-DGX-NKFG
+        - cell "object":
+          - generic: object
+        - cell "—"
+        - cell "9/8/2026"
+  - generic: Page 2 · 25 per page
+  - button "Previous"
+  - button "Next"
+- dialog:
+  - button "Close dialog": ×
+  - alert: Filters must be a JSON array
+  - heading "Advanced metadata filters" [level=2]
+  - generic: JSON filters
+  - textbox "JSON filters": "{}"
+  - generic: "Use paths such as metadata.project, producer_system, or storage_kind. Operators: eq, neq, contains, in, exists, gte, lte."
+  - button "Apply" [active]
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

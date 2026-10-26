@@ -68,7 +68,8 @@ source ./activate <deploy-name>
 
 - Start with `source ./activate <deploy-name>`
 - Use `dewey config init`
-- Use `dewey db build --target local`
+- Use `dewey db lifecycle`
+- Use `dewey db verify-templates`
 - Use `dewey server start --port 8914`
 - Use `tapdb ...` and `daycog ...` only where Dewey docs or Dewey CLI explicitly delegate to them
 # DEPLOYED SERVICE GUI AUTH EVIDENCE

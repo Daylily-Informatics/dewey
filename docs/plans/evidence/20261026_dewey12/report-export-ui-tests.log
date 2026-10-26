@@ -1,0 +1,60 @@
+✔ recipient account renders text safely and offers revocation only for active own tokens (4.914ms)
+✔ recipient creation posts only name and finite lifetime, shows credential once as text and refreshes own list (1.884292ms)
+✔ recipient creation failure clears previous one-use display and reenables submission (0.667042ms)
+✔ recipient revoke success refreshes list (0.70525ms)
+✔ recipient revoke failure retains actionable button (0.80675ms)
+✔ recipient initial list failure is visible without exposing a credential (0.601458ms)
+✔ sharing editor creates registered-public WWW share with explicit indefinite lifetime and no anonymous grant (21.903542ms)
+✔ sharing editor preserves explicit domain/email scopes and null expiry when editing (1.303375ms)
+✔ sharing editor resolves changed target IDs and submits typed target set at reviewed revision (1.129917ms)
+✔ sharing editor rejects missing WWW entry without policy mutation (1.217416ms)
+✔ sharing editor rejects empty include policy without policy mutation (1.316ms)
+✔ sharing editor rejects blank named recipient without policy mutation (0.801333ms)
+✔ sharing editor rejects email subdomain flag without policy mutation (0.705875ms)
+✔ sharing editor rejects zero targets without policy mutation (0.9095ms)
+✔ sharing editor rejects removed scoped target without policy mutation (1.072542ms)
+✔ sharing editor rejects invalid finite expiry without policy mutation (0.838042ms)
+✔ sharing editor rejects indefinite grant beyond finite share without policy mutation (1.557042ms)
+✔ sharing editor rejects missing target/revision and unsupported target kinds (1.278875ms)
+✔ duplicate share submission is suppressed and failed save reenables the form (1.829084ms)
+✔ registered-public editor does not manufacture explicit email grants (0.99425ms)
+✔ share pages render indefinite/public and expired policies without treating expiry null as expired (0.806334ms)
+✔ manager report preview permits local form-driven downloads while keeping isolated one-use handoff (1.803583ms)
+✔ manager report preview rejects a handoff endpoint outside the application origin (0.67825ms)
+✔ alias claim, copied report URL, permanent retirement and grant revoke carry reviewed revision (1.061042ms)
+✔ audit UI freezes timestamp/digest across pages and exports only declared inventory completeness (1.552375ms)
+✔ audit request failure reenables submission instead of exporting a stale result (0.66125ms)
+✔ manager copy-share retains canonical URL without report (1.770333ms)
+✔ manager copy-share retains canonical URL with deep path (0.7015ms)
+✔ manager invitation surfaces actual delivery state {"status":"accepted"} (0.929417ms)
+✔ manager invitation surfaces actual delivery state {"status":"uncertain"} (1.163209ms)
+✔ manager invitation surfaces actual delivery state {"invitation_status":"failed"} (0.726958ms)
+✔ manager invitation surfaces actual delivery state {} (0.713958ms)
+✔ manager revoke carries current revision and opens report through selected managed share (1.303083ms)
+✔ manager rebind posts reviewed location revision and null version (0.837125ms)
+✔ manager rebind posts reviewed location revision and explicit version (0.736208ms)
+✔ manager rebind refuses missing current revision or blank reason before sending mutation (0.8705ms)
+✔ manager token lifetime 0 is rejected before issuance (0.828083ms)
+✔ manager token lifetime 31 is rejected before issuance (1.228166ms)
+✔ manager token lifetime 1.5 is rejected before issuance (0.925542ms)
+✔ manager token lifetime not-a-number is rejected before issuance (0.756209ms)
+✔ manager token lifetime boundary 1 sends intended role and escapes one-use display (0.912459ms)
+✔ manager token lifetime boundary 30 sends intended role and escapes one-use display (0.772667ms)
+✔ sharing index displays no-expiry and expired rows and provides audit entry (0.885875ms)
+✔ record exposes storage rebind only when edit capability is false (2.782ms)
+✔ record exposes storage rebind only when edit capability is true (0.662458ms)
+ℹ tests 45
+ℹ suites 0
+ℹ pass 45
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 146.466916
+
+=============================== Coverage summary ===============================
+Statements   : 98.8% ( 166/168 )
+Branches     : 85.45% ( 235/275 )
+Functions    : 100% ( 32/32 )
+Lines        : 98.8% ( 166/168 )
+================================================================================

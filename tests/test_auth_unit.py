@@ -123,23 +123,26 @@ def test_exchange_code_success_and_error_wrapping(monkeypatch: pytest.MonkeyPatc
 
 def test_require_api_auth_validates_tokens() -> None:
     dependency = auth_mod.require_api_auth(_settings())
+    request = SimpleNamespace(
+        state=SimpleNamespace(), method="GET", url=SimpleNamespace(path="/api/v1/records")
+    )
     good = HTTPAuthorizationCredentials(scheme="Bearer", credentials="dewey-dev-token")
     bad = HTTPAuthorizationCredentials(scheme="Bearer", credentials="wrong-token")
 
     with authenticated_user_email_context("operator@example.com"):
-        assert dependency(good) == "dewey-dev-token"
+        assert dependency(request, good) == "dewey-dev-token"
         assert current_authenticated_user_email() is None
 
     with pytest.raises(HTTPException) as missing_exc:
         with authenticated_user_email_context("operator@example.com"):
-            dependency(None)
+            dependency(request, None)
     assert missing_exc.value.status_code == 401
     assert missing_exc.value.detail == "Missing bearer token"
     assert current_authenticated_user_email() is None
 
     with pytest.raises(HTTPException) as invalid_exc:
         with authenticated_user_email_context("operator@example.com"):
-            dependency(bad)
+            dependency(request, bad)
     assert invalid_exc.value.status_code == 401
     assert invalid_exc.value.detail == "Invalid bearer token"
     assert current_authenticated_user_email() is None

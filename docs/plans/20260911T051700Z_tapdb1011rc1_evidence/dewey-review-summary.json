@@ -1,0 +1,103 @@
+{
+  "dewey_boot_template_comparisons": [
+    {
+      "instance_prefix": "DGX",
+      "matched_count": 1,
+      "source_domain": "M",
+      "template_code": "data/artifact/generic/1.0/",
+      "template_prefix": "DGX"
+    },
+    {
+      "instance_prefix": "DGX",
+      "matched_count": 1,
+      "source_domain": "M",
+      "template_code": "data/artifact_set/generic/1.0/",
+      "template_prefix": "DGX"
+    },
+    {
+      "instance_prefix": "DGX",
+      "matched_count": 1,
+      "source_domain": "M",
+      "template_code": "access/share/generic/1.0/",
+      "template_prefix": "DGX"
+    },
+    {
+      "instance_prefix": "DGX",
+      "matched_count": 1,
+      "source_domain": "M",
+      "template_code": "access/share_root/generic/1.0/",
+      "template_prefix": "DGX"
+    },
+    {
+      "instance_prefix": "DGX",
+      "matched_count": 1,
+      "source_domain": "M",
+      "template_code": "integration/external_object/generic/1.0/",
+      "template_prefix": "DGX"
+    },
+    {
+      "instance_prefix": "DGX",
+      "matched_count": 1,
+      "source_domain": "M",
+      "template_code": "integration/external_object_relation/generic/1.0/",
+      "template_prefix": "DGX"
+    },
+    {
+      "instance_prefix": "DGX",
+      "matched_count": 1,
+      "source_domain": "M",
+      "template_code": "access/literature_save/generic/1.0/",
+      "template_prefix": "DGX"
+    },
+    {
+      "instance_prefix": "DGX",
+      "matched_count": 1,
+      "source_domain": "M",
+      "template_code": "operational/anomaly/generic/1.0/",
+      "template_prefix": "DGX"
+    },
+    {
+      "instance_prefix": "DGX",
+      "matched_count": 1,
+      "source_domain": "M",
+      "template_code": "system/idempotency_request/generic/1.0/",
+      "template_prefix": "DGX"
+    },
+    {
+      "instance_prefix": "DGX",
+      "matched_count": 1,
+      "source_domain": "M",
+      "template_code": "system/registration_receipt/generic/1.0/",
+      "template_prefix": "DGX"
+    },
+    {
+      "instance_prefix": "DGX",
+      "matched_count": 1,
+      "source_domain": "M",
+      "template_code": "system/outbox_event/generic/1.0/",
+      "template_prefix": "DGX"
+    }
+  ],
+  "reused_latest_passing_cases": 120,
+  "reviewed_dewey_commit": "492c0ffd2a385cf1331103ebb2daa6c618605503",
+  "scope": "Static independent public API/auth/startup review and exact published source-summary coordinate comparison. No DB access, no broad test rerun, no production acceptance.",
+  "source_file_bytes": 225211759,
+  "source_file_sha256": "45776ac58ee2e9889a5590490a8a75d59c9745bca5dcc40ca982f0d75364a937",
+  "source_identity_sha256": "4a4d2df17d60f3caacd0b6decd3cee8ebc6263a9ad46b8908fb168b79cd2164f",
+  "source_limits": {
+    "max_receipt_bytes": 536870912,
+    "max_row_bytes": 8388608,
+    "max_rows": 1000000
+  },
+  "source_native_tpx_template_count": 11,
+  "source_summary_path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-tapdb10-major-20260910/docs/plans/evidence/20260911_dewey_rc_inventory/source-summary.json",
+  "source_summary_sha256": "8d4415b2ce46dff550d9773f0a713c591b575b7502c65bdea5ffc7a90157013f",
+  "source_template_count": 22,
+  "source_usage": {
+    "evidence_bytes": 173423825,
+    "largest_source_row_bytes": 1706924,
+    "rows": 79918
+  },
+  "tapdb_commit": "02ab7c9d0325dfcbf9dc47a03be66b62e0a22f2c",
+  "validation_sha256": "c6981ce450e46d1da42e612dc6417d74833d697a59e428a4ba9ae47acf6274cd"
+}

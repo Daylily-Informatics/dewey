@@ -1,0 +1,81 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / SHARING
+  - heading "Sharing" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - searchbox "Search library"
+  - combobox "Sort":
+    - option "Newest first" [selected]
+    - option "Name"
+  - button "Search"
+  - button "Filters"
+  - generic: 2 accessible shares
+  - table:
+    - rowgroup:
+      - row "Name / EUID Audience / recipients Status Expires Owner Last access":
+        - columnheader "Name / EUID"
+        - columnheader "Audience / recipients"
+        - columnheader "Status"
+        - columnheader "Expires"
+        - columnheader "Owner"
+        - columnheader "Last access"
+    - rowgroup:
+      - row "Dewey GUI audit 20260916 I1-B storage set M-DGX-TSNK recipients johnm+dewey-gui-20260916-i1a@lsmc.com, johnm+dewey-gui-20260916-i1b@lsmc.com active 9/17/2026 johnm@lsmc.com —":
+        - cell "Dewey GUI audit 20260916 I1-B storage set M-DGX-TSNK":
+          - link "Dewey GUI audit 20260916 I1-B storage set":
+            - /url: /shares/M-DGX-TSNK
+          - generic: M-DGX-TSNK
+        - cell "recipients johnm+dewey-gui-20260916-i1a@lsmc.com, johnm+dewey-gui-20260916-i1b@lsmc.com":
+          - text: recipients
+          - generic: johnm+dewey-gui-20260916-i1a@lsmc.com, johnm+dewey-gui-20260916-i1b@lsmc.com
+        - cell "active":
+          - generic: active
+        - cell "9/17/2026"
+        - cell "johnm@lsmc.com"
+        - cell "—"
+      - row "Dewey GUI audit 20260916 I1-A storage set M-DGX-TQZ1 recipients johnm+dewey-gui-20260916-i1a@lsmc.com, johnm+dewey-gui-20260916-i1b@lsmc.com active 9/17/2026 johnm@lsmc.com —":
+        - cell "Dewey GUI audit 20260916 I1-A storage set M-DGX-TQZ1":
+          - link "Dewey GUI audit 20260916 I1-A storage set":
+            - /url: /shares/M-DGX-TQZ1
+          - generic: M-DGX-TQZ1
+        - cell "recipients johnm+dewey-gui-20260916-i1a@lsmc.com, johnm+dewey-gui-20260916-i1b@lsmc.com":
+          - text: recipients
+          - generic: johnm+dewey-gui-20260916-i1a@lsmc.com, johnm+dewey-gui-20260916-i1b@lsmc.com
+        - cell "active":
+          - generic: active
+        - cell "9/17/2026"
+        - cell "johnm@lsmc.com"
+        - cell "—"
+  - generic: Page 1 · 25 per page
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

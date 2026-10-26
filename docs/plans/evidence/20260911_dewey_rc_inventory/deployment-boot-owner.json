@@ -1,0 +1,29 @@
+{
+  "active_state": "active",
+  "deployment_boundary": "Replace only canonical services.dewey and invoke only the named service; do not restart shared systemd unit or run all-service/remove-orphans commands.",
+  "environment_files": [],
+  "exec_start": [
+    "/usr/bin/docker",
+    "compose",
+    "-f",
+    "/opt/dayhoff/deployments/day/compose/docker-compose.yml",
+    "up",
+    "-d",
+    "--remove-orphans"
+  ],
+  "exec_stop": [
+    "/usr/bin/docker",
+    "compose",
+    "-f",
+    "/opt/dayhoff/deployments/day/compose/docker-compose.yml",
+    "stop"
+  ],
+  "inspection_command": "sudo systemctl show --no-pager dayhoff-container-compose.service --property=FragmentPath,UnitFileState,ActiveState,ExecStart,ExecStop,WorkingDirectory,EnvironmentFiles",
+  "observed_at": "2026-09-11T07:45Z",
+  "production_change": false,
+  "unit": "dayhoff-container-compose.service",
+  "unit_file": "/etc/systemd/system/dayhoff-container-compose.service",
+  "unit_file_sha256": "8ca48be506f650bbb7102e63f3ec51a3e5841f0f8d53e1b1ecd658095da62c31",
+  "unit_file_state": "enabled",
+  "working_directory": "/opt/dayhoff/deployments/day/compose"
+}

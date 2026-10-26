@@ -1,0 +1,245 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / SHARING
+  - heading "Sharing" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - searchbox "Search library"
+  - combobox "Sort":
+    - option "Newest first" [selected]
+    - option "Name"
+  - button "Search"
+  - button "Filters"
+  - generic: 40 accessible shares
+  - table:
+    - rowgroup:
+      - row "Name / EUID Audience / recipients Status Expires Owner Last access":
+        - columnheader "Name / EUID"
+        - columnheader "Audience / recipients"
+        - columnheader "Status"
+        - columnheader "Expires"
+        - columnheader "Owner"
+        - columnheader "Last access"
+    - rowgroup:
+      - row "Dewey production delivery acceptance dewey-prod-share-20260714T223433Z M-DGX-K3X7 — johnm@lsmc.com revoked 7/14/2026 johnm@lsmc.com 7/14/2026":
+        - cell "Dewey production delivery acceptance dewey-prod-share-20260714T223433Z M-DGX-K3X7":
+          - link "Dewey production delivery acceptance dewey-prod-share-20260714T223433Z":
+            - /url: /shares/M-DGX-K3X7
+          - generic: M-DGX-K3X7
+        - cell "— johnm@lsmc.com":
+          - text: —
+          - generic: johnm@lsmc.com
+        - cell "revoked":
+          - generic: revoked
+        - cell "7/14/2026"
+        - cell "johnm@lsmc.com"
+        - cell "7/14/2026"
+      - row "Dewey production delivery acceptance dewey-prod-share-20260714T223433Z M-DGX-K3VB — johnm@lsmc.com revoked 7/14/2026 johnm@lsmc.com 7/14/2026":
+        - cell "Dewey production delivery acceptance dewey-prod-share-20260714T223433Z M-DGX-K3VB":
+          - link "Dewey production delivery acceptance dewey-prod-share-20260714T223433Z":
+            - /url: /shares/M-DGX-K3VB
+          - generic: M-DGX-K3VB
+        - cell "— johnm@lsmc.com":
+          - text: —
+          - generic: johnm@lsmc.com
+        - cell "revoked":
+          - generic: revoked
+        - cell "7/14/2026"
+        - cell "johnm@lsmc.com"
+        - cell "7/14/2026"
+      - row "Dewey production delivery acceptance dewey-prod-share-20260714T223433Z M-DGX-K3SF — johnm@lsmc.com revoked 7/14/2026 johnm@lsmc.com 7/14/2026":
+        - cell "Dewey production delivery acceptance dewey-prod-share-20260714T223433Z M-DGX-K3SF":
+          - link "Dewey production delivery acceptance dewey-prod-share-20260714T223433Z":
+            - /url: /shares/M-DGX-K3SF
+          - generic: M-DGX-K3SF
+        - cell "— johnm@lsmc.com":
+          - text: —
+          - generic: johnm@lsmc.com
+        - cell "revoked":
+          - generic: revoked
+        - cell "7/14/2026"
+        - cell "johnm@lsmc.com"
+        - cell "7/14/2026"
+      - row "Dewey production delivery acceptance dewey-prod-share-20260714T223433Z M-DGX-K3QK — johnm@lsmc.com revoked 7/14/2026 johnm@lsmc.com 7/14/2026":
+        - cell "Dewey production delivery acceptance dewey-prod-share-20260714T223433Z M-DGX-K3QK":
+          - link "Dewey production delivery acceptance dewey-prod-share-20260714T223433Z":
+            - /url: /shares/M-DGX-K3QK
+          - generic: M-DGX-K3QK
+        - cell "— johnm@lsmc.com":
+          - text: —
+          - generic: johnm@lsmc.com
+        - cell "revoked":
+          - generic: revoked
+        - cell "7/14/2026"
+        - cell "johnm@lsmc.com"
+        - cell "7/14/2026"
+      - row "Dewey production delivery acceptance dewey-prod-share-20260714T223433Z M-DGX-K3NQ — johnm@lsmc.com revoked 7/14/2026 johnm@lsmc.com 7/14/2026":
+        - cell "Dewey production delivery acceptance dewey-prod-share-20260714T223433Z M-DGX-K3NQ":
+          - link "Dewey production delivery acceptance dewey-prod-share-20260714T223433Z":
+            - /url: /shares/M-DGX-K3NQ
+          - generic: M-DGX-K3NQ
+        - cell "— johnm@lsmc.com":
+          - text: —
+          - generic: johnm@lsmc.com
+        - cell "revoked":
+          - generic: revoked
+        - cell "7/14/2026"
+        - cell "johnm@lsmc.com"
+        - cell "7/14/2026"
+      - row "JEM M-DGX-K3HZ — daylilyinformatics.com expired 7/21/2026 johnm@lsmc.com —":
+        - cell "JEM M-DGX-K3HZ":
+          - link "JEM":
+            - /url: /shares/M-DGX-K3HZ
+          - generic: M-DGX-K3HZ
+        - cell "— daylilyinformatics.com":
+          - text: —
+          - generic: daylilyinformatics.com
+        - cell "expired":
+          - generic: expired
+        - cell "7/21/2026"
+        - cell "johnm@lsmc.com"
+        - cell "—"
+      - row "JEM M-DGX-K3F4 — daylilyinformatics.com expired 7/21/2026 johnm@lsmc.com —":
+        - cell "JEM M-DGX-K3F4":
+          - link "JEM":
+            - /url: /shares/M-DGX-K3F4
+          - generic: M-DGX-K3F4
+        - cell "— daylilyinformatics.com":
+          - text: —
+          - generic: daylilyinformatics.com
+        - cell "expired":
+          - generic: expired
+        - cell "7/21/2026"
+        - cell "johnm@lsmc.com"
+        - cell "—"
+      - row "Direct download M-DGX-K2BD M-DGX-K3D8 — johnm@lsmc.com expired 7/15/2026 johnm@lsmc.com 7/14/2026":
+        - cell "Direct download M-DGX-K2BD M-DGX-K3D8":
+          - link "Direct download M-DGX-K2BD":
+            - /url: /shares/M-DGX-K3D8
+          - generic: M-DGX-K3D8
+        - cell "— johnm@lsmc.com":
+          - text: —
+          - generic: johnm@lsmc.com
+        - cell "expired":
+          - generic: expired
+        - cell "7/15/2026"
+        - cell "johnm@lsmc.com"
+        - cell "7/14/2026"
+      - row "Mike M-DGX-K3BC — mike@lsmc.com, lsmc.com expired 7/14/2026 michael.kennemer@lsmc.com 7/14/2026":
+        - cell "Mike M-DGX-K3BC":
+          - link "Mike":
+            - /url: /shares/M-DGX-K3BC
+          - generic: M-DGX-K3BC
+        - cell "— mike@lsmc.com, lsmc.com":
+          - text: —
+          - generic: mike@lsmc.com, lsmc.com
+        - cell "expired":
+          - generic: expired
+        - cell "7/14/2026"
+        - cell "michael.kennemer@lsmc.com"
+        - cell "7/14/2026"
+      - row "Michael Kennemer M-DGX-K39G — mike@lsmc.com, lsmc.com expired 7/14/2026 michael.kennemer@lsmc.com —":
+        - cell "Michael Kennemer M-DGX-K39G":
+          - link "Michael Kennemer":
+            - /url: /shares/M-DGX-K39G
+          - generic: M-DGX-K39G
+        - cell "— mike@lsmc.com, lsmc.com":
+          - text: —
+          - generic: mike@lsmc.com, lsmc.com
+        - cell "expired":
+          - generic: expired
+        - cell "7/14/2026"
+        - cell "michael.kennemer@lsmc.com"
+        - cell "—"
+      - row "HG003 1x HIOMRS kitchen-sink MultiQC report M-DGX-K2PP — johnm@lsmc.com, lsmc.com active 7/13/2031 johnm@lsmc.com 7/14/2026":
+        - cell "HG003 1x HIOMRS kitchen-sink MultiQC report M-DGX-K2PP":
+          - link "HG003 1x HIOMRS kitchen-sink MultiQC report":
+            - /url: /shares/M-DGX-K2PP
+          - generic: M-DGX-K2PP
+        - cell "— johnm@lsmc.com, lsmc.com":
+          - text: —
+          - generic: johnm@lsmc.com, lsmc.com
+        - cell "active":
+          - generic: active
+        - cell "7/13/2031"
+        - cell "johnm@lsmc.com"
+        - cell "7/14/2026"
+      - row "HG003 1x HIOMRS kitchen-sink MultiQC HTML report M-DGX-K2MT — johnm@lsmc.com, lsmc.com active 7/13/2031 johnm@lsmc.com 7/13/2026":
+        - cell "HG003 1x HIOMRS kitchen-sink MultiQC HTML report M-DGX-K2MT":
+          - link "HG003 1x HIOMRS kitchen-sink MultiQC HTML report":
+            - /url: /shares/M-DGX-K2MT
+          - generic: M-DGX-K2MT
+        - cell "— johnm@lsmc.com, lsmc.com":
+          - text: —
+          - generic: johnm@lsmc.com, lsmc.com
+        - cell "active":
+          - generic: active
+        - cell "7/13/2031"
+        - cell "johnm@lsmc.com"
+        - cell "7/13/2026"
+      - row "share:artifact:M-DGX-9S3V M-DGX-A1PA — expired 6/9/2026 — 6/8/2026":
+        - cell "share:artifact:M-DGX-9S3V M-DGX-A1PA":
+          - link "share:artifact:M-DGX-9S3V":
+            - /url: /shares/M-DGX-A1PA
+          - generic: M-DGX-A1PA
+        - cell "—": —
+        - cell "expired":
+          - generic: expired
+        - cell "6/9/2026"
+        - cell "—"
+        - cell "6/8/2026"
+      - row "share:artifact:M-DGX-9XKP M-DGX-9YKN — error 6/3/2026 — —":
+        - cell "share:artifact:M-DGX-9XKP M-DGX-9YKN":
+          - link "share:artifact:M-DGX-9XKP":
+            - /url: /shares/M-DGX-9YKN
+          - generic: M-DGX-9YKN
+        - cell "—": —
+        - cell "error":
+          - generic: error
+        - cell "6/3/2026"
+        - cell "—"
+        - cell "—"
+      - row "share:artifact:M-DGX-9XX2 M-DGX-9YHS — error 6/3/2026 — —":
+        - cell "share:artifact:M-DGX-9XX2 M-DGX-9YHS":
+          - link "share:artifact:M-DGX-9XX2":
+            - /url: /shares/M-DGX-9YHS
+          - generic: M-DGX-9YHS
+        - cell "—": —
+        - cell "error":
+          - generic: error
+        - cell "6/3/2026"
+        - cell "—"
+        - cell "—"
+  - generic: Page 2 · 25 per page
+  - button "Previous"
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

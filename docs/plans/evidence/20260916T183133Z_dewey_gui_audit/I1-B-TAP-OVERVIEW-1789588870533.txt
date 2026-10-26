@@ -1,0 +1,161 @@
+- banner:
+  - link "Dewey / TapDB":
+    - /url: /tapdb/
+  - navigation:
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Admin":
+      - /url: /admin
+    - link "Overview":
+      - /url: /tapdb/admin/overview
+    - link "Search":
+      - /url: /tapdb/search
+    - link "Graph":
+      - /url: /tapdb/graph
+    - link "Templates":
+      - /url: /tapdb/templates
+    - link "Audit":
+      - /url: /tapdb/audit
+    - link "Help":
+      - /url: /tapdb/help
+    - link "Readiness":
+      - /url: /tapdb/admin/readiness
+    - link "Inventory":
+      - /url: /tapdb/admin/inventory
+    - link "Meridian":
+      - /url: /tapdb/admin/meridian
+    - link "Metrics":
+      - /url: /tapdb/admin/metrics
+    - link "Runtime":
+      - /url: /tapdb/admin/runtime
+    - link "Backups":
+      - /url: /tapdb/admin/backups
+    - link "Sign out":
+      - /url: /auth/logout
+  - generic: johnm@lsmc.com · admin
+- main:
+  - heading "Overview" [level=1]
+  - paragraph: Canonical TapDB object, lineage, audit, recovery, and discovery console.
+  - link "16 active templates":
+    - /url: /tapdb/search?record_type=template
+    - strong: "16"
+    - generic: active templates
+  - link "17707 active instances":
+    - /url: /tapdb/search?record_type=instance
+    - strong: "17707"
+    - generic: active instances
+  - link "6503 active lineage edges":
+    - /url: /tapdb/search?record_type=lineage
+    - strong: "6503"
+    - generic: active lineage edges
+  - heading "Recent audit activity" [level=2]
+  - link "Open audit explorer":
+    - /url: /tapdb/audit
+  - table:
+    - rowgroup:
+      - row "Time Object Operation Actor Name":
+        - columnheader "Time"
+        - columnheader "Object"
+        - columnheader "Operation"
+        - columnheader "Actor"
+        - columnheader "Name"
+    - rowgroup:
+      - row "2026-09-16 20:00:03.878464+00:00 M-EDG-G3JP INSERT dewey R0-HG003-D0-0-D0-PCR-FREE-ILMN-NOVASEQ.pangenome_sr.spmd.sentpg.giabHC_x_clinvar_genes.parse_vcfeval_summary.bench.tsv":
+        - cell "2026-09-16 20:00:03.878464+00:00"
+        - cell "M-EDG-G3JP":
+          - link "M-EDG-G3JP":
+            - /url: /tapdb/object/M-EDG-G3JP
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "R0-HG003-D0-0-D0-PCR-FREE-ILMN-NOVASEQ.pangenome_sr.spmd.sentpg.giabHC_x_clinvar_genes.parse_vcfeval_summary.bench.tsv"
+      - row "2026-09-16 20:00:03.878464+00:00 M-DGX-TT9B INSERT dewey pubmedcentral:pmcid:PMC11898561":
+        - cell "2026-09-16 20:00:03.878464+00:00"
+        - cell "M-DGX-TT9B":
+          - link "M-DGX-TT9B":
+            - /url: /tapdb/object/M-DGX-TT9B
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "pubmedcentral:pmcid:PMC11898561"
+      - row "2026-09-16 20:00:03.878464+00:00 M-DGX-TTA9 UPDATE dewey artifact:M-DGX-TT5K:M-DGX-TT9B:source_record":
+        - cell "2026-09-16 20:00:03.878464+00:00"
+        - cell "M-DGX-TTA9":
+          - link "M-DGX-TTA9":
+            - /url: /tapdb/object/M-DGX-TTA9
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "artifact:M-DGX-TT5K:M-DGX-TT9B:source_record"
+      - row "2026-09-16 20:00:03.878464+00:00 M-DGX-TTA9 UPDATE dewey artifact:M-DGX-TT5K:M-DGX-TT9B:source_record":
+        - cell "2026-09-16 20:00:03.878464+00:00"
+        - cell "M-DGX-TTA9":
+          - link "M-DGX-TTA9":
+            - /url: /tapdb/object/M-DGX-TTA9
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "artifact:M-DGX-TT5K:M-DGX-TT9B:source_record"
+      - row "2026-09-16 20:00:03.878464+00:00 M-EDG-G3KM INSERT dewey artifact.import:ursa-dayoa-12-artifacts-20260710-08:child:26":
+        - cell "2026-09-16 20:00:03.878464+00:00"
+        - cell "M-EDG-G3KM":
+          - link "M-EDG-G3KM":
+            - /url: /tapdb/object/M-EDG-G3KM
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "artifact.import:ursa-dayoa-12-artifacts-20260710-08:child:26"
+      - row "2026-09-16 20:00:03.878464+00:00 M-EDG-G3MJ INSERT dewey R0-HG003-D0-0-D0-PCR-FREE-ILMN-NOVASEQ.pangenome_sr.spmd.sentpg.giabHC_x_clinvar_genes.rtg_vcfeval.bench.tsv":
+        - cell "2026-09-16 20:00:03.878464+00:00"
+        - cell "M-EDG-G3MJ":
+          - link "M-EDG-G3MJ":
+            - /url: /tapdb/object/M-EDG-G3MJ
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "R0-HG003-D0-0-D0-PCR-FREE-ILMN-NOVASEQ.pangenome_sr.spmd.sentpg.giabHC_x_clinvar_genes.rtg_vcfeval.bench.tsv"
+      - 'row "2026-09-16 20:00:03.878464+00:00 M-XRF-982 INSERT dewey External identifier: pmcid/article"':
+        - cell "2026-09-16 20:00:03.878464+00:00"
+        - cell "M-XRF-982":
+          - link "M-XRF-982":
+            - /url: /tapdb/object/M-XRF-982
+        - cell "INSERT"
+        - cell "dewey"
+        - 'cell "External identifier: pmcid/article"'
+      - row "2026-09-16 20:00:03.878464+00:00 M-EDG-G3NG INSERT dewey artifact.import:ursa-dayoa-12-artifacts-20260710-08:child:27":
+        - cell "2026-09-16 20:00:03.878464+00:00"
+        - cell "M-EDG-G3NG":
+          - link "M-EDG-G3NG":
+            - /url: /tapdb/object/M-EDG-G3NG
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "artifact.import:ursa-dayoa-12-artifacts-20260710-08:child:27"
+      - row "2026-09-16 20:00:03.878464+00:00 M-DGX-TTB7 INSERT dewey doi:doi:10.1002/ajpa.70010":
+        - cell "2026-09-16 20:00:03.878464+00:00"
+        - cell "M-DGX-TTB7":
+          - link "M-DGX-TTB7":
+            - /url: /tapdb/object/M-DGX-TTB7
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "doi:doi:10.1002/ajpa.70010"
+      - row "2026-09-16 20:00:03.878464+00:00 M-DGX-TT9B UPDATE dewey pubmedcentral:pmcid:PMC11898561":
+        - cell "2026-09-16 20:00:03.878464+00:00"
+        - cell "M-DGX-TT9B":
+          - link "M-DGX-TT9B":
+            - /url: /tapdb/object/M-DGX-TT9B
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "pubmedcentral:pmcid:PMC11898561"
+- contentinfo: TapDB 10.1.1rc1
+- text: Theme
+- combobox "Theme":
+  - option "original" [selected]
+  - option "light"
+  - option "dark"
+  - option "CBF"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

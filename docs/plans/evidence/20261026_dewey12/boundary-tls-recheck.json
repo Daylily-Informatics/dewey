@@ -1,0 +1,41 @@
+{
+  "observed_at": "2026-10-26T03:36:14.479422+00:00",
+  "checks": [
+    {
+      "name": "login-recipient",
+      "host": "login.day.lsmc.bio",
+      "path": "/auth/share?state=boundary-check",
+      "method": "GET",
+      "status": "200",
+      "expected": 200,
+      "exit_code": 0,
+      "pass": true,
+      "error": ""
+    },
+    {
+      "name": "invalid-content-host",
+      "host": "probe.dewey-content.day.lsmc.bio",
+      "path": "/__dewey_preview/challenge",
+      "method": "GET",
+      "status": "403",
+      "expected": 403,
+      "exit_code": 0,
+      "pass": true,
+      "error": ""
+    },
+    {
+      "name": "nonexistent-content-context",
+      "host": "pv-00000000000000000000000000000000.dewey-content.day.lsmc.bio",
+      "path": "/__dewey_preview/assets/report.html",
+      "method": "GET",
+      "status": "404",
+      "expected": 404,
+      "exit_code": 0,
+      "pass": true,
+      "error": ""
+    }
+  ],
+  "ok": true,
+  "source": "same EC2 external-management-source ALB path",
+  "tls_verification": true
+}

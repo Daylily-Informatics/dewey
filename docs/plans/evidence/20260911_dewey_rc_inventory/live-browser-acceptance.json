@@ -1,0 +1,27 @@
+{
+  "base_url": "https://dewey.day.lsmc.bio",
+  "browser": "existing Chrome LSMC profile",
+  "credentials_exported": false,
+  "dag": {
+    "initial_bounded_edges": 79,
+    "initial_bounded_nodes": 200,
+    "persisted_acceptance_root": "M-DGX-NP19",
+    "root_edges": 21,
+    "root_nodes": 22,
+    "url": "/tapdb/graph"
+  },
+  "dewey_console": {
+    "existing_data_rendered": true,
+    "heading": "Artifact Control Room",
+    "version": "9.0.0"
+  },
+  "embedded_tapdb": {
+    "active_instances_visible": 12448,
+    "active_lineage_visible": 1302,
+    "url": "/tapdb/",
+    "version": "10.1.1rc1"
+  },
+  "observed_at": "2026-09-11T11:18:09.972543+00:00",
+  "outstanding_cosmetic_issue": "Dewey footer uses local Git discovery and displays Branch unavailable / Tag unreleased / Commit unavailable in the packaged image; package version, public health build, OCI revision and immutable tag are correct.",
+  "shared_login": "LSMC login followed by Continue with Google; existing authenticated admin session completed"
+}

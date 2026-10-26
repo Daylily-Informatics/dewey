@@ -1,0 +1,899 @@
+[
+  {
+    "path": "/endpoint_health?limit=200",
+    "duration_s": 0.066,
+    "data": {
+      "contract_version": "v3",
+      "service": "dewey",
+      "environment": "day",
+      "instance_id": "0d8d50eef67b46a8ae71e4078929ae45",
+      "observed_at": "2026-09-23T21:05:28.419163+00:00",
+      "status": "ok",
+      "request_id": "HuiEWZgvtKG1HIALG9IgbvY6uCn7Z4oq",
+      "correlation_id": "b493c16e45cc37e3",
+      "build": {
+        "version": "10.0.7",
+        "sha": "8d04719a6ad82a6808bf38933b39cadb210b43d0"
+      },
+      "page": {
+        "total": 36,
+        "offset": 0,
+        "limit": 200
+      },
+      "items": [
+        {
+          "method": "GET",
+          "route_template": "/readyz",
+          "request_count": 210,
+          "status_class_counts": {
+            "2xx": 210
+          },
+          "p50_ms": 147.844,
+          "p95_ms": 172.441,
+          "p99_ms": 191.807,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T21:00:09.510221+00:00"
+        },
+        {
+          "method": "POST",
+          "route_template": "/api/v1/resolve/multiqc",
+          "request_count": 27,
+          "status_class_counts": {
+            "2xx": 27
+          },
+          "p50_ms": 1740.641,
+          "p95_ms": 7210.909,
+          "p99_ms": 7867.152,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-22T07:40:16.689891+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/static/registry.css",
+          "request_count": 24,
+          "status_class_counts": {
+            "2xx": 24
+          },
+          "p50_ms": 2.282,
+          "p95_ms": 6.731,
+          "p99_ms": 8.704,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T20:56:34.099728+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/static/registry.js",
+          "request_count": 24,
+          "status_class_counts": {
+            "2xx": 24
+          },
+          "p50_ms": 2.551,
+          "p95_ms": 7.402,
+          "p99_ms": 8.59,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T20:56:34.124219+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/storage",
+          "request_count": 17,
+          "status_class_counts": {
+            "2xx": 16,
+            "3xx": 1
+          },
+          "p50_ms": 2.234,
+          "p95_ms": 12.829,
+          "p99_ms": 12.829,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T20:57:49.645771+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/api/v1/artifacts/{artifact_euid}",
+          "request_count": 14,
+          "status_class_counts": {
+            "2xx": 14
+          },
+          "p50_ms": 17.795,
+          "p95_ms": 151.059,
+          "p99_ms": 151.059,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-22T03:07:57.229527+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/api/v1/storage/browse",
+          "request_count": 13,
+          "status_class_counts": {
+            "2xx": 13
+          },
+          "p50_ms": 4269.31,
+          "p95_ms": 75429.446,
+          "p99_ms": 75429.446,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T20:57:49.640006+00:00"
+        },
+        {
+          "method": "POST",
+          "route_template": "/api/v1/artifact-sets/multiqc/register",
+          "request_count": 12,
+          "status_class_counts": {
+            "2xx": 12
+          },
+          "p50_ms": 322.894,
+          "p95_ms": 1338.82,
+          "p99_ms": 1338.82,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-22T07:40:07.695188+00:00"
+        },
+        {
+          "method": "POST",
+          "route_template": "/api/v1/analysis-results/register",
+          "request_count": 11,
+          "status_class_counts": {
+            "2xx": 11
+          },
+          "p50_ms": 5339.428,
+          "p95_ms": 22217.87,
+          "p99_ms": 22217.87,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-22T07:33:10.399483+00:00"
+        },
+        {
+          "method": "POST",
+          "route_template": "/api/v1/registry/search",
+          "request_count": 11,
+          "status_class_counts": {
+            "2xx": 11
+          },
+          "p50_ms": 202.423,
+          "p95_ms": 869.99,
+          "p99_ms": 869.99,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T20:55:56.024343+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/api/v1/storage/object",
+          "request_count": 8,
+          "status_class_counts": {
+            "2xx": 8
+          },
+          "p50_ms": 936.816,
+          "p95_ms": 1866.58,
+          "p99_ms": 1866.58,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T20:54:51.181048+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/ui",
+          "request_count": 8,
+          "status_class_counts": {
+            "2xx": 7,
+            "3xx": 1
+          },
+          "p50_ms": 3.231,
+          "p95_ms": 14.744,
+          "p99_ms": 14.744,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T21:02:56.207861+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/static/favicon.svg",
+          "request_count": 6,
+          "status_class_counts": {
+            "2xx": 6
+          },
+          "p50_ms": 1.945,
+          "p95_ms": 53.962,
+          "p99_ms": 53.962,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T21:02:56.599415+00:00"
+        },
+        {
+          "method": "POST",
+          "route_template": "/api/search/v2/query",
+          "request_count": 4,
+          "status_class_counts": {
+            "2xx": 4
+          },
+          "p50_ms": 650.552,
+          "p95_ms": 658.538,
+          "p99_ms": 658.538,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-21T16:17:00.934322+00:00"
+        },
+        {
+          "method": "POST",
+          "route_template": "/api/v1/artifact-prefixes",
+          "request_count": 4,
+          "status_class_counts": {
+            "4xx": 1,
+            "2xx": 3
+          },
+          "p50_ms": 146.335,
+          "p95_ms": 161.414,
+          "p99_ms": 161.414,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-21T03:36:30.702835+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/",
+          "request_count": 3,
+          "status_class_counts": {
+            "3xx": 3
+          },
+          "p50_ms": 1.538,
+          "p95_ms": 8.951,
+          "p99_ms": 8.951,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T20:57:49.643993+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/api/v1/artifacts",
+          "request_count": 3,
+          "status_class_counts": {
+            "2xx": 3
+          },
+          "p50_ms": 34.411,
+          "p95_ms": 153.383,
+          "p99_ms": 153.383,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-20T05:56:14.570462+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/api/v1/me/preferences",
+          "request_count": 3,
+          "status_class_counts": {
+            "4xx": 3
+          },
+          "p50_ms": 1.967,
+          "p95_ms": 2.124,
+          "p99_ms": 2.124,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T21:02:56.575665+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/api/v1/records/{euid}",
+          "request_count": 3,
+          "status_class_counts": {
+            "2xx": 3
+          },
+          "p50_ms": 28.602,
+          "p95_ms": 40.141,
+          "p99_ms": 40.141,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T20:49:45.863630+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/auth/login",
+          "request_count": 3,
+          "status_class_counts": {
+            "3xx": 3
+          },
+          "p50_ms": 1.812,
+          "p95_ms": 3.157,
+          "p99_ms": 3.157,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T21:03:00.634370+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/favicon.ico",
+          "request_count": 3,
+          "status_class_counts": {
+            "3xx": 3
+          },
+          "p50_ms": 2.189,
+          "p95_ms": 5.812,
+          "p99_ms": 5.812,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T20:55:51.697352+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/login",
+          "request_count": 3,
+          "status_class_counts": {
+            "2xx": 3
+          },
+          "p50_ms": 2.435,
+          "p95_ms": 30.147,
+          "p99_ms": 30.147,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T21:02:56.292606+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/records/{euid}",
+          "request_count": 3,
+          "status_class_counts": {
+            "2xx": 3
+          },
+          "p50_ms": 2.301,
+          "p95_ms": 12.785,
+          "p99_ms": 12.785,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T20:57:49.646156+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/static/console.css",
+          "request_count": 3,
+          "status_class_counts": {
+            "2xx": 3
+          },
+          "p50_ms": 3.709,
+          "p95_ms": 6.029,
+          "p99_ms": 6.029,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T21:02:56.407130+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/static/lsmc_ui.js",
+          "request_count": 3,
+          "status_class_counts": {
+            "2xx": 3
+          },
+          "p50_ms": 2.375,
+          "p95_ms": 3.794,
+          "p99_ms": 3.794,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T21:02:56.492433+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/add",
+          "request_count": 2,
+          "status_class_counts": {
+            "2xx": 2
+          },
+          "p50_ms": 2.442,
+          "p95_ms": 2.753,
+          "p99_ms": 2.753,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T20:54:32.028577+00:00"
+        },
+        {
+          "method": "POST",
+          "route_template": "/api/v1/artifacts",
+          "request_count": 2,
+          "status_class_counts": {
+            "2xx": 2
+          },
+          "p50_ms": 292.484,
+          "p95_ms": 309.196,
+          "p99_ms": 309.196,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-21T11:11:47.946416+00:00"
+        },
+        {
+          "method": "POST",
+          "route_template": "/api/v1/external-object-relations",
+          "request_count": 2,
+          "status_class_counts": {
+            "2xx": 2
+          },
+          "p50_ms": 187.871,
+          "p95_ms": 203.534,
+          "p99_ms": 203.534,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-21T11:11:53.970708+00:00"
+        },
+        {
+          "method": "POST",
+          "route_template": "/api/v1/external-objects",
+          "request_count": 2,
+          "status_class_counts": {
+            "2xx": 2
+          },
+          "p50_ms": 99.755,
+          "p95_ms": 107.774,
+          "p99_ms": 107.774,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-21T11:11:53.660424+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/api/v1/storage/buckets",
+          "request_count": 2,
+          "status_class_counts": {
+            "2xx": 2
+          },
+          "p50_ms": 6974.712,
+          "p95_ms": 13829.926,
+          "p99_ms": 13829.926,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T20:56:25.152582+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/auth/lsmc/callback",
+          "request_count": 2,
+          "status_class_counts": {
+            "3xx": 2
+          },
+          "p50_ms": 127.73,
+          "p95_ms": 167.895,
+          "p99_ms": 167.895,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T20:49:47.136508+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/healthz",
+          "request_count": 2,
+          "status_class_counts": {
+            "2xx": 2
+          },
+          "p50_ms": 2.151,
+          "p95_ms": 3.017,
+          "p99_ms": 3.017,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T21:00:20.476000+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/openapi.json",
+          "request_count": 2,
+          "status_class_counts": {
+            "2xx": 2
+          },
+          "p50_ms": 195.158,
+          "p95_ms": 386.401,
+          "p99_ms": 386.401,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-21T03:34:27.240596+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/api/v1/records/{euid}/contents",
+          "request_count": 1,
+          "status_class_counts": {
+            "2xx": 1
+          },
+          "p50_ms": 142.228,
+          "p95_ms": 142.228,
+          "p99_ms": 142.228,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T20:47:34.304272+00:00"
+        },
+        {
+          "method": "POST",
+          "route_template": "/api/v1/storage/access",
+          "request_count": 1,
+          "status_class_counts": {
+            "2xx": 1
+          },
+          "p50_ms": 1199.275,
+          "p95_ms": 1199.275,
+          "p99_ms": 1199.275,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-23T20:52:07.875480+00:00"
+        },
+        {
+          "method": "GET",
+          "route_template": "/obs_services",
+          "request_count": 1,
+          "status_class_counts": {
+            "2xx": 1
+          },
+          "p50_ms": 4.411,
+          "p95_ms": 4.411,
+          "p99_ms": 4.411,
+          "fingerprint_count": 0,
+          "error_count": 0,
+          "observed_at": "2026-09-19T11:24:06.595748+00:00"
+        }
+      ],
+      "projection": {
+        "state": "ready",
+        "stale": false,
+        "observed_at": "2026-09-23T21:00:09.510221+00:00",
+        "last_synced_at": "2026-09-23T21:00:09.510221+00:00",
+        "detail": null
+      }
+    }
+  },
+  {
+    "path": "/db_health",
+    "duration_s": 0.068,
+    "data": {
+      "contract_version": "v3",
+      "service": "dewey",
+      "environment": "day",
+      "instance_id": "0d8d50eef67b46a8ae71e4078929ae45",
+      "observed_at": "2026-09-23T21:05:28.486943+00:00",
+      "status": "ok",
+      "request_id": "t2J9pBqNztnbKVwQ4M-3p16aE5KEwBjV",
+      "correlation_id": "ea6c18b1dc1a01fe",
+      "build": {
+        "version": "10.0.7",
+        "sha": "8d04719a6ad82a6808bf38933b39cadb210b43d0"
+      },
+      "database": {
+        "status": "ok",
+        "latest": {
+          "status": "ok",
+          "latency_ms": 63.254,
+          "detail": "ok",
+          "fingerprint": "2689367b205c16ce",
+          "observed_at": "2026-09-23T21:05:28.486565+00:00"
+        },
+        "recent": [
+          {
+            "fingerprint": "cccbcccb6353d5e8",
+            "label": "service:registry_browse",
+            "request_count": 14,
+            "error_count": 0,
+            "p50_ms": 1606.694,
+            "p95_ms": 73759.059,
+            "p99_ms": 73759.059,
+            "observed_at": "2026-09-23T20:57:48.494950+00:00"
+          },
+          {
+            "fingerprint": "4f50de8a9fedfcdb",
+            "label": "service:register_analysis_results",
+            "request_count": 19,
+            "error_count": 0,
+            "p50_ms": 2781.803,
+            "p95_ms": 19217.758,
+            "p99_ms": 19217.758,
+            "observed_at": "2026-09-22T07:33:10.393609+00:00"
+          },
+          {
+            "fingerprint": "25e805884c9e4163",
+            "label": "service:resolve_qeo_package",
+            "request_count": 27,
+            "error_count": 0,
+            "p50_ms": 1737.78,
+            "p95_ms": 7207.591,
+            "p99_ms": 7863.995,
+            "observed_at": "2026-09-22T07:40:16.688739+00:00"
+          },
+          {
+            "fingerprint": "079190c3720879eb",
+            "label": "service:register_qeo_package",
+            "request_count": 12,
+            "error_count": 0,
+            "p50_ms": 318.971,
+            "p95_ms": 1330.832,
+            "p99_ms": 1330.832,
+            "observed_at": "2026-09-22T07:40:07.693446+00:00"
+          },
+          {
+            "fingerprint": "934010df992e38aa",
+            "label": "service:browse_storage_prefix",
+            "request_count": 13,
+            "error_count": 0,
+            "p50_ms": 492.263,
+            "p95_ms": 967.106,
+            "p99_ms": 967.106,
+            "observed_at": "2026-09-23T20:57:49.631015+00:00"
+          },
+          {
+            "fingerprint": "f045c8ddfbf422d1",
+            "label": "service:registry_object",
+            "request_count": 8,
+            "error_count": 0,
+            "p50_ms": 464.124,
+            "p95_ms": 902.677,
+            "p99_ms": 902.677,
+            "observed_at": "2026-09-23T20:54:51.180028+00:00"
+          },
+          {
+            "fingerprint": "e22939e867faab31",
+            "label": "service:search_registry",
+            "request_count": 15,
+            "error_count": 0,
+            "p50_ms": 640.419,
+            "p95_ms": 865.823,
+            "p99_ms": 865.823,
+            "observed_at": "2026-09-23T20:55:56.022541+00:00"
+          },
+          {
+            "fingerprint": "066cc1ab75287660",
+            "label": "service:registry_defaults",
+            "request_count": 1,
+            "error_count": 0,
+            "p50_ms": 793.216,
+            "p95_ms": 793.216,
+            "p99_ms": 793.216,
+            "observed_at": "2026-09-23T20:52:07.726450+00:00"
+          },
+          {
+            "fingerprint": "4dc25251929355b8",
+            "label": "service:registry_buckets",
+            "request_count": 2,
+            "error_count": 0,
+            "p50_ms": 383.597,
+            "p95_ms": 729.134,
+            "p99_ms": 729.134,
+            "observed_at": "2026-09-23T20:56:25.151047+00:00"
+          },
+          {
+            "fingerprint": "01abc1f5112d8a7c",
+            "label": "service:require_storage_access",
+            "request_count": 181,
+            "error_count": 0,
+            "p50_ms": 122.525,
+            "p95_ms": 312.111,
+            "p99_ms": 710.074,
+            "observed_at": "2026-09-23T20:57:48.954476+00:00"
+          },
+          {
+            "fingerprint": "6dbd8abc63a06f2b",
+            "label": "service:register_artifact",
+            "request_count": 2,
+            "error_count": 0,
+            "p50_ms": 288.549,
+            "p95_ms": 304.266,
+            "p99_ms": 304.266,
+            "observed_at": "2026-09-21T11:11:47.945736+00:00"
+          },
+          {
+            "fingerprint": "c053c37230bcde16",
+            "label": "service:attach_external_object_relation",
+            "request_count": 2,
+            "error_count": 0,
+            "p50_ms": 183.591,
+            "p95_ms": 198.132,
+            "p99_ms": 198.132,
+            "observed_at": "2026-09-21T11:11:53.969744+00:00"
+          },
+          {
+            "fingerprint": "0185df64c26cbad0",
+            "label": "app:readyz",
+            "request_count": 210,
+            "error_count": 0,
+            "p50_ms": 146.202,
+            "p95_ms": 170.808,
+            "p99_ms": 190.144,
+            "observed_at": "2026-09-23T21:00:09.509158+00:00"
+          },
+          {
+            "fingerprint": "6eb5d250fd33948b",
+            "label": "service:register_artifact_prefix",
+            "request_count": 3,
+            "error_count": 0,
+            "p50_ms": 144.715,
+            "p95_ms": 157.975,
+            "p99_ms": 157.975,
+            "observed_at": "2026-09-21T03:36:30.702206+00:00"
+          },
+          {
+            "fingerprint": "6e38cb5da17b74ca",
+            "label": "service:list_artifacts",
+            "request_count": 3,
+            "error_count": 0,
+            "p50_ms": 29.898,
+            "p95_ms": 151.328,
+            "p99_ms": 151.328,
+            "observed_at": "2026-09-20T05:56:14.569839+00:00"
+          },
+          {
+            "fingerprint": "c5c94b807538b395",
+            "label": "service:get_artifact",
+            "request_count": 14,
+            "error_count": 0,
+            "p50_ms": 15.826,
+            "p95_ms": 148.813,
+            "p99_ms": 148.813,
+            "observed_at": "2026-09-22T03:07:57.228954+00:00"
+          },
+          {
+            "fingerprint": "ed865cc35660e7b9",
+            "label": "service:registry_download",
+            "request_count": 1,
+            "error_count": 0,
+            "p50_ms": 148.006,
+            "p95_ms": 148.006,
+            "p99_ms": 148.006,
+            "observed_at": "2026-09-23T20:52:07.874574+00:00"
+          },
+          {
+            "fingerprint": "ec7844895131205e",
+            "label": "service:create_external_object",
+            "request_count": 2,
+            "error_count": 0,
+            "p50_ms": 95.437,
+            "p95_ms": 102.103,
+            "p99_ms": 102.103,
+            "observed_at": "2026-09-21T11:11:53.659827+00:00"
+          },
+          {
+            "fingerprint": "c6f5a844daef0492",
+            "label": "app:db_health",
+            "request_count": 1,
+            "error_count": 0,
+            "p50_ms": 63.159,
+            "p95_ms": 63.159,
+            "p99_ms": 63.159,
+            "observed_at": "2026-09-23T21:05:28.486526+00:00"
+          },
+          {
+            "fingerprint": "5e057105e377d075",
+            "label": "service:resolve_registry",
+            "request_count": 4,
+            "error_count": 0,
+            "p50_ms": 24.646,
+            "p95_ms": 32.065,
+            "p99_ms": 32.065,
+            "observed_at": "2026-09-23T20:49:45.862567+00:00"
+          }
+        ],
+        "slowest": [
+          {
+            "fingerprint": "cccbcccb6353d5e8",
+            "label": "service:registry_browse",
+            "request_count": 14,
+            "error_count": 0,
+            "p50_ms": 1606.694,
+            "p95_ms": 73759.059,
+            "p99_ms": 73759.059,
+            "observed_at": "2026-09-23T20:57:48.494950+00:00"
+          },
+          {
+            "fingerprint": "4f50de8a9fedfcdb",
+            "label": "service:register_analysis_results",
+            "request_count": 19,
+            "error_count": 0,
+            "p50_ms": 2781.803,
+            "p95_ms": 19217.758,
+            "p99_ms": 19217.758,
+            "observed_at": "2026-09-22T07:33:10.393609+00:00"
+          },
+          {
+            "fingerprint": "25e805884c9e4163",
+            "label": "service:resolve_qeo_package",
+            "request_count": 27,
+            "error_count": 0,
+            "p50_ms": 1737.78,
+            "p95_ms": 7207.591,
+            "p99_ms": 7863.995,
+            "observed_at": "2026-09-22T07:40:16.688739+00:00"
+          },
+          {
+            "fingerprint": "079190c3720879eb",
+            "label": "service:register_qeo_package",
+            "request_count": 12,
+            "error_count": 0,
+            "p50_ms": 318.971,
+            "p95_ms": 1330.832,
+            "p99_ms": 1330.832,
+            "observed_at": "2026-09-22T07:40:07.693446+00:00"
+          },
+          {
+            "fingerprint": "934010df992e38aa",
+            "label": "service:browse_storage_prefix",
+            "request_count": 13,
+            "error_count": 0,
+            "p50_ms": 492.263,
+            "p95_ms": 967.106,
+            "p99_ms": 967.106,
+            "observed_at": "2026-09-23T20:57:49.631015+00:00"
+          }
+        ],
+        "hottest": [
+          {
+            "fingerprint": "0185df64c26cbad0",
+            "label": "app:readyz",
+            "request_count": 210,
+            "error_count": 0,
+            "p50_ms": 146.202,
+            "p95_ms": 170.808,
+            "p99_ms": 190.144,
+            "observed_at": "2026-09-23T21:00:09.509158+00:00"
+          },
+          {
+            "fingerprint": "01abc1f5112d8a7c",
+            "label": "service:require_storage_access",
+            "request_count": 181,
+            "error_count": 0,
+            "p50_ms": 122.525,
+            "p95_ms": 312.111,
+            "p99_ms": 710.074,
+            "observed_at": "2026-09-23T20:57:48.954476+00:00"
+          },
+          {
+            "fingerprint": "25e805884c9e4163",
+            "label": "service:resolve_qeo_package",
+            "request_count": 27,
+            "error_count": 0,
+            "p50_ms": 1737.78,
+            "p95_ms": 7207.591,
+            "p99_ms": 7863.995,
+            "observed_at": "2026-09-22T07:40:16.688739+00:00"
+          },
+          {
+            "fingerprint": "4f50de8a9fedfcdb",
+            "label": "service:register_analysis_results",
+            "request_count": 19,
+            "error_count": 0,
+            "p50_ms": 2781.803,
+            "p95_ms": 19217.758,
+            "p99_ms": 19217.758,
+            "observed_at": "2026-09-22T07:33:10.393609+00:00"
+          },
+          {
+            "fingerprint": "e22939e867faab31",
+            "label": "service:search_registry",
+            "request_count": 15,
+            "error_count": 0,
+            "p50_ms": 640.419,
+            "p95_ms": 865.823,
+            "p99_ms": 865.823,
+            "observed_at": "2026-09-23T20:55:56.022541+00:00"
+          }
+        ],
+        "schema_drift": {
+          "status": "check_failed",
+          "checked_at": "2026-09-19T10:05:32.513659+00:00",
+          "target": "aurora",
+          "tool_version": "10.1.1rc1",
+          "summary": "This operation requires explicit target.operator credentials",
+          "report": {
+            "database": "dewey_prod_tapdb10",
+            "error": "This operation requires explicit target.operator credentials",
+            "schema_name": "tapdb_dewey_lsmcok1_local",
+            "status": "error",
+            "strict": true,
+            "target": "explicit"
+          },
+          "strict": true
+        },
+        "observed_at": "2026-09-23T21:05:28.486565+00:00"
+      },
+      "projection": {
+        "state": "ready",
+        "stale": false,
+        "observed_at": "2026-09-23T21:05:28.486565+00:00",
+        "last_synced_at": "2026-09-23T21:05:28.486565+00:00",
+        "detail": null
+      }
+    }
+  }
+]

@@ -1,0 +1,44 @@
+{
+  "format": "tapdb.repository-template-pack/v1",
+  "templates": [
+    {
+      "name": "Dewey Share Revision",
+      "polymorphic_discriminator": "data_template",
+      "category": "access",
+      "type": "share_revision",
+      "subtype": "generic",
+      "version": "1.0",
+      "instance_prefix": "DGX",
+      "instance_polymorphic_identity": "data_instance",
+      "bstatus": "active",
+      "is_singleton": false,
+      "json_addl": {}
+    },
+    {
+      "name": "Dewey Share Alias",
+      "polymorphic_discriminator": "data_template",
+      "category": "access",
+      "type": "share_alias",
+      "subtype": "generic",
+      "version": "1.0",
+      "instance_prefix": "DGX",
+      "instance_polymorphic_identity": "data_instance",
+      "bstatus": "active",
+      "is_singleton": false,
+      "json_addl": {}
+    },
+    {
+      "name": "Dewey Artifact Location Revision",
+      "polymorphic_discriminator": "data_template",
+      "category": "data",
+      "type": "artifact_location_revision",
+      "subtype": "generic",
+      "version": "1.0",
+      "instance_prefix": "DGX",
+      "instance_polymorphic_identity": "data_instance",
+      "bstatus": "active",
+      "is_singleton": false,
+      "json_addl": {}
+    }
+  ]
+}

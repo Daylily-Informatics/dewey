@@ -1,0 +1,242 @@
+[
+  {
+    "name": "aquarium-tfstate-dev",
+    "path": "/storage?uri=s3%3A%2F%2Faquarium-tfstate-dev%2F"
+  },
+  {
+    "name": "aquarium-tfstate-prod",
+    "path": "/storage?uri=s3%3A%2F%2Faquarium-tfstate-prod%2F"
+  },
+  {
+    "name": "asterism-note-screenshots-dev",
+    "path": "/storage?uri=s3%3A%2F%2Fasterism-note-screenshots-dev%2F"
+  },
+  {
+    "name": "aws-sam-cli-managed-default-samclisourcebucket-nr7kmk76fofd",
+    "path": "/storage?uri=s3%3A%2F%2Faws-sam-cli-managed-default-samclisourcebucket-nr7kmk76fofd%2F"
+  },
+  {
+    "name": "aws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp",
+    "path": "/storage?uri=s3%3A%2F%2Faws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp%2F"
+  },
+  {
+    "name": "cdk-dayhoff-assets-108782052779-us-east-1",
+    "path": "/storage?uri=s3%3A%2F%2Fcdk-dayhoff-assets-108782052779-us-east-1%2F"
+  },
+  {
+    "name": "cdk-dayhoff-assets-108782052779-us-west-2",
+    "path": "/storage?uri=s3%3A%2F%2Fcdk-dayhoff-assets-108782052779-us-west-2%2F"
+  },
+  {
+    "name": "cdk-hnb659fds-assets-108782052779-us-east-1",
+    "path": "/storage?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-east-1%2F"
+  },
+  {
+    "name": "cdk-hnb659fds-assets-108782052779-us-west-2",
+    "path": "/storage?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2F"
+  },
+  {
+    "name": "cf-templates-pfrobpqqun1c-us-east-2",
+    "path": "/storage?uri=s3%3A%2F%2Fcf-templates-pfrobpqqun1c-us-east-2%2F"
+  },
+  {
+    "name": "dayec-cur-108782052779-us-east-1",
+    "path": "/storage?uri=s3%3A%2F%2Fdayec-cur-108782052779-us-east-1%2F"
+  },
+  {
+    "name": "daylily-customer-lsmc-a0477268",
+    "path": "/storage?uri=s3%3A%2F%2Fdaylily-customer-lsmc-a0477268%2F"
+  },
+  {
+    "name": "lsmc-atlas-demo",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-atlas-demo%2F"
+  },
+  {
+    "name": "lsmc-atlas-dev",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F"
+  },
+  {
+    "name": "lsmc-aws-config-108782052779",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-aws-config-108782052779%2F"
+  },
+  {
+    "name": "lsmc-bio-oauth-static-site-108782052779-us-east-1",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-bio-oauth-static-site-108782052779-us-east-1%2F"
+  },
+  {
+    "name": "lsmc-copy-ultimagen-lsmc-cro-316",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-copy-ultimagen-lsmc-cro-316%2F"
+  },
+  {
+    "name": "lsmc-datalake-raw-dev",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-datalake-raw-dev%2F"
+  },
+  {
+    "name": "lsmc-dayoa-analysis-results-usw2",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-dayoa-analysis-results-usw2%2F"
+  },
+  {
+    "name": "lsmc-dayoa-control-data-use1",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-dayoa-control-data-use1%2F"
+  },
+  {
+    "name": "lsmc-dayoa-control-data-usw2",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-dayoa-control-data-usw2%2F"
+  },
+  {
+    "name": "lsmc-dayoa-omics-analysis-us-west-2",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2F"
+  },
+  {
+    "name": "lsmc-dayoa-references-use1",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-dayoa-references-use1%2F"
+  },
+  {
+    "name": "lsmc-dayoa-references-usw2",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2F"
+  },
+  {
+    "name": "lsmc-dayoa-runtime-assets-usw2",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2F"
+  },
+  {
+    "name": "lsmc-dayoa-staging-usw2",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2F"
+  },
+  {
+    "name": "lsmc-dewey-0",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-dewey-0%2F"
+  },
+  {
+    "name": "lsmc-docs-public-108782052779-us-west-2",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-docs-public-108782052779-us-west-2%2F"
+  },
+  {
+    "name": "lsmc-healthomics-failiover",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-healthomics-failiover%2F"
+  },
+  {
+    "name": "lsmc-healthomics-results",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-healthomics-results%2F"
+  },
+  {
+    "name": "lsmc-ifx-bjuice-pkgd-data",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-ifx-bjuice-pkgd-data%2F"
+  },
+  {
+    "name": "lsmc-illumina-public-data",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-illumina-public-data%2F"
+  },
+  {
+    "name": "lsmc-meridian-governance-registry",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-meridian-governance-registry%2F"
+  },
+  {
+    "name": "lsmc-mvp-v1-event-sink-raw-108782052779-us-west-2",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-mvp-v1-event-sink-raw-108782052779-us-west-2%2F"
+  },
+  {
+    "name": "lsmc-mvp-v1-labcore-accessioning-docs-108782052779-us-west-2",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-mvp-v1-labcore-accessioning-docs-108782052779-us-west-2%2F"
+  },
+  {
+    "name": "lsmc-mvp-v1-labcore-ui-108782052779-us-west-2",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-mvp-v1-labcore-ui-108782052779-us-west-2%2F"
+  },
+  {
+    "name": "lsmc-mvp-v1-status-alb-logs-108782052779",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-mvp-v1-status-alb-logs-108782052779%2F"
+  },
+  {
+    "name": "lsmc-public-ont-data",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-public-ont-data%2F"
+  },
+  {
+    "name": "lsmc-qeo-day-analytical-108782052779-us-west-2",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-qeo-day-analytical-108782052779-us-west-2%2F"
+  },
+  {
+    "name": "lsmc-ssf-sequencing-data",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2F"
+  },
+  {
+    "name": "lsmc-terraform-state",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-terraform-state%2F"
+  },
+  {
+    "name": "lsmc-twenty-prod-storage",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-twenty-prod-storage%2F"
+  },
+  {
+    "name": "lsmc-ursa-cost-reports-108782052779-us-west-2",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-ursa-cost-reports-108782052779-us-west-2%2F"
+  },
+  {
+    "name": "lsmc-ursa-customers-usw2",
+    "path": "/storage?uri=s3%3A%2F%2Flsmc-ursa-customers-usw2%2F"
+  },
+  {
+    "name": "marvain-cleanroom-20260712t103857z-artifactbucket-mecojkek5eps",
+    "path": "/storage?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t103857z-artifactbucket-mecojkek5eps%2F"
+  },
+  {
+    "name": "marvain-cleanroom-20260712t103857z-auditbucket-yl3kufkgfdie",
+    "path": "/storage?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t103857z-auditbucket-yl3kufkgfdie%2F"
+  },
+  {
+    "name": "marvain-cleanroom-20260712t111914z-artifactbucket-qkwenuto9bbo",
+    "path": "/storage?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-artifactbucket-qkwenuto9bbo%2F"
+  },
+  {
+    "name": "marvain-cleanroom-20260712t111914z-auditbucket-wvcw5pjxz1kj",
+    "path": "/storage?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-auditbucket-wvcw5pjxz1kj%2F"
+  },
+  {
+    "name": "marvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl",
+    "path": "/storage?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2F"
+  },
+  {
+    "name": "parallelcluster-4da281c1dc024f1c-v1-do-not-delete",
+    "path": "/storage?uri=s3%3A%2F%2Fparallelcluster-4da281c1dc024f1c-v1-do-not-delete%2F"
+  },
+  {
+    "name": "parallelcluster-730cb6d53cf2deec-v1-do-not-delete",
+    "path": "/storage?uri=s3%3A%2F%2Fparallelcluster-730cb6d53cf2deec-v1-do-not-delete%2F"
+  },
+  {
+    "name": "parallelcluster-e781c59d26140bab-v1-do-not-delete",
+    "path": "/storage?uri=s3%3A%2F%2Fparallelcluster-e781c59d26140bab-v1-do-not-delete%2F"
+  },
+  {
+    "name": "terrarium-dev-media",
+    "path": "/storage?uri=s3%3A%2F%2Fterrarium-dev-media%2F"
+  },
+  {
+    "name": "terrarium-dev-web",
+    "path": "/storage?uri=s3%3A%2F%2Fterrarium-dev-web%2F"
+  },
+  {
+    "name": "terrarium-prod-media",
+    "path": "/storage?uri=s3%3A%2F%2Fterrarium-prod-media%2F"
+  },
+  {
+    "name": "terrarium-prod-web",
+    "path": "/storage?uri=s3%3A%2F%2Fterrarium-prod-web%2F"
+  },
+  {
+    "name": "terrarium-tfstate-dev",
+    "path": "/storage?uri=s3%3A%2F%2Fterrarium-tfstate-dev%2F"
+  },
+  {
+    "name": "terrarium-tfstate-prod",
+    "path": "/storage?uri=s3%3A%2F%2Fterrarium-tfstate-prod%2F"
+  },
+  {
+    "name": "ursa-us-west-2-052779-default-customer-1d8c14",
+    "path": "/storage?uri=s3%3A%2F%2Fursa-us-west-2-052779-default-customer-1d8c14%2F"
+  },
+  {
+    "name": "zebra-day-cfg-us-west-2",
+    "path": "/storage?uri=s3%3A%2F%2Fzebra-day-cfg-us-west-2%2F"
+  }
+]

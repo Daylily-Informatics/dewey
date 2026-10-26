@@ -1,0 +1,213 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / S3 BROWSER
+  - heading "S3 Browser" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - textbox "S3 URI":
+    - /placeholder: s3://bucket/exact/prefix/
+    - text: s3://lsmc-dayoa-staging-usw2/
+  - button "Go"
+  - link "All buckets":
+    - /url: /storage
+  - generic: s3://lsmc-dayoa-staging-usw2/
+  - button "Upload files"
+  - link "Register this folder":
+    - /url: /add?kind=prefix&uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2F
+  - link "lsmc-dayoa-staging-usw2":
+    - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2F
+  - searchbox "Filter names on this page"
+  - button "Register selection as a set"
+  - table:
+    - rowgroup:
+      - row "Kind Name Size Registration":
+        - columnheader "Kind"
+        - columnheader "Name"
+        - columnheader "Size"
+        - columnheader "Registration"
+    - rowgroup:
+      - row "Select codex-headnode-relay/ prefix codex-headnode-relay/ — Register":
+        - cell "Select codex-headnode-relay/ prefix":
+          - checkbox "Select codex-headnode-relay/"
+          - generic: prefix
+        - cell "codex-headnode-relay/":
+          - link "codex-headnode-relay/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fcodex-headnode-relay%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fcodex-headnode-relay%2F&kind=prefix
+      - row "Select codex-relay/ prefix codex-relay/ — Register":
+        - cell "Select codex-relay/ prefix":
+          - checkbox "Select codex-relay/"
+          - generic: prefix
+        - cell "codex-relay/":
+          - link "codex-relay/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fcodex-relay%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fcodex-relay%2F&kind=prefix
+      - row "Select codex/ prefix codex/ — Register":
+        - cell "Select codex/ prefix":
+          - checkbox "Select codex/"
+          - generic: prefix
+        - cell "codex/":
+          - link "codex/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fcodex%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fcodex%2F&kind=prefix
+      - row "Select dyec-19.0.95/ prefix dyec-19.0.95/ — Register":
+        - cell "Select dyec-19.0.95/ prefix":
+          - checkbox "Select dyec-19.0.95/"
+          - generic: prefix
+        - cell "dyec-19.0.95/":
+          - link "dyec-19.0.95/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fdyec-19.0.95%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fdyec-19.0.95%2F&kind=prefix
+      - row "Select dyec-headnode-upload/ prefix dyec-headnode-upload/ — Register":
+        - cell "Select dyec-headnode-upload/ prefix":
+          - checkbox "Select dyec-headnode-upload/"
+          - generic: prefix
+        - cell "dyec-headnode-upload/":
+          - link "dyec-headnode-upload/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fdyec-headnode-upload%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fdyec-headnode-upload%2F&kind=prefix
+      - row "Select dyec-transient/ prefix dyec-transient/ — Register":
+        - cell "Select dyec-transient/ prefix":
+          - checkbox "Select dyec-transient/"
+          - generic: prefix
+        - cell "dyec-transient/":
+          - link "dyec-transient/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fdyec-transient%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fdyec-transient%2F&kind=prefix
+      - row "Select lh010618_merged/ prefix lh010618_merged/ — Register":
+        - cell "Select lh010618_merged/ prefix":
+          - checkbox "Select lh010618_merged/"
+          - generic: prefix
+        - cell "lh010618_merged/":
+          - link "lh010618_merged/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Flh010618_merged%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Flh010618_merged%2F&kind=prefix
+      - row "Select remote_stage_20260903T004546Z_7672b12d/ prefix remote_stage_20260903T004546Z_7672b12d/ — Register":
+        - cell "Select remote_stage_20260903T004546Z_7672b12d/ prefix":
+          - checkbox "Select remote_stage_20260903T004546Z_7672b12d/"
+          - generic: prefix
+        - cell "remote_stage_20260903T004546Z_7672b12d/":
+          - link "remote_stage_20260903T004546Z_7672b12d/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fremote_stage_20260903T004546Z_7672b12d%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fremote_stage_20260903T004546Z_7672b12d%2F&kind=prefix
+      - row "Select remote_stage_20260903T073048Z_3125f100/ prefix remote_stage_20260903T073048Z_3125f100/ — Register":
+        - cell "Select remote_stage_20260903T073048Z_3125f100/ prefix":
+          - checkbox "Select remote_stage_20260903T073048Z_3125f100/"
+          - generic: prefix
+        - cell "remote_stage_20260903T073048Z_3125f100/":
+          - link "remote_stage_20260903T073048Z_3125f100/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fremote_stage_20260903T073048Z_3125f100%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fremote_stage_20260903T073048Z_3125f100%2F&kind=prefix
+      - row "Select remote_stage_20260903T142019Z_473bd635/ prefix remote_stage_20260903T142019Z_473bd635/ — Register":
+        - cell "Select remote_stage_20260903T142019Z_473bd635/ prefix":
+          - checkbox "Select remote_stage_20260903T142019Z_473bd635/"
+          - generic: prefix
+        - cell "remote_stage_20260903T142019Z_473bd635/":
+          - link "remote_stage_20260903T142019Z_473bd635/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fremote_stage_20260903T142019Z_473bd635%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fremote_stage_20260903T142019Z_473bd635%2F&kind=prefix
+      - row "Select staged/ prefix staged/ — Register":
+        - cell "Select staged/ prefix":
+          - checkbox "Select staged/"
+          - generic: prefix
+        - cell "staged/":
+          - link "staged/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fstaged%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fstaged%2F&kind=prefix
+      - row "Select staged_sample_data/ prefix staged_sample_data/ — Register":
+        - cell "Select staged_sample_data/ prefix":
+          - checkbox "Select staged_sample_data/"
+          - generic: prefix
+        - cell "staged_sample_data/":
+          - link "staged_sample_data/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fstaged_sample_data%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fstaged_sample_data%2F&kind=prefix
+      - row "Select staging/ prefix staging/ — Register":
+        - cell "Select staging/ prefix":
+          - checkbox "Select staging/"
+          - generic: prefix
+        - cell "staging/":
+          - link "staging/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fstaging%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Fstaging%2F&kind=prefix
+      - row "Select tmp/ prefix tmp/ — Register":
+        - cell "Select tmp/ prefix":
+          - checkbox "Select tmp/"
+          - generic: prefix
+        - cell "tmp/":
+          - link "tmp/":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Ftmp%2F
+        - cell "—"
+        - cell "Register":
+          - link "Register":
+            - /url: /add?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2Ftmp%2F&kind=prefix
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

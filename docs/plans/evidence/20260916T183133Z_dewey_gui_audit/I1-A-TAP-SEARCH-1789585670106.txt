@@ -1,0 +1,281 @@
+- banner:
+  - link "Dewey / TapDB":
+    - /url: /tapdb/
+  - navigation:
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Admin":
+      - /url: /admin
+    - link "Overview":
+      - /url: /tapdb/admin/overview
+    - link "Search":
+      - /url: /tapdb/search
+    - link "Graph":
+      - /url: /tapdb/graph
+    - link "Templates":
+      - /url: /tapdb/templates
+    - link "Audit":
+      - /url: /tapdb/audit
+    - link "Help":
+      - /url: /tapdb/help
+    - link "Readiness":
+      - /url: /tapdb/admin/readiness
+    - link "Inventory":
+      - /url: /tapdb/admin/inventory
+    - link "Meridian":
+      - /url: /tapdb/admin/meridian
+    - link "Metrics":
+      - /url: /tapdb/admin/metrics
+    - link "Runtime":
+      - /url: /tapdb/admin/runtime
+    - link "Backups":
+      - /url: /tapdb/admin/backups
+    - link "Sign out":
+      - /url: /auth/logout
+  - generic: johnm@lsmc.com · admin
+- main:
+  - heading "Search" [level=1]
+  - textbox "EUID, name, type, status"
+  - combobox:
+    - option "all" [selected]
+    - option "template"
+    - option "instance"
+    - option "lineage"
+  - textbox "name contains"
+  - textbox "EUID contains"
+  - textbox "category"
+  - textbox "type"
+  - textbox "subtype"
+  - button "Search"
+  - heading "Results" [level=2]
+  - table:
+    - rowgroup:
+      - row "EUID Kind Name Type Status":
+        - columnheader "EUID"
+        - columnheader "Kind"
+        - columnheader "Name"
+        - columnheader "Type"
+        - columnheader "Status"
+    - rowgroup:
+      - row "M-DGX-1A template Dewey Artifact data/artifact/generic active":
+        - cell "M-DGX-1A":
+          - link "M-DGX-1A":
+            - /url: /tapdb/object/M-DGX-1A
+        - cell "template"
+        - cell "Dewey Artifact"
+        - cell "data/artifact/generic"
+        - cell "active"
+      - row "M-DGX-28 template Dewey Artifact Set data/artifact_set/generic active":
+        - cell "M-DGX-28":
+          - link "M-DGX-28":
+            - /url: /tapdb/object/M-DGX-28
+        - cell "template"
+        - cell "Dewey Artifact Set"
+        - cell "data/artifact_set/generic"
+        - cell "active"
+      - row "M-DGX-36 template Dewey Share access/share/generic active":
+        - cell "M-DGX-36":
+          - link "M-DGX-36":
+            - /url: /tapdb/object/M-DGX-36
+        - cell "template"
+        - cell "Dewey Share"
+        - cell "access/share/generic"
+        - cell "active"
+      - row "M-DGX-44 template Dewey External Object integration/external_object/generic active":
+        - cell "M-DGX-44":
+          - link "M-DGX-44":
+            - /url: /tapdb/object/M-DGX-44
+        - cell "template"
+        - cell "Dewey External Object"
+        - cell "integration/external_object/generic"
+        - cell "active"
+      - row "M-DGX-52 template Dewey External Object Relation integration/external_object_relation/generic active":
+        - cell "M-DGX-52":
+          - link "M-DGX-52":
+            - /url: /tapdb/object/M-DGX-52
+        - cell "template"
+        - cell "Dewey External Object Relation"
+        - cell "integration/external_object_relation/generic"
+        - cell "active"
+      - row "M-DGX-60 template Dewey Literature Save access/literature_save/generic active":
+        - cell "M-DGX-60":
+          - link "M-DGX-60":
+            - /url: /tapdb/object/M-DGX-60
+        - cell "template"
+        - cell "Dewey Literature Save"
+        - cell "access/literature_save/generic"
+        - cell "active"
+      - row "M-DGX-7Y template Dewey Anomaly operational/anomaly/generic active":
+        - cell "M-DGX-7Y":
+          - link "M-DGX-7Y":
+            - /url: /tapdb/object/M-DGX-7Y
+        - cell "template"
+        - cell "Dewey Anomaly"
+        - cell "operational/anomaly/generic"
+        - cell "active"
+      - row "M-DGX-8W template Dewey Idempotency system/idempotency_request/generic active":
+        - cell "M-DGX-8W":
+          - link "M-DGX-8W":
+            - /url: /tapdb/object/M-DGX-8W
+        - cell "template"
+        - cell "Dewey Idempotency"
+        - cell "system/idempotency_request/generic"
+        - cell "active"
+      - row "M-DGX-9YNH template Dewey Registration Receipt system/registration_receipt/generic active":
+        - cell "M-DGX-9YNH":
+          - link "M-DGX-9YNH":
+            - /url: /tapdb/object/M-DGX-9YNH
+        - cell "template"
+        - cell "Dewey Registration Receipt"
+        - cell "system/registration_receipt/generic"
+        - cell "active"
+      - row "M-DGX-9YPF template Dewey Outbox Event system/outbox_event/generic active":
+        - cell "M-DGX-9YPF":
+          - link "M-DGX-9YPF":
+            - /url: /tapdb/object/M-DGX-9YPF
+        - cell "template"
+        - cell "Dewey Outbox Event"
+        - cell "system/outbox_event/generic"
+        - cell "active"
+      - row "M-DGX-AAM5 template Dewey Share Root access/share_root/generic active":
+        - cell "M-DGX-AAM5":
+          - link "M-DGX-AAM5":
+            - /url: /tapdb/object/M-DGX-AAM5
+        - cell "template"
+        - cell "Dewey Share Root"
+        - cell "access/share_root/generic"
+        - cell "active"
+      - row "M-DGX-NNZD template Opaque External Identifier reference/external_identifier/opaque active":
+        - cell "M-DGX-NNZD":
+          - link "M-DGX-NNZD":
+            - /url: /tapdb/object/M-DGX-NNZD
+        - cell "template"
+        - cell "Opaque External Identifier"
+        - cell "reference/external_identifier/opaque"
+        - cell "active"
+      - row "M-DGX-NP0B template TapDB Object Reference reference/external_identifier/tapdb_object active":
+        - cell "M-DGX-NP0B":
+          - link "M-DGX-NP0B":
+            - /url: /tapdb/object/M-DGX-NP0B
+        - cell "template"
+        - cell "TapDB Object Reference"
+        - cell "reference/external_identifier/tapdb_object"
+        - cell "active"
+      - row "M-DGX-NPFD template Dewey Registry Policy access/registry_policy/generic active":
+        - cell "M-DGX-NPFD":
+          - link "M-DGX-NPFD":
+            - /url: /tapdb/object/M-DGX-NPFD
+        - cell "template"
+        - cell "Dewey Registry Policy"
+        - cell "access/registry_policy/generic"
+        - cell "active"
+      - row "M-DGX-NPGA template Dewey API Client access/api_client/generic active":
+        - cell "M-DGX-NPGA":
+          - link "M-DGX-NPGA":
+            - /url: /tapdb/object/M-DGX-NPGA
+        - cell "template"
+        - cell "Dewey API Client"
+        - cell "access/api_client/generic"
+        - cell "active"
+      - row "M-DGX-NPH8 template Dewey Storage Operation operational/storage_operation/generic active":
+        - cell "M-DGX-NPH8":
+          - link "M-DGX-NPH8":
+            - /url: /tapdb/object/M-DGX-NPH8
+        - cell "template"
+        - cell "Dewey Storage Operation"
+        - cell "operational/storage_operation/generic"
+        - cell "active"
+      - row "M-DGX-9RG1 instance Readiness probe observed a bootstrap gap operational/anomaly/generic active":
+        - cell "M-DGX-9RG1":
+          - link "M-DGX-9RG1":
+            - /url: /tapdb/object/M-DGX-9RG1
+        - cell "instance"
+        - cell "Readiness probe observed a bootstrap gap"
+        - cell "operational/anomaly/generic"
+        - cell "active"
+      - row "M-DGX-9RHZ instance Operator session activity is sparse operational/anomaly/generic active":
+        - cell "M-DGX-9RHZ":
+          - link "M-DGX-9RHZ":
+            - /url: /tapdb/object/M-DGX-9RHZ
+        - cell "instance"
+        - cell "Operator session activity is sparse"
+        - cell "operational/anomaly/generic"
+        - cell "active"
+      - row "M-DGX-9RJX instance Artifact storage review is pending operational/anomaly/generic active":
+        - cell "M-DGX-9RJX":
+          - link "M-DGX-9RJX":
+            - /url: /tapdb/object/M-DGX-9RJX
+        - cell "instance"
+        - cell "Artifact storage review is pending"
+        - cell "operational/anomaly/generic"
+        - cell "active"
+      - row "M-DGX-9RKV instance s3://beta-runs/M-BDT-9SDK/a9be03c0_R1.fastq.gz data/artifact/generic active":
+        - cell "M-DGX-9RKV":
+          - link "M-DGX-9RKV":
+            - /url: /tapdb/object/M-DGX-9RKV
+        - cell "instance"
+        - cell "s3://beta-runs/M-BDT-9SDK/a9be03c0_R1.fastq.gz"
+        - cell "data/artifact/generic"
+        - cell "active"
+      - row "M-DGX-9RMS instance artifact.register:M-BDT-9SDK:fastq:s3://beta-runs/M-BDT-9SDK/a9be03c0_R1.fastq.gz system/idempotency_request/generic active":
+        - cell "M-DGX-9RMS":
+          - link "M-DGX-9RMS":
+            - /url: /tapdb/object/M-DGX-9RMS
+        - cell "instance"
+        - cell "artifact.register:M-BDT-9SDK:fastq:s3://beta-runs/M-BDT-9SDK/a9be03c0_R1.fastq.gz"
+        - cell "system/idempotency_request/generic"
+        - cell "active"
+      - row "M-DGX-9RNQ instance s3://beta-runs/M-BDT-9SDK/a9be03c0_R2.fastq.gz data/artifact/generic active":
+        - cell "M-DGX-9RNQ":
+          - link "M-DGX-9RNQ":
+            - /url: /tapdb/object/M-DGX-9RNQ
+        - cell "instance"
+        - cell "s3://beta-runs/M-BDT-9SDK/a9be03c0_R2.fastq.gz"
+        - cell "data/artifact/generic"
+        - cell "active"
+      - row "M-DGX-9RPN instance artifact.register:M-BDT-9SDK:fastq:s3://beta-runs/M-BDT-9SDK/a9be03c0_R2.fastq.gz system/idempotency_request/generic active":
+        - cell "M-DGX-9RPN":
+          - link "M-DGX-9RPN":
+            - /url: /tapdb/object/M-DGX-9RPN
+        - cell "instance"
+        - cell "artifact.register:M-BDT-9SDK:fastq:s3://beta-runs/M-BDT-9SDK/a9be03c0_R2.fastq.gz"
+        - cell "system/idempotency_request/generic"
+        - cell "active"
+      - row "M-DGX-9RQK instance s3://lsmc-dewey-0/functional-tests/20260520T120220Z-0f07e1/variants.vcf.gz data/artifact/generic active":
+        - cell "M-DGX-9RQK":
+          - link "M-DGX-9RQK":
+            - /url: /tapdb/object/M-DGX-9RQK
+        - cell "instance"
+        - cell "s3://lsmc-dewey-0/functional-tests/20260520T120220Z-0f07e1/variants.vcf.gz"
+        - cell "data/artifact/generic"
+        - cell "active"
+      - row "M-DGX-9RRH instance artifact.register:20260520T120220Z-0f07e1:dewey-variant system/idempotency_request/generic active":
+        - cell "M-DGX-9RRH":
+          - link "M-DGX-9RRH":
+            - /url: /tapdb/object/M-DGX-9RRH
+        - cell "instance"
+        - cell "artifact.register:20260520T120220Z-0f07e1:dewey-variant"
+        - cell "system/idempotency_request/generic"
+        - cell "active"
+  - paragraph:
+    - link "Next page":
+      - /url: /tapdb/search?record_type=all&limit=25&cursor=eyJraW5kIjoiaW5zdGFuY2UiLCJ1aWQiOjl9
+- contentinfo: TapDB 10.1.1rc1
+- text: Theme
+- combobox "Theme":
+  - option "original" [selected]
+  - option "light"
+  - option "dark"
+  - option "CBF"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

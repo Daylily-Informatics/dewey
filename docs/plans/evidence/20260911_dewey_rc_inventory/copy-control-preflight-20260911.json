@@ -1,0 +1,55 @@
+{
+  "backup_operation_performed": false,
+  "captured_at": "2026-09-11T06:11:04.401172+00:00",
+  "cluster_scalability_type": null,
+  "control_config": "/home/ubuntu/dewey_ops/tapdb101-20260911/control-operator.yaml",
+  "control_identity": {
+    "backend_pid": 28664,
+    "database": "postgres",
+    "operator": "dayhoff",
+    "server_address": "10.0.2.148/32",
+    "server_version": "16.13"
+  },
+  "database_mutation_performed": false,
+  "databases": [
+    {
+      "datacl": null,
+      "datallowconn": true,
+      "datconnlimit": -1,
+      "datistemplate": false,
+      "datname": "dewey_prod",
+      "oid": 16749,
+      "owner": "dayhoff"
+    },
+    {
+      "datacl": null,
+      "datallowconn": true,
+      "datconnlimit": -1,
+      "datistemplate": false,
+      "datname": "postgres",
+      "oid": 5,
+      "owner": "dayhoff"
+    }
+  ],
+  "engine_mode": "provisioned",
+  "operator": {
+    "rolcanlogin": true,
+    "rolcreatedb": true,
+    "rolcreaterole": true,
+    "rolname": "dayhoff",
+    "rolsuper": false
+  },
+  "provider_contract": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/aurora-provider-contract-20260911.json",
+  "provider_file_sha256": "0700678f55acd55a39f2563b4ec73c4dbfba9876611644279ab3ad1d04abaa84",
+  "purpose": "Operator-owned read-only copy prerequisite census; no writer fence",
+  "source_sessions": [
+    {
+      "application_name": "",
+      "backend_start": "2026-09-11 06:00:37.982614+00:00",
+      "client_addr": "10.0.0.222/32",
+      "pid": 27027,
+      "state": "idle",
+      "usename": "dayhoff"
+    }
+  ]
+}

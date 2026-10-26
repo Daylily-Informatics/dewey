@@ -1,0 +1,281 @@
+- banner:
+  - link "Dewey / TapDB":
+    - /url: /tapdb/
+  - navigation:
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Admin":
+      - /url: /admin
+    - link "Overview":
+      - /url: /tapdb/admin/overview
+    - link "Search":
+      - /url: /tapdb/search
+    - link "Graph":
+      - /url: /tapdb/graph
+    - link "Templates":
+      - /url: /tapdb/templates
+    - link "Audit":
+      - /url: /tapdb/audit
+    - link "Help":
+      - /url: /tapdb/help
+    - link "Readiness":
+      - /url: /tapdb/admin/readiness
+    - link "Inventory":
+      - /url: /tapdb/admin/inventory
+    - link "Meridian":
+      - /url: /tapdb/admin/meridian
+    - link "Metrics":
+      - /url: /tapdb/admin/metrics
+    - link "Runtime":
+      - /url: /tapdb/admin/runtime
+    - link "Backups":
+      - /url: /tapdb/admin/backups
+    - link "Sign out":
+      - /url: /auth/logout
+  - generic: johnm@lsmc.com · admin
+- main:
+  - heading "Search" [level=1]
+  - textbox "EUID, name, type, status"
+  - combobox:
+    - option "all" [selected]
+    - option "template"
+    - option "instance"
+    - option "lineage"
+  - textbox "name contains"
+  - textbox "EUID contains"
+  - textbox "category"
+  - textbox "type"
+  - textbox "subtype"
+  - button "Search"
+  - heading "Results" [level=2]
+  - table:
+    - rowgroup:
+      - row "EUID Kind Name Type Status":
+        - columnheader "EUID"
+        - columnheader "Kind"
+        - columnheader "Name"
+        - columnheader "Type"
+        - columnheader "Status"
+    - rowgroup:
+      - row "M-DGX-9RSF instance s3://beta-runs/M-BDT-9T28/e3ddd9ce_R1.fastq.gz data/artifact/generic active":
+        - cell "M-DGX-9RSF":
+          - link "M-DGX-9RSF":
+            - /url: /tapdb/object/M-DGX-9RSF
+        - cell "instance"
+        - cell "s3://beta-runs/M-BDT-9T28/e3ddd9ce_R1.fastq.gz"
+        - cell "data/artifact/generic"
+        - cell "active"
+      - row "M-DGX-9RTD instance artifact.register:M-BDT-9T28:fastq:s3://beta-runs/M-BDT-9T28/e3ddd9ce_R1.fastq.gz system/idempotency_request/generic active":
+        - cell "M-DGX-9RTD":
+          - link "M-DGX-9RTD":
+            - /url: /tapdb/object/M-DGX-9RTD
+        - cell "instance"
+        - cell "artifact.register:M-BDT-9T28:fastq:s3://beta-runs/M-BDT-9T28/e3ddd9ce_R1.fastq.gz"
+        - cell "system/idempotency_request/generic"
+        - cell "active"
+      - row "M-DGX-9RVB instance s3://beta-runs/M-BDT-9T28/e3ddd9ce_R2.fastq.gz data/artifact/generic active":
+        - cell "M-DGX-9RVB":
+          - link "M-DGX-9RVB":
+            - /url: /tapdb/object/M-DGX-9RVB
+        - cell "instance"
+        - cell "s3://beta-runs/M-BDT-9T28/e3ddd9ce_R2.fastq.gz"
+        - cell "data/artifact/generic"
+        - cell "active"
+      - row "M-DGX-9RW9 instance artifact.register:M-BDT-9T28:fastq:s3://beta-runs/M-BDT-9T28/e3ddd9ce_R2.fastq.gz system/idempotency_request/generic active":
+        - cell "M-DGX-9RW9":
+          - link "M-DGX-9RW9":
+            - /url: /tapdb/object/M-DGX-9RW9
+        - cell "instance"
+        - cell "artifact.register:M-BDT-9T28:fastq:s3://beta-runs/M-BDT-9T28/e3ddd9ce_R2.fastq.gz"
+        - cell "system/idempotency_request/generic"
+        - cell "active"
+      - row "M-DGX-9RX7 instance s3://lsmc-dewey-0/functional-tests/20260520T122523Z-35b80e/variants.vcf.gz data/artifact/generic active":
+        - cell "M-DGX-9RX7":
+          - link "M-DGX-9RX7":
+            - /url: /tapdb/object/M-DGX-9RX7
+        - cell "instance"
+        - cell "s3://lsmc-dewey-0/functional-tests/20260520T122523Z-35b80e/variants.vcf.gz"
+        - cell "data/artifact/generic"
+        - cell "active"
+      - row "M-DGX-9RY5 instance artifact.register:20260520T122523Z-35b80e:dewey-variant system/idempotency_request/generic active":
+        - cell "M-DGX-9RY5":
+          - link "M-DGX-9RY5":
+            - /url: /tapdb/object/M-DGX-9RY5
+        - cell "instance"
+        - cell "artifact.register:20260520T122523Z-35b80e:dewey-variant"
+        - cell "system/idempotency_request/generic"
+        - cell "active"
+      - row "M-DGX-9RZ3 instance s3://beta-runs/M-BDT-9TQX/fb9a82af_R1.fastq.gz data/artifact/generic active":
+        - cell "M-DGX-9RZ3":
+          - link "M-DGX-9RZ3":
+            - /url: /tapdb/object/M-DGX-9RZ3
+        - cell "instance"
+        - cell "s3://beta-runs/M-BDT-9TQX/fb9a82af_R1.fastq.gz"
+        - cell "data/artifact/generic"
+        - cell "active"
+      - row "M-DGX-9S01 instance artifact.register:M-BDT-9TQX:fastq:s3://beta-runs/M-BDT-9TQX/fb9a82af_R1.fastq.gz system/idempotency_request/generic active":
+        - cell "M-DGX-9S01":
+          - link "M-DGX-9S01":
+            - /url: /tapdb/object/M-DGX-9S01
+        - cell "instance"
+        - cell "artifact.register:M-BDT-9TQX:fastq:s3://beta-runs/M-BDT-9TQX/fb9a82af_R1.fastq.gz"
+        - cell "system/idempotency_request/generic"
+        - cell "active"
+      - row "M-DGX-9S1Z instance s3://beta-runs/M-BDT-9TQX/fb9a82af_R2.fastq.gz data/artifact/generic active":
+        - cell "M-DGX-9S1Z":
+          - link "M-DGX-9S1Z":
+            - /url: /tapdb/object/M-DGX-9S1Z
+        - cell "instance"
+        - cell "s3://beta-runs/M-BDT-9TQX/fb9a82af_R2.fastq.gz"
+        - cell "data/artifact/generic"
+        - cell "active"
+      - row "M-DGX-9S2X instance artifact.register:M-BDT-9TQX:fastq:s3://beta-runs/M-BDT-9TQX/fb9a82af_R2.fastq.gz system/idempotency_request/generic active":
+        - cell "M-DGX-9S2X":
+          - link "M-DGX-9S2X":
+            - /url: /tapdb/object/M-DGX-9S2X
+        - cell "instance"
+        - cell "artifact.register:M-BDT-9TQX:fastq:s3://beta-runs/M-BDT-9TQX/fb9a82af_R2.fastq.gz"
+        - cell "system/idempotency_request/generic"
+        - cell "active"
+      - row "M-DGX-9S3V instance s3://lsmc-dewey-0/functional-tests/20260520T181129Z-10c6c2/variants.vcf.gz data/artifact/generic active":
+        - cell "M-DGX-9S3V":
+          - link "M-DGX-9S3V":
+            - /url: /tapdb/object/M-DGX-9S3V
+        - cell "instance"
+        - cell "s3://lsmc-dewey-0/functional-tests/20260520T181129Z-10c6c2/variants.vcf.gz"
+        - cell "data/artifact/generic"
+        - cell "active"
+      - row "M-DGX-9S4S instance artifact.register:20260520T181129Z-10c6c2:dewey-variant system/idempotency_request/generic active":
+        - cell "M-DGX-9S4S":
+          - link "M-DGX-9S4S":
+            - /url: /tapdb/object/M-DGX-9S4S
+        - cell "instance"
+        - cell "artifact.register:20260520T181129Z-10c6c2:dewey-variant"
+        - cell "system/idempotency_request/generic"
+        - cell "active"
+      - row "M-DGX-9S5Q instance hg003_hybrid_calls.tgz data/artifact/generic active":
+        - cell "M-DGX-9S5Q":
+          - link "M-DGX-9S5Q":
+            - /url: /tapdb/object/M-DGX-9S5Q
+        - cell "instance"
+        - cell "hg003_hybrid_calls.tgz"
+        - cell "data/artifact/generic"
+        - cell "active"
+      - row "M-DGX-9S6N instance artifact.register:dayoa-hg003-hybrid-calls-tgz-goodole3-20260528 system/idempotency_request/generic active":
+        - cell "M-DGX-9S6N":
+          - link "M-DGX-9S6N":
+            - /url: /tapdb/object/M-DGX-9S6N
+        - cell "instance"
+        - cell "artifact.register:dayoa-hg003-hybrid-calls-tgz-goodole3-20260528"
+        - cell "system/idempotency_request/generic"
+        - cell "active"
+      - row "M-DGX-9S7K instance 20260514_LH01106_0008_A23TVNWLT4 data/artifact/generic active":
+        - cell "M-DGX-9S7K":
+          - link "M-DGX-9S7K":
+            - /url: /tapdb/object/M-DGX-9S7K
+        - cell "instance"
+        - cell "20260514_LH01106_0008_A23TVNWLT4"
+        - cell "data/artifact/generic"
+        - cell "active"
+      - row "M-DGX-9S8H instance artifact.register:owy-c9be805bc5b7b04cfcce6b5fc68db2e2 system/idempotency_request/generic active":
+        - cell "M-DGX-9S8H":
+          - link "M-DGX-9S8H":
+            - /url: /tapdb/object/M-DGX-9S8H
+        - cell "instance"
+        - cell "artifact.register:owy-c9be805bc5b7b04cfcce6b5fc68db2e2"
+        - cell "system/idempotency_request/generic"
+        - cell "active"
+      - row "M-DGX-9S9F instance bloom:sequencing_run:M-BRM-31 integration/external_object/generic active":
+        - cell "M-DGX-9S9F":
+          - link "M-DGX-9S9F":
+            - /url: /tapdb/object/M-DGX-9S9F
+        - cell "instance"
+        - cell "bloom:sequencing_run:M-BRM-31"
+        - cell "integration/external_object/generic"
+        - cell "active"
+      - row "M-DGX-9SAD instance external_object.create:owy-dewey-bloom-object-e1d42857b90a309a02433441 system/idempotency_request/generic active":
+        - cell "M-DGX-9SAD":
+          - link "M-DGX-9SAD":
+            - /url: /tapdb/object/M-DGX-9SAD
+        - cell "instance"
+        - cell "external_object.create:owy-dewey-bloom-object-e1d42857b90a309a02433441"
+        - cell "system/idempotency_request/generic"
+        - cell "active"
+      - row "M-DGX-9SBB instance artifact:M-DGX-9S7K:M-DGX-9S9F:bloom_sequencing_run integration/external_object_relation/generic active":
+        - cell "M-DGX-9SBB":
+          - link "M-DGX-9SBB":
+            - /url: /tapdb/object/M-DGX-9SBB
+        - cell "instance"
+        - cell "artifact:M-DGX-9S7K:M-DGX-9S9F:bloom_sequencing_run"
+        - cell "integration/external_object_relation/generic"
+        - cell "active"
+      - row "M-DGX-9SC9 instance external_object_relation.attach:owy-dewey-bloom-relation-df14a4a37b7f9930f4e712da system/idempotency_request/generic active":
+        - cell "M-DGX-9SC9":
+          - link "M-DGX-9SC9":
+            - /url: /tapdb/object/M-DGX-9SC9
+        - cell "instance"
+        - cell "external_object_relation.attach:owy-dewey-bloom-relation-df14a4a37b7f9930f4e712da"
+        - cell "system/idempotency_request/generic"
+        - cell "active"
+      - row "M-DGX-9SD7 instance 20260520_LH01121_0001_A23WW7FLT4 data/artifact/generic active":
+        - cell "M-DGX-9SD7":
+          - link "M-DGX-9SD7":
+            - /url: /tapdb/object/M-DGX-9SD7
+        - cell "instance"
+        - cell "20260520_LH01121_0001_A23WW7FLT4"
+        - cell "data/artifact/generic"
+        - cell "active"
+      - row "M-DGX-9SE5 instance artifact.register:owy-1fe85067a9d367889340e284817eafd8 system/idempotency_request/generic active":
+        - cell "M-DGX-9SE5":
+          - link "M-DGX-9SE5":
+            - /url: /tapdb/object/M-DGX-9SE5
+        - cell "instance"
+        - cell "artifact.register:owy-1fe85067a9d367889340e284817eafd8"
+        - cell "system/idempotency_request/generic"
+        - cell "active"
+      - row "M-DGX-9SF3 instance bloom:sequencing_run:M-BRM-4Z integration/external_object/generic active":
+        - cell "M-DGX-9SF3":
+          - link "M-DGX-9SF3":
+            - /url: /tapdb/object/M-DGX-9SF3
+        - cell "instance"
+        - cell "bloom:sequencing_run:M-BRM-4Z"
+        - cell "integration/external_object/generic"
+        - cell "active"
+      - row "M-DGX-9SG0 instance external_object.create:owy-dewey-bloom-object-43a8e53f0600ec9430b8ef0b system/idempotency_request/generic active":
+        - cell "M-DGX-9SG0":
+          - link "M-DGX-9SG0":
+            - /url: /tapdb/object/M-DGX-9SG0
+        - cell "instance"
+        - cell "external_object.create:owy-dewey-bloom-object-43a8e53f0600ec9430b8ef0b"
+        - cell "system/idempotency_request/generic"
+        - cell "active"
+      - row "M-DGX-9SHY instance artifact:M-DGX-9SD7:M-DGX-9SF3:bloom_sequencing_run integration/external_object_relation/generic active":
+        - cell "M-DGX-9SHY":
+          - link "M-DGX-9SHY":
+            - /url: /tapdb/object/M-DGX-9SHY
+        - cell "instance"
+        - cell "artifact:M-DGX-9SD7:M-DGX-9SF3:bloom_sequencing_run"
+        - cell "integration/external_object_relation/generic"
+        - cell "active"
+  - paragraph:
+    - link "Next page":
+      - /url: /tapdb/search?record_type=all&limit=25&cursor=eyJraW5kIjoiaW5zdGFuY2UiLCJ1aWQiOjM0fQ
+- contentinfo: TapDB 10.1.1rc1
+- text: Theme
+- combobox "Theme":
+  - option "original" [selected]
+  - option "light"
+  - option "dark"
+  - option "CBF"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

@@ -1,0 +1,7 @@
+{
+  "deletion_policy_sha256": "dcf5421c626b41df900db5f0bb40d0007f52d654956dc6562107ed863114f8f4",
+  "running_container_policy_matches_release": true,
+  "public_registry_js_sha256": "7f4b1124910f0330a3335966b36efaab55f48bde7c7df9524d981fa297c5377d",
+  "public_registry_js_matches_release": true,
+  "verification": "Read-only file/source identity observation; no destructive requests or test campaign."
+}

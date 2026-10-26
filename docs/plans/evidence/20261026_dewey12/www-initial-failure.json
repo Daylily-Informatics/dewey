@@ -1,0 +1,21 @@
+{
+  "observed_at": "2026-10-26T04:42:10.880446+00:00",
+  "context_euid": "M-DGX-14EGF",
+  "context_origin": "https://pv-c2d6df7aa345f798784163bd2f83f60a.dewey-content.day.lsmc.bio",
+  "native_status": "pending",
+  "expires_at": "2026-10-26T04:49:26.874578+00:00",
+  "created_at": "2026-10-26T04:34:26.909167Z",
+  "challenge_issued": false,
+  "handoff_issued": false,
+  "relationships": [
+    "has_report_context",
+    "has_storage_operation",
+    "preview_target"
+  ],
+  "http_status": 400,
+  "detail": "Dewey writes require a verified actor or explicit attribution envelope",
+  "deployed_version": "12.0.3",
+  "root_cause": "challenge entered a mutating TapDB transaction before restoring the current verified binding principal",
+  "additional_static_finding": "no-referrer wrapper would send Origin:null for the cross-origin POST handoff; wrapper-only strict-origin is required",
+  "native_state_mutated_by_diagnosis": false
+}

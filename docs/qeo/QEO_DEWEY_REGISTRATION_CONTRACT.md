@@ -18,7 +18,7 @@ Existing read surfaces remain:
 - `GET /api/v1/artifact-sets/{artifact_set_euid}`
 - `GET /api/v1/artifacts/{artifact_euid}`
 
-No `/api/v1/qeo/ingest-ready` route is added. QEO handoff is the registration receipt plus transactional outbox event.
+The MultiQC route registers a package of existing Dewey file artifacts through the same service as `dewey qeo package-register`. It does not fetch workflow files or dispatch QEO ingestion. The existing dedicated-credential `POST /api/v1/resolve/multiqc` resolves authoritative package membership for QEO.
 
 ## Idempotency
 
@@ -30,7 +30,7 @@ Dewey computes a deterministic `idempotency_key` from canonical JSON for the val
 
 ## Manifest Hash
 
-`manifest_sha256` is the canonical SHA-256 of the validated request with `manifest_sha256` omitted. Dewey rejects a mismatch before any mutation.
+For the analysis artifact-set request, `manifest_sha256` is the canonical SHA-256 of the validated request with `manifest_sha256` omitted. Dewey rejects a mismatch before any mutation.
 
 Use `dewey_service.registration_contracts.manifest_sha256_for_request` when constructing producer tests or clients in this repo.
 
@@ -93,31 +93,34 @@ Dewey records the prefix pointer and never expands descendants.
 
 Dewey creates `artifact_set_type == "analysis_artifact_set"` and member lineage from the set to each registered artifact. If `parent_analysis_artifact_set_euid` or `rerun_of` is supplied, the referenced artifact set must exist.
 
-## MultiQC Artifact Set
+## MultiQC Existing-Artifact Package
 
-`MultiQCArtifactSetRegistrationRequest` fields:
+`POST /api/v1/artifact-sets/multiqc/register` accepts `PackageRegistration`:
 
-- `schema_version`
-- `analysis_euid`
-- `report_kind`
-- `multiqc_version`
-- `html_artifact`
-- `data_dir_artifact`
-- `key_files`
-- `parser_relevant_files`
-- `generated_at`
-- `manifest_sha256`
-- `metadata`
-- `local_only`
-- `parser_family_hint`
+- `contract`: `dewey.multiqc-package/v1`
+- `complete_data_package`: `true`
+- `label`: explicit package label
+- `files`: `{artifact_euid, role, relative_path, sha256, size_bytes}` for each existing Dewey file artifact
 
-`html_artifact.artifact_role` must be `multiqc_html`. `data_dir_artifact.artifact_role` must be `directory`.
+Exactly one report plus either one complete archive or all data files is required. The request never creates or discovers file artifacts. Roles are `report`, `data`, or `archive`. Paths and artifact identities must be unique; each registered SHA256 and byte count must equal the supplied values. Zero bytes are valid. An unknown stored size/checksum does not establish equality.
 
-Dewey creates `artifact_set_type == "multiqc_artifact_set"`.
+API and CLI sort members by relative path and derive `qeo.package.register:<sha256(canonical request JSON)>`. A supplied key must match. Transactional key serialization protects canonical replay and package creation. Dewey creates `artifact_set_type=qeo_multiqc_package` with native `artifact_set_member` lineage.
+
+Registration and `POST /api/v1/resolve/multiqc` return `{contract,artifact_set_euid,complete_data_package,label,files}`. Each returned member preserves `{artifact_euid,role,relative_path,sha256,size_bytes,url,version_id}`. `url` is its exact registered S3 object URI. `version_id` is the registered exact version string or null when absent; resolution does not look up a newer S3 version. A report reference must resolve through its unique persisted package membership; ambiguous matches fail.
+
+The QEO consumer supporting `files[].version_id` must be deployed before this resolver response is deployed. Complete MultiQC artifact collection and Dewey registration are independent of the optional onward QEO ingestion flag.
+
+## Native Ursa Analysis Results
+
+The existing `POST /api/v1/analysis-results/register` requires new requests to include `metadata.registration_contract=analysis_results.v1`, the complete `artifact_manifest_rows` including exclusions, explicit `entity_owner_systems`, and exact `artifact_lineage` entries `{path,entity_type,entity_euid,relationship,source}`. Requested file artifacts must equal all and only importable rows and lie at their exact paths under `result_root_uri`. Sample/library projections must reconcile with the full plural typed associations.
+
+Dewey persists prefix/file hierarchy and typed external-reference lineage to the owning Ursa execution and declared biological entities. Intermediate prefix records remain outside the exact API receipt/result-set member list: the returned manifest and receipt cover the root and requested files only. No reference implies scientific or customer acceptance.
+
+Completed canonical registrations replay their historical response before new contract checks or storage HEAD. New registrations serialize their deterministic request key, verify exact supplied S3 versions and byte counts, and retain the observed version. Missing object size fails; zero-byte objects are supported. The existing current-principal authorization on stored receipts remains in force.
 
 ## Receipt
 
-Registration returns deterministic receipt JSON:
+The analysis artifact-set and native analysis-result registrations return receipt JSON. The existing-artifact MultiQC package response is specified above.
 
 - `schema_version`
 - `request_id`
@@ -136,4 +139,4 @@ Registration returns deterministic receipt JSON:
 
 ## Immutable Semantics
 
-An existing artifact can be reused only when `storage_uri`, `sha256`, `size_bytes`, and `artifact_role` match exactly. Conflicting existing records return `409`. Dewey never rewrites an existing artifact record to satisfy a new registration manifest.
+An existing artifact can be reused only when `storage_uri`, exact `version_id`, `sha256`, `size_bytes`, and `artifact_role` match exactly for native analysis results. Conflicting existing records return `409`. Dewey never rewrites an existing artifact record to satisfy a new registration manifest.

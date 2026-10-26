@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -24,6 +25,7 @@ def _settings() -> SimpleNamespace:
         aws_region="us-west-2",
         tapdb_client_id="dewey",
         tapdb_database_name="dewey",
+        tapdb_config_path="/tmp/test-tapdb.yaml",
     )
 
 
@@ -173,6 +175,7 @@ def test_tapdb_run_invokes_runtime_and_emits_output(monkeypatch: pytest.MonkeyPa
         profile: str,
         region: str,
         namespace: str,
+        config_path: str,
         cwd: Path,
         check: bool,
     ) -> SimpleNamespace:
@@ -184,6 +187,7 @@ def test_tapdb_run_invokes_runtime_and_emits_output(monkeypatch: pytest.MonkeyPa
                 "profile": profile,
                 "region": region,
                 "namespace": namespace,
+                "config_path": config_path,
                 "cwd": cwd,
                 "check": check,
             }
@@ -212,6 +216,7 @@ def test_tapdb_run_invokes_runtime_and_emits_output(monkeypatch: pytest.MonkeyPa
             "profile": "profile-1",
             "region": "us-west-1",
             "namespace": "ns1",
+            "config_path": "/tmp/test-tapdb.yaml",
             "cwd": tapdb_cli.PROJECT_ROOT,
             "check": False,
         }
@@ -249,6 +254,7 @@ def test_tapdb_run_resolves_profile_from_config_when_flag_missing(
             "profile": "config-profile",
             "region": "us-west-2",
             "namespace": "dewey",
+            "config_path": "/tmp/test-tapdb.yaml",
             "cwd": tapdb_cli.PROJECT_ROOT,
             "check": False,
         }
@@ -389,7 +395,7 @@ def test_quality_check_runs_tests_after_clean_lint(monkeypatch: pytest.MonkeyPat
         assert check is False
         if len(calls) == 1:
             assert env is not None
-            assert env["DAYHOFF_PROJECT_ROOT"] == str(quality_cli.PROJECT_ROOT)
+            assert env.get("DAYHOFF_PROJECT_ROOT") == os.environ.get("DAYHOFF_PROJECT_ROOT")
         calls.append(cmd)
         return _proc(returncode=0 if len(calls) == 1 else 4)
 

@@ -1,0 +1,106 @@
+{
+  "status": "pass",
+  "minimum_changed_line_percent": 80,
+  "minimum_changed_branch_percent": 80,
+  "scope": "added/modified executable lines and changed-origin branches; unchanged legacy code excluded",
+  "groups": {
+    "dewey": {
+      "totals": {
+        "covered_lines": 1777,
+        "total_lines": 1846,
+        "covered_branches": 706,
+        "total_branches": 780,
+        "line_percent": 96.26218851570964,
+        "branch_percent": 90.51282051282051
+      },
+      "baseline_commit": "7f6fde5429741780517cf461a615e5b3e5f102f2",
+      "receipt": "dewey-changed-coverage.json",
+      "measured_file_count": 30
+    },
+    "dewey-ui": {
+      "totals": {
+        "covered_lines": 108,
+        "total_lines": 108,
+        "covered_branches": 186,
+        "total_branches": 211,
+        "line_percent": 100.0,
+        "branch_percent": 88.15165876777252
+      },
+      "baseline_commit": "7f6fde5429741780517cf461a615e5b3e5f102f2",
+      "receipt": "dewey-ui-changed-coverage.json",
+      "measured_file_count": 3
+    },
+    "login": {
+      "totals": {
+        "covered_lines": 476,
+        "total_lines": 491,
+        "covered_branches": 117,
+        "total_branches": 122,
+        "line_percent": 96.94501018329939,
+        "branch_percent": 95.90163934426229
+      },
+      "baseline_commit": "d3d76d9f1eb91a8e8f7ede73c37ca93b172ec258",
+      "receipt": "login-changed-coverage.json",
+      "measured_file_count": 9
+    },
+    "dayhoff": {
+      "totals": {
+        "covered_lines": 391,
+        "total_lines": 396,
+        "covered_branches": 124,
+        "total_branches": 126,
+        "line_percent": 98.73737373737374,
+        "branch_percent": 98.41269841269842
+      },
+      "baseline_commit": "0b40c85a1b9ee9f6878092bd9ab6640fe148cf2d",
+      "receipt": "dayhoff-changed-coverage.json",
+      "measured_file_count": 2
+    }
+  },
+  "execution": "One final combined changed-code selection per Python repository, each with a new coverage data file and all tests passing. JavaScript measured once in its fully passing group. Earlier diagnostic/affected runs are retained separately.",
+  "runtime_source_changes_after_initial_measurement": false,
+  "production_changes_during_expansion": false,
+  "corrected_test_failures": [
+    "Old auth dependency test omitted the now-required Request argument.",
+    "Old storage fixtures omitted existing authorization/listing/multipart/conditional-upload contracts; expectations updated to current adapter behavior.",
+    "New Login management-flow fixture omitted mandatory callback_url; corrected fixture passed.",
+    "New test sibling imports required package-qualified tests.* paths; collection rerun succeeded.",
+    "New lifecycle fixture reused one physical S3 identity for three targets; distinct reviewed fixture keys restored intended membership assertion."
+  ],
+  "unresolved_test_failures": [],
+  "javascript_tests": {
+    "passed": 43,
+    "failed": 0,
+    "skipped": 0,
+    "duration_ms": 172.701708,
+    "framework": "native node:test with shipped VM scripts; c8 12.0.0"
+  },
+  "native_postgres": "Original isolated PostgreSQL contract receipt retained; not rerun for test-only expansion.",
+  "python_tests": {
+    "dewey": {
+      "tests": 525,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "seconds": 10.29,
+      "timestamp": "2026-10-26T02:06:04.750585-04:00"
+    },
+    "login": {
+      "tests": 148,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "seconds": 8.518,
+      "timestamp": "2026-10-26T02:06:02.946173-04:00"
+    },
+    "dayhoff": {
+      "tests": 55,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "seconds": 3.152,
+      "timestamp": "2026-10-26T02:06:02.948738-04:00"
+    }
+  },
+  "total_passed": 771
+}

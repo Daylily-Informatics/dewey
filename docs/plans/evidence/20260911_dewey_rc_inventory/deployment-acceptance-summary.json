@@ -1,0 +1,219 @@
+{
+  "acceptance_object": "M-DGX-NP19",
+  "evidence": {
+    "floor_plan": {
+      "file_sha256": "dc1a375afee4d2b698fe16ea4e5ccfa5013a5fda686f63b1d275b63972be9d47",
+      "ok": null,
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/final-native/post-acceptance-exposure-plan.json",
+      "status": null
+    },
+    "floor_verify": {
+      "file_sha256": "8caed9c8e805136c5e38df6be0b35c92511fbeed8c5742907f9ba8dc14dd2151",
+      "ok": true,
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/final-native/post-acceptance-sequence-verify.stdout",
+      "status": null
+    },
+    "live_runtime": {
+      "file_sha256": "1f86bc0312814cf081c56e4d28e4b63d8a9a537e0e6cc7170fb80f721104233c",
+      "ok": null,
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/production-application-state-1f634ef66082/live-runtime-verified.json",
+      "status": "verified"
+    },
+    "metadata_verify": {
+      "file_sha256": "096f652c3fc0ccd2e1e2ab5ab4e717fee40d16be69d7a340ffef0512b45829e8",
+      "ok": true,
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/final-native/metadata-verify.stdout",
+      "status": null
+    },
+    "promotion": {
+      "file_sha256": "3b65701febf2430babe4a47f2683c6f1610b805501c803828069f381a1538746",
+      "ok": null,
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/production-promotion-1f634ef66082/promotion.json",
+      "status": "promoted"
+    },
+    "read": {
+      "file_sha256": "ea3e893de12be1c7bb8f331797d18eb43ef04da1e1a834850f11b65209c9dca5",
+      "ok": null,
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/production-application-1f634ef66082/app-read.json",
+      "status": "passed"
+    },
+    "reference_verify": {
+      "file_sha256": "c3456eea486cada7b2d21a976301abae04851bb17a671cd40bff12b965bc87b1",
+      "ok": true,
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/final-native/reference-verify.stdout",
+      "status": null
+    },
+    "replay": {
+      "file_sha256": "aa4454f7f9d5aa4be045f1b48612a68592adcb010d8f9729b4e43aa3547548a4",
+      "ok": null,
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/production-application-1f634ef66082/app-replay.json",
+      "status": "passed"
+    },
+    "runtime": {
+      "file_sha256": "b809b1f707005ceecbfb26f3b826b66df890763944343595d4c9231fca84c5ca",
+      "ok": null,
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/production-application-1f634ef66082/runtime-verified.json",
+      "status": "verified"
+    },
+    "write": {
+      "file_sha256": "1094fb207baddb6a6d022930fed72368edefe4d6ea32c14485976766b7a3d991",
+      "ok": null,
+      "path": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/production-application-1f634ef66082/app-write.json",
+      "status": "passed"
+    }
+  },
+  "generator_count": 20,
+  "generator_states": [
+    {
+      "is_called": true,
+      "last_value": 156529,
+      "name": "adt_instance_seq",
+      "next_value": 156530
+    },
+    {
+      "is_called": true,
+      "last_value": 146530,
+      "name": "audit_log_uid_seq",
+      "next_value": 146531
+    },
+    {
+      "is_called": false,
+      "last_value": 10003,
+      "name": "ay_instance_seq",
+      "next_value": 10003
+    },
+    {
+      "is_called": true,
+      "last_value": 22211,
+      "name": "dgx_instance_seq",
+      "next_value": 22212
+    },
+    {
+      "is_called": true,
+      "last_value": 11304,
+      "name": "edg_instance_seq",
+      "next_value": 11305
+    },
+    {
+      "is_called": true,
+      "last_value": 1305,
+      "name": "generic_instance_lineage_uid_seq",
+      "next_value": 1306
+    },
+    {
+      "is_called": true,
+      "last_value": 12496,
+      "name": "generic_instance_uid_seq",
+      "next_value": 12497
+    },
+    {
+      "is_called": true,
+      "last_value": 28,
+      "name": "generic_template_uid_seq",
+      "next_value": 29
+    },
+    {
+      "is_called": false,
+      "last_value": 4,
+      "name": "gse_instance_seq",
+      "next_value": 4
+    },
+    {
+      "is_called": false,
+      "last_value": 8,
+      "name": "gvr_instance_seq",
+      "next_value": 8
+    },
+    {
+      "is_called": false,
+      "last_value": 4,
+      "name": "inbox_message_uid_seq",
+      "next_value": 4
+    },
+    {
+      "is_called": false,
+      "last_value": 10003,
+      "name": "msg_instance_seq",
+      "next_value": 10003
+    },
+    {
+      "is_called": false,
+      "last_value": 4,
+      "name": "outbox_event_attempt_uid_seq",
+      "next_value": 4
+    },
+    {
+      "is_called": false,
+      "last_value": 4,
+      "name": "outbox_event_id_seq",
+      "next_value": 4
+    },
+    {
+      "is_called": false,
+      "last_value": 10003,
+      "name": "sys_instance_seq",
+      "next_value": 10003
+    },
+    {
+      "is_called": false,
+      "last_value": 10014,
+      "name": "tpx_instance_seq",
+      "next_value": 10014
+    },
+    {
+      "is_called": false,
+      "last_value": 10003,
+      "name": "wsx_instance_seq",
+      "next_value": 10003
+    },
+    {
+      "is_called": false,
+      "last_value": 10003,
+      "name": "wx_instance_seq",
+      "next_value": 10003
+    },
+    {
+      "is_called": true,
+      "last_value": 289,
+      "name": "xrf_instance_seq",
+      "next_value": 290
+    },
+    {
+      "is_called": false,
+      "last_value": 10003,
+      "name": "xx_instance_seq",
+      "next_value": 10003
+    }
+  ],
+  "promotion": {
+    "completed_at": "2026-09-11T11:07:42.066769+00:00",
+    "compose_sha256": "9f1c4c3b7b8a177943442defff7eef7ee1829e7d672f581647a40eda0f1fe22a",
+    "container_id": "8ef3589605c69072c5e6a5b89e98a4edf12ca2d85a8150c056ed06f2c8ac8e73",
+    "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:bce8846d42320467824ce9473dd2315922ea7575c92633e04ca0a159c25c613b",
+    "manifest_sha256": "6d459793eb56d1be70aed76811ca116aee863f123650ad70ee7b37a902c9db7f",
+    "siblings_unchanged": true,
+    "source_sha": "1f634ef66082eee32c788e0d8c386a20c2b8563e",
+    "status": "promoted"
+  },
+  "runtime_session": {
+    "allow_global": "false",
+    "backend_pid": 14441,
+    "config_identity": "/opt/dewey/day/releases/9.0.0/tapdb-runtime.yaml",
+    "connect": true,
+    "database": "dewey_prod_tapdb10",
+    "db_create": false,
+    "domain": "M",
+    "login": "dewey_runtime_9",
+    "owner": "dewey",
+    "rolbypassrls": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "role": "dewey_runtime_9",
+    "rolinherit": false,
+    "rolreplication": false,
+    "rolsuper": false,
+    "schema_create": false,
+    "temp": false,
+    "tenant": ""
+  }
+}

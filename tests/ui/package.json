@@ -1,0 +1,8 @@
+{
+  "name": "dewey-sharing-ui-contracts",
+  "private": true,
+  "version": "1.0.0",
+  "devDependencies": {
+    "c8": "12.0.0"
+  }
+}

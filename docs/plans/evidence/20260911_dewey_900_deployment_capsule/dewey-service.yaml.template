@@ -1,0 +1,69 @@
+image: "@@IMAGE_REFERENCE@@"
+user: "0:0"
+restart: unless-stopped
+network_mode: host
+environment: {}
+extra_hosts:
+  - login.day.lsmc.bio:127.0.0.1
+  - atlas.day.lsmc.bio:127.0.0.1
+  - bloom.day.lsmc.bio:127.0.0.1
+  - ursa.day.lsmc.bio:127.0.0.1
+  - dewey.day.lsmc.bio:127.0.0.1
+  - qeo.day.lsmc.bio:127.0.0.1
+  - zebra-day.day.lsmc.bio:127.0.0.1
+  - kahlo.day.lsmc.bio:127.0.0.1
+volumes:
+  - type: bind
+    source: /opt/dewey/day/releases/9.0.0/dewey-config.yaml
+    target: /opt/dewey/day/releases/9.0.0/dewey-config.yaml
+    read_only: true
+    bind:
+      create_host_path: false
+  - type: bind
+    source: /opt/dewey/day/releases/9.0.0/tapdb-runtime.yaml
+    target: /opt/dewey/day/releases/9.0.0/tapdb-runtime.yaml
+    read_only: true
+    bind:
+      create_host_path: false
+  - type: bind
+    source: /home/ubuntu/.aws
+    target: /home/ubuntu/.aws
+    read_only: true
+    bind:
+      create_host_path: false
+  - type: bind
+    source: /home/ubuntu/.config/tapdb/rds-ca-bundle.pem
+    target: /home/ubuntu/.config/tapdb/rds-ca-bundle.pem
+    read_only: true
+    bind:
+      create_host_path: false
+  - type: bind
+    source: /home/ubuntu/.config/dewey-day/cloudfront-private-key.pem
+    target: /home/ubuntu/.config/dewey-day/cloudfront-private-key.pem
+    read_only: true
+    bind:
+      create_host_path: false
+  - type: bind
+    source: /opt/dayhoff/deployments/day/state/kahlo/ai-agent-grants.json
+    target: /opt/dayhoff/deployments/day/state/kahlo/ai-agent-grants.json
+    read_only: true
+    bind:
+      create_host_path: false
+  - type: bind
+    source: /opt/dayhoff/deployments/day/tapdb-registry/domain_code_registry.json
+    target: /opt/dayhoff/deployments/day/tapdb-registry/domain_code_registry.json
+    read_only: true
+    bind:
+      create_host_path: false
+  - type: bind
+    source: /opt/dayhoff/deployments/day/tapdb-registry/prefix_ownership_registry.json
+    target: /opt/dayhoff/deployments/day/tapdb-registry/prefix_ownership_registry.json
+    read_only: true
+    bind:
+      create_host_path: false
+  - type: bind
+    source: "@@STATE_DIRECTORY@@"
+    target: /run/dewey-production-state
+    read_only: false
+    bind:
+      create_host_path: false

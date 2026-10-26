@@ -1,0 +1,6 @@
+{
+  "before_sha256": "0f642821a272e2326563ba8ad08f5a0a64b970000f9888e4b5e14105e95baeea",
+  "after_sha256": "5470c88942a8a758da177bcb5b58bce7b7ef97aeee28f0b23fb4e1cc02fcafeb",
+  "all_manifest_digests_match_runtime": true,
+  "image_count": 8
+}

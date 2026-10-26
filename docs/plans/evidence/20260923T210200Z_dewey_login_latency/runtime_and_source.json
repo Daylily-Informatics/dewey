@@ -1,0 +1,54 @@
+{
+  "observed_at": "2026-09-23T21:07:25Z",
+  "deployment": {
+    "service": "dewey",
+    "version": "10.0.7",
+    "commit": "8d04719a6ad82a6808bf38933b39cadb210b43d0",
+    "image": "sha256:50ef1ba6922be663e7c88839849b4a1649590ae8674c819dc8862e695055b7ac",
+    "container": "dayhoff-day-dewey-1",
+    "instance": "i-07df3a933e4839f52",
+    "region": "us-west-2",
+    "restart_count": 0,
+    "oom_killed": false
+  },
+  "resource_snapshot": {
+    "at": "2026-09-23T21:00:56Z",
+    "load_average": [
+      0.23,
+      0.65,
+      0.93
+    ],
+    "memory_total_MiB": 31719,
+    "memory_available_MiB": 23015,
+    "disk_root_used_percent": 94,
+    "disk_root_available_GiB": 63,
+    "dewey_cpu_percent": 0.17,
+    "dewey_memory_MiB": 267.3
+  },
+  "source_sha256": {
+    "dewey_service/app.py": "c586b0c7c10b81af7f76e7eaa98dd4477c3012f63e09f373bdcc874888cfec0f",
+    "dewey_service/services/registry_storage.py": "5b133fac12de521eb4fd06391c46945b5e0f5569a143865fce9c5a2d779aa1e2",
+    "dewey_service/registry_access.py": "a314d0aa832b795859a142da80c1f66a5de5370a1ca7472da3b815e6a5bb543b",
+    "dewey_service/services/registry.py": "795cdeca730245c710f30e1fb604410fecf633ca8e5a8ac67b92984fe67f98a5",
+    "dewey_service/tapdb_backend.py": "05961dadf44f4b370a01f1d693dff8db9534ba7d78784e82b91a4634de549685",
+    "dewey_service/cli/server.py": "0c71b2710ca92be99ce08c78d120fcc41c8694b56eb84d1ec6e1109cd39810b1"
+  },
+  "source_verified": "Six live-container file hashes equal local source; git diff 10.0.7 HEAD -- dewey_service is empty.",
+  "boundaries": {
+    "production_mutation": false,
+    "tests": false,
+    "load_test": false,
+    "build": false,
+    "restart": false,
+    "release": false,
+    "deployment": false,
+    "secrets_recorded": false,
+    "real_user_credentials_entered": false
+  },
+  "limitations": [
+    "Two client labels are not attributed to human identities or roles.",
+    "No query-plan profiling or reproduction with a human browser session was performed.",
+    "Database-session rollups include Python work inside the session, not exclusively SQL execution.",
+    "Root disk is 94 percent used, but no evidence links disk capacity to this incident."
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "observed_at": "2026-10-04T05:35:59.859588+00:00",
+  "tag": "11.0.2",
+  "container_id": "7a34c472d7e6e0d6c000f977d3e06513660510963869e2dca11bb1d03d6089c2",
+  "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:df7bca9ea7cf9e999a24d4d8e8f1369182104d989fc20c25b3cc4209ecb31499",
+  "running": true,
+  "started_at": "2026-10-04T05:34:06.870299783Z",
+  "restart_count": 0,
+  "runtime_env": {
+    "HOST": "127.0.0.1",
+    "PORT": "8914",
+    "DEWEY_HOST": "127.0.0.1",
+    "DEWEY_BUILD_SHA": "3f782eebc6e43ded3fa655c3fcdc1c2c616bcd89",
+    "LSMC_RELEASE_SHA": "3f782eebc6e43ded3fa655c3fcdc1c2c616bcd89",
+    "DEWEY_BUILD_BRANCH": "codex/dewey-tapdb-globaldag-20260926"
+  },
+  "installed_proxy_and_dns_match_reviewed": {
+    "/etc/apache2/sites-available/dewey-day.conf": true,
+    "/etc/apache2/sites-available/dewey-content-day.conf": true,
+    "/etc/dnsmasq.d/dayhoff-day-lsmc-bio.conf": true
+  },
+  "listener": [
+    "LISTEN 0      2048                              127.0.0.1:8914       0.0.0.0:*    users:((\"python\",pid=4188580,fd=12))"
+  ],
+  "services": {
+    "apache2": "active",
+    "dayhoff-day-lsmc-bio-dnsmasq": "active",
+    "certbot.timer": "active"
+  },
+  "existing_certificate_deploy_hook": "/etc/letsencrypt/renewal-hooks/deploy/reload-apache.sh",
+  "reload_hook_command": "#!/bin/bash\nsystemctl reload apache2",
+  "final_roll_seconds": 4.237324,
+  "user_acceptance": "pending"
+}

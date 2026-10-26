@@ -1,0 +1,87 @@
+- banner:
+  - link "Dewey / TapDB":
+    - /url: /tapdb/
+  - navigation:
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Admin":
+      - /url: /admin
+    - link "Overview":
+      - /url: /tapdb/admin/overview
+    - link "Search":
+      - /url: /tapdb/search
+    - link "Graph":
+      - /url: /tapdb/graph
+    - link "Templates":
+      - /url: /tapdb/templates
+    - link "Audit":
+      - /url: /tapdb/audit
+    - link "Help":
+      - /url: /tapdb/help
+    - link "Readiness":
+      - /url: /tapdb/admin/readiness
+    - link "Inventory":
+      - /url: /tapdb/admin/inventory
+    - link "Meridian":
+      - /url: /tapdb/admin/meridian
+    - link "Metrics":
+      - /url: /tapdb/admin/metrics
+    - link "Runtime":
+      - /url: /tapdb/admin/runtime
+    - link "Backups":
+      - /url: /tapdb/admin/backups
+    - link "Sign out":
+      - /url: /auth/logout
+  - generic: johnm@lsmc.com · admin
+- main:
+  - heading "Backups" [level=1]
+  - paragraph:
+    - strong: "Target:"
+    - text: dewey/dewey-day/tapdb_dewey_lsmcok1_local@dewey_prod_tapdb10
+  - strong: "Status: never_run"
+  - text: No successful backup has ever been recorded for this target.
+  - paragraph:
+    - text: No cadence is configured, so this target is never reported as stale. Set
+    - code: backup.expected_interval_hours
+    - text: to enable staleness reporting.
+  - heading "Create a backup" [level=2]
+  - paragraph: Reads the database only; nothing is modified.
+  - text: Class
+  - combobox "Class":
+    - option "full (logical dump)" [selected]
+    - option "template-pack (definitions only)"
+  - text: Note
+  - textbox "Note":
+    - /placeholder: optional
+  - checkbox "Acknowledge measured schema drift (requires a verified source contract)"
+  - text: Acknowledge measured schema drift (requires a verified source contract)
+  - text: Reviewed source-contract JSON (required for historical or drifted schemas)
+  - textbox "Reviewed source-contract JSON (required for historical or drifted schemas)"
+  - text: Sealed recovery-family JSON (for recovery across replacements)
+  - textbox "Sealed recovery-family JSON (for recovery across replacements)"
+  - paragraph: A database backup does not include service configuration, runtime files, credentials or principal artifacts.
+  - button "Create backup"
+  - heading "Backups (0)" [level=2]
+  - paragraph: "Storage: file:///opt/dewey/day/releases/9.0.0/backups"
+  - paragraph: No backups have been taken for this target.
+  - heading "Recent activity" [level=2]
+  - paragraph: No lifecycle operations have been recorded.
+- contentinfo: TapDB 10.1.1rc1
+- text: Theme
+- combobox "Theme":
+  - option "original" [selected]
+  - option "light"
+  - option "dark"
+  - option "CBF"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

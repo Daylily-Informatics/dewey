@@ -1,0 +1,9 @@
+{
+  "container": "132a4e648ac6b674468981bcf75ac713c0bf76fc51e4553f5c17b8933ffa9c18",
+  "running": true,
+  "restarts": 0,
+  "source_tag": "11.0.3",
+  "source_commit": "eba14993e342386641803fa99b58ce63cf51e5a1",
+  "image_digest": "sha256:5605870c2bf4cbafa89049ef08997ea50b73ca1cc557fff2255ad0752af126fb",
+  "observed_via": "Interactive ubuntu Docker inspect and public readyz readback"
+}

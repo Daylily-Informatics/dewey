@@ -1,0 +1,13 @@
+{
+  "completed_at": "2026-09-11T09:13:09.109925+00:00",
+  "container": "dewey-tapdb10-rehearsal-c6406b8ffb40",
+  "container_id": "039f7ac3d6a3f3ccc289b7a379b1370df2b4b1339a37b3ff66e5b5ea333a666d",
+  "exit_code": 0,
+  "finished_at": "2026-09-11T09:13:08.994562299Z",
+  "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:cdf64e75f23c2ee6cd9327e3a52432000b7aa08073f02b9237e125f5df9f54c1",
+  "oom_killed": false,
+  "operation": "stop_isolated_rehearsal_writer_before_reviewed_metadata_conversion",
+  "original_container_id": "872434f0530335fd5a985a920f498fe39a36fd5eab40b9cb3934b185ceddeb36",
+  "original_container_running": false,
+  "started_at": "2026-09-11T08:42:27.856317219Z"
+}

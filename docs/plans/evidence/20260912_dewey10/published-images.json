@@ -1,0 +1,30 @@
+{
+  "repository": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey",
+  "images": [
+    {
+      "tag": "10.0.0",
+      "commit": "a69da97d8eafd78734815d7dc73a5daa2c793c3c",
+      "digest": "sha256:e5a54e5452d2303490f936371377cd1bfeabf501e9b1e75754bb912f8cc53e38",
+      "pushed_at": "2026-09-12T09:32:45.036000+00:00",
+      "promoted": false
+    },
+    {
+      "tag": "10.0.1",
+      "commit": "afe13e1b466ca6a0f625c4401790299f9322d7d1",
+      "digest": "sha256:287ad87fb21f6c3eaea5ae56bddeb1f4b39d2b4299d085acb4449250f2a5b672",
+      "pushed_at": "2026-09-12T09:40:19.574000+00:00",
+      "promoted": false
+    },
+    {
+      "tag": "10.0.2",
+      "commit": "8be9d0429360ee6d750a0363af08b3a4c35e3091",
+      "digest": "sha256:7256217d7c7a1dc71658eb7f82caf85ea8dff627d8471a96a64fdac7f1c6e047",
+      "pushed_at": "2026-09-12T09:44:59.625000+00:00",
+      "promotion_status": "promoted",
+      "promoted": true
+    }
+  ],
+  "tests_run": false,
+  "production_host": "i-07df3a933e4839f52",
+  "build_receipt_root": "/home/ubuntu/dewey_ops/registry10-20260912"
+}

@@ -1,0 +1,82 @@
+- banner:
+  - link "Dewey / TapDB":
+    - /url: /tapdb/
+  - navigation:
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Admin":
+      - /url: /admin
+    - link "Overview":
+      - /url: /tapdb/admin/overview
+    - link "Search":
+      - /url: /tapdb/search
+    - link "Graph":
+      - /url: /tapdb/graph
+    - link "Templates":
+      - /url: /tapdb/templates
+    - link "Audit":
+      - /url: /tapdb/audit
+    - link "Help":
+      - /url: /tapdb/help
+    - link "Readiness":
+      - /url: /tapdb/admin/readiness
+    - link "Inventory":
+      - /url: /tapdb/admin/inventory
+    - link "Meridian":
+      - /url: /tapdb/admin/meridian
+    - link "Metrics":
+      - /url: /tapdb/admin/metrics
+    - link "Runtime":
+      - /url: /tapdb/admin/runtime
+    - link "Backups":
+      - /url: /tapdb/admin/backups
+    - link "Sign out":
+      - /url: /auth/logout
+  - generic: johnm@lsmc.com · admin
+- main:
+  - heading "Create Instance" [level=1]
+  - table:
+    - rowgroup:
+      - row "Template M-DGX-1A · Dewey Artifact":
+        - rowheader "Template"
+        - cell "M-DGX-1A · Dewey Artifact":
+          - link "M-DGX-1A":
+            - /url: /tapdb/object/M-DGX-1A
+          - text: · Dewey Artifact
+      - row "Code data/artifact/generic/1.0/":
+        - rowheader "Code"
+        - cell "data/artifact/generic/1.0/"
+  - text: Name
+  - textbox "Name"
+  - text: Create children
+  - checkbox "Create children" [checked]
+  - text: Properties JSON
+  - generic: Instance properties JSON
+  - 'button "Properties JSON Instance properties JSON Compact JSON data, remove all whitespaces (Ctrl+Shift+I) Sort contents Filter, sort, or transform contents Repair JSON: fix quotes and escape characters, remove comments and JSONP notation, turn JavaScript objects into JSON. Text ▾ {} Ln:1Col:1"'
+  - button "Compact JSON data, remove all whitespaces (Ctrl+Shift+I)"
+  - button "Sort contents"
+  - button "Filter, sort, or transform contents"
+  - 'button "Repair JSON: fix quotes and escape characters, remove comments and JSONP notation, turn JavaScript objects into JSON."'
+  - button "Text ▾"
+  - textbox: "{}"
+  - generic: Ln:1Col:1
+  - button "Create"
+- contentinfo: TapDB 10.1.1rc1
+- text: Theme
+- combobox "Theme":
+  - option "original" [selected]
+  - option "light"
+  - option "dark"
+  - option "CBF"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

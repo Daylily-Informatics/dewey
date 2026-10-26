@@ -69,7 +69,7 @@ def test_analysis_registration_route_requires_bearer(test_settings, service, sto
     request = _request(artifact)
     app = create_app(settings=test_settings, service=service)
 
-    with TestClient(app, base_url="https://localhost:8914") as client:
+    with TestClient(app, base_url=test_settings.share_application_origin) as client:
         unauthenticated = client.post(
             "/api/v1/artifact-sets/analysis/register",
             json=request.model_dump(mode="json"),

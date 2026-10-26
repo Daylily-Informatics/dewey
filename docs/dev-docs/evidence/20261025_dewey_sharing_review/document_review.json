@@ -1,0 +1,25 @@
+{
+  "observed_at": "2026-10-25T21:45:38.386517+00:00",
+  "published_documents_commit_verified": "d43fb90e573fcb61480004cd91bb0fb793d648a6",
+  "branch": "codex/dewey-sharing-review-20261025",
+  "live_source_tag": "11.0.10",
+  "live_source_sha": "7f6fde5429741780517cf461a615e5b3e5f102f2",
+  "requirements": 20,
+  "gap_mappings": 20,
+  "local_link_and_source_path_issues": [],
+  "application_tests_run": false,
+  "build_or_deployment_performed": false,
+  "github_actions_branch_runs_observed": 0,
+  "ci_skip_policy": "Every documentation commit includes [skip ci].",
+  "documents_sha256": {
+    "README.md": "3ed965d0c4d7a7b7ff9812d185215322741bac0b68eae2b906bdf78c8b8b2197",
+    "docs/dev-docs/20261025_dewey_capabilities.md": "63c90ff7288953ab781ba164d9ca61134423350a290208a13d420fd071d21076",
+    "docs/dev-docs/20261025_dewey_sharing_gap_analysis.md": "90323e32508de926ef97dbe485ecbb9da6be966c8a7e14c02919b33c0e843721",
+    "docs/dev-docs/20261025_dewey_sharing_requirements.md": "7cdbf07c786f25b4feba2f6553ff93eaaafc379023a90bd932e4fc7aa2934665"
+  },
+  "limits": [
+    "Browser access host unavailable; no authenticated functional acceptance",
+    "No Login/Cognito configuration or external-network reachability acceptance",
+    "No live recipient/file/share inventory or real transfer counts exported"
+  ]
+}

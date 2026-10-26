@@ -1,0 +1,57 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / ADD
+  - heading "Add" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - heading "Register an artifact" [level=2]
+  - generic: What are you adding?
+  - combobox "What are you adding?":
+    - option "Object · one file or URL" [selected]
+    - option "Prefix · one S3 folder or bucket"
+    - option "Set · selected Object and Prefix EUIDs"
+    - option "Upload · add a new file to S3"
+  - generic: S3 URI or HTTP(S) URL
+  - textbox "S3 URI or HTTP(S) URL"
+  - generic: S3 keys are preserved exactly. A prefix receives one EUID; its children are not registered.
+  - generic: Name
+  - textbox "Name"
+  - generic: Description
+  - textbox "Description"
+  - generic "Metadata"
+  - button "Register"
+  - complementary:
+    - heading "One stable reference" [level=2]
+    - paragraph: Store the Dewey EUID in your other tools. Dewey resolves the location, metadata, contents, and authorized access.
+    - paragraph: New registrations are visible and downloadable by internal LSMC users. You can change metadata and download permissions independently.
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

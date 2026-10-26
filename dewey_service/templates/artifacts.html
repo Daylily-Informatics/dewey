@@ -22,7 +22,7 @@
           <a class="navlink" href="/ui">Dashboard</a>
           <a class="navlink" href="/artifacts/dag">DAG And Browser</a>
           <a class="navlink" href="/literature">Literature Search</a>
-          <a class="navlink" href="/search">Unified Search</a>
+          <a class="navlink" href="/search">Search v2</a>
           <a class="navlink" href="/ui/anomalies">Anomalies</a>
           <a class="navlink" href="/ui/observability">Observability</a>
           {% if is_admin %}
@@ -53,7 +53,7 @@
 
         <section class="section-tabs">
           <a class="button section-tab {% if active_section == 'register' %}section-tab-active{% endif %}" href="/artifacts" data-target="register">Register</a>
-          <a class="button section-tab {% if active_section == 'search' %}section-tab-active{% endif %}" href="/artifacts?section=search#section-search" data-target="search">Search Artifacts</a>
+          <a class="button section-tab {% if active_section == 'search' %}section-tab-active{% endif %}" href="/search?scope=artifact">Search Artifacts</a>
           <a class="button section-tab {% if active_section == 'artifact_sets' %}section-tab-active{% endif %}" href="/artifacts?section=artifact_sets#section-artifact_sets" data-target="artifact_sets">Artifact Sets</a>
           <a class="button section-tab {% if active_section == 'recent_artifacts' %}section-tab-active{% endif %}" href="/artifacts?section=recent_artifacts#section-recent_artifacts" data-target="recent_artifacts">Recent Artifacts</a>
         </section>
@@ -114,7 +114,7 @@
                   <div class="field">
                     <label for="artifact_meta_tags">Tags</label>
                     <input id="artifact_meta_tags" name="artifact_meta_tags" data-testid="dewey-artifact-tags" type="text" value="{{ artifact_form.get('artifact_meta_tags', '') }}" placeholder="space or comma separated: project-x urgent bam" />
-                    <div class="note">Tags are queryable from Artifact Search and Unified Search.</div>
+                    <div class="note">Tags are queryable from Artifact Search and Search v2.</div>
                   </div>
                   <div class="field field-wide">
                     <label for="artifact_meta_notes">Notes</label>
@@ -511,100 +511,11 @@
             <section class="panel">
               <div class="panel-header">
                 <div>
-                  <h3>Artifact Search</h3>
-                  <div class="panel-copy">Search all artifacts, by EUID list, or by schema-driven metadata and lifecycle fields.</div>
+                  <h3>Search v2</h3>
+                  <div class="panel-copy">Search artifacts and metadata in the unified Search v2 workspace.</div>
                 </div>
               </div>
-              <form method="post" action="/artifacts/search">
-                <div class="form-grid">
-                  <div class="field field-wide">
-                    <label for="artifact_q">Full Text</label>
-                    <input id="artifact_q" name="artifact_q" type="text" value="{{ artifact_search_form.get('artifact_q', '') }}" placeholder="artifact EUID, filename, producer, tag..." />
-                  </div>
-                  <div class="field field-wide">
-                    <label for="artifact_euids">Artifact EUIDs</label>
-                    <textarea id="artifact_euids" name="artifact_euids" placeholder="One EUID per line">{{ artifact_search_form.get("artifact_euids", "") }}</textarea>
-                  </div>
-                  <div class="field">
-                    <label for="artifact_search_artifact_type">Artifact Type</label>
-                    <select id="artifact_search_artifact_type" name="artifact_type">
-                      <option value="">Any</option>
-                      {% for item in artifact_types %}
-                      <option value="{{ item }}" {% if artifact_search_form.get("artifact_type") == item %}selected{% endif %}>{{ item }}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                  <div class="field">
-                    <label for="artifact_search_producer_system">Producer System</label>
-                    <input id="artifact_search_producer_system" name="producer_system" type="text" value="{{ artifact_search_form.get('producer_system', '') }}" placeholder="atlas, bloom, ursa" />
-                  </div>
-                  <div class="field">
-                    <label for="availability_status">Availability</label>
-                    <select id="availability_status" name="availability_status">
-                      <option value="">Any</option>
-                      <option value="available" {% if artifact_search_form.get("availability_status") == "available" %}selected{% endif %}>available</option>
-                      <option value="missing" {% if artifact_search_form.get("availability_status") == "missing" %}selected{% endif %}>missing</option>
-                      <option value="ready" {% if artifact_search_form.get("availability_status") == "ready" %}selected{% endif %}>ready</option>
-                    </select>
-                  </div>
-                  <div class="field">
-                    <label for="import_mode">Import Mode</label>
-                    <select id="import_mode" name="import_mode">
-                      <option value="">Any</option>
-                      <option value="register" {% if artifact_search_form.get("import_mode") == "register" %}selected{% endif %}>register</option>
-                      <option value="reference" {% if artifact_search_form.get("import_mode") == "reference" %}selected{% endif %}>reference</option>
-                      <option value="copy" {% if artifact_search_form.get("import_mode") == "copy" %}selected{% endif %}>copy</option>
-                      <option value="upload" {% if artifact_search_form.get("import_mode") == "upload" %}selected{% endif %}>upload</option>
-                    </select>
-                  </div>
-                  <div class="field">
-                    <label for="artifact_match_mode">Match Mode</label>
-                    <select id="artifact_match_mode" name="artifact_match_mode">
-                      <option value="greedy" {% if artifact_search_form.get("artifact_match_mode", "greedy") == "greedy" %}selected{% endif %}>greedy</option>
-                      <option value="exact" {% if artifact_search_form.get("artifact_match_mode") == "exact" %}selected{% endif %}>exact</option>
-                    </select>
-                  </div>
-                  <div class="field">
-                    <label for="external_object_id">External Object ID</label>
-                    <input id="external_object_id" name="external_object_id" type="text" value="{{ artifact_search_form.get('external_object_id', '') }}" />
-                  </div>
-                  <div class="field">
-                    <label for="artifact_created_at_start">Created After</label>
-                    <input id="artifact_created_at_start" name="artifact_created_at_start" type="datetime-local" value="{{ artifact_search_form.get('artifact_created_at_start', '') }}" />
-                  </div>
-                  <div class="field">
-                    <label for="artifact_created_at_end">Created Before</label>
-                    <input id="artifact_created_at_end" name="artifact_created_at_end" type="datetime-local" value="{{ artifact_search_form.get('artifact_created_at_end', '') }}" />
-                  </div>
-                  {% for field in artifact_metadata_fields %}
-                  {% if field.type == "datetime" %}
-                  <div class="field">
-                    <label for="artifact_filter_{{ field.name }}_start">{{ field.label }} Start</label>
-                    <input id="artifact_filter_{{ field.name }}_start" name="artifact_filter_{{ field.name }}_start" type="datetime-local" value="{{ artifact_search_form.get('artifact_filter_' ~ field.name ~ '_start', '') }}" />
-                  </div>
-                  <div class="field">
-                    <label for="artifact_filter_{{ field.name }}_end">{{ field.label }} End</label>
-                    <input id="artifact_filter_{{ field.name }}_end" name="artifact_filter_{{ field.name }}_end" type="datetime-local" value="{{ artifact_search_form.get('artifact_filter_' ~ field.name ~ '_end', '') }}" />
-                  </div>
-                  {% elif field.type == "textarea" %}
-                  <div class="field field-wide">
-                    <label for="artifact_filter_{{ field.name }}">{{ field.label }}</label>
-                    <textarea id="artifact_filter_{{ field.name }}" name="artifact_filter_{{ field.name }}">{{ artifact_search_form.get('artifact_filter_' ~ field.name, '') }}</textarea>
-                  </div>
-                  {% else %}
-                  <div class="field">
-                    <label for="artifact_filter_{{ field.name }}">{{ field.label }}</label>
-                    <input id="artifact_filter_{{ field.name }}" name="artifact_filter_{{ field.name }}" type="text" value="{{ artifact_search_form.get('artifact_filter_' ~ field.name, '') }}" {% if field.name == "tags" %}placeholder="space or comma separated tags"{% endif %} />
-                  </div>
-                  {% endif %}
-                  {% endfor %}
-                </div>
-                <div class="form-actions">
-                  <button class="button button-primary" type="submit">Search</button>
-                  <button class="button" type="submit" formaction="/artifacts/search/export" name="format" value="tsv">Export TSV</button>
-                  <button class="button" type="submit" formaction="/artifacts/search/export" name="format" value="json">Export JSON</button>
-                </div>
-              </form>
+              <a class="button button-primary" href="/search?scope=artifact">Open Search v2</a>
             </section>
 
             <section class="stack">
@@ -899,81 +810,11 @@
             <section class="panel">
               <div class="panel-header">
                 <div>
-                  <h3>Search Artifact Sets</h3>
+                  <h3>Find Artifact Sets</h3>
                   <div class="panel-copy">Query set labels, descriptions, metadata, and created-at ranges, then issue managed shares for a selected set.</div>
                 </div>
               </div>
-              <form method="post" action="/artifacts/sets/search">
-                <div class="form-grid">
-                  <div class="field field-wide">
-                    <label for="artifact_set_q">Full Text</label>
-                    <input id="artifact_set_q" name="artifact_set_q" type="text" value="{{ artifact_set_search_form.get('artifact_set_q', '') }}" placeholder="artifact set EUID, label, description, metadata..." />
-                  </div>
-                  <div class="field field-wide">
-                    <label for="artifact_set_euids">Artifact Set EUIDs</label>
-                    <textarea id="artifact_set_euids" name="artifact_set_euids">{{ artifact_set_search_form.get("artifact_set_euids", "") }}</textarea>
-                  </div>
-                  <div class="field">
-                    <label for="artifact_set_type_search">Set Type</label>
-                    <select id="artifact_set_type_search" name="artifact_set_type">
-                      <option value="">Any</option>
-                      {% for item in artifact_set_types %}
-                      <option value="{{ item }}" {% if artifact_set_search_form.get("artifact_set_type") == item %}selected{% endif %}>{{ item }}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                  <div class="field">
-                    <label for="artifact_set_label_search">Label</label>
-                    <input id="artifact_set_label_search" name="artifact_set_label" type="text" value="{{ artifact_set_search_form.get('artifact_set_label', '') }}" />
-                  </div>
-                  <div class="field field-wide">
-                    <label for="artifact_set_description_search">Description</label>
-                    <input id="artifact_set_description_search" name="artifact_set_description" type="text" value="{{ artifact_set_search_form.get('artifact_set_description', '') }}" />
-                  </div>
-                  <div class="field">
-                    <label for="artifact_set_match_mode">Match Mode</label>
-                    <select id="artifact_set_match_mode" name="artifact_set_match_mode">
-                      <option value="greedy" {% if artifact_set_search_form.get("artifact_set_match_mode", "greedy") == "greedy" %}selected{% endif %}>greedy</option>
-                      <option value="exact" {% if artifact_set_search_form.get("artifact_set_match_mode") == "exact" %}selected{% endif %}>exact</option>
-                    </select>
-                  </div>
-                  <div class="field">
-                    <label for="artifact_set_created_at_start">Created After</label>
-                    <input id="artifact_set_created_at_start" name="artifact_set_created_at_start" type="datetime-local" value="{{ artifact_set_search_form.get('artifact_set_created_at_start', '') }}" />
-                  </div>
-                  <div class="field">
-                    <label for="artifact_set_created_at_end">Created Before</label>
-                    <input id="artifact_set_created_at_end" name="artifact_set_created_at_end" type="datetime-local" value="{{ artifact_set_search_form.get('artifact_set_created_at_end', '') }}" />
-                  </div>
-                  {% for field in artifact_set_metadata_fields %}
-                  {% if field.type == "datetime" %}
-                  <div class="field">
-                    <label for="artifact_set_filter_{{ field.name }}_start">{{ field.label }} Start</label>
-                    <input id="artifact_set_filter_{{ field.name }}_start" name="artifact_set_filter_{{ field.name }}_start" type="datetime-local" value="{{ artifact_set_search_form.get('artifact_set_filter_' ~ field.name ~ '_start', '') }}" />
-                  </div>
-                  <div class="field">
-                    <label for="artifact_set_filter_{{ field.name }}_end">{{ field.label }} End</label>
-                    <input id="artifact_set_filter_{{ field.name }}_end" name="artifact_set_filter_{{ field.name }}_end" type="datetime-local" value="{{ artifact_set_search_form.get('artifact_set_filter_' ~ field.name ~ '_end', '') }}" />
-                  </div>
-                  {% elif field.type == "textarea" %}
-                  <div class="field field-wide">
-                    <label for="artifact_set_filter_{{ field.name }}">{{ field.label }}</label>
-                    <textarea id="artifact_set_filter_{{ field.name }}" name="artifact_set_filter_{{ field.name }}">{{ artifact_set_search_form.get('artifact_set_filter_' ~ field.name, '') }}</textarea>
-                  </div>
-                  {% else %}
-                  <div class="field">
-                    <label for="artifact_set_filter_{{ field.name }}">{{ field.label }}</label>
-                    <input id="artifact_set_filter_{{ field.name }}" name="artifact_set_filter_{{ field.name }}" type="text" value="{{ artifact_set_search_form.get('artifact_set_filter_' ~ field.name, '') }}" {% if field.name == "tags" %}placeholder="space or comma separated tags"{% endif %} />
-                  </div>
-                  {% endif %}
-                  {% endfor %}
-                </div>
-                <div class="form-actions">
-                  <button class="button button-primary" type="submit">Search</button>
-                  <button class="button" type="submit" formaction="/artifacts/sets/export" name="format" value="tsv">Export TSV</button>
-                  <button class="button" type="submit" formaction="/artifacts/sets/export" name="format" value="json">Export JSON</button>
-                </div>
-              </form>
+              <a class="button button-primary" href="/search?scope=artifact_set">Open Search v2</a>
 
               {% if artifact_set_search_result["items"] %}
               <form method="post" action="/artifacts/sets/share" style="margin-top: 1rem;">
@@ -1061,7 +902,7 @@
                 <div class="panel-copy">Most recent Dewey artifact records across register, upload, copy, and reference flows.</div>
               </div>
               <div class="form-actions" style="margin-top: 0;">
-                <a class="button" href="/artifacts?section=search#section-search">Search Artifacts</a>
+                <a class="button" href="/search?scope=artifact">Search Artifacts</a>
                 <a class="button" href="/artifacts">Register</a>
               </div>
             </div>

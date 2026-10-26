@@ -72,10 +72,11 @@ def test_readme_and_how_tos_reference_current_cli_commands() -> None:
         "dewey --json version",
         "dewey runtime check",
         "dewey config init",
-        "dewey db build --target local",
+        "dewey db lifecycle",
+        "dewey db verify-templates",
         "dewey server start --port 8914",
-        "pytest --collect-only -q",
-        "pytest --cov=dewey_service --cov-report=term-missing:skip-covered",
+        "DEWEY_DEPLOYMENT_CODE=contract python -m pytest tests/test_share_management.py "
+        "tests/test_share_grant_revision_envelope.py -q",
     ]
 
     for command in expected_commands:
@@ -123,7 +124,7 @@ def test_documented_cli_groups_match_live_help_surface() -> None:
         assert snippet in root_help
     for snippet in ("start", "stop", "status", "logs", "restart"):
         assert snippet in server_help
-    for snippet in ("build", "seed", "reset", "nuke"):
+    for snippet in ("verify-templates", "lifecycle"):
         assert snippet in db_help
     for snippet in ("run", "cov"):
         assert snippet in test_help

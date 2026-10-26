@@ -1,0 +1,9 @@
+{
+  "command_id": "c1706320-abd5-41ec-888e-128092268d68",
+  "target": "/home/ubuntu/dewey-10.0.7-preparation-20260919T100300Z/build_final_image.py",
+  "helper_sha256": "71cb4ac362184270dec946a4d36eeba3994595170cad1615ae8eff6657441e4a",
+  "execution_requested": false,
+  "instance_id": "i-07df3a933e4839f52",
+  "profile": "lsmc",
+  "region": "us-west-2"
+}

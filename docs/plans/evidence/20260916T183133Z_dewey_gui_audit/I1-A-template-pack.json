@@ -1,0 +1,20 @@
+{
+  "format": "tapdb.repository-template-pack/v1",
+  "templates": [
+    {
+      "bstatus": "active",
+      "category": "data",
+      "instance_polymorphic_identity": "data_instance",
+      "instance_prefix": "DGX",
+      "is_singleton": false,
+      "json_addl": {},
+      "json_addl_schema": null,
+      "name": "Dewey Artifact",
+      "polymorphic_discriminator": "data_template",
+      "subtype": "generic",
+      "type": "artifact",
+      "validator_ref": "UNIVERSAL_PASS@1",
+      "version": "1.0"
+    }
+  ]
+}

@@ -1,0 +1,626 @@
+- banner:
+  - link "Dewey / TapDB":
+    - /url: /tapdb/
+  - navigation:
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Admin":
+      - /url: /admin
+    - link "Overview":
+      - /url: /tapdb/admin/overview
+    - link "Search":
+      - /url: /tapdb/search
+    - link "Graph":
+      - /url: /tapdb/graph
+    - link "Templates":
+      - /url: /tapdb/templates
+    - link "Audit":
+      - /url: /tapdb/audit
+    - link "Help":
+      - /url: /tapdb/help
+    - link "Readiness":
+      - /url: /tapdb/admin/readiness
+    - link "Inventory":
+      - /url: /tapdb/admin/inventory
+    - link "Meridian":
+      - /url: /tapdb/admin/meridian
+    - link "Metrics":
+      - /url: /tapdb/admin/metrics
+    - link "Runtime":
+      - /url: /tapdb/admin/runtime
+    - link "Backups":
+      - /url: /tapdb/admin/backups
+    - link "Sign out":
+      - /url: /auth/logout
+  - generic: johnm@lsmc.com · admin
+- main:
+  - heading "Audit explorer" [level=1]
+  - textbox "exact object EUID"
+  - textbox "exact actor"
+  - combobox:
+    - option "ALL" [selected]
+    - option "INSERT"
+    - option "UPDATE"
+    - option "DELETE"
+  - spinbutton: "50"
+  - button "Query"
+  - table:
+    - rowgroup:
+      - row "Time EUID Operation Actor Kind Name Change":
+        - columnheader "Time"
+        - columnheader "EUID"
+        - columnheader "Operation"
+        - columnheader "Actor"
+        - columnheader "Kind"
+        - columnheader "Name"
+        - columnheader "Change"
+    - rowgroup:
+      - row "2026-09-16 17:40:02.493319+00:00 M-DGX-TQ00 UPDATE dewey operational/storage_operation/generic Download credential issued":
+        - cell "2026-09-16 17:40:02.493319+00:00"
+        - cell "M-DGX-TQ00":
+          - link "M-DGX-TQ00":
+            - /url: /tapdb/object/M-DGX-TQ00
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "operational/storage_operation/generic"
+        - cell "Download credential issued"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 17:40:02.493319+00:00 M-DGX-TQ00 UPDATE dewey operational/storage_operation/generic Download credential issued":
+        - cell "2026-09-16 17:40:02.493319+00:00"
+        - cell "M-DGX-TQ00":
+          - link "M-DGX-TQ00":
+            - /url: /tapdb/object/M-DGX-TQ00
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "operational/storage_operation/generic"
+        - cell "Download credential issued"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 17:40:02.493319+00:00 M-DGX-TQ00 UPDATE dewey operational/storage_operation/generic Download credential issued":
+        - cell "2026-09-16 17:40:02.493319+00:00"
+        - cell "M-DGX-TQ00":
+          - link "M-DGX-TQ00":
+            - /url: /tapdb/object/M-DGX-TQ00
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "operational/storage_operation/generic"
+        - cell "Download credential issued"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 17:40:02.493319+00:00 M-DGX-TQ00 INSERT dewey operational/storage_operation/generic Download credential issued":
+        - cell "2026-09-16 17:40:02.493319+00:00"
+        - cell "M-DGX-TQ00":
+          - link "M-DGX-TQ00":
+            - /url: /tapdb/object/M-DGX-TQ00
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "operational/storage_operation/generic"
+        - cell "Download credential issued"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 17:40:02.493319+00:00 M-DGX-TQ00 UPDATE dewey operational/storage_operation/generic Download credential issued":
+        - cell "2026-09-16 17:40:02.493319+00:00"
+        - cell "M-DGX-TQ00":
+          - link "M-DGX-TQ00":
+            - /url: /tapdb/object/M-DGX-TQ00
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "operational/storage_operation/generic"
+        - cell "Download credential issued"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:41.035794+00:00 M-DGX-TPY4 INSERT dewey integration/external_object_relation/generic artifact:M-DGX-TPSE:M-DGX-TPW8:bloom_sequencing_run":
+        - cell "2026-09-16 14:49:41.035794+00:00"
+        - cell "M-DGX-TPY4":
+          - link "M-DGX-TPY4":
+            - /url: /tapdb/object/M-DGX-TPY4
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "integration/external_object_relation/generic"
+        - cell "artifact:M-DGX-TPSE:M-DGX-TPW8:bloom_sequencing_run"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:41.035794+00:00 M-DGX-TPY4 UPDATE dewey integration/external_object_relation/generic artifact:M-DGX-TPSE:M-DGX-TPW8:bloom_sequencing_run":
+        - cell "2026-09-16 14:49:41.035794+00:00"
+        - cell "M-DGX-TPY4":
+          - link "M-DGX-TPY4":
+            - /url: /tapdb/object/M-DGX-TPY4
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "integration/external_object_relation/generic"
+        - cell "artifact:M-DGX-TPSE:M-DGX-TPW8:bloom_sequencing_run"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:41.035794+00:00 M-DGX-TPY4 UPDATE dewey integration/external_object_relation/generic artifact:M-DGX-TPSE:M-DGX-TPW8:bloom_sequencing_run":
+        - cell "2026-09-16 14:49:41.035794+00:00"
+        - cell "M-DGX-TPY4":
+          - link "M-DGX-TPY4":
+            - /url: /tapdb/object/M-DGX-TPY4
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "integration/external_object_relation/generic"
+        - cell "artifact:M-DGX-TPSE:M-DGX-TPW8:bloom_sequencing_run"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:41.035794+00:00 M-DGX-TPY4 UPDATE dewey integration/external_object_relation/generic artifact:M-DGX-TPSE:M-DGX-TPW8:bloom_sequencing_run":
+        - cell "2026-09-16 14:49:41.035794+00:00"
+        - cell "M-DGX-TPY4":
+          - link "M-DGX-TPY4":
+            - /url: /tapdb/object/M-DGX-TPY4
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "integration/external_object_relation/generic"
+        - cell "artifact:M-DGX-TPSE:M-DGX-TPW8:bloom_sequencing_run"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:41.035794+00:00 M-DGX-TPY4 UPDATE dewey integration/external_object_relation/generic artifact:M-DGX-TPSE:M-DGX-TPW8:bloom_sequencing_run":
+        - cell "2026-09-16 14:49:41.035794+00:00"
+        - cell "M-DGX-TPY4":
+          - link "M-DGX-TPY4":
+            - /url: /tapdb/object/M-DGX-TPY4
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "integration/external_object_relation/generic"
+        - cell "artifact:M-DGX-TPSE:M-DGX-TPW8:bloom_sequencing_run"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:41.035794+00:00 M-EDG-G1JR INSERT dewey data/artifact/generic tp_vcf_gz_stripped.vcf.gz.X_indel_50.vcf.gz":
+        - cell "2026-09-16 14:49:41.035794+00:00"
+        - cell "M-EDG-G1JR":
+          - link "M-EDG-G1JR":
+            - /url: /tapdb/object/M-EDG-G1JR
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "data/artifact/generic"
+        - cell "tp_vcf_gz_stripped.vcf.gz.X_indel_50.vcf.gz"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:41.035794+00:00 M-EDG-G1KP INSERT dewey system/idempotency_request/generic artifact.import:ursa-dayoa-12-artifacts-20260710-07:child:312":
+        - cell "2026-09-16 14:49:41.035794+00:00"
+        - cell "M-EDG-G1KP":
+          - link "M-EDG-G1KP":
+            - /url: /tapdb/object/M-EDG-G1KP
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "system/idempotency_request/generic"
+        - cell "artifact.import:ursa-dayoa-12-artifacts-20260710-07:child:312"
+        - cell:
+          - generic "values"
+      - 'row "2026-09-16 14:49:41.035794+00:00 M-XRF-94A INSERT dewey reference/external_identifier/tapdb_object External TapDB reference: bloom"':
+        - cell "2026-09-16 14:49:41.035794+00:00"
+        - cell "M-XRF-94A":
+          - link "M-XRF-94A":
+            - /url: /tapdb/object/M-XRF-94A
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "reference/external_identifier/tapdb_object"
+        - 'cell "External TapDB reference: bloom"'
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:41.035794+00:00 M-EDG-G1MM INSERT dewey data/artifact/generic tp_vcf_gz_stripped.vcf.gz.X_indel_gt50.vcf.gz":
+        - cell "2026-09-16 14:49:41.035794+00:00"
+        - cell "M-EDG-G1MM":
+          - link "M-EDG-G1MM":
+            - /url: /tapdb/object/M-EDG-G1MM
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "data/artifact/generic"
+        - cell "tp_vcf_gz_stripped.vcf.gz.X_indel_gt50.vcf.gz"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:41.035794+00:00 M-DGX-TPZ2 INSERT dewey system/idempotency_request/generic external_object_relation.attach:owy-dewey-bloom-relation-59637bfeac70c3a5b9ec1fde":
+        - cell "2026-09-16 14:49:41.035794+00:00"
+        - cell "M-DGX-TPZ2":
+          - link "M-DGX-TPZ2":
+            - /url: /tapdb/object/M-DGX-TPZ2
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "system/idempotency_request/generic"
+        - cell "external_object_relation.attach:owy-dewey-bloom-relation-59637bfeac70c3a5b9ec1fde"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:41.035794+00:00 M-DGX-TPZ2 UPDATE dewey system/idempotency_request/generic external_object_relation.attach:owy-dewey-bloom-relation-59637bfeac70c3a5b9ec1fde":
+        - cell "2026-09-16 14:49:41.035794+00:00"
+        - cell "M-DGX-TPZ2":
+          - link "M-DGX-TPZ2":
+            - /url: /tapdb/object/M-DGX-TPZ2
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "system/idempotency_request/generic"
+        - cell "external_object_relation.attach:owy-dewey-bloom-relation-59637bfeac70c3a5b9ec1fde"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:41.035794+00:00 M-DGX-TPZ2 UPDATE dewey system/idempotency_request/generic external_object_relation.attach:owy-dewey-bloom-relation-59637bfeac70c3a5b9ec1fde":
+        - cell "2026-09-16 14:49:41.035794+00:00"
+        - cell "M-DGX-TPZ2":
+          - link "M-DGX-TPZ2":
+            - /url: /tapdb/object/M-DGX-TPZ2
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "system/idempotency_request/generic"
+        - cell "external_object_relation.attach:owy-dewey-bloom-relation-59637bfeac70c3a5b9ec1fde"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:41.035794+00:00 M-DGX-TPZ2 UPDATE dewey system/idempotency_request/generic external_object_relation.attach:owy-dewey-bloom-relation-59637bfeac70c3a5b9ec1fde":
+        - cell "2026-09-16 14:49:41.035794+00:00"
+        - cell "M-DGX-TPZ2":
+          - link "M-DGX-TPZ2":
+            - /url: /tapdb/object/M-DGX-TPZ2
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "system/idempotency_request/generic"
+        - cell "external_object_relation.attach:owy-dewey-bloom-relation-59637bfeac70c3a5b9ec1fde"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:41.035794+00:00 M-DGX-TPZ2 UPDATE dewey system/idempotency_request/generic external_object_relation.attach:owy-dewey-bloom-relation-59637bfeac70c3a5b9ec1fde":
+        - cell "2026-09-16 14:49:41.035794+00:00"
+        - cell "M-DGX-TPZ2":
+          - link "M-DGX-TPZ2":
+            - /url: /tapdb/object/M-DGX-TPZ2
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "system/idempotency_request/generic"
+        - cell "external_object_relation.attach:owy-dewey-bloom-relation-59637bfeac70c3a5b9ec1fde"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:40.822252+00:00 M-DGX-TPW8 INSERT dewey integration/external_object/generic bloom:sequencing_run:M-BRM-11J":
+        - cell "2026-09-16 14:49:40.822252+00:00"
+        - cell "M-DGX-TPW8":
+          - link "M-DGX-TPW8":
+            - /url: /tapdb/object/M-DGX-TPW8
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "integration/external_object/generic"
+        - cell "bloom:sequencing_run:M-BRM-11J"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:40.822252+00:00 M-DGX-TPW8 UPDATE dewey integration/external_object/generic bloom:sequencing_run:M-BRM-11J":
+        - cell "2026-09-16 14:49:40.822252+00:00"
+        - cell "M-DGX-TPW8":
+          - link "M-DGX-TPW8":
+            - /url: /tapdb/object/M-DGX-TPW8
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "integration/external_object/generic"
+        - cell "bloom:sequencing_run:M-BRM-11J"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:40.822252+00:00 M-DGX-TPW8 UPDATE dewey integration/external_object/generic bloom:sequencing_run:M-BRM-11J":
+        - cell "2026-09-16 14:49:40.822252+00:00"
+        - cell "M-DGX-TPW8":
+          - link "M-DGX-TPW8":
+            - /url: /tapdb/object/M-DGX-TPW8
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "integration/external_object/generic"
+        - cell "bloom:sequencing_run:M-BRM-11J"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:40.822252+00:00 M-DGX-TPW8 UPDATE dewey integration/external_object/generic bloom:sequencing_run:M-BRM-11J":
+        - cell "2026-09-16 14:49:40.822252+00:00"
+        - cell "M-DGX-TPW8":
+          - link "M-DGX-TPW8":
+            - /url: /tapdb/object/M-DGX-TPW8
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "integration/external_object/generic"
+        - cell "bloom:sequencing_run:M-BRM-11J"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:40.822252+00:00 M-DGX-TPW8 UPDATE dewey integration/external_object/generic bloom:sequencing_run:M-BRM-11J":
+        - cell "2026-09-16 14:49:40.822252+00:00"
+        - cell "M-DGX-TPW8":
+          - link "M-DGX-TPW8":
+            - /url: /tapdb/object/M-DGX-TPW8
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "integration/external_object/generic"
+        - cell "bloom:sequencing_run:M-BRM-11J"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:40.822252+00:00 M-DGX-TPX6 INSERT dewey system/idempotency_request/generic external_object.create:owy-dewey-bloom-object-55c96b16e91f419d27f7bf8d":
+        - cell "2026-09-16 14:49:40.822252+00:00"
+        - cell "M-DGX-TPX6":
+          - link "M-DGX-TPX6":
+            - /url: /tapdb/object/M-DGX-TPX6
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "system/idempotency_request/generic"
+        - cell "external_object.create:owy-dewey-bloom-object-55c96b16e91f419d27f7bf8d"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:40.822252+00:00 M-DGX-TPX6 UPDATE dewey system/idempotency_request/generic external_object.create:owy-dewey-bloom-object-55c96b16e91f419d27f7bf8d":
+        - cell "2026-09-16 14:49:40.822252+00:00"
+        - cell "M-DGX-TPX6":
+          - link "M-DGX-TPX6":
+            - /url: /tapdb/object/M-DGX-TPX6
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "system/idempotency_request/generic"
+        - cell "external_object.create:owy-dewey-bloom-object-55c96b16e91f419d27f7bf8d"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:40.822252+00:00 M-DGX-TPX6 UPDATE dewey system/idempotency_request/generic external_object.create:owy-dewey-bloom-object-55c96b16e91f419d27f7bf8d":
+        - cell "2026-09-16 14:49:40.822252+00:00"
+        - cell "M-DGX-TPX6":
+          - link "M-DGX-TPX6":
+            - /url: /tapdb/object/M-DGX-TPX6
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "system/idempotency_request/generic"
+        - cell "external_object.create:owy-dewey-bloom-object-55c96b16e91f419d27f7bf8d"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:40.822252+00:00 M-DGX-TPX6 UPDATE dewey system/idempotency_request/generic external_object.create:owy-dewey-bloom-object-55c96b16e91f419d27f7bf8d":
+        - cell "2026-09-16 14:49:40.822252+00:00"
+        - cell "M-DGX-TPX6":
+          - link "M-DGX-TPX6":
+            - /url: /tapdb/object/M-DGX-TPX6
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "system/idempotency_request/generic"
+        - cell "external_object.create:owy-dewey-bloom-object-55c96b16e91f419d27f7bf8d"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:40.822252+00:00 M-DGX-TPX6 UPDATE dewey system/idempotency_request/generic external_object.create:owy-dewey-bloom-object-55c96b16e91f419d27f7bf8d":
+        - cell "2026-09-16 14:49:40.822252+00:00"
+        - cell "M-DGX-TPX6":
+          - link "M-DGX-TPX6":
+            - /url: /tapdb/object/M-DGX-TPX6
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "system/idempotency_request/generic"
+        - cell "external_object.create:owy-dewey-bloom-object-55c96b16e91f419d27f7bf8d"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:33.310045+00:00 M-DGX-TPSE INSERT dewey data/artifact/generic 20260604_LH01121_0005_A23TVVFLT4":
+        - cell "2026-09-16 14:49:33.310045+00:00"
+        - cell "M-DGX-TPSE":
+          - link "M-DGX-TPSE":
+            - /url: /tapdb/object/M-DGX-TPSE
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "data/artifact/generic"
+        - cell "20260604_LH01121_0005_A23TVVFLT4"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:33.310045+00:00 M-DGX-TPSE UPDATE dewey data/artifact/generic 20260604_LH01121_0005_A23TVVFLT4":
+        - cell "2026-09-16 14:49:33.310045+00:00"
+        - cell "M-DGX-TPSE":
+          - link "M-DGX-TPSE":
+            - /url: /tapdb/object/M-DGX-TPSE
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "data/artifact/generic"
+        - cell "20260604_LH01121_0005_A23TVVFLT4"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:33.310045+00:00 M-DGX-TPSE UPDATE dewey data/artifact/generic 20260604_LH01121_0005_A23TVVFLT4":
+        - cell "2026-09-16 14:49:33.310045+00:00"
+        - cell "M-DGX-TPSE":
+          - link "M-DGX-TPSE":
+            - /url: /tapdb/object/M-DGX-TPSE
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "data/artifact/generic"
+        - cell "20260604_LH01121_0005_A23TVVFLT4"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:33.310045+00:00 M-DGX-TPSE UPDATE dewey data/artifact/generic 20260604_LH01121_0005_A23TVVFLT4":
+        - cell "2026-09-16 14:49:33.310045+00:00"
+        - cell "M-DGX-TPSE":
+          - link "M-DGX-TPSE":
+            - /url: /tapdb/object/M-DGX-TPSE
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "data/artifact/generic"
+        - cell "20260604_LH01121_0005_A23TVVFLT4"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:33.310045+00:00 M-DGX-TPSE UPDATE dewey data/artifact/generic 20260604_LH01121_0005_A23TVVFLT4":
+        - cell "2026-09-16 14:49:33.310045+00:00"
+        - cell "M-DGX-TPSE":
+          - link "M-DGX-TPSE":
+            - /url: /tapdb/object/M-DGX-TPSE
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "data/artifact/generic"
+        - cell "20260604_LH01121_0005_A23TVVFLT4"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:33.310045+00:00 M-DGX-TPTC INSERT dewey access/registry_policy/generic Access for M-DGX-TPSE":
+        - cell "2026-09-16 14:49:33.310045+00:00"
+        - cell "M-DGX-TPTC":
+          - link "M-DGX-TPTC":
+            - /url: /tapdb/object/M-DGX-TPTC
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "access/registry_policy/generic"
+        - cell "Access for M-DGX-TPSE"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:33.310045+00:00 M-DGX-TPTC UPDATE dewey access/registry_policy/generic Access for M-DGX-TPSE":
+        - cell "2026-09-16 14:49:33.310045+00:00"
+        - cell "M-DGX-TPTC":
+          - link "M-DGX-TPTC":
+            - /url: /tapdb/object/M-DGX-TPTC
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "access/registry_policy/generic"
+        - cell "Access for M-DGX-TPSE"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:33.310045+00:00 M-DGX-TPTC UPDATE dewey access/registry_policy/generic Access for M-DGX-TPSE":
+        - cell "2026-09-16 14:49:33.310045+00:00"
+        - cell "M-DGX-TPTC":
+          - link "M-DGX-TPTC":
+            - /url: /tapdb/object/M-DGX-TPTC
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "access/registry_policy/generic"
+        - cell "Access for M-DGX-TPSE"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:33.310045+00:00 M-DGX-TPTC UPDATE dewey access/registry_policy/generic Access for M-DGX-TPSE":
+        - cell "2026-09-16 14:49:33.310045+00:00"
+        - cell "M-DGX-TPTC":
+          - link "M-DGX-TPTC":
+            - /url: /tapdb/object/M-DGX-TPTC
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "access/registry_policy/generic"
+        - cell "Access for M-DGX-TPSE"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:33.310045+00:00 M-DGX-TPTC UPDATE dewey access/registry_policy/generic Access for M-DGX-TPSE":
+        - cell "2026-09-16 14:49:33.310045+00:00"
+        - cell "M-DGX-TPTC":
+          - link "M-DGX-TPTC":
+            - /url: /tapdb/object/M-DGX-TPTC
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "access/registry_policy/generic"
+        - cell "Access for M-DGX-TPSE"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:33.310045+00:00 M-EDG-G1HT INSERT dewey system/idempotency_request/generic artifact.import:ursa-dayoa-12-artifacts-20260710-07:child:311":
+        - cell "2026-09-16 14:49:33.310045+00:00"
+        - cell "M-EDG-G1HT":
+          - link "M-EDG-G1HT":
+            - /url: /tapdb/object/M-EDG-G1HT
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "system/idempotency_request/generic"
+        - cell "artifact.import:ursa-dayoa-12-artifacts-20260710-07:child:311"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:33.310045+00:00 M-DGX-TPVA INSERT dewey system/idempotency_request/generic artifact.register:owy-50ec580f67bb9914a4d4ba4377fd7844":
+        - cell "2026-09-16 14:49:33.310045+00:00"
+        - cell "M-DGX-TPVA":
+          - link "M-DGX-TPVA":
+            - /url: /tapdb/object/M-DGX-TPVA
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "system/idempotency_request/generic"
+        - cell "artifact.register:owy-50ec580f67bb9914a4d4ba4377fd7844"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:33.310045+00:00 M-DGX-TPVA UPDATE dewey system/idempotency_request/generic artifact.register:owy-50ec580f67bb9914a4d4ba4377fd7844":
+        - cell "2026-09-16 14:49:33.310045+00:00"
+        - cell "M-DGX-TPVA":
+          - link "M-DGX-TPVA":
+            - /url: /tapdb/object/M-DGX-TPVA
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "system/idempotency_request/generic"
+        - cell "artifact.register:owy-50ec580f67bb9914a4d4ba4377fd7844"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:33.310045+00:00 M-DGX-TPVA UPDATE dewey system/idempotency_request/generic artifact.register:owy-50ec580f67bb9914a4d4ba4377fd7844":
+        - cell "2026-09-16 14:49:33.310045+00:00"
+        - cell "M-DGX-TPVA":
+          - link "M-DGX-TPVA":
+            - /url: /tapdb/object/M-DGX-TPVA
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "system/idempotency_request/generic"
+        - cell "artifact.register:owy-50ec580f67bb9914a4d4ba4377fd7844"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:33.310045+00:00 M-DGX-TPVA UPDATE dewey system/idempotency_request/generic artifact.register:owy-50ec580f67bb9914a4d4ba4377fd7844":
+        - cell "2026-09-16 14:49:33.310045+00:00"
+        - cell "M-DGX-TPVA":
+          - link "M-DGX-TPVA":
+            - /url: /tapdb/object/M-DGX-TPVA
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "system/idempotency_request/generic"
+        - cell "artifact.register:owy-50ec580f67bb9914a4d4ba4377fd7844"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 14:49:33.310045+00:00 M-DGX-TPVA UPDATE dewey system/idempotency_request/generic artifact.register:owy-50ec580f67bb9914a4d4ba4377fd7844":
+        - cell "2026-09-16 14:49:33.310045+00:00"
+        - cell "M-DGX-TPVA":
+          - link "M-DGX-TPVA":
+            - /url: /tapdb/object/M-DGX-TPVA
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "system/idempotency_request/generic"
+        - cell "artifact.register:owy-50ec580f67bb9914a4d4ba4377fd7844"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 08:25:53.540837+00:00 M-DGX-TPQJ INSERT dewey integration/external_object_relation/generic artifact:M-DGX-TPJW:M-DGX-TPNP:bloom_sequencing_run":
+        - cell "2026-09-16 08:25:53.540837+00:00"
+        - cell "M-DGX-TPQJ":
+          - link "M-DGX-TPQJ":
+            - /url: /tapdb/object/M-DGX-TPQJ
+        - cell "INSERT"
+        - cell "dewey"
+        - cell "integration/external_object_relation/generic"
+        - cell "artifact:M-DGX-TPJW:M-DGX-TPNP:bloom_sequencing_run"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 08:25:53.540837+00:00 M-DGX-TPQJ UPDATE dewey integration/external_object_relation/generic artifact:M-DGX-TPJW:M-DGX-TPNP:bloom_sequencing_run":
+        - cell "2026-09-16 08:25:53.540837+00:00"
+        - cell "M-DGX-TPQJ":
+          - link "M-DGX-TPQJ":
+            - /url: /tapdb/object/M-DGX-TPQJ
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "integration/external_object_relation/generic"
+        - cell "artifact:M-DGX-TPJW:M-DGX-TPNP:bloom_sequencing_run"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 08:25:53.540837+00:00 M-DGX-TPQJ UPDATE dewey integration/external_object_relation/generic artifact:M-DGX-TPJW:M-DGX-TPNP:bloom_sequencing_run":
+        - cell "2026-09-16 08:25:53.540837+00:00"
+        - cell "M-DGX-TPQJ":
+          - link "M-DGX-TPQJ":
+            - /url: /tapdb/object/M-DGX-TPQJ
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "integration/external_object_relation/generic"
+        - cell "artifact:M-DGX-TPJW:M-DGX-TPNP:bloom_sequencing_run"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 08:25:53.540837+00:00 M-DGX-TPQJ UPDATE dewey integration/external_object_relation/generic artifact:M-DGX-TPJW:M-DGX-TPNP:bloom_sequencing_run":
+        - cell "2026-09-16 08:25:53.540837+00:00"
+        - cell "M-DGX-TPQJ":
+          - link "M-DGX-TPQJ":
+            - /url: /tapdb/object/M-DGX-TPQJ
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "integration/external_object_relation/generic"
+        - cell "artifact:M-DGX-TPJW:M-DGX-TPNP:bloom_sequencing_run"
+        - cell:
+          - generic "values"
+      - row "2026-09-16 08:25:53.540837+00:00 M-DGX-TPQJ UPDATE dewey integration/external_object_relation/generic artifact:M-DGX-TPJW:M-DGX-TPNP:bloom_sequencing_run":
+        - cell "2026-09-16 08:25:53.540837+00:00"
+        - cell "M-DGX-TPQJ":
+          - link "M-DGX-TPQJ":
+            - /url: /tapdb/object/M-DGX-TPQJ
+        - cell "UPDATE"
+        - cell "dewey"
+        - cell "integration/external_object_relation/generic"
+        - cell "artifact:M-DGX-TPJW:M-DGX-TPNP:bloom_sequencing_run"
+        - cell:
+          - generic "values"
+- contentinfo: TapDB 10.1.1rc1
+- text: Theme
+- combobox "Theme":
+  - option "original" [selected]
+  - option "light"
+  - option "dark"
+  - option "CBF"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

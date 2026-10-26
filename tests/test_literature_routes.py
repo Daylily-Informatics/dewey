@@ -28,8 +28,10 @@ def _login_user(monkeypatch, client, groups: list[str] | None = None) -> None:
 
 
 def test_literature_page_requires_login(client) -> None:
-    response = client.get("/literature")
-    assert response.status_code == 401
+    response = client.get("/literature", follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login?next=%2Fliterature"
+    assert 'data-section="Literature"' not in response.text
 
 
 def test_literature_page_and_search_render_after_login(monkeypatch, client) -> None:
@@ -37,14 +39,18 @@ def test_literature_page_and_search_render_after_login(monkeypatch, client) -> N
 
     response = client.get("/literature", params={"q": "gene therapy"})
     assert response.status_code == 200
-    assert "PubMed Search And Save" in response.text
-    assert "Gene Therapy For Example Disease" in response.text
-    assert (
-        "Search results stay read-mostly until you explicitly save them into Dewey."
-        in response.text
+    assert 'data-section="Literature"' in response.text
+    assert "/static/registry.js" in response.text
+    search = client.post(
+        "/api/v1/literature/search",
+        json={"query": "gene therapy", "page": 1, "page_size": 20},
     )
-    assert "Open Full Text" in response.text
-    assert "metapub" in response.text.lower()
+    assert search.status_code == 200
+    item = search.json()["items"][0]
+    assert item["title"] == "Gene Therapy For Example Disease"
+    assert item["pmid"] == "123456"
+    assert item["already_in_dewey"] is False
+    assert item["saved_by_me"] is False
 
 
 def test_literature_search_and_save_routes(monkeypatch, client) -> None:
@@ -103,19 +109,28 @@ def test_literature_search_and_save_routes(monkeypatch, client) -> None:
 def test_literature_search_page_shows_saved_badges(monkeypatch, client) -> None:
     _login_user(monkeypatch, client)
 
-    client.post(
+    saved = client.post(
         "/api/v1/literature/save",
         headers={"Idempotency-Key": "lit-route-save-2"},
         json={"pmid": "123456", "save_mode": "auto", "visibility_scope": "all_users"},
     )
+    assert saved.status_code == 200
 
     response = client.get(
         "/search",
         params={"q": "123456", "scope": "artifact", "page_size": 25},
     )
     assert response.status_code == 200
-    assert "Gene Therapy For Example Disease" in response.text
-    assert "saved by me" in response.text
+    assert 'data-section="Library"' in response.text
+    search = client.post(
+        "/api/v1/literature/search",
+        json={"query": "123456", "page": 1, "page_size": 25},
+    )
+    assert search.status_code == 200
+    item = search.json()["items"][0]
+    assert item["title"] == "Gene Therapy For Example Disease"
+    assert item["saved_by_me"] is True
+    assert item["artifact_euid"] == saved.json()["artifact"]["artifact_euid"]
 
 
 def test_literature_endpoints_return_503_when_unavailable(
@@ -144,6 +159,12 @@ def test_literature_page_returns_503_for_runtime_config_failure(
 
     response = client.get("/literature", params={"q": "PTEN"})
 
-    assert response.status_code == 503
-    assert "Literature search is unavailable" in response.text
-    assert "NCBI" in response.text
+    assert response.status_code == 200
+    assert 'data-section="Literature"' in response.text
+    search = client.post(
+        "/api/v1/literature/search",
+        json={"query": "PTEN", "page": 1, "page_size": 20},
+    )
+    assert search.status_code == 503
+    assert "Literature search is unavailable" in search.json()["detail"]
+    assert "NCBI" in search.json()["detail"]

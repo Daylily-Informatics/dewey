@@ -5,12 +5,13 @@ import zipfile
 
 import pytest
 
+from dewey_service.registry_access import POLICY_TEMPLATE
 from dewey_service.service import DeweyNotFoundError, DeweyService
-from tests.support.service_fakes import _FakeStorageClient
+from tests.support.service_fakes import _FakeStorageClient, _InMemoryBackend
 
 
 def test_register_artifact_replay_and_identity_reuse(service: DeweyService) -> None:
-    service.bootstrap()
+    service.verify_existing()
 
     status_code, created = service.register_artifact(
         artifact_type="FASTQ",
@@ -78,22 +79,9 @@ def test_register_artifact_replay_and_identity_reuse(service: DeweyService) -> N
     assert service.list_artifacts(artifact_type="fastq", producer_system="atlas") == [created]
 
 
-def test_bootstrap_seeds_and_reads_local_anomalies(
-    service: DeweyService,
-    explicit_config_file,
-) -> None:
-    _ = explicit_config_file
-    service.bootstrap()
-
-    anomalies = service.list_anomalies()
-    assert len(anomalies) == 3
-    assert anomalies[0]["anomaly_id"].startswith("ANM-")
-    assert anomalies[0]["source_view_url"].startswith("/ui/anomalies/")
-
-    anomaly = service.get_anomaly(anomalies[0]["anomaly_id"])
-    assert anomaly["anomaly_id"] == anomalies[0]["anomaly_id"]
-    assert anomaly["severity"] in {"high", "medium", "low"}
-
+def test_verify_existing_does_not_seed_anomalies(service: DeweyService) -> None:
+    service.verify_existing()
+    assert service.list_anomalies() == []
     with pytest.raises(DeweyNotFoundError):
         service.get_anomaly("ANM-999999")
 
@@ -168,7 +156,7 @@ def test_register_artifact_prefix_creates_single_prefix_without_s3_scan(
     storage: _FakeStorageClient,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    service.bootstrap()
+    service.verify_existing()
 
     def _fail_list_objects(*args, **kwargs):
         raise AssertionError("prefix-only registration must not list S3 objects")
@@ -200,7 +188,7 @@ def test_register_artifact_prefix_creates_single_prefix_without_s3_scan(
     assert replay_code == 201
     assert replay["artifact_euid"] == created["artifact_euid"]
     assert created["storage_kind"] == "prefix"
-    assert created["node_kind"] == "prefix"
+    assert created["node_kind"] == "folder"
     assert created["is_terminal"] is False
     assert created["storage_uri"] == "s3://bucket-7/projects/run-a/"
     assert created["source_uri"] == "s3://bucket-7/projects/run-a/"
@@ -315,8 +303,20 @@ def test_service_infers_artifact_type_from_filename_and_allows_na(
 def test_browse_storage_prefix_marks_registered_and_unregistered_entries(
     service: DeweyService,
     storage: _FakeStorageClient,
+    backend: _InMemoryBackend,
 ) -> None:
-    service.bootstrap()
+    service.verify_existing()
+    backend.create_instance(
+        backend,
+        template_code=POLICY_TEMPLATE,
+        name="Fixture performance settings",
+        json_addl={
+            "policy_kind": "service_defaults",
+            "share_lifetime_days": 30,
+            "delivery_lifetime_seconds": 900,
+            "listing_cache_ttl_seconds": 0,
+        },
+    )
     run_root = "runs/RUN504352/2026/504352-20260404_1215/"
     sample = "504352-UGAv3-1527-CAACGATATGTGAT"
     for key in [
@@ -342,8 +342,8 @@ def test_browse_storage_prefix_marks_registered_and_unregistered_entries(
     payload = service.browse_storage_prefix(root_uri=sample_folder["storage_uri"])
 
     assert payload["current_artifact"]["artifact_euid"] == sample_folder["artifact_euid"]
-    assert any(item["registered_artifact"] for item in payload["objects"])
-    assert any(not item["registered_artifact"] for item in payload["objects"])
+    assert any(item["artifact_euid"] for item in payload["objects"])
+    assert any(item["artifact_euid"] is None for item in payload["objects"])
     assert payload["objects"][0]["storage_uri"].startswith("s3://bucket-9/")
 
 
@@ -351,7 +351,7 @@ def test_get_artifact_graph_returns_nodes_and_edges_for_hierarchy(
     service: DeweyService,
     storage: _FakeStorageClient,
 ) -> None:
-    service.bootstrap()
+    service.verify_existing()
     storage.seed_object(
         bucket="bucket-10",
         key="runs/RUN504352/2026/504352-20260404_1215/504352-UGAv3-1527-CAACGATATGTGAT/504352-UGAv3-1527-CAACGATATGTGAT.cram",
@@ -377,8 +377,17 @@ def test_get_artifact_graph_returns_nodes_and_edges_for_hierarchy(
     )
 
     assert payload["root_euid"] == imported["run_artifact"]["artifact_euid"]
-    assert any(node["subtitle"] == "run_folder" for node in payload["nodes"])
-    assert any(node["subtitle"] == "sample_folder" for node in payload["nodes"])
+    root = next(node for node in payload["nodes"] if node["id"] == payload["root_euid"])
+    assert root["subtitle"] == "folder" and root["storage_kind"] == "prefix"
+    assert root["metadata"]["run_id"] == "RUN504352"
+    sample_nodes = [
+        node
+        for node in payload["nodes"]
+        if node["storage_kind"] == "prefix" and node["metadata"].get("seq_index")
+    ]
+    assert len(sample_nodes) == 1
+    assert sample_nodes[0]["subtitle"] == "folder"
+    assert sample_nodes[0]["metadata"]["seq_index"] == "CAACGATATGTGAT"
     assert any(
         edge["source"] == imported["run_artifact"]["artifact_euid"] for edge in payload["edges"]
     )

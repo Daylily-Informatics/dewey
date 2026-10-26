@@ -94,6 +94,7 @@ qeo:
     )
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
     monkeypatch.delenv("DEWEY_API_BEARER_TOKEN", raising=False)
+    monkeypatch.setenv("DEWEY_CONFIG", str(cfg))
     loaded = load_settings()
     assert loaded.api_bearer_token == "yaml-token"
     assert loaded.cognito_domain == "auth.example.com"
@@ -210,6 +211,7 @@ database:
         encoding="utf-8",
     )
 
+    monkeypatch.setenv("DEWEY_CONFIG", str(cfg))
     loaded = load_settings()
 
     assert loaded.auth_mode == "external_broker"
@@ -333,7 +335,8 @@ def test_settings_honors_tapdb_config_path_env_override(
     assert loaded.tapdb_config_path == str(Path("/tmp/from-env-tapdb.yaml").resolve())
 
 
-def test_settings_require_absolute_tapdb_paths() -> None:
+def test_settings_require_absolute_tapdb_paths(monkeypatch) -> None:
+    monkeypatch.delenv("TAPDB_CONFIG_PATH")
     with pytest.raises(ValueError, match="absolute file path"):
         Settings(
             api_bearer_token="token",

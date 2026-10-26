@@ -1,0 +1,34 @@
+{
+  "observed_at": "2026-10-26T07:26:43.550Z",
+  "release": "12.0.6",
+  "share_euid": "M-DGX-14D1F",
+  "scope": "Native Chrome management controls; edit dialog opened then closed without submission",
+  "visible_controls": [
+    "Copy share link",
+    "Edit share and targets",
+    "Send login invitation",
+    "Revoke share",
+    "Claim a URL slug",
+    "Revoke recipient grant",
+    "Load activity",
+    "Export loaded activity JSON"
+  ],
+  "edit_fields": [
+    "name",
+    "purpose",
+    "audience",
+    "expiry/no expiry",
+    "content mode",
+    "WWW entrypoint",
+    "WWW bundle root",
+    "target EUID membership",
+    "include/exclude filters",
+    "excluded emails",
+    "recipient grants",
+    "add/remove grant",
+    "grant-specific filters and expiry"
+  ],
+  "mutation_performed": false,
+  "validation_limit": "Form handlers have separate automated regression coverage; live lifecycle mutations were proven through the same management API.",
+  "baseline_limit": "Existing11.0.10 share search matches name/purpose despite its name-or-EUID placeholder; generic OpenEUID targets registry records. Use sharing name search or canonical management path."
+}

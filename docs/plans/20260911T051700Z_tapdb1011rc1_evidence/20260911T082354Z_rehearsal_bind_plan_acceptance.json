@@ -1,0 +1,673 @@
+{
+  "bind_plan": {
+    "catalog_counts": {
+      "functions": 30,
+      "grants": 25,
+      "objects": 31,
+      "policies": 19,
+      "routine_grants": 30,
+      "sequence_bindings": 15,
+      "triggers": 19
+    },
+    "companion_inputs_sha256": "8560a114ba006ac634d2a026d7333e050b3482d2bec2a8e88e54339b9383da41",
+    "database_access": {
+      "acl": "{dayhoff=CTc/dayhoff,dewey_rehearsal_9=c/dayhoff}",
+      "operator_temp": true,
+      "operator_temp_after_revokes": true,
+      "runtime_connect": true,
+      "runtime_temp": false
+    },
+    "database_grants": [
+      {
+        "database": "dewey_tapdb10_rehearsal_20260911",
+        "privileges": [
+          "CONNECT"
+        ]
+      }
+    ],
+    "database_revokes": [
+      {
+        "database": "dewey_tapdb10_rehearsal_20260911",
+        "grantee": "PUBLIC",
+        "grantee_kind": "public",
+        "privileges": [
+          "TEMPORARY"
+        ]
+      },
+      {
+        "database": "dewey_tapdb10_rehearsal_20260911",
+        "grantee": "dewey_rehearsal_9",
+        "grantee_kind": "role",
+        "privileges": [
+          "TEMPORARY"
+        ]
+      }
+    ],
+    "default_acls": [],
+    "existing_scope": null,
+    "grants": [
+      {
+        "kind": "TABLE",
+        "name": "_tapdb_migrations",
+        "privileges": [
+          "SELECT"
+        ]
+      },
+      {
+        "kind": "SEQUENCE",
+        "name": "adt_instance_seq",
+        "privileges": [
+          "USAGE",
+          "SELECT"
+        ]
+      },
+      {
+        "kind": "TABLE",
+        "name": "audit_log",
+        "privileges": [
+          "SELECT",
+          "INSERT",
+          "UPDATE",
+          "DELETE"
+        ]
+      },
+      {
+        "kind": "SEQUENCE",
+        "name": "audit_log_uid_seq",
+        "privileges": [
+          "USAGE",
+          "SELECT"
+        ]
+      },
+      {
+        "kind": "SEQUENCE",
+        "name": "ay_instance_seq",
+        "privileges": [
+          "USAGE",
+          "SELECT"
+        ]
+      },
+      {
+        "kind": "SEQUENCE",
+        "name": "dgx_instance_seq",
+        "privileges": [
+          "USAGE",
+          "SELECT"
+        ]
+      },
+      {
+        "kind": "SEQUENCE",
+        "name": "edg_instance_seq",
+        "privileges": [
+          "USAGE",
+          "SELECT"
+        ]
+      },
+      {
+        "kind": "TABLE",
+        "name": "generic_instance",
+        "privileges": [
+          "SELECT",
+          "INSERT",
+          "UPDATE",
+          "DELETE"
+        ]
+      },
+      {
+        "kind": "TABLE",
+        "name": "generic_instance_lineage",
+        "privileges": [
+          "SELECT",
+          "INSERT",
+          "UPDATE",
+          "DELETE"
+        ]
+      },
+      {
+        "kind": "SEQUENCE",
+        "name": "generic_instance_lineage_uid_seq",
+        "privileges": [
+          "USAGE",
+          "SELECT"
+        ]
+      },
+      {
+        "kind": "SEQUENCE",
+        "name": "generic_instance_uid_seq",
+        "privileges": [
+          "USAGE",
+          "SELECT"
+        ]
+      },
+      {
+        "kind": "TABLE",
+        "name": "generic_template",
+        "privileges": [
+          "SELECT",
+          "INSERT",
+          "UPDATE",
+          "DELETE"
+        ]
+      },
+      {
+        "kind": "SEQUENCE",
+        "name": "generic_template_uid_seq",
+        "privileges": [
+          "USAGE",
+          "SELECT"
+        ]
+      },
+      {
+        "kind": "TABLE",
+        "name": "inbox_message",
+        "privileges": [
+          "SELECT",
+          "INSERT",
+          "UPDATE",
+          "DELETE"
+        ]
+      },
+      {
+        "kind": "SEQUENCE",
+        "name": "inbox_message_uid_seq",
+        "privileges": [
+          "USAGE",
+          "SELECT"
+        ]
+      },
+      {
+        "kind": "SEQUENCE",
+        "name": "msg_instance_seq",
+        "privileges": [
+          "USAGE",
+          "SELECT"
+        ]
+      },
+      {
+        "kind": "TABLE",
+        "name": "outbox_event",
+        "privileges": [
+          "SELECT",
+          "INSERT",
+          "UPDATE",
+          "DELETE"
+        ]
+      },
+      {
+        "kind": "TABLE",
+        "name": "outbox_event_attempt",
+        "privileges": [
+          "SELECT",
+          "INSERT",
+          "UPDATE",
+          "DELETE"
+        ]
+      },
+      {
+        "kind": "SEQUENCE",
+        "name": "outbox_event_attempt_uid_seq",
+        "privileges": [
+          "USAGE",
+          "SELECT"
+        ]
+      },
+      {
+        "kind": "SEQUENCE",
+        "name": "outbox_event_id_seq",
+        "privileges": [
+          "USAGE",
+          "SELECT"
+        ]
+      },
+      {
+        "kind": "TABLE",
+        "name": "tapdb_identity_prefix_config",
+        "privileges": [
+          "SELECT"
+        ]
+      },
+      {
+        "kind": "TABLE",
+        "name": "tapdb_legacy_outbox_mapping",
+        "privileges": [
+          "SELECT"
+        ]
+      },
+      {
+        "kind": "SEQUENCE",
+        "name": "wsx_instance_seq",
+        "privileges": [
+          "USAGE",
+          "SELECT"
+        ]
+      },
+      {
+        "kind": "SEQUENCE",
+        "name": "wx_instance_seq",
+        "privileges": [
+          "USAGE",
+          "SELECT"
+        ]
+      },
+      {
+        "kind": "SEQUENCE",
+        "name": "xx_instance_seq",
+        "privileges": [
+          "USAGE",
+          "SELECT"
+        ]
+      }
+    ],
+    "helper_sha256": "9921210bd5b3ee4fcc52f06184dd88a6efa986e23e608f3672ccffcd529372f2",
+    "identity": {
+      "current_user": "dayhoff",
+      "database": "dewey_tapdb10_rehearsal_20260911",
+      "database_oid": 645854,
+      "session_user": "dayhoff"
+    },
+    "inputs_identical_to_previously_accepted_and_actual_bootstrap": true,
+    "native_sha256": "e65fdff7d846d58730696f5e54cb34936d470d8073d25f0c04ac2606cc360f86",
+    "operator_config_sha256": "9208dde2d25577ff06679e2bd19a37870ddc1c5d3039edc11dd31f3da8f53520",
+    "operator_database_grants": [],
+    "planned_default_privileges": {
+      "sequences": [],
+      "tables": []
+    },
+    "preserved_generators_outside_runtime_grant_set": [
+      "gse_instance_seq",
+      "gvr_instance_seq",
+      "sys_instance_seq",
+      "tpx_instance_seq",
+      "xrf_instance_seq"
+    ],
+    "principal": {
+      "bypassrls": false,
+      "createdb": false,
+      "createrole": false,
+      "inherit": false,
+      "login": true,
+      "memberships": [],
+      "name": "dewey_rehearsal_9",
+      "oid": 646337,
+      "replication": false,
+      "superuser": false
+    },
+    "routine_grants": [
+      {
+        "arguments": "code text",
+        "definition_hash": "91c443a4dce167a9e31b6a8b25f90070",
+        "name": "tapdb_validate_domain_code",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "code text",
+        "definition_hash": "caf52f378974de53f08e916a56494d5c",
+        "name": "tapdb_validate_owner_repo_name",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "",
+        "definition_hash": "530d10474c06dacbb70ead5bfae24064",
+        "name": "tapdb_current_domain_code",
+        "owner": "dayhoff",
+        "security_definer": true
+      },
+      {
+        "arguments": "",
+        "definition_hash": "e5d3c75256a815069de443a3dd9c7998",
+        "name": "tapdb_current_owner_repo_name",
+        "owner": "dayhoff",
+        "security_definer": true
+      },
+      {
+        "arguments": "val bigint",
+        "definition_hash": "dc6322e6fe825fce9023f7998b1f040e",
+        "name": "crockford_base32_encode",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "val text",
+        "definition_hash": "b7cbc2aaa3d02158f4f9403c5e96d1aa",
+        "name": "crockford_base32_decode",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "prefix text",
+        "definition_hash": "d108560dba9b899157c1e0b578be8513",
+        "name": "tapdb_validate_meridian_prefix",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "euid text",
+        "definition_hash": "ac68c1d5a2527a5c2a799b5362f38e3f",
+        "name": "meridian_euid_domain_code",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "euid text",
+        "definition_hash": "9467800e1fb82070eec1301137721dd8",
+        "name": "meridian_euid_prefix",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "euid text",
+        "definition_hash": "e670010e0a0747de8f9d56a4599dad7c",
+        "name": "meridian_euid_seq_from_euid",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "payload text",
+        "definition_hash": "540efb44269edf789cd43155a8c3e161",
+        "name": "meridian_luhn_mod32_check",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "prefix text, seq_val bigint, domain_code text",
+        "definition_hash": "38b75f5f16e74c55268e27c84c1e3466",
+        "name": "meridian_generate_euid",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "prefix text, seq_val bigint",
+        "definition_hash": "963d8b9ad5e5a4a45467307e28b30e8c",
+        "name": "meridian_generate_euid",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "entity_name text",
+        "definition_hash": "45471b31dbf4a02fc47d79ff72911612",
+        "name": "tapdb_get_identity_prefix",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "",
+        "definition_hash": "1ef713e92d24cf13cb340887f50076fe",
+        "name": "set_generic_template_euid",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "",
+        "definition_hash": "9fca9b8f4354fd2afbc64c3fffc6e15e",
+        "name": "set_generic_instance_euid",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "",
+        "definition_hash": "bd5200aeab75dd4784fb6f8f6065f36f",
+        "name": "set_generic_instance_lineage_euid",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "",
+        "definition_hash": "63172eefab8d01ba3464a66891e99e94",
+        "name": "set_audit_log_euid",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "",
+        "definition_hash": "5d5a3998d8624573ec6119b306556c76",
+        "name": "soft_delete_row",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "",
+        "definition_hash": "f5d71203c2b82d22ee1ae33cc260c2d6",
+        "name": "record_update",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "",
+        "definition_hash": "b77f6e4fce4ad32a0d78a0f81ee5a567",
+        "name": "record_insert",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "",
+        "definition_hash": "5d85fd0b2db0f0d793738ecade8ccecb",
+        "name": "update_modified_dt",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "",
+        "definition_hash": "147c9d93b76a3f34729a1fa3b96ffa02",
+        "name": "tapdb_session_role_is_operator",
+        "owner": "dayhoff",
+        "security_definer": true
+      },
+      {
+        "arguments": "",
+        "definition_hash": "6dec4452f23de133e163ca3534fecfd8",
+        "name": "tapdb_current_tenant_id",
+        "owner": "dayhoff",
+        "security_definer": true
+      },
+      {
+        "arguments": "",
+        "definition_hash": "8d801e455d4c858640b1359fcd623c6c",
+        "name": "tapdb_current_actor",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "",
+        "definition_hash": "1c71f722b03069977615f850f4f52f31",
+        "name": "tapdb_allow_global_rows",
+        "owner": "dayhoff",
+        "security_definer": true
+      },
+      {
+        "arguments": "",
+        "definition_hash": "897dc09aee39af1335fc9c601598ab7f",
+        "name": "tapdb_assert_runtime_role",
+        "owner": "dayhoff",
+        "security_definer": true
+      },
+      {
+        "arguments": "",
+        "definition_hash": "2b6dba64293fd415d343f9c19efe7273",
+        "name": "tapdb_reject_runtime_scope_mutation",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "",
+        "definition_hash": "f3de606d14e7540c351c0d870702624c",
+        "name": "tapdb_validate_lineage_endpoint_scope",
+        "owner": "dayhoff",
+        "security_definer": false
+      },
+      {
+        "arguments": "",
+        "definition_hash": "daf7208973029566791889322db3cf33",
+        "name": "tapdb_reject_legacy_outbox_mapping_mutation",
+        "owner": "dayhoff",
+        "security_definer": false
+      }
+    ],
+    "runtime_config": "/opt/dewey/day/releases/tapdb10-rehearsal-20260911/tapdb-runtime.yaml",
+    "runtime_config_sha256": "a5ee191de51ae3912c96878ac92a3f80429888638d578ccb191f6cf1b6025117",
+    "runtime_session_requirement": {
+      "action": "close_and_recreate_pre_binding_runtime_sessions",
+      "performed_by_bind": false,
+      "reason": "Database TEMP revocation does not remove existing temporary objects or prove existing sessions cannot create more.",
+      "verified": false
+    },
+    "schema": {
+      "acl": "{dayhoff=UC/dayhoff}",
+      "oid": 28108,
+      "owner": "dayhoff",
+      "owner_oid": 16409,
+      "runtime_create": false,
+      "sql_name": "tapdb_dewey_lsmcok1_local"
+    },
+    "scope": {
+      "allow_global_rows": false,
+      "config_identity": "/opt/dewey/day/releases/tapdb10-rehearsal-20260911/tapdb-runtime.yaml",
+      "domain_code": "M",
+      "issuer_app_code": "dewey",
+      "schema_name": "tapdb_dewey_lsmcok1_local",
+      "tenant_id": null
+    },
+    "security_assets_match_exact_release": {
+      "allocator_functions.sql": "0c0897df273fc581a02f133f8dde043c38d3149486598618189c1ae4388acbe3",
+      "rls.sql": "85144de81d7ec7d9f5a30b7776b78adb9dd46de08e6506a8c76a6c1ae46a9afd",
+      "tapdb_schema.sql": "f174ac8100c84aba3ed29a74b35df36a39b63e0b296271a66aa777194aad1ca8"
+    },
+    "target": {
+      "allow_global_claims": false,
+      "client_id": "dewey",
+      "cluster_identifier": "dayhoff-lsmcok1-tapdb",
+      "config_path": "/opt/dewey/day/releases/tapdb10-rehearsal-20260911/tapdb-runtime.yaml",
+      "database": "dewey_tapdb10_rehearsal_20260911",
+      "database_name": "dewey-day",
+      "domain_code": "M",
+      "engine_type": "aurora",
+      "host": "dayhoff-lsmcok1-tapdb.cluster-ch4mq8a6wcdf.us-west-2.rds.amazonaws.com",
+      "hostaddr": "",
+      "iam_auth": false,
+      "operator_iam_auth": false,
+      "operator_user": "dayhoff",
+      "owner_repo_name": "dewey",
+      "port": 5432,
+      "region": "us-west-2",
+      "schema_name": "tapdb_dewey_lsmcok1_local",
+      "sslrootcert": "/home/ubuntu/.config/tapdb/rds-ca-bundle.pem",
+      "tenant_id": "",
+      "user": "dewey_rehearsal_9"
+    }
+  },
+  "bootstrap": {
+    "accepted_plan_sha256": "bba0522a8ae3e5f64a176928adbd10a43c4f6867bc235885d4e5bc67295b416b",
+    "created": true,
+    "grants": [
+      {
+        "database": "dewey_tapdb10_rehearsal_20260911",
+        "privileges": [
+          "CONNECT"
+        ]
+      }
+    ],
+    "native_sha256": "259ebed9eccbd1cc2c4f4b5fa81f4e570d80f99acf3022ee176a494118ebe6cb",
+    "outer_sha256": "494fe841eb7fd792757ef597b06bd6267b19191ad02a6ac0a74316283cc15371",
+    "principal": {
+      "bypassrls": false,
+      "createdb": false,
+      "createrole": false,
+      "inherit": false,
+      "login": true,
+      "memberships": [],
+      "name": "dewey_rehearsal_9",
+      "oid": 646337,
+      "replication": false,
+      "superuser": false
+    },
+    "status": "applied"
+  },
+  "checks": [
+    "All seven supplied file hashes independently recomputed.",
+    "Native bind/companion/bootstrap and completed verification seals independently recomputed.",
+    "Fresh RC0 verification is the exact entire successful verification from the committed advance; all130 prior floors exact and150 future result floors retained.",
+    "Actual bootstrap is created/applied and binds the exact accepted bootstrap plan; principal OID646337 remains LOGIN only with empty memberships.",
+    "Bind inputs exactly match accepted bootstrap and actual bootstrap inputs, preserving runtime path, matching runtime credential reference and separate operator reference.",
+    "Authenticated operator and physical database OID match accepted rehearsal copy.",
+    "New immutable scope is exact M/dewey, tenantNULL, allow_global_rowsfalse and fixed runtime config identity.",
+    "All three security asset hashes match exact released source; native preflight owns full canonical routine/policy/trigger verification.",
+    "All31 schema objects remain operator-owned; all10 protected tables keep enabled/forced RLS, tracking table excepted as specified.",
+    "Exact grant list is7 writable tables,3 read-only tables and15 proven runtime sequences;30 canonical routines; no scope-table grant or global default privilege expansion.",
+    "All selected sequence definitions/current positions/owners/dependencies match committed allocator state; prefix semantics unchanged.",
+    "PUBLIC and runtime TEMP revoked, existing operator TEMP preserved; runtime schema CREATE absent and principal elevated attributes absent.",
+    "Native bind apply must re-read and require exact equality with reviewed catalog/role/scope/privileges before applying."
+  ],
+  "completed_transition": {
+    "complete_result_floors_retained": 150,
+    "completed_at": "2026-09-11T08:18:13.995753+00:00",
+    "exact_equality_with_committed_apply_verification": true,
+    "floor_count": 130,
+    "helper_commit": "928c24d",
+    "helper_sha256": "0e2765067beb776dfe914a553d02ef8d2710723ff2582cc5fa56e43b2b6378a1",
+    "inventory_sha256": "584a01f80984c14cd15a79cff007b4e260fafd97481ab8f80b03aaae7c56e170",
+    "native_verification_sha256": "84c97198683d71494277cf05ccfb6df058481560d8c53a064b8855bb439c8eab",
+    "returncode": 0
+  },
+  "disposition": {
+    "actual_runtime_bootstrap": "accepted",
+    "exact_runtime_bind_apply": "accepted",
+    "fresh_completed_transition_verification": "accepted",
+    "fresh_runtime_and_isolated_image_acceptance": "pending",
+    "runtime_bind_completion": "pending_operator_execution"
+  },
+  "inputs": {
+    "rehearsal-completed-transition-floors.json": {
+      "bytes": 27336,
+      "file_sha256": "d4d902717ade64e13c90d0cc5ae1d19fc28dab023accabd31169dc69e66ee548",
+      "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-tapdb10-major-20260910/docs/plans/evidence/20260911_dewey_rc_inventory/rehearsal-completed-transition-floors.json"
+    },
+    "rehearsal-completed-transition-preparation.json": {
+      "bytes": 2548,
+      "file_sha256": "ddd6160c4f1907844358bf3eaa10ad13ac030b4752f77da2d8430ea4d6e95a5e",
+      "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-tapdb10-major-20260910/docs/plans/evidence/20260911_dewey_rc_inventory/rehearsal-completed-transition-preparation.json"
+    },
+    "rehearsal-completed-transition-verify.completed.json": {
+      "bytes": 3019,
+      "file_sha256": "982e78abb5092c7784a25f31baaaf199734b16db57c1f1697004f5f85a6dd61c",
+      "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-tapdb10-major-20260910/docs/plans/evidence/20260911_dewey_rc_inventory/rehearsal-completed-transition-verify.completed.json"
+    },
+    "rehearsal-completed-transition-verify.json": {
+      "bytes": 27594,
+      "file_sha256": "858ff517ba01068374e6e5061bf25787f139c4542f6806839cb312958f13e03d",
+      "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-tapdb10-major-20260910/docs/plans/evidence/20260911_dewey_rc_inventory/rehearsal-completed-transition-verify.json"
+    },
+    "rehearsal-principal-bind-plan.inputs.json": {
+      "bytes": 1462,
+      "file_sha256": "9d4fe78d5c8e45208a84cf856a1eafe69501bdbdd3ebe7ae22360b9e2ebc3c9e",
+      "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-tapdb10-major-20260910/docs/plans/evidence/20260911_dewey_rc_inventory/rehearsal-principal-bind-plan.inputs.json"
+    },
+    "rehearsal-principal-bind-plan.json": {
+      "bytes": 152733,
+      "file_sha256": "f841c1221979b0c3412016e4acf2a330a3c59b857f3f5679420a443b1d544eac",
+      "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-tapdb10-major-20260910/docs/plans/evidence/20260911_dewey_rc_inventory/rehearsal-principal-bind-plan.json"
+    },
+    "rehearsal-principal-bootstrap-result.json": {
+      "bytes": 3021,
+      "file_sha256": "bb1fae3f055b911adc388a7a7642da1de7b3c387436899f970b939b09724eccb",
+      "path": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-tapdb10-major-20260910/docs/plans/evidence/20260911_dewey_rc_inventory/rehearsal-principal-bootstrap-result.json"
+    }
+  },
+  "limits": {
+    "credentials_read_by_E": false,
+    "database_calls": 0,
+    "runtime_sessions_created_by_E": false,
+    "test_suites_run": 0
+  },
+  "package": "daylily-tapdb==10.1.1rc1",
+  "remaining": [
+    "Actual bind result must report applied, reviewed plan link, privileges_verified true and runtime_temp_denied true.",
+    "Close/recreate pre-binding runtime sessions; native binding does not claim to do this.",
+    "Fresh isolated image runtime-only login/scope/privilege/11historicalDGX-binding checks and application acceptance remain separate.",
+    "Complete family and all20 generators/floors remain mandatory for future exposure/final-copy recovery."
+  ],
+  "reviewed_at": "2026-09-11T08:25:21.091803+00:00",
+  "reviewer": "independent E",
+  "schema_version": "dewey-independent-acceptance/v1",
+  "scope": "Fresh completed-transition verification, actual runtime bootstrap and exact rehearsal native binding plan"
+}

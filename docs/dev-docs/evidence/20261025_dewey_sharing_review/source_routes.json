@@ -1,0 +1,1319 @@
+{
+  "source_tag": "11.0.10",
+  "source_sha": "7f6fde5429741780517cf461a615e5b3e5f102f2",
+  "note": "Static decorator inventory; router prefixes/mounts are not expanded. Includes retained/blocked routes; not an availability claim.",
+  "routes": [
+    {
+      "file": "dewey_service/annotation_api.py",
+      "line": 177,
+      "method": "POST",
+      "path_literal": "/uploads/{operation_id}",
+      "handler": "create"
+    },
+    {
+      "file": "dewey_service/annotation_api.py",
+      "line": 187,
+      "method": "POST",
+      "path_literal": "/uploads/{operation_id}/resume",
+      "handler": "resume"
+    },
+    {
+      "file": "dewey_service/annotation_api.py",
+      "line": 206,
+      "method": "POST",
+      "path_literal": "/uploads/{operation_id}/complete",
+      "handler": "complete"
+    },
+    {
+      "file": "dewey_service/annotation_api.py",
+      "line": 231,
+      "method": "POST",
+      "path_literal": "/artifacts/{euid}/context",
+      "handler": "context"
+    },
+    {
+      "file": "dewey_service/annotation_api.py",
+      "line": 236,
+      "method": "GET",
+      "path_literal": "/artifacts/{euid}",
+      "handler": "resolve"
+    },
+    {
+      "file": "dewey_service/annotation_api.py",
+      "line": 241,
+      "method": "POST",
+      "path_literal": "/artifacts/{euid}/access",
+      "handler": "access"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1464,
+      "method": "GET",
+      "path_literal": "/",
+      "handler": "root",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1470,
+      "method": "GET",
+      "path_literal": "/favicon.ico",
+      "handler": "favicon",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1476,
+      "method": "GET",
+      "path_literal": "/auth/login",
+      "handler": "auth_login",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1494,
+      "method": "GET",
+      "path_literal": "/auth/callback",
+      "handler": "auth_callback",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1503,
+      "method": "GET",
+      "path_literal": "/auth/lsmc/callback",
+      "handler": "external_broker_callback",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1514,
+      "method": "GET",
+      "path_literal": "/login",
+      "handler": "login_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1528,
+      "method": "GET",
+      "path_literal": "/auth/error",
+      "handler": "auth_error",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1588,
+      "method": "GET",
+      "path_literal": "/auth/logout",
+      "handler": "auth_logout_get",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1592,
+      "method": "POST",
+      "path_literal": "/auth/logout",
+      "handler": "auth_logout_post",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1596,
+      "method": "POST",
+      "path_literal": "/logout",
+      "handler": "logout",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1600,
+      "method": "GET",
+      "path_literal": "/logout",
+      "handler": "logout_get_alias",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1604,
+      "method": "GET",
+      "path_literal": "/healthz",
+      "handler": "healthz"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1611,
+      "method": "GET",
+      "path_literal": "/readyz",
+      "handler": "readyz"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1631,
+      "method": "GET",
+      "path_literal": "/health",
+      "handler": "health"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1646,
+      "method": "GET",
+      "path_literal": "/obs_services",
+      "handler": "obs_services"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1654,
+      "method": "GET",
+      "path_literal": "/api_health",
+      "handler": "api_health"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1662,
+      "method": "GET",
+      "path_literal": "/endpoint_health",
+      "handler": "endpoint_health"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1679,
+      "method": "GET",
+      "path_literal": "/db_health",
+      "handler": "db_health"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1693,
+      "method": "GET",
+      "path_literal": "/my_health",
+      "handler": "my_health"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1700,
+      "method": "GET",
+      "path_literal": "/api/v1/me/preferences",
+      "handler": "current_user_preferences"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1714,
+      "method": "PUT",
+      "path_literal": "/api/v1/me/preferences",
+      "handler": "update_current_user_preferences"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1747,
+      "method": "GET",
+      "path_literal": "/auth_health",
+      "handler": "auth_health"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1755,
+      "method": "GET",
+      "path_literal": "/api/anomalies",
+      "handler": "list_anomalies"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1765,
+      "method": "GET",
+      "path_literal": "/api/anomalies/{anomaly_id}",
+      "handler": "get_anomaly"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1775,
+      "method": "GET",
+      "path_literal": "/ui",
+      "handler": "ui_home",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1781,
+      "method": "POST",
+      "path_literal": "/ui/register",
+      "handler": "ui_quick_register",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1881,
+      "method": "GET",
+      "path_literal": "/ui/anomalies",
+      "handler": "anomalies_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1896,
+      "method": "GET",
+      "path_literal": "/ui/anomalies/{anomaly_id}",
+      "handler": "anomaly_detail_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1916,
+      "method": "GET",
+      "path_literal": "/admin",
+      "handler": "admin_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1922,
+      "method": "POST",
+      "path_literal": "/admin/artifact-storage",
+      "handler": "admin_update_artifact_storage",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 1955,
+      "method": "GET",
+      "path_literal": "/ui/observability",
+      "handler": "observability_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2004,
+      "method": "GET",
+      "path_literal": "/literature",
+      "handler": "literature_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2043,
+      "method": "GET",
+      "path_literal": "/search",
+      "handler": "search_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2061,
+      "method": "GET",
+      "path_literal": "/search/export",
+      "handler": "search_export_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2094,
+      "method": "GET",
+      "path_literal": "/artifacts",
+      "handler": "artifacts_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2106,
+      "method": "GET",
+      "path_literal": "/artifacts/dag",
+      "handler": "artifact_dag_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2161,
+      "method": "GET",
+      "path_literal": "/graph",
+      "handler": "tapdb_graph_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2173,
+      "method": "GET",
+      "path_literal": "/artifacts/euid/{artifact_euid}",
+      "handler": "artifact_detail_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2182,
+      "method": "POST",
+      "path_literal": "/artifacts/euid/{artifact_euid}/external-reference/validate",
+      "handler": "artifact_external_reference_validate",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2219,
+      "method": "POST",
+      "path_literal": "/artifacts/euid/{artifact_euid}/external-reference/create",
+      "handler": "artifact_external_reference_create",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2284,
+      "method": "GET",
+      "path_literal": "/artifacts/bulk-template.tsv",
+      "handler": "artifacts_bulk_template",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2297,
+      "method": "POST",
+      "path_literal": "/artifacts/register",
+      "handler": "artifacts_register",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2505,
+      "method": "POST",
+      "path_literal": "/artifacts/bulk-upload",
+      "handler": "artifacts_bulk_upload",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2651,
+      "method": "POST",
+      "path_literal": "/artifacts/register-prefix",
+      "handler": "artifacts_register_prefix",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2703,
+      "method": "POST",
+      "path_literal": "/artifacts/import-run-prefix",
+      "handler": "artifacts_import_run_prefix",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2747,
+      "method": "POST",
+      "path_literal": "/sequencer-runs/register",
+      "handler": "sequencer_runs_register_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2787,
+      "method": "POST",
+      "path_literal": "/artifacts/search",
+      "handler": "artifacts_search",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2805,
+      "method": "POST",
+      "path_literal": "/artifacts/search/export",
+      "handler": "artifacts_search_export",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2834,
+      "method": "POST",
+      "path_literal": "/artifacts/download",
+      "handler": "artifacts_download",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2855,
+      "method": "POST",
+      "path_literal": "/artifacts/euid/{artifact_euid}/download",
+      "handler": "artifact_download_redirect",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2914,
+      "method": "GET",
+      "path_literal": "/shares",
+      "handler": "shared_data_report",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2925,
+      "method": "GET",
+      "path_literal": "/admin/shares",
+      "handler": "admin_shares_report",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2936,
+      "method": "POST",
+      "path_literal": "/shares/create",
+      "handler": "shares_create_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 2988,
+      "method": "GET",
+      "path_literal": "/shares/{share_euid}",
+      "handler": "share_detail_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3008,
+      "method": "POST",
+      "path_literal": "/shares/{share_euid}/access-package",
+      "handler": "share_access_package_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3054,
+      "method": "POST",
+      "path_literal": "/shares/{share_euid}/revoke",
+      "handler": "share_revoke_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3081,
+      "method": "POST",
+      "path_literal": "/share-roots/create",
+      "handler": "share_roots_create_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3125,
+      "method": "POST",
+      "path_literal": "/share-roots/{share_root_euid}/subsets/create",
+      "handler": "share_root_subset_create_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3175,
+      "method": "POST",
+      "path_literal": "/artifacts/share",
+      "handler": "artifacts_share",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3216,
+      "method": "POST",
+      "path_literal": "/artifacts/sets/create",
+      "handler": "artifacts_set_create",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3265,
+      "method": "POST",
+      "path_literal": "/artifacts/sets/search",
+      "handler": "artifacts_set_search",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3283,
+      "method": "POST",
+      "path_literal": "/artifacts/sets/export",
+      "handler": "artifacts_set_export",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3312,
+      "method": "POST",
+      "path_literal": "/artifacts/sets/share",
+      "handler": "artifacts_set_share",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3361,
+      "method": "POST",
+      "path_literal": "/api/v1/literature/search",
+      "handler": "literature_search"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3376,
+      "method": "POST",
+      "path_literal": "/api/v1/literature/save",
+      "handler": "literature_save"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3398,
+      "method": "PATCH",
+      "path_literal": "/api/v1/literature/saves/{literature_save_euid}",
+      "handler": "literature_save_visibility"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3422,
+      "method": "GET",
+      "path_literal": "/api/v1/literature/saves/mine",
+      "handler": "my_literature_saves"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3433,
+      "method": "GET",
+      "path_literal": "/api/v1/artifacts/{artifact_euid}",
+      "handler": "get_artifact"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3443,
+      "method": "GET",
+      "path_literal": "/api/v1/artifacts/{artifact_euid}/children",
+      "handler": "get_artifact_children"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3457,
+      "method": "GET",
+      "path_literal": "/api/v1/artifacts/{artifact_euid}/parents",
+      "handler": "get_artifact_parents"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3471,
+      "method": "GET",
+      "path_literal": "/api/v1/artifacts/{artifact_euid}/graph",
+      "handler": "get_artifact_graph"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3488,
+      "method": "GET",
+      "path_literal": "/api/v1/storage/browse",
+      "handler": "browse_storage_prefix"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3511,
+      "method": "POST",
+      "path_literal": "/api/v1/artifacts/{artifact_euid}/storage/verify",
+      "handler": "verify_artifact_storage"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3534,
+      "method": "POST",
+      "path_literal": "/api/v1/artifacts/{artifact_euid}/storage/lock",
+      "handler": "lock_artifact_storage"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3560,
+      "method": "GET",
+      "path_literal": "/api/v1/artifacts",
+      "handler": "list_artifacts"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3576,
+      "method": "POST",
+      "path_literal": "/api/v1/artifacts",
+      "handler": "register_artifact"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3608,
+      "method": "POST",
+      "path_literal": "/api/v1/artifacts/import",
+      "handler": "import_artifact"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3636,
+      "method": "POST",
+      "path_literal": "/api/v1/artifact-prefixes",
+      "handler": "register_artifact_prefix"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3659,
+      "method": "POST",
+      "path_literal": "/api/v1/artifacts/import-run-prefix",
+      "handler": "import_run_prefix"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3685,
+      "method": "POST",
+      "path_literal": "/api/v1/sequencer-runs/register",
+      "handler": "register_sequencer_run"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3715,
+      "method": "POST",
+      "path_literal": "/api/v1/analysis-results/register",
+      "handler": "register_analysis_results"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3747,
+      "method": "POST",
+      "path_literal": "/api/v1/artifacts/upload-sessions",
+      "handler": "create_upload_session"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3774,
+      "method": "POST",
+      "path_literal": "/api/v1/artifacts/upload-sessions/{upload_token}/complete",
+      "handler": "complete_upload_session"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3800,
+      "method": "GET",
+      "path_literal": "/api/v1/artifact-sets/{artifact_set_euid}",
+      "handler": "get_artifact_set"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3810,
+      "method": "GET",
+      "path_literal": "/api/v1/artifact-sets",
+      "handler": "list_artifact_sets"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3824,
+      "method": "POST",
+      "path_literal": "/api/v1/artifact-sets/analysis/register",
+      "handler": "register_analysis_artifact_set"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3847,
+      "method": "POST",
+      "path_literal": "/api/v1/artifact-sets/multiqc/register",
+      "handler": "register_multiqc_artifact_set"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3870,
+      "method": "POST",
+      "path_literal": "/api/v1/artifact-sets",
+      "handler": "create_artifact_set"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3892,
+      "method": "POST",
+      "path_literal": "/api/v1/artifact-sets/{artifact_set_euid}/members",
+      "handler": "add_artifact_set_member"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3915,
+      "method": "DELETE",
+      "path_literal": "/api/v1/artifact-sets/{artifact_set_euid}/members/{artifact_euid}",
+      "handler": "remove_artifact_set_member"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3938,
+      "method": "POST",
+      "path_literal": "/api/v1/resolve/multiqc",
+      "handler": "resolve_multiqc"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3952,
+      "method": "POST",
+      "path_literal": "/api/v1/resolve/artifact",
+      "handler": "resolve_artifact"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3962,
+      "method": "POST",
+      "path_literal": "/api/v1/resolve/artifact-set",
+      "handler": "resolve_artifact_set"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 3974,
+      "method": "POST",
+      "path_literal": "/api/v1/shares",
+      "handler": "create_share"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 4012,
+      "method": "GET",
+      "path_literal": "/api/v1/shares/{share_euid}",
+      "handler": "get_share"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 4022,
+      "method": "POST",
+      "path_literal": "/api/v1/shares/{share_euid}/access-package",
+      "handler": "create_share_access_package"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 4048,
+      "method": "POST",
+      "path_literal": "/api/v1/shares/{share_euid}/revoke",
+      "handler": "revoke_share"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 4059,
+      "method": "GET",
+      "path_literal": "/api/v1/shares/{share_euid}/audit",
+      "handler": "list_share_audit"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 4069,
+      "method": "POST",
+      "path_literal": "/api/v1/share-roots",
+      "handler": "create_share_root"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 4092,
+      "method": "POST",
+      "path_literal": "/api/v1/share-roots/{share_root_euid}/subsets",
+      "handler": "create_share_root_subset"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 4128,
+      "method": "GET",
+      "path_literal": "/api/v1/artifacts/{artifact_euid}/shares",
+      "handler": "list_artifact_shares"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 4148,
+      "method": "POST",
+      "path_literal": "/api/search/v2/query",
+      "handler": "search_v2_query"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 4158,
+      "method": "POST",
+      "path_literal": "/api/search/v2/export",
+      "handler": "search_v2_export"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 4187,
+      "method": "POST",
+      "path_literal": "/api/v1/external-objects",
+      "handler": "create_external_object"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 4233,
+      "method": "POST",
+      "path_literal": "/api/v1/external-object-relations",
+      "handler": "attach_external_object_relation"
+    },
+    {
+      "file": "dewey_service/app.py",
+      "line": 4258,
+      "method": "GET",
+      "path_literal": "/api/v1/{target_type}/{target_euid}/external-object-relations",
+      "handler": "list_external_object_relations"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 111,
+      "method": "PATCH",
+      "path_literal": "/records/{euid}/owner",
+      "handler": "owner"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 166,
+      "method": "POST",
+      "path_literal": "/records",
+      "handler": "register"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 171,
+      "method": "GET",
+      "path_literal": "/records/{euid}",
+      "handler": "resolve"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 175,
+      "method": "GET",
+      "path_literal": "/records/{euid}/metadata",
+      "handler": "record_metadata"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 179,
+      "method": "GET",
+      "path_literal": "/records/{euid}/activity",
+      "handler": "record_activity"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 183,
+      "method": "GET",
+      "path_literal": "/records/{euid}/members",
+      "handler": "record_members"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 187,
+      "method": "PATCH",
+      "path_literal": "/records/{euid}",
+      "handler": "edit"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 191,
+      "method": "POST",
+      "path_literal": "/records/{euid}/archive",
+      "handler": "archive"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 195,
+      "method": "PATCH",
+      "path_literal": "/records/{euid}/permissions",
+      "handler": "permissions"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 199,
+      "method": "GET",
+      "path_literal": "/records/{euid}/contents",
+      "handler": "contents"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 204,
+      "method": "POST",
+      "path_literal": "/records/{euid}/members",
+      "handler": "add_member"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 209,
+      "method": "DELETE",
+      "path_literal": "/records/{euid}/members/{member_euid}",
+      "handler": "remove_member"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 214,
+      "method": "POST",
+      "path_literal": "/records/{euid}/access",
+      "handler": "access"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 218,
+      "method": "POST",
+      "path_literal": "/records/{euid}/shares",
+      "handler": "share"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 223,
+      "method": "POST",
+      "path_literal": "/records/{euid}/shares/preview",
+      "handler": "preview_selection"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 227,
+      "method": "POST",
+      "path_literal": "/registry/search",
+      "handler": "search"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 231,
+      "method": "POST",
+      "path_literal": "/registry/search/counts",
+      "handler": "search_counts"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 235,
+      "method": "GET",
+      "path_literal": "/registry/shares",
+      "handler": "share_index"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 240,
+      "method": "GET",
+      "path_literal": "/registry/shares/{euid}",
+      "handler": "share_detail"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 244,
+      "method": "GET",
+      "path_literal": "/registry/shares/{euid}/contents",
+      "handler": "share_contents"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 250,
+      "method": "GET",
+      "path_literal": "/registry/shares/{euid}/activity",
+      "handler": "share_activity"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 254,
+      "method": "POST",
+      "path_literal": "/registry/shares/{euid}/grants/{grant_euid}/revoke",
+      "handler": "revoke_grant"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 258,
+      "method": "PATCH",
+      "path_literal": "/registry/shares/{euid}",
+      "handler": "share_edit"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 262,
+      "method": "POST",
+      "path_literal": "/registry/shares/{euid}/revoke",
+      "handler": "share_revoke"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 267,
+      "method": "POST",
+      "path_literal": "/registry/shares/{euid}/invite",
+      "handler": "invite"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 273,
+      "method": "GET",
+      "path_literal": "/storage/buckets",
+      "handler": "buckets"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 277,
+      "method": "GET",
+      "path_literal": "/storage/object",
+      "handler": "object_detail"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 281,
+      "method": "POST",
+      "path_literal": "/storage/access",
+      "handler": "storage_access"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 285,
+      "method": "POST",
+      "path_literal": "/storage/uploads",
+      "handler": "upload"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 289,
+      "method": "PUT",
+      "path_literal": "/storage/uploads/{euid}/parts/{number}",
+      "handler": "part"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 303,
+      "method": "POST",
+      "path_literal": "/storage/uploads/{euid}/complete",
+      "handler": "complete"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 307,
+      "method": "POST",
+      "path_literal": "/storage/uploads/{euid}/abort",
+      "handler": "abort"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 311,
+      "method": "POST",
+      "path_literal": "/storage/deletions/preview",
+      "handler": "deletion_preview"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 315,
+      "method": "POST",
+      "path_literal": "/storage/deletions/{euid}/execute",
+      "handler": "deletion_execute"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 319,
+      "method": "GET",
+      "path_literal": "/storage/operations/{euid}",
+      "handler": "operation"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 325,
+      "method": "GET",
+      "path_literal": "/account/tokens",
+      "handler": "tokens"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 329,
+      "method": "GET",
+      "path_literal": "/registry/admin",
+      "handler": "administration"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 339,
+      "method": "GET",
+      "path_literal": "/registry/defaults",
+      "handler": "defaults"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 343,
+      "method": "PATCH",
+      "path_literal": "/registry/defaults",
+      "handler": "change_defaults"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 347,
+      "method": "POST",
+      "path_literal": "/account/tokens",
+      "handler": "token_create"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 351,
+      "method": "POST",
+      "path_literal": "/account/tokens/{euid}/revoke",
+      "handler": "token_revoke"
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 370,
+      "method": "GET",
+      "path_literal": "/ui",
+      "handler": "library_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 371,
+      "method": "GET",
+      "path_literal": "/search",
+      "handler": "library_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 375,
+      "method": "GET",
+      "path_literal": "/sets",
+      "handler": "sets_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 379,
+      "method": "GET",
+      "path_literal": "/storage",
+      "handler": "storage_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 380,
+      "method": "GET",
+      "path_literal": "/artifacts/dag",
+      "handler": "storage_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 384,
+      "method": "GET",
+      "path_literal": "/records/{euid}",
+      "handler": "record_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 385,
+      "method": "GET",
+      "path_literal": "/artifacts/euid/{euid}",
+      "handler": "record_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 389,
+      "method": "GET",
+      "path_literal": "/artifacts",
+      "handler": "add_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 390,
+      "method": "GET",
+      "path_literal": "/add",
+      "handler": "add_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 394,
+      "method": "GET",
+      "path_literal": "/shares",
+      "handler": "shares_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 398,
+      "method": "GET",
+      "path_literal": "/shares/{euid}",
+      "handler": "recipient_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 402,
+      "method": "GET",
+      "path_literal": "/account",
+      "handler": "account_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 406,
+      "method": "GET",
+      "path_literal": "/literature",
+      "handler": "literature_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/registry_api.py",
+      "line": 410,
+      "method": "GET",
+      "path_literal": "/admin",
+      "handler": "admin_page",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/report_preview.py",
+      "line": 131,
+      "method": "POST",
+      "path_literal": "/records/{euid}/preview",
+      "handler": "retired_record_preview"
+    },
+    {
+      "file": "dewey_service/report_preview.py",
+      "line": 135,
+      "method": "API_ROUTE",
+      "path_literal": "/previews/{path:path}",
+      "handler": "retired_bearer_preview",
+      "methods": [
+        "GET",
+        "HEAD"
+      ],
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/report_preview.py",
+      "line": 139,
+      "method": "POST",
+      "path_literal": "/registry/shares/{share_euid}/preview",
+      "handler": "create_preview"
+    },
+    {
+      "file": "dewey_service/report_preview.py",
+      "line": 187,
+      "method": "GET",
+      "path_literal": "/__dewey_preview/challenge",
+      "handler": "preview_challenge",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/report_preview.py",
+      "line": 205,
+      "method": "POST",
+      "path_literal": "/registry/shares/{share_euid}/preview/{context_euid}/handoff",
+      "handler": "issue_handoff"
+    },
+    {
+      "file": "dewey_service/report_preview.py",
+      "line": 225,
+      "method": "POST",
+      "path_literal": "/__dewey_preview/handoff",
+      "handler": "consume_handoff",
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/report_preview.py",
+      "line": 261,
+      "method": "API_ROUTE",
+      "path_literal": "/__dewey_preview/assets/{asset_path:path}",
+      "handler": "preview_asset",
+      "methods": [
+        "GET",
+        "HEAD"
+      ],
+      "include_in_schema": false
+    },
+    {
+      "file": "dewey_service/share_gateway.py",
+      "line": 234,
+      "method": "API_ROUTE",
+      "path_literal": "/shares/{share_euid}/files/{target_euid}",
+      "handler": "share_file",
+      "methods": [
+        "GET",
+        "HEAD"
+      ]
+    },
+    {
+      "file": "dewey_service/share_gateway.py",
+      "line": 241,
+      "method": "POST",
+      "path_literal": "/registry/shares/{share_euid}/presign",
+      "handler": "share_presign"
+    }
+  ]
+}

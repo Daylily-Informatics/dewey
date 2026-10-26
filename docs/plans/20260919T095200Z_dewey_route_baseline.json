@@ -1,0 +1,164 @@
+{
+  "auth_scheme": "existing OWY_DEWEY_API_TOKEN bearer",
+  "credential_source_reference": "/home/sysman/.config/offwithyou/owy-dayhoff-env",
+  "credential_values_or_hashes_recorded": false,
+  "host": "sfo1-xfer1.sfo.lsmc.com",
+  "owner_or_runtime_mutations": false,
+  "requests": [
+    {
+      "bytes": 46195,
+      "counts": {
+        "items": 25
+      },
+      "duration_ms": 408.565,
+      "finished_at": "2026-09-19T09:49:09.641526+00:00",
+      "label": "library",
+      "method": "POST",
+      "path": "/api/v1/registry/search",
+      "request": {
+        "page": 1,
+        "page_size": 25,
+        "property_filters": [],
+        "q": "",
+        "scopes": [
+          "artifact",
+          "artifact_set"
+        ],
+        "sort_dir": "desc",
+        "sort_field": "created_at"
+      },
+      "response_fields": [
+        "facets",
+        "has_more",
+        "items",
+        "page",
+        "page_size",
+        "timing_ms",
+        "total"
+      ],
+      "sha256": "c94ce894aeac36e50c73890fbbcdb6a1b6d6fb47524a4818a7493e61614cd516",
+      "source_date": "Sat, 19 Sep 2026 09:49:08 GMT",
+      "started_at": "2026-09-19T09:49:09.232705+00:00",
+      "status": 200,
+      "summary": {
+        "facets": {
+          "artifact": 5590,
+          "artifact_set": 26,
+          "share": 0
+        },
+        "has_more": true,
+        "page": 1,
+        "page_size": 25,
+        "timing_ms": 68,
+        "total": 5616
+      },
+      "time_to_headers_ms": 347.748
+    },
+    {
+      "bytes": 1357675,
+      "counts": {
+        "items": 25
+      },
+      "duration_ms": 857.658,
+      "finished_at": "2026-09-19T09:49:10.505897+00:00",
+      "label": "sets",
+      "method": "POST",
+      "path": "/api/v1/registry/search",
+      "request": {
+        "page": 1,
+        "page_size": 25,
+        "property_filters": [],
+        "q": "",
+        "scopes": [
+          "artifact_set"
+        ],
+        "sort_dir": "desc",
+        "sort_field": "created_at"
+      },
+      "response_fields": [
+        "facets",
+        "has_more",
+        "items",
+        "page",
+        "page_size",
+        "timing_ms",
+        "total"
+      ],
+      "sha256": "f5e5138a87c90677993fe6b20b5bb1409644a3dcde159024997d486d10e67f64",
+      "source_date": "Sat, 19 Sep 2026 09:49:08 GMT",
+      "started_at": "2026-09-19T09:49:09.641539+00:00",
+      "status": 200,
+      "summary": {
+        "facets": {
+          "artifact": 0,
+          "artifact_set": 26,
+          "share": 0
+        },
+        "has_more": true,
+        "page": 1,
+        "page_size": 25,
+        "timing_ms": 135,
+        "total": 26
+      },
+      "time_to_headers_ms": 339.465
+    },
+    {
+      "bytes": 111637,
+      "counts": {
+        "activity": 0,
+        "artifact_euids": 33,
+        "members": 33
+      },
+      "duration_ms": 262.517,
+      "finished_at": "2026-09-19T09:49:10.769380+00:00",
+      "label": "p1_registered_set",
+      "method": "GET",
+      "path": "/api/v1/records/M-DGX-VVW1",
+      "request": null,
+      "response_fields": [
+        "activity",
+        "artifact_euids",
+        "artifact_set_euid",
+        "artifact_set_type",
+        "capabilities",
+        "created_at",
+        "description",
+        "dewey_path",
+        "euid",
+        "kind",
+        "label",
+        "links",
+        "member_count",
+        "members",
+        "metadata",
+        "modified_at",
+        "name",
+        "owner",
+        "permissions",
+        "record_type",
+        "source_kind",
+        "status"
+      ],
+      "sha256": "642bad6d3211653b9fb9fbcf4ece2412dcc653db0c80712d04172852423bff40",
+      "source_date": "Sat, 19 Sep 2026 09:49:09 GMT",
+      "started_at": "2026-09-19T09:49:10.505916+00:00",
+      "status": 200,
+      "summary": {
+        "capabilities": {
+          "download": true,
+          "edit": true,
+          "metadata": true,
+          "owner": true,
+          "share": true
+        },
+        "euid": "M-DGX-VVW1",
+        "kind": "set",
+        "member_count": 33
+      },
+      "time_to_headers_ms": 170.268
+    }
+  ],
+  "schema": "dewey.gui-backend-route-observation/1",
+  "scope": "one normal public read per route; POST registry/search is read-only",
+  "uid": 1000
+}

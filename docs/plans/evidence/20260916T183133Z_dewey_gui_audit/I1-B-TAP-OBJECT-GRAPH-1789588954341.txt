@@ -1,0 +1,126 @@
+- banner:
+  - link "Dewey / TapDB":
+    - /url: /tapdb/
+  - navigation:
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Admin":
+      - /url: /admin
+    - link "Overview":
+      - /url: /tapdb/admin/overview
+    - link "Search":
+      - /url: /tapdb/search
+    - link "Graph":
+      - /url: /tapdb/graph
+    - link "Templates":
+      - /url: /tapdb/templates
+    - link "Audit":
+      - /url: /tapdb/audit
+    - link "Help":
+      - /url: /tapdb/help
+    - link "Readiness":
+      - /url: /tapdb/admin/readiness
+    - link "Inventory":
+      - /url: /tapdb/admin/inventory
+    - link "Meridian":
+      - /url: /tapdb/admin/meridian
+    - link "Metrics":
+      - /url: /tapdb/admin/metrics
+    - link "Runtime":
+      - /url: /tapdb/admin/runtime
+    - link "Backups":
+      - /url: /tapdb/admin/backups
+    - link "Sign out":
+      - /url: /auth/logout
+  - generic: johnm@lsmc.com · admin
+- main:
+  - 'heading "Graph: M-DGX-TST9" [level=1]':
+    - text: "Graph:"
+    - link "M-DGX-TST9":
+      - /url: /tapdb/object/M-DGX-TST9
+  - paragraph: "Canonical DAG v2: persisted lineage only. Leave Start EUID blank to inspect the bounded graph visible to your database role."
+  - generic "Object graph":
+    - generic: Loading graph data...
+  - heading "🔍 Navigation" [level=3]
+  - generic: Start EUID
+  - textbox "Start EUID":
+    - /placeholder: blank shows visible graph
+    - text: M-DGX-TST9
+  - generic: Depth
+  - spinbutton "Depth": "4"
+  - generic: Maximum Nodes
+  - spinbutton "Maximum Nodes": "1000"
+  - generic: Maximum Edges
+  - spinbutton "Maximum Edges": "500"
+  - button "Load Graph"
+  - button "Fit"
+  - heading "🔎 Search & Find" [level=3]
+  - generic: Fuzzy Search
+  - textbox "Fuzzy Search":
+    - /placeholder: Match id, name, type, subtype
+    - text: GUI audit
+  - generic: Find Exact EUID
+  - textbox "Find Exact EUID":
+    - /placeholder: Exact EUID in current graph
+  - button "Apply Search"
+  - button "Find"
+  - heading "🧰 Filters" [level=3]
+  - generic: Connected Edge Count ≤
+  - slider "Connected Edge Count ≤": "1"
+  - generic: "1"
+  - generic: Relative Distance (0 = all)
+  - slider "Relative Distance (0 = all)": "0"
+  - generic: "0"
+  - generic: Type Visibility
+  - generic: Load graph to populate.
+  - generic: Subtype Muting
+  - generic: Load graph to populate.
+  - heading "⚙️ Layout" [level=3]
+  - generic: Layout Type
+  - combobox "Layout Type":
+    - option "Dagre (Hierarchical)"
+    - option "CoSE (Force-directed)"
+    - option "Breadth First"
+    - option "Circle"
+    - option "Grid" [selected]
+  - heading "⌨️ Graph Gestures" [level=3]
+  - strong: D + right click
+  - text: ": delete node or edge"
+  - strong: 3x left click node
+  - text: ": child-wave glow (pink)"
+  - strong: 3x right click node
+  - text: ": parent-wave glow (aqua)"
+  - strong: L + left click node
+  - text: ": pick child, then click parent to create edge"
+  - strong: N + left click node
+  - text: ": neighborhood highlight"
+  - generic: Ready.
+  - heading "🎨 Legend" [level=3]
+  - generic: No visible nodes.
+  - heading "💾 Export" [level=3]
+  - button "Save DAG" [disabled]
+  - generic: Mermaid
+  - generic: Load a graph to generate Mermaid.
+  - heading "📋 Details" [level=3]
+  - paragraph: Click a node or edge to see details
+  - generic "Nodes and edges"
+  - generic "Payload JSON"
+- contentinfo: TapDB 10.1.1rc1
+- text: Theme
+- combobox "Theme":
+  - option "original" [selected]
+  - option "light"
+  - option "dark"
+  - option "CBF"
+  - option "S.SF"
+  - option "Viridis"
+  - option "Viridis Dark"
+- checkbox "Global" [checked]
+- text: Global
+- button "?"

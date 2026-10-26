@@ -1,0 +1,75 @@
+{
+  "observed_at": "2026-10-26T04:26:05.017995+00:00",
+  "phases": [
+    {
+      "snapshot_name": "dewey12-acceptance-20261026-browser-create-2026-10-26T04-22-40-867Z.json",
+      "summary": {
+        "phase": "create",
+        "status": "complete",
+        "requests": 14,
+        "http_expectations_passed": 14,
+        "identity_created": false,
+        "credentials_exported": false,
+        "storage_deleted": false
+      },
+      "operation_status_counts": {
+        "done": 12,
+        "pending": 0
+      }
+    },
+    {
+      "snapshot_name": "dewey12-acceptance-20261026-browser-invite-2026-10-26T04-23-16-789Z.json",
+      "summary": {
+        "phase": "invite",
+        "status": "complete",
+        "requests": 3,
+        "http_expectations_passed": 3,
+        "identity_created": false,
+        "credentials_exported": false,
+        "storage_deleted": false
+      },
+      "operation_status_counts": {
+        "done": 13,
+        "pending": 0
+      }
+    },
+    {
+      "snapshot_name": "dewey12-acceptance-20261026-browser-invite-2026-10-26T04-23-52-105Z.json",
+      "summary": {
+        "phase": "invite",
+        "status": "complete",
+        "requests": 3,
+        "http_expectations_passed": 3,
+        "identity_created": false,
+        "credentials_exported": false,
+        "storage_deleted": false
+      },
+      "operation_status_counts": {
+        "done": 14,
+        "pending": 0
+      }
+    },
+    {
+      "snapshot_name": "dewey12-acceptance-20261026-browser-lifecycle-duration-2026-10-26T04-25-27-527Z.json",
+      "summary": {
+        "phase": "lifecycle-duration",
+        "status": "complete",
+        "requests": 8,
+        "http_expectations_passed": 8,
+        "identity_created": false,
+        "credentials_exported": false,
+        "storage_deleted": false
+      },
+      "operation_status_counts": {
+        "done": 17,
+        "pending": 0
+      }
+    }
+  ],
+  "invitations": {
+    "external": "SES accepted",
+    "internal": "SES accepted"
+  },
+  "recipient_verification": "user action pending",
+  "cookie_or_token_exported": false
+}

@@ -1,0 +1,147 @@
+{
+  "contract": "dewey.multiqc-package/v1",
+  "complete_data_package": true,
+  "label": "Illumina run QC 20260815 LH01121 full MultiQC package",
+  "files": [
+    {
+      "artifact_euid": "M-DGX-NKDM",
+      "role": "report",
+      "relative_path": "multiqc_report.html",
+      "sha256": "c766927f11961d247a8efe737e3833c54a763c96967c199f605d5490538b5f2a",
+      "size_bytes": 4072247
+    },
+    {
+      "artifact_euid": "M-DGX-NMN2",
+      "role": "data",
+      "relative_path": "multiqc_report_data/bclconvert-lane-stats-table.txt",
+      "sha256": "675ccb7a5f2ea38edb3adade5b58e7266ea087392614a9043bb69ebae4e13bf0",
+      "size_bytes": 13715
+    },
+    {
+      "artifact_euid": "M-DGX-NMQY",
+      "role": "data",
+      "relative_path": "multiqc_report_data/bclconvert-sample-stats-table.txt",
+      "sha256": "66a961c6fcfe14f6372dcf659c039fc66395f2f344cf2387708440fb46994ccc",
+      "size_bytes": 26168
+    },
+    {
+      "artifact_euid": "M-DGX-NMST",
+      "role": "data",
+      "relative_path": "multiqc_report_data/bclconvert_lane_counts.txt",
+      "sha256": "9ccc3466b4569b4b5d22b51cb223df34cf835154cc6282d8f5c94f1d60019a8f",
+      "size_bytes": 381
+    },
+    {
+      "artifact_euid": "M-DGX-NMVP",
+      "role": "data",
+      "relative_path": "multiqc_report_data/bclconvert_sample_counts_Counts_per_lane.txt",
+      "sha256": "678e30e27a63f70bc0c0bedc8a59cd95bac1c8dcdc6e1c5a3b2f6ccc67c937ee",
+      "size_bytes": 2077
+    },
+    {
+      "artifact_euid": "M-DGX-NMXJ",
+      "role": "data",
+      "relative_path": "multiqc_report_data/bclconvert_sample_counts_Index_mismatches.txt",
+      "sha256": "88d10d9ddb7f5ac334a3ab9de7eb8874930b8892386c432641d35f2f95b66a47",
+      "size_bytes": 741
+    },
+    {
+      "artifact_euid": "M-DGX-NMZE",
+      "role": "data",
+      "relative_path": "multiqc_report_data/bclconvert_undetermined.txt",
+      "sha256": "7e280429f6660820f3b2e1df2a0cc2140f995823c9d495ca679d2bf709c389bf",
+      "size_bytes": 3771
+    },
+    {
+      "artifact_euid": "M-DGX-NN1A",
+      "role": "data",
+      "relative_path": "multiqc_report_data/interop-runmetrics-detail-table.txt",
+      "sha256": "78efc2644bf75983e15a98a36f712e203f46305c13e97686d96e5090c700bf43",
+      "size_bytes": 5823
+    },
+    {
+      "artifact_euid": "M-DGX-NN36",
+      "role": "data",
+      "relative_path": "multiqc_report_data/interop-runmetrics-summary-table.txt",
+      "sha256": "7a45eb7a9fef2658a1c91961dc0251f4eaa47d2b04dfb2b4375ed0b100dce670",
+      "size_bytes": 300
+    },
+    {
+      "artifact_euid": "M-DGX-NN52",
+      "role": "data",
+      "relative_path": "multiqc_report_data/interop_runsummary.txt",
+      "sha256": "dbfb1e2be4720216fade44ab390c4e83327b0c66ae18dcfe72a4e4f598426f94",
+      "size_bytes": 17525
+    },
+    {
+      "artifact_euid": "M-DGX-NN7Y",
+      "role": "data",
+      "relative_path": "multiqc_report_data/llms-full.txt",
+      "sha256": "cc2adfb0cceb1cf5448ac66a609ea1f940ab4901921e82fb7555a8dce500ee86",
+      "size_bytes": 49164
+    },
+    {
+      "artifact_euid": "M-DGX-NN9T",
+      "role": "data",
+      "relative_path": "multiqc_report_data/multiqc.log",
+      "sha256": "bfedf581da12795b58e9de2be524e0bae641bf7f0f7c516877a9ebfe4a4724f2",
+      "size_bytes": 17933
+    },
+    {
+      "artifact_euid": "M-DGX-NNBP",
+      "role": "data",
+      "relative_path": "multiqc_report_data/multiqc.parquet",
+      "sha256": "bd827bc31b61b271439fe173569e488350bbb33914be8234d5352b71b7eface9",
+      "size_bytes": 192060
+    },
+    {
+      "artifact_euid": "M-DGX-NNDJ",
+      "role": "data",
+      "relative_path": "multiqc_report_data/multiqc_bclconvert_bylane.txt",
+      "sha256": "0a20a2b96f0123d7b28eda5f015df1b54bcec9db49eaad98813fb3fd6845475d",
+      "size_bytes": 367410
+    },
+    {
+      "artifact_euid": "M-DGX-NNFE",
+      "role": "data",
+      "relative_path": "multiqc_report_data/multiqc_bclconvert_bysample.txt",
+      "sha256": "d95681c601f4d89e441f8f6501f0c5afedf07689fdf78ed0008b0aff7bc9f890",
+      "size_bytes": 111714
+    },
+    {
+      "artifact_euid": "M-DGX-NNH9",
+      "role": "data",
+      "relative_path": "multiqc_report_data/multiqc_citations.txt",
+      "sha256": "01b7abc926d9e75aa87ee19b7c0674c7a3998af6438a8b5361cf8835770a0ccb",
+      "size_bytes": 62
+    },
+    {
+      "artifact_euid": "M-DGX-NNK5",
+      "role": "data",
+      "relative_path": "multiqc_report_data/multiqc_illumina_run_qc_summary.txt",
+      "sha256": "26d258bdcd025bd4a32c110ec8b466751837cf7ba28152aef7abe97494f45fc4",
+      "size_bytes": 625
+    },
+    {
+      "artifact_euid": "M-DGX-NNN1",
+      "role": "data",
+      "relative_path": "multiqc_report_data/multiqc_software_versions.txt",
+      "sha256": "3f1c5cc29d450b5cfc84e4f9a4703b6a7781c892717c10eb2b2b893150989618",
+      "size_bytes": 70
+    },
+    {
+      "artifact_euid": "M-DGX-NNQX",
+      "role": "data",
+      "relative_path": "multiqc_report_data/multiqc_sources.txt",
+      "sha256": "84087aed91a8e46d2e99ad0823afa6b9e1c27e391e817ce1d1383e0d9124ddd0",
+      "size_bytes": 3781
+    },
+    {
+      "artifact_euid": "M-DGX-NKFG",
+      "role": "data",
+      "relative_path": "multiqc_report_data/multiqc_data.json",
+      "sha256": "299f3b607749ea7bd728a731afde85967e372da99cf485ed820a92ab065ac066",
+      "size_bytes": 2559621
+    }
+  ]
+}

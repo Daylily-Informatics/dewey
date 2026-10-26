@@ -1,0 +1,60 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / ADMIN
+  - heading "Admin" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - heading "Service administration" [level=2]
+  - paragraph: Dewey 10.0.5
+  - link "Health":
+    - /url: /health
+  - link "Observability":
+    - /url: /ui/observability
+  - link "Anomalies":
+    - /url: /ui/anomalies
+  - link "All accessible shares":
+    - /url: /shares
+  - link "Clients and tokens":
+    - /url: /account
+  - paragraph: Shared login owns users, roles, and credentials. Dewey owns record policies, delegated access, and shares.
+  - heading "Sharing defaults" [level=3]
+  - paragraph: 30 days per share · 900 seconds per delivery credential
+  - button "Edit defaults"
+  - heading "TapDB administration" [level=2]
+  - paragraph: Advanced templates, object repair, relationship graphs, audit, inventory, backups, and runtime inspection.
+  - link "Open TapDB":
+    - /url: /tapdb/
+  - paragraph: These tools require Dewey admin access. Standalone TapDB probe failures do not establish that embedded Dewey is unavailable.
+  - generic "Effective configuration · secrets redacted"
+  - generic "Release identity"
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

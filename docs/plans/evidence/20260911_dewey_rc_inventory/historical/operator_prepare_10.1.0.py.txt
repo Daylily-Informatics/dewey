@@ -1,0 +1,176 @@
+"""Prepare an isolated, public-release TapDB operator installation on Dewey EC2.
+
+This creates local operator files only. It never connects to a database, changes
+the running application, or prepares database principals. Run from the approved
+interactive SSM ubuntu session. All destinations must be absent.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import pwd
+import subprocess
+import sys
+import urllib.request
+from pathlib import Path
+
+ROOT = Path("/home/ubuntu/dewey_ops/tapdb101-20260911")
+SOURCE_CONFIG = Path("/home/ubuntu/.config/tapdb/dewey/dewey-day/tapdb-config.yaml")
+WHEEL_NAME = "daylily_tapdb-10.1.0-py3-none-any.whl"
+WHEEL_SHA256 = "f46cb2abfccb3000b9f9443ea00045e83fb96f6b320d2aeac0ad800ea47e8801"
+PIP_NAME = "pip-25.1.1-py3-none-any.whl"
+PIP_URL = (
+    "https://files.pythonhosted.org/packages/29/a2/"
+    "d40fb2460e883eca5199c62cfc2463fd261f760556ae6290f88488c362c0/" + PIP_NAME
+)
+PIP_SHA256 = "2913a38a2abf4ea6b64ab507bd9e967f3b53dc1ede74b01b0931e1ce548751af"
+
+
+def run(argv: list[str]) -> None:
+    subprocess.run(argv, check=True)
+
+
+def private_json(path: Path, value: dict) -> None:
+    with path.open("x", encoding="utf-8") as handle:
+        os.chmod(path, 0o600)
+        json.dump(value, handle, indent=2, sort_keys=True)
+        handle.write("\n")
+
+
+def prepare_config() -> None:
+    import yaml
+
+    if os.geteuid() != 0 or SOURCE_CONFIG.is_symlink():
+        raise RuntimeError("Targeted sudo and the exact regular source config are required")
+    document = yaml.safe_load(SOURCE_CONFIG.read_text())
+    target = document["target"]
+    expected = {
+        "engine_type": "aurora",
+        "database": "dewey_prod",
+        "schema_name": "tapdb_dewey_lsmcok1_local",
+        "domain_code": "M",
+        "cluster_identifier": "dayhoff-lsmcok1-tapdb",
+        "region": "us-west-2",
+        "user": "dayhoff",
+    }
+    if document["meta"]["config_version"] != 4 or any(
+        target.get(key) != value for key, value in expected.items()
+    ):
+        raise RuntimeError("Source configuration differs from the reviewed inventory")
+    if not target.get("secret_arn"):
+        raise RuntimeError("Explicit source operator secret reference is required")
+    # The historical config lacks the newer mandatory admin section. Native
+    # init owns its complete configuration shape; never hand-fill missing keys.
+    # This inventory-only config is not a future runtime authentication config.
+    destination = ROOT / "source-operator.yaml"
+    if destination.exists():
+        raise RuntimeError("Native operator configuration destination already exists")
+    if target["iam_auth"] not in (False, "false") or target["ssl"] not in (True, "true"):
+        raise RuntimeError("Source authentication/TLS mode differs from the reviewed source")
+    meta = document["meta"]
+    arguments = [str(ROOT / "venv/bin/tapdb"), "--config", str(destination),
+                 "db-config", "init"]
+    for key in ("client_id", "database_name", "owner_repo_name", "domain_registry_path",
+                "prefix_ownership_registry_path"):
+        arguments.extend(["--" + key.replace("_", "-"), str(meta[key])])
+    for key in ("engine_type", "host", "port", "ui_port", "database", "schema_name",
+                "domain_code", "cluster_identifier", "region", "sslrootcert"):
+        arguments.extend(["--" + key.replace("_", "-"), str(target[key])])
+    arguments.extend([
+        "--user", "dewey_runtime_9", "--operator-user", "dayhoff",
+        "--operator-secret-arn", target["secret_arn"], "--no-operator-iam-auth",
+        "--tenant-id", "", "--no-allow-global-claims", "--no-iam-auth",
+        "--secret-arn", target["secret_arn"], "--ssl", "verify-full",
+        "--aws-profile", "lsmc", "--safety-tier", "production",
+        "--destructive-operations", "blocked",
+    ])
+    run(arguments)
+    print(json.dumps({"config_copy": str(destination), "password_copied": False}))
+
+
+def verify_install() -> None:
+    environment = ROOT / "venv"
+    wheel = ROOT / "artifacts" / WHEEL_NAME
+    digest = hashlib.sha256(wheel.read_bytes()).hexdigest()
+    if digest != WHEEL_SHA256:
+        raise RuntimeError("Operator wheel differs from the approved release")
+    python = str(environment / "bin/python")
+    run([python, "-m", "pip", "check"])
+    run([str(environment / "bin/tapdb"), "version"])
+    installed = subprocess.check_output([
+        python, "-c",
+        "import importlib.metadata,json; print(json.dumps({n:importlib.metadata.version(n) "
+        "for n in ['daylily-tapdb','meridian-euid']}))",
+    ], text=True)
+    versions = json.loads(installed)
+    if versions != {"daylily-tapdb": "10.1.0", "meridian-euid": "0.4.8"}:
+        raise RuntimeError("Installed operator release versions do not match")
+    private_json(ROOT / "receipts/operator-install.json", {
+        "wheel": str(wheel), "wheel_sha256": digest, "versions": versions,
+        "pip_wheel_sha256": PIP_SHA256,
+        "environment": str(environment), "production_app_changed": False,
+        "database_connection_performed": False,
+    })
+    print(json.dumps({"operator_install": "verified", "versions": versions}))
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--prepare-config", action="store_true")
+    parser.add_argument("--verify-install", action="store_true")
+    args = parser.parse_args()
+    os.umask(0o077)
+    if args.prepare_config:
+        prepare_config()
+        return
+    if pwd.getpwuid(os.geteuid()).pw_name != "ubuntu":
+        raise RuntimeError("Installation must run as ubuntu")
+    if sys.version_info[:2] != (3, 12):
+        raise RuntimeError("Explicit Python 3.12 interpreter required")
+    if args.verify_install:
+        verify_install()
+        return
+    environment = ROOT / "venv"
+    artifacts = ROOT / "artifacts"
+    receipts = ROOT / "receipts"
+    bootstrap = ROOT / "bootstrap"
+    if any(path.exists() for path in (environment, artifacts, receipts, bootstrap)):
+        raise RuntimeError("Operator environment/artifact/receipt destination already exists")
+    artifacts.mkdir(mode=0o700)
+    receipts.mkdir(mode=0o700)
+    bootstrap.mkdir(mode=0o700)
+    # Explicit isolated bootstrap: this host lacks ensurepip and its unrelated
+    # kernel-package dependency failure must not broaden this task into OS repair.
+    with urllib.request.urlopen(PIP_URL, timeout=60) as response:
+        pip_bytes = response.read()
+    if hashlib.sha256(pip_bytes).hexdigest() != PIP_SHA256:
+        raise RuntimeError("Bootstrap pip wheel differs from its PyPI SHA-256")
+    pip_wheel = bootstrap / PIP_NAME
+    with pip_wheel.open("xb") as handle:
+        handle.write(pip_bytes)
+    run([sys.executable, "-m", "venv", "--without-pip", str(environment)])
+    python = str(environment / "bin/python")
+    run([
+        python, "-c", "import runpy,sys; sys.path.insert(0,sys.argv.pop(1)); "
+        "runpy.run_module('pip',run_name='__main__')", str(pip_wheel),
+        "install", "--no-index", str(pip_wheel),
+    ])
+    run([
+        python, "-m", "pip", "download", "--index-url", "https://pypi.org/simple",
+        "--only-binary=:all:", "--no-deps", "--dest", str(artifacts),
+        "daylily-tapdb==10.1.0",
+    ])
+    wheel = artifacts / WHEEL_NAME
+    digest = hashlib.sha256(wheel.read_bytes()).hexdigest()
+    if digest != WHEEL_SHA256 or list(artifacts.iterdir()) != [wheel]:
+        raise RuntimeError("Published operator wheel does not match approved release")
+    run([python, "-m", "pip", "install", "--index-url", "https://pypi.org/simple",
+         str(wheel) + "[aurora,gui]"])
+    verify_install()
+
+
+if __name__ == "__main__":
+    main()

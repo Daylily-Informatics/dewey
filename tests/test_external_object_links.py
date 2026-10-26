@@ -21,6 +21,12 @@ def test_create_external_object_and_relation(client) -> None:
             "external_object_type": "document",
             "external_object_id": "DOC-1",
             "external_uri": "https://atlas.example/documents/DOC-1",
+            "reference_target": {
+                "kind": "opaque",
+                "namespace": "fixture-documents",
+                "identifier_kind": "document",
+                "scope": "public_global",
+            },
         },
     )
     assert external_object.status_code == 200

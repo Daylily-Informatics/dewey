@@ -4,186 +4,81 @@ from __future__ import annotations
 
 from typing import Any
 
-from dewey_service.services.base import DeweyNotFoundError
+from dewey_service.integrations.tapdb_external_references import (
+    attach_external_relation,
+    build_external_target,
+    lock_external_relation_source,
+    resolve_relation_endpoints,
+)
+from dewey_service.registry_access import require_record
+from dewey_service.services.base import DeweyConflictError, DeweyNotFoundError
 from dewey_service.tapdb_backend import (
     ARTIFACT_SET_TEMPLATE,
     ARTIFACT_TEMPLATE,
     EXTERNAL_OBJECT_RELATION_TEMPLATE,
     EXTERNAL_OBJECT_TEMPLATE,
+    normalize_instance_payload,
     utc_now_iso,
 )
 
-DEWEY_EXTERNAL_GRAPH_SOURCE_FIELD = "dewey.external_object_relation"
+LABCORE_OWNER_EXTERNAL_SYSTEM = "labcore"
+LABCORE_OWNER_EXTERNAL_OBJECT_TYPE = "sequencing_run"
+LABCORE_OWNER_RELATION_TYPE = "labcore_sequencing_run"
 
 
 class ExternalObjectServiceMixin:
     @staticmethod
-    def _copy_graph_field(
-        ref: dict[str, Any],
-        *,
-        field: str,
-        relation_payload: dict[str, Any],
-        external_payload: dict[str, Any],
+    def _assert_generic_external_identity_available(
+        *, external_system: object, external_object_type: object
     ) -> None:
-        relation_metadata = relation_payload.get("metadata")
-        external_metadata = external_payload.get("metadata")
-        candidates = []
-        if isinstance(relation_metadata, dict):
-            candidates.append(relation_metadata)
-        if isinstance(external_metadata, dict):
-            candidates.append(external_metadata)
-        candidates.append(external_payload)
-        for source in candidates:
-            value = source.get(field)
-            if value is not None and str(value).strip():
-                ref[field] = value
-                return
-
-    @staticmethod
-    def _is_dewey_external_graph_ref(ref: Any) -> bool:
-        return (
-            isinstance(ref, dict)
-            and str(ref.get("source_field") or "") == DEWEY_EXTERNAL_GRAPH_SOURCE_FIELD
-        )
-
-    @staticmethod
-    def _external_graph_ref_key(ref: dict[str, Any]) -> tuple[str, str, str, str]:
-        return (
-            str(ref.get("system") or "").strip().lower(),
-            str(ref.get("root_euid") or "").strip(),
-            str(ref.get("relationship_type") or "").strip(),
-            str(ref.get("tenant_id") or "").strip(),
-        )
-
-    def _external_graph_ref_from_payloads(
-        self,
-        *,
-        relation_payload: dict[str, Any],
-        external_payload: dict[str, Any],
-    ) -> dict[str, Any]:
-        relation_euid = str(relation_payload.get("external_object_relation_euid") or "").strip()
-        external_euid = str(relation_payload.get("external_object_euid") or "").strip()
-        system = str(external_payload.get("external_system") or "").strip().lower()
-        root_euid = str(external_payload.get("external_object_id") or "").strip()
-        relationship_type = str(relation_payload.get("relation_type") or "").strip()
-        if not system:
-            raise ValueError(f"External object relation {relation_euid} is missing external_system")
-        if not root_euid:
-            raise ValueError(
-                f"External object relation {relation_euid} is missing external_object_id"
-            )
-        if not relationship_type:
-            raise ValueError(f"External object relation {relation_euid} is missing relation_type")
-
-        ref: dict[str, Any] = {
-            "system": system,
-            "root_euid": root_euid,
-            "target_euid": root_euid,
-            "relationship_type": relationship_type,
-            "source_field": DEWEY_EXTERNAL_GRAPH_SOURCE_FIELD,
-            "label": f"{system}:{relationship_type}:{root_euid}",
-            "external_object_euid": external_euid,
-            "external_object_relation_euid": relation_euid,
-        }
-        object_type = external_payload.get("external_object_type")
-        if object_type is not None and str(object_type).strip():
-            ref["external_object_type"] = object_type
-        external_uri = external_payload.get("external_uri")
-        if external_uri is not None and str(external_uri).strip():
-            ref["href"] = external_uri
-        for field in (
-            "tenant_id",
-            "base_url",
-            "graph_data_path",
-            "object_detail_path_template",
-            "auth_mode",
+        system = str(external_system or "").strip().lower()
+        object_type = str(external_object_type or "").strip().lower()
+        if (
+            system == LABCORE_OWNER_EXTERNAL_SYSTEM
+            and object_type == LABCORE_OWNER_EXTERNAL_OBJECT_TYPE
         ):
-            self._copy_graph_field(
-                ref,
-                field=field,
-                relation_payload=relation_payload,
-                external_payload=external_payload,
+            raise DeweyConflictError(
+                "Labcore sequencing-run ownership must use the v2 Labcore owner API"
             )
-        return ref
 
-    def _external_object_for_relation(self, session, relation_payload: dict[str, Any]):
-        external_euid = str(relation_payload.get("external_object_euid") or "").strip()
-        external = self.backend.find_by_euid(
-            session,
-            template_code=EXTERNAL_OBJECT_TEMPLATE,
-            euid=external_euid,
-        )
-        if external is None:
-            relation_euid = str(relation_payload.get("external_object_relation_euid") or "").strip()
-            raise DeweyNotFoundError(
-                f"External object not found for relation {relation_euid}: {external_euid}"
+    def _assert_generic_relation_available(self, *, external_object, relation_type: object) -> None:
+        if str(relation_type or "").strip().lower() == LABCORE_OWNER_RELATION_TYPE:
+            raise DeweyConflictError(
+                "Labcore sequencing-run ownership must use the v2 Labcore owner API"
             )
-        return external
-
-    def _external_object_relation_response_with_external(
-        self,
-        session,
-        relation,
-    ) -> dict[str, Any]:
-        body = self._external_object_relation_response(relation)
-        external = self._external_object_for_relation(session, body)
-        external_payload = self._external_object_response(external)
-        graph_ref = self._external_graph_ref_from_payloads(
-            relation_payload=body,
-            external_payload=external_payload,
+        payload = self._external_object_response(external_object)
+        self._assert_generic_external_identity_available(
+            external_system=payload.get("external_system"),
+            external_object_type=payload.get("external_object_type"),
         )
+
+    @staticmethod
+    def _require_external_relation_pair(session, relation, source, external_object) -> None:
+        endpoints = resolve_relation_endpoints(session, relation)
+        if (
+            endpoints.source.uid != source.uid
+            or endpoints.external_object.uid != external_object.uid
+        ):
+            raise DeweyConflictError("External relation lookup disagrees with canonical lineage")
+
+    def _external_object_relation_response_with_external(self, session, relation) -> dict[str, Any]:
+        endpoints = resolve_relation_endpoints(session, relation)
+        payload = normalize_instance_payload(relation)
+        external_payload = self._external_object_response(endpoints.external_object)
         return {
-            **body,
-            "external_system": external_payload.get("external_system"),
-            "external_object_type": external_payload.get("external_object_type"),
-            "external_object_id": external_payload.get("external_object_id"),
-            "external_uri": external_payload.get("external_uri"),
+            "external_object_relation_euid": relation.euid,
+            "target_type": endpoints.source.type,
+            "target_euid": endpoints.source.euid,
+            "external_object_euid": endpoints.external_object.euid,
+            "relation_type": payload.get("relation_type"),
+            "metadata": dict(payload.get("metadata") or {}),
+            "created_at": payload.get("created_at"),
+            "external_system": external_payload["external_system"],
+            "external_object_type": external_payload["external_object_type"],
+            "external_object_id": external_payload["external_object_id"],
+            "external_uri": external_payload["external_uri"],
             "external_object": external_payload,
-            "external_graph_ref": graph_ref,
         }
-
-    def _sync_external_graph_refs_for_target(self, session, target) -> None:
-        target_payload = dict(target.json_addl or {})
-        properties = dict(target_payload.get("properties") or {})
-        external_payload = dict(properties.get("external_payload") or {})
-        raw_refs = external_payload.get("tapdb_graph", [])
-        if raw_refs is None:
-            raw_refs = []
-        if not isinstance(raw_refs, list):
-            raise ValueError("properties.external_payload.tapdb_graph must be a list")
-
-        preserved_refs = [ref for ref in raw_refs if not self._is_dewey_external_graph_ref(ref)]
-        relations = self.backend.list_children(
-            session,
-            parent=target,
-            relationship_type="has_external_relation",
-        )
-        derived_refs: list[dict[str, Any]] = []
-        seen: set[tuple[str, str, str, str]] = set()
-        for relation in relations:
-            relation_payload = self._external_object_relation_response(relation)
-            external = self._external_object_for_relation(session, relation_payload)
-            ref = self._external_graph_ref_from_payloads(
-                relation_payload=relation_payload,
-                external_payload=self._external_object_response(external),
-            )
-            key = self._external_graph_ref_key(ref)
-            if key in seen:
-                continue
-            seen.add(key)
-            derived_refs.append(ref)
-
-        next_external_payload = {
-            **external_payload,
-            "tapdb_graph": preserved_refs + derived_refs,
-        }
-        next_properties = {
-            **properties,
-            "external_payload": next_external_payload,
-        }
-        if target_payload.get("properties") == next_properties:
-            return
-        self.backend.update_instance_json(session, target, {"properties": next_properties})
 
     def _find_or_create_external_object(
         self,
@@ -194,6 +89,16 @@ class ExternalObjectServiceMixin:
         external_object_id: str,
         external_uri: str | None,
     ):
+        build_external_target(
+            {
+                "external_system": external_system,
+                "external_object_type": external_object_type,
+                "external_object_id": external_object_id,
+            }
+        )
+        self._assert_generic_external_identity_available(
+            external_system=external_system, external_object_type=external_object_type
+        )
         identity_key = f"{external_system}:{external_object_type}:{external_object_id}"
         existing = self.backend.find_by_json_field(
             session,
@@ -226,9 +131,14 @@ class ExternalObjectServiceMixin:
         external_object,
         relation_type: str,
     ) -> None:
-        relation_identity = (
-            f"artifact:{artifact_instance.euid}:{external_object.euid}:{relation_type}"
+        artifact_instance = lock_external_relation_source(session, artifact_instance)
+        require_record(self.backend, session, artifact_instance, "edit")
+        self._assert_generic_relation_available(
+            external_object=external_object, relation_type=relation_type
         )
+        if artifact_instance.type not in {"artifact", "artifact_set"}:
+            raise ValueError("External relation source must be an artifact or set")
+        relation_identity = f"{artifact_instance.type}:{artifact_instance.euid}:{external_object.euid}:{relation_type}"
         existing = self.backend.find_by_json_field(
             session,
             template_code=EXTERNAL_OBJECT_RELATION_TEMPLATE,
@@ -241,7 +151,7 @@ class ExternalObjectServiceMixin:
                 template_code=EXTERNAL_OBJECT_RELATION_TEMPLATE,
                 name=relation_identity,
                 json_addl={
-                    "target_type": "artifact",
+                    "target_type": artifact_instance.type,
                     "target_euid": artifact_instance.euid,
                     "external_object_euid": external_object.euid,
                     "relation_type": relation_type,
@@ -250,19 +160,23 @@ class ExternalObjectServiceMixin:
                     "created_at": utc_now_iso(),
                 },
             )
-        self.backend.create_lineage(
-            session,
-            parent=artifact_instance,
-            child=existing,
-            relationship_type="has_external_relation",
-        )
-        self.backend.create_lineage(
-            session,
-            parent=external_object,
-            child=existing,
-            relationship_type="is_external_relation_for",
-        )
-        self._sync_external_graph_refs_for_target(session, artifact_instance)
+            self.backend.create_lineage(
+                session,
+                parent=artifact_instance,
+                child=existing,
+                relationship_type="has_external_relation",
+            )
+            self.backend.create_lineage(
+                session,
+                parent=external_object,
+                child=existing,
+                relationship_type="is_external_relation_for",
+            )
+        else:
+            self._require_external_relation_pair(
+                session, existing, artifact_instance, external_object
+            )
+        attach_external_relation(session, existing)
 
     def _find_artifact_by_external_identity(
         self,
@@ -286,13 +200,10 @@ class ExternalObjectServiceMixin:
             relationship_type="is_external_relation_for",
         )
         for relation in relations:
-            parents = self.backend.list_parents(
-                session,
-                child=relation,
-                relationship_type="has_external_relation",
-            )
-            if parents:
-                return parents[0]
+            endpoints = resolve_relation_endpoints(session, relation)
+            if endpoints.external_object.uid != external.uid:
+                raise ValueError("External identity lineage endpoint disagrees")
+            return endpoints.source
         return None
 
     def create_external_object(
@@ -304,6 +215,7 @@ class ExternalObjectServiceMixin:
         external_uri: str | None,
         metadata: dict[str, Any] | None,
         idempotency_key: str,
+        reference_target: dict[str, Any] | None = None,
     ) -> tuple[int, dict[str, Any]]:
         payload = {
             "external_system": str(external_system or "").strip().lower(),
@@ -312,13 +224,20 @@ class ExternalObjectServiceMixin:
             "external_uri": str(external_uri or "").strip() or None,
             "metadata": dict(metadata or {}),
         }
+        if reference_target is not None:
+            payload["reference_target"] = reference_target
         if not payload["external_system"]:
             raise ValueError("external_system is required")
         if not payload["external_object_type"]:
             raise ValueError("external_object_type is required")
         if not payload["external_object_id"]:
             raise ValueError("external_object_id is required")
+        requested_target = build_external_target(payload)
 
+        self._assert_generic_external_identity_available(
+            external_system=payload["external_system"],
+            external_object_type=payload["external_object_type"],
+        )
         fingerprint = self._fingerprint(payload)
         identity_key = (
             f"{payload['external_system']}:"
@@ -343,6 +262,8 @@ class ExternalObjectServiceMixin:
                 value=identity_key,
             )
             if existing is not None:
+                if build_external_target(existing.json_addl) != requested_target:
+                    raise DeweyConflictError("External identity has a different target contract")
                 body = self._external_object_response(existing)
                 self._store_idempotency(
                     session,
@@ -404,6 +325,16 @@ class ExternalObjectServiceMixin:
         fingerprint = self._fingerprint(payload)
 
         with self.backend.session_scope(commit=True) as session:
+            external_object = self.backend.find_by_euid(
+                session,
+                template_code=EXTERNAL_OBJECT_TEMPLATE,
+                euid=payload["external_object_euid"],
+            )
+            if external_object is None:
+                raise DeweyNotFoundError("External object not found")
+            self._assert_generic_relation_available(
+                external_object=external_object, relation_type=payload["relation_type"]
+            )
             replay = self._idempotency_replay(
                 session,
                 operation="external_object_relation.attach",
@@ -427,6 +358,16 @@ class ExternalObjectServiceMixin:
                 )
             if target is None:
                 raise DeweyNotFoundError(f"Target not found: {payload['target_euid']}")
+            target = lock_external_relation_source(session, target)
+            require_record(self.backend, session, target, "edit")
+            replay = self._idempotency_replay(
+                session,
+                operation="external_object_relation.attach",
+                idempotency_key=idempotency_key,
+                fingerprint=fingerprint,
+            )
+            if replay is not None:
+                return replay.status_code, replay.response
 
             external_object = self.backend.find_by_euid(
                 session,
@@ -449,19 +390,8 @@ class ExternalObjectServiceMixin:
                 value=relation_identity,
             )
             if existing is not None:
-                self.backend.create_lineage(
-                    session,
-                    parent=target,
-                    child=existing,
-                    relationship_type="has_external_relation",
-                )
-                self.backend.create_lineage(
-                    session,
-                    parent=external_object,
-                    child=existing,
-                    relationship_type="is_external_relation_for",
-                )
-                self._sync_external_graph_refs_for_target(session, target)
+                self._require_external_relation_pair(session, existing, target, external_object)
+                attach_external_relation(session, existing)
                 body = self._external_object_relation_response_with_external(session, existing)
                 self._store_idempotency(
                     session,
@@ -495,7 +425,7 @@ class ExternalObjectServiceMixin:
                 child=relation,
                 relationship_type="is_external_relation_for",
             )
-            self._sync_external_graph_refs_for_target(session, target)
+            attach_external_relation(session, relation)
 
             body = self._external_object_relation_response_with_external(session, relation)
             self._store_idempotency(
@@ -519,7 +449,7 @@ class ExternalObjectServiceMixin:
         if clean_target_type not in {"artifact", "artifact_set"}:
             raise ValueError("target_type must be artifact or artifact_set")
 
-        with self.backend.session_scope(commit=True) as session:
+        with self.backend.session_scope(commit=False) as session:
             if clean_target_type == "artifact":
                 target = self.backend.find_by_euid(
                     session,
@@ -535,7 +465,6 @@ class ExternalObjectServiceMixin:
             if target is None:
                 raise DeweyNotFoundError(f"Target not found: {target_euid}")
 
-            self._sync_external_graph_refs_for_target(session, target)
             rows = self.backend.list_children(
                 session,
                 parent=target,

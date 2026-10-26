@@ -1,0 +1,283 @@
+{
+  "status": "author_review_requires_native_execution_and_independent_acceptance",
+  "source_version": "9.0.9",
+  "source_contract_sha256": "b4fa8198d2c8082e551011f227497b4d17b379d79d4350ff15635e1c9a9f6e75",
+  "source_identity_inventory_sha256": "4a4d2df17d60f3caacd0b6decd3cee8ebc6263a9ad46b8908fb168b79cd2164f",
+  "source_file_sha256": "c8d8d02e4ee93a6e615b960a20fa761e0456ba2a4d2a6318107f1441583b79f3",
+  "source_inventory_reference": "/home/ubuntu/dewey_ops/tapdb101-20260911/receipts/source-mapped-inventory-10.1.1rc1.json",
+  "source_migration_tracking_content_sha256": "f7a9825353b6c141b1b3d88fbc6cac65b63dda6166b24f3c506819da16c29bf1",
+  "applied_migrations": [
+    {
+      "filename": "20260303_120000_add_tenant_id.sql",
+      "filename_sha256": "b4cae3cf037b00dd95fa6f9cff00c9749cd45770f57c4f899f54a19f5ac7b0c8",
+      "row_key_sha256": "b86053ae191bb665da919a3c8e97ea768c7cc9d41b1500a37931dd92f5a9f286",
+      "row_count": 1
+    },
+    {
+      "filename": "20260303_120010_add_outbox_event.sql",
+      "filename_sha256": "de5cba6f21dda4b1503ec9f0c3005674458b792c0db5badb97b571f344ae7a6f",
+      "row_key_sha256": "d97b085225a458be686f4130203d74e6f38991997c00b307e92bcc96d667803a",
+      "row_count": 1
+    },
+    {
+      "filename": "20260405_120000_add_domain_scoping.sql",
+      "filename_sha256": "aee49804cbcc4601f43f8a98d55e52181ff75542f0978fee35a1e50cd6d7cea9",
+      "row_key_sha256": "b3e683a0b18c292da5f8d4ec60c74eb58e748de02bb65a9eca1d9bc14447b6dd",
+      "row_count": 1
+    },
+    {
+      "filename": "20260612_154200_add_template_validator_ref.sql",
+      "filename_sha256": "49320cbae354fd3edced9dfcb8ca4350ff96100d7cda2680c6fde4f697b6f02d",
+      "row_key_sha256": "cf906892878557d3368877adc7729fdf89b21997acb679a655bec48ff0ea36c4",
+      "row_count": 1
+    },
+    {
+      "filename": "20260612_154210_instance_prefix_from_template.sql",
+      "filename_sha256": "e722931635d622c610e23b5f9a2db558e1f567aa658ce1cbf594fe6b50622545",
+      "row_key_sha256": "794724122a7bf47ae5a2ab9ccdc7d39fb7b8f450c92421a412a63af1cd1fb44b",
+      "row_count": 1
+    }
+  ],
+  "pending_migration_filenames": [
+    "20260902_010000_natural_identity_and_owner_uniqueness.sql",
+    "20260902_010100_legacy_outbox_message_conversion.sql",
+    "20260902_020000_force_rls_and_audit_attribution.sql",
+    "20260903_031820_runtime_ddl_guard.sql",
+    "20260904_061819_tenant_scoped_natural_identity.sql",
+    "20260910_203200_aurora_operator_principals.sql",
+    "20260910_220000_sequence_prefix_bindings.sql",
+    "20260910_233000_pin_managed_allocator_resolution.sql"
+  ],
+  "native_assets": {
+    "tag": "10.1.1rc1",
+    "commit": "02ab7c9d0325dfcbf9dc47a03be66b62e0a22f2c",
+    "assets": [
+      {
+        "filename": "20260303_120000_add_tenant_id.sql",
+        "source_sha256": "a4792e381f1753121cf55310339b31606d34094c1822b01acbd7d2c5735a4be7",
+        "allowed_schema_tables": [
+          "audit_log",
+          "generic_instance",
+          "generic_instance_lineage",
+          "generic_template"
+        ],
+        "allowed_new_tables": [],
+        "allowed_new_rows": [],
+        "allowed_transformations": [],
+        "includes": []
+      },
+      {
+        "filename": "20260303_120010_add_outbox_event.sql",
+        "source_sha256": "323696d2d42e9a9f726d3884e7f10fd7c3966b0e0ee0d254da7031a06b703b98",
+        "allowed_schema_tables": [
+          "outbox_event"
+        ],
+        "allowed_new_tables": [
+          "outbox_event"
+        ],
+        "allowed_new_rows": [],
+        "allowed_transformations": [],
+        "includes": []
+      },
+      {
+        "filename": "20260405_120000_add_domain_scoping.sql",
+        "source_sha256": "ddf93da9c783f093b7415b6bf91f697909c435b3d164cb61521946fc68d9d289",
+        "allowed_schema_tables": [
+          "audit_log",
+          "generic_instance",
+          "generic_instance_lineage",
+          "generic_template",
+          "outbox_event"
+        ],
+        "allowed_new_tables": [],
+        "allowed_new_rows": [],
+        "allowed_transformations": [],
+        "includes": []
+      },
+      {
+        "filename": "20260612_154200_add_template_validator_ref.sql",
+        "source_sha256": "77fe94bfad8932e64b565e811dd6bfd2ffc05eedefeb589a4d5c0d0caeb02c26",
+        "allowed_schema_tables": [
+          "generic_template"
+        ],
+        "allowed_new_tables": [],
+        "allowed_new_rows": [],
+        "allowed_transformations": [
+          "generic_template.validator_ref:null_or_empty_to_universal_pass_v1"
+        ],
+        "includes": []
+      },
+      {
+        "filename": "20260612_154210_instance_prefix_from_template.sql",
+        "source_sha256": "49950a3942c6a5e8eb3098d502032bf2ab55c925fe374fc522d07cd1ca3388ab",
+        "allowed_schema_tables": [],
+        "allowed_new_tables": [],
+        "allowed_new_rows": [],
+        "allowed_transformations": [],
+        "includes": []
+      },
+      {
+        "filename": "20260902_010000_natural_identity_and_owner_uniqueness.sql",
+        "source_sha256": "587ad63ac6b30a6dfc3ab3d65fe07255fd5bfc9a0feb7951629c204a116d6fc9",
+        "allowed_schema_tables": [
+          "generic_instance",
+          "generic_template"
+        ],
+        "allowed_new_tables": [],
+        "allowed_new_rows": [],
+        "allowed_transformations": [],
+        "includes": []
+      },
+      {
+        "filename": "20260902_010100_legacy_outbox_message_conversion.sql",
+        "source_sha256": "d1823c4c32cbc2e7c652d14a6d935550a62c0fc9a6492a6cc3f15208d6f68f34",
+        "allowed_schema_tables": [
+          "generic_instance",
+          "outbox_event",
+          "tapdb_legacy_outbox_mapping"
+        ],
+        "allowed_new_tables": [
+          "tapdb_legacy_outbox_mapping"
+        ],
+        "allowed_new_rows": [
+          "generic_instance",
+          "tapdb_legacy_outbox_mapping"
+        ],
+        "allowed_transformations": [
+          "outbox_event.message_uid:null_to_legacy_mapping_v1"
+        ],
+        "includes": []
+      },
+      {
+        "filename": "20260902_020000_force_rls_and_audit_attribution.sql",
+        "source_sha256": "ee9e8f303d6c44b2a1d1db5c997848475d9aa0fa49c4359d47820198453cf58d",
+        "allowed_schema_tables": [
+          "audit_log",
+          "generic_instance",
+          "generic_instance_lineage",
+          "generic_template",
+          "inbox_message",
+          "outbox_event",
+          "outbox_event_attempt",
+          "tapdb_identity_prefix_config",
+          "tapdb_legacy_outbox_mapping",
+          "tapdb_runtime_principal_scope"
+        ],
+        "allowed_new_tables": [
+          "tapdb_runtime_principal_scope"
+        ],
+        "allowed_new_rows": [],
+        "allowed_transformations": [
+          "audit_log.changed_by:null_or_empty_to_pre92_unattributed_v1"
+        ],
+        "includes": [
+          "../rls.sql"
+        ]
+      },
+      {
+        "filename": "20260903_031820_runtime_ddl_guard.sql",
+        "source_sha256": "b307e07e955779e0185b778fb7b5d142cc0f42967df78dfdd2bd86afc6f46b03",
+        "allowed_schema_tables": [],
+        "allowed_new_tables": [],
+        "allowed_new_rows": [],
+        "allowed_transformations": [],
+        "includes": []
+      },
+      {
+        "filename": "20260904_061819_tenant_scoped_natural_identity.sql",
+        "source_sha256": "61bbe0fd833575c8074f8ff00ff1bc2726bf026b687040f4966474f658b51cb3",
+        "allowed_schema_tables": [
+          "generic_instance"
+        ],
+        "allowed_new_tables": [],
+        "allowed_new_rows": [],
+        "allowed_transformations": [],
+        "includes": []
+      },
+      {
+        "filename": "20260910_203200_aurora_operator_principals.sql",
+        "source_sha256": "52082288bd594ce457af4cfc7997e4e52f8d6910c5b02696e348691f03bb0e5d",
+        "allowed_schema_tables": [
+          "audit_log",
+          "generic_instance",
+          "generic_instance_lineage",
+          "generic_template",
+          "inbox_message",
+          "outbox_event",
+          "outbox_event_attempt",
+          "tapdb_identity_prefix_config",
+          "tapdb_legacy_outbox_mapping",
+          "tapdb_runtime_principal_scope"
+        ],
+        "allowed_new_tables": [
+          "tapdb_runtime_principal_scope"
+        ],
+        "allowed_new_rows": [],
+        "allowed_transformations": [],
+        "includes": [
+          "../rls.sql"
+        ]
+      },
+      {
+        "filename": "20260910_220000_sequence_prefix_bindings.sql",
+        "source_sha256": "99329ae1bb85e0bfff071ef68b3bce87e75d186f79601338dfdb9447ab6ca3fc",
+        "allowed_schema_tables": [],
+        "allowed_new_tables": [],
+        "allowed_new_rows": [],
+        "allowed_transformations": [],
+        "includes": []
+      },
+      {
+        "filename": "20260910_233000_pin_managed_allocator_resolution.sql",
+        "source_sha256": "3adaf757cc515a253b6bdf5d900a2884cc2452171138f11105c53f969d136ffb",
+        "allowed_schema_tables": [
+          "audit_log",
+          "generic_instance",
+          "generic_instance_lineage",
+          "generic_template"
+        ],
+        "allowed_new_tables": [],
+        "allowed_new_rows": [],
+        "allowed_transformations": [],
+        "includes": [
+          "../allocator_functions.sql"
+        ]
+      }
+    ],
+    "included_assets": [
+      {
+        "path": "schema/rls.sql",
+        "source_sha256": "85144de81d7ec7d9f5a30b7776b78adb9dd46de08e6506a8c76a6c1ae46a9afd"
+      },
+      {
+        "path": "schema/allocator_functions.sql",
+        "source_sha256": "0c0897df273fc581a02f133f8dde043c38d3149486598618189c1ae4388acbe3"
+      }
+    ]
+  },
+  "preconditions": {
+    "original_source_cell_conversions_permitted": false,
+    "audit_log.changed_by": {
+      "null_hash_count": 0,
+      "empty_string_hash_count": 0
+    },
+    "generic_template.validator_ref": {
+      "null_hash_count": 0,
+      "empty_string_hash_count": 0
+    },
+    "outbox_event": {
+      "row_count": 0,
+      "legacy_event_id_column_present": false,
+      "message_uid_column_present": true
+    },
+    "generic_instance": {
+      "identity_key_column_present": false,
+      "machine_uuid_null_rows": 12204
+    },
+    "original_tenant_id": "All observed source tenant_id values remain NULL; no backfill",
+    "new_table_rows_before_runtime_binding": {
+      "tapdb_legacy_outbox_mapping": 0,
+      "tapdb_runtime_principal_scope": 0
+    }
+  }
+}

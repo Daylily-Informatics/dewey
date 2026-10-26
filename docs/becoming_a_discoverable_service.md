@@ -1,6 +1,6 @@
 # Dewey As A Discoverable Service
 
-This page describes how Dewey fits the Dayhoff-managed service contract today.
+This page describes how Dewey 12.0.7 fits the Dayhoff-managed service contract.
 
 The goal is not to restate Dayhoff's generic guidance. The goal is to show how Dewey already satisfies that contract in concrete, repo-local terms.
 
@@ -48,6 +48,11 @@ The CLI exposes this contract directly through:
 - `dewey config validate`
 - `dewey config status`
 
+Runtime and native lifecycle operations receive the actual service/TapDB config
+as explicit absolute paths. A local CLI default is not authority to infer a
+production config, database or deployment identity. Activation is environment
+setup; it does not prepare recipient ingress or migrate a database.
+
 ### CLI-owned lifecycle
 
 Dewey already owns its own runtime lifecycle through the `dewey` CLI:
@@ -56,9 +61,8 @@ Dewey already owns its own runtime lifecycle through the `dewey` CLI:
 - `dewey server stop`
 - `dewey server status`
 - `dewey server logs`
-- `dewey db build`
-- `dewey db reset`
-- `dewey db nuke`
+- `dewey db lifecycle`
+- `dewey db verify-templates`
 
 That is exactly the shape Dayhoff needs: service-owned lifecycle, not hidden shell glue.
 
@@ -92,6 +96,20 @@ That base URL is used by:
 - service discovery and deployment metadata in the wider stack
 - cross-service configuration in Dayhoff-managed environments
 
+### Recipient And Management Reachability
+
+The day endpoint is `https://dewey.day.lsmc.bio`. Its dedicated public ALB exposes
+only the configured recipient/authentication routes and isolated content hosts.
+The private origin listeners are restricted to that gateway; shared port 443,
+management/admin/health, service backchannels and sibling services retain their
+approved-network boundary. A routable hostname does not make every service path
+public.
+
+Durable recipient URLs are `/fetch/<share-euid-or-slug>[/<relative-path>]`.
+Management URLs, API credentials and raw storage URLs are not substitutes for
+that contract. Hostnames, certificates, proxy assertions and route allowlists are
+explicit configuration; there is no wildcard fallback to sibling applications.
+
 ### Auth and base-URL handoff
 
 Dewey consumes auth and browser-session wiring through config/env values such as:
@@ -104,7 +122,15 @@ Dewey consumes auth and browser-session wiring through config/env values such as
 - allowed email domains
 - group-role mapping
 
-Dayhoff can synthesize and hand off these deployment-scoped values without needing to own Dewey's route logic.
+The day deployment additionally binds shared Login's share entry, handoff,
+identity-introspection, credential-mint and credential-revoke endpoints. New
+recipients receive verified share-only identity rather than automatic domain
+organization membership. Independent private/public ingress assertions preserve
+the boundary between management and recipient traffic.
+
+Dayhoff hands off reviewed deployment-scoped values while Dewey owns route and
+sharing policy. Missing or mismatched origin/identity configuration fails; the
+service does not discover alternate hosts or synthesize callback destinations.
 
 ## Why Dewey Is Discoverable In Practice
 
@@ -157,9 +183,9 @@ Dewey being discoverable does not mean:
 
 Discoverability is an operations and runtime contract. Ownership still stays local to Dewey for artifact concerns.
 
-## Current-State Caveat
+## Validation And Acceptance Boundary
 
-The discoverability contract remains stable in the current April 6, 2026 verification run. The repo now measures `256` collected tests with `254 passed`, `2 skipped`, and `84%` coverage. Dayhoff still depends mainly on these service-contract facts:
+Dayhoff depends on these service-contract facts:
 
 - activation
 - config pathing
@@ -168,4 +194,10 @@ The discoverability contract remains stable in the current April 6, 2026 verific
 - base URL
 - observability endpoints
 
-That means Dewey is discoverable in the Dayhoff sense, with the remaining runtime sensitivity concentrated in environment-specific browser auth rather than the discoverability contract itself.
+Source contracts, image provenance, runtime health, changed-code validation and
+real recipient acceptance have separate receipts in the
+[release ledger](plans/20261026T010947Z_dewey_12_sharing_release_ledger.md).
+Historical April test totals are not the current release's evidence. Internal
+signup is confirmed; internal application admission/scoped-access proof and final
+user acceptance remain open. Discoverability or healthy probes do not close those
+gates.

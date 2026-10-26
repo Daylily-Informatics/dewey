@@ -1,0 +1,331 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / ADMIN
+  - heading "Admin" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - heading "Service administration" [level=2]
+  - paragraph: Dewey 10.0.5
+  - link "Health":
+    - /url: /health
+  - link "Observability":
+    - /url: /ui/observability
+  - link "Anomalies":
+    - /url: /ui/anomalies
+  - link "All accessible shares":
+    - /url: /shares
+  - link "Clients and tokens":
+    - /url: /account
+  - paragraph: Shared login owns users, roles, and credentials. Dewey owns record policies, delegated access, and shares.
+  - heading "Sharing defaults" [level=3]
+  - paragraph: 30 days per share · 900 seconds per delivery credential
+  - button "Edit defaults" [active]
+  - heading "TapDB administration" [level=2]
+  - paragraph: Advanced templates, object repair, relationship graphs, audit, inventory, backups, and runtime inspection.
+  - link "Open TapDB":
+    - /url: /tapdb/
+  - paragraph: These tools require Dewey admin access. Standalone TapDB probe failures do not establish that embedded Dewey is unavailable.
+  - generic "Effective configuration · secrets redacted"
+  - table:
+    - rowgroup:
+      - row "Setting Value":
+        - columnheader "Setting"
+        - columnheader "Value"
+    - rowgroup:
+      - row "application.api_bearer_token <redacted>":
+        - cell "application.api_bearer_token"
+        - cell "<redacted>"
+      - row "application.api_bearer_tokens <redacted>":
+        - cell "application.api_bearer_tokens"
+        - cell "<redacted>"
+      - row "application.environment production":
+        - cell "application.environment"
+        - cell "production"
+      - row "application.host 0.0.0.0":
+        - cell "application.host"
+        - cell "0.0.0.0"
+      - row "application.port 8914":
+        - cell "application.port"
+        - cell "8914"
+      - row "application.session_secret_key <redacted>":
+        - cell "application.session_secret_key"
+        - cell "<redacted>"
+      - row "application.verify_ssl true":
+        - cell "application.verify_ssl"
+        - cell "true"
+      - row "auth.cognito.allowed_email_domains lsmc.com, lsmc.bio, lsmc.life, daylilyinformatics.com":
+        - cell "auth.cognito.allowed_email_domains"
+        - cell "lsmc.com, lsmc.bio, lsmc.life, daylilyinformatics.com"
+      - row "auth.cognito.app_client_id 43bru8cp55em7ea6ovj5nvsl75":
+        - cell "auth.cognito.app_client_id"
+        - cell "43bru8cp55em7ea6ovj5nvsl75"
+      - row "auth.cognito.app_client_secret <redacted>":
+        - cell "auth.cognito.app_client_secret"
+        - cell "<redacted>"
+      - row "auth.cognito.auto_provision_allowed_domains lsmc.com, lsmc.bio, lsmc.life, inflectionmedicine.com, daylilyinformatics.com":
+        - cell "auth.cognito.auto_provision_allowed_domains"
+        - cell "lsmc.com, lsmc.bio, lsmc.life, inflectionmedicine.com, daylilyinformatics.com"
+      - row "auth.cognito.default_tenant_id 00000000-0000-0000-0000-000000000000":
+        - cell "auth.cognito.default_tenant_id"
+        - cell "00000000-0000-0000-0000-000000000000"
+      - row "auth.cognito.domain lsmc-atlas-gui-users-8915-lsmcok1.auth.us-west-2.amazoncognito.com":
+        - cell "auth.cognito.domain"
+        - cell "lsmc-atlas-gui-users-8915-lsmcok1.auth.us-west-2.amazoncognito.com"
+      - row "auth.cognito.group_role_map.dewey-admin ADMIN":
+        - cell "auth.cognito.group_role_map.dewey-admin"
+        - cell "ADMIN"
+      - row "auth.cognito.group_role_map.dewey-readonly READ_ONLY":
+        - cell "auth.cognito.group_role_map.dewey-readonly"
+        - cell "READ_ONLY"
+      - row "auth.cognito.group_role_map.dewey-readwrite READ_WRITE":
+        - cell "auth.cognito.group_role_map.dewey-readwrite"
+        - cell "READ_WRITE"
+      - row "auth.cognito.group_role_map.lsmc:dewey:admin ADMIN":
+        - cell "auth.cognito.group_role_map.lsmc:dewey:admin"
+        - cell "ADMIN"
+      - row "auth.cognito.group_role_map.lsmc:dewey:readonly READ_ONLY":
+        - cell "auth.cognito.group_role_map.lsmc:dewey:readonly"
+        - cell "READ_ONLY"
+      - row "auth.cognito.group_role_map.lsmc:dewey:readwrite READ_WRITE":
+        - cell "auth.cognito.group_role_map.lsmc:dewey:readwrite"
+        - cell "READ_WRITE"
+      - row "auth.cognito.group_role_map.lsmc:external-share-user READ_ONLY":
+        - cell "auth.cognito.group_role_map.lsmc:external-share-user"
+        - cell "READ_ONLY"
+      - row "auth.cognito.group_role_map.lsmc:global-admin ADMIN":
+        - cell "auth.cognito.group_role_map.lsmc:global-admin"
+        - cell "ADMIN"
+      - row "auth.cognito.group_role_map.lsmc:internal-user READ_WRITE":
+        - cell "auth.cognito.group_role_map.lsmc:internal-user"
+        - cell "READ_WRITE"
+      - row "auth.cognito.group_role_map.platform-admin ADMIN":
+        - cell "auth.cognito.group_role_map.platform-admin"
+        - cell "ADMIN"
+      - row "auth.cognito.logout_url https://dewey.day.lsmc.bio/auth/logout":
+        - cell "auth.cognito.logout_url"
+        - cell "https://dewey.day.lsmc.bio/auth/logout"
+      - row "auth.cognito.redirect_uri https://dewey.day.lsmc.bio/auth/lsmc/callback":
+        - cell "auth.cognito.redirect_uri"
+        - cell "https://dewey.day.lsmc.bio/auth/lsmc/callback"
+      - row "auth.cognito.region us-west-2":
+        - cell "auth.cognito.region"
+        - cell "us-west-2"
+      - row "auth.cognito.user_pool_id us-west-2_dPYPLRKZe":
+        - cell "auth.cognito.user_pool_id"
+        - cell "us-west-2_dPYPLRKZe"
+      - row "auth.external_broker.ca_bundle <unset>":
+        - cell "auth.external_broker.ca_bundle"
+        - cell "<unset>"
+      - row "auth.external_broker.callback_url https://dewey.day.lsmc.bio/auth/lsmc/callback":
+        - cell "auth.external_broker.callback_url"
+        - cell "https://dewey.day.lsmc.bio/auth/lsmc/callback"
+      - row "auth.external_broker.handoff_exchange_url https://login.day.lsmc.bio/auth/handoff/consume":
+        - cell "auth.external_broker.handoff_exchange_url"
+        - cell "https://login.day.lsmc.bio/auth/handoff/consume"
+      - row "auth.external_broker.login_url https://login.day.lsmc.bio/auth/login":
+        - cell "auth.external_broker.login_url"
+        - cell "https://login.day.lsmc.bio/auth/login"
+      - row "auth.external_broker.logout_url https://login.day.lsmc.bio/auth/logout?service=dewey":
+        - cell "auth.external_broker.logout_url"
+        - cell "https://login.day.lsmc.bio/auth/logout?service=dewey"
+      - row "auth.external_broker.service_id dewey":
+        - cell "auth.external_broker.service_id"
+        - cell "dewey"
+      - row "auth.external_broker.service_token <redacted>":
+        - cell "auth.external_broker.service_token"
+        - cell "<redacted>"
+      - row "auth.mode external_broker":
+        - cell "auth.mode"
+        - cell "external_broker"
+      - row "aws.profile lsmc":
+        - cell "aws.profile"
+        - cell "lsmc"
+      - row "aws.region us-west-2":
+        - cell "aws.region"
+        - cell "us-west-2"
+      - row "cloudfront.cookie.ttl.seconds <redacted>":
+        - cell "cloudfront.cookie.ttl.seconds"
+        - cell "<redacted>"
+      - row "cloudfront.default.ttl.seconds 900":
+        - cell "cloudfront.default.ttl.seconds"
+        - cell "900"
+      - row "cloudfront.distribution.domain d213df1ma80hb0.cloudfront.net":
+        - cell "cloudfront.distribution.domain"
+        - cell "d213df1ma80hb0.cloudfront.net"
+      - row "cloudfront.distribution.id E3V6LY7GVFQDQ3":
+        - cell "cloudfront.distribution.id"
+        - cell "E3V6LY7GVFQDQ3"
+      - row "cloudfront.enabled true":
+        - cell "cloudfront.enabled"
+        - cell "true"
+      - row "cloudfront.key.pair.id <redacted>":
+        - cell "cloudfront.key.pair.id"
+        - cell "<redacted>"
+      - row "cloudfront.private.key.path <redacted>":
+        - cell "cloudfront.private.key.path"
+        - cell "<redacted>"
+      - row "config.file_path /opt/dewey/day/releases/10.0.2/dewey-config.yaml":
+        - cell "config.file_path"
+        - cell "/opt/dewey/day/releases/10.0.2/dewey-config.yaml"
+      - row "database.backend tapdb":
+        - cell "database.backend"
+        - cell "tapdb"
+      - row "database.client_id dewey":
+        - cell "database.client_id"
+        - cell "dewey"
+      - row "database.config_path /opt/dewey/day/releases/9.0.0/tapdb-runtime.yaml":
+        - cell "database.config_path"
+        - cell "/opt/dewey/day/releases/9.0.0/tapdb-runtime.yaml"
+      - row "database.domain_code M":
+        - cell "database.domain_code"
+        - cell "M"
+      - row "database.domain_registry_path /opt/dayhoff/deployments/day/tapdb-registry/domain_code_registry.json":
+        - cell "database.domain_registry_path"
+        - cell "/opt/dayhoff/deployments/day/tapdb-registry/domain_code_registry.json"
+      - row "database.namespace dewey-day":
+        - cell "database.namespace"
+        - cell "dewey-day"
+      - row "database.owner_repo_name dewey":
+        - cell "database.owner_repo_name"
+        - cell "dewey"
+      - row "database.prefix_ownership_registry_path /opt/dayhoff/deployments/day/tapdb-registry/prefix_ownership_registry.json":
+        - cell "database.prefix_ownership_registry_path"
+        - cell "/opt/dayhoff/deployments/day/tapdb-registry/prefix_ownership_registry.json"
+      - row "database.strict_namespace 1":
+        - cell "database.strict_namespace"
+        - cell "1"
+      - row "database.target aurora":
+        - cell "database.target"
+        - cell "aurora"
+      - 'row "deployment.color #35ca21"':
+        - cell "deployment.color"
+        - cell "#35ca21"
+      - row "deployment.is_production false":
+        - cell "deployment.is_production"
+        - cell "false"
+      - row "deployment.name day":
+        - cell "deployment.name"
+        - cell "day"
+      - 'row "external_references.targets {''service_id'': ''atlas'', ''base_url'': ''https://atlas.day.lsmc.bio'', ''object_path'': ''/api/dag/object/{euid}'', ''detail_url_template'': ''https://atlas.day.lsmc.bio/object/{euid}'', ''verify_ssl'': True, ''headers'': {''Authorization'': ''<redacted>''}}, {''service_id'': ''ursa'', ''base_url'': ''https://ursa.day.lsmc.bio'', ''object_path'': ''/api/dag/object/{euid}'', ''detail_url_template'': ''https://ursa.day.lsmc.bio/object/{euid}'', ''verify_ssl'': True, ''headers'': {''Authorization'': ''<redacted>''}}, {''service_id'': ''zebra_day'', ''base_url'': ''https://zebra-day.day.lsmc.bio'', ''object_path'': ''/api/dag/object/{euid}'', ''detail_url_template'': ''https://zebra-day.day.lsmc.bio/object/{euid}'', ''verify_ssl'': True, ''headers'': {''Authorization'': ''<redacted>''}}"':
+        - cell "external_references.targets"
+        - 'cell "{''service_id'': ''atlas'', ''base_url'': ''https://atlas.day.lsmc.bio'', ''object_path'': ''/api/dag/object/{euid}'', ''detail_url_template'': ''https://atlas.day.lsmc.bio/object/{euid}'', ''verify_ssl'': True, ''headers'': {''Authorization'': ''<redacted>''}}, {''service_id'': ''ursa'', ''base_url'': ''https://ursa.day.lsmc.bio'', ''object_path'': ''/api/dag/object/{euid}'', ''detail_url_template'': ''https://ursa.day.lsmc.bio/object/{euid}'', ''verify_ssl'': True, ''headers'': {''Authorization'': ''<redacted>''}}, {''service_id'': ''zebra_day'', ''base_url'': ''https://zebra-day.day.lsmc.bio'', ''object_path'': ''/api/dag/object/{euid}'', ''detail_url_template'': ''https://zebra-day.day.lsmc.bio/object/{euid}'', ''verify_ssl'': True, ''headers'': {''Authorization'': ''<redacted>''}}"'
+      - row "literature.managed_copy_allowed_domains europepmc.org,ncbi.nlm.nih.gov":
+        - cell "literature.managed_copy_allowed_domains"
+        - cell "europepmc.org,ncbi.nlm.nih.gov"
+      - row "literature.max_redirects 3":
+        - cell "literature.max_redirects"
+        - cell "3"
+      - row "literature.metapub_cache_dir /run/dewey-production-state/metapub":
+        - cell "literature.metapub_cache_dir"
+        - cell "/run/dewey-production-state/metapub"
+      - row "literature.request_timeout_seconds 10":
+        - cell "literature.request_timeout_seconds"
+        - cell "10"
+      - row:
+        - cell "network.allowed.hosts"
+        - cell
+      - row "qeo.api_token <redacted>":
+        - cell "qeo.api_token"
+        - cell "<redacted>"
+      - row "qeo.ca_bundle_path <unset>":
+        - cell "qeo.ca_bundle_path"
+        - cell "<unset>"
+      - row "qeo.consumer_group <unset>":
+        - cell "qeo.consumer_group"
+        - cell "<unset>"
+      - row "qeo.ingest_url <unset>":
+        - cell "qeo.ingest_url"
+        - cell "<unset>"
+      - row "qeo.resolver.token.expires.at <redacted>":
+        - cell "qeo.resolver.token.expires.at"
+        - cell "<redacted>"
+      - row "qeo.resolver.token.sha256 <redacted>":
+        - cell "qeo.resolver.token.sha256"
+        - cell "<redacted>"
+      - row "qeo.timeout_seconds 10":
+        - cell "qeo.timeout_seconds"
+        - cell "10"
+      - row "registry.default.share.lifetime.days 30":
+        - cell "registry.default.share.lifetime.days"
+        - cell "30"
+      - row "registry.internal.domains lsmc.com":
+        - cell "registry.internal.domains"
+        - cell "lsmc.com"
+      - row "registry.service.principals.1c4e120de6145abc1627db06c6f7a238e8cefde6bae1f7247af697088989733b.roles ADMIN":
+        - cell "registry.service.principals.1c4e120de6145abc1627db06c6f7a238e8cefde6bae1f7247af697088989733b.roles"
+        - cell "ADMIN"
+      - row "registry.service.principals.1c4e120de6145abc1627db06c6f7a238e8cefde6bae1f7247af697088989733b.subject existing-service-credential:1c4e120de6145abc":
+        - cell "registry.service.principals.1c4e120de6145abc1627db06c6f7a238e8cefde6bae1f7247af697088989733b.subject"
+        - cell "existing-service-credential:1c4e120de6145abc"
+      - row "registry.service.principals.81b98e1c3a8f6bffe0735dc416136e59d0ee7f3a0fad46609612f53edcc3a7fe.roles ADMIN":
+        - cell "registry.service.principals.81b98e1c3a8f6bffe0735dc416136e59d0ee7f3a0fad46609612f53edcc3a7fe.roles"
+        - cell "ADMIN"
+      - row "registry.service.principals.81b98e1c3a8f6bffe0735dc416136e59d0ee7f3a0fad46609612f53edcc3a7fe.subject existing-service-credential:81b98e1c3a8f6bff":
+        - cell "registry.service.principals.81b98e1c3a8f6bffe0735dc416136e59d0ee7f3a0fad46609612f53edcc3a7fe.subject"
+        - cell "existing-service-credential:81b98e1c3a8f6bff"
+      - row "registry.service.principals.87b37bd82a81011908c22e3f21340cf30b025649205667a43fcd5a8bd38c7e5c.roles ADMIN":
+        - cell "registry.service.principals.87b37bd82a81011908c22e3f21340cf30b025649205667a43fcd5a8bd38c7e5c.roles"
+        - cell "ADMIN"
+      - row "registry.service.principals.87b37bd82a81011908c22e3f21340cf30b025649205667a43fcd5a8bd38c7e5c.subject existing-service-credential:87b37bd82a810119":
+        - cell "registry.service.principals.87b37bd82a81011908c22e3f21340cf30b025649205667a43fcd5a8bd38c7e5c.subject"
+        - cell "existing-service-credential:87b37bd82a810119"
+      - row "requester.pays.buckets <unset>":
+        - cell "requester.pays.buckets"
+        - cell "<unset>"
+      - row "search.export_max_rows 1000":
+        - cell "search.export_max_rows"
+        - cell "1000"
+      - row "share.approved.origins s3://lsmc-dewey-0/":
+        - cell "share.approved.origins"
+        - cell "s3://lsmc-dewey-0/"
+      - row "share.default.signed.ttl.seconds 900":
+        - cell "share.default.signed.ttl.seconds"
+        - cell "900"
+      - row "share.max.lifetime.days 3650":
+        - cell "share.max.lifetime.days"
+        - cell "3650"
+      - row "storage.managed_bucket lsmc-dewey-0":
+        - cell "storage.managed_bucket"
+        - cell "lsmc-dewey-0"
+      - row "storage.managed_prefix artifacts":
+        - cell "storage.managed_prefix"
+        - cell "artifacts"
+      - row "storage.upload_session_ttl_seconds <redacted>":
+        - cell "storage.upload_session_ttl_seconds"
+        - cell "<redacted>"
+      - row "ui.show_environment_chrome true":
+        - cell "ui.show_environment_chrome"
+        - cell "true"
+  - generic "Release identity"
+  - generic: "{ \"branch\": \"codex/dewey-labcore-910\", \"tag\": \"10.0.5\", \"commit\": \"df6d4d0646fc1385c35ff2b6353478a46b4587ac\", \"source\": \"tagged-image\" }"
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

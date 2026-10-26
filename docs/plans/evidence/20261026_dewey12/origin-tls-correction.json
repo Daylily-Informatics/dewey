@@ -1,0 +1,8 @@
+{
+  "before_sha256": "45aad56141ce1d70d916b5a18518d6f238ca6e9ea1ad76644e9d86b11496cbb7",
+  "after_sha256": "3524aff880c885e9835727b7d5a0d4d75c43d84f7efc698ce4f76a5f64f8d9a3",
+  "configtest": "pass",
+  "reload": "graceful",
+  "other_vhosts_unchanged": 10,
+  "existing_443_unchanged": true
+}

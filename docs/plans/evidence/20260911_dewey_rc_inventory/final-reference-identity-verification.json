@@ -1,0 +1,8 @@
+{
+  "after_sha256": "bcb415ff15a9d9b5c8f4dc469508915768bacfbc45dbfc1a772fdf913a2f0a8a",
+  "before_sha256": "5977604290e4dbf6df066a717e5199a6e27a1c0c5437a4c97d95c902cc5e6dca",
+  "ok": true,
+  "schema_version": "tapdb-identity-verification/v1",
+  "sha256": "e891a8c73cf1968d660be073b572c48d5c99548d8467d12749433e44e6d03009",
+  "violations": []
+}

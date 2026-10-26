@@ -1,0 +1,17 @@
+{
+  "contract_version": "v3",
+  "service": "dewey",
+  "environment": "day",
+  "observed_at": "2026-10-25T21:26:29.282395+00:00",
+  "status": "ok",
+  "build": {
+    "version": "11.0.10",
+    "sha": "7f6fde5429741780517cf461a615e5b3e5f102f2"
+  },
+  "checks": {
+    "process": {
+      "status": "ok",
+      "started_at": "2026-10-15T20:49:35.131844+00:00"
+    }
+  }
+}

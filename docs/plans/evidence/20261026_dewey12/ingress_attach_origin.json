@@ -1,0 +1,9 @@
+{
+  "added_security_group": "sg-0a032b52eff239628",
+  "eni_id": "eni-00d0d767fe52379a8",
+  "preserved_security_groups": [
+    "sg-01439b28585f4a617",
+    "sg-0516a6da8fe443299",
+    "sg-0860b90837ee8753c"
+  ]
+}

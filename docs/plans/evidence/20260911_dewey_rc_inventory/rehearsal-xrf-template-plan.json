@@ -1,0 +1,80 @@
+{
+  "actor": "dewey-tapdb10-migration",
+  "candidate": {
+    "id": "039f7ac3d6a3f3ccc289b7a379b1370df2b4b1339a37b3ff66e5b5ea333a666d",
+    "image": "sha256:cdf64e75f23c2ee6cd9327e3a52432000b7aa08073f02b9237e125f5df9f54c1",
+    "name": "dewey-tapdb10-rehearsal-c6406b8ffb40"
+  },
+  "canonical_definition_hashes": {
+    "opaque": "a7f1ce51946c25e452be0346d49c76b0f0d1fd9e98c2924e7554670a45218263",
+    "tapdb_object": "319725fef0e110d7605af7b093e6749d16ea55ba8e9158d64778a28554fe2a65"
+  },
+  "expected_inserted": 2,
+  "inputs": {
+    "/home/ubuntu/dewey_ops/tapdb101-20260911/control-operator.yaml": "42491d0bf321d4d8027ef52918a1396e4e4c7f2c7bdecdabd82449b86b87686a",
+    "/home/ubuntu/dewey_ops/tapdb101-20260911/dewey_rehearsal_copy.py": "d7a316eb10e9788e8f5a0d7459845c31a52b2b813d7584c8f43323a0cc121733",
+    "/home/ubuntu/dewey_ops/tapdb101-20260911/dewey_xrf_template_setup_port_fix.py": "a59c18d74d3ebf251e418c79beb5597fcac42fba706a0f54512578e6ed14cdd9",
+    "/home/ubuntu/dewey_ops/tapdb101-20260911/rehearsal-operator.yaml": "9208dde2d25577ff06679e2bd19a37870ddc1c5d3039edc11dd31f3da8f53520",
+    "/home/ubuntu/dewey_ops/tapdb101-20260911/venv/lib/python3.12/site-packages/daylily_tapdb/core_config/system/external_identifier.json": "fcf66d68956cca9b18b70363eccef2bc0b6fae0cace7c4c772af8a6070a15026",
+    "/home/ubuntu/dewey_ops/tapdb101-20260911/venv/lib/python3.12/site-packages/daylily_tapdb/core_config/system/external_reference.json": "27432b4fd15f2e048e9b313e2b4f70ed5f44be9ad66ecaba024783ce130fd97c",
+    "/opt/dayhoff/deployments/day/tapdb-registry/domain_code_registry.json": "95023b502d5340f12aefa1c343f38aa876abca99c3e2310b57b105eaf2d74c28",
+    "/opt/dayhoff/deployments/day/tapdb-registry/prefix_ownership_registry.json": "afacde40149dabb14e48b79fd392d5ebbd71929aba6a8ed1a08332acb73bc8b4"
+  },
+  "lane": "rehearsal",
+  "overwrite": false,
+  "physical_target": {
+    "database": "dewey_tapdb10_rehearsal_20260911",
+    "database_oid": 645854,
+    "server_address": "10.0.2.148/32",
+    "server_port": 5432
+  },
+  "schema_version": "dewey-xrf-template-setup/v1",
+  "source_freeze": {
+    "container_id": "872434f0530335fd5a985a920f498fe39a36fd5eab40b9cb3934b185ceddeb36",
+    "image": "sha256:4fe9907f2d3443f2360cad2463974a60f8158aea90cbf2aa7fbc56349d45a91f",
+    "physical": {
+      "database": "dewey_prod",
+      "database_oid": 16749,
+      "server_address": "10.0.2.148/32",
+      "server_port": 5432
+    }
+  },
+  "target": {
+    "config_identity": "/home/ubuntu/dewey_ops/tapdb101-20260911/rehearsal-operator.yaml",
+    "database": "dewey_tapdb10_rehearsal_20260911",
+    "domain_code": "M",
+    "engine_type": "aurora",
+    "host": "dayhoff-lsmcok1-tapdb.cluster-ch4mq8a6wcdf.us-west-2.rds.amazonaws.com",
+    "owner_repo_name": "dewey",
+    "port": 5432,
+    "schema_name": "tapdb_dewey_lsmcok1_local"
+  },
+  "templates_before": {
+    "existing_scoped_uids": [],
+    "original_rows": {
+      "1": "1d89e15d351a3eb06e94296b228badaae9bc987dedf30af58e0be3918c77dfbe",
+      "10": "ea0db55a3182d5fd8f53dbedf0ee8ca3b2b91f0a2a217b9d99ffddb0a008e531",
+      "11": "2f0950fc7363d2269b57e3c936b6bc8eb228da6189a5bdfee0c21dcd83adcca8",
+      "12": "450a16f1e12123a6e1c984e28a5050f933ffde7b8a04e0e9e5be2ac7b1ece2c5",
+      "13": "ca08374bbda51392268c7e3fc7d294b99b90caa04b627f288ad4bff8df9ab3c0",
+      "14": "3bcf3908c4064307e65b9fb35eb8f9f86296fc49a92d8eb9ff9008e965f83d89",
+      "15": "e4c78cc0de18fe0353dc6df2fe3f00177957ac8f88a186ac84d6a7546432613d",
+      "16": "356b439f72c3133b59b3826faf8fddd2afd6b07508f07ac6b574eec6790cd534",
+      "17": "6ee4651485bddd39c98f676a34da376b6cc9fedde9e67ef3a462c9d8b4185858",
+      "18": "4977f699a8bba902db237afdc4902a4d263316427799d4e6d137e5dd4c9029f0",
+      "19": "4f523dfcaeef5a4980560cf01541327659cd1dd431a0f4350277578a02f5ef76",
+      "2": "89f81e716fc28e6238c7781b590359e1837016198398d50f0a4086fff1bb14d8",
+      "20": "a408334c49bc516c89d6d9626b07d574d878bd032dd04656cd2713f4cefdb8a5",
+      "21": "5dfb7c5d1624ed3a0080120f68c7fddd9c33cc83af9d62c8829618cc3733c857",
+      "22": "8bb755effa332ba1f812aebef756a7b2db1dfe8c5376eed1b2652937e68cd5dc",
+      "3": "d3ca20c650721d88ad59ecab6997dc791a7d26a53dee0abea62dcd228fc885a8",
+      "4": "307e01a800e5df35d7e0c5257a071b9f5ab18d3f4abc29f58735f717d13cd922",
+      "5": "2a3d897db29d74e712f0d63acc839b44d9273898606c7053a7b292a6ad3b648e",
+      "6": "8adbc875f55661ad5f16cf43d6732f823d4c773241792586e651d2e53e43ee56",
+      "7": "cd86f929a124eae3efeec9acabe85e48325a00e81fcca639bf87e072a62fb9b5",
+      "8": "b82ddd50a5eeef3ce0cce9b2c8c19e4c5d569b9d736cdf0f85b1b517410ea70a",
+      "9": "3810a6de56f531652af9bff006d4c59c798ff47ad8a70ff79ed7922aefd3011e"
+    },
+    "row_count": 22
+  }
+}

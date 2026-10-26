@@ -1,0 +1,41 @@
+{
+  "observed_at": "2026-10-26T07:17:56.750164+00:00",
+  "status": 200,
+  "body": {
+    "contract_version": "v3",
+    "service": "dewey",
+    "environment": "day",
+    "instance_id": "e3efef6a8a0b4d43a82a27ade9ac3019",
+    "observed_at": "2026-10-26T07:17:56.727484+00:00",
+    "status": "ok",
+    "request_id": "WcZDtcq54cfPqGZxEOuXx9hJ-e_1j-0q",
+    "correlation_id": "79af01aa4ca2dd15",
+    "build": {
+      "version": "12.0.6",
+      "sha": "25ec6c9d19ebbe32ef445aa348b2287aff89781f"
+    },
+    "ready": true,
+    "checks": {
+      "process": {
+        "status": "ok",
+        "started_at": "2026-10-26T07:16:56.312308+00:00",
+        "details": {}
+      },
+      "database": {
+        "status": "ok",
+        "latency_ms": 24.868,
+        "detail": "ok",
+        "observed_at": "2026-10-26T07:17:56.727484+00:00",
+        "details": {}
+      }
+    },
+    "projection": {
+      "state": "ready",
+      "stale": false,
+      "observed_at": "2026-10-26T07:17:56.727484+00:00",
+      "last_synced_at": "2026-10-26T07:17:56.727484+00:00",
+      "detail": null
+    },
+    "sharing_schema": "verified"
+  }
+}

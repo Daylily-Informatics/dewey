@@ -1,0 +1,17 @@
+{
+  "observed_at": "2026-10-04T03:19:04.944550+00:00",
+  "changes": [
+    {
+      "path": "/home/ubuntu/dewey-sharing-20261004T000136Z/source/dewey_service/share_upgrade.py",
+      "previous_sha256": "86542f3bf822088fe6e505d4d351ee5a577e6406af998250274c7aca9a1312a1",
+      "sha256": "fc1041c44b1538ba8b1a16d7ee027e93fa298ec565834538bb7074ca8178f197"
+    },
+    {
+      "path": "/home/ubuntu/dewey-sharing-20261004T000136Z/source/dewey_service/services/share_policy.py",
+      "previous_sha256": "02a6159d4ba281a73f282092fd85161c34a3b4cedb4e35da6053e1253f872fba",
+      "sha256": "b54f36760f395c476fef22a3225a195704fbe671b1c40b94525b5111a9a98ad2"
+    }
+  ],
+  "purpose": "Native read-only inventory version 3; explicit historical set authority",
+  "command_id": "7331d820-8756-4b8d-970d-60d7302d9c50"
+}

@@ -1,0 +1,35 @@
+{
+  "observed_at": "2026-10-04T05:34:41.941375+00:00",
+  "origin": "https://dewey.day.lsmc.bio",
+  "observations": [
+    {
+      "path": "/healthz",
+      "http_status": 200,
+      "remote_ip": "100.71.233.11",
+      "tls_verify_result": 0,
+      "status": "ok",
+      "build": {
+        "version": "11.0.2",
+        "sha": "3f782eebc6e43ded3fa655c3fcdc1c2c616bcd89"
+      },
+      "ready": null,
+      "sharing_schema": null,
+      "database_status": null
+    },
+    {
+      "path": "/readyz",
+      "http_status": 200,
+      "remote_ip": "100.71.233.11",
+      "tls_verify_result": 0,
+      "status": "ok",
+      "build": {
+        "version": "11.0.2",
+        "sha": "3f782eebc6e43ded3fa655c3fcdc1c2c616bcd89"
+      },
+      "ready": true,
+      "sharing_schema": "verified",
+      "database_status": "ok"
+    }
+  ],
+  "scope": "Runtime availability observation only; no share functional campaign or user acceptance"
+}

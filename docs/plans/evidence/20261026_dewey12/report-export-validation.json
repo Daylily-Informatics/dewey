@@ -1,0 +1,41 @@
+{
+  "recorded_at": "2026-10-26T08:42:55.381718+00:00",
+  "status": "pass",
+  "purpose": "Only changed report viewer policy/GUI correction; no full suite or database group rerun",
+  "python_tests": {
+    "tests": "17",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "time": "0.515"
+  },
+  "javascript_tests": {
+    "tests": 45,
+    "passed": 45,
+    "failed": 0,
+    "skipped": 0
+  },
+  "new_javascript_regressions": 2,
+  "coverage": {
+    "dewey": {
+      "covered_lines": 1781,
+      "total_lines": 1856,
+      "covered_branches": 703,
+      "total_branches": 784,
+      "line_percent": 95.95905172413794,
+      "branch_percent": 89.66836734693878
+    },
+    "ui": {
+      "covered_lines": 109,
+      "total_lines": 109,
+      "covered_branches": 190,
+      "total_branches": 214,
+      "line_percent": 100.0,
+      "branch_percent": 88.78504672897196
+    }
+  },
+  "commands": {
+    "python": "DEWEY_DEPLOYMENT_CODE=contract COVERAGE_FILE=/tmp/dewey12-acceptance-20261026/dewey-export-fix-coverage.data .venv/bin/python -m pytest -q tests/test_fetch_delivery_v12.py::test_www_entry_is_only_trusted_shell_on_application_origin tests/test_report_preview_attribution.py tests/test_report_identity_v12.py tests/test_preview_session_identity_boundaries.py --cov=dewey_service.report_preview --cov-branch --cov-report=json:/tmp/dewey12-acceptance-20261026/dewey-export-fix-coverage.json --cov-report=term:skip-covered --junitxml=/tmp/dewey12-acceptance-20261026/dewey-export-fix-tests.xml",
+    "javascript": "tests/ui/node_modules/.bin/c8 --all --include=dewey_service/static/sharing.js --temp-directory=/tmp/dewey12-acceptance-20261026/dewey-export-ui-v8 --reporter=json --reporter=text-summary --reports-dir=/tmp/dewey12-acceptance-20261026/dewey-export-ui-coverage node --test tests/ui/sharing_v12.test.cjs"
+  }
+}

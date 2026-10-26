@@ -1,0 +1,125 @@
+{
+  "acceptance_limits": [
+    "E used coordinator sanitized source summary and C reported tracking hash pairs; no full private source row file read.",
+    "Candidate filename and row-key hashes independently recomputed; actual final native preflight must corroborate exact five applied and eight pending files.",
+    "Zero NULL and empty-string hashes do not establish absence of trimmed whitespace; no original cell change is permitted and native comparison must enforce it.",
+    "Per-table schema_changes is broad native permission; actual metadata diff must match tagged assets and retain owner/kind/original columns/PKs.",
+    "New identity_key must be NULL on all original rows; mapping and scope tables empty before binding.",
+    "Copy policy needs actual after target materialization; no invented physical identity.",
+    "No tests, database calls, package edits or live operations executed for this static input review."
+  ],
+  "added_column": "generic_instance.identity_key",
+  "added_tables": [
+    "tapdb_legacy_outbox_mapping",
+    "tapdb_runtime_principal_scope"
+  ],
+  "author_asset_review_sha256": "860b97aaa143b9f29689dd6ca4ba471e3567a5ca4ed612cb87e7df32fb5fffec",
+  "conditional_postmigration_rows": 79926,
+  "conditional_postmigration_tables": 11,
+  "copy_policy_sha256": "6885079d900c747f68e19cc4c2d0b1fc1bff6d49ad9b00478e1f4991df8bf870",
+  "expected_pending_filenames": [
+    "20260902_010000_natural_identity_and_owner_uniqueness.sql",
+    "20260902_010100_legacy_outbox_message_conversion.sql",
+    "20260902_020000_force_rls_and_audit_attribution.sql",
+    "20260903_031820_runtime_ddl_guard.sql",
+    "20260904_061819_tenant_scoped_natural_identity.sql",
+    "20260910_203200_aurora_operator_principals.sql",
+    "20260910_220000_sequence_prefix_bindings.sql",
+    "20260910_233000_pin_managed_allocator_resolution.sql"
+  ],
+  "manifest_file": "/Users/jmajor/projects/mega_dayhoff/.codex-worktrees/dewey-data-migration-20260911/docs/plans/evidence/20260911T055609Z_dewey_native_migration_manifest.json",
+  "manifest_sha256": "af99535d9328b6de1e62b5a3758b36dbcd75ec7aa046f1663d16a8efa25261b8",
+  "new_rows_permitted_only": "_tapdb_migrations",
+  "original_cell_conversions_permitted": false,
+  "original_tables": 9,
+  "release": "10.1.1rc1",
+  "release_commit": "02ab7c9d0325dfcbf9dc47a03be66b62e0a22f2c",
+  "schema_permission_tables": [
+    "audit_log",
+    "generic_instance",
+    "generic_instance_lineage",
+    "generic_template",
+    "inbox_message",
+    "outbox_event",
+    "outbox_event_attempt",
+    "tapdb_identity_prefix_config"
+  ],
+  "source_contract_sha256": "b4fa8198d2c8082e551011f227497b4d17b379d79d4350ff15635e1c9a9f6e75",
+  "source_summary_sha256": "b91a09876d8f27411a45d7c2cf9f684ccc4d79b576b0425d8bb8ca07af450a90",
+  "status": "reviewed_inputs_accepted_pending_actual_native_results",
+  "tagged_asset_checks": [
+    {
+      "declarations_match": true,
+      "path": "schema/migrations/20260303_120000_add_tenant_id.sql",
+      "sha256": "a4792e381f1753121cf55310339b31606d34094c1822b01acbd7d2c5735a4be7"
+    },
+    {
+      "declarations_match": true,
+      "path": "schema/migrations/20260303_120010_add_outbox_event.sql",
+      "sha256": "323696d2d42e9a9f726d3884e7f10fd7c3966b0e0ee0d254da7031a06b703b98"
+    },
+    {
+      "declarations_match": true,
+      "path": "schema/migrations/20260405_120000_add_domain_scoping.sql",
+      "sha256": "ddf93da9c783f093b7415b6bf91f697909c435b3d164cb61521946fc68d9d289"
+    },
+    {
+      "declarations_match": true,
+      "path": "schema/migrations/20260612_154200_add_template_validator_ref.sql",
+      "sha256": "77fe94bfad8932e64b565e811dd6bfd2ffc05eedefeb589a4d5c0d0caeb02c26"
+    },
+    {
+      "declarations_match": true,
+      "path": "schema/migrations/20260612_154210_instance_prefix_from_template.sql",
+      "sha256": "49950a3942c6a5e8eb3098d502032bf2ab55c925fe374fc522d07cd1ca3388ab"
+    },
+    {
+      "declarations_match": true,
+      "path": "schema/migrations/20260902_010000_natural_identity_and_owner_uniqueness.sql",
+      "sha256": "587ad63ac6b30a6dfc3ab3d65fe07255fd5bfc9a0feb7951629c204a116d6fc9"
+    },
+    {
+      "declarations_match": true,
+      "path": "schema/migrations/20260902_010100_legacy_outbox_message_conversion.sql",
+      "sha256": "d1823c4c32cbc2e7c652d14a6d935550a62c0fc9a6492a6cc3f15208d6f68f34"
+    },
+    {
+      "declarations_match": true,
+      "path": "schema/migrations/20260902_020000_force_rls_and_audit_attribution.sql",
+      "sha256": "ee9e8f303d6c44b2a1d1db5c997848475d9aa0fa49c4359d47820198453cf58d"
+    },
+    {
+      "declarations_match": true,
+      "path": "schema/migrations/20260903_031820_runtime_ddl_guard.sql",
+      "sha256": "b307e07e955779e0185b778fb7b5d142cc0f42967df78dfdd2bd86afc6f46b03"
+    },
+    {
+      "declarations_match": true,
+      "path": "schema/migrations/20260904_061819_tenant_scoped_natural_identity.sql",
+      "sha256": "61bbe0fd833575c8074f8ff00ff1bc2726bf026b687040f4966474f658b51cb3"
+    },
+    {
+      "declarations_match": true,
+      "path": "schema/migrations/20260910_203200_aurora_operator_principals.sql",
+      "sha256": "52082288bd594ce457af4cfc7997e4e52f8d6910c5b02696e348691f03bb0e5d"
+    },
+    {
+      "declarations_match": true,
+      "path": "schema/migrations/20260910_220000_sequence_prefix_bindings.sql",
+      "sha256": "99329ae1bb85e0bfff071ef68b3bce87e75d186f79601338dfdb9447ab6ca3fc"
+    },
+    {
+      "declarations_match": true,
+      "path": "schema/migrations/20260910_233000_pin_managed_allocator_resolution.sql",
+      "sha256": "3adaf757cc515a253b6bdf5d900a2884cc2452171138f11105c53f969d136ffb"
+    },
+    {
+      "path": "schema/rls.sql",
+      "sha256": "85144de81d7ec7d9f5a30b7776b78adb9dd46de08e6506a8c76a6c1ae46a9afd"
+    },
+    {
+      "path": "schema/allocator_functions.sql",
+      "sha256": "0c0897df273fc581a02f133f8dde043c38d3149486598618189c1ae4388acbe3"
+    }
+  ]
+}

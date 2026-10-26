@@ -1,0 +1,149 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / LIBRARY
+  - heading "Library" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - searchbox "Search library": I1-B
+  - combobox "Kind":
+    - option "All kinds" [selected]
+    - option "Objects"
+    - option "Prefixes"
+  - combobox "Sort":
+    - option "Newest first" [selected]
+    - option "Name"
+  - button "Search"
+  - button "Filters"
+  - generic: 8 accessible records
+  - button "Create set from selection"
+  - link "New set":
+    - /url: /add?kind=set
+  - table:
+    - rowgroup:
+      - row "Name / EUID Kind Producer Created":
+        - columnheader
+        - columnheader "Name / EUID"
+        - columnheader "Kind"
+        - columnheader "Producer"
+        - columnheader "Created"
+    - rowgroup:
+      - row "Select M-DGX-TSY1 Dewey GUI audit 20260916 I1-B URL M-DGX-TSY1 object dewey 9/16/2026":
+        - cell "Select M-DGX-TSY1":
+          - checkbox "Select M-DGX-TSY1"
+        - cell "Dewey GUI audit 20260916 I1-B URL M-DGX-TSY1":
+          - link "Dewey GUI audit 20260916 I1-B URL":
+            - /url: /records/M-DGX-TSY1
+          - generic: M-DGX-TSY1
+        - cell "object":
+          - generic: object
+        - cell "dewey"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TST9 Dewey GUI audit 20260916 I1-B prefix M-DGX-TST9 prefix dewey 9/16/2026":
+        - cell "Select M-DGX-TST9":
+          - checkbox "Select M-DGX-TST9"
+        - cell "Dewey GUI audit 20260916 I1-B prefix M-DGX-TST9":
+          - link "Dewey GUI audit 20260916 I1-B prefix":
+            - /url: /records/M-DGX-TST9
+          - generic: M-DGX-TST9
+        - cell "prefix":
+          - generic: prefix
+        - cell "dewey"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TSE2 Dewey GUI audit 20260916 I1-B storage set M-DGX-TSE2 set — 9/16/2026":
+        - cell "Select M-DGX-TSE2":
+          - checkbox "Select M-DGX-TSE2" [disabled]
+        - cell "Dewey GUI audit 20260916 I1-B storage set M-DGX-TSE2":
+          - link "Dewey GUI audit 20260916 I1-B storage set":
+            - /url: /records/M-DGX-TSE2
+          - generic: M-DGX-TSE2
+        - cell "set":
+          - generic: set
+        - cell "—"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TS8E multipart-17MiB.txt M-DGX-TS8E object dewey 9/16/2026":
+        - cell "Select M-DGX-TS8E":
+          - checkbox "Select M-DGX-TS8E"
+        - cell "multipart-17MiB.txt M-DGX-TS8E":
+          - link "multipart-17MiB.txt":
+            - /url: /records/M-DGX-TS8E
+          - generic: M-DGX-TS8E
+        - cell "object":
+          - generic: object
+        - cell "dewey"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TS4P asset.svg M-DGX-TS4P object dewey 9/16/2026":
+        - cell "Select M-DGX-TS4P":
+          - checkbox "Select M-DGX-TS4P"
+        - cell "asset.svg M-DGX-TS4P":
+          - link "asset.svg":
+            - /url: /records/M-DGX-TS4P
+          - generic: M-DGX-TS4P
+        - cell "object":
+          - generic: object
+        - cell "dewey"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TS0Y index.html M-DGX-TS0Y object dewey 9/16/2026":
+        - cell "Select M-DGX-TS0Y":
+          - checkbox "Select M-DGX-TS0Y"
+        - cell "index.html M-DGX-TS0Y":
+          - link "index.html":
+            - /url: /records/M-DGX-TS0Y
+          - generic: M-DGX-TS0Y
+        - cell "object":
+          - generic: object
+        - cell "dewey"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TRW6 fixture.json M-DGX-TRW6 object dewey 9/16/2026":
+        - cell "Select M-DGX-TRW6":
+          - checkbox "Select M-DGX-TRW6"
+        - cell "fixture.json M-DGX-TRW6":
+          - link "fixture.json":
+            - /url: /records/M-DGX-TRW6
+          - generic: M-DGX-TRW6
+        - cell "object":
+          - generic: object
+        - cell "dewey"
+        - cell "9/16/2026"
+      - row "Select M-DGX-TRRE hello world ü.txt M-DGX-TRRE object dewey 9/16/2026":
+        - cell "Select M-DGX-TRRE":
+          - checkbox "Select M-DGX-TRRE"
+        - cell "hello world ü.txt M-DGX-TRRE":
+          - link "hello world ü.txt":
+            - /url: /records/M-DGX-TRRE
+          - generic: M-DGX-TRRE
+        - cell "object":
+          - generic: object
+        - cell "dewey"
+        - cell "9/16/2026"
+  - generic: Page 1 · 25 per page
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

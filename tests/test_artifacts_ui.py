@@ -38,23 +38,22 @@ def _login_user(monkeypatch, client, groups: list[str] | None = None) -> None:
 
 
 def test_artifacts_page_requires_login_and_serves_bulk_template(monkeypatch, client) -> None:
-    response = client.get("/artifacts")
-    assert response.status_code == 401
+    response = client.get("/artifacts", follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login?next=%2Fartifacts"
+    assert 'data-section="Add"' not in response.text
 
     _login_user(monkeypatch, client)
 
     page = client.get("/artifacts")
     assert page.status_code == 200
-    assert "Register, Search, Download, And Share" in page.text
-    assert "Artifact Sets" in page.text
-    assert "Recent Artifacts" in page.text
-    assert 'href="/artifacts"' in page.text
-    assert 'href="/artifacts/dag"' in page.text
-    assert "section=recent_artifacts#section-recent_artifacts" in page.text
-    assert 'data-testid="dewey-artifact-register-form"' in page.text
-    assert 'data-testid="dewey-artifact-s3-mode"' in page.text
-    assert 'data-testid="dewey-artifact-s3-sources"' in page.text
-    assert 'data-testid="dewey-artifact-register-submit"' in page.text
+    assert 'data-section="Add"' in page.text
+    assert 'data-writable="true"' in page.text
+    assert 'href="/ui"' in page.text
+    assert 'href="/sets"' in page.text
+    assert 'href="/storage"' in page.text
+    assert "/static/registry.js" in page.text
+    assert 'id="content" aria-busy="true"' in page.text
 
     template = client.get("/artifacts/bulk-template.tsv")
     assert template.status_code == 200
@@ -190,16 +189,17 @@ def test_artifacts_register_search_download_and_artifact_share(
             ),
         },
     )
-    assert share.status_code == 200
-    assert "Issued Artifact Shares" in share.text
-    assert len(fake_service.shares) == 2
+    assert share.status_code == 403
+    assert "current verified-email identity" in share.text
+    assert fake_service.shares == {}
 
     recent = client.get("/artifacts?section=recent_artifacts")
     assert recent.status_code == 200
-    assert "Recent Artifacts" in recent.text
-    assert "local-report.txt" in recent.text
-    assert 'href="/artifacts/euid/AT-000001"' in recent.text
-    assert 'action="/artifacts/euid/AT-000001/download"' in recent.text
+    assert 'data-section="Add"' in recent.text
+    listing = client.get("/api/v1/artifacts", headers={"Authorization": "Bearer token-123"})
+    assert listing.status_code == 200
+    assert listing.json()["total"] == 4
+    assert "local-report.txt" in {row["original_filename"] for row in listing.json()["items"]}
 
 
 def test_artifact_dag_page_and_storage_browser_routes(
@@ -226,9 +226,8 @@ def test_artifact_dag_page_and_storage_browser_routes(
 
     page = client.get(f"/artifacts/dag?artifact_euid={run_artifact['artifact_euid']}")
     assert page.status_code == 200
-    assert "Directory Browser And DAG View" in page.text
-    assert "S3 Directory Browser" in page.text
-    assert run_artifact["artifact_euid"] in page.text
+    assert 'data-section="S3 Browser"' in page.text
+    assert "/static/registry.js" in page.text
 
     browse_api = client.get(
         "/api/v1/storage/browse",
@@ -260,47 +259,48 @@ def test_artifact_detail_page_and_direct_download_redirect(
     assert register.status_code == 200
 
     artifact_euid = next(iter(fake_service.artifacts))
-    artifact = fake_service.artifacts.pop(artifact_euid)
-    artifact["artifact_euid"] = "M-DGX-9S5Q"
-    artifact_euid = artifact["artifact_euid"]
-    fake_service.artifacts[artifact_euid] = artifact
-
     detail = client.get(f"/artifacts/euid/{artifact_euid}")
     assert detail.status_code == 200
-    assert artifact_euid in detail.text
-    assert "detail-report.txt" in detail.text
-    assert "(detail-report.txt)" in detail.text
-    assert 'class="artifact-heading-filename"' in detail.text
-    assert "Storage URI" in detail.text
+    assert f'data-euid="{artifact_euid}"' in detail.text
+    assert 'data-section="Record"' in detail.text
+    record = client.get(
+        f"/api/v1/artifacts/{artifact_euid}",
+        headers={"Authorization": "Bearer token-123"},
+    )
+    assert record.status_code == 200
+    assert record.json()["original_filename"] == "detail-report.txt"
+    assert record.json()["storage_uri"].startswith("s3://")
 
     download = client.post(
         f"/artifacts/euid/{artifact_euid}/download",
         data={"share_duration_days": "1.25"},
         follow_redirects=False,
     )
-    assert download.status_code == 303, download.text
-    assert download.headers["location"] == "https://downloads.example.com/SHR-000001"
-    assert len(fake_service.shares) == 1
+    assert download.status_code == 403, download.text
+    assert "current verified-email identity" in download.text
+    assert "location" not in download.headers
+    assert fake_service.shares == {}
 
     opened = client.post(
-        "/shares/SHR-000001/access-package",
+        "/shares/share-fixture/access-package",
         data={"delivery_mode": "presigned_s3", "signed_ttl_seconds": "300"},
     )
-    assert opened.status_code == 200
-    assert "downloads.example.com/SHR-000001" in opened.text
-    assert fake_service.shares["SHR-000001"]["access_count"] == 2
+    assert opened.status_code == 403
+    assert opened.json()["detail"] == "Verified sharing ingress is required"
+    assert "signed_url" not in opened.text
 
     shares = client.get("/shares")
-    assert shares.status_code == 200
-    assert "S3 and CloudFront Shares" in shares.text
+    assert shares.status_code == 403
+    assert shares.json()["detail"] == "Verified sharing ingress is required"
 
     revoke = client.post(
-        "/shares/SHR-000001/revoke",
+        "/shares/share-fixture/revoke",
         data={"return_to": "artifact"},
         follow_redirects=False,
     )
-    assert revoke.status_code == 200
-    assert fake_service.shares["SHR-000001"]["status"] == "revoked"
+    assert revoke.status_code == 403
+    assert revoke.json()["detail"] == "Verified sharing ingress is required"
+    assert fake_service.shares == {}
 
 
 def test_artifacts_register_infers_artifact_type_from_extension(
@@ -431,10 +431,12 @@ def test_artifacts_bulk_directory_limit_and_artifact_set_routes(
             ),
         },
     )
-    assert set_share.status_code == 200
-    assert "Latest Set Share" in set_share.text
-    assert "artifact-set-share" in set_share.text
-    assert len(fake_service.shares) == 1
+    assert set_share.status_code == 403
+    assert "current verified-email identity" in set_share.text
+    assert "Latest Set Share" not in set_share.text
+    assert fake_service.shares == {}
+    assert fake_service.artifact_sets[created_set["artifact_set_euid"]] == created_set
+    assert len(fake_service.artifacts) == 2
 
 
 def test_artifact_detail_external_reference_validate_and_create(
@@ -444,10 +446,10 @@ def test_artifact_detail_external_reference_validate_and_create(
         {
             "service_id": "ursa",
             "base_url": "https://localhost:8913",
-            "object_path": "/api/dag/object/{euid}",
+            "object_path": "/api/dag/v2/object/{euid}",
             "detail_url_template": "https://ursa.dev.lsmc.life/object/{euid}",
             "verify_ssl": False,
-            "headers": {"Authorization": "Bearer token"},
+            "dag_read_token": "native-read-token",
         }
     ]
 
@@ -456,7 +458,24 @@ def test_artifact_detail_external_reference_validate_and_create(
 
         @staticmethod
         def json() -> dict:
-            return {"euid": "Z-RGX-15T", "label": "Result Graph", "record_type": "analysis_result"}
+            return {
+                "service_id": "ursa",
+                "euid": "Z-RGX-15T",
+                "display_label": "Result Graph",
+                "record_type": "instance",
+                "tenant_id": None,
+                "category": "analysis",
+                "type": "run-linked",
+                "subtype": "generic",
+                "version": "1.0",
+            }
+
+    class _ManifestResponse:
+        status_code = 200
+
+        @staticmethod
+        def json() -> dict:
+            return {"service_id": "ursa", "contract": "dag:v2"}
 
     class _AsyncClient:
         def __init__(self, *, timeout: float, verify: bool) -> None:
@@ -470,11 +489,22 @@ def test_artifact_detail_external_reference_validate_and_create(
             return False
 
         async def get(self, url: str, *, headers: dict):
-            assert url == "https://localhost:8913/api/dag/object/Z-RGX-15T"
-            assert headers["Authorization"] == "Bearer token"
+            assert headers["Authorization"] == "Bearer native-read-token"
+            if url == "https://localhost:8913/api/dag/manifest":
+                return _ManifestResponse()
+            assert url == "https://localhost:8913/api/dag/v2/object/Z-RGX-15T"
             return _Response()
 
     monkeypatch.setattr("dewey_service.app.httpx.AsyncClient", _AsyncClient)
+
+    def _validate_manifest(payload, *, expected_service_id):
+        assert payload == {"service_id": expected_service_id, "contract": "dag:v2"}
+        return None
+
+    monkeypatch.setattr(
+        "daylily_tapdb.web.dag_v2.validate_dag_v2_manifest",
+        _validate_manifest,
+    )
     app = create_app(settings=test_settings, service=fake_service)
     with TestClient(app, base_url="https://localhost:8914") as local_client:
         _login_user(monkeypatch, local_client)
@@ -498,6 +528,8 @@ def test_artifact_detail_external_reference_validate_and_create(
         assert create.status_code == 200
         assert len(fake_service.external_relations) == 1
         assert fake_service.external_relations[0]["relation_type"] == "analysis_result"
+        external_object = next(iter(fake_service.external_objects.values()))
+        assert external_object["external_object_type"] == "analysis"
 
 
 def test_artifact_detail_external_reference_requires_explicit_targets(monkeypatch, client) -> None:
@@ -532,3 +564,66 @@ def test_artifact_detail_rejects_invalid_share_days(monkeypatch, client) -> None
     )
     assert too_long.status_code == 400
     assert "at most 365.0" in too_long.text
+
+
+def test_gui_quick_registration_preserves_native_conflict(monkeypatch, client, fake_service):
+    from fastapi import HTTPException
+
+    _login_user(monkeypatch, client)
+    calls = []
+
+    def conflict(**kwargs):
+        calls.append(kwargs)
+        raise HTTPException(409, "TapDB revision conflict; explicitly reconcile")
+
+    monkeypatch.setattr(fake_service, "import_artifact_from_uri", conflict)
+    response = client.post("/ui/register", data={"source_s3_uri": "s3://fixture-bucket/input.txt"})
+    assert response.status_code == 409
+    assert len(calls) == 1
+
+
+def test_gui_multi_upload_conflict_stops_later_writes(monkeypatch, client, fake_service):
+    from fastapi import HTTPException
+
+    _login_user(monkeypatch, client)
+    calls = []
+
+    def conflict(**kwargs):
+        calls.append(kwargs)
+        raise HTTPException(409, "TapDB revision conflict; explicitly reconcile")
+
+    monkeypatch.setattr(fake_service, "upload_artifact_bytes", conflict)
+    response = client.post(
+        "/artifacts/register",
+        data={"artifact_type": "report"},
+        files=[
+            ("directory_data", ("first.txt", b"one", "text/plain")),
+            ("directory_data", ("second.txt", b"two", "text/plain")),
+        ],
+    )
+    assert response.status_code == 409
+    assert len(calls) == 1
+
+
+def test_gui_bulk_conflict_stops_later_rows(monkeypatch, client, fake_service):
+    from fastapi import HTTPException
+
+    _login_user(monkeypatch, client)
+    calls = []
+
+    def conflict(**kwargs):
+        calls.append(kwargs)
+        raise HTTPException(409, "TapDB revision conflict; explicitly reconcile")
+
+    monkeypatch.setattr(fake_service, "import_artifact_from_uri", conflict)
+    body = (
+        "source_mode\tartifact_type\tsource_uri\n"
+        "reference\treport\ts3://fixture-bucket/first.txt\n"
+        "reference\treport\ts3://fixture-bucket/second.txt\n"
+    )
+    response = client.post(
+        "/artifacts/bulk-upload",
+        files={"bulk_tsv": ("artifacts.tsv", body.encode(), "text/tab-separated-values")},
+    )
+    assert response.status_code == 409
+    assert len(calls) == 1

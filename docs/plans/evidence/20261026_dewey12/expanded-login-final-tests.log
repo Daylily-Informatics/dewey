@@ -1,0 +1,51 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.0, pytest-9.0.3, pluggy-1.6.0
+rootdir: /Users/jmajor/projects/lsmc/lsmc-oauth-login
+configfile: pyproject.toml
+plugins: cov-7.1.0, base-url-2.1.0, playwright-0.8.0, anyio-4.13.0
+collected 148 items
+
+tests/test_recipient_identity.py .........                               [  6%]
+tests/test_recipient_mail.py ...                                         [  8%]
+tests/test_recipient_web.py ...                                          [ 10%]
+tests/test_postgres_state_concurrency.py .                               [ 10%]
+tests/test_handoff.py ..                                                 [ 12%]
+tests/test_invites.py ...                                                [ 14%]
+tests/test_settings.py ...........                                       [ 21%]
+tests/test_web.py ..........................                             [ 39%]
+tests/test_recipient_provider_boundaries.py ............................ [ 58%]
+                                                                         [ 58%]
+tests/test_recipient_identity_boundaries.py ........................     [ 74%]
+tests/test_recipient_store_boundaries.py ........                        [ 79%]
+tests/test_recipient_onboarding_boundaries.py ............               [ 87%]
+tests/test_recipient_mail_boundaries.py .......                          [ 92%]
+tests/test_recipient_settings_cli_boundaries.py ...........              [100%]
+
+-- generated xml file: /tmp/dewey12-acceptance-20261026/login-final-tests.xml --
+================================ tests coverage ================================
+_______________ coverage: platform darwin, python 3.12.0-final-0 _______________
+
+Name                                     Stmts   Miss Branch BrPart  Cover
+--------------------------------------------------------------------------
+lsmc_oauth_login/account_linking.py         21      4      8      4    72%
+lsmc_oauth_login/cli/__init__.py            11      1      0      0    91%
+lsmc_oauth_login/cli/plugins/auth.py        38     22     10      0    33%
+lsmc_oauth_login/cli/plugins/server.py      48     29     16      0    30%
+lsmc_oauth_login/cli/plugins/state.py       35      8      8      0    72%
+lsmc_oauth_login/cli/plugins/status.py      22     11      2      0    46%
+lsmc_oauth_login/cognito_core.py            38     38     10      0     0%
+lsmc_oauth_login/container_entry.py         26     26      8      0     0%
+lsmc_oauth_login/contracts.py               78     10     10      2    80%
+lsmc_oauth_login/delegation.py              55     40     22      1    21%
+lsmc_oauth_login/handoff.py                 46      3      6      2    90%
+lsmc_oauth_login/identity_store.py         268     44     74     22    80%
+lsmc_oauth_login/invites.py                 68      1     10      1    97%
+lsmc_oauth_login/postgres_state.py         166     93     20      1    40%
+lsmc_oauth_login/settings.py               306     43     84     30    78%
+lsmc_oauth_login/web.py                    853    129    248     56    82%
+--------------------------------------------------------------------------
+TOTAL                                     2366    502    594    119    75%
+
+6 files skipped due to complete coverage.
+Coverage JSON written to file /tmp/dewey12-acceptance-20261026/login-final-coverage.json
+============================= 148 passed in 8.52s ==============================

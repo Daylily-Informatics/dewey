@@ -1,0 +1,31 @@
+{
+  "captured_at": "2026-09-11T09:03:34.155472+00:00",
+  "generic_instance": [
+    {
+      "archive_key_exists": false,
+      "is_deleted": false,
+      "properties_type": "object",
+      "rows": 109
+    },
+    {
+      "archive_key_exists": false,
+      "is_deleted": false,
+      "properties_type": null,
+      "rows": 12091
+    }
+  ],
+  "generic_instance_lineage": [
+    {
+      "archive_key_exists": false,
+      "is_deleted": false,
+      "properties_type": "object",
+      "rows": 1
+    },
+    {
+      "archive_key_exists": false,
+      "is_deleted": false,
+      "properties_type": null,
+      "rows": 1014
+    }
+  ]
+}

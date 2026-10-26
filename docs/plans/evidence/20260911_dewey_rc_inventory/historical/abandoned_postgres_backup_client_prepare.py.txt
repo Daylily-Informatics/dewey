@@ -1,0 +1,69 @@
+"""Extract signed-repository PostgreSQL client packages for isolated operator use.
+
+Run as ubuntu through interactive SSM. This never installs Debian packages into
+the host, repairs the unrelated kernel package state, or connects to a database.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+from pathlib import Path
+import pwd
+import subprocess
+
+ROOT = Path("/home/ubuntu/dewey_ops/tapdb101-20260911/postgres-client-16.14")
+PACKAGES = (
+    "postgresql-client-16=16.14-0ubuntu0.24.04.1",
+    "libpq5=16.14-0ubuntu0.24.04.1",
+)
+
+
+def main() -> None:
+    os.umask(0o077)
+    if pwd.getpwuid(os.geteuid()).pw_name != "ubuntu":
+        raise RuntimeError("The isolated client preparation must run as ubuntu")
+    ROOT.mkdir(mode=0o700)
+    packages = ROOT / "packages"
+    packages.mkdir(mode=0o700)
+    install = ROOT / "install"
+    install.mkdir(mode=0o700)
+    subprocess.run(["apt-get", "download", *PACKAGES], cwd=packages, check=True)
+    archives = sorted(packages.glob("*.deb"))
+    if len(archives) != len(PACKAGES):
+        raise RuntimeError("Unexpected downloaded package inventory")
+    receipts = []
+    for archive in archives:
+        metadata = subprocess.check_output(
+            ["dpkg-deb", "--field", str(archive), "Package", "Version", "Architecture"],
+            text=True,
+        )
+        with archive.open("rb") as handle:
+            digest = hashlib.file_digest(handle, "sha256").hexdigest()
+        receipts.append({"path": str(archive), "sha256": digest, "metadata": metadata})
+        subprocess.run(["dpkg-deb", "--extract", str(archive), str(install)], check=True)
+    binary_dir = install / "usr/lib/postgresql/16/bin"
+    environment = dict(os.environ)
+    environment["LD_LIBRARY_PATH"] = str(install / "usr/lib/x86_64-linux-gnu")
+    versions = {}
+    for binary in ("pg_dump", "pg_restore", "psql"):
+        command = binary_dir / binary
+        subprocess.run(["ldd", str(command)], env=environment, check=True)
+        versions[binary] = subprocess.check_output(
+            [str(command), "--version"], env=environment, text=True
+        ).strip()
+    result = {
+        "packages": receipts, "versions": versions,
+        "binary_directory": str(binary_dir),
+        "LD_LIBRARY_PATH": environment["LD_LIBRARY_PATH"],
+        "host_package_state_modified": False, "database_connection_performed": False,
+    }
+    with (ROOT / "preparation.json").open("x") as output:
+        json.dump(result, output, indent=2, sort_keys=True)
+        output.write("\n")
+    print(json.dumps(result, sort_keys=True))
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,50 @@
+{
+  "base_revision": "c98cbbbd5c5f7b1b622579923800e6ffa2f382e6",
+  "branch": "codex/dewey-gui-performance-20260919",
+  "build_execution_gate": "Parent-reviewed helper and builder slot release required",
+  "files": [
+    {
+      "bytes": 47833,
+      "path": "dewey_service/services/registry.py",
+      "sha256": "795cdeca730245c710f30e1fb604410fecf633ca8e5a8ac67b92984fe67f98a5"
+    },
+    {
+      "bytes": 42223,
+      "path": "dewey_service/static/registry.js",
+      "sha256": "ca40355d8b1a7cbdcbaf82360706a26ce6046362f7d7f23132286a3186dbe1f1"
+    },
+    {
+      "bytes": 6408,
+      "path": "README.md",
+      "sha256": "92e5f03d252e2eb553b3da84db919184d7535f4338b250032c594fa864f9344c"
+    },
+    {
+      "bytes": 5239,
+      "path": "docs/plans/20260919T095100Z_dewey_gui_performance_ledger.md",
+      "sha256": "68fb3922ffae3e827b7776263716e821a00956ed897800d006f020977abd5ec8"
+    },
+    {
+      "bytes": 4175,
+      "path": "docs/plans/20260919T095200Z_dewey_route_baseline.json",
+      "sha256": "659d33c5ba58f0ea9135ae2b26b9f1856c5b2721761acc5dbac0a6a57a3894cf"
+    },
+    {
+      "bytes": 3948,
+      "path": "docs/plans/20260919T095200Z_dewey_route_observer.py",
+      "sha256": "8338ac2fd457b141810791d7f17397ee34e727baa289ff2baae63f032ff28196"
+    },
+    {
+      "bytes": 1075,
+      "path": "docs/plans/20260919T095400Z_dewey_runtime_identity.json",
+      "sha256": "03796e24c6c5187430e72676e2a94f0e35ed0caa85d0d2685cd036eeb515cee6"
+    },
+    {
+      "bytes": 8995,
+      "path": "docs/plans/20260919T095700Z_dewey_existing_summary_authority.json",
+      "sha256": "e2915f2321ae66c0cc7bdb8715e0a9d6f3030a1e16853a69a777b2a11d1ddfc2"
+    }
+  ],
+  "release_deployment_authorized": true,
+  "schema": "dewey.performance-source-allowlist/1",
+  "tests_run": false
+}

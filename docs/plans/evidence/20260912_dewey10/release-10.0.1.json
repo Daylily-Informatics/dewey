@@ -1,0 +1,11 @@
+{
+  "tag": "10.0.1",
+  "commit": "afe13e1b466ca6a0f625c4401790299f9322d7d1",
+  "tree": "ca5214a05422b79e6cffb23f77f9e1d84526a3a7",
+  "source_sha256": "b658550406e94f33d60b75336ca115a6761baa33f1d9cc647d43fe56631314b0",
+  "dockerfile_sha256": "c1bff4721e975e0756f7f243f8477c233a36d759cef37bec817d0223694c621d",
+  "repository": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey",
+  "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey:10.0.1",
+  "platform": "linux/amd64",
+  "tests_run": false
+}

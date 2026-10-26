@@ -1,0 +1,16 @@
+{
+    "imageDetails": [
+        {
+            "registryId": "108782052779",
+            "repositoryName": "dayhoff/day/dewey",
+            "imageDigest": "sha256:cdf64e75f23c2ee6cd9327e3a52432000b7aa08073f02b9237e125f5df9f54c1",
+            "imageTags": [
+                "9.0.0-c6406b8ffb40"
+            ],
+            "imageSizeInBytes": 213514666,
+            "imagePushedAt": "2026-09-11T08:41:35.772000+00:00",
+            "imageManifestMediaType": "application/vnd.oci.image.index.v1+json",
+            "imageStatus": "ACTIVE"
+        }
+    ]
+}

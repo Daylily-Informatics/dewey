@@ -1,0 +1,146 @@
+{
+  "observed_at": "2026-10-26T07:55:21.530Z",
+  "status": "pass",
+  "release": {
+    "version": "12.0.6",
+    "sha": "25ec6c9d19ebbe32ef445aa348b2287aff89781f"
+  },
+  "source_snapshot_sha256": "cac1ab54775595d75e2923371cbde19cb1d67e238f1685f39d540f1a9b71e982",
+  "retained_after_snapshot_sha256": "fc07a94af970a326fc297a7a49dfeb637e607616120cece60e7ff64d2108f269",
+  "helper_sha256": "f4e248d7bab9a0f6218c7bd183d774940dc2660370a6112bc5c752d0e65ca7d6",
+  "scope": "Four controlled synthetic shares; one authenticated external GET of revoked file and native/aggregate reconciliation",
+  "baseline_native_events": 275,
+  "current_native_events": 277,
+  "new_events": 2,
+  "expected_external_denials": 1,
+  "manager_contents_reads": 1,
+  "events": [
+    {
+      "euid": "M-DGX-14QQR",
+      "share_euid": "M-DGX-14CN7",
+      "event_type": "authorization",
+      "decision": "deny",
+      "created_at": "2026-10-26T07:41:26.018703Z",
+      "policy_revision": 6,
+      "request_id": "36d073cb-d6c6-48dd-a7e5-b2140ae421f9",
+      "details": {
+        "action": "resolve",
+        "reason": "Share is not available",
+        "status_code": 403
+      },
+      "actor_email_verified": true,
+      "actor_service": false,
+      "verified_actor_role": "external_recipient"
+    },
+    {
+      "euid": "M-DGX-14QRP",
+      "share_euid": "M-DGX-14D1F",
+      "event_type": "contents",
+      "decision": "allow",
+      "created_at": "2026-10-26T07:43:40.395490Z",
+      "policy_revision": 1,
+      "request_id": "f723a60b-8eb1-4ec2-b1b3-18a25ec9ec7d",
+      "details": {
+        "policy_revision": 1
+      },
+      "actor_email_verified": true,
+      "actor_service": false,
+      "verified_actor_role": "manager"
+    }
+  ],
+  "manager_contents_cause": "Native event proves the manager contents read; observed CUA share-page reload at the same time explains its trigger.",
+  "full_report_metrics": {
+    "events": 277,
+    "authorization_evaluations": 108,
+    "denials": 1,
+    "file_responses_completed": 30,
+    "report_entries": 2,
+    "report_sidecars": 5,
+    "head_responses": 2,
+    "not_modified_responses": 1,
+    "range_responses": 5,
+    "archive_attempts": 2,
+    "archive_completions": 2,
+    "server_bytes_sent": 19769289,
+    "client_downloads_completed": null
+  },
+  "fresh_window": {
+    "starts_at": "2026-10-26T07:27:23.513715+00:00",
+    "ends_at": "2026-10-26T07:45:29.314601+00:00",
+    "end_exclusive": true
+  },
+  "fresh_metrics": {
+    "events": 2,
+    "authorization_evaluations": 1,
+    "denials": 1,
+    "file_responses_completed": 0,
+    "report_entries": 0,
+    "report_sidecars": 0,
+    "head_responses": 0,
+    "not_modified_responses": 0,
+    "range_responses": 0,
+    "archive_attempts": 0,
+    "archive_completions": 0,
+    "server_bytes_sent": 0,
+    "client_downloads_completed": null
+  },
+  "fresh_event_groups": [
+    {
+      "event_type": "authorization",
+      "decision": "deny",
+      "method": "unknown",
+      "status_code": "403",
+      "inline_report": false,
+      "count": 1,
+      "server_bytes_sent": 0
+    },
+    {
+      "event_type": "contents",
+      "decision": "allow",
+      "method": "unknown",
+      "status_code": "unknown",
+      "inline_report": false,
+      "count": 1,
+      "server_bytes_sent": 0
+    }
+  ],
+  "coverage": {
+    "complete": true,
+    "schema_version": 3,
+    "inventory_sha256": "af9a7d1ef7bffda742331e3b64d13f38e1ee201c024510fd33b35dd081cab117"
+  },
+  "final_phase": {
+    "phase": "audit-final-reconcile",
+    "status": "complete",
+    "requests": 1,
+    "http_expectations_passed": 1,
+    "identity_created": false,
+    "credentials_exported": false,
+    "storage_deleted": false
+  },
+  "exactly_one_revoked_file_get": true,
+  "extra_denied_get_replays": 0,
+  "prior_events_unchanged": true,
+  "historical_274_zero_denial_evidence_preserved": true,
+  "historical_denials_backfilled": false,
+  "response_ids_not_equated_to_native_ids": true,
+  "original_helper_stops_preserved": [
+    {
+      "phase": "external release preflight",
+      "cause": "Public recipient ingress correctly rejects private healthz; no file GET dispatched"
+    },
+    {
+      "phase": "denied GET response parser",
+      "cause": "403 text response incorrectly parsed as JSON; saved exact text/body hash reconciled with zero extra requests"
+    },
+    {
+      "phase": "manager strict comparison",
+      "cause": "Expected one new event but normal manager page reload added a second contents event; both exact native events and actors reconciled"
+    }
+  ],
+  "limitations": [
+    "Native historical early denials before12.0.6 were not reconstructed",
+    "Server completion does not prove client-persisted bytes",
+    "First-time internal registration and report access remain unverified"
+  ]
+}

@@ -1,0 +1,12 @@
+- generic: DAY
+- main:
+  - heading "TapDB Object Graph" [level=1]
+  - paragraph:
+    - link "Open the TapDB graph explorer":
+      - /url: /tapdb/graph
+  - iframe
+- contentinfo:
+  - generic: Version 10.0.5
+  - generic: Branch codex/dewey-labcore-910
+  - generic: Tag 10.0.5
+  - generic: Commit df6d4d0646fc1385c35ff2b6353478a46b4587ac

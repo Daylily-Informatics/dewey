@@ -1,0 +1,353 @@
+- banner:
+  - link "dewey ARTIFACT LIBRARY":
+    - /url: /ui
+    - text: dewey
+    - generic: ARTIFACT LIBRARY
+  - navigation "Primary":
+    - link "Library":
+      - /url: /ui
+    - link "S3 Browser":
+      - /url: /storage
+    - link "Sets":
+      - /url: /sets
+    - link "Sharing":
+      - /url: /shares
+    - link "Literature":
+      - /url: /literature
+  - link "+ Add":
+    - /url: /add
+  - link "Admin":
+    - /url: /admin
+  - link "Account":
+    - /url: /account
+- main:
+  - paragraph: DEWEY / S3 BROWSER
+  - heading "S3 Browser" [level=1]
+  - generic: Open an EUID
+  - textbox "Open an EUID":
+    - /placeholder: Open a Dewey EUID
+  - button "Open"
+  - textbox "S3 URI":
+    - /placeholder: s3://bucket/exact/prefix/
+  - button "Go"
+  - link "All buckets":
+    - /url: /storage
+  - heading "Buckets" [level=2]
+  - paragraph: Available through Dewey's configured server credentials.
+  - table:
+    - rowgroup:
+      - row "Bucket Region":
+        - columnheader "Bucket"
+        - columnheader "Region"
+    - rowgroup:
+      - row "aquarium-tfstate-dev us-west-2":
+        - cell "aquarium-tfstate-dev":
+          - link "aquarium-tfstate-dev":
+            - /url: /storage?uri=s3%3A%2F%2Faquarium-tfstate-dev%2F
+        - cell "us-west-2"
+      - row "aquarium-tfstate-prod us-west-2":
+        - cell "aquarium-tfstate-prod":
+          - link "aquarium-tfstate-prod":
+            - /url: /storage?uri=s3%3A%2F%2Faquarium-tfstate-prod%2F
+        - cell "us-west-2"
+      - row "asterism-note-screenshots-dev us-west-2":
+        - cell "asterism-note-screenshots-dev":
+          - link "asterism-note-screenshots-dev":
+            - /url: /storage?uri=s3%3A%2F%2Fasterism-note-screenshots-dev%2F
+        - cell "us-west-2"
+      - row "aws-sam-cli-managed-default-samclisourcebucket-nr7kmk76fofd us-west-1":
+        - cell "aws-sam-cli-managed-default-samclisourcebucket-nr7kmk76fofd":
+          - link "aws-sam-cli-managed-default-samclisourcebucket-nr7kmk76fofd":
+            - /url: /storage?uri=s3%3A%2F%2Faws-sam-cli-managed-default-samclisourcebucket-nr7kmk76fofd%2F
+        - cell "us-west-1"
+      - row "aws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp us-east-1":
+        - cell "aws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp":
+          - link "aws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp":
+            - /url: /storage?uri=s3%3A%2F%2Faws-sam-cli-managed-default-samclisourcebucket-wyvracmmocbp%2F
+        - cell "us-east-1"
+      - row "cdk-dayhoff-assets-108782052779-us-east-1 us-east-1":
+        - cell "cdk-dayhoff-assets-108782052779-us-east-1":
+          - link "cdk-dayhoff-assets-108782052779-us-east-1":
+            - /url: /storage?uri=s3%3A%2F%2Fcdk-dayhoff-assets-108782052779-us-east-1%2F
+        - cell "us-east-1"
+      - row "cdk-dayhoff-assets-108782052779-us-west-2 us-west-2":
+        - cell "cdk-dayhoff-assets-108782052779-us-west-2":
+          - link "cdk-dayhoff-assets-108782052779-us-west-2":
+            - /url: /storage?uri=s3%3A%2F%2Fcdk-dayhoff-assets-108782052779-us-west-2%2F
+        - cell "us-west-2"
+      - row "cdk-hnb659fds-assets-108782052779-us-east-1 us-east-1":
+        - cell "cdk-hnb659fds-assets-108782052779-us-east-1":
+          - link "cdk-hnb659fds-assets-108782052779-us-east-1":
+            - /url: /storage?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-east-1%2F
+        - cell "us-east-1"
+      - row "cdk-hnb659fds-assets-108782052779-us-west-2 us-west-2":
+        - cell "cdk-hnb659fds-assets-108782052779-us-west-2":
+          - link "cdk-hnb659fds-assets-108782052779-us-west-2":
+            - /url: /storage?uri=s3%3A%2F%2Fcdk-hnb659fds-assets-108782052779-us-west-2%2F
+        - cell "us-west-2"
+      - row "cf-templates-pfrobpqqun1c-us-east-2 us-east-2":
+        - cell "cf-templates-pfrobpqqun1c-us-east-2":
+          - link "cf-templates-pfrobpqqun1c-us-east-2":
+            - /url: /storage?uri=s3%3A%2F%2Fcf-templates-pfrobpqqun1c-us-east-2%2F
+        - cell "us-east-2"
+      - row "dayec-cur-108782052779-us-east-1 us-east-1":
+        - cell "dayec-cur-108782052779-us-east-1":
+          - link "dayec-cur-108782052779-us-east-1":
+            - /url: /storage?uri=s3%3A%2F%2Fdayec-cur-108782052779-us-east-1%2F
+        - cell "us-east-1"
+      - row "daylily-customer-lsmc-a0477268 us-west-2":
+        - cell "daylily-customer-lsmc-a0477268":
+          - link "daylily-customer-lsmc-a0477268":
+            - /url: /storage?uri=s3%3A%2F%2Fdaylily-customer-lsmc-a0477268%2F
+        - cell "us-west-2"
+      - row "lsmc-atlas-demo us-west-2":
+        - cell "lsmc-atlas-demo":
+          - link "lsmc-atlas-demo":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-demo%2F
+        - cell "us-west-2"
+      - row "lsmc-atlas-dev us-west-2":
+        - cell "lsmc-atlas-dev":
+          - link "lsmc-atlas-dev":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-atlas-dev%2F
+        - cell "us-west-2"
+      - row "lsmc-aws-config-108782052779 us-west-2":
+        - cell "lsmc-aws-config-108782052779":
+          - link "lsmc-aws-config-108782052779":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-aws-config-108782052779%2F
+        - cell "us-west-2"
+      - row "lsmc-bio-oauth-static-site-108782052779-us-east-1 us-east-1":
+        - cell "lsmc-bio-oauth-static-site-108782052779-us-east-1":
+          - link "lsmc-bio-oauth-static-site-108782052779-us-east-1":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-bio-oauth-static-site-108782052779-us-east-1%2F
+        - cell "us-east-1"
+      - row "lsmc-copy-ultimagen-lsmc-cro-316 us-west-2":
+        - cell "lsmc-copy-ultimagen-lsmc-cro-316":
+          - link "lsmc-copy-ultimagen-lsmc-cro-316":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-copy-ultimagen-lsmc-cro-316%2F
+        - cell "us-west-2"
+      - row "lsmc-datalake-raw-dev us-west-2":
+        - cell "lsmc-datalake-raw-dev":
+          - link "lsmc-datalake-raw-dev":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-datalake-raw-dev%2F
+        - cell "us-west-2"
+      - row "lsmc-dayoa-analysis-results-usw2 us-west-2":
+        - cell "lsmc-dayoa-analysis-results-usw2":
+          - link "lsmc-dayoa-analysis-results-usw2":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-analysis-results-usw2%2F
+        - cell "us-west-2"
+      - row "lsmc-dayoa-control-data-use1 us-east-1":
+        - cell "lsmc-dayoa-control-data-use1":
+          - link "lsmc-dayoa-control-data-use1":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-control-data-use1%2F
+        - cell "us-east-1"
+      - row "lsmc-dayoa-control-data-usw2 us-west-2":
+        - cell "lsmc-dayoa-control-data-usw2":
+          - link "lsmc-dayoa-control-data-usw2":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-control-data-usw2%2F
+        - cell "us-west-2"
+      - row "lsmc-dayoa-omics-analysis-us-west-2 us-west-2":
+        - cell "lsmc-dayoa-omics-analysis-us-west-2":
+          - link "lsmc-dayoa-omics-analysis-us-west-2":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-omics-analysis-us-west-2%2F
+        - cell "us-west-2"
+      - row "lsmc-dayoa-references-use1 us-east-1":
+        - cell "lsmc-dayoa-references-use1":
+          - link "lsmc-dayoa-references-use1":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-use1%2F
+        - cell "us-east-1"
+      - row "lsmc-dayoa-references-usw2 us-west-2":
+        - cell "lsmc-dayoa-references-usw2":
+          - link "lsmc-dayoa-references-usw2":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-references-usw2%2F
+        - cell "us-west-2"
+      - row "lsmc-dayoa-runtime-assets-usw2 us-west-2":
+        - cell "lsmc-dayoa-runtime-assets-usw2":
+          - link "lsmc-dayoa-runtime-assets-usw2":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-runtime-assets-usw2%2F
+        - cell "us-west-2"
+      - row "lsmc-dayoa-staging-usw2 us-west-2":
+        - cell "lsmc-dayoa-staging-usw2":
+          - link "lsmc-dayoa-staging-usw2":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dayoa-staging-usw2%2F
+        - cell "us-west-2"
+      - row "lsmc-dewey-0 us-west-2":
+        - cell "lsmc-dewey-0":
+          - link "lsmc-dewey-0":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-dewey-0%2F
+        - cell "us-west-2"
+      - row "lsmc-docs-public-108782052779-us-west-2 us-west-2":
+        - cell "lsmc-docs-public-108782052779-us-west-2":
+          - link "lsmc-docs-public-108782052779-us-west-2":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-docs-public-108782052779-us-west-2%2F
+        - cell "us-west-2"
+      - row "lsmc-healthomics-failiover us-west-2":
+        - cell "lsmc-healthomics-failiover":
+          - link "lsmc-healthomics-failiover":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-healthomics-failiover%2F
+        - cell "us-west-2"
+      - row "lsmc-healthomics-results us-west-2":
+        - cell "lsmc-healthomics-results":
+          - link "lsmc-healthomics-results":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-healthomics-results%2F
+        - cell "us-west-2"
+      - row "lsmc-ifx-bjuice-pkgd-data us-west-2":
+        - cell "lsmc-ifx-bjuice-pkgd-data":
+          - link "lsmc-ifx-bjuice-pkgd-data":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-ifx-bjuice-pkgd-data%2F
+        - cell "us-west-2"
+      - row "lsmc-illumina-public-data us-west-2":
+        - cell "lsmc-illumina-public-data":
+          - link "lsmc-illumina-public-data":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-illumina-public-data%2F
+        - cell "us-west-2"
+      - row "lsmc-meridian-governance-registry us-west-2":
+        - cell "lsmc-meridian-governance-registry":
+          - link "lsmc-meridian-governance-registry":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-meridian-governance-registry%2F
+        - cell "us-west-2"
+      - row "lsmc-mvp-v1-event-sink-raw-108782052779-us-west-2 us-west-2":
+        - cell "lsmc-mvp-v1-event-sink-raw-108782052779-us-west-2":
+          - link "lsmc-mvp-v1-event-sink-raw-108782052779-us-west-2":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-mvp-v1-event-sink-raw-108782052779-us-west-2%2F
+        - cell "us-west-2"
+      - row "lsmc-mvp-v1-labcore-accessioning-docs-108782052779-us-west-2 us-west-2":
+        - cell "lsmc-mvp-v1-labcore-accessioning-docs-108782052779-us-west-2":
+          - link "lsmc-mvp-v1-labcore-accessioning-docs-108782052779-us-west-2":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-mvp-v1-labcore-accessioning-docs-108782052779-us-west-2%2F
+        - cell "us-west-2"
+      - row "lsmc-mvp-v1-labcore-ui-108782052779-us-west-2 us-west-2":
+        - cell "lsmc-mvp-v1-labcore-ui-108782052779-us-west-2":
+          - link "lsmc-mvp-v1-labcore-ui-108782052779-us-west-2":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-mvp-v1-labcore-ui-108782052779-us-west-2%2F
+        - cell "us-west-2"
+      - row "lsmc-mvp-v1-status-alb-logs-108782052779 us-west-2":
+        - cell "lsmc-mvp-v1-status-alb-logs-108782052779":
+          - link "lsmc-mvp-v1-status-alb-logs-108782052779":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-mvp-v1-status-alb-logs-108782052779%2F
+        - cell "us-west-2"
+      - row "lsmc-public-ont-data us-west-2":
+        - cell "lsmc-public-ont-data":
+          - link "lsmc-public-ont-data":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-public-ont-data%2F
+        - cell "us-west-2"
+      - row "lsmc-qeo-day-analytical-108782052779-us-west-2 us-west-2":
+        - cell "lsmc-qeo-day-analytical-108782052779-us-west-2":
+          - link "lsmc-qeo-day-analytical-108782052779-us-west-2":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-qeo-day-analytical-108782052779-us-west-2%2F
+        - cell "us-west-2"
+      - row "lsmc-ssf-sequencing-data us-west-2":
+        - cell "lsmc-ssf-sequencing-data":
+          - link "lsmc-ssf-sequencing-data":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-ssf-sequencing-data%2F
+        - cell "us-west-2"
+      - row "lsmc-terraform-state us-west-2":
+        - cell "lsmc-terraform-state":
+          - link "lsmc-terraform-state":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-terraform-state%2F
+        - cell "us-west-2"
+      - row "lsmc-twenty-prod-storage us-east-1":
+        - cell "lsmc-twenty-prod-storage":
+          - link "lsmc-twenty-prod-storage":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-twenty-prod-storage%2F
+        - cell "us-east-1"
+      - row "lsmc-ursa-cost-reports-108782052779-us-west-2 us-west-2":
+        - cell "lsmc-ursa-cost-reports-108782052779-us-west-2":
+          - link "lsmc-ursa-cost-reports-108782052779-us-west-2":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-ursa-cost-reports-108782052779-us-west-2%2F
+        - cell "us-west-2"
+      - row "lsmc-ursa-customers-usw2 us-west-2":
+        - cell "lsmc-ursa-customers-usw2":
+          - link "lsmc-ursa-customers-usw2":
+            - /url: /storage?uri=s3%3A%2F%2Flsmc-ursa-customers-usw2%2F
+        - cell "us-west-2"
+      - row "marvain-cleanroom-20260712t103857z-artifactbucket-mecojkek5eps us-west-1":
+        - cell "marvain-cleanroom-20260712t103857z-artifactbucket-mecojkek5eps":
+          - link "marvain-cleanroom-20260712t103857z-artifactbucket-mecojkek5eps":
+            - /url: /storage?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t103857z-artifactbucket-mecojkek5eps%2F
+        - cell "us-west-1"
+      - row "marvain-cleanroom-20260712t103857z-auditbucket-yl3kufkgfdie us-west-1":
+        - cell "marvain-cleanroom-20260712t103857z-auditbucket-yl3kufkgfdie":
+          - link "marvain-cleanroom-20260712t103857z-auditbucket-yl3kufkgfdie":
+            - /url: /storage?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t103857z-auditbucket-yl3kufkgfdie%2F
+        - cell "us-west-1"
+      - row "marvain-cleanroom-20260712t111914z-artifactbucket-qkwenuto9bbo us-west-1":
+        - cell "marvain-cleanroom-20260712t111914z-artifactbucket-qkwenuto9bbo":
+          - link "marvain-cleanroom-20260712t111914z-artifactbucket-qkwenuto9bbo":
+            - /url: /storage?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-artifactbucket-qkwenuto9bbo%2F
+        - cell "us-west-1"
+      - row "marvain-cleanroom-20260712t111914z-auditbucket-wvcw5pjxz1kj us-west-1":
+        - cell "marvain-cleanroom-20260712t111914z-auditbucket-wvcw5pjxz1kj":
+          - link "marvain-cleanroom-20260712t111914z-auditbucket-wvcw5pjxz1kj":
+            - /url: /storage?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-auditbucket-wvcw5pjxz1kj%2F
+        - cell "us-west-1"
+      - row "marvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl us-west-1":
+        - cell "marvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl":
+          - link "marvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl":
+            - /url: /storage?uri=s3%3A%2F%2Fmarvain-cleanroom-20260712t111914z-packagingbucket-bccev8bwblrl%2F
+        - cell "us-west-1"
+      - row "parallelcluster-4da281c1dc024f1c-v1-do-not-delete us-west-2":
+        - cell "parallelcluster-4da281c1dc024f1c-v1-do-not-delete":
+          - link "parallelcluster-4da281c1dc024f1c-v1-do-not-delete":
+            - /url: /storage?uri=s3%3A%2F%2Fparallelcluster-4da281c1dc024f1c-v1-do-not-delete%2F
+        - cell "us-west-2"
+      - row "parallelcluster-730cb6d53cf2deec-v1-do-not-delete eu-central-1":
+        - cell "parallelcluster-730cb6d53cf2deec-v1-do-not-delete":
+          - link "parallelcluster-730cb6d53cf2deec-v1-do-not-delete":
+            - /url: /storage?uri=s3%3A%2F%2Fparallelcluster-730cb6d53cf2deec-v1-do-not-delete%2F
+        - cell "eu-central-1"
+      - row "parallelcluster-e781c59d26140bab-v1-do-not-delete ap-south-1":
+        - cell "parallelcluster-e781c59d26140bab-v1-do-not-delete":
+          - link "parallelcluster-e781c59d26140bab-v1-do-not-delete":
+            - /url: /storage?uri=s3%3A%2F%2Fparallelcluster-e781c59d26140bab-v1-do-not-delete%2F
+        - cell "ap-south-1"
+      - row "terrarium-dev-media us-west-2":
+        - cell "terrarium-dev-media":
+          - link "terrarium-dev-media":
+            - /url: /storage?uri=s3%3A%2F%2Fterrarium-dev-media%2F
+        - cell "us-west-2"
+      - row "terrarium-dev-web us-west-2":
+        - cell "terrarium-dev-web":
+          - link "terrarium-dev-web":
+            - /url: /storage?uri=s3%3A%2F%2Fterrarium-dev-web%2F
+        - cell "us-west-2"
+      - row "terrarium-prod-media us-west-2":
+        - cell "terrarium-prod-media":
+          - link "terrarium-prod-media":
+            - /url: /storage?uri=s3%3A%2F%2Fterrarium-prod-media%2F
+        - cell "us-west-2"
+      - row "terrarium-prod-web us-west-2":
+        - cell "terrarium-prod-web":
+          - link "terrarium-prod-web":
+            - /url: /storage?uri=s3%3A%2F%2Fterrarium-prod-web%2F
+        - cell "us-west-2"
+      - row "terrarium-tfstate-dev us-west-2":
+        - cell "terrarium-tfstate-dev":
+          - link "terrarium-tfstate-dev":
+            - /url: /storage?uri=s3%3A%2F%2Fterrarium-tfstate-dev%2F
+        - cell "us-west-2"
+      - row "terrarium-tfstate-prod us-west-2":
+        - cell "terrarium-tfstate-prod":
+          - link "terrarium-tfstate-prod":
+            - /url: /storage?uri=s3%3A%2F%2Fterrarium-tfstate-prod%2F
+        - cell "us-west-2"
+      - row "ursa-us-west-2-052779-default-customer-1d8c14 us-west-2":
+        - cell "ursa-us-west-2-052779-default-customer-1d8c14":
+          - link "ursa-us-west-2-052779-default-customer-1d8c14":
+            - /url: /storage?uri=s3%3A%2F%2Fursa-us-west-2-052779-default-customer-1d8c14%2F
+        - cell "us-west-2"
+      - row "zebra-day-cfg-us-west-2 us-west-2":
+        - cell "zebra-day-cfg-us-west-2":
+          - link "zebra-day-cfg-us-west-2":
+            - /url: /storage?uri=s3%3A%2F%2Fzebra-day-cfg-us-west-2%2F
+        - cell "us-west-2"
+  - heading "Registered locations" [level=2]
+  - paragraph: Includes explicitly registered external buckets and shared folders.
+  - paragraph: No registered locations available.
+- contentinfo:
+  - generic: Dewey 10.0.5 · One EUID per object, prefix, or set
+  - link "API reference":
+    - /url: /docs
+  - link "CLI access":
+    - /url: /account
+  - link "Sign out":
+    - /url: /auth/logout

@@ -1,0 +1,15 @@
+
+Runtime check
+
+   Summary: 4 pass, 0 warn, 0 fail, 4 skip
+✓ dewey-container:env:DEWEY_EXECUTION_BACKEND: Backend env var present:
+DEWEY_EXECUTION_BACKEND (dewey-container)
+✓ dewey-container:file:/.dockerenv: Backend path exists: /.dockerenv
+(/.dockerenv)
+✓ dewey-container:file:/app/dewey_service/cli/__init__.py: Backend path exists:
+/app/dewey_service/cli/__init__.py (/app/dewey_service/cli/__init__.py)
+✓ dewey-container:probe: Backend probe passed for dewey-container
+   dewey-conda-active-env: Skipped by backend/tag filter.
+   dewey-conda-env-name: Skipped by backend/tag filter.
+   dewey-daylily-tapdb: Skipped by backend/tag filter.
+   dewey-daylily-auth-cognito: Skipped by backend/tag filter.
