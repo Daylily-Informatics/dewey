@@ -1,6 +1,10 @@
-# Managed Dewey sharing — 12.0.0
+# Managed Dewey sharing — 12.x
 
 This is the schema-3 source contract. The [release ledger](plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) separates implementation, tests, tagged images, deployment and acceptance. The [11.0.10 analysis](dev-docs/20261025_dewey_capabilities.md) remains a historical baseline.
+
+The recorded deployed versions are **Dewey 12.0.7 / Login 4.1.1**. The application
+package matches the published Dewey tag byte-for-byte. Internal registration is
+confirmed; internal first-use/scoped-access proof and final acceptance remain open.
 
 ## Authority, recipients and selection
 
@@ -18,9 +22,17 @@ Omitted `expires_at` means 30 days; explicit `expires_at: null` means indefinite
 
 Use `/fetch/<share-euid>` or `/fetch/<claimed-slug>`. A single file resolves at the root; a single prefix preserves relative paths; multiple targets use `<target-euid>/<relative-path>`. The namespace follows the whole share even when a recipient sees only one target. Existing `/shares/<share-euid>` URLs remain authenticated entrypoints.
 
-Slugs use one global namespace: lowercase ASCII letters, digits and hyphens, 3–63 characters. Reserved control/EUID names fail. Claims are atomic; a conflict never adds a suffix. Aliases have native lineage to one share; retired names remain permanent tombstones.
+Slugs use one global namespace: lowercase ASCII letters, digits and hyphens, 3–63
+characters, starting and ending with a letter or digit. Reserved control names
+and the EUID namespace fail. Claims are atomic; a conflict never adds a suffix.
+Aliases have native lineage to one share; retired names remain permanent tombstones.
 
 GET/HEAD provide filename, MIME, size, one byte range and ETag/date conditions. Browser login retains the exact deep destination. Unauthenticated machines receive 401. Traversal, ambiguous paths and invalid encodings fail explicitly.
+
+For a WWW entrypoint, `?download=true` requests the original file instead of opening
+the isolated viewer. A root collection URL presents a paginated file browser to
+HTML clients and a manifest page to machine clients. Listing one page does not
+establish complete recursive enumeration.
 
 - `?format=manifest` returns authorized entries and continuation metadata. Follow every token, including empty filtered pages. Cursors bind current policy and storage-location revisions.
 - `?format=tar` streams uncompressed PAX TAR after complete inventory. The inventory cap is one million objects or 256 MiB of metadata; larger requests fail before headers and can use manifest/CLI retrieval.
@@ -36,6 +48,12 @@ Declare `content_mode: www`, `report_entrypoint` and `report_bundle_root`. `/fet
 Report HTML/CSS/JavaScript/data execute on a unique `pv-<context>.dewey-content.day.lsmc.bio` host. A one-use POST handoff and Secure HttpOnly host cookie bind the viewer and finite context. Every asset checks current identity/policy and stays within its bundle. Logout, expiry, revocation or session invalidation prevents subsequent assets.
 
 The isolated iframe allows scripts and same-origin within its separate content host. The iframe and content policy permit local form-driven exports and generated downloads. CSP still blocks network form submissions, workers and nested frames. Application cookies/APIs are unavailable to report scripts. Chrome may ask you to allow multiple downloads when MultiQC saves one file per selected plot. Reports requiring additional browser capabilities need a separate product decision.
+
+After allowing multiple downloads, click the report's download button again if
+Chrome withheld the remaining files. Reopen the durable report URL to renew an
+expired context or load a viewer update. Generated plot exports use data already
+delivered to the browser; they are separate from downloading the original shared
+files or a recursive TAR and cannot be recalled after delivery.
 
 ## Credentials and invitations
 

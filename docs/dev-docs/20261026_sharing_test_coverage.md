@@ -2,7 +2,7 @@
 
 The release requires at least **80% line coverage and 80% branch coverage of added or modified executable code**, with separate gates for Dewey Python, Dewey browser JavaScript, Login Python, and the maintained Dayhoff ingress/build tools. A passing combined average cannot hide a failing group. Coverage does not replace behavioral assertions, native PostgreSQL contracts, deployed delivery checks, or user acceptance.
 
-The user approved the expanded changed-code coverage pass on 2026-10-26 after requesting extensive tests for the new functionality. Full main-suite CI, PR creation, and merging remain a later phase. Feature-branch pushes do not run these workflows. Local validation uses the existing Python environments, mocked network/build boundaries, and locked Node test tooling; no laptop container builds are permitted.
+The user approved the expanded changed-code coverage pass on 2026-10-26 after requesting extensive tests for the new functionality. The user subsequently requested a full-source PR against main. Its workflow/merge state belongs to the integration section of the release ledger; the retained release receipts are not a claim that main CI passed. Feature-branch pushes do not run these workflows. Local validation uses the existing Python environments, mocked network/build boundaries, and locked Node test tooling; no laptop container builds are permitted.
 
 ## Measurement
 
@@ -17,9 +17,9 @@ The user approved the expanded changed-code coverage pass on 2026-10-26 after re
 
 Python measurements use coverage.py with branch tracing. Browser tests execute the shipped scripts through Node's VM with their actual filenames, then use the standard [c8 V8/Istanbul conversion](https://github.com/bcoe/c8) and the same changed-source gate. Each inline JavaScript branch alternative remains distinct. DOM and fetch doubles exercise actual handlers and request payloads; they do not claim real browser layout or authentication success. Those have separate deployed evidence.
 
-Main/PR CI separates unit coverage from a native PostgreSQL job. The native job creates a fresh loopback-only `dewey12_contract` database through the existing supported TapDB lifecycle preparer and passes an explicit matching DSN/config to the contract group. The unit job explicitly excludes that group because it has no database; the native job does not silently skip it or infer any production connection. This CI wiring is authored for the later main/PR phase and is not a claim that GitHub Actions ran during this release.
+Main/PR CI separates unit coverage from a native PostgreSQL job. The native job creates a fresh loopback-only `dewey12_contract` database through the existing supported TapDB lifecycle preparer and passes an explicit matching DSN/config to the contract group. The unit job explicitly excludes that group because it has no database; the native job does not silently skip it or infer any production connection. This CI wiring is used for main-target integration; its actual runs and results are recorded separately from the pre-PR release evidence.
 
-The gate utility itself has focused tests for exact thresholds, empty denominators, missing-file failure, added/deleted-line parsing, and distinct inline JavaScript branches. Coverage instrumentation dependencies are test-only and do not change Dewey, Login, or shared-library runtime pins.
+The gate utility itself has focused tests for exact thresholds, empty denominators, missing-file failure, added/deleted-line parsing, and distinct inline JavaScript branches. Coverage instrumentation is used for validation. Python tooling remains in the project’s single dependency set; Node coverage tools are locked under `tests/ui`. No separate development extra is introduced, and the shared-library pins remain unchanged.
 
 ## Required behavioral groups
 

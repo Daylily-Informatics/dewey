@@ -18,6 +18,13 @@ Dayhoff release inputs are maintained in its `services/pins.toml`. Dewey 12 reta
 
 The GUI centers on Library, S3 Browser, Sets, Sharing and Literature. Metadata and download permissions are independent; every share requires authentication. Prefix browsing is bounded and does not register descendants. Physical S3 deletion is prohibited. See the [Dewey 12 release ledger](docs/plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) for source, validation, deployment and acceptance states.
 
+The recorded production release is **Dewey 12.0.7** with **Login 4.1.1**. All 113
+installed Dewey application files and assets match the published `12.0.7` tag;
+the [running-source receipt](docs/plans/evidence/20261026_dewey12/running-source-pr-binding-12.0.7.json)
+binds that source to the deployed image. Internal registration is confirmed.
+Internal first-use/scoped-access verification and final acceptance remain open in
+the ledger.
+
 Dewey management remains on approved networks. The scoped recipient ingress exposes authenticated fetch, report and recipient-account routes to external users.
 
 ```mermaid
@@ -33,7 +40,7 @@ flowchart LR
 | Capability | Current surface |
 |---|---|
 | Artifact registry | CLI, GUI search/details, and `/api/v1/*` artifact routes |
-| Managed shares | Durable Dewey share records with short-lived access packages, revocation, and sanitized diagnostics |
+| Managed shares | Revisioned schema-3 policies, stable authenticated fetch URLs, editable scope, revocation, manifests/TAR and isolated reports |
 | External objects | Cross-service object references and relation records |
 | TapDB substrate | Generic object, lineage, audit, template, and external-link inspection at `/tapdb` |
 
@@ -52,14 +59,15 @@ organization membership. There are **no anonymous shares**.
 Choose **Named recipients** or **Public with registration**. Both require an active,
 verified email through shared Login. New recipients receive share-only access;
 their email domain does not admit them to an organization. The default lifetime is
-30 days; explicit `expires_at: null` is indefinite. Personal download credentials
-expire within 30 days and remain separately revocable.
+30 days; explicit `expires_at: null` is indefinite. Recipient credentials issued
+at `/recipient/account` last 1–30 days, can be shortened by provider-grant expiry,
+and remain separately revocable.
 
 | Operation | Dewey 12 behavior |
 |---|---|
 | Edit | Atomically change recipients, deadline, target membership and include/exclude filters using the current `policy_revision`; stale edits return conflict |
 | Stable URLs | `/fetch/<share-euid>`; a single file resolves at the root, a single prefix preserves relative paths, and multiple targets use `<target-euid>/<relative-path>` |
-| Friendly URLs | Claim a global lowercase ASCII slug of 3–63 letters/digits/hyphens; conflicts fail. Retired aliases remain tombstones and are never reassigned |
+| Friendly URLs | Claim a global lowercase ASCII slug of 3–63 letters/digits/hyphens, beginning and ending with a letter or digit; reserved names and conflicts fail. Retired aliases remain tombstones |
 | File retrieval | Authenticated GET/HEAD, one byte range, conditional requests, MIME/filename metadata; unauthenticated machine clients receive 401 |
 | Recursive retrieval | `?format=manifest` supplies complete paginated enumeration; CLI retrieves all pages with resume and partial-failure receipts |
 | One-URL archive | `?format=tar` streams uncompressed TAR after completing inventory; changed/missing content aborts. TAR restarts; individual files resume |
@@ -117,7 +125,7 @@ baseline and requirement-by-requirement disposition.
 ## Quickstart
 
 ```bash
-cd /Users/jmajor/projects/mega_dayhoff/repos_work/dewey
+cd /absolute/path/to/dewey
 source ./activate <deploy-name>
 dewey --help
 dewey config init --help
@@ -140,7 +148,7 @@ Common command families:
 | `dewey db ...` | Verify existing Dewey templates or show native lifecycle guidance. |
 | `dewey server ...` | Start the FastAPI service. |
 | `dewey artifacts ...` | Register, resolve, and inspect artifact references where exposed by CLI. |
-| `dewey shares ...` | Inspect managed shares through safe routes where exposed by CLI. |
+| `dewey shares ...` | Create, preview, edit, revoke, invite, claim/retire aliases, export manifests, fetch files/trees, and inspect activity or aggregate reports. |
 
 Dewey delegates low-level storage lifecycle to `tapdb` and shared Cognito lifecycle to `daycog` only where Dewey explicitly documents that delegation. CLI, API, and GUI should expose the same registry/share capabilities wherever practical.
 
@@ -152,7 +160,11 @@ GUI pages must not expose raw presigned URLs, bucket keys, or sensitive storage 
 
 ## API
 
-The primary API is under `/api/v1/*`. Current route families include artifact registration/resolve, external objects, external-object relations, shares/share roots, search, QEO handoff, and observability.
+Management APIs are under `/api/v1/*`; recipient APIs use `/api/v2/recipient/*`,
+and authenticated delivery uses `/fetch/<share-euid-or-slug>[/<relative-path>]`.
+Management route families include artifact registration/resolve, external objects,
+external-object relations, shares/share roots, search, QEO handoff and observability.
+General API documentation, health and management routes stay on trusted ingress.
 
 Library, Sets and Sharing request `projection: "summary"` from
 `POST /api/v1/registry/search`. This returns the complete authorized page of table
@@ -174,7 +186,13 @@ Example focused checks, when explicitly authorized:
 DEWEY_DEPLOYMENT_CODE=contract python -m pytest tests/test_share_management.py tests/test_share_grant_revision_envelope.py -q
 ```
 
-Main/PR-only CI is configured to enforce the coverage gates; those workflows have not run during this release. Feature-branch pushes do not start full CI. Deployed sharing acceptance targets `https://dewey.day.lsmc.bio` with controlled fixtures and real authorized identities, including deep login, isolated report sidecars, machine retrieval, lifecycle changes, and audit reconciliation. Build provenance and user acceptance remain separate receipts.
+CI targets pushes to `main` and PRs explicitly targeting `main`; the repository's
+default branch is not a substitute for that explicit base. Feature-branch pushes
+do not start full CI. The release ledger records actual CI state separately from
+the retained focused test/coverage receipts. Deployed acceptance uses controlled
+fixtures and real authorized identities for deep login, isolated report sidecars,
+machine retrieval, lifecycle changes and audit reconciliation. Build provenance
+and user acceptance remain separate receipts.
 
 ## Technical Details, History, And Linkouts
 
@@ -198,3 +216,5 @@ deleting data through a secondary surface. New registrations, registry metadata
 edits, uploads to new keys, downloads, and sharing remain available. Revoking shares
 or tokens retains their records and remains available as an access-security control.
 The prohibition has no configuration switch or administrator exemption.
+Removing a target from a managed share is an access-policy edit and remains
+available; it does not remove the registered artifact, set member or S3 bytes.

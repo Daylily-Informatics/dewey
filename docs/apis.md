@@ -1,16 +1,22 @@
 # Dewey API Surface
 
-This page documents the current HTTP contract implemented in `dewey_service/app.py`.
+This page indexes the HTTP contract in `dewey_service/app.py`, `registry_api.py`,
+`fetch.py`, `recipient_api.py` and `report_preview.py` at release 12.0.7. The
+configured service's OpenAPI document supplies request schemas; hidden browser
+routes are described separately below.
 
-Current Cognito authentication uses the `daylily-auth-cognito` 2.0 split: browser session auth lives in `browser.session`, Hosted UI helpers live in `browser.oauth` and `browser.google`, bearer verification lives in `runtime.verifier` and `runtime.m2m`, and lifecycle changes stay in `daycog` via `admin.*`.
+Authentication uses the `daylily-auth-cognito` 2.x library boundaries. The day
+deployment uses shared Login as its external broker; direct Cognito mode is a
+separate explicit configuration. Cognito lifecycle changes stay in `daycog`.
 
 ## API Design Notes
 
 Current design rules that matter to integrators:
 
-- the main registry API is bearer-token protected
-- GUI pages use Cognito-backed browser sessions
-- most write endpoints require `Idempotency-Key`
+- current EUID registry APIs accept authenticated session-or-bearer principals; older service APIs retain the bearer requirements listed below
+- management pages and APIs remain on trusted-network ingress; the public ingress exposes only the explicit recipient/auth/content allowlist
+- managed-share access requires a current verified email and verified ingress; a recipient grant does not grant management authority
+- creates require `Idempotency-Key` where declared; lifecycle edits use explicit revision fields
 - search has canonical `/api/search/v2/*` endpoints
 - the current repo does not expose a separate public messaging or event-stream API
 
@@ -20,7 +26,7 @@ Current auth modes used in this document:
 
 - `none`: no auth required
 - `bearer token`: valid Dewey API bearer token required
-- `UI session`: Cognito-backed browser session required
+- `UI session`: a verified browser session through the configured auth mode
 - `session or bearer token`: valid session or bearer token accepted
 - `admin session`: valid UI session with `ADMIN` role required
 
@@ -46,41 +52,37 @@ Current auth modes used in this document:
 | --- | --- | --- | --- |
 | `GET` | `/` | `none` | Redirects to `/ui` |
 | `GET` | `/login` | `none` | Login page |
-| `GET` | `/auth/login` | `none` | Starts Cognito login |
-| `GET` | `/auth/callback` | `none` | Completes Cognito callback |
+| `GET` | `/auth/login` | `none` | Starts the configured shared Login or direct Cognito flow |
+| `GET` | `/auth/callback` | `none` | Direct Cognito-mode callback; not the day public broker callback |
+| `GET` | `/auth/lsmc/callback` | `none` | Completes shared Login broker handoff; validates the saved return path |
 | `GET` | `/auth/error` | `none` | Auth error page |
 | `GET` | `/auth/logout` | `none` | Logout redirect |
 | `POST` | `/auth/logout` | `none` | Logout action |
 | `POST` | `/logout` | `none` | Logout alias |
 
-## GUI Pages
+For shared links, browser sign-in returns to the exact permitted fetch path.
+Missing/invalid machine credentials return 401 instead of a successful HTML login
+page. Routes requiring no application credentials may still be network-restricted.
+
+## Current GUI Entrypoints
 
 | Method | Path | Auth | Notes |
 | --- | --- | --- | --- |
-| `GET` | `/ui` | `UI session` | Dashboard |
-| `POST` | `/ui/register` | `UI session` | Dashboard quick-register action |
-| `GET` | `/artifacts` | `UI session` | Full artifact console |
-| `GET` | `/artifacts/euid/{artifact_euid}` | `UI session` | Artifact detail page |
-| `GET` | `/artifacts/bulk-template.tsv` | `UI session` | Bulk TSV template |
-| `POST` | `/artifacts/register` | `UI session` | Artifact intake workflow |
-| `POST` | `/artifacts/register-prefix` | `UI session` | Prefix-only artifact registration |
-| `POST` | `/artifacts/bulk-upload` | `UI session` | Bulk TSV intake |
-| `POST` | `/artifacts/search` | `UI session` | Artifact search page action |
-| `POST` | `/artifacts/search/export` | `UI session` | Artifact search export |
-| `POST` | `/artifacts/download` | `UI session` | ZIP download of selected artifacts |
-| `POST` | `/artifacts/euid/{artifact_euid}/download` | `UI session` | Direct artifact download/share redirect |
-| `POST` | `/artifacts/share` | `UI session` | Generate artifact links |
-| `POST` | `/artifacts/sets/create` | `UI session` | Create set from current selection |
-| `POST` | `/artifacts/sets/search` | `UI session` | Artifact-set search page action |
-| `POST` | `/artifacts/sets/export` | `UI session` | Artifact-set export |
-| `POST` | `/artifacts/sets/share` | `UI session` | Share selected artifact set |
+| `GET` | `/ui`, `/search` | `UI session` | Authorized Library |
+| `GET` | `/storage` | `UI session` | S3 Browser |
+| `GET` | `/sets` | `UI session` | Artifact sets |
+| `GET` | `/add`, `/artifacts` | `UI session` | Add/register; actions require the appropriate write authority |
+| `GET` | `/records/{euid}`, `/artifacts/euid/{euid}` | `UI session` | Record detail and authorized actions |
+| `GET` | `/shares` | `UI session` | Sharing management on trusted-network ingress |
+| `GET` | `/shares/{euid}` | `UI session` | Management detail; public/recipient-only callers redirect to canonical fetch |
+| `GET` | `/account` | `UI session` | Management account and personal-token controls |
+| `GET` | `/recipient/account` | `UI session` | Own finite read-only credentials; recipient surface |
 | `GET` | `/literature` | `UI session` | PubMed search and save page |
-| `GET` | `/search` | `UI session` | Unified Search page |
 | `GET` | `/search/export` | `UI session` | Unified Search export |
-| `GET` | `/ui/anomalies` | `UI session` | Anomaly list page |
-| `GET` | `/ui/anomalies/{anomaly_id}` | `UI session` | Anomaly detail page |
-| `GET` | `/ui/observability` | `UI session` | Observability page |
-| `GET` | `/tapdb` | `UI session` | Mounted TapDB admin landing page |
+| `GET` | `/ui/anomalies` | `admin session` | Anomaly list page |
+| `GET` | `/ui/anomalies/{anomaly_id}` | `admin session` | Anomaly detail page |
+| `GET` | `/ui/observability` | `admin session` | Observability page |
+| `GET` | `/tapdb` | `admin session` | Mounted TapDB admin landing page |
 | `GET` | `/admin` | `admin session` | Admin page |
 | `POST` | `/admin/artifact-storage` | `admin session` | Update managed artifact bucket |
 
@@ -174,40 +176,99 @@ match that computed key.
 
 Current resolution is a lookup contract, not a workflow engine.
 
-## Share API
+## Managed Sharing API
 
-| Method | Path | Auth | `Idempotency-Key` |
-| --- | --- | --- | --- |
-| `POST` | `/api/v1/shares` | `bearer token` | yes |
-| `GET` | `/api/v1/shares/{share_euid}` | `bearer token` | no |
-| `POST` | `/api/v1/shares/{share_euid}/access-package` | browser session or bearer token | no |
-| `POST` | `/api/v1/shares/{share_euid}/revoke` | `bearer token` | no |
-| `GET` | `/api/v1/shares/{share_euid}/audit` | `bearer token` | no |
-| `POST` | `/api/v1/share-roots` | `bearer token` | yes |
-| `POST` | `/api/v1/share-roots/{share_root_euid}/subsets` | `bearer token` | yes |
-| `GET` | `/api/v1/artifacts/{artifact_euid}/shares` | `bearer token` | no |
+### Management And Audit
 
-Current create fields include:
+These endpoints accept the current session-or-bearer principal, enforce creator/
+owner/admin policy, and remain on trusted-network ingress. Replace placeholders
+with identities returned by Dewey; never construct EUIDs.
 
-- `target_kind`: `artifact_object`, `artifact_prefix`, `artifact_set`, or `mixed_set`
-- `target_euid`
-- `targets` for mixed sets
-- `name`
-- `purpose`
-- `owner_email`
-- `allowed_users`
-- `allowed_domains`
-- `allowed_groups`
-- `delivery_modes`
-- `expires_at`
-- `ttl_seconds`
+| Method | Path | Required concurrency / behavior |
+| --- | --- | --- |
+| `POST` | `/api/v1/records/{euid}/shares` | `Idempotency-Key`; target is an existing Object, Prefix or Set |
+| `POST` | `/api/v1/records/{euid}/shares/preview` | Bounded draft selection; `incomplete` is not a complete inventory |
+| `GET` | `/api/v1/registry/shares` | Authorized paginated index |
+| `GET`, `PATCH` | `/api/v1/registry/shares/{euid}` | PATCH requires current `policy_revision` |
+| `POST` | `/api/v1/registry/shares/{euid}/revoke` | `policy_revision`, optional `reason` |
+| `POST` | `/api/v1/registry/shares/{euid}/grants/{grant_euid}/revoke` | Same revision fence; preserves prior grants/history |
+| `POST` | `/api/v1/registry/shares/{euid}/invite` | Explicit `email` already covered by the share; separate accepted/failed/uncertain submission receipt |
+| `GET`, `POST` | `/api/v1/registry/shares/{euid}/aliases` | POST requires `slug` and `policy_revision` |
+| `POST` | `/api/v1/registry/shares/{euid}/aliases/{slug}/revoke` | `policy_revision`; permanently retires the alias |
+| `GET` | `/api/v1/registry/shares/{euid}/contents` | Current authorized contents with explicit continuation |
+| `GET` | `/api/v1/registry/shares/{euid}/activity` | Append-only event pages; follow `continuation_token` |
+| `GET` | `/api/v1/registry/sharing-report` | Finite `starts_at`, optional `ends_at`; owner/status/audience/content/date/age/unused filters |
+| `GET` | `/api/v1/registry/sharing-inventory` | Lifecycle rows; preserve `observed_at` and `expected_inventory_sha256` across export pages |
+| `POST` | `/api/v1/records/{euid}/location-rebind` | `storage_uri`, `expected_location_revision`, `reason`, optional `version_id`; verifies equivalent content, moves no bytes |
 
-Current delivery behavior:
+Create fields include `name`, `purpose`, `audience` (`recipients` or
+`public_registered`), `allowed_users`, `allowed_domains`, or explicit `grants`,
+`include_patterns`, `exclude_patterns`, `denied_emails`, `expires_at`,
+`content_mode` (`download` or `www`), `report_entrypoint`, and
+`report_bundle_root`. `delivery_modes` admits only `["gateway"]`. Omitted expiry
+defaults to 30 days; explicit `null` is indefinite. Record-scoped creation also
+accepts `lifetime_days` when no explicit expiry is supplied. Owner identity is
+derived from the authenticated creator. Arbitrary owner/group/TTL and old
+transport payloads are not the 12.x share contract.
 
-- `presigned_s3` is object-only and returns one short-lived URL from an access package.
-- `presigned_s3_manifest` returns a manifest for object/set/mixed targets.
-- CloudFront signed URL/cookie and Dewey HTML browser modes require explicit configured origins and signing material.
-- Share roots register collaborator/customer bucket/prefix roots without automatically registering changing child objects.
+PATCH can change recipients, targets, filters, content mode and expiry atomically.
+For replacement targets, provide a reviewed `targets` list; each entry has
+`target_kind` set to `artifact_object` or `artifact_prefix` and `target_euid` set to
+the actual persisted identity. Stale policy or location revisions return 409;
+no partial new revision is published. A valid share grant supplies recipient access without an independent
+artifact ACL. Sharing does not confer management or organization membership.
+
+Slugs use 3–63 lowercase ASCII letters/digits/hyphens with alphanumeric ends;
+reserved names and collisions fail. Retired aliases never point to another share.
+
+### Recipient Delivery And Credentials
+
+All recipient endpoints require verified ingress and a current verified-email
+identity. Named grants may include pending internal/external addresses. Public
+with registration still requires sign-in and email verification.
+
+| Method | Path | Behavior |
+| --- | --- | --- |
+| `GET`, `HEAD` | `/fetch/{identifier}` and `/fetch/{identifier}/{relative_path}` | Share EUID or active slug; file delivery, directory view or explicit representation |
+| `GET` | `/api/v2/recipient/shares/{identifier}` | Sanitized current share summary; no storage coordinates |
+| `GET` | `/api/v2/recipient/shares/{identifier}/contents` | Manifest page; `path`, `limit` 1–200, `continuation_token` |
+| `POST` | `/api/v2/recipient/shares/{identifier}/preview` | Creates an isolated report context for an authorized HTML entrypoint/bundle |
+| `POST` | `/api/v2/recipient/shares/{identifier}/preview/{context_euid}/handoff` | One-time viewer handoff; not a durable shared credential |
+| `GET`, `POST` | `/api/v2/recipient/tokens` | List own credentials; create with `name`, `lifetime_days` 1–30, fixed read-only role |
+| `POST` | `/api/v2/recipient/tokens/{token_euid}/revoke` | Revoke only the caller's credential |
+
+`?format=manifest` is paginated; follow every continuation to establish
+completeness. `?format=tar` inventories the entire selection before streaming an
+uncompressed archive. TAR has explicit capacity limits and restarts after
+interruption; the CLI supports conditional per-file resume. Single objects resolve
+at the root, single prefixes retain relative keys, and multiple targets use
+`<target-euid>/<relative-path>` beneath the share root.
+
+File delivery supports HEAD, a single byte range and conditional requests. A WWW
+browser entry initializes the isolated viewer; `download=true` requests file
+delivery instead. Sidecars remain on the authorized content host. Client-generated
+report exports can download there without permitting network form submission.
+Current policy applies on each request and TAR member. An admitted individual
+response may finish; subsequent requests are denied after revocation.
+
+Known canonical-share resolution 403 decisions are durably audited; unknown or
+retired identifiers do not create fabricated lineage. Reports distinguish server
+completion/bytes from client receipt, and exact native creation-to-deadline
+durations from indefinite lifetimes. Partial event pages are not aggregate totals.
+
+### Retained Service Entrypoints
+
+`POST /api/v1/shares` remains the explicit-target create route for
+`artifact_object`, `artifact_prefix`, `artifact_set` or `mixed_set`. Its schema
+requires `target_euid` or explicit `targets` as appropriate and uses the same
+audience/expiry/gateway rules. Existing share read/revoke/audit and share-root
+subset routes retain their declared auth requirements. Access packages now return
+authenticated `/fetch/` paths for gateway/manifest/TAR; they do not return S3
+presigns or CloudFront cookies. Removed delivery modes fail explicitly.
+
+See [Managed sharing](sharing.md) for limits and examples. This API description
+does not close the remaining internal scoped-access or final user-acceptance gates
+in the [release ledger](plans/20261026T010947Z_dewey_12_sharing_release_ledger.md).
 
 ## Search API
 
@@ -238,7 +299,9 @@ Current searchable record families:
 - `artifact_set`
 - `share`
 
-The browser Unified Search page currently focuses on artifacts and shares. Artifact-set search is currently more explicit in the Artifacts page.
+The current browser uses the Library, Sets and Sharing views over the EUID
+registry search API (`/api/v1/registry/search`). The normalized service search
+endpoints above remain available with their explicit filters/scopes.
 
 ## External Objects API
 
@@ -266,30 +329,37 @@ Current relation fields:
 
 ## TapDB DAG API
 
-The unreleased Dewey 9 candidate mounts the published TapDB 10.1.1rc1 DAG v2
-contract with Dewey session-or-bearer authentication. The successful mount
+The release 12 runtime mounts the pinned TapDB 11.0.9 DAG v2
+contract with Dewey administrator authentication or an explicitly configured
+dedicated DAG-reader credential on supported reads. The successful mount
 manifest is also advertised by `/obs_services`. Missing required configuration
 or an unsuccessful native mount prevents startup.
 
 | Method | Path | Auth | Notes |
 | --- | --- | --- | --- |
-| `GET` | `/api/dag/manifest` | `session or bearer token` | Exact mounted DAG v2 manifest |
-| `GET` | `/api/dag/v2/object/{euid}` | `session or bearer token` | Native ownership lookup |
-| `GET` | `/api/dag/v2/data` | `session or bearer token` | Native bounded DAG query |
-| `GET` | `/api/dag/v2/search` | `session or bearer token` | Native bounded search |
+| `GET` | `/api/dag/manifest` | `admin or configured DAG reader` | Exact mounted DAG v2 manifest |
+| `GET` | `/api/dag/v2/object/{euid}` | `admin or configured DAG reader` | Native ownership lookup |
+| `GET` | `/api/dag/v2/data` | `admin or configured DAG reader` | Native bounded DAG query |
+| `GET` | `/api/dag/v2/search` | `admin or configured DAG reader` | Native bounded search |
 
 The removed v1 endpoints and external graph proxy have no compatibility aliases.
 DAG v2 advertises `outbound_fetch: false`; typed persisted external references
-remain the owning substrate contract. Production remains on the earlier deployed
-version until the separate populated-data migration gate can pass.
+remain the owning substrate contract. Current deployment provenance and preserved
+database history are recorded in the release ledger; the old Dewey 9 migration
+candidate status is historical.
 
 ## Idempotency Rules
 
-Current code requires `Idempotency-Key` on most write endpoints and returns:
+Endpoints that declare `Idempotency-Key` reject missing keys through their request
+validation and return:
 
-- `400` when the header is missing where required
 - `409` on key reuse with a different request fingerprint
 - stored replay responses for safe retries when the same key and payload are reused
+
+Share edits, recipient/share revocation and alias changes instead require the
+reviewed `policy_revision`; location rebind requires `expected_location_revision`.
+An invitation is an explicit submission with its own outcome receipt. Do not
+blindly repeat a mutation whose result is unknown.
 
 ## Error Modes
 
@@ -297,9 +367,10 @@ Common current error shapes:
 
 - `400` for malformed requests or missing idempotency header
 - `401` for missing or invalid auth
-- `403` for admin-only session surfaces
+- `403` for denied recipient or management authority
 - `404` for missing artifact, set, share, literature save, or external object
-- `409` for idempotency or ownership conflicts
+- `409` for idempotency, alias, policy/location revision or inventory-drift conflicts
+- `410` for explicitly retired delivery operations or archived shares where declared
 - `502` for runtime/storage/literature backend failures surfaced by Dewey
 
 ## No Public Messaging API

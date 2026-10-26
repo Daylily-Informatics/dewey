@@ -2,6 +2,12 @@
 
 Evidence cutoff: 2026-09-01
 
+> **Historical reference, not the current product contract.** Findings below are
+> retained for their dated evidence. For Dewey 12.0.7, use the current
+> [README](../README.md), [API guide](apis.md) and [managed-sharing guide](sharing.md).
+> Release and remaining acceptance status are tracked in the
+> [execution ledger](plans/20261026T010947Z_dewey_12_sharing_release_ledger.md).
+
 **Historical snapshot.** The production source/image/version observations and
 repository state below apply to the September 1 audit, not the current migration.
 The approved Dewey 9 source baseline is subsequently deployed commit

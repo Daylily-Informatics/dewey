@@ -4,7 +4,7 @@
 
 Dewey is the canonical artifact registry and artifact-resolution service in the Daylily stack. Its job is not to run workflows or own every domain object. Its job is to answer a narrower set of questions well:
 
-Dewey's Cognito integration follows the `daylily-auth-cognito` 2.0 split: browser sessions live in `browser.session`, Hosted UI helpers live in `browser.oauth` and `browser.google`, bearer verification lives in `runtime.verifier` and `runtime.m2m`, and lifecycle changes stay in `daycog` via `admin.*`. Service runtime code should not import `daylily_auth_cognito.cli`.
+Dewey's authentication integration uses `daylily-auth-cognito` 2.x: browser sessions live in `browser.session`, Hosted UI helpers live in `browser.oauth` and `browser.google`, bearer verification lives in `runtime.verifier` and `runtime.m2m`, and Cognito lifecycle changes stay in `daycog` via `admin.*`. The day deployment uses shared Login as its external broker. Service runtime code must not import `daylily_auth_cognito.cli`.
 
 - what artifact exists
 - what its stable Dewey identity is
@@ -27,50 +27,45 @@ An artifact record currently carries:
 - lifecycle fields such as `storage_status`, `availability_status`, and retention metadata
 - freeform `metadata`
 
-Browser-supported artifact metadata fields are currently:
-
-- `title`
-- `sample_id`
-- `study_id`
-- `assay`
-- `pipeline`
-- `recorded_at`
-- `tags`
-- `notes`
-
-The browser also accepts extra JSON metadata, so the structured fields are a starting convention rather than the whole schema.
+The current browser accepts name, description and arbitrary JSON metadata through
+key/value and advanced JSON editors. Producer-specific fields such as sample,
+study, assay and pipeline metadata remain conventions or explicit producer API
+contracts; they are not a fixed browser metadata schema.
 
 ### Artifact Set
 
-Artifact sets are Dewey-owned groupings of artifacts. Current browser-supported set metadata fields are:
+Artifact sets are Dewey-owned groupings with explicit native membership lineage,
+name/description and arbitrary metadata. The browser selects existing Object and
+Prefix EUIDs. Producer registration APIs retain their typed set and manifest
+contracts; ordinary set edits do not redefine those producer receipts. Set member
+removal and registry archiving remain blocked by the deletion policy; removing
+a share target changes access without removing a registry relationship or bytes.
 
-- `program`
-- `cohort`
-- `release_label`
-- `recorded_at`
-- `tags`
-- `notes`
+### Managed Share
 
-Current browser artifact-set types are:
+A schema-3 share has a stable native share EUID, owner, audience, content mode,
+current policy revision and expiry. Typed TapDB lineage connects the share to
+immutable scope revisions, their artifact targets, recipient grants, aliases and
+audit events. Recipient or target removal preserves prior revisions and events.
 
-- `analysis_output`
-- `batch`
-- `collection`
-- `delivery`
-- `release`
+- Object and fixed-set selections coexist with live prefixes whose future matching descendants are included.
+- Named recipients may mix internal/external addresses and pending accounts. Public with registration admits any current verified registered identity. Neither audience admits anonymous access.
+- The creator needs delegation authority. A valid recipient grant supplies access without an independent artifact ACL, S3 permission or organization membership.
+- Omitted expiry means 30 days; explicit `null` means indefinite. Atomic edits require the current `policy_revision`; stale writes conflict.
+- `/fetch/<share-euid>` and claimed slugs resolve the same policy. Global slug claims are unique and remain permanent tombstones after retirement.
+- Authenticated gateway delivery supports files, paginated manifests and uncompressed TAR after complete inventory. Managed raw S3 presigns and old transport payloads are rejected.
+- WWW mode declares an HTML entrypoint and bundle root. The durable fetch URL initializes an isolated content host; authorized sidecars are checked individually.
 
-### Share Reference
+See [Managed sharing](sharing.md) for exact fields, path layout, limits and
+credential acquisition. Share-only onboarding grants no automatic organization
+membership. Personal credentials expire independently of the share.
 
-Share references describe a sharing action for an artifact or artifact set. Current live behavior includes:
+### Storage Location Revision
 
-- target type and target EUID
-- purpose and scope
-- start and expiry
-- transport metadata
-- concrete presigned URLs for S3-backed shares where available
-- manifest rows for artifact-set sharing
-
-Artifact shares currently require `presigned_s3`. Artifact-set shares support `presigned_s3`, `rclone_http`, and `rclone_sftp`.
+An explicit location rebind retains the artifact EUID and stable share paths only
+after qualified content-equivalence and collision checks. Current location
+revision is an optimistic concurrency fence; native history records the change.
+Rebind moves a reference, not S3 bytes, and does not delete storage objects.
 
 ### External Object And Relation
 
@@ -95,15 +90,17 @@ At startup, Dewey wires together:
 - FastAPI app and route surface
 - a `DeweyService` composed from artifact, artifact-set, QEO/KEO registration, outbox, search, literature, sharing, and external-object mixins
 - a TapDB backend for persistence
-- an S3 storage client for object inspection, upload sessions, downloads, locking, and presigned URLs
+- an S3 storage client for object inspection, upload sessions, authenticated delivery, locking, and independently authorized storage access
 - a `MetapubAdapter` for PubMed search and record retrieval when available
 - a Cognito web-session config via `daylily-auth-cognito`
 - an in-memory observability store for request, DB, and auth rollups
 
 ```mermaid
 flowchart TB
-    Browser["Browser UI
-Dashboard, Artifacts, Literature, Search"] --> FastAPI["FastAPI app"]
+    Browser["Management UI
+Library, S3 Browser, Sets, Sharing"] --> FastAPI["FastAPI app"]
+    Recipient["Verified recipients
+fetch, report viewer, personal credentials"] --> FastAPI
     ServiceCaller["Bearer-token clients
 Bloom, Ursa, operators, scripts"] --> FastAPI
 
@@ -124,25 +121,37 @@ registration receipts, outbox"]
 head/get/list/upload/presign/lock"]
     Service --> Metapub["metapub adapter
 PubMed lookup and full-text discovery"]
-    Auth --> Cognito["Cognito Hosted UI
-through daylily-auth-cognito"]
+    Auth --> Login["Shared Login
+verified identity and current credential binding"]
+    Login --> Cognito["Cognito Hosted UI"]
 ```
 
-## Public Surfaces
+## HTTP And Browser Surfaces
+
+Internet reachability is restricted to the configured recipient/authentication
+routes and isolated content hosts. The day deployment uses a dedicated ALB and
+restricted private origin listeners 8443/8444. Management, admin, embedded TapDB,
+service backchannels and sibling services retain their trusted-network boundary.
+An endpoint with no application-auth requirement is not necessarily public ingress.
 
 ### Browser UI
 
 The current GUI is split across these main pages:
 
 - `/ui`
-- `/artifacts`
+- `/storage`
+- `/sets`
+- `/shares` and `/shares/<share-euid>` for management
+- `/records/<artifact-or-set-euid>`
+- `/add` (`/artifacts` also opens Add)
 - `/literature`
-- `/search`
+- `/search` (the Library)
 - `/ui/anomalies`
 - `/ui/observability`
 - `/admin`
 
-This is a task-focused operator console, not a broad end-user application.
+Recipient pages use `/fetch/<share-euid-or-slug>[/<path>]` and
+`/recipient/account`. They do not expose the management library.
 
 ### HTTP API
 
@@ -157,14 +166,18 @@ The API surface is grouped into:
 - search endpoints
 - external objects and relations
 
-Write operations are intentionally idempotent and generally require `Idempotency-Key`.
+Create operations use `Idempotency-Key` where declared. Share edits/revocations
+use explicit policy revisions; storage rebind uses an explicit location revision.
+Do not infer replay safety for an invitation or lifecycle operation from its HTTP method.
 
 ## Auth Model
 
 The current auth split is explicit in code:
 
-- bearer token auth for the main `/api/v1/*` registry surface
-- Cognito-backed browser sessions for GUI pages
+- session-or-bearer principals for the current EUID registry; older service APIs retain their declared bearer requirements
+- shared Login-backed browser sessions on day, with direct Cognito mode available only when explicitly configured
+- verified-email identity and verified ingress for managed sharing; recipient-only identities are restricted to recipient routes
+- current broker/provider identity checks and finite, separately revocable personal credentials
 - either bearer token or valid session for most observability endpoints
 - session-only access for `/my_health`
 - admin-session requirement for `/admin`
@@ -195,8 +208,9 @@ Implemented storage behaviors include:
 - complete uploads into managed storage
 - verify artifact storage
 - apply retention locks
-- generate presigned download URLs
-- build ZIP downloads with companion `.dewey.yaml` metadata files in the browser flow
+- retain independently authorized storage access; a share-only right cannot issue raw presigns
+- stream share files with HEAD/range/conditional semantics, paginated manifests and complete-inventory TAR delivery
+- verify equivalent storage destinations before changing an artifact's location reference
 
 This is broader than a pure metadata catalog, but it is still bounded by artifact ownership, not end-to-end workflow ownership.
 
@@ -204,10 +218,10 @@ This is broader than a pure metadata catalog, but it is still bounded by artifac
 
 Current search is split between:
 
-- Unified Search for normalized search across artifacts and managed shares, and artifact sets through the API
-- the dedicated Artifacts page for register/upload/download/set workflows and more detailed artifact-set actions
+- the Library for authorized artifact records, Sets for selections and Sharing for managed shares
+- Add and the S3 Browser for registration/upload workflows
 
-Current live search behavior includes:
+Implemented service search behavior includes:
 
 - text query over names, IDs, metadata, storage URIs, literature fields, and external-object projections
 - property filters over fields and nested metadata
@@ -258,6 +272,19 @@ stream.
 - TapDB persists Dewey objects, but TapDB is not the semantic owner.
 - Dayhoff deploys and wires Dewey into the stack, but Dayhoff does not own Dewey's domain behavior.
 
-## Current-State Caveat
+## Audit And Evidence Boundary
 
-The architecture described here is grounded in live code and current tests. In the current April 6, 2026 verification run, the repo measured `256` collected tests with `254 passed`, `2 skipped`, and `84%` coverage. The main remaining caveat is that browser-auth verification still depends on a configured Cognito deployment and the local HTTPS surface being available.
+Native events record lifecycle changes, authorization decisions and server
+delivery outcomes. Resolution denials for known canonical shares commit before
+returning 403; unknown identifiers and retired aliases do not fabricate native
+share relationships. Aggregate reports distinguish authorization evaluations,
+successful file responses, report entries/assets, archive outcomes and bytes.
+Server completion is not proof that a client saved the file. Complete inventory
+exports bind an observation time and inventory digest across pages.
+
+This guide describes the 12.0.7 source contract. Release provenance, changed-code
+coverage and live acceptance have separate receipts in the
+[execution ledger](plans/20261026T010947Z_dewey_12_sharing_release_ledger.md).
+Internal signup is confirmed; internal application admission/scoped-access proof
+and final user acceptance remain open. Historical test totals are not current
+validation evidence.
