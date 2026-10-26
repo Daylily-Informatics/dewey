@@ -1,0 +1,9 @@
+{
+  "started_at": "2026-10-26T04:16:45.355722+00:00",
+  "finished_at": "2026-10-26T04:17:36.179455+00:00",
+  "exit_code": 0,
+  "selected": [
+    "lsmc-oauth-login"
+  ],
+  "cache_mode": "off"
+}

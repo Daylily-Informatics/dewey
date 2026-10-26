@@ -1,0 +1,17 @@
+{
+  "dewey": "12.0.3",
+  "login": "4.1.1",
+  "method": "real authenticated LSMC Chrome session",
+  "parallel_static_requests": {
+    "/static/registry.js": 200,
+    "/static/registry.css": 200,
+    "/static/sharing.css": 200
+  },
+  "sharing_page_rendered": true,
+  "visible_controls": [
+    "Search accessible shares",
+    "Sharing audit report",
+    "Refresh"
+  ],
+  "no_new_manager_credential": true
+}

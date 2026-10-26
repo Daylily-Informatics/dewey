@@ -1,0 +1,51 @@
+{
+  "dewey": {
+    "container": {
+      "name": "dayhoff-day-dewey-1",
+      "id": "56a8b7cecaa38b0bd3fdda8f3d9cf0a940bc922d68c3ba61ebe69f6ce9ae5d38",
+      "image_id": "sha256:0885649fb6a2aad1352db6cf1a21e2034f4f7120d25087bc00d7d2c0b5a4a79d",
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:0885649fb6a2aad1352db6cf1a21e2034f4f7120d25087bc00d7d2c0b5a4a79d",
+      "repo_digests": [
+        "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:0885649fb6a2aad1352db6cf1a21e2034f4f7120d25087bc00d7d2c0b5a4a79d"
+      ],
+      "started_at": "2026-10-26T04:02:38.042658494Z",
+      "restart_count": 0,
+      "version": "12.0.3",
+      "source_revision": "a5d6c05df2337a9b87dff1ab19c0b109f910a986"
+    },
+    "packages": {
+      "dewey-service": "12.0.3",
+      "daylily-tapdb": "11.0.9",
+      "daylily-auth-cognito": "2.1.5"
+    },
+    "ready": true,
+    "health_build": {
+      "version": "12.0.3",
+      "sha": "a5d6c05df2337a9b87dff1ab19c0b109f910a986"
+    }
+  },
+  "login": {
+    "container": {
+      "name": "dayhoff-day-login-1",
+      "id": "bfe936144539aed8fa5f993b38e38b83b82b2abe0e58bef54dbc6c7526e2d3b6",
+      "image_id": "sha256:82985b4c51c2f397d1e2a209c3e43f06b7328eca56f0bc4d618c3316cd41c355",
+      "configured_image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/lsmc-oauth-login@sha256:82985b4c51c2f397d1e2a209c3e43f06b7328eca56f0bc4d618c3316cd41c355",
+      "repo_digests": [
+        "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/lsmc-oauth-login@sha256:82985b4c51c2f397d1e2a209c3e43f06b7328eca56f0bc4d618c3316cd41c355"
+      ],
+      "started_at": "2026-10-26T04:19:39.235169785Z",
+      "restart_count": 0,
+      "version": "4.1.1",
+      "source_revision": "3a54d153c10193dda78e77a7c562529c2768ee45"
+    },
+    "packages": {
+      "lsmc-oauth-login": "4.1.1",
+      "daylily-auth-cognito": "2.1.9"
+    },
+    "ready": true,
+    "health_build": {
+      "version": "4.1.1",
+      "sha": ""
+    }
+  }
+}

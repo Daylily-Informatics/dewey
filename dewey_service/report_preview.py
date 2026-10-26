@@ -9,6 +9,8 @@ import logging
 import mimetypes
 import re
 import secrets
+from contextlib import contextmanager
+from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from urllib.parse import parse_qs, quote, urlsplit
 
@@ -101,6 +103,26 @@ def _host_context(request, service, session, *, lock=False):
     return row, _live_context(service, settings, session, row)
 
 
+@contextmanager
+def _attributed_host_write(request, service):
+    # Isolated hosts deliberately have no application session cookie. Resolve
+    # their native session lineage read-only, then restore its current verified
+    # viewer before opening a transaction that requires write attribution.
+    with service.backend.session_scope(commit=False) as session:
+        row, context = _host_context(request, service, session)
+        expected = deepcopy((row.euid, context[1:]))
+    actor = binding_principal(context[1], request.app.state.settings)
+    with principal_context(actor), authenticated_user_email_context(actor.email):
+        with service.backend.session_scope(commit=True) as session:
+            row, context = _host_context(request, service, session, lock=True)
+            # Recheck the live context/session under its native row lock. The
+            # verified identity must still describe the exact same binding and
+            # source relationships observed before the provider check.
+            if (row.euid, context[1:]) != expected:
+                raise HTTPException(409, "Preview session changed; reopen it from Dewey")
+            yield session, row, context
+
+
 def _cookie_matches(request, data):
     cookie = request.cookies.get(_COOKIE, "")
     if not cookie or not hmac.compare_digest(_hash(cookie), str(data.get("cookie_sha256", ""))):
@@ -191,7 +213,9 @@ async function post(path, body) {
         '<iframe id="report" name="dewey-isolated-report" title="Shared report" sandbox="allow-scripts allow-same-origin" '
         f'referrerpolicy="no-referrer"></iframe><script nonce="{nonce}">{script}</script></html>')
     content_origin = "https://*." + settings.share_content_host_suffix
-    headers = {"Cache-Control": "no-store", "Referrer-Policy": "no-referrer", "X-Content-Type-Options": "nosniff",
+    # A native cross-origin POST form needs the real application Origin for
+    # the one-use handoff. no-referrer would serialize that Origin as null.
+    headers = {"Cache-Control": "no-store", "Referrer-Policy": "strict-origin", "X-Content-Type-Options": "nosniff",
         "Content-Security-Policy": f"default-src 'none'; script-src 'nonce-{nonce}'; style-src 'nonce-{nonce}'; "
             f"connect-src 'self'; frame-src {content_origin}; form-action {content_origin}; frame-ancestors 'none'; base-uri 'none'",
         "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()"}
@@ -268,8 +292,8 @@ def attach_report_preview(app, router, service):
     def preview_challenge(request: Request):
         settings = request.app.state.settings
         cookie, nonce = secrets.token_urlsafe(32), secrets.token_urlsafe(24)
-        with service.backend.session_scope(commit=True) as session:
-            row, (data, binding, _, _, _) = _host_context(request, service, session, lock=True)
+        with _attributed_host_write(request, service) as (session, row, context):
+            data, _, _, _, _ = context
             if data["status"] != "pending":
                 raise HTTPException(409, "Preview challenge already issued; reopen from Dewey")
             service.backend.update_instance_json(session, row, {"status": "challenged", "cookie_sha256": _hash(cookie)})
@@ -327,16 +351,14 @@ def attach_report_preview(app, router, service):
         if set(form) != {"token"} or len(form["token"]) != 1:
             raise HTTPException(400, "A single handoff token is required")
         token = form["token"][0]
-        with service.backend.session_scope(commit=True) as session:
-            row, (data, binding, _, share, target) = _host_context(request, service, session, lock=True)
+        with _attributed_host_write(request, service) as (session, row, context):
+            data, _, _, share, target = context
             _cookie_matches(request, data)
             if (data["status"] != "handoff_issued" or not hmac.compare_digest(_hash(token), data.get("handoff_sha256", ""))
                     or datetime.fromisoformat(data["handoff_expires_at"]) <= datetime.now(timezone.utc)):
                 raise HTTPException(403, "Preview handoff is invalid, expired or already used")
-            actor = binding_principal(binding, settings)
-            with principal_context(actor), authenticated_user_email_context(actor.email):
-                receipt = service.authorize_share_object(share, target, data["report_relative_key"], action="report")
-                service.backend.update_instance_json(session, row, {"status": "active", "handoff_sha256": "", "activated_at": utc_now_iso()})
+            receipt = service.authorize_share_object(share, target, data["report_relative_key"], action="report")
+            service.backend.update_instance_json(session, row, {"status": "active", "handoff_sha256": "", "activated_at": utc_now_iso()})
         report = receipt["key"].rsplit("/", 1)[-1] if data["object_only"] else data["report_relative_key"][len(data["bundle_root"]):]
         return RedirectResponse("/__dewey_preview/assets/" + quote(report, safe="/"), status_code=303, headers=_headers(settings))
 

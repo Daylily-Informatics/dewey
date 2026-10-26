@@ -1,0 +1,155 @@
+{
+  "observed_at": "2026-10-26T04:42:52.208823+00:00",
+  "phases": [
+    {
+      "snapshot_name": "dewey12-acceptance-20261026-browser-manager-audience-2026-10-26T04-29-04-640Z.json",
+      "summary": {
+        "phase": "manager-audience",
+        "status": "complete",
+        "requests": 9,
+        "http_expectations_passed": 9,
+        "identity_created": false,
+        "credentials_exported": false,
+        "storage_deleted": false
+      },
+      "expected_http_results": [
+        {
+          "label": "manager-verified-account",
+          "status": 200
+        },
+        {
+          "label": "manager-private-api",
+          "status": 200
+        },
+        {
+          "label": "wrong-email-file-denied",
+          "status": 403
+        },
+        {
+          "label": "wrong-email-www-denied",
+          "status": 403
+        },
+        {
+          "label": "public-manifest-0",
+          "status": 200
+        },
+        {
+          "label": "public-manifest-1",
+          "status": 200
+        },
+        {
+          "label": "public-manifest-2",
+          "status": 200
+        },
+        {
+          "label": "public-manifest-3",
+          "status": 200
+        },
+        {
+          "label": "registered-public-sidecar",
+          "status": 200
+        }
+      ],
+      "pending_operation_count": 0
+    },
+    {
+      "snapshot_name": "dewey12-acceptance-20261026-browser-alias-claim-2026-10-26T04-30-01-752Z.json",
+      "summary": {
+        "phase": "alias-claim",
+        "status": "complete",
+        "requests": 7,
+        "http_expectations_passed": 7,
+        "identity_created": false,
+        "credentials_exported": false,
+        "storage_deleted": false
+      },
+      "expected_http_results": [
+        {
+          "label": "manager-verified-account",
+          "status": 200
+        },
+        {
+          "label": "manager-private-api",
+          "status": 200
+        },
+        {
+          "label": "current-www",
+          "status": 200
+        },
+        {
+          "label": "claim-alias",
+          "status": 201
+        },
+        {
+          "label": "current-public",
+          "status": 200
+        },
+        {
+          "label": "alias-conflict",
+          "status": 409
+        },
+        {
+          "label": "alias-list-active",
+          "status": 200
+        }
+      ],
+      "pending_operation_count": 0
+    },
+    {
+      "snapshot_name": "dewey12-acceptance-20261026-browser-public-www-enable-2026-10-26T04-33-18-435Z.json",
+      "summary": {
+        "phase": "public-www-enable",
+        "status": "complete",
+        "requests": 4,
+        "http_expectations_passed": 4,
+        "identity_created": false,
+        "credentials_exported": false,
+        "storage_deleted": false
+      },
+      "expected_http_results": [
+        {
+          "label": "manager-verified-account",
+          "status": 200
+        },
+        {
+          "label": "manager-private-api",
+          "status": 200
+        },
+        {
+          "label": "current-public",
+          "status": 200
+        },
+        {
+          "label": "public-www-enable",
+          "status": 200
+        }
+      ],
+      "pending_operation_count": 0
+    },
+    {
+      "snapshot_name": "dewey12-acceptance-20261026-browser-www-prepare-2026-10-26T04-34-03-245Z.json",
+      "summary": {
+        "phase": "www-prepare",
+        "status": "complete",
+        "requests": 2,
+        "http_expectations_passed": 2,
+        "identity_created": false,
+        "credentials_exported": false,
+        "storage_deleted": false
+      },
+      "expected_http_results": [
+        {
+          "label": "manager-verified-account",
+          "status": 200
+        },
+        {
+          "label": "manager-private-api",
+          "status": 200
+        }
+      ],
+      "pending_operation_count": 1
+    }
+  ],
+  "recipient_verification": "user action pending",
+  "report_rendering": "failed before challenge cookie or handoff"
+}

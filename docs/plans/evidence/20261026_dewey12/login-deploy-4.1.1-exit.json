@@ -1,0 +1,30 @@
+{
+  "source_sha256": "a89a5f72035f81ba2689450229eb865713299da094ebdd116d4bb7f85f3f5641",
+  "candidate_sha256": "be9dcb95029257a76d047cf543ff2cfe8a8c244e3c549c0c426459aff5209faf",
+  "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/lsmc-oauth-login@sha256:82985b4c51c2f397d1e2a209c3e43f06b7328eca56f0bc4d618c3316cd41c355",
+  "commit": "3a54d153c10193dda78e77a7c562529c2768ee45",
+  "version": "4.1.1",
+  "selected_service": "login",
+  "only_changed_fields": [
+    "image",
+    "LSMC_RELEASE_SHA"
+  ],
+  "unchanged_services": [
+    "atlas",
+    "bloom",
+    "dewey",
+    "kahlo",
+    "qeo",
+    "ursa",
+    "ursa-cluster-sweeper",
+    "ursa-cost-guardrail-scheduler",
+    "ursa-placement-scheduler",
+    "ursa-v2-run-monitor",
+    "ursa-v2-run-worker",
+    "zebra-day"
+  ],
+  "started_at": "2026-10-26T04:19:37.748536+00:00",
+  "finished_at": "2026-10-26T04:19:39.350307+00:00",
+  "exit_code": 0,
+  "previous_exit_code": 0
+}

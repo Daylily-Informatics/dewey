@@ -40,7 +40,7 @@
       "version": "4.1.0",
       "commit": "4836f1581b309176bdf1706cdb9eabbf4b4ea4b4",
       "digest": "sha256:675b378414f04d173c01475ba1624abb1f3325b0fe49ea96e2b55e473c0ff516",
-      "disposition": "deployed and ready",
+      "disposition": "deployed then superseded by shared transaction concurrency correction",
       "packages": {
         "daylily-auth-cognito": "2.1.9"
       }
@@ -68,6 +68,17 @@
         "daylily-tapdb": "11.0.9",
         "daylily-auth-cognito": "2.1.5"
       }
+    },
+    {
+      "service": "login",
+      "version": "4.1.1",
+      "commit": "3a54d153c10193dda78e77a7c562529c2768ee45",
+      "tag_object": "f7a576557a66ccf2eae78f321bcdaff94eef8bb8",
+      "digest": "sha256:82985b4c51c2f397d1e2a209c3e43f06b7328eca56f0bc4d618c3316cd41c355",
+      "disposition": "deployed and ready; authenticated parallel assets and Sharing UI pass",
+      "packages": {
+        "daylily-auth-cognito": "2.1.9"
+      }
     }
   ],
   "private_evidence_root": "/home/ubuntu/dewey12-release-20261026T021700Z",
@@ -86,6 +97,15 @@
     "exit_code": 0,
     "selected": [
       "dewey"
+    ],
+    "cache_mode": "off"
+  },
+  "login_concurrency_corrective_build": {
+    "started_at": "2026-10-26T04:16:45.355722+00:00",
+    "finished_at": "2026-10-26T04:17:36.179455+00:00",
+    "exit_code": 0,
+    "selected": [
+      "lsmc-oauth-login"
     ],
     "cache_mode": "off"
   }
