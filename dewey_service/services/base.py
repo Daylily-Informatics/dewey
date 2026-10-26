@@ -252,6 +252,7 @@ class BaseDeweyService:
             "bucket": str(payload.get("bucket") or ""),
             "key": str(payload.get("key") or ""),
             "version_id": payload.get("version_id"),
+            "location_revision": int(payload.get("location_revision", 1)),
             "size": payload.get("size"),
             "checksums": dict(payload.get("checksums") or {}),
             "content_type": payload.get("content_type"),

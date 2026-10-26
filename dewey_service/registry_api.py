@@ -53,7 +53,7 @@ class ShareRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str | None = None
     purpose: str | None = None
-    audience: Literal["private", "internal", "recipients", "authenticated"] = "private"
+    audience: Literal["recipients", "public_registered"] = "recipients"
     allowed_users: list[str] = Field(default_factory=list)
     allowed_domains: list[str] = Field(default_factory=list)
     expires_at: str | None = None
@@ -62,13 +62,30 @@ class ShareRequest(BaseModel):
     include_patterns: list[str] = Field(default_factory=lambda: ["**"])
     exclude_patterns: list[str] = Field(default_factory=list)
     denied_emails: list[str] = Field(default_factory=list)
-    delivery_modes: list[Literal["gateway", "presigned"]] = Field(default_factory=lambda: ["gateway"])
+    delivery_modes: list[Literal["gateway"]] = Field(default_factory=lambda: ["gateway"])
+    content_mode: Literal["download", "www"] = "download"
+    report_entrypoint: str | None = None
+    report_bundle_root: str = ""
 
 
 class GrantRevocationRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     policy_revision: int = Field(ge=1)
     reason: str | None = None
+
+
+class SlugClaimRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    slug: str
+    policy_revision: int = Field(ge=1)
+
+
+class LocationRebindRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    storage_uri: str
+    expected_location_revision: int = Field(ge=1)
+    reason: str = Field(min_length=1)
+    version_id: str | None = None
 
 
 class UploadRequest(BaseModel):
@@ -98,6 +115,10 @@ def attach_registry_api(app, *, templates):
     attach_report_preview(app, router, service)
     from dewey_service.share_gateway import attach_share_gateway
     attach_share_gateway(app, router, service)
+    from dewey_service.fetch import attach_fetch_routes
+    attach_fetch_routes(app, service)
+    from dewey_service.recipient_api import attach_recipient_account
+    attach_recipient_account(app, service, templates)
 
     @app.middleware("http")
     async def private_registry_responses(request, call_next):
@@ -188,6 +209,10 @@ def attach_registry_api(app, *, templates):
     def edit(euid: str, data: MetadataUpdate):
         return service.update_registry(euid, data.model_dump(exclude_unset=True))
 
+    @router.post("/records/{euid}/location-rebind")
+    def location_rebind(euid: str, data: LocationRebindRequest):
+        return service.rebind_artifact_location(euid, **data.model_dump())
+
     @router.post("/records/{euid}/archive")
     def archive(euid: str):
         return service.archive_registry(euid)
@@ -217,12 +242,12 @@ def attach_registry_api(app, *, templates):
 
     @router.post("/records/{euid}/shares", status_code=201)
     def share(euid: str, data: ShareRequest, idempotency_key: str = Header(alias="Idempotency-Key")):
-        code, result = service.share_registry(euid, data.model_dump(exclude_none=True), idempotency_key=idempotency_key)
+        code, result = service.share_registry(euid, data.model_dump(exclude_unset=True), idempotency_key=idempotency_key)
         return JSONResponse(result, status_code=code)
 
     @router.post("/records/{euid}/shares/preview")
     def preview_selection(euid: str, data: ShareRequest):
-        return service.preview_share_selection(euid, data.model_dump(exclude_none=True))
+        return service.preview_share_selection(euid, data.model_dump(exclude_unset=True))
 
     @router.post("/registry/search")
     def search(data: dict[str, Any] = Body(default={})):
@@ -240,6 +265,39 @@ def attach_registry_api(app, *, templates):
     @router.get("/registry/shares/{euid}")
     def share_detail(euid: str):
         return service.registry_share_detail(euid)
+
+    @router.get("/registry/shares/{euid}/aliases")
+    def share_aliases(euid: str):
+        return service.list_share_aliases(euid)
+
+    @router.post("/registry/shares/{euid}/aliases", status_code=201)
+    def claim_alias(euid: str, data: SlugClaimRequest):
+        return service.claim_share_slug(euid, data.slug, policy_revision=data.policy_revision)
+
+    @router.post("/registry/shares/{euid}/aliases/{slug}/revoke")
+    def revoke_alias(euid: str, slug: str, data: GrantRevocationRequest):
+        return service.revoke_share_slug(euid, slug, policy_revision=data.policy_revision)
+
+    @router.get("/registry/sharing-report")
+    def sharing_report(starts_at: str, ends_at: str | None = None, owner_subject: str | None = None,
+                       status: str | None = None, audience: str | None = None, content_mode: str | None = None,
+                       created_from: str | None = None, created_before: str | None = None,
+                       older_than_days: int | None = Query(None, ge=0), never_accessed: bool = False):
+        return service.sharing_report(starts_at=starts_at, ends_at=ends_at, owner_subject=owner_subject,
+            status=status, audience=audience, content_mode=content_mode, created_from=created_from,
+            created_before=created_before, older_than_days=older_than_days, never_accessed=never_accessed)
+
+    @router.get("/registry/sharing-inventory")
+    def sharing_inventory(owner_subject: str | None = None,
+                       status: str | None = None, audience: str | None = None, content_mode: str | None = None,
+                       created_from: str | None = None, created_before: str | None = None,
+                       older_than_days: int | None = Query(None, ge=0), never_accessed: bool = False,
+                       page: int = Query(1, ge=1), page_size: int = Query(100, ge=1, le=200),
+                       observed_at: str | None = None, expected_inventory_sha256: str | None = None):
+        return service.sharing_inventory(owner_subject=owner_subject,
+            status=status, audience=audience, content_mode=content_mode, created_from=created_from,
+            created_before=created_before, older_than_days=older_than_days, never_accessed=never_accessed,
+            page=page, page_size=page_size, observed_at=observed_at, expected_inventory_sha256=expected_inventory_sha256)
 
     @router.get("/registry/shares/{euid}/contents")
     def share_contents(euid: str, target_euid: str | None = None, prefix: str = "",
@@ -397,6 +455,10 @@ def attach_registry_api(app, *, templates):
 
     @app.get("/shares/{euid}", include_in_schema=False)
     def recipient_page(request: Request, euid: str):
+        actor = getattr(request.state, "registry_principal", None)
+        if getattr(request.state, "public_recipient", False) or (actor is not None and actor.recipient_only):
+            from urllib.parse import quote
+            return RedirectResponse("/fetch/" + quote(euid, safe=""), status_code=303)
         return page(request, "Share", euid=euid)
 
     @app.get("/account", include_in_schema=False)

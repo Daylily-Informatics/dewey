@@ -379,6 +379,10 @@ class ArtifactServiceMixin:
             "is_terminal": payload["storage_kind"] == "object"}
         if payload["storage_backend"] == "s3":
             self.require_storage_access(payload["bucket"], payload["key"], action="metadata")
+        if payload["storage_backend"] == "s3":
+            from dewey_service.services.share_rebind import lock_storage_coordinate
+            lock_storage_coordinate(session, payload["storage_uri"], payload.get("version_id"))
+        self.backend.lock_external_key(session, operation="artifact.identity", key=payload["artifact_identity_key"])
         existing = self._registry_query(session, scopes=("artifact",), authorize=False).filter(
             generic_instance.json_addl["artifact_identity_key"].astext == payload["artifact_identity_key"]
         ).first()

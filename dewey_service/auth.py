@@ -42,6 +42,7 @@ configure_session_middleware = _configure_session_middleware
 
 _EXTERNAL_BROKER_STATE_KEY = "dewey_external_broker_state"
 _EXTERNAL_BROKER_NEXT_KEY = "dewey_external_broker_next"
+_EXTERNAL_BROKER_RECIPIENT_KEY = "dewey_external_broker_recipient"
 
 
 class AuthError(RuntimeError):
@@ -227,6 +228,11 @@ def start_external_broker_login(
     target = _safe_next_path(next_path or "/ui")
     request.session[_EXTERNAL_BROKER_STATE_KEY] = state
     request.session[_EXTERNAL_BROKER_NEXT_KEY] = target
+    recipient = urlsplit(target).path.startswith(("/fetch/", "/shares/", "/api/v2/recipient/", "/recipient/"))
+    request.session[_EXTERNAL_BROKER_RECIPIENT_KEY] = recipient
+    login_url = settings.external_broker_share_login_url if recipient else settings.external_broker_login_url
+    if recipient and not login_url:
+        raise HTTPException(503, "Recipient login is not configured")
     query = urlencode(
         {
             "service": settings.external_broker_service_id,
@@ -236,7 +242,7 @@ def start_external_broker_login(
         }
     )
     return RedirectResponse(
-        url=f"{settings.external_broker_login_url.rstrip('/')}?{query}",
+        url=f"{login_url.rstrip('/')}?{query}",
         status_code=status.HTTP_303_SEE_OTHER,
     )
 
@@ -340,6 +346,20 @@ def resolve_external_broker_principal(user: dict[str, Any], request: Request) ->
         )
     groups = [str(item).strip() for item in user.get("groups") or [] if str(item).strip()]
     groups.extend(_service_entitlement_roles(user, service_id=settings.external_broker_service_id))
+    binding = user.get("recipient_identity")
+    if binding is not None:
+        from dewey_service.recipient_identity import _binding
+        try:
+            binding = _binding(binding)
+            if (user.get("email_verified") is not True or user.get("verification_state") != "verified"
+                    or binding["canonical_user_id"] != subject or binding["email"] != email
+                    or binding["kind"] != "browser"):
+                raise HTTPException(401, "Recipient identity does not match the handoff")
+        except HTTPException as exc:
+            raise CognitoWebAuthError("not_authorized", "Verified recipient identity is required",
+                                     status_code=401, redirect_to_error=True) from exc
+        if binding["recipient_only"]:
+            groups = ["lsmc:external-share-user", "dewey-readonly"]
     # This callback consumes a verified broker handoff, not user-supplied claims.
     # Invited external share recipients are deliberately outside internal domains.
     if "lsmc:external-share-user" not in groups:
@@ -366,7 +386,8 @@ def resolve_external_broker_principal(user: dict[str, Any], request: Request) ->
         roles=list(profile["roles"]),
         cognito_groups=list(profile["groups"]),
         auth_mode="external_broker",
-        app_context={"canonical_user": dict(user)},
+        app_context={"canonical_user": dict(user), "recipient_identity": binding,
+                     "recipient_only": binding["recipient_only"] if binding is not None else False},
     )
 
 
@@ -402,6 +423,12 @@ async def complete_external_broker_login(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 redirect_to_error=True,
             )
+        binding = payload.get("recipient_identity")
+        if request.session.get(_EXTERNAL_BROKER_RECIPIENT_KEY) and not isinstance(binding, dict):
+            raise CognitoWebAuthError("not_authorized", "Recipient handoff omitted verified identity",
+                                     status_code=401, redirect_to_error=True)
+        if binding is not None:
+            user = {**user, "recipient_identity": binding}
         principal = resolve_external_broker_principal(user, request)
         store_session_principal(request, config, principal)
         from dewey_service.preview_sessions import establish_session_binding
@@ -414,6 +441,7 @@ async def complete_external_broker_login(
         )
 
     request.session.pop(_EXTERNAL_BROKER_STATE_KEY, None)
+    request.session.pop(_EXTERNAL_BROKER_RECIPIENT_KEY, None)
     redirect_to = _safe_next_path(
         str(request.session.pop(_EXTERNAL_BROKER_NEXT_KEY, "/ui") or "/ui")
     )
@@ -430,6 +458,7 @@ def clear_ui_session(request: Request) -> None:
         request.session.pop(config.next_path_session_key, None)
     request.session.pop(_EXTERNAL_BROKER_STATE_KEY, None)
     request.session.pop(_EXTERNAL_BROKER_NEXT_KEY, None)
+    request.session.pop(_EXTERNAL_BROKER_RECIPIENT_KEY, None)
 
 
 def resolve_operator_principal(
@@ -532,6 +561,15 @@ def _load_ui_profile(request: Request) -> dict[str, Any] | None:
             groups=principal.cognito_groups,
             group_role_map=settings.cognito_group_role_map,
         )
+        binding = principal.app_context.get("recipient_identity")
+        if isinstance(binding, dict):
+            profile.update({
+                "identity_grant_id": binding.get("grant_id", ""),
+                "identity_revision": binding.get("revision", 0),
+                "identity_expires_at": binding.get("expires_at", ""),
+                "email_verified": binding.get("email_verified") is True,
+                "recipient_only": binding["recipient_only"],
+            })
         email = str(profile.get("email") or "").strip().lower()
         if not email:
             set_current_authenticated_user_email(None)

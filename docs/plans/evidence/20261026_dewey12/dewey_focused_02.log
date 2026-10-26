@@ -1,0 +1,28 @@
+............F..F................F....................................... [ 72%]
+...........................                                              [100%]
+=================================== FAILURES ===================================
+_____ test_recipient_grant_is_sufficient_without_underlying_recipient_acl ______
+tests/test_sharing_v3_core.py:65: in test_recipient_grant_is_sufficient_without_underlying_recipient_acl
+    artifact = row("artifact","artifact-fixture",storage_backend="s3",storage_kind="object",bucket="fixture",key="new-location/data.dat",original_filename="stable.dat")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: row() got multiple values for argument 'key'
+_____ test_www_selected_target_and_bundle_are_validated_before_persisting ______
+tests/test_sharing_v3_core.py:108: in test_www_selected_target_and_bundle_are_validated_before_persisting
+    target=row("artifact","artifact-fixture",storage_backend="s3",storage_kind="prefix",bucket="fixture",key="reports/")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: row() got multiple values for argument 'key'
+_________________ test_path_decodes_once_and_rejects_traversal _________________
+tests/test_fetch_delivery_v12.py:199: in test_path_decodes_once_and_rejects_traversal
+    assert response.status_code == 200 and response.content == b"literal encoded name"
+E   assert (400 == 200)
+E    +  where 400 = <Response [400 Bad Request]>.status_code
+=============================== warnings summary ===============================
+.venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /Users/jmajor/projects/dewey-sharing-docs-20261025/.venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_sharing_v3_core.py::test_recipient_grant_is_sufficient_without_underlying_recipient_acl
+FAILED tests/test_sharing_v3_core.py::test_www_selected_target_and_bundle_are_validated_before_persisting
+FAILED tests/test_fetch_delivery_v12.py::test_path_decodes_once_and_rejects_traversal

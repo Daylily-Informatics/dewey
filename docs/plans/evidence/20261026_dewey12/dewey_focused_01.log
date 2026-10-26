@@ -1,0 +1,64 @@
+
+==================================== ERRORS ====================================
+______________ ERROR collecting tests/test_config_sharing_v12.py _______________
+tests/test_config_sharing_v12.py:11: in <module>
+    from dewey_service.cli import config_extra
+dewey_service/cli/__init__.py:283: in <module>
+    spec = _build_spec()
+           ^^^^^^^^^^^^^
+dewey_service/cli/__init__.py:68: in _build_spec
+    xdg=XdgSpec(app_dir_name=_config_dir_name()),
+                             ^^^^^^^^^^^^^^^^^^
+dewey_service/settings.py:155: in _config_dir_name
+    return f"dewey-{_resolve_deployment_code()}"
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+dewey_service/settings.py:151: in _resolve_deployment_code
+    return _sanitize_deployment_code(raw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dewey_service/settings.py:141: in _sanitize_deployment_code
+    raise RuntimeError("Dewey deployment code is required")
+E   RuntimeError: Dewey deployment code is required
+______________ ERROR collecting tests/test_share_fetch_cli_v12.py ______________
+tests/test_share_fetch_cli_v12.py:9: in <module>
+    from dewey_service.cli import share_fetch
+dewey_service/cli/__init__.py:283: in <module>
+    spec = _build_spec()
+           ^^^^^^^^^^^^^
+dewey_service/cli/__init__.py:68: in _build_spec
+    xdg=XdgSpec(app_dir_name=_config_dir_name()),
+                             ^^^^^^^^^^^^^^^^^^
+dewey_service/settings.py:155: in _config_dir_name
+    return f"dewey-{_resolve_deployment_code()}"
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+dewey_service/settings.py:151: in _resolve_deployment_code
+    return _sanitize_deployment_code(raw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dewey_service/settings.py:141: in _sanitize_deployment_code
+    raise RuntimeError("Dewey deployment code is required")
+E   RuntimeError: Dewey deployment code is required
+=============================== warnings summary ===============================
+.venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /Users/jmajor/projects/dewey-sharing-docs-20261025/.venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+.venv/lib/python3.12/site-packages/docopt.py:165
+  /Users/jmajor/projects/dewey-sharing-docs-20261025/.venv/lib/python3.12/site-packages/docopt.py:165: SyntaxWarning: invalid escape sequence '\S'
+    name = re.findall('(<\S*?>)', source)[0]
+
+.venv/lib/python3.12/site-packages/docopt.py:166
+  /Users/jmajor/projects/dewey-sharing-docs-20261025/.venv/lib/python3.12/site-packages/docopt.py:166: SyntaxWarning: invalid escape sequence '\['
+    value = re.findall('\[default: (.*)\]', source, flags=re.I)
+
+.venv/lib/python3.12/site-packages/docopt.py:207
+  /Users/jmajor/projects/dewey-sharing-docs-20261025/.venv/lib/python3.12/site-packages/docopt.py:207: SyntaxWarning: invalid escape sequence '\['
+    matched = re.findall('\[default: (.*)\]', description, flags=re.I)
+
+.venv/lib/python3.12/site-packages/docopt.py:456
+  /Users/jmajor/projects/dewey-sharing-docs-20261025/.venv/lib/python3.12/site-packages/docopt.py:456: SyntaxWarning: invalid escape sequence '\S'
+    split = re.split('\n *(<\S+?>|-\S+?)', doc)[1:]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR tests/test_config_sharing_v12.py - RuntimeError: Dewey deployment code ...
+ERROR tests/test_share_fetch_cli_v12.py - RuntimeError: Dewey deployment code...
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!

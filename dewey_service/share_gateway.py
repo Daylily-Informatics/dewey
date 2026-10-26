@@ -76,10 +76,11 @@ def _reserve(subject):
 
 class AuditedObjectResponse(StreamingResponse):
     """Close resources even if response headers or the stream fail to send."""
-    def __init__(self, *, body, metadata, headers, status_code, service, receipt, actor, context, release):
+    def __init__(self, *, body, metadata, headers, status_code, service, receipt, actor, context, release, method):
         self.body_stream, self.release = body, release
         self.service, self.receipt, self.actor, self.context = service, receipt, actor, context
         self.bytes_served, self.completed = 0, False
+        self.method = method
         async def chunks():
             if body is not None:
                 while True:
@@ -120,7 +121,9 @@ class AuditedObjectResponse(StreamingResponse):
                             "download_completion_observed": False, "response_completion_observed": self.completed,
                             "outcome": "close_failure" if close_failed else "completed" if self.completed else "disconnect_or_failure",
                             "key": self.receipt["key"], "version_id": self.receipt.get("version_id"),
-                            "policy_revision": self.receipt["policy_revision"]})
+                            "policy_revision": self.receipt["policy_revision"], "method": self.method,
+                            "status_code": self.status_code, "inline_report": self.receipt.get("inline_report", False),
+                            "location_revision": self.receipt.get("location_revision")})
             except Exception:
                 _LOG.exception("Could not persist gateway outcome event")
 
@@ -176,7 +179,7 @@ def object_delivery(request: Request, service, receipt: dict, *, inline: bool = 
                 if_match=if_match, if_none_match=if_none_match, if_modified_since=modified, if_unmodified_since=unmodified,
                 request_payer=request_payer)
         body = metadata.get("Body")
-        receipt = {**receipt, "version_id": metadata.get("VersionId") or receipt.get("version_id")}
+        receipt = {**receipt, "version_id": metadata.get("VersionId") or receipt.get("version_id"), "inline_report": inline}
         filename = receipt["key"].rsplit("/", 1)[-1]
         ascii_name = re.sub(r'[^A-Za-z0-9._ -]', '_', filename)[:180] or "download"
         headers = {"Cache-Control": "no-store", "Accept-Ranges": "bytes", "Referrer-Policy": "no-referrer",
@@ -199,7 +202,7 @@ def object_delivery(request: Request, service, receipt: dict, *, inline: bool = 
                 "method": request.method, "status_code": status, "range": range_value,
                 "policy_revision": receipt["policy_revision"], "inline_report": inline})
         return AuditedObjectResponse(body=body, metadata=metadata, headers=headers, status_code=status,
-            service=service, receipt=receipt, actor=actor, context=context, release=release)
+            service=service, receipt=receipt, actor=actor, context=context, release=release, method=request.method)
     except Exception as exc:
         close_failed = False
         try:
@@ -241,6 +244,4 @@ def attach_share_gateway(app, router, service):
     @router.post("/registry/shares/{share_euid}/presign", tags=["Managed sharing"])
     def share_presign(share_euid: str, body: PresignRequest):
         require_share_context()
-        exact_relative_key(body.relative_key)
-        return service.presign_share_object(share_euid, body.target_euid,
-            relative_key=body.relative_key, ttl_seconds=body.ttl_seconds)
+        raise HTTPException(410, "Raw S3 links are retired; use the authenticated /fetch URL")

@@ -4,6 +4,22 @@ Status: proposed product requirements for user review. No implementation, deploy
 
 Baseline: [Dewey capabilities and feature analysis](20261025_dewey_capabilities.md), deployed release `11.0.10`. Requirements below describe the desired product, including changes to existing behavior. They do not assert that the features already work.
 
+## Approved execution decisions — 2026-10-26
+
+The user approved **Dewey 12.0.0 + Login 4.1.0**, scoped Dayhoff ingress and preserving conversion. The [controlling ledger](../plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) owns validation/deployment status. Requirement IDs below remain stable; earlier proposed choices are superseded as follows:
+
+- Canonical fetch identity is the share EUID; aliases are global atomic claims with permanent tombstones.
+- Creator delegation authorizes verified recipients without independent artifact ACLs. Named recipients and Public with registration never permit anonymous access. New external users are share-only, without automatic domain tenant membership.
+- Omitted expiry means 30 days; explicit null means indefinite. Revisions atomically change recipients/targets/filters/expiry. Conversion preserves identities, recipients, scope, lifecycle and history; ambiguity blocks cutover.
+- Collection delivery is uncompressed streaming TAR after complete inventory; manifests and resumable per-file CLI retrieval handle trees. TAR restarts; admitted individual-file responses may finish, while later requests/members recheck policy.
+- Managed raw S3 presign issuance is retired, with old issued URL deadlines explicitly tracked. WWW reports use isolated per-context content hosts and current asset authorization.
+- Login retains encrypted provider credentials and supplies opaque bindings. Introspection checks current enabled/verified-email state and provider revocation with positive caching at most 60 seconds. Personal credentials are finite; explicit SES invitations have accepted/failed/uncertain receipts.
+- Dedicated HTTPS ALB and restricted private 8443/8444 listeners expose recipient routes only. Existing shared 443, private management, tailnet/backchannels and sibling services remain preserved.
+- Rebind requires complete qualified content equivalence and collision checks, with native location history. Physical S3 moves/deletes are excluded.
+- Changed-code tests, one isolated PostgreSQL contract group, one integrated focused pass and bounded controlled production acceptance are approved. Full main CI, PR creation and merges remain a separate later phase.
+
+See [Managed sharing](../sharing.md) for implemented interfaces and operational limits. This amendment is not a deployment or acceptance receipt.
+
 ## 1. Intended outcome
 
 Dewey should be the durable, human-usable and machine-usable entrypoint for important stored artifacts. Users and systems should retain Dewey identities and HTTPS links while Dewey resolves the current authorized storage location. Internal, external and worldwide recipients should be supported without giving them direct S3 credentials or requiring them to join the LSMC network.

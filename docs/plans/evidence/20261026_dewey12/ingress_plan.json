@@ -1,0 +1,50 @@
+{
+  "baseline": {
+    "eni_id": "eni-00d0d767fe52379a8",
+    "instance_id": "i-07df3a933e4839f52",
+    "public_records": {
+      "*.dewey-content.day.lsmc.bio": [],
+      "dewey.day.lsmc.bio": [
+        {
+          "Name": "dewey.day.lsmc.bio.",
+          "ResourceRecords": [
+            {
+              "Value": "52.89.110.76"
+            }
+          ],
+          "TTL": 300,
+          "Type": "A"
+        }
+      ],
+      "login.day.lsmc.bio": [
+        {
+          "Name": "login.day.lsmc.bio.",
+          "ResourceRecords": [
+            {
+              "Value": "52.89.110.76"
+            }
+          ],
+          "TTL": 300,
+          "Type": "A"
+        }
+      ]
+    },
+    "security_group_ids": [
+      "sg-01439b28585f4a617",
+      "sg-0516a6da8fe443299",
+      "sg-0860b90837ee8753c"
+    ]
+  },
+  "config_sha256": "3255a121ba4a1381dd49275712924d447eed66b477c9d48a4bb12c4a0159fef1",
+  "phases": [
+    "apply",
+    "render-origin",
+    "attach-origin",
+    "private-dns",
+    "activate-dns"
+  ],
+  "public_dns_activated": false,
+  "schema": 1,
+  "separate_email_phase": "prepare-email",
+  "template_sha256": "321c719e03e8ab9c7153d887061fe0ba99536c4ae6d8224bb7d92c84cd0a3467"
+}

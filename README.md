@@ -14,11 +14,11 @@
 
 Dewey is the LSMC artifact and reference registry. It tracks durable artifacts such as sequencing run directories, VCFs, reports, external objects, external-object relations, managed shares, and access routes. It is the registry layer for data products and referenceable outputs, not the laboratory material graph.
 
-Current Dayhoff pins are maintained in `/Users/jmajor/projects/mega_dayhoff/dayhoff/services/pins.toml`. Current TapDB dependency: `daylily-tapdb[aurora,gui]==10.1.1rc1` with `meridian-euid==0.4.8` (Python >=3.12). Dewey 10 retains the Artifact and Set templates: each object, prefix or set has one EUID. Other services can persist that EUID alone and resolve metadata, contents and delivery access when needed.
+Dayhoff release inputs are maintained in its `services/pins.toml`. Dewey 12 retains TapDB **11.0.9**, auth **2.1.5**, and Python >=3.12. Each registered object, prefix or set has one EUID; each managed share has its own EUID and policy. Other services can persist these identities and resolve current metadata and delivery when needed.
 
-The GUI centers on Library, S3 Browser, Sets, Sharing and Literature. Metadata and download permissions are independent; every share requires authentication. Prefix browsing is bounded and does not register descendants. Physical S3 deletion is a separate admin operation with a reviewed target manifest. See the [API/GUI/CLI crosswalk](docs/plans/20260912T070011Z_dewey10_contract_crosswalk.md) and [release ledger](docs/plans/20260912T070011Z_dewey10_ux_registry_s3_ledger.md) for implementation scope and actual deployment evidence.
+The GUI centers on Library, S3 Browser, Sets, Sharing and Literature. Metadata and download permissions are independent; every share requires authentication. Prefix browsing is bounded and does not register descendants. Physical S3 deletion is prohibited. See the [Dewey 12 release ledger](docs/plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) for source, validation, deployment and acceptance states.
 
-Dewey is an approved-network customer/collaborator service in Dayhoff exposure policy.
+Dewey management remains on approved networks. The scoped recipient ingress exposes authenticated fetch, report and recipient-account routes to external users.
 
 ```mermaid
 flowchart LR
@@ -43,56 +43,62 @@ Dewey writes registry objects and share state through explicit service config an
 
 ## Sharing
 
-Dewey supports sharing registered **S3 files, sets of files/prefixes, and prefix
-contents including subdirectories** with individual email addresses or domains.
-Internal LSMC and external recipients can be mixed in one share. The current
-contract below was inspected against deployed release **11.0.10 on 2026-10-25**;
-authenticated recipient workflows were not exercised in that review.
+The **12.0.0 contract** supports individual files, fixed selections and live recursive
+prefixes. Named recipients can mix internal and external email addresses, including
+people who have not registered. A creator must be allowed to delegate the selected
+content; an authorized recipient needs no separate artifact ACL, S3 permission or
+organization membership. There are **no anonymous shares**.
 
-| Operation | Current behavior |
+Choose **Named recipients** or **Public with registration**. Both require an active,
+verified email through shared Login. New recipients receive share-only access;
+their email domain does not admit them to an organization. The default lifetime is
+30 days; explicit `expires_at: null` is indefinite. Personal download credentials
+expire within 30 days and remain separately revocable.
+
+| Operation | Dewey 12 behavior |
 |---|---|
-| Select content | Share an object, prefix, set or mixed targets; apply root-relative include/exclude patterns and recipient-specific target restrictions |
-| Choose recipients | Email/domain grants can name a new user; creating a grant does not require an existing Dewey account. Domain grants match exactly unless subdomains are explicitly enabled |
-| Edit or revoke | Add/remove recipient grants, change finite expiry and filters, revoke a grant or revoke the whole share; edits use the current policy revision |
-| Change files | Filters can change paths within existing prefix targets. Adding/removing persisted target members from an existing share is not supported; later ordinary set changes do not update its frozen share membership |
-| Download | Authenticated Dewey gateway with GET/HEAD, single byte ranges and HTTP conditions; personal-token CLI access and single-file streaming |
-| Recursive access | Authorized, paginated prefix listings; follow all continuation tokens. No complete recursive downloader/archive workflow is provided |
-| View HTML reports | An explicit HTML entrypoint and bundle root can render permitted sidecars through an isolated report origin; sharing only an HTML object does not include its siblings |
-| Audit | Per-share policy/access/issuance/transfer events and paginated JSON activity export; aggregate share-lifetime/download reporting is not provided |
+| Edit | Atomically change recipients, deadline, target membership and include/exclude filters using the current `policy_revision`; stale edits return conflict |
+| Stable URLs | `/fetch/<share-euid>`; a single file resolves at the root, a single prefix preserves relative paths, and multiple targets use `<target-euid>/<relative-path>` |
+| Friendly URLs | Claim a global lowercase ASCII slug of 3–63 letters/digits/hyphens; conflicts fail. Retired aliases remain tombstones and are never reassigned |
+| File retrieval | Authenticated GET/HEAD, one byte range, conditional requests, MIME/filename metadata; unauthenticated machine clients receive 401 |
+| Recursive retrieval | `?format=manifest` supplies complete paginated enumeration; CLI retrieves all pages with resume and partial-failure receipts |
+| One-URL archive | `?format=tar` streams uncompressed TAR after completing inventory; changed/missing content aborts. TAR restarts; individual files resume |
+| WWW reports | Declare `content_mode: www`, the HTML entrypoint and bundle root. A `/fetch/…/multiqc.html` URL initializes the isolated viewer; authorized CSS, JavaScript and data stay on per-context content hosts |
+| Lifecycle audit | Authorized inventory and aggregate reports distinguish audiences, durations, age, last access, viewers, report assets, ranges, HEAD/304, archive outcomes and server bytes |
+| Storage rebind | Compare destination content using qualified checksums, then revise the storage reference while retaining artifact/share identities and paths. No physical S3 move/delete occurs |
 
-Current recipient links use `/shares/<share-euid>`. File delivery uses
-`/shares/<share-euid>/files/<target-euid>?relative_key=<encoded-relative-key>`.
-Every managed request requires **trusted Tailscale ingress, verified shared Login
-identity and current share authorization**. Explicit artifact/ancestor restrictions
-can also deny a recipient. External email grants therefore do not, by themselves,
-provide worldwide internet access. Managers do not bypass recipient grants when
-reading files.
+Create or edit from **Sharing**, copy the canonical or claimed-slug URL, and send an
+invitation only when requested. SES acceptance is recorded separately from failed
+or uncertain submission; it does not establish mailbox delivery. Existing durable
+`/shares/<share-euid>` links remain entrypoints. New raw S3 presigns are disabled;
+obsolete delivery payloads fail explicitly.
 
-Shares have finite expiration. Optional raw S3 presigns are a separate delivery
-mode: anyone holding an issued URL can use it until expiry, even without Dewey
-login. Revocation stops new issuance but cannot recall an issued presign or bytes
-already downloaded. This differs from the proposed registered-users-only policy.
+For curl/wget/CLI, sign in at `/recipient/account` and create a personal credential.
+Keep it in a private file or environment, never in the durable URL. These shell
+examples use the caller's `DEWEY_TOKEN` and an actual persisted `SHARE_EUID`:
 
-Typical existing workflow:
+```bash
+curl --fail -H "Authorization: Bearer ${DEWEY_TOKEN}" \
+  "https://dewey.day.lsmc.bio/fetch/${SHARE_EUID}" -o artifact.bin
+wget --header="Authorization: Bearer ${DEWEY_TOKEN}" \
+  "https://dewey.day.lsmc.bio/fetch/${SHARE_EUID}?format=tar" -O collection.tar
+dewey shares fetch "${SHARE_EUID}" --output ./collection --recursive --resume
+```
 
-1. Open a registered object, prefix or set and choose **Share**; enter recipients,
-   scope and a deadline, then preview the selected files.
-2. Create the share and copy its Dewey URL. **Send login invitation** is a separate
-   explicit email action for a permitted address; creation sends no email.
-3. The recipient signs in over the required network and selects **Download** or
-   **View report**. Managers use **Edit share**, revocation controls and **Load activity**.
+Each request and each TAR member checks current policy. An admitted individual-file
+response may finish; revocation blocks subsequent requests and archive members.
+Already downloaded bytes and previously issued S3 presigns cannot be recalled.
+Archive inventory is capped at one million objects/256 MiB of metadata; larger
+collections fail explicitly before streaming and can use manifest/CLI retrieval.
+Server response completion never claims the client saved the file.
 
-See [Managed sharing](docs/sharing.md) for current API/CLI commands, filters,
-expiration, report bundles, invitation prerequisites and delivery limitations.
-The following are **proposed, not existing complete features**: stable `/fetch/`
-URLs and human slugs, unrestricted-network verified registration, **Public with
-registration**, indefinite shares, editable share target membership, complete
-recursive delivery, aggregate reporting, and controlled storage relocation that
-preserves links. Review these documents before implementation:
-
-- [Current capabilities and full API inventory](docs/dev-docs/20261025_dewey_capabilities.md)
-- [Sharing requirements and consequential design choices](docs/dev-docs/20261025_dewey_sharing_requirements.md)
-- [Requirement-by-requirement gap analysis](docs/dev-docs/20261025_dewey_sharing_gap_analysis.md)
+See [Managed sharing](docs/sharing.md) for API/CLI details and
+[release evidence](docs/plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) for
+the actual validation/deployment state. The original
+[11.0.10 capabilities](docs/dev-docs/20261025_dewey_capabilities.md),
+[requirements](docs/dev-docs/20261025_dewey_sharing_requirements.md) and
+[gap analysis](docs/dev-docs/20261025_dewey_sharing_gap_analysis.md) retain the dated
+baseline and requirement-by-requirement disposition.
 
 ## Quickstart
 

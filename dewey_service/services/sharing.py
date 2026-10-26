@@ -20,7 +20,6 @@ from dewey_service.tapdb_backend import (
 SHARE_TARGET_KINDS = {"artifact_object", "artifact_prefix", "artifact_set", "mixed_set"}
 SHARE_DELIVERY_MODES = {
     "gateway",
-    "presigned",
 }
 
 
@@ -28,7 +27,13 @@ def _clean_list(values: list[Any] | tuple[Any, ...] | set[Any] | None) -> list[s
     return [str(item or "").strip() for item in (values or []) if str(item or "").strip()]
 
 
-class SharingServiceMixin:
+from dewey_service.services.share_policy import UNSET
+from dewey_service.services.share_revisions import ShareRevisionMixin
+from dewey_service.services.share_rebind import ShareRebindMixin
+from dewey_service.services.share_reports import ShareReportMixin
+
+
+class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin):
     @staticmethod
     def _parse_share_s3_uri(value: str, *, require_prefix: bool = False) -> tuple[str, str, str]:
         raw = str(value or "")
@@ -46,17 +51,18 @@ class SharingServiceMixin:
     def _request_payer_for_bucket(self, bucket: str) -> str | None:
         return "requester" if str(bucket or "").strip() in self.requester_pays_buckets else None
 
-    def _normalize_share_expiry(
-        self, expires_at: str | None, ttl_seconds: int | None = None
-    ) -> str:
-        expiry = self._normalize_expiry(expires_at, ttl_seconds=None if expires_at else self.registry_defaults()["share_lifetime_days"] * 86400)
-        parsed = datetime.fromisoformat(expiry.replace("Z", "+00:00"))
-        max_expiry = datetime.now(timezone.utc) + timedelta(days=int(self.share_max_lifetime_days))
+    def _normalize_share_expiry(self, expires_at=UNSET, ttl_seconds=None):
+        from dewey_service.services.share_policy import expiry
+        if expires_at is None:
+            return None
+        if expires_at is UNSET:
+            expires_at = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
+        parsed = expiry(expires_at)
         if parsed <= datetime.now(timezone.utc):
             raise ValueError("Share expiry must be in the future")
-        if parsed > max_expiry:
-            raise ValueError("share expires_at exceeds configured maximum share lifetime")
-        return expiry
+        if parsed > datetime.now(timezone.utc) + timedelta(days=int(self.share_max_lifetime_days)):
+            raise ValueError("share expires_at exceeds configured maximum; use explicit null for indefinite")
+        return parsed.isoformat()
 
     def _artifact_member_from_instance(
         self,
@@ -87,6 +93,7 @@ class SharingServiceMixin:
             "storage_uri": str(payload.get("storage_uri") or f"s3://{bucket}/{key}"),
             "content_type": payload.get("content_type"),
             "size": payload.get("size"),
+            "location_revision": int(payload.get("location_revision", 1)),
         }
 
     def _expand_share_targets(
@@ -172,13 +179,20 @@ class SharingServiceMixin:
             generic_instance.type == "share", generic_instance.is_deleted.is_(False))
 
     def _share_members(self, session, share):
+        scope = self._share_revision(session, share)
+        members = self._share_related(session, scope, relationship="share_revision_target", kind="artifact")
+        if any(t.type != "artifact" or t.domain_code != self.backend.domain_code for t in members):
+            raise HTTPException(503, "Share revision contains invalid target lineage")
+        return members
+
+    def _historical_share_members(self, session, share):
         from daylily_tapdb import generic_instance, generic_instance_lineage
         return session.query(generic_instance).join(generic_instance_lineage,
             generic_instance_lineage.parent_instance_uid == generic_instance.uid).filter(
             generic_instance_lineage.child_instance_uid == share.uid,
-            generic_instance_lineage.relationship_type == "has_share",
-            generic_instance_lineage.is_deleted.is_(False), generic_instance.is_deleted.is_(False),
-            generic_instance.type == "artifact", generic_instance.domain_code == self.backend.domain_code).all()
+            generic_instance_lineage.relationship_type == "has_share", generic_instance_lineage.is_deleted.is_(False),
+            generic_instance.is_deleted.is_(False), generic_instance.type == "artifact",
+            generic_instance.domain_code == self.backend.domain_code).all()
 
     def _grant_targets(self, session, grant):
         from daylily_tapdb import generic_instance, generic_instance_lineage
@@ -237,7 +251,7 @@ class SharingServiceMixin:
             raise DeweyNotFoundError("Share not found")
         if share.bstatus == "archived":
             raise HTTPException(410, "Share is archived")
-        if normalize_instance_payload(share).get("schema_version") != 2:
+        if normalize_instance_payload(share).get("schema_version") != 3:
             raise HTTPException(503, "Share requires explicit canonical upgrade")
         return share
 
@@ -258,7 +272,8 @@ class SharingServiceMixin:
             "outcome", "expires_in", "request_method", "range", "network", "source_event_index",
             "key", "version_id", "etag", "method", "server_bytes_sent", "response_completion_observed",
             "download_completion_observed", "inline_report", "expires_at", "ttl_seconds", "bearer_url_forwardable",
-            "bundle_root", "context_euid", "historical_timestamp", "historical_actor", "historical_route"}
+            "bundle_root", "context_euid", "historical_timestamp", "historical_actor", "historical_route",
+            "slug", "location_revision", "manifest_sha256", "object_count", "total_bytes", "archive_members_completed", "format", "inventory_complete", "method"}
         clean = {k: v for k, v in (details or {}).items() if k in allowed}
         from dewey_service.share_context import current_share_audit_context
         from dewey_service.registry_access import maintenance_mode
@@ -282,6 +297,7 @@ class SharingServiceMixin:
             raise ValueError("Managed-share audit requires the observed policy revision")
         row = self.backend.create_instance(session, template_code=EVENT_TEMPLATE, name=str(event_type),
             json_addl={"event_type": str(event_type), "decision": str(decision), "actor": principal().subject,
+                "actor_email_verified": bool(principal().email_verified), "actor_service": bool(principal().service),
                 "created_at": utc_now_iso(), "details": clean, "request_id": request_id,
                 "trusted_tailnet": trusted_tailnet, "managed_origin": managed_origin,
                 "policy_revision": revision})
@@ -295,9 +311,9 @@ class SharingServiceMixin:
     def append_share_event(self, share_euid, *, event_type, decision, grant_euid=None, target_euid=None, details=None):
         # Gateway calls this after authorization, including stream termination. No credentials are accepted.
         with self.backend.session_scope(commit=True) as session:
-            share = self._canonical_share(session, share_euid)
+            share = self._share_query(session).filter_by(euid=share_euid).one()
             grant = next((g for g in self._share_grants(session, share) if g.euid == grant_euid), None)
-            target = next((t for t in self._share_members(session, share) if t.euid == target_euid), None)
+            target = next((t for t in self._historical_share_members(session, share) if t.euid == target_euid), None)
             if grant_euid and grant is None or target_euid and target is None:
                 raise ValueError("Audit relationship is outside this share")
             return self._event(session, share, event_type=event_type, decision=decision, grant=grant, target=target, details=details)
@@ -326,33 +342,33 @@ class SharingServiceMixin:
 
     def _evaluate_share(self, session, share, target_euid, relative_key, action):
         from dewey_service.services.share_policy import expiry, selected, recipient_matches
+        self._require_recipient(session, share)
         data = normalize_instance_payload(share)
         actor = principal()
         now = datetime.now(timezone.utc)
         if data.get("status") != "active" or share.bstatus == "archived" or expiry(data["expires_at"]) <= now:
             raise HTTPException(410, "Share is inactive or expired")
-        if actor.email.lower() in data["denied_emails"]:
+        if not actor.email or actor.service or actor.email.lower() in data["denied_emails"]:
             raise HTTPException(403, "Share access denied")
         mode = "presigned" if action == "presign" else "gateway"
-        if action not in {"metadata", "gateway", "report", "presign"}:
+        if action not in {"metadata", "gateway", "report"}:
             raise ValueError("Unsupported share action")
         if action != "metadata" and mode not in data["delivery_modes"]:
             raise HTTPException(403, "Delivery mode is not enabled")
         target = next((t for t in self._share_members(session, share) if t.euid == target_euid), None)
-        if target is None:
-            raise HTTPException(403, "Target is not a persisted share member")
+        if target is None or target.bstatus == "archived":
+            raise HTTPException(403, "Target is not a current available share member")
         member = self._artifact_member_from_instance(target)
         if member["target_kind"] == "artifact_object":
             if relative_key:
                 raise ValueError("An object target does not accept relative_key")
-            path, key = member["key"].rsplit("/", 1)[-1], member["key"]
+            path, key = member["filename"], member["key"]
         else:
             if not isinstance(relative_key, str) or "\x00" in relative_key:
                 raise ValueError("relative_key must be a literal root-relative S3 key")
             path, key = relative_key, member["key"] + relative_key
         if not selected(path, data["include_patterns"], data["exclude_patterns"]):
             raise HTTPException(403, "Path is excluded from this share")
-        self._protected_share_path(session, member["bucket"], key, action=action)
         candidates = []
         for grant in self._share_grants(session, share):
             rule = normalize_instance_payload(grant)
@@ -369,8 +385,10 @@ class SharingServiceMixin:
         deadline, grant = max(candidates, key=lambda pair: pair[0])
         return {"bucket": member["bucket"], "key": key, "version_id": member.get("version_id"),
             "share_euid": share.euid, "target_euid": target.euid, "grant_euid": grant.euid,
-            "policy_revision": data["policy_revision"], "expires_at": min(deadline, expiry(data["expires_at"])).isoformat(),
-            "relative_key": relative_key, "filename": key.rsplit("/", 1)[-1]}
+            "policy_revision": data["policy_revision"],
+            "expires_at": None if min(deadline, expiry(data["expires_at"])) == expiry(None) else min(deadline, expiry(data["expires_at"])).isoformat(),
+            "location_revision": member["location_revision"], "content_mode": data["content_mode"],
+            "relative_key": relative_key, "filename": member["filename"] if member["target_kind"] == "artifact_object" else key.rsplit("/", 1)[-1]}
 
     def authorize_share_object(self, share_euid, target_euid, relative_key="", action="gateway"):
         self._require_sharing()
@@ -395,7 +413,7 @@ class SharingServiceMixin:
         self._require_sharing()
         with self.backend.session_scope(commit=False) as session:
             for share in self._share_query(session).filter_by(bstatus="active").all():
-                if normalize_instance_payload(share).get("schema_version") != 2:
+                if normalize_instance_payload(share).get("schema_version") != 3:
                     continue
                 for target in self._share_members(session, share):
                     member = self._artifact_member_from_instance(target)
@@ -414,24 +432,24 @@ class SharingServiceMixin:
 
     def create_share(self, *, target_kind, target_euid=None, targets=None, name=None, purpose=None,
             owner_email=None, allowed_users=None, allowed_domains=None, allowed_groups=None,
-            delivery_modes=None, expires_at=None, ttl_seconds=None, idempotency_key,
+            delivery_modes=None, expires_at=UNSET, ttl_seconds=None, idempotency_key,
+            audience="recipients", content_mode="download", report_entrypoint=None, report_bundle_root="",
             grants=None, include_patterns=None, exclude_patterns=None, denied_emails=None):
         from dewey_service.services.share_policy import normalized_policy
         self._require_sharing()
         actor = principal()
         if not actor.writable:
             raise HTTPException(403, "Sharing requires write access")
-        signed_ttl = 900 if ttl_seconds is None else int(ttl_seconds)
-        if not 1 <= signed_ttl <= 3600:
-            raise ValueError("Signed URL lifetime must be 1..3600 seconds")
-        source = {"allowed_users": allowed_users or [], "allowed_domains": allowed_domains or [],
+        if ttl_seconds is not None:
+            raise ValueError("Raw signed URL lifetimes are no longer supported")
+        source = {"audience": audience, "content_mode": content_mode, "report_entrypoint": report_entrypoint, "report_bundle_root": report_bundle_root, "allowed_users": allowed_users or [], "allowed_domains": allowed_domains or [],
             "allowed_groups": allowed_groups or [], "include_patterns": include_patterns,
             "exclude_patterns": exclude_patterns, "denied_emails": denied_emails or []}
         if grants is not None: source["grants"] = grants
         if delivery_modes is not None:
-            source["delivery_modes"] = [{"dewey_html_browser": "gateway", "presigned_s3": "presigned", "presigned_s3_manifest": "presigned"}.get(m, m) for m in delivery_modes]
+            source["delivery_modes"] = delivery_modes
         fingerprint = self._fingerprint({**source, "actor_subject": actor.subject, "target_kind": target_kind, "target_euid": target_euid,
-            "targets": targets, "expires_at": expires_at, "name": name, "purpose": purpose, "signed_ttl": signed_ttl})
+            "targets": targets, "expires_at": "default_30_days" if expires_at is UNSET else expires_at, "name": name, "purpose": purpose})
         with self.backend.session_scope(commit=True) as session:
             replay = self._idempotency_replay(session, operation="share.create", idempotency_key=idempotency_key, fingerprint=fingerprint)
             if replay is not None:
@@ -445,16 +463,19 @@ class SharingServiceMixin:
             members = self._expand_share_targets(session, target_kind=target_kind, target_euid=target_euid, targets=targets)
             records = [self._registry_record(session, m["artifact_euid"], action="share") for m in members]
             if not records: raise ValueError("Share requires selected S3 targets")
+            self._assert_share_delegation(session, records)
             root = self._registry_record(session, target_euid, action="share") if target_euid and target_kind != "mixed_set" else None
             policy = normalized_policy(source, share_expiry=deadline, member_euids=[r.euid for r in records])
+            self._validate_report_selection(policy, records)
             grant_values = policy.pop("grants")
             share = self.backend.create_instance(session, template_code=SHARE_TEMPLATE, name=name or "Managed share",
                 json_addl={**policy, "policy_revision": 1, "target_kind": target_kind, "target_euid": target_euid,
                     "targets": targets or [], "name": name, "purpose": purpose, "owner_subject": actor.subject,
-                    "owner_email": actor.email, "audience": "recipients", "expires_at": deadline, "status": "active", "starts_at": utc_now_iso(),
-                    "created_at": utc_now_iso(), "member_count": len(records), "default_signed_ttl_seconds": signed_ttl})
+                    "owner_email": actor.email, "expires_at": deadline, "status": "active", "starts_at": utc_now_iso(),
+                    "created_at": utc_now_iso(), "member_count": len(records)})
             for record in records + ([root] if root is not None and root.euid not in {r.euid for r in records} else []):
                 self.backend.create_lineage(session, parent=record, child=share, relationship_type="has_share")
+            self._write_share_revision(session, share, records, 1, policy={**policy, "expires_at": deadline})
             self._write_grants(session, share, grant_values, records, 1)
             self._event(session, share, event_type="created", decision="change", details={"policy_revision": 1})
             body = self._canonical_response(session, share, manager=True)
@@ -465,9 +486,12 @@ class SharingServiceMixin:
     def _canonical_response(self, session, share, *, manager):
         data = normalize_instance_payload(share)
         value = {**self._share_response(share), "euid": share.euid, "web_path": f"/shares/{share.euid}",
+            "content_mode": data["content_mode"], "report_entrypoint": data.get("report_entrypoint"), "report_bundle_root": data.get("report_bundle_root", ""),
+            "fetch_path": f"/fetch/{share.euid}",
             "policy_revision": data["policy_revision"], "include_patterns": data["include_patterns"],
-            "exclude_patterns": data["exclude_patterns"], "can_manage": manager, "schema_version": 2}
+            "exclude_patterns": data["exclude_patterns"], "can_manage": manager, "schema_version": 3}
         if manager:
+            value["aliases"] = self._share_aliases(session, share)
             value["denied_emails"] = data["denied_emails"]
             value["grants"] = [{**normalize_instance_payload(g), "grant_euid": g.euid,
                 "target_euids": [t.euid for t in self._grant_targets(session, g)]} for g in self._share_grants(session, share)
@@ -479,29 +503,34 @@ class SharingServiceMixin:
                 value.pop(name, None)
         return value
 
+    def _require_recipient(self, session, share):
+        from dewey_service.services.share_policy import recipient_matches, expiry
+        data, actor = normalize_instance_payload(share), principal()
+        now = datetime.now(timezone.utc)
+        if not actor.email or not getattr(actor, "email_verified", False) or actor.service:
+            raise HTTPException(403, "A current verified email identity is required")
+        if share.bstatus == "archived" or data["status"] != "active" or expiry(data["expires_at"]) <= now or actor.email.lower() in data["denied_emails"]:
+            raise HTTPException(403, "Share is not available")
+        if not any(normalize_instance_payload(g).get("status") == "active" and
+                normalize_instance_payload(g).get("policy_revision") == data["policy_revision"] and
+                expiry(normalize_instance_payload(g)["expires_at"]) > now and
+                recipient_matches(normalize_instance_payload(g), actor.email) for g in self._share_grants(session, share)):
+            raise HTTPException(403, "No current recipient grant")
+
     def get_share(self, share_euid):
         self._require_sharing()
-        from dewey_service.services.share_policy import recipient_matches, expiry
         with self.backend.session_scope(commit=False) as session:
             share = self._canonical_share(session, share_euid)
             manager = self._registry_share_manager(session, share)
-            data = normalize_instance_payload(share)
             if not manager:
-                now = datetime.now(timezone.utc)
-                if share.bstatus == "archived" or data["status"] != "active" or expiry(data["expires_at"]) <= now or principal().email.lower() in data["denied_emails"]:
-                    raise HTTPException(403, "Share is not available")
-                if not any(normalize_instance_payload(g).get("status") == "active" and
-                        normalize_instance_payload(g).get("policy_revision") == data["policy_revision"] and
-                        expiry(normalize_instance_payload(g)["expires_at"]) > now and
-                        recipient_matches(normalize_instance_payload(g), principal().email) for g in self._share_grants(session, share)):
-                    raise HTTPException(403, "No current recipient grant")
+                self._require_recipient(session, share)
             return self._canonical_response(session, share, manager=manager)
 
     def _authorized_share_index_query(self, session):
         """Native recipient predicates precede search, ordering and pagination.
 
         This discovers share containers only. Every disclosed file still passes
-        the canonical path evaluator and protected-ancestor checks separately.
+        the canonical recipient, current-scope and selection evaluator separately.
         """
         from daylily_tapdb import generic_instance, generic_instance_lineage
         from sqlalchemy import DateTime, and_, cast, exists, literal, or_, select
@@ -516,6 +545,7 @@ class SharingServiceMixin:
         domain = email.rpartition("@")[2]
         suffixes = [".".join(domain.split(".")[index:]) for index in range(len(domain.split(".")))]
         recipient = or_(
+            rule["recipient_type"].astext == "registered",
             and_(rule["recipient_type"].astext == "email", rule["recipient"].astext == email),
             and_(rule["recipient_type"].astext == "domain", or_(
                 rule["recipient"].astext == domain,
@@ -531,13 +561,14 @@ class SharingServiceMixin:
             grant.domain_code == generic_instance.domain_code,
             rule["status"].astext == "active",
             rule["policy_revision"].astext == data["policy_revision"].astext,
-            cast(rule["expires_at"].astext, DateTime(timezone=True)) > now, recipient,
+            or_(rule["expires_at"].astext.is_(None), cast(rule["expires_at"].astext, DateTime(timezone=True)) > now), recipient,
         )).correlate(generic_instance)
         manage = literal(True) if actor.admin else owner_clause(data, actor)
         current_recipient = and_(generic_instance.bstatus != "archived", data["status"].astext == "active",
-            cast(data["expires_at"].astext, DateTime(timezone=True)) > now,
+            or_(data["expires_at"].astext.is_(None), cast(data["expires_at"].astext, DateTime(timezone=True)) > now),
+            literal(bool(actor.email and getattr(actor, "email_verified", False) and not actor.service)),
             ~data["denied_emails"].contains([email]), recipient_grant)
-        return self._share_query(session).filter(data["schema_version"].astext == "2", or_(manage, current_recipient))
+        return self._share_query(session).filter(data["schema_version"].astext == "3", or_(manage, current_recipient))
 
     def list_registry_shares(self, *, page=1, page_size=25, q="", sort="created_at"):
         from daylily_tapdb import generic_instance
@@ -577,12 +608,18 @@ class SharingServiceMixin:
                 query = query.filter(generic_instance.json_addl["target_kind"].astext == target_kind)
             if target_euid:
                 from sqlalchemy.orm import aliased
-                member = aliased(generic_instance)
-                edge = aliased(generic_instance_lineage)
-                query = query.filter(exists(select(literal(1)).select_from(edge).join(member,
-                    member.uid == edge.parent_instance_uid).where(
-                    edge.child_instance_uid == generic_instance.uid, edge.relationship_type == "has_share",
-                    edge.is_deleted.is_(False), member.is_deleted.is_(False), member.euid == target_euid,
+                scope, member = aliased(generic_instance), aliased(generic_instance)
+                scope_edge, target_edge = aliased(generic_instance_lineage), aliased(generic_instance_lineage)
+                query = query.filter(exists(select(literal(1)).select_from(scope_edge).join(scope,
+                    scope.uid == scope_edge.child_instance_uid).join(target_edge,
+                    target_edge.parent_instance_uid == scope.uid).join(member,
+                    member.uid == target_edge.child_instance_uid).where(
+                    scope_edge.parent_instance_uid == generic_instance.uid,
+                    scope_edge.relationship_type == "share_revision", scope_edge.is_deleted.is_(False),
+                    scope.is_deleted.is_(False), scope.type == "share_revision",
+                    scope.json_addl["policy_revision"].astext == generic_instance.json_addl["policy_revision"].astext,
+                    target_edge.relationship_type == "share_revision_target", target_edge.is_deleted.is_(False),
+                    member.is_deleted.is_(False), member.euid == target_euid,
                 )).correlate(generic_instance))
             rows = query.order_by(generic_instance.created_dt.desc(), generic_instance.euid).limit(max(1, min(int(limit), 2000))).all()
             return [self._canonical_response(session, share, manager=self._registry_share_manager(session, share)) for share in rows]
@@ -590,33 +627,65 @@ class SharingServiceMixin:
     def modify_registry_share(self, euid, changes):
         from dewey_service.services.share_policy import normalized_policy, expiry
         self._require_sharing()
-        allowed = {"name", "purpose", "grants", "include_patterns", "exclude_patterns", "denied_emails", "delivery_modes", "expires_at", "policy_revision", "allowed_users", "allowed_domains"}
+        allowed = {"name", "purpose", "grants", "include_patterns", "exclude_patterns", "denied_emails", "delivery_modes", "expires_at", "policy_revision", "allowed_users", "allowed_domains", "target_kind", "target_euid", "targets", "audience", "content_mode", "report_entrypoint", "report_bundle_root"}
         if set(changes) - allowed or type(changes.get("policy_revision")) is not int:
             raise ValueError("Supported changes and the reviewed policy_revision are required")
         with self.backend.session_scope(commit=True) as session:
             share = self._canonical_share(session, euid, lock=True)
-            if not self._registry_share_manager(session, share): raise HTTPException(403, "Share management permission required")
+            if not self._registry_share_manager(session, share):
+                raise HTTPException(403, "Share management permission required")
             data = normalize_instance_payload(share)
-            if changes["policy_revision"] != data["policy_revision"]: raise HTTPException(409, "Share policy changed; reload before editing")
+            if changes["policy_revision"] != data["policy_revision"]:
+                raise HTTPException(409, "Share policy changed; reload before editing")
             if data["status"] != "active" or expiry(data["expires_at"]) <= datetime.now(timezone.utc):
                 raise ValueError("Expired or revoked shares cannot be reactivated")
-            members = self._share_members(session, share)
-            for member in members: require_record(self.backend, session, member, "share")
-            current = self._canonical_response(session, share, manager=True)
-            grant_data = [{k: v for k, v in g.items() if k in {"recipient_type", "recipient", "include_subdomains", "include_patterns", "exclude_patterns", "expires_at", "target_euids"}} for g in current["grants"] if g["status"] == "active"]
-            merged = {**data, "grants": grant_data, **changes}
-            if "grants" not in changes and ({"allowed_users", "allowed_domains"} & set(changes)):
-                merged.pop("grants")
+            old_members = self._share_members(session, share)
+            merged = {**data, **changes}
+            target_change = bool({"targets", "target_kind", "target_euid"} & changes.keys())
+            if target_change:
+                if "targets" in changes and "target_kind" not in changes:
+                    merged.update(target_kind="mixed_set", target_euid=None)
+                expanded = self._expand_share_targets(session, target_kind=merged["target_kind"],
+                    target_euid=merged.get("target_euid"), targets=merged.get("targets"))
+                members = [self._registry_record(session, m["artifact_euid"], action="share") for m in expanded]
+                if not members:
+                    raise ValueError("Share must retain at least one target; revoke it to remove all access")
+            else:
+                members = old_members
+            self._assert_share_delegation(session, members)
             deadline = self._normalize_share_expiry(merged["expires_at"])
+            if "grants" not in changes and not ({"allowed_users", "allowed_domains"} & changes.keys()):
+                grant_data = []
+                old_ids, new_ids = {m.euid for m in old_members}, {m.euid for m in members}
+                for grant in self._share_grants(session, share):
+                    rule = normalize_instance_payload(grant)
+                    if rule.get("status") != "active" or rule.get("policy_revision") != data["policy_revision"] or rule["recipient_type"] == "registered":
+                        continue
+                    ids = {t.euid for t in self._grant_targets(session, grant)}
+                    ids = new_ids if ids == old_ids else ids & new_ids
+                    if not ids:
+                        continue
+                    value = {k: v for k, v in rule.items() if k in {"recipient_type", "recipient", "include_subdomains", "include_patterns", "exclude_patterns", "expires_at", "recipient_status"}}
+                    value["target_euids"] = sorted(ids)
+                    if value["expires_at"] == data["expires_at"] or expiry(value["expires_at"]) > expiry(deadline):
+                        value["expires_at"] = deadline
+                    grant_data.append(value)
+                merged["grants"] = grant_data
             policy = normalized_policy(merged, share_expiry=deadline, member_euids=[m.euid for m in members])
+            self._validate_report_selection(policy, members)
             grants = policy.pop("grants")
             revision = data["policy_revision"] + 1
             for grant in self._share_grants(session, share):
                 if normalize_instance_payload(grant).get("status") == "active":
                     self.backend.update_instance_json(session, grant, {"status": "superseded"})
+            self._write_share_revision(session, share, members, revision, policy={**policy, "expires_at": deadline})
             self._write_grants(session, share, grants, members, revision)
+            for member in members:
+                self.backend.create_lineage(session, parent=member, child=share, relationship_type="has_share")
             self.backend.update_instance_json(session, share, {**policy, "policy_revision": revision,
-                "expires_at": deadline, "name": merged.get("name"), "purpose": merged.get("purpose")})
+                "expires_at": deadline, "name": merged.get("name"), "purpose": merged.get("purpose"),
+                "target_kind": merged["target_kind"], "target_euid": merged.get("target_euid"),
+                "targets": merged.get("targets", []), "member_count": len(members)})
             self._event(session, share, event_type="policy_updated", decision="change", details={"policy_revision": revision})
             session.refresh(share)
             return self._canonical_response(session, share, manager=True)
@@ -625,19 +694,30 @@ class SharingServiceMixin:
         self._require_sharing()
         with self.backend.session_scope(commit=True) as session:
             share = self._canonical_share(session, share_euid, lock=True)
-            if not self._registry_share_manager(session, share): raise HTTPException(403, "Share management permission required")
+            if not self._registry_share_manager(session, share):
+                raise HTTPException(403, "Share management permission required")
             data = normalize_instance_payload(share)
-            if data["policy_revision"] != policy_revision: raise HTTPException(409, "Share policy changed; reload")
-            grant = next((g for g in self._share_grants(session, share) if g.euid == grant_euid), None)
-            if grant is None: raise DeweyNotFoundError("Grant not found")
-            revision = data["policy_revision"] + 1
-            self.backend.update_instance_json(session, grant, {"status": "revoked", "revoked_at": utc_now_iso()})
-            for other in self._share_grants(session, share):
-                if other.euid != grant.euid and normalize_instance_payload(other).get("status") == "active":
-                    self.backend.update_instance_json(session, other, {"policy_revision": revision})
+            if data["policy_revision"] != policy_revision:
+                raise HTTPException(409, "Share policy changed; reload")
+            grants = self._share_grants(session, share)
+            selected_grant = next((g for g in grants if g.euid == grant_euid and normalize_instance_payload(g).get("status") == "active" and normalize_instance_payload(g).get("policy_revision") == policy_revision), None)
+            if selected_grant is None:
+                raise DeweyNotFoundError("Current grant not found")
+            if normalize_instance_payload(selected_grant)["recipient_type"] == "registered":
+                raise ValueError("Change audience to recipients to remove public-with-registration access")
+            revision, members = policy_revision + 1, self._share_members(session, share)
+            remaining = []
+            for grant in grants:
+                rule = normalize_instance_payload(grant)
+                if rule.get("status") != "active" or rule.get("policy_revision") != policy_revision:
+                    continue
+                self.backend.update_instance_json(session, grant, {"status": "revoked" if grant.euid == grant_euid else "superseded", "revoked_at": utc_now_iso() if grant.euid == grant_euid else None})
+                if grant.euid != grant_euid:
+                    remaining.append({**{k:v for k,v in rule.items() if k not in {"status", "policy_revision"}}, "target_euids": [t.euid for t in self._grant_targets(session, grant)]})
+            self._write_share_revision(session, share, members, revision, policy=normalize_instance_payload(self._share_revision(session, share))["policy"])
+            self._write_grants(session, share, remaining, members, revision)
             self.backend.update_instance_json(session, share, {"policy_revision": revision})
-            self._event(session, share, event_type="recipient_revoked", decision="revoke", grant=grant,
-                details={"reason": reason, "policy_revision": revision})
+            self._event(session, share, event_type="recipient_revoked", decision="revoke", grant=selected_grant, details={"reason": reason, "policy_revision": revision})
             session.refresh(share)
             return self._canonical_response(session, share, manager=True)
 
@@ -649,6 +729,8 @@ class SharingServiceMixin:
             data = normalize_instance_payload(share)
             if policy_revision is None or data["policy_revision"] != policy_revision:
                 raise HTTPException(409, "The current policy_revision is required")
+            members = self._share_members(session, share)
+            self._write_share_revision(session, share, members, policy_revision + 1, policy={**normalize_instance_payload(self._share_revision(session, share))["policy"], "status": "revoked"})
             self.backend.update_instance_json(session, share, {"status": "revoked", "policy_revision": policy_revision + 1,
                 "revoked_at": utc_now_iso(), "revoked_by": principal().subject, "revocation_reason": reason})
             self._event(session, share, event_type="revoked", decision="revoke", details={"reason": reason, "policy_revision": policy_revision + 1})
@@ -725,7 +807,9 @@ class SharingServiceMixin:
                 members = [m for m in members if m.euid == target_euid]
                 if not members: raise HTTPException(403, "Target is outside this share")
             context = self._fingerprint({"share": share.euid, "revision": data["policy_revision"],
-                "target": target_euid, "prefix": prefix, "limit": limit})
+                "target": target_euid, "prefix": prefix, "limit": limit,
+                "locations": [{key: value for key, value in self._artifact_member_from_instance(member).items()
+                    if key in {"artifact_euid", "location_revision", "bucket", "key", "version_id"}} for member in members]})
             position = self._listing_cursor(session, share, continuation_token, context)
             index, s3_token = position["member_index"], position["s3_token"]
             items = []
@@ -748,7 +832,9 @@ class SharingServiceMixin:
                     next_s3 = page["next_continuation_token"]
                 for candidate in candidates:
                     scanned += 1
-                    if prefix and member["target_kind"] == "artifact_object" and not member["key"].rsplit("/", 1)[-1].startswith(prefix):
+                    if member["target_kind"] == "artifact_prefix" and candidate["relative_key"] == "" and candidate["size"] == 0:
+                        continue
+                    if prefix and member["target_kind"] == "artifact_object" and not member["filename"].startswith(prefix):
                         continue
                     try:
                         receipt = self._evaluate_share(session, share, members[index].euid, candidate["relative_key"], "metadata")
@@ -757,7 +843,7 @@ class SharingServiceMixin:
                         raise
                     items.append({"target_euid": members[index].euid, "kind": "object",
                         "name": candidate["relative_key"] or receipt["filename"], "relative_key": candidate["relative_key"],
-                        "size": candidate["size"], "grant_euid": receipt["grant_euid"]})
+                        "size": candidate["size"], "grant_euid": receipt["grant_euid"], "location_revision": receipt["location_revision"]})
                 if next_s3:
                     s3_token = next_s3
                 else:
@@ -776,14 +862,14 @@ class SharingServiceMixin:
             target = self._registry_record(session, euid, action="share")
             kind = "artifact_set" if target.type == "artifact_set" else "artifact_" + normalize_instance_payload(target)["storage_kind"]
             members = self._expand_share_targets(session, target_kind=kind, target_euid=euid)
-            deadline = self._normalize_share_expiry(payload.get("expires_at"))
+            deadline = self._normalize_share_expiry(payload.get("expires_at", UNSET))
             policy = normalized_policy(payload, share_expiry=deadline, member_euids=[m["artifact_euid"] for m in members])
             items = []
             incomplete = False
             for member in members:
                 self._registry_record(session, member["artifact_euid"], action="share")
                 if member["target_kind"] == "artifact_object":
-                    candidates = [("", member["key"].rsplit("/", 1)[-1], member.get("size"))]
+                    candidates = [("", member["filename"], member.get("size"))]
                 else:
                     # Preview uses the manager's independent storage authorization.
                     page = self._require_storage().list_share_candidates(bucket=member["bucket"], prefix=member["key"], limit=200)
@@ -805,54 +891,15 @@ class SharingServiceMixin:
                 if len(items) >= 200: break
             return {"items": items, "continuation_token": None, "incomplete": incomplete}
 
-    def create_share_access_package(self, share_euid, *, delivery_mode="gateway", actor_email=None,
-            actor_groups=None, ip=None, user_agent=None, signed_ttl_seconds=None):
-        mode = {"dewey_html_browser": "gateway", "presigned_s3": "presigned", "presigned_s3_manifest": "presigned"}.get(delivery_mode, delivery_mode)
-        if mode not in {"gateway", "presigned"}: raise ValueError("Unsupported delivery mode")
-        page = self.list_share_contents(share_euid, limit=200)
-        if page["incomplete"]:
-            raise ValueError("Access package exceeds one bounded page; use share contents and exact-object issuance")
-        if mode == "gateway":
-            from urllib.parse import quote
-            return {"share_euid": share_euid, "delivery_mode": "gateway", "browser_path": f"/shares/{share_euid}",
-                "manifest": [{**item, "web_path": f"/shares/{share_euid}/files/{item['target_euid']}?relative_key={quote(item['relative_key'], safe='')}"} for item in page["items"]]}
-        return {"share_euid": share_euid, "delivery_mode": "presigned", "manifest": [
-            self.presign_share_object(share_euid, item["target_euid"], relative_key=item["relative_key"], ttl_seconds=signed_ttl_seconds) for item in page["items"]]}
+    def create_share_access_package(self, share_euid, *, delivery_mode="gateway", **kwargs):
+        if delivery_mode != "gateway":
+            raise HTTPException(410, "Raw S3 delivery was removed; use authenticated /fetch URLs")
+        self.get_share(share_euid)
+        return {"share_euid": share_euid, "delivery_mode": "gateway", "browser_path": f"/fetch/{share_euid}",
+            "manifest_path": f"/fetch/{share_euid}?format=manifest", "archive_path": f"/fetch/{share_euid}?format=tar"}
 
-    def presign_share_object(self, share_euid, target_euid, *, relative_key="", ttl_seconds=None):
-        from dewey_service.storage import storage_authorization_context
-        from dewey_service.services.share_policy import expiry
-        receipt = self.authorize_share_object(share_euid, target_euid, relative_key, action="presign")
-        ttl = 900 if ttl_seconds is None else int(ttl_seconds)
-        if not 1 <= ttl <= 3600: raise ValueError("Presign lifetime must be 1..3600 seconds")
-        ttl = min(ttl, int((expiry(receipt["expires_at"]) - datetime.now(timezone.utc)).total_seconds()))
-        if ttl < 1: raise HTTPException(410, "Share grant expired")
-        def scope(bucket, key, action):
-            if (bucket, key) != (receipt["bucket"], receipt["key"]) or action not in {"metadata", "download"}:
-                raise HTTPException(403, "Storage request exceeds authorized object")
-        with storage_authorization_context(scope):
-            url = self._require_storage().generate_presigned_get_url(bucket=receipt["bucket"], key=receipt["key"],
-                version_id=receipt["version_id"], expires_in=ttl,
-                request_payer=self._request_payer_for_bucket(receipt["bucket"]))
-        from urllib.parse import parse_qs, urlsplit
-        signed_fields = parse_qs(urlsplit(url).query)
-        try:
-            signed_at = datetime.strptime(signed_fields["X-Amz-Date"][0], "%Y%m%dT%H%M%SZ").replace(tzinfo=timezone.utc)
-            signed_ttl = int(signed_fields["X-Amz-Expires"][0])
-            signed_expiry = signed_at + timedelta(seconds=signed_ttl)
-        except (KeyError, ValueError, IndexError) as exc:
-            raise HTTPException(503, "S3 signer did not return the required explicit expiration") from exc
-        if signed_ttl != ttl or signed_expiry > expiry(receipt["expires_at"]) or signed_expiry <= datetime.now(timezone.utc):
-            raise HTTPException(410, "S3 signing could not stay within the current grant deadline")
-        event = self.append_share_event(share_euid, event_type="raw_s3_presign_issued", decision="allow",
-            grant_euid=receipt["grant_euid"], target_euid=target_euid,
-            details={"expires_in": ttl, "expires_at": signed_expiry.isoformat(), "relative_key": relative_key,
-                "key": receipt["key"], "version_id": receipt["version_id"], "bearer_url_forwardable": True,
-                "policy_revision": receipt["policy_revision"], "outcome": "credential_issued"})
-        return {"share_euid": share_euid, "target_euid": target_euid, "relative_key": relative_key,
-            "url": url, "signed_url": url, "expires_in": ttl, "expires_at": signed_expiry.isoformat(),
-            "receipt_euid": event, "delivery": "presigned_s3", "bearer_url_forwardable": True,
-            "authentication_required_for_consumption": False, "download_completion_observed": False}
+    def presign_share_object(self, *args, **kwargs):
+        raise HTTPException(410, "Raw S3 presigns were removed; use authenticated /fetch URLs")
 
     def create_share_root(
         self,
@@ -940,13 +987,14 @@ class SharingServiceMixin:
         allowed_domains: list[str] | None,
         allowed_groups: list[str] | None,
         delivery_modes: list[str] | None,
-        expires_at: str | None,
-        ttl_seconds: int | None,
+        expires_at=UNSET,
+        ttl_seconds: int | None = None,
         idempotency_key: str,
         grants: list[dict[str, Any]] | None = None,
         include_patterns: list[str] | None = None,
         exclude_patterns: list[str] | None = None,
         denied_emails: list[str] | None = None,
+        audience="recipients", content_mode="download", report_entrypoint=None, report_bundle_root="",
     ) -> tuple[int, dict[str, Any]]:
         self._require_sharing()
         with self.backend.session_scope(commit=False) as session:
@@ -989,6 +1037,7 @@ class SharingServiceMixin:
             idempotency_key=idempotency_key,
             grants=grants, include_patterns=include_patterns,
             exclude_patterns=exclude_patterns, denied_emails=denied_emails,
+            audience=audience, content_mode=content_mode, report_entrypoint=report_entrypoint, report_bundle_root=report_bundle_root,
         )
 
     def _normalize_expiry(self, expires_at: str | None, ttl_seconds: int | None = None) -> str:

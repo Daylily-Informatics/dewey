@@ -4,6 +4,23 @@ Status: review document; implementation and the later multi-agent ledgered plan 
 
 Baseline: [current capabilities](20261025_dewey_capabilities.md), observed deployed `11.0.10` / `7f6fde5429741780517cf461a615e5b3e5f102f2`. Target: [sharing requirements](20261025_dewey_sharing_requirements.md), SHR-01 through SHR-20. The documentation branch does not change the deployed service.
 
+## Dewey 12 implementation disposition — 2026-10-26
+
+The original comparison below is the **11.0.10 baseline**, preserved for traceability. The user subsequently approved implementation. The [execution ledger](../plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) controls completion; source changes alone do not close live acceptance.
+
+| Requirements | Implemented source | Remaining release evidence |
+|---|---|---|
+| SHR-01,02,04,05,19 | Schema-3 revisions, delegation, atomic target/grant/expiry edits, preserved history | Native PostgreSQL contracts and deployed journeys |
+| SHR-03,06,12,13 | Mixed/pending grants, registration-open audience, share-only verified Login identities, current introspection | Identity tests and controlled internal/external onboarding |
+| SHR-07,08,09 | Canonical fetch, native global aliases/tombstones, HTTP/range/conditional behavior | Focused contracts and deployed URL/credential access |
+| SHR-10,11 | Complete manifests, recursive CLI/resume receipts, streaming TAR, isolated WWW entry/assets | Pagination/change/interruption tests and deployed report/tree proof |
+| SHR-14 | Dedicated ALB and restricted origin/DNS operator | Scoped infrastructure receipts and outside-network boundaries |
+| SHR-15,16 | Native events, lifecycle inventory, windowed aggregate reports, complete frozen exports | Fixture reconciliation and deployed audit totals |
+| SHR-17 | Qualified-equivalence rebind, collision checks, native location revisions | Rebind tests and preserved deployed URLs |
+| SHR-18,20 | Management/recipient API, GUI/CLI, README and sharing guide | Integrated interface checks and final verified documentation |
+
+At this checkpoint, implementations are awaiting the bounded test/release gates; no row is represented as production-complete. See [current sharing behavior](../sharing.md) and the ledger for subsequent receipts, limitations and terminal status.
+
 ## 1. Finding
 
 Dewey has substantial reusable sharing functionality. It already models shares and grants, supports individual files and filtered prefix descendants, accepts mixed internal/external emails, edits recipient policies and finite deadlines, revokes access, streams authenticated bytes, isolates HTML reports, and stores access/transfer events.

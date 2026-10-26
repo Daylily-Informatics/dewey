@@ -36,6 +36,11 @@ class Principal:
     internal: bool = False
     service: bool = False
     annotation_upload: bool = False
+    identity_grant_id: str = ""
+    identity_revision: int = 0
+    identity_expires_at: str = ""
+    email_verified: bool = False
+    recipient_only: bool = False
 
     @property
     def admin(self) -> bool:
@@ -116,7 +121,7 @@ def direct_record_clause(session, model, action: str = "metadata"):
     actor = _PRINCIPAL.get()
     if maintenance_mode():
         return true()
-    if actor is None:
+    if actor is None or actor.recipient_only:
         return false()
     if actor.admin:
         return true()
@@ -199,7 +204,7 @@ def visibility_clause(session, model, *, types=None):
     if maintenance_mode():
         return true()
     from dewey_service.share_context import share_context_available
-    protected_types = {"share_grant", "share_event"}
+    protected_types = {"share_grant", "share_event", "share_revision", "share_alias", "artifact_location_revision"}
     if not share_context_available():
         protected_types.add("share")
     visible_type = ~model.type.in_(protected_types)
@@ -308,14 +313,33 @@ class RegistryPrincipalMiddleware(BaseHTTPMiddleware):
         settings = request.app.state.settings
         actor = None
         try:
-            profile = _load_ui_profile(request)
+            # An expired credential must not prevent a new OAuth flow or logout.
+            # These endpoints establish/clear identity and never consume a share.
+            auth_path = request.url.path in {
+                "/login", "/auth/login", "/auth/callback", "/auth/lsmc/callback",
+                "/auth/error", "/auth/logout", "/logout",
+            }
+            profile = None if auth_path else _load_ui_profile(request)
             if profile:
                 email = profile["email"].lower()
+                binding = {}
+                if profile.get("identity_grant_id"):
+                    from dewey_service.recipient_identity import verify_recipient_binding
+                    from starlette.concurrency import run_in_threadpool
+                    binding = await run_in_threadpool(verify_recipient_binding, settings,
+                        grant_id=profile["identity_grant_id"], revision=profile["identity_revision"])
+                    if binding["email"] != email or binding["canonical_user_id"] != profile["sub"]:
+                        raise HTTPException(401, "Recipient identity changed; sign in again")
                 actor = Principal(
                     subject=profile["sub"], email=email,
                     roles=tuple(profile["roles"]), groups=tuple(profile["groups"]),
                     internal=("lsmc:internal-user" in profile["groups"] or
                               email.rpartition("@")[2] in settings.registry_internal_domains),
+                    identity_grant_id=binding.get("grant_id", ""),
+                    identity_revision=binding.get("revision", 0),
+                    identity_expires_at=binding.get("expires_at", ""),
+                    email_verified=binding.get("email_verified") is True,
+                    recipient_only=bool(profile.get("recipient_only", False)),
                 )
             authorization = request.headers.get("authorization", "")
             if actor is None and authorization.startswith("Bearer "):
@@ -329,6 +353,10 @@ class RegistryPrincipalMiddleware(BaseHTTPMiddleware):
                     from starlette.concurrency import run_in_threadpool
                     actor = await run_in_threadpool(request.app.state.service.authenticate_registry_token, token)
             path = request.url.path
+            if actor is not None and actor.recipient_only:
+                from dewey_service.share_routing import public_recipient_route
+                if not public_recipient_route(request.method, path) and not path.startswith("/__dewey_preview/"):
+                    return JSONResponse({"detail": "This credential is limited to shared content"}, status_code=403)
             dag_reader = None
             if is_canonical_dag_get(request):
                 scheme, token = get_authorization_scheme_param(authorization)

@@ -10,7 +10,7 @@ import os
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from time import monotonic, time_ns
-from typing import Any
+from typing import Any, Literal
 from urllib.parse import quote, urlencode, urlsplit, urlunsplit
 from uuid import UUID, uuid4
 
@@ -23,6 +23,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, ConfigDict, Field
 from starlette.datastructures import UploadFile as StarletteUploadFile
 from starlette.middleware.trustedhost import TrustedHostMiddleware
+from starlette.concurrency import run_in_threadpool
 
 from dewey_service.artifact_ui import (
     ARTIFACT_SET_TYPES,
@@ -51,6 +52,7 @@ from dewey_service.auth import (
     configure_session_middleware,
     generate_state,
     has_ui_session,
+    load_session_principal,
     require_api_auth,
     require_observability_access,
     require_session_or_api_auth,
@@ -223,17 +225,18 @@ class ShareCreateRequest(BaseModel):
     targets: list[ShareTargetRequest] = Field(default_factory=list)
     name: str | None = None
     purpose: str | None = None
-    owner_email: str | None = None
     allowed_users: list[str] = Field(default_factory=list)
     allowed_domains: list[str] = Field(default_factory=list)
-    allowed_groups: list[str] = Field(default_factory=list)
-    delivery_modes: list[str] = Field(default_factory=lambda: ["gateway"])
+    delivery_modes: list[Literal["gateway"]] = Field(default_factory=lambda: ["gateway"])
     expires_at: str | None = None
-    ttl_seconds: int | None = None
     grants: list[dict[str, Any]] | None = None
     include_patterns: list[str] = Field(default_factory=lambda: ["**"])
     exclude_patterns: list[str] = Field(default_factory=list)
     denied_emails: list[str] = Field(default_factory=list)
+    audience: Literal["recipients", "public_registered"] = "recipients"
+    content_mode: Literal["download", "www"] = "download"
+    report_entrypoint: str | None = None
+    report_bundle_root: str = ""
 
 
 class ShareAccessPackageRequest(BaseModel):
@@ -241,11 +244,8 @@ class ShareAccessPackageRequest(BaseModel):
 
     delivery_mode: str = Field(
         default="gateway",
-        pattern="^(gateway|presigned|presigned_s3|presigned_s3_manifest|dewey_html_browser)$",
+        pattern="^gateway$",
     )
-    actor_email: str | None = None
-    actor_groups: list[str] = Field(default_factory=list)
-    signed_ttl_seconds: int | None = None
 
 
 class ShareRevokeRequest(BaseModel):
@@ -266,7 +266,7 @@ class ShareRootCreateRequest(BaseModel):
 
 
 class ShareRootSubsetCreateRequest(ShareCreateRequest):
-    pass
+    target_kind: Literal["mixed_set"] = "mixed_set"
 
 
 class ArtifactStorageLockRequest(BaseModel):
@@ -1562,8 +1562,17 @@ def create_app(
         return templates.TemplateResponse(request, "login.html", context, status_code=status_code)
 
     async def _logout_response(request: Request) -> RedirectResponse:
+        session_principal = load_session_principal(request)
+        binding = (session_principal.app_context.get("recipient_identity")
+                   if session_principal is not None else None)
         clear_ui_session(request)
         request.session.clear()
+        if isinstance(binding, dict) and binding.get("kind") == "browser":
+            from dewey_service.recipient_identity import revoke_recipient_identity
+            await run_in_threadpool(
+                revoke_recipient_identity, settings,
+                grant_id=binding["grant_id"], revision=binding["revision"],
+            )
         if settings.auth_mode == "external_broker":
             if not settings.external_broker_logout_url:
                 return RedirectResponse(
@@ -3981,22 +3990,7 @@ def create_app(
     ) -> dict[str, Any]:
         try:
             status_code, payload = service.create_share(
-                target_kind=body.target_kind,
-                target_euid=body.target_euid,
-                targets=[item.model_dump() for item in body.targets],
-                name=body.name,
-                purpose=body.purpose,
-                owner_email=body.owner_email,
-                allowed_users=body.allowed_users,
-                allowed_domains=body.allowed_domains,
-                allowed_groups=body.allowed_groups,
-                delivery_modes=body.delivery_modes,
-                expires_at=body.expires_at,
-                ttl_seconds=body.ttl_seconds,
-                grants=body.grants,
-                include_patterns=body.include_patterns,
-                exclude_patterns=body.exclude_patterns,
-                denied_emails=body.denied_emails,
+                **body.model_dump(exclude_unset=True),
                 idempotency_key=_require_idempotency_key(idempotency_key),
             )
             return {"status_code": status_code, **payload}
@@ -4034,7 +4028,6 @@ def create_app(
                 actor_groups=list(actor.groups),
                 ip=request.client.host if request.client else None,
                 user_agent=request.headers.get("user-agent"),
-                signed_ttl_seconds=body.signed_ttl_seconds,
             )
         except DeweyNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -4099,22 +4092,15 @@ def create_app(
         idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
     ) -> dict[str, Any]:
         try:
+            if body.target_euid is not None:
+                raise ValueError("A share-root subset requires explicit targets")
+            changes = {"targets": [], "name": None, "purpose": None, "owner_email": None,
+                       "allowed_users": None, "allowed_domains": None,
+                       "allowed_groups": None, "delivery_modes": None}
+            changes.update(body.model_dump(exclude_unset=True, exclude={"target_kind", "target_euid"}))
             status_code, payload = service.create_share_root_subset(
                 share_root_euid,
-                targets=[item.model_dump() for item in body.targets],
-                name=body.name,
-                purpose=body.purpose,
-                owner_email=body.owner_email,
-                allowed_users=body.allowed_users,
-                allowed_domains=body.allowed_domains,
-                allowed_groups=body.allowed_groups,
-                delivery_modes=body.delivery_modes,
-                expires_at=body.expires_at,
-                ttl_seconds=body.ttl_seconds,
-                grants=body.grants,
-                include_patterns=body.include_patterns,
-                exclude_patterns=body.exclude_patterns,
-                denied_emails=body.denied_emails,
+                **changes,
                 idempotency_key=_require_idempotency_key(idempotency_key),
             )
             return {"status_code": status_code, **payload}

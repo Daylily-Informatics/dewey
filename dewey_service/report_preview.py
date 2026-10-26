@@ -1,8 +1,9 @@
-"""Current-viewer report sessions on isolated, Tailscale-only content hosts."""
+"""Current-viewer report sessions on isolated, authenticated content hosts."""
 from __future__ import annotations
 
 import hashlib
 import hmac
+import html
 import json
 import logging
 import mimetypes
@@ -18,7 +19,7 @@ from daylily_tapdb import generic_instance, generic_instance_lineage
 from dewey_service.registry_access import OPERATION_TEMPLATE, principal, principal_context
 from dewey_service.preview_sessions import (current_session_binding, live_session_binding,
     operation_row, require_preview_configuration, binding_principal)
-from dewey_service.share_context import require_share_context, require_trusted_tailnet
+from dewey_service.share_context import require_share_context, require_share_ingress
 from dewey_service.share_gateway import exact_relative_key, object_delivery
 from dewey_service.tapdb_backend import normalize_instance_payload, utc_now_iso
 from dewey_service.audit import authenticated_user_email_context
@@ -78,7 +79,7 @@ def _live_context(service, settings, session, row):
 def _host_context(request, service, session, *, lock=False):
     settings = request.app.state.settings
     require_preview_configuration(settings)
-    require_trusted_tailnet(request)
+    require_share_ingress(request)
     # Host selects a persisted context only; transport attestation authorizes
     # network access. App APIs are separately excluded from this subtree.
     host = request.url.hostname
@@ -125,6 +126,81 @@ def _headers(settings, *, nonce=None):
         "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()"}
 
 
+def _context_expiry(now, share_expiry, session_expiry=None):
+    deadlines = [now + timedelta(seconds=900)]
+    for value in (share_expiry, session_expiry):
+        if value is not None:
+            deadlines.append(datetime.fromisoformat(value.replace("Z", "+00:00")))
+    return min(deadlines)
+
+
+def report_entry_page(request, resolved, receipt):
+    """The durable application URL contains only the trusted viewer shell."""
+    settings = request.app.state.settings
+    require_preview_configuration(settings)
+    nonce = secrets.token_urlsafe(24)
+    endpoint = "/api/v2/recipient/shares/" + quote(resolved["share_euid"], safe="") + "/preview"
+    config = json.dumps({"endpoint": endpoint, "content_suffix": settings.share_content_host_suffix,
+        "body": {"target_euid": receipt["target_euid"], "relative_key": receipt["relative_key"],
+            "bundle_root": resolved.get("report_bundle_root", "")}}, separators=(",", ":")).replace("<", "\\u003c")
+    script = """
+const config = CONFIG;
+const frame = document.getElementById('report');
+const status = document.getElementById('status');
+async function post(path, body) {
+  const response = await fetch(path, {method:'POST', credentials:'same-origin',
+    headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+  if (!response.ok) { let detail='Report access failed ('+response.status+')';
+    try { detail=(await response.json()).detail || detail; } catch (_) {}
+    throw new Error(typeof detail==='string'?detail:'Report access failed'); }
+  return response.json();
+}
+(async () => {
+  const view = await post(config.endpoint, config.body);
+  const origin = new URL(view.preview_origin), challenge = new URL(view.challenge_url);
+  const handoffEndpoint = new URL(view.handoff_endpoint, location.origin);
+  if (origin.protocol!=='https:' || origin.hostname.split('.').slice(1).join('.')!==config.content_suffix ||
+      !/^pv-[0-9a-f]{32}$/.test(origin.hostname.split('.')[0]) || origin.port || origin.username || origin.password ||
+      origin.href!==origin.origin+'/' || challenge.origin!==origin.origin || challenge.pathname!=='/__dewey_preview/challenge' ||
+      handoffEndpoint.origin!==location.origin || !handoffEndpoint.pathname.startsWith(config.endpoint+'/'))
+    throw new Error('Invalid report host configuration');
+  let used=false;
+  window.addEventListener('message', async event => {
+    if (used || event.origin!==origin.origin || event.source!==frame.contentWindow ||
+        event.data?.type!=='dewey-preview-challenge' || event.data.context_euid!==view.context_euid ||
+        !/^[0-9a-f]{64}$/.test(event.data.challenge || '')) return;
+    used=true;
+    try {
+      const handoff=await post(handoffEndpoint.pathname, {challenge:event.data.challenge});
+      if (!handoff.token || handoff.handoff_url!==origin.origin+'/__dewey_preview/handoff')
+        throw new Error('Invalid report handoff');
+      const form=document.createElement('form'), token=document.createElement('input');
+      form.method='POST'; form.action=handoff.handoff_url; form.target=frame.name; form.hidden=true;
+      token.name='token'; token.value=handoff.token; form.append(token); document.body.append(form);
+      form.submit(); form.remove(); status.textContent='Report session expires '+view.expires_at+'. Reopen this URL to renew.';
+    } catch (error) { status.textContent=error.message; }
+  });
+  frame.src=challenge.href;
+})().catch(error => { status.textContent=error.message; });
+""".replace("CONFIG", config, 1)
+    title = html.escape(resolved.get("name") or "Shared report")
+    content = (f'<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
+        f'<title>{title} · Dewey</title><style nonce="{nonce}">body{{margin:0;font:15px system-ui}}header{{padding:12px 18px}}'
+        'h1{font-size:18px;margin:0}iframe{display:block;width:100%;height:calc(100vh - 110px);border:0}</style>'
+        f'<header><h1>{title}</h1><p id="status" role="status">Opening your authorized report…</p></header>'
+        '<iframe id="report" name="dewey-isolated-report" title="Shared report" sandbox="allow-scripts allow-same-origin" '
+        f'referrerpolicy="no-referrer"></iframe><script nonce="{nonce}">{script}</script></html>')
+    content_origin = "https://*." + settings.share_content_host_suffix
+    headers = {"Cache-Control": "no-store", "Referrer-Policy": "no-referrer", "X-Content-Type-Options": "nosniff",
+        "Content-Security-Policy": f"default-src 'none'; script-src 'nonce-{nonce}'; style-src 'nonce-{nonce}'; "
+            f"connect-src 'self'; frame-src {content_origin}; form-action {content_origin}; frame-ancestors 'none'; base-uri 'none'",
+        "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()"}
+    response = HTMLResponse(content, headers=headers)
+    if request.method == "HEAD":
+        response.body = b""
+    return response
+
+
 def attach_report_preview(app, router, service):
     logging.getLogger("uvicorn.access").addFilter(PreviewLogFilter())
 
@@ -136,9 +212,11 @@ def attach_report_preview(app, router, service):
     def retired_bearer_preview(path: str):
         raise HTTPException(410, "Stored-issuer bearer report previews are retired; reopen through a managed share")
 
+    @app.post("/api/v2/recipient/shares/{share_euid}/preview", tags=["Recipient sharing"])
     @router.post("/registry/shares/{share_euid}/preview", tags=["Managed sharing"])
     def create_preview(share_euid: str, request: Request, body: dict = Body(...)):
         require_share_context()
+        share_euid = service.resolve_share_identifier(share_euid)["share_euid"]
         settings = request.app.state.settings
         require_preview_configuration(settings)
         if set(body) != {"target_euid", "relative_key", "bundle_root"}:
@@ -158,11 +236,11 @@ def attach_report_preview(app, router, service):
         binding_euid = current_session_binding(request, service)
         context_host = "pv-" + secrets.token_hex(16) + "." + settings.share_content_host_suffix
         now = datetime.now(timezone.utc)
-        expires = min(now + timedelta(seconds=900), datetime.fromisoformat(receipt["expires_at"].replace("Z", "+00:00")))
+        expires = _context_expiry(now, receipt["expires_at"])
         with service.backend.session_scope(commit=True) as session:
             binding = operation_row(service, session, binding_euid)
             session_data = live_session_binding(service, settings, session, binding_euid)
-            expires = min(expires, datetime.fromisoformat(session_data["expires_at"]))
+            expires = _context_expiry(now, receipt["expires_at"], session_data["expires_at"])
             share = service._canonical_share(session, share_euid)
             target_row = next((v for v in service._share_members(session, share) if v.euid == target), None)
             if target_row is None:
@@ -179,9 +257,11 @@ def attach_report_preview(app, router, service):
             grant_euid=receipt["grant_euid"], target_euid=target, details={"context_euid": context_euid,
                 "bundle_root": root, "policy_revision": receipt["policy_revision"], "expires_at": expires.isoformat()})
         origin = "https://" + context_host
+        recipient = request.url.path.startswith("/api/v2/recipient/")
+        endpoint_root = "/api/v2/recipient/shares/" if recipient else "/api/v1/registry/shares/"
         return {"context_euid": context_euid, "preview_origin": origin,
             "challenge_url": origin + "/__dewey_preview/challenge",
-            "handoff_endpoint": f"/api/v1/registry/shares/{quote(share_euid, safe='')}/preview/{quote(context_euid, safe='')}/handoff",
+            "handoff_endpoint": f"{endpoint_root}{quote(share_euid, safe='')}/preview/{quote(context_euid, safe='')}/handoff",
             "expires_at": expires.isoformat()}
 
     @app.get("/__dewey_preview/challenge", include_in_schema=False)
@@ -202,9 +282,11 @@ def attach_report_preview(app, router, service):
         response.set_cookie(_COOKIE, cookie, secure=True, httponly=True, samesite="strict", path="/", max_age=900)
         return response
 
+    @app.post("/api/v2/recipient/shares/{share_euid}/preview/{context_euid}/handoff", tags=["Recipient sharing"])
     @router.post("/registry/shares/{share_euid}/preview/{context_euid}/handoff", tags=["Managed sharing"])
     def issue_handoff(share_euid: str, context_euid: str, request: Request, body: dict = Body(...)):
         require_share_context()
+        share_euid = service.resolve_share_identifier(share_euid)["share_euid"]
         if (set(body) != {"challenge"} or not isinstance(body["challenge"], str)
                 or not re.fullmatch(r"[0-9a-f]{64}", body["challenge"])):
             raise HTTPException(400, "A preview host challenge is required")

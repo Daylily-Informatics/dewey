@@ -46,9 +46,24 @@ def establish_session_binding(request, config, *, previous_user=None):
         raise HTTPException(401, "Verified callback did not establish a session")
     service = request.app.state.service
     expires = datetime.now(timezone.utc) + timedelta(seconds=config.session_max_age)
+    from dewey_service.recipient_identity import verify_recipient_binding
+    stored_identity = user.app_context.get("recipient_identity")
+    identity = None
+    if stored_identity is not None:
+        if not isinstance(stored_identity, dict) or not stored_identity.get("grant_id") or "recipient_only" not in user.app_context:
+            raise HTTPException(401, "Browser identity binding is invalid")
+        identity = verify_recipient_binding(settings, grant_id=stored_identity["grant_id"], revision=stored_identity["revision"])
+        if identity["canonical_user_id"] != user.user_sub or identity["email"] != user.email:
+            raise HTTPException(401, "Browser identity changed; sign in again")
+        expires = min(expires, datetime.fromisoformat(identity["expires_at"].replace("Z", "+00:00")))
+    # Ordinary manager sessions remain valid for existing console access. They
+    # gain no sharing authority until a fresh broker verified binding exists.
     actor = Principal(subject=user.user_sub, email=user.email, roles=tuple(user.roles),
         groups=tuple(user.cognito_groups), internal=("lsmc:internal-user" in user.cognito_groups
-            or user.email.rpartition("@")[2] in settings.registry_internal_domains))
+            or user.email.rpartition("@")[2] in settings.registry_internal_domains),
+        identity_grant_id=identity["grant_id"] if identity else "", identity_revision=identity["revision"] if identity else 0,
+        identity_expires_at=identity["expires_at"] if identity else "", email_verified=bool(identity and identity["email_verified"] is True),
+        recipient_only=bool(identity and user.app_context["recipient_only"]))
     if previous_user is not None:
         revoke_session_binding(request, user=previous_user)
     with principal_context(actor), authenticated_user_email_context(actor.email), service.backend.session_scope(commit=True) as session:
@@ -100,10 +115,20 @@ def current_session_binding(request, service):
 
 def binding_principal(binding, settings):
     identity = binding["principal"]
+    from dewey_service.recipient_identity import verify_recipient_binding
+    if not identity.get("identity_grant_id"):
+        raise HTTPException(401, "Report session requires a new verified browser sign-in")
+    current = verify_recipient_binding(settings, grant_id=identity["identity_grant_id"], revision=identity["identity_revision"])
+    if (current["canonical_user_id"] != identity["subject"] or current["email"] != identity["email"]
+            or current["email_verified"] is not True):
+        raise HTTPException(401, "Report viewer identity changed; sign in again")
     profile = normalize_session_profile(email=identity["email"], sub=identity["subject"],
         groups=identity["groups"], group_role_map=settings.cognito_group_role_map)
-    if not profile["roles"]:
+    roles = ("READ_ONLY",) if identity.get("recipient_only") else tuple(profile["roles"])
+    if not roles:
         raise HTTPException(403, "Current report session has no Dewey role")
-    return Principal(subject=profile["sub"], email=profile["email"], roles=tuple(profile["roles"]),
+    return Principal(subject=profile["sub"], email=profile["email"], roles=roles,
         groups=tuple(profile["groups"]), internal=("lsmc:internal-user" in profile["groups"]
-            or profile["email"].rpartition("@")[2] in settings.registry_internal_domains))
+            or profile["email"].rpartition("@")[2] in settings.registry_internal_domains),
+        identity_grant_id=current["grant_id"], identity_revision=current["revision"],
+        identity_expires_at=current["expires_at"], email_verified=True, recipient_only=bool(identity.get("recipient_only")))

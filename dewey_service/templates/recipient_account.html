@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dewey recipient credentials</title><link rel="stylesheet" href="/static/console.css"></head>
+<body><main class="shell"><section class="panel"><h1>Download credentials</h1>
+<p>Signed in as {{ email }}. Credentials allow reading shares currently granted to you. They expire even when a share is indefinite.</p>
+<form id="token-form"><label>Name <input name="name" required maxlength="120" placeholder="Analysis workstation"></label>
+<label>Days <input name="lifetime_days" type="number" min="1" max="30" value="30" required></label>
+<button type="submit">Create download credential</button></form>
+<p id="message" role="status"></p><pre id="new-token" hidden></pre>
+<p>Save a new credential privately; it is shown once. Send it with <code>Authorization: Bearer &lt;credential&gt;</code> using curl, wget or the Dewey CLI. Never put it in a shared URL.</p>
+<table><thead><tr><th>Name</th><th>Expires</th><th>Status</th><th>Action</th></tr></thead><tbody id="tokens"></tbody></table>
+</section></main><script src="/static/recipient-account.js"></script></body></html>

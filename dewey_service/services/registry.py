@@ -336,15 +336,18 @@ class RegistryServiceMixin:
 
     def share_registry(self, euid, data, *, idempotency_key):
         allowed = {"name", "purpose", "audience", "allowed_users", "allowed_domains", "expires_at", "lifetime_days",
-            "grants", "include_patterns", "exclude_patterns", "denied_emails", "delivery_modes"}
-        if set(data) - allowed or data.get("audience", "recipients") not in {"recipients", "private"}:
-            raise ValueError("Only explicit recipient shares are supported")
+            "grants", "include_patterns", "exclude_patterns", "denied_emails", "delivery_modes",
+            "content_mode", "report_entrypoint", "report_bundle_root"}
+        if set(data) - allowed or data.get("audience", "recipients") not in {"recipients", "public_registered"}:
+            raise ValueError("Choose recipients or public_registered with registered access")
         self._require_sharing()
         with self.backend.session_scope(commit=False) as session:
             target = self._registry_record(session, euid, action="share")
             kind = "artifact_set" if target.type == "artifact_set" else "artifact_" + normalize_instance_payload(target)["storage_kind"]
-        args = {k: v for k, v in data.items() if k not in {"lifetime_days", "audience"}}
-        if not args.get("expires_at") and "lifetime_days" in data:
+        args = {k: v for k, v in data.items() if k != "lifetime_days"}
+        if "expires_at" in data and "lifetime_days" in data:
+            raise ValueError("Supply expires_at or lifetime_days, not both")
+        if "lifetime_days" in data:
             days = int(data["lifetime_days"])
             if not 1 <= days <= self.share_max_lifetime_days: raise ValueError("Invalid share lifetime")
             args["expires_at"] = (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
@@ -381,37 +384,47 @@ class RegistryServiceMixin:
             if share is None or not self._registry_share_manager(session, share):
                 raise HTTPException(403, "Share management permission is required")
             data = normalize_instance_payload(share)
-            if data["status"] != "active" or datetime.fromisoformat(data["expires_at"].replace("Z", "+00:00")) <= datetime.now(timezone.utc):
+            if data["status"] != "active" or (data["expires_at"] is not None and
+                    datetime.fromisoformat(data["expires_at"].replace("Z", "+00:00")) <= datetime.now(timezone.utc)):
                 raise ValueError("Only active, unexpired shares can send invitations")
             from dewey_service.services.share_policy import recipient_matches, expiry
-            allowed = email not in data["denied_emails"] and any(
+            allowed = email not in data["denied_emails"] and (data["audience"] == "public_registered" or any(
                 normalize_instance_payload(g).get("status") == "active" and
                 normalize_instance_payload(g).get("policy_revision") == data["policy_revision"] and
-                expiry(normalize_instance_payload(g)["expires_at"]) > datetime.now(timezone.utc) and
-                recipient_matches(normalize_instance_payload(g), email) for g in self._share_grants(session, share))
+                (normalize_instance_payload(g)["expires_at"] is None or
+                 expiry(normalize_instance_payload(g)["expires_at"]) > datetime.now(timezone.utc)) and
+                recipient_matches(normalize_instance_payload(g), email) for g in self._share_grants(session, share)))
             if not allowed:
                 raise ValueError("This email is not included in a current recipient grant")
             origin = urlsplit(settings.external_broker_callback_url)
-            share_url = f"{origin.scheme}://{origin.netloc}/shares/{euid}"
+            share_url = f"{origin.scheme}://{origin.netloc}/fetch/{euid}"
             receipt = self.backend.create_instance(session, template_code=OPERATION_TEMPLATE, name="Share invitation",
                 json_addl={"operation": "share_invitation", "actor": principal().subject, "created_at": utc_now_iso(),
                     "status": "sending", "recipient_email": email})
             self.backend.create_lineage(session, parent=share, child=receipt, relationship_type="has_storage_operation")
             operation_euid = receipt.euid
-        state = "uncertain_failure"
+        state = "uncertain"
         try:
             response = requests.post(endpoint, json={"recipient_email": email, "share_ref_euid": euid,
                 "share_url": share_url, "expires_at": data["expires_at"]},
                 headers={"Authorization": "Bearer " + settings.external_broker_service_token, "x-lsmc-service-id": "dewey"},
                 timeout=(10, 30), allow_redirects=False, verify=settings.external_broker_ca_bundle or True)
-            if 200 <= response.status_code < 300:
-                state = "sent"
-        except requests.RequestException:
+            if 400 <= response.status_code < 500:
+                state = "failed"
+            result = response.json()
+            delivery = result.get("invite_email", {}) if isinstance(result, dict) else {}
+            if 200 <= response.status_code < 300 and delivery.get("status") == "accepted":
+                state = "accepted"
+            elif delivery.get("status") in {"failed", "uncertain"}:
+                state = delivery["status"]
+            elif 400 <= response.status_code < 500:
+                state = "failed"
+        except (requests.RequestException, ValueError, AttributeError):
             pass
         with self.backend.session_scope(commit=True) as session:
             row, _ = self._storage_operation(session, operation_euid, lock=True)
             self.backend.update_instance_json(session, row, {"status": state, "completed_at": utc_now_iso()})
-        if state != "sent":
+        if state != "accepted":
             raise HTTPException(502, f"Invitation was not confirmed; inspect operation {operation_euid} before retrying")
         return {"share_euid": euid, "operation_euid": operation_euid, "status": state}
 
@@ -615,10 +628,11 @@ class RegistryServiceMixin:
                     "page_size": page_size, "has_more": has_more,
                     "timing_ms": int((perf_counter() - started) * 1000)}
 
-    def issue_registry_token(self, *, name: str, lifetime_days: int = 30, role: str | None = None):
+    def issue_registry_token(self, *, name: str, lifetime_days: int = 30, role: str | None = None,
+                             recipient_only: bool = False):
         actor = principal()
-        if actor.service or not actor.email or not name.strip() or not 1 <= lifetime_days <= 90:
-            raise ValueError("A signed-in user, token name, and lifetime of 1..90 days are required")
+        if actor.service or not actor.email or not name.strip() or not 1 <= lifetime_days <= 30:
+            raise ValueError("A signed-in user, token name, and lifetime of 1..30 days are required")
         permitted = {"READ_ONLY"}
         if actor.writable:
             permitted.add("READ_WRITE")
@@ -626,14 +640,26 @@ class RegistryServiceMixin:
             permitted.add("ADMIN")
         if role is not None and role not in permitted:
             raise HTTPException(403, "Token role exceeds the issuing user's access")
-        roles = [role] if role is not None else list(actor.roles)
+        if not actor.email_verified or not actor.identity_grant_id:
+            raise HTTPException(401, "Sign in through the sharing login before issuing a personal token")
+        from dewey_service.recipient_identity import mint_personal_identity
+        from dewey_service.settings import get_settings
+        binding = mint_personal_identity(get_settings(), grant_id=actor.identity_grant_id,
+                                        revision=actor.identity_revision, lifetime_days=lifetime_days)
+        if binding["email"] != actor.email or binding["canonical_user_id"] != actor.subject:
+            raise HTTPException(401, "Recipient identity changed; sign in again")
+        recipient_only = recipient_only or actor.recipient_only
+        roles = ["READ_ONLY"] if recipient_only else ([role] if role is not None else list(actor.roles))
         token = "dewey_user_" + secrets.token_urlsafe(48)
-        expires = (datetime.now(timezone.utc) + timedelta(days=lifetime_days)).isoformat()
+        expires = min(datetime.now(timezone.utc) + timedelta(days=lifetime_days),
+                      datetime.fromisoformat(binding["expires_at"].replace("Z", "+00:00"))).isoformat()
         with self.backend.session_scope(commit=True) as session:
             row = self.backend.create_instance(session, template_code=TOKEN_TEMPLATE, name=name.strip(), json_addl={
                 "token_sha256": sha256(token.encode()).hexdigest(), "subject": actor.subject,
                 "email": actor.email, "roles": roles, "groups": list(actor.groups),
                 "internal": actor.internal, "expires_at": expires, "status": "active",
+                "identity_grant_id": binding["grant_id"], "identity_revision": binding["revision"],
+                "identity_expires_at": binding["expires_at"], "recipient_only": recipient_only,
             })
             return {"euid": row.euid, "token": token, "expires_at": expires, "roles": roles, "display_once": True}
 
@@ -651,24 +677,42 @@ class RegistryServiceMixin:
             data = normalize_instance_payload(row)
             if data["status"] != "active" or datetime.fromisoformat(data["expires_at"]) <= datetime.now(timezone.utc):
                 raise HTTPException(401, "Dewey user token is revoked or expired")
-            return Principal(subject=data["subject"], email=data["email"], roles=tuple(data["roles"]),
-                groups=tuple(data["groups"]), internal=data["internal"])
+        binding = {}
+        if data.get("identity_grant_id"):
+            from dewey_service.recipient_identity import verify_recipient_binding
+            from dewey_service.settings import get_settings
+            binding = verify_recipient_binding(get_settings(), grant_id=data["identity_grant_id"],
+                                               revision=data["identity_revision"])
+            if binding["email"] != data["email"] or binding["canonical_user_id"] != data["subject"]:
+                raise HTTPException(401, "Recipient identity changed; renew the personal token")
+        recipient_only = data.get("recipient_only", False)
+        return Principal(subject=data["subject"], email=data["email"],
+            roles=("READ_ONLY",) if recipient_only else tuple(data["roles"]),
+            groups=tuple(data["groups"]), internal=data["internal"], recipient_only=recipient_only,
+            identity_grant_id=binding.get("grant_id", ""), identity_revision=binding.get("revision", 0),
+            identity_expires_at=binding.get("expires_at", ""), email_verified=binding.get("email_verified") is True)
 
-    def registry_tokens(self):
+    def registry_tokens(self, *, own_only: bool = False):
         actor = principal()
         with self.backend.session_scope(commit=False) as session:
             query = self.backend._template_query(session, template_code=TOKEN_TEMPLATE)
-            if not actor.admin:
+            if own_only or not actor.admin:
                 query = query.filter(generic_instance.json_addl["subject"].astext == actor.subject)
             return [{"euid": r.euid, "name": r.name, "email": normalize_instance_payload(r)["email"],
                 "status": normalize_instance_payload(r)["status"], "expires_at": normalize_instance_payload(r)["expires_at"]}
                 for r in query.order_by(generic_instance.created_dt.desc()).all()]
 
-    def revoke_registry_token(self, euid: str):
+    def revoke_registry_token(self, euid: str, *, own_only: bool = False):
         actor = principal()
         with self.backend.session_scope(commit=True) as session:
             row = self.backend.find_by_euid(session, template_code=TOKEN_TEMPLATE, euid=euid, for_update=True)
-            if row is None or (not actor.admin and normalize_instance_payload(row)["subject"] != actor.subject):
+            if row is None or ((own_only or not actor.admin) and normalize_instance_payload(row)["subject"] != actor.subject):
                 raise DeweyNotFoundError("Token not found")
+            data = normalize_instance_payload(row)
             self.backend.update_instance_json(session, row, {"status": "revoked", "revoked_at": utc_now_iso()})
-            return {"euid": euid, "status": "revoked"}
+        # Local revocation takes effect even if the identity service is unavailable.
+        if data.get("identity_grant_id"):
+            from dewey_service.recipient_identity import revoke_recipient_identity
+            from dewey_service.settings import get_settings
+            revoke_recipient_identity(get_settings(), grant_id=data["identity_grant_id"], revision=data["identity_revision"])
+        return {"euid": euid, "status": "revoked"}

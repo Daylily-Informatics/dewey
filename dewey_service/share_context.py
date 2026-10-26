@@ -14,20 +14,21 @@ _CONTEXT: ContextVar[dict | None] = ContextVar("dewey_share_context", default=No
 
 def current_share_audit_context() -> dict:
     value = _CONTEXT.get() or {}
-    return {key: value[key] for key in ("request_id", "trusted_tailnet", "managed_origin") if key in value}
+    return {key: value[key] for key in ("request_id", "trusted_tailnet", "public_recipient", "managed_origin") if key in value}
 
 
 def share_context_available() -> bool:
     value = _CONTEXT.get()
     from dewey_service.registry_access import current_principal
     actor = current_principal()
-    return bool(value and value.get("trusted_tailnet") is True and value.get("managed_origin") is True and actor
-                and actor.subject and actor.email and not actor.service)
+    return bool(value and (value.get("trusted_tailnet") is True or value.get("public_recipient") is True)
+                and value.get("managed_origin") is True and actor and actor.subject and actor.email
+                and actor.email_verified and not actor.service)
 
 
 def require_share_context() -> dict:
     if not share_context_available():
-        raise HTTPException(403, "Managed sharing requires trusted Tailscale ingress and a verified current identity")
+        raise HTTPException(403, "Managed sharing requires verified ingress and a current verified-email identity")
     from dewey_service.registry_access import principal
     actor = principal()
     return {**dict(_CONTEXT.get()), "identity_verified": True,
@@ -60,6 +61,13 @@ def require_trusted_tailnet(request) -> None:
         raise HTTPException(403, "Trusted Tailscale ingress is required")
 
 
+def require_share_ingress(request) -> None:
+    """Recipient transport may be private or the explicitly asserted public gateway."""
+    if not (getattr(request.state, "trusted_tailnet", False)
+            or getattr(request.state, "public_recipient", False)):
+        raise HTTPException(403, "Verified sharing ingress is required")
+
+
 class ManagedShareIngressMiddleware:
     """Pure ASGI context; principal resolution can safely run inside it."""
     def __init__(self, app, *, settings):
@@ -75,6 +83,15 @@ class ManagedShareIngressMiddleware:
         trusted = bool(self.settings.share_trusted_proxy_peer and expected and peer
                        and peer[0] == self.settings.share_trusted_proxy_peer and len(values) == 1
                        and hmac.compare_digest(values[0], expected.encode("utf-8")))
+        public_header = self.settings.share_public_ingress_assertion_header.lower().encode("ascii")
+        public_values = [value for name, value in scope.get("headers", ()) if name.lower() == public_header]
+        public_expected = self.settings.share_public_ingress_assertion
+        public = bool(self.settings.share_trusted_proxy_peer and public_expected and peer
+                      and peer[0] == self.settings.share_trusted_proxy_peer and len(public_values) == 1
+                      and hmac.compare_digest(public_values[0], public_expected.encode("utf-8")))
+        # Conflicting assertions are invalid, never a privilege upgrade.
+        if trusted and public:
+            trusted = public = False
         from starlette.datastructures import Headers
         headers = Headers(scope=scope)
         authority, origin = headers.get("host", ""), headers.get("origin")
@@ -84,6 +101,7 @@ class ManagedShareIngressMiddleware:
         managed_origin = (authority == urlsplit(application).netloc and origin in {None, application}) or (
             content and origin in {None, application, "https://" + authority})
         scope.setdefault("state", {})["trusted_tailnet"] = trusted
-        with share_context_context({"trusted_tailnet": trusted, "managed_origin": managed_origin,
+        scope["state"]["public_recipient"] = public
+        with share_context_context({"trusted_tailnet": trusted, "public_recipient": public, "managed_origin": managed_origin,
                                     "request_id": str(uuid4())}):
             await self.app(scope, receive, send)

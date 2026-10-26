@@ -116,9 +116,9 @@ def _revoke(euid: str = typer.Argument(...), reason: str = typer.Option(...), po
     _emit(lambda: _request("POST", f"/api/v1/registry/shares/{quote(euid, safe='')}/revoke", data={"reason":reason,"policy_revision":policy_revision}))
 
 
-def _share_contents(euid: str = typer.Argument(...), target_euid: str = typer.Option(""), prefix: str = typer.Option(""), continuation_token: str | None = typer.Option(None), limit: int = typer.Option(100, min=1, max=1000)):
+def _share_contents(euid: str = typer.Argument(...), relative_path: str = typer.Option(""), continuation_token: str | None = typer.Option(None), limit: int = typer.Option(100, min=1, max=200)):
     """List only current permitted files within this share; preserve exact relative keys."""
-    _emit(lambda: _request("GET", f"/api/v1/registry/shares/{quote(euid, safe='')}/contents", params={"target_euid":target_euid,"prefix":prefix,"continuation_token":continuation_token,"limit":limit}))
+    _emit(lambda: _request("GET", f"/api/v2/recipient/shares/{quote(euid, safe='')}/contents", params={"path":relative_path,"continuation_token":continuation_token,"limit":limit}))
 
 
 def _share_selection_preview(euid: str = typer.Argument(..., help="Persisted target record EUID."), policy: Path = typer.Option(..., exists=True, dir_okay=False)):
@@ -136,41 +136,98 @@ def _share_revoke_grant(euid: str = typer.Argument(...), grant_euid: str = typer
     _emit(lambda: _request("POST", f"/api/v1/registry/shares/{quote(euid, safe='')}/grants/{quote(grant_euid, safe='')}/revoke", data={"policy_revision":policy_revision,"reason":reason}))
 
 
-def _share_presign(euid: str = typer.Argument(...), target_euid: str = typer.Argument(...), relative_key: str = typer.Option(""), ttl_seconds: int = typer.Option(900, min=1, max=3600)):
-    """Explicitly issue a raw S3 bearer URL; anyone can consume it until actual expires_at."""
-    _emit(lambda: _request("POST", f"/api/v1/registry/shares/{quote(euid, safe='')}/presign", data={"target_euid":target_euid,"relative_key":relative_key,"ttl_seconds":ttl_seconds}))
-
-
 def _share_report(euid: str = typer.Argument(...)):
     """Show the authenticated share page for isolated report viewing in a browser."""
     def run():
         base, _ = _connection()
-        detail = _request("GET", f"/api/v1/registry/shares/{quote(euid, safe='')}")
-        return {"share_euid":detail["euid"], "browser_url":base + "/shares/" + quote(euid, safe=""), "requirements":["Tailscale", "Dewey browser sign-in"], "action":"Choose View report for an authorized HTML file"}
+        detail = _request("GET", f"/api/v2/recipient/shares/{quote(euid, safe='')}")
+        path = "/fetch/" + quote(euid, safe="")
+        if detail.get("report_entrypoint"):
+            path += "/" + quote(detail["report_entrypoint"], safe="/")
+        return {"share_euid":detail["share_euid"], "browser_url":base + path,
+            "requirements":["Verified-email browser sign-in", "Current share grant"], "action":"Open this durable URL in a browser"}
     _emit(run)
 
 
-def _share_download(euid: str = typer.Argument(...), target_euid: str = typer.Argument(...), output: Path = typer.Option(..., dir_okay=False, help="New output path; existing files are never overwritten."), relative_key: str = typer.Option("")):
-    """Stream a file through the authenticated Dewey gateway using this share only."""
+def _alias(euid: str = typer.Argument(...), slug: str = typer.Argument(...), policy_revision: int = typer.Option(..., min=1)):
+    """Claim one available human-readable URL; claims cannot be reassigned."""
+    _emit(lambda: _request("POST", f"/api/v1/registry/shares/{quote(euid, safe='')}/aliases",
+        data={"slug": slug, "policy_revision": policy_revision}))
+
+
+def _alias_list(euid: str = typer.Argument(...)):
+    """List active and retired human-readable URLs for a managed share."""
+    _emit(lambda: _request("GET", f"/api/v1/registry/shares/{quote(euid, safe='')}/aliases"))
+
+
+def _alias_revoke(euid: str = typer.Argument(...), slug: str = typer.Argument(...), policy_revision: int = typer.Option(..., min=1)):
+    """Permanently retire a slug without changing the canonical share URL."""
+    _emit(lambda: _request("POST", f"/api/v1/registry/shares/{quote(euid, safe='')}/aliases/{quote(slug, safe='')}/revoke",
+        data={"policy_revision": policy_revision}))
+
+
+def _rebind(euid: str = typer.Argument(...), storage_uri: str = typer.Option(...), expected_location_revision: int = typer.Option(..., min=1),
+            reason: str = typer.Option(...), version_id: str | None = typer.Option(None)):
+    """Rebind a stable artifact to a verified equivalent S3 location; no storage objects are moved or deleted."""
+    _emit(lambda: _request("POST", f"/api/v1/records/{quote(euid, safe='')}/location-rebind",
+        data={"storage_uri": storage_uri, "expected_location_revision": expected_location_revision, "reason": reason, "version_id": version_id}))
+
+
+def _sharing_report(starts_at: str = typer.Option(...), ends_at: str | None = typer.Option(None), owner_subject: str | None = typer.Option(None),
+                    status: str | None = typer.Option(None), audience: str | None = typer.Option(None), content_mode: str | None = typer.Option(None),
+                    older_than_days: int | None = typer.Option(None, min=0), never_accessed: bool = typer.Option(False),
+                    inventory: bool = typer.Option(False), page: int = typer.Option(1, min=1),
+                    observed_at: str | None = typer.Option(None), expected_inventory_sha256: str | None = typer.Option(None),
+                    created_from: str | None = typer.Option(None), created_before: str | None = typer.Option(None),
+                    output: Path | None = typer.Option(None, dir_okay=False, help="Export all frozen inventory pages to a new JSON file.")):
+    """Read authorized share aggregates or paginated lifecycle inventory with explicit observation coverage."""
+    params = {"starts_at": starts_at, "ends_at": ends_at, "owner_subject": owner_subject, "status": status,
+        "audience": audience, "content_mode": content_mode, "older_than_days": older_than_days, "never_accessed": never_accessed,
+        "created_from": created_from, "created_before": created_before}
+    if inventory:
+        params.update(page=page, page_size=100, observed_at=observed_at, expected_inventory_sha256=expected_inventory_sha256)
     def run():
-        base, token = _connection()
-        if output.exists():
-            raise ValueError("Output already exists; choose a new path")
-        path = f"/shares/{quote(euid, safe='')}/files/{quote(target_euid, safe='')}"
-        count = 0
-        with requests.get(base+path, params={"relative_key":relative_key}, headers={"Authorization":"Bearer "+token}, stream=True, timeout=(10,300), allow_redirects=False) as response:
-            if response.status_code != 200:
-                raise RuntimeError(f"Dewey gateway returned HTTP {response.status_code}; no download was written")
-            with output.open("xb") as destination:
-                for chunk in response.iter_content(chunk_size=1024*1024):
-                    if chunk:
-                        destination.write(chunk)
-                        count += len(chunk)
-            expected = response.headers.get("Content-Length")
-            if expected is not None and int(expected) != count:
-                raise RuntimeError("Gateway download length mismatch; partial output retained for inspection")
-        return {"share_euid":euid,"target_euid":target_euid,"output":str(output.resolve()),"bytes_received":count,"status":"complete"}
+        if page > 1 and (not inventory or not observed_at or not expected_inventory_sha256):
+            raise ValueError("Inventory page 2 onward requires --observed-at and --expected-inventory-sha256 from page 1")
+        if output:
+            if not inventory or page != 1:
+                raise ValueError("Complete inventory export requires --inventory and --page 1")
+            return _export_sharing_inventory(params, output)
+        return _request("GET", "/api/v1/registry/" + ("sharing-inventory" if inventory else "sharing-report"), params=params)
     _emit(run)
+
+
+def _export_sharing_inventory(params, output):
+    if output.exists() or output.is_symlink():
+        raise ValueError("Inventory export output already exists")
+    partial = output.with_name(output.name + ".partial")
+    query, count, first = dict(params), 0, True
+    frozen = None
+    with partial.open("x") as stream:
+        stream.write('{"items":[')
+        while True:
+            result = _request("GET", "/api/v1/registry/sharing-inventory", params=query)
+            stamp = (result["observed_at"], result["inventory_sha256"])
+            if frozen is not None and stamp != frozen:
+                raise RuntimeError("Sharing inventory changed; partial export retained, restart with a new output")
+            frozen = stamp
+            for row in result["items"]:
+                stream.write(("" if first else ",") + json.dumps(row, separators=(",", ":")))
+                first = False
+                count += 1
+            if not result["has_more"]:
+                break
+            query.update(page=result["page"] + 1, observed_at=frozen[0], expected_inventory_sha256=frozen[1])
+        if count != result["total"]:
+            raise RuntimeError("Sharing inventory count differs from its frozen total")
+        stream.write('],"complete":true,"observed_at":' + json.dumps(frozen[0])
+            + ',"inventory_sha256":' + json.dumps(frozen[1]) + ',"coverage":' + json.dumps(result["coverage"]) + "}")
+        stream.flush()
+        os.fsync(stream.fileno())
+    os.link(partial, output)
+    partial.unlink()
+    return {"status": "complete", "output": str(output.resolve()), "shares": count,
+        "observed_at": frozen[0], "inventory_sha256": frozen[1]}
 
 
 def _invite(euid: str = typer.Argument(...), email: str = typer.Option(...)):
@@ -198,7 +255,7 @@ def _owner(euid: str = typer.Argument(...), email: str = typer.Option(...)):
     _emit(lambda: _request("PATCH", f"/api/v1/records/{quote(euid, safe='')}/owner", data={"email":email}))
 
 
-def _preview(euid: str = typer.Argument(...), share_euid: str = typer.Option(..., help="Explicit managed share to view this report; Tailscale and browser sign-in required.")):
+def _preview(euid: str = typer.Argument(...), share_euid: str = typer.Option(..., help="Explicit managed share to view this report; verified browser sign-in required.")):
     """View through an explicit managed share rather than issuing a bearer preview."""
     _share_report(share_euid)
 
@@ -254,6 +311,7 @@ def _delete_execute(euid: str = typer.Argument(...), manifest_sha256: str = type
 
 
 def register(registry, spec):
+    from dewey_service.cli.share_fetch import fetch, manifest
     read = CommandPolicy(runtime_guard="exempt", supports_json=True)
     write = CommandPolicy(runtime_guard="exempt", supports_json=True, mutates_state=True)
     for group in ("artifacts", "sets", "shares", "storage"):
@@ -274,7 +332,8 @@ def register(registry, spec):
             registry.add_command(group, name, command, help_text=help_text, policy=policy)
     for group, commands in {
         "sets": [("add-member",_member_add,write),("remove-member",_member_remove,write)],
-        "shares": [("list",_share_list,read),("get",_share_get,read),("create",_share,write),("update",_share_edit,write),("revoke",_revoke,write),("invite",_invite,write),("contents",_share_contents,read),("preview",_share_selection_preview,read),("activity",_share_activity,read),("revoke-grant",_share_revoke_grant,write),("download",_share_download,write),("presign",_share_presign,write),("report",_share_report,read)],
+        "artifacts": [("location-rebind",_rebind,write)],
+        "shares": [("list",_share_list,read),("get",_share_get,read),("create",_share,write),("update",_share_edit,write),("revoke",_revoke,write),("invite",_invite,write),("contents",_share_contents,read),("preview",_share_selection_preview,read),("activity",_share_activity,read),("revoke-grant",_share_revoke_grant,write),("fetch",fetch,write),("manifest",manifest,write),("report",_share_report,read),("aliases",_alias_list,read),("claim-slug",_alias,write),("retire-slug",_alias_revoke,write),("audit-report",_sharing_report,read)],
         "storage": [("buckets",_buckets,read),("browse",_browse,read),("object",_object,read),("upload",_upload,write),
             ("operation",_operation,read),("abort-upload",_abort,write),("delete-preview",_delete_preview,write),("delete-execute",_delete_execute,write)],
     }.items():

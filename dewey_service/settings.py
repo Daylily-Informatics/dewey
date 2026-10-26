@@ -265,6 +265,8 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "share_trusted_proxy_peer": "share_trusted_proxy_peer",
         "share_ingress_assertion_header": "share_ingress_assertion_header",
         "share_ingress_assertion": "share_ingress_assertion",
+        "share_public_ingress_assertion_header": "share_public_ingress_assertion_header",
+        "share_public_ingress_assertion": "share_public_ingress_assertion",
         "share_application_origin": "share_application_origin",
         "share_content_host_suffix": "share_content_host_suffix",
         "share_session_generation": "share_session_generation",
@@ -287,6 +289,10 @@ def _flatten_config(config: dict[str, Any]) -> dict[str, Any]:
         "auth_external_broker_callback_url": "external_broker_callback_url",
         "auth_external_broker_logout_url": "external_broker_logout_url",
         "auth_external_broker_ca_bundle": "external_broker_ca_bundle",
+        "auth_external_broker_share_login_url": "external_broker_share_login_url",
+        "auth_external_broker_identity_url": "external_broker_identity_url",
+        "auth_external_broker_identity_mint_url": "external_broker_identity_mint_url",
+        "auth_external_broker_identity_revoke_url": "external_broker_identity_revoke_url",
         "qeo_ingest_url": "qeo_ingest_url",
         "qeo_api_token": "qeo_api_token",
         "qeo_consumer_group": "qeo_consumer_group",
@@ -382,6 +388,10 @@ def _display_config_path(path: str) -> str:
         "external_broker_callback_url": "auth.external_broker.callback_url",
         "external_broker_logout_url": "auth.external_broker.logout_url",
         "external_broker_ca_bundle": "auth.external_broker.ca_bundle",
+        "external_broker_share_login_url": "auth.external_broker.share_login_url",
+        "external_broker_identity_url": "auth.external_broker.identity_url",
+        "external_broker_identity_mint_url": "auth.external_broker.identity_mint_url",
+        "external_broker_identity_revoke_url": "auth.external_broker.identity_revoke_url",
         "qeo_ingest_url": "qeo.ingest_url",
         "qeo_api_token": "qeo.api_token",
         "qeo_consumer_group": "qeo.consumer_group",
@@ -502,6 +512,10 @@ class Settings(BaseSettings):
     external_broker_callback_url: str = ""
     external_broker_logout_url: str = ""
     external_broker_ca_bundle: str = ""
+    external_broker_share_login_url: str = ""
+    external_broker_identity_url: str = ""
+    external_broker_identity_mint_url: str = ""
+    external_broker_identity_revoke_url: str = ""
 
     # Explicit Dewey -> QEO outbox dispatch. Empty values disable dispatch by failing hard.
     qeo_ingest_url: str = ""
@@ -553,6 +567,8 @@ class Settings(BaseSettings):
     share_trusted_proxy_peer: str = ""
     share_ingress_assertion_header: str = "X-Dewey-Tailnet-Assertion"
     share_ingress_assertion: str = ""
+    share_public_ingress_assertion_header: str = "X-Dewey-Recipient-Assertion"
+    share_public_ingress_assertion: str = ""
     share_application_origin: str = ""
     share_content_host_suffix: str = ""
     share_session_generation: str = ""
@@ -576,7 +592,7 @@ class Settings(BaseSettings):
             raise ValueError("share_content_host_suffix must be an explicit lowercase DNS suffix")
         return value
 
-    @field_validator("share_ingress_assertion_header")
+    @field_validator("share_ingress_assertion_header", "share_public_ingress_assertion_header")
     @classmethod
     def validate_ingress_header(cls, value: str) -> str:
         if not re.fullmatch(r"[A-Za-z0-9-]+", value):
@@ -602,6 +618,10 @@ class Settings(BaseSettings):
         "external_broker_handoff_exchange_url",
         "external_broker_callback_url",
         "external_broker_logout_url",
+        "external_broker_share_login_url",
+        "external_broker_identity_url",
+        "external_broker_identity_mint_url",
+        "external_broker_identity_revoke_url",
     )
     @classmethod
     def validate_external_broker_urls(cls, value: str, info):

@@ -109,9 +109,11 @@ def registry_templates(
     expected = {("access", "registry_policy", "generic", "1.0"),
         ("access", "api_client", "generic", "1.0"), ("operational", "storage_operation", "generic", "1.0")}
     sharing = {("access", "share_grant", "generic", "1.0"), ("operational", "share_event", "generic", "1.0")}
+    sharing3 = {("access", "share_revision", "generic", "1.0"),
+        ("access", "share_alias", "generic", "1.0"), ("data", "artifact_location_revision", "generic", "1.0")}
     keys = {template_key(t) for t in pack["templates"]}
-    if keys not in (expected, sharing) or len(pack["templates"]) != len(keys):
-        raise typer.BadParameter("This operation accepts only the exact registry10 or sharing2 release pack")
+    if keys not in (expected, sharing, sharing3) or len(pack["templates"]) != len(keys):
+        raise typer.BadParameter("This operation accepts only the exact registry10, sharing2 or sharing3 release pack")
     with TAPDBConnection(db_hostname=f"{cfg['host']}:{cfg['port']}", db_hostaddr=cfg.get("hostaddr"),
         db_user=cfg["operator_user"], db_pass=cfg.get("operator_password"),
         secret_arn=cfg.get("operator_secret_arn"), db_name=cfg["database"], engine_type=cfg["engine_type"],
@@ -221,6 +223,45 @@ def upgrade_sharing(
     ccyo_out.print_text(json.dumps(summary))
 
 
+def upgrade_sharing_v3(
+    phase: str = typer.Option(..., help="inventory, apply, or verify; preserving conversion, never startup"),
+    inventory: Path = typer.Option(...),
+    actor: str = typer.Option(...),
+    attribution: Path = typer.Option(..., exists=True, dir_okay=False),
+    expected_sha256: str | None = typer.Option(None),
+    receipt: Path | None = typer.Option(None),
+) -> None:
+    import json
+    import os
+    from dewey_service.audit import explicit_attribution_context
+    from dewey_service.registry_access import Principal, principal_context
+    from dewey_service.service import DeweyService
+    from dewey_service.tapdb_backend import TapDBBackend
+    from dewey_service import share_upgrade_v3
+    from dewey_service.share_upgrade import write_private
+    if phase not in {"inventory", "apply", "verify"} or not actor.strip():
+        raise typer.BadParameter("Explicit phase and operator identity required")
+    if not Path(os.environ.get("DEWEY_CONFIG", "")).is_absolute() or not inventory.is_absolute() or not attribution.is_absolute():
+        raise typer.BadParameter("DEWEY_CONFIG, inventory and attribution paths must be absolute")
+    if phase != "inventory" and (not expected_sha256 or receipt is None or not receipt.is_absolute() or receipt.exists()):
+        raise typer.BadParameter("Apply/verify require the reviewed digest and a new absolute receipt path")
+    backend = TapDBBackend(app_username=actor)
+    service = DeweyService(backend)
+    with explicit_attribution_context(attribution), principal_context(
+            Principal(subject=actor, roles=("ADMIN",), service=True), maintenance=True):
+        if phase == "inventory":
+            result = share_upgrade_v3.inventory(service)
+            write_private(inventory, result)
+        else:
+            result = getattr(share_upgrade_v3, phase)(service, json.loads(inventory.read_text()), expected_sha256)
+            write_private(receipt, result)
+    # Private inventories may contain recipient identities; print counts/digests only.
+    summary = {key: value for key, value in result.items() if key in {
+        "phase", "status", "schema_version", "inventory_sha256", "share_count", "ambiguous_count",
+        "converted_count", "verified_count", "preserved_count", "eligible_share_count"}}
+    ccyo_out.print_text(json.dumps({"phase": phase, **summary}))
+
+
 def register(registry: CommandRegistry, spec: CliSpec) -> None:
     """Register verification and lifecycle guidance, with no bootstrap aliases."""
     _ = spec
@@ -228,7 +269,8 @@ def register(registry: CommandRegistry, spec: CliSpec) -> None:
         registry,
         "db",
         "Verify existing Dewey data and review native TapDB lifecycle ownership",
-        [("upgrade-sharing", upgrade_sharing, REQUIRED_MUTATING),
+        [("upgrade-sharing-v3", upgrade_sharing_v3, REQUIRED_MUTATING),
+         ("upgrade-sharing", upgrade_sharing, REQUIRED_MUTATING),
          ("initialize-performance-settings", initialize_performance_settings, REQUIRED_MUTATING),
          ("verify-templates", verify_templates, REQUIRED), ("lifecycle", lifecycle, EXEMPT),
          ("registry-conversion", registry_conversion, REQUIRED_MUTATING),

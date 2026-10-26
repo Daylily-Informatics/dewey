@@ -49,6 +49,7 @@ class StorageObject:
     storage_class: str | None = None
     etag: str | None = None
     sha256: str | None = None
+    checksum_type: str | None = None
     metadata: dict[str, str] | None = None
     last_modified: str | None = None
 
@@ -103,11 +104,14 @@ class S3StorageClient:
         version_id: str | None = None,
         request_payer: str | None = None,
         permission: str = "metadata",
+        checksum_mode: bool = False,
     ) -> StorageObject:
         if permission not in {"metadata", "download", "upload"}:
             raise ValueError("Invalid object inspection permission")
         self._check(bucket, key, permission)
         params: dict[str, Any] = {"Bucket": bucket, "Key": key}
+        if checksum_mode:
+            params["ChecksumMode"] = "ENABLED"
         if version_id:
             params["VersionId"] = version_id
         if str(request_payer or "").strip():
@@ -527,6 +531,7 @@ class S3StorageClient:
             storage_class=response.get("StorageClass"),
             etag=str(response.get("ETag") or "").strip('"') or None,
             sha256=str(response.get("ChecksumSHA256") or "").strip() or None,
+            checksum_type=str(response.get("ChecksumType") or "").strip() or None,
             metadata=dict(response.get("Metadata") or {}),
             last_modified=response["LastModified"].isoformat() if response.get("LastModified") else None,
         )
