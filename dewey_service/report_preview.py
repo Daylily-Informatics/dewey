@@ -111,6 +111,8 @@ def _live_context(service, settings, session, row):
     )
     if len(targets) != 1 or len(shares) != 1:
         raise HTTPException(409, "Preview source relationship unavailable")
+    from dewey_service.services.share_expiry import validate_activation_generation
+    validate_activation_generation(data, normalize_instance_payload(shares[0]))
     return data, binding, bindings[0].euid, shares[0].euid, targets[0].euid
 
 
@@ -340,6 +342,8 @@ def attach_report_preview(app, router, service):
             session_data = live_session_binding(service, settings, session, binding_euid)
             expires = _context_expiry(now, receipt["expires_at"], session_data["expires_at"])
             share = service._canonical_share(session, share_euid)
+            if normalize_instance_payload(share)["policy_revision"] != receipt["policy_revision"]:
+                raise HTTPException(409, "Share policy changed before preview creation; reopen from Dewey")
             target_row = next(
                 (v for v in service._share_members(session, share) if v.euid == target), None
             )
@@ -357,6 +361,7 @@ def attach_report_preview(app, router, service):
                     "bundle_root": root,
                     "report_relative_key": relative,
                     "object_only": not relative,
+                    "share_activation_generation": normalize_instance_payload(share).get("activation_generation", 0),
                     "created_at": utc_now_iso(),
                     "expires_at": expires.isoformat(),
                 },

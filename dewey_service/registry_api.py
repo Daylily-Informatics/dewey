@@ -28,7 +28,6 @@ class Registration(BaseModel):
 
 class RegistryDefaultsUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    share_lifetime_days: int | None = Field(default=None, ge=1, strict=True)
     delivery_lifetime_seconds: int = Field(default=None, ge=1, le=3600, strict=True)
     listing_cache_ttl_seconds: int = Field(default=None, ge=0, le=300, strict=True)
 
@@ -80,6 +79,15 @@ class GrantRevocationRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     policy_revision: int = Field(ge=1)
     reason: str | None = None
+
+
+class ShareRevivalRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    policy_revision: int = Field(ge=1)
+    expires_at: str = Field(min_length=1)
+    grant_euids: list[str]
+    reason: str = Field(min_length=1)
+    reauthorize_public_registered: bool = False
 
 
 class SlugClaimRequest(BaseModel):
@@ -445,6 +453,10 @@ def attach_registry_api(app, *, templates):
     def share_edit(euid: str, data: dict[str, Any] = Body(...)):
         return service.modify_registry_share(euid, data)
 
+    @router.post("/registry/shares/{euid}/revive")
+    def share_revive(euid: str, data: ShareRevivalRequest):
+        return service.revive_share(euid, **data.model_dump())
+
     @router.post("/registry/shares/{euid}/revoke")
     def share_revoke(euid: str, data: GrantRevocationRequest):
         return service.revoke_share(
@@ -545,6 +557,10 @@ def attach_registry_api(app, *, templates):
             **service.registry_defaults(),
             "tokens": service.registry_tokens(),
         }
+
+    @router.get("/registry/share-expiry-policy")
+    def scoped_share_expiry_policy():
+        return service.share_expiry_policy()
 
     @router.get("/registry/defaults")
     def defaults():

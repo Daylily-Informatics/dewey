@@ -85,18 +85,26 @@ class RegistryServiceMixin(ShareNotificationMixin):
                 or not 0 <= data["listing_cache_ttl_seconds"] <= 300
             ):
                 raise HTTPException(503, "Invalid persisted listing cache TTL")
-            return {key: data[key] for key in keys}
+            return {**{key: data[key] for key in keys}, "share_expiry_policy": {
+                "scope": "original_creator_and_entire_audience",
+                "internal_domains": ["lsmc.com", "lsmc.bio"],
+                "internal_default_lifetime_days": None, "bounded_default_lifetime_days": 14,
+                "bounded_max_lifetime_days": 365,
+                "configured_share_lifetime_is_scoped_override": False,
+                "share_lifetime_days_field_scope": "historical_persisted_setting_not_used_for_creation",
+                "description": "Persisted legacy lifetime is not a global authorization. Creator/audience policy determines defaults and no-expiry eligibility."}}
 
     def update_registry_defaults(self, changes):
         if not principal().admin:
             raise HTTPException(403, "Admin access required")
+        if "share_lifetime_days" in changes:
+            raise ValueError("Global share lifetime edits are unsupported; creator/audience scoped rules are fixed")
         if not changes or set(changes) - {
-            "share_lifetime_days",
             "delivery_lifetime_seconds",
             "listing_cache_ttl_seconds",
         }:
             raise ValueError(
-                "Only share lifetime, delivery lifetime and listing cache TTL may be changed"
+                "Only delivery lifetime and listing cache TTL may be changed; share expiry follows fixed creator/audience rules"
             )
         with self.backend.session_scope(commit=True) as session:
             self.backend.lock_external_key(
@@ -651,9 +659,12 @@ class RegistryServiceMixin(ShareNotificationMixin):
             if days is None:
                 args["expires_at"] = None
             else:
-                if type(days) is not int or not 1 <= days <= self.share_max_lifetime_days:
+                if type(days) is not int or days < 1:
                     raise ValueError("Invalid share lifetime")
-                args["expires_at"] = (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
+                try:
+                    args["expires_at"] = (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
+                except OverflowError as exc:
+                    raise ValueError("Share lifetime exceeds the supported calendar") from exc
         return self.create_share(
             target_kind=kind, target_euid=euid, idempotency_key=idempotency_key, **args
         )

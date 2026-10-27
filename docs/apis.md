@@ -211,14 +211,21 @@ Create fields include `name`, `purpose`, `audience` (`recipients` or
 `public_registered`), `allowed_users`, `allowed_domains`, or explicit `grants`,
 `include_patterns`, `exclude_patterns`, `denied_emails`, `expires_at`,
 `content_mode` (`download` or `www`), `report_entrypoint`, and
-`report_bundle_root`. `delivery_modes` admits only `["gateway"]`. Omitted expiry
-uses the explicit native `share_lifetime_days` service default, initially `null`
-(**No expiration**). Explicit `expires_at: null` or `lifetime_days: null` is
-indefinite. Record-scoped creation also accepts a positive integer `lifetime_days`
-when no explicit expiry is supplied. Finite deadlines retain the configured
-`share.max_lifetime_days` limit and timezone/future validation. Owner identity is
-derived from the authenticated creator. Arbitrary owner/group/TTL and old
-transport payloads are not the 12.x share contract.
+`report_bundle_root`. `delivery_modes` admits only `["gateway"]`.
+
+Expiry is scoped to the **original creator and entire audience**. A verified
+`lsmc.com`/`lsmc.bio` account creator sharing only with exact `lsmc.com`/`lsmc.bio`
+email addresses or domains defaults to no expiry and may choose an explicit finite
+expiration. Included subdomains, outside recipients, public registration,
+service/unknown creators, and all other creators default to **14 days**, require a
+finite future expiration, and have an explicit maximum of **365 days from now**.
+An internal administrator editing an external-created share does not change the
+original creator's eligibility. Explicit `expires_at: null` or
+`lifetime_days: null` is accepted only for eligible internal shares. Positive
+`lifetime_days` is validated under the same scope. Grant deadlines cannot outlive
+a finite share; omission inherits its deadline. Preview, create, edit and revival
+use the same native rules. Ownership and creator verification come from native
+authenticated creation/audit records, not client fields.
 
 PATCH can change recipients, targets, filters, content mode and expiry atomically.
 For replacement targets, provide a reviewed `targets` list; each entry has
@@ -407,29 +414,54 @@ Current Dewey code does not expose:
 Historical governance documents may describe event families conceptually for the broader platform, but those are not implemented here as a public runtime API.
 
 
-### Native nullable sharing defaults (12.0.10)
+### Scoped expiry policy and explicit revival
 
-`registry.default_share_lifetime_days` is a nullable configuration seed, default
-`null`. `GET /api/v1/registry/defaults` returns the actual persisted
-`share_lifetime_days` as `null` or a positive integer; the admin response and GUI
-show the same native value. An authorized administrator updates the existing
-setting through `PATCH /api/v1/registry/defaults` with
-`{"share_lifetime_days": null}`. A finite integer may be explicitly configured
-later, bounded by `share.max_lifetime_days`. The admin field's blank value means
-**No expiration**, never zero. Delivery and listing TTL fields remain non-null.
+`GET /api/v1/registry/share-expiry-policy` returns the authenticated prospective
+creator's proof and scoped rule description. Share-manager detail returns
+`expiry_policy` for the **original persisted creator**, including whether the
+current no-expiry policy requires explicit review. Historical original-creator
+proof may be recovered from the native creation audit; missing proof is bounded.
 
-A deployment moving from the former persisted30-day default must explicitly
-apply that native PATCH; changing code/config alone does not silently override
-the saved setting. The new-share editor reads the native default. An existing
-share editor retains its stored finite or indefinite expiry. Default changes do
-not rewrite any persisted share or grant deadline.
+`GET /api/v1/registry/defaults` preserves the stored `share_lifetime_days` as a
+historical setting and explicitly describes its non-authoritative scope in
+`share_expiry_policy`. It is not a mutable global no-expiry authorization.
+`PATCH /api/v1/registry/defaults` rejects the unsupported `share_lifetime_days`
+field; it still supports `delivery_lifetime_seconds` and
+`listing_cache_ttl_seconds`. Admin API, server-rendered summary and editor show
+the fixed creator/audience rules rather than a global no-expiry toggle.
 
-Finite expiration remains settable both at share level and on each explicit
-email/domain grant, including `lsmc.com`, `lsmc.bio`, and all other domains.
-An indefinite share may contain finite grants. A grant cannot outlive a finite
-share. Verified identity and current access checks remain required at every
-request. There is no domain-specific expiration exception.
+Inactive shares are not reactivated by PATCH. A manager explicitly calls
+`POST /api/v1/registry/shares/{euid}/revive` with:
 
-Share/grant expiration is separate from gateway-delivery credentials and personal
-API tokens. Their finite lifetimes, revocation and provider-identity boundaries
-are unchanged; **No expiration** on a share does not create permanent credentials.
+```json
+{
+  "policy_revision": 3,
+  "expires_at": "2026-11-10T18:00:00+00:00",
+  "grant_euids": ["<actual persisted previously-active grant identity>"],
+  "reason": "Reviewed recipient and new expiration",
+  "reauthorize_public_registered": false
+}
+```
+
+Revival requires a new **finite** future expiration, the current revision, current
+target delegation authority, and explicit selection of existing recipients.
+The same original-creator/audience cap applies; an eligible internal finite
+expiration may exceed 365 days. Previously revoked individual grants cannot be
+selected. A public-with-registration audience requires its separate explicit
+reauthorization flag. Targets, patterns and denied rules are retained; revival
+cannot add recipients or broaden permissions. It increments policy revision and
+activation generation, retains prior revoked/expired audit evidence, retires old
+aliases and revokes old report contexts. It creates no automatic notification or
+resend. Later recipient additions are separate reviewed policy edits.
+
+New access-package paths carry policy-revision/activation pins; stale pins are
+rejected by `/fetch`. Listing cursors and TAR inventories retain revision fences;
+report contexts additionally retain permanent activation-generation fences.
+Ordinary unversioned canonical URLs remain locators requiring current verified
+identity and current grants on every request; they are not bearer credentials.
+Personal/API identity credentials retain their separate finite lifetimes.
+
+No source deployment automatically rewrites existing shares. A pre-existing
+outside-audience no-expiry policy is a visible exception requiring explicit
+review, not an endorsed grandfathered policy. Actual existing-share corrections
+or revivals require their separately authorized action and native audit receipt.

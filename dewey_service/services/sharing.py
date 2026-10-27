@@ -47,7 +47,10 @@ def _clean_list(values: list[Any] | tuple[Any, ...] | set[Any] | None) -> list[s
     return [str(item or "").strip() for item in (values or []) if str(item or "").strip()]
 
 
-class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin):
+from dewey_service.services.share_expiry import ShareExpiryMixin, lifetime_policy, normalize_lifetime
+
+
+class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin, ShareReportMixin):
     @staticmethod
     def _parse_share_s3_uri(value: str, *, require_prefix: bool = False) -> tuple[str, str, str]:
         raw = str(value or "")
@@ -65,26 +68,13 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
     def _request_payer_for_bucket(self, bucket: str) -> str | None:
         return "requester" if str(bucket or "").strip() in self.requester_pays_buckets else None
 
-    def _normalize_share_expiry(self, expires_at=UNSET, ttl_seconds=None):
-        from dewey_service.services.share_policy import expiry
-
-        if expires_at is None:
-            return None
-        if expires_at is UNSET:
-            days = self.registry_defaults()["share_lifetime_days"]
-            if days is None:
-                return None
-            if type(days) is not int or not 1 <= days <= self.share_max_lifetime_days:
-                raise ValueError("Invalid persisted share lifetime default")
-            expires_at = (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
-        parsed = expiry(expires_at)
-        if parsed <= datetime.now(timezone.utc):
-            raise ValueError("Share expiry must be in the future")
-        if parsed > datetime.now(timezone.utc) + timedelta(days=int(self.share_max_lifetime_days)):
-            raise ValueError(
-                "share expires_at exceeds configured maximum; use explicit null for indefinite"
-            )
-        return parsed.isoformat()
+    def _normalize_share_expiry(self, expires_at=UNSET, ttl_seconds=None, *, policy=None):
+        if ttl_seconds is not None:
+            raise ValueError("Raw signed URL lifetimes are no longer supported")
+        # Missing creator/audience proof is deliberately bounded. A persisted
+        # global null cannot authorize indefinite external or unknown shares.
+        scope = policy or lifetime_policy(self._new_share_creator(), {})
+        return normalize_lifetime(expires_at, scope)
 
     def _artifact_member_from_instance(
         self,
@@ -415,6 +405,8 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
             "format",
             "inventory_complete",
             "method",
+            "previous_status", "previous_expires_at", "previous_policy_revision",
+            "reauthorized_grant_euids", "retired_aliases", "activation_generation",
         }
         clean = {k: v for k, v in (details or {}).items() if k in allowed}
         from dewey_service.registry_access import maintenance_mode
@@ -774,7 +766,8 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
                 # A replay reports current lifecycle state, including revocation/expiry.
                 # It cannot reactivate a share or disclose an old privileged snapshot.
                 return replay.status_code, self._canonical_response(session, share, manager=True)
-            deadline = self._normalize_share_expiry(expires_at)
+            scope = lifetime_policy(self._new_share_creator(), source)
+            deadline = self._normalize_share_expiry(expires_at, policy=scope)
             members = self._expand_share_targets(
                 session, target_kind=target_kind, target_euid=target_euid, targets=targets
             )
@@ -808,6 +801,9 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
                     "purpose": purpose,
                     "owner_subject": actor.subject,
                     "owner_email": actor.email,
+                    "creator_email_verified": bool(actor.email_verified),
+                    "creator_service": bool(actor.service),
+                    "activation_generation": 0,
                     "expires_at": deadline,
                     "status": "active",
                     "starts_at": utc_now_iso(),
@@ -845,6 +841,7 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
             return 201, body
 
     def _canonical_response(self, session, share, *, manager):
+        from dewey_service.services.share_policy import expiry
         data = normalize_instance_payload(share)
         value = {
             **self._share_response(share),
@@ -855,6 +852,7 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
             "report_bundle_root": data.get("report_bundle_root", ""),
             "fetch_path": f"/fetch/{share.euid}",
             "policy_revision": data["policy_revision"],
+            "activation_generation": data.get("activation_generation", 0),
             "include_patterns": data["include_patterns"],
             "exclude_patterns": data["exclude_patterns"],
             "can_manage": manager,
@@ -862,6 +860,18 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
         }
         if manager:
             value["notifications"] = self._share_notification_status(session, share)
+            creator = self._share_creator(session, share)
+            live_grants = [normalize_instance_payload(g) for g in self._share_grants(session, share)
+                           if normalize_instance_payload(g).get("policy_revision") == data["policy_revision"]
+                           and normalize_instance_payload(g).get("status") == "active"]
+            value["expiry_policy"] = lifetime_policy(creator, {**data, "grants": live_grants})
+            value["expiry_policy"]["current_expiry_compliant"] = (data["expires_at"] is not None or value["expiry_policy"]["indefinite_allowed"])
+            value["expiry_policy"]["requires_explicit_review"] = data["status"] == "active" and not value["expiry_policy"]["current_expiry_compliant"]
+            value["can_revive"] = share.bstatus != "archived" and (
+                data["status"] != "active" or expiry(data["expires_at"]) <= datetime.now(timezone.utc))
+            value["revivable_grants"] = [{**normalize_instance_payload(g), "grant_euid": g.euid,
+                "target_euids": [t.euid for t in self._grant_targets(session, g)]}
+                for g in self._revivable_grants(session, share)] if value["can_revive"] else []
             value["aliases"] = self._share_aliases(session, share)
             value["denied_emails"] = data["denied_emails"]
             value["grants"] = [
@@ -1155,7 +1165,7 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
             if data["status"] != "active" or expiry(data["expires_at"]) <= datetime.now(
                 timezone.utc
             ):
-                raise ValueError("Expired or revoked shares cannot be reactivated")
+                raise ValueError("Inactive shares require the explicit revive action with new expiration and recipient reauthorization")
             old_emails = self._explicit_notification_emails(
                 [normalize_instance_payload(g) for g in self._share_grants(session, share)
                  if normalize_instance_payload(g).get("policy_revision") == data["policy_revision"]],
@@ -1183,7 +1193,6 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
             else:
                 members = old_members
             self._assert_share_delegation(session, members)
-            deadline = self._normalize_share_expiry(merged["expires_at"])
             if "grants" not in changes and not (
                 {"allowed_users", "allowed_domains"} & changes.keys()
             ):
@@ -1203,12 +1212,23 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
                         continue
                     value = _grant_policy_payload(rule)
                     value["target_euids"] = sorted(ids)
-                    if value["expires_at"] == data["expires_at"] or expiry(
-                        value["expires_at"]
-                    ) > expiry(deadline):
-                        value["expires_at"] = deadline
                     grant_data.append(value)
                 merged["grants"] = grant_data
+            # Replacing convenience recipient lists must not retain stale grants.
+            elif "grants" not in changes:
+                merged.pop("grants", None)
+                merged["allowed_users"] = changes.get("allowed_users", [])
+                merged["allowed_domains"] = changes.get("allowed_domains", [])
+            creator = self._share_creator(session, share)
+            scope = lifetime_policy(creator, merged)
+            raw_deadline = changes.get("expires_at", data["expires_at"])
+            if "expires_at" not in changes and raw_deadline is None and not scope["indefinite_allowed"]:
+                raw_deadline = UNSET
+            deadline = self._normalize_share_expiry(raw_deadline, policy=scope)
+            if "grants" not in changes and merged.get("grants") is not None:
+                for value in merged["grants"]:
+                    if value["expires_at"] == data["expires_at"] or expiry(value["expires_at"]) > expiry(deadline):
+                        value["expires_at"] = deadline
             policy = normalized_policy(
                 merged, share_expiry=deadline, member_euids=[m.euid for m in members]
             )
@@ -1239,6 +1259,8 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
                     "target_euid": merged.get("target_euid"),
                     "targets": merged.get("targets", []),
                     "member_count": len(members),
+                    "creator_email_verified": creator["email_verified"],
+                    "creator_service": creator["service"],
                 },
             )
             self._event(
@@ -1620,7 +1642,8 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
                 else "artifact_" + normalize_instance_payload(target)["storage_kind"]
             )
             members = self._expand_share_targets(session, target_kind=kind, target_euid=euid)
-            deadline = self._normalize_share_expiry(payload.get("expires_at", UNSET))
+            deadline = self._normalize_share_expiry(payload.get("expires_at", UNSET),
+                policy=lifetime_policy(self._new_share_creator(), payload))
             policy = normalized_policy(
                 payload, share_expiry=deadline, member_euids=[m["artifact_euid"] for m in members]
             )
@@ -1682,13 +1705,20 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
     def create_share_access_package(self, share_euid, *, delivery_mode="gateway", **kwargs):
         if delivery_mode != "gateway":
             raise HTTPException(410, "Raw S3 delivery was removed; use authenticated /fetch URLs")
-        self.get_share(share_euid)
+        from dewey_service.services.share_policy import expiry
+        data = self.get_share(share_euid)
+        if data["status"] != "active" or expiry(data["expires_at"]) <= datetime.now(timezone.utc):
+            raise HTTPException(410, "Inactive shares cannot issue access packages")
+        pins = f"policy_revision={data['policy_revision']}&activation_generation={data.get('activation_generation', 0)}"
         return {
             "share_euid": share_euid,
             "delivery_mode": "gateway",
-            "browser_path": f"/fetch/{share_euid}",
-            "manifest_path": f"/fetch/{share_euid}?format=manifest",
-            "archive_path": f"/fetch/{share_euid}?format=tar",
+            "policy_revision": data["policy_revision"],
+            "activation_generation": data.get("activation_generation", 0),
+            "browser_path": f"/fetch/{share_euid}?{pins}",
+            "manifest_path": f"/fetch/{share_euid}?format=manifest&{pins}",
+            "archive_path": f"/fetch/{share_euid}?format=tar&{pins}",
+            "authority": "Current verified identity and current recipient grants are required on every request; these paths are not bearer credentials",
         }
 
     def presign_share_object(self, *args, **kwargs):
