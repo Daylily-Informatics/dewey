@@ -26,6 +26,13 @@ class Registration(BaseModel):
     version_id: str | None = None
 
 
+class RegistryDefaultsUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    share_lifetime_days: int | None = Field(default=None, ge=1, strict=True)
+    delivery_lifetime_seconds: int = Field(default=None, ge=1, le=3600, strict=True)
+    listing_cache_ttl_seconds: int = Field(default=None, ge=0, le=300, strict=True)
+
+
 class MetadataUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str | None = None
@@ -58,7 +65,7 @@ class ShareRequest(BaseModel):
     allowed_users: list[str] = Field(default_factory=list)
     allowed_domains: list[str] = Field(default_factory=list)
     expires_at: str | None = None
-    lifetime_days: int | None = Field(default=None, ge=1)
+    lifetime_days: int | None = Field(default=None, ge=1, strict=True)
     grants: list[RecipientGrantRequest] | None = None
     include_patterns: list[str] = Field(default_factory=lambda: ["**"])
     exclude_patterns: list[str] = Field(default_factory=list)
@@ -544,8 +551,8 @@ def attach_registry_api(app, *, templates):
         return service.registry_defaults()
 
     @router.patch("/registry/defaults")
-    def change_defaults(data: dict[str, int] = Body(...)):
-        return service.update_registry_defaults(data)
+    def change_defaults(data: RegistryDefaultsUpdate):
+        return service.update_registry_defaults(data.model_dump(exclude_unset=True))
 
     @router.post("/account/tokens", status_code=201)
     def token_create(data: dict[str, Any] = Body(...)):

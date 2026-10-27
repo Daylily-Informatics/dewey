@@ -71,7 +71,12 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
         if expires_at is None:
             return None
         if expires_at is UNSET:
-            expires_at = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
+            days = self.registry_defaults()["share_lifetime_days"]
+            if days is None:
+                return None
+            if type(days) is not int or not 1 <= days <= self.share_max_lifetime_days:
+                raise ValueError("Invalid persisted share lifetime default")
+            expires_at = (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
         parsed = expiry(expires_at)
         if parsed <= datetime.now(timezone.utc):
             raise ValueError("Share expiry must be in the future")
@@ -746,6 +751,8 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
                 "target_kind": target_kind,
                 "target_euid": target_euid,
                 "targets": targets,
+                # Opaque persisted idempotency spelling; duration is resolved only
+                # by _normalize_share_expiry from the native defaults record.
                 "expires_at": "default_30_days" if expires_at is UNSET else expires_at,
                 "name": name,
                 "purpose": purpose,

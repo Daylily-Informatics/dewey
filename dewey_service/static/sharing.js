@@ -14,8 +14,8 @@ window.DeweySharing = (() => {
   const localValue = date => `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
   const offsetValue = date => { const n = -date.getTimezoneOffset(); return `${n < 0 ? "-" : "+"}${pad(Math.floor(Math.abs(n)/60))}:${pad(Math.abs(n)%60)}`; };
   function expiryMarkup(prefix, value) {
-    const d = new Date(value || Date.now()+30*86400000), zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    return `<label><input type="checkbox" name="${prefix}_indefinite" ${value===null?"checked":""}> No expiry · verified registered users only</label><div class="expiry-grid">${field(prefix+"_local", "Expiry in "+zone, localValue(d), "datetime-local", true)}${field(prefix+"_offset", "UTC offset (±HH:MM)", offsetValue(d), "text", true)}</div><output class="expiry-resolved" data-expiry="${prefix}"></output>`;
+    const d = value===null ? null : new Date(value), zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return `<label><input type="checkbox" name="${prefix}_indefinite" ${value===null?"checked":""}> No expiry · verified registered users only</label><div class="expiry-grid">${field(prefix+"_local", "Expiry in "+zone, d===null?"":localValue(d), "datetime-local", true)}${field(prefix+"_offset", "UTC offset (±HH:MM)", offsetValue(d===null?new Date():d), "text", true)}</div><output class="expiry-resolved" data-expiry="${prefix}"></output>`;
   }
   function expiry(form, prefix) {
     if(form.elements[prefix+"_indefinite"].checked) return null;
@@ -44,7 +44,10 @@ window.DeweySharing = (() => {
   async function editor(target, existing = null) {
     let record = null;
     if (!existing) record = await h.api(`/api/v1/records/${enc(target)}`);
-    const deadline = existing ? existing.expires_at : new Date(Date.now()+30*86400000).toISOString();
+    const defaults = existing ? null : await h.api("/api/v1/registry/defaults");
+    const days = defaults?.share_lifetime_days;
+    if (!existing && days!==null && (!Number.isInteger(days)||days<1)) throw Error("Invalid native share lifetime default.");
+    const deadline = existing ? existing.expires_at : days===null ? null : new Date(Date.now()+days*86400000).toISOString();
     const targets = existing ? existing.targets : (record.kind==="set" ? record.members.map(m=>({euid:m.artifact_euid,name:m.original_filename,kind:m.storage_kind})) : [{euid:target,name:record.name}]);
     if (!Array.isArray(targets)||!targets.length||targets.some(t=>typeof t.euid!=="string"||!t.euid)) throw Error("Persisted share targets are required to edit grants.");
     const grants = existing ? existing.grants.filter(g=>g.status==="active"&&g.recipient_type!=="registered") : [{recipient_type:"email",recipient:"",include_patterns:["**"]}];

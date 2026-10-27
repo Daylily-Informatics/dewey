@@ -75,6 +75,11 @@ class RegistryServiceMixin(ShareNotificationMixin):
                 raise HTTPException(
                     503, "Dewey performance settings have not been explicitly initialized"
                 )
+            if data["share_lifetime_days"] is not None and (
+                type(data["share_lifetime_days"]) is not int
+                or not 1 <= data["share_lifetime_days"] <= self.share_max_lifetime_days
+            ):
+                raise HTTPException(503, "Invalid persisted share lifetime default")
             if (
                 type(data["listing_cache_ttl_seconds"]) is not int
                 or not 0 <= data["listing_cache_ttl_seconds"] <= 300
@@ -109,7 +114,7 @@ class RegistryServiceMixin(ShareNotificationMixin):
                     503, "Dewey performance settings have not been explicitly initialized"
                 )
             data = {**normalize_instance_payload(row), **changes}
-            if (
+            if data["share_lifetime_days"] is not None and (
                 type(data["share_lifetime_days"]) is not int
                 or not 1 <= data["share_lifetime_days"] <= self.share_max_lifetime_days
             ):
@@ -642,10 +647,13 @@ class RegistryServiceMixin(ShareNotificationMixin):
         if "expires_at" in data and "lifetime_days" in data:
             raise ValueError("Supply expires_at or lifetime_days, not both")
         if "lifetime_days" in data:
-            days = int(data["lifetime_days"])
-            if not 1 <= days <= self.share_max_lifetime_days:
-                raise ValueError("Invalid share lifetime")
-            args["expires_at"] = (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
+            days = data["lifetime_days"]
+            if days is None:
+                args["expires_at"] = None
+            else:
+                if type(days) is not int or not 1 <= days <= self.share_max_lifetime_days:
+                    raise ValueError("Invalid share lifetime")
+                args["expires_at"] = (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
         return self.create_share(
             target_kind=kind, target_euid=euid, idempotency_key=idempotency_key, **args
         )

@@ -61,8 +61,11 @@ organization membership. There are **no anonymous shares**.
 
 Choose **Named recipients** or **Public with registration**. Both require an active,
 verified email through shared Login. New recipients receive share-only access;
-their email domain does not admit them to an organization. The default lifetime is
-30 days; explicit `expires_at: null` is indefinite. Recipient credentials issued
+their email domain does not admit them to an organization. The global default is
+**No expiration** (`null`). Explicit finite share and individual email/domain-grant
+expirations remain available for `lsmc.com`, `lsmc.bio`, and every other domain;
+there are no domain exemptions. Existing finite shares and grants keep their saved
+deadlines. Recipient credentials issued
 at `/recipient/account` last 1–30 days, can be shortened by provider-grant expiry,
 and remain separately revocable.
 

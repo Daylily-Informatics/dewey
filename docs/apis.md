@@ -212,8 +212,11 @@ Create fields include `name`, `purpose`, `audience` (`recipients` or
 `include_patterns`, `exclude_patterns`, `denied_emails`, `expires_at`,
 `content_mode` (`download` or `www`), `report_entrypoint`, and
 `report_bundle_root`. `delivery_modes` admits only `["gateway"]`. Omitted expiry
-defaults to 30 days; explicit `null` is indefinite. Record-scoped creation also
-accepts `lifetime_days` when no explicit expiry is supplied. Owner identity is
+uses the explicit native `share_lifetime_days` service default, initially `null`
+(**No expiration**). Explicit `expires_at: null` or `lifetime_days: null` is
+indefinite. Record-scoped creation also accepts a positive integer `lifetime_days`
+when no explicit expiry is supplied. Finite deadlines retain the configured
+`share.max_lifetime_days` limit and timezone/future validation. Owner identity is
 derived from the authenticated creator. Arbitrary owner/group/TTL and old
 transport payloads are not the 12.x share contract.
 
@@ -402,3 +405,31 @@ Current Dewey code does not expose:
 - a queue-consumer management surface
 
 Historical governance documents may describe event families conceptually for the broader platform, but those are not implemented here as a public runtime API.
+
+
+### Native nullable sharing defaults (12.0.10)
+
+`registry.default_share_lifetime_days` is a nullable configuration seed, default
+`null`. `GET /api/v1/registry/defaults` returns the actual persisted
+`share_lifetime_days` as `null` or a positive integer; the admin response and GUI
+show the same native value. An authorized administrator updates the existing
+setting through `PATCH /api/v1/registry/defaults` with
+`{"share_lifetime_days": null}`. A finite integer may be explicitly configured
+later, bounded by `share.max_lifetime_days`. The admin field's blank value means
+**No expiration**, never zero. Delivery and listing TTL fields remain non-null.
+
+A deployment moving from the former persisted30-day default must explicitly
+apply that native PATCH; changing code/config alone does not silently override
+the saved setting. The new-share editor reads the native default. An existing
+share editor retains its stored finite or indefinite expiry. Default changes do
+not rewrite any persisted share or grant deadline.
+
+Finite expiration remains settable both at share level and on each explicit
+email/domain grant, including `lsmc.com`, `lsmc.bio`, and all other domains.
+An indefinite share may contain finite grants. A grant cannot outlive a finite
+share. Verified identity and current access checks remain required at every
+request. There is no domain-specific expiration exception.
+
+Share/grant expiration is separate from gateway-delivery credentials and personal
+API tokens. Their finite lifetimes, revocation and provider-identity boundaries
+are unchanged; **No expiration** on a share does not create permanent credentials.
