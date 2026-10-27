@@ -301,6 +301,18 @@
               </div>
               {% endif %}
               <div>
+                <h4>Recipient notifications</h4>
+                {% if selected_share.notifications %}
+                <table><thead><tr><th>Recipient</th><th>Status</th><th>Policy revision</th><th>Receipt</th></tr></thead><tbody>
+                {% for notice in selected_share.notifications %}
+                <tr><td>{{ notice.recipient_email }}</td><td>{{ notice.status }}</td><td>{{ notice.policy_revision }}</td>
+                  <td><pre class="json-pre">{{ notice | tojson(indent=2) }}</pre></td></tr>
+                {% endfor %}
+                </tbody></table>
+                {% else %}<div class="empty-state">No explicit recipient notifications. Domain grants do not send broadcast email.</div>{% endif %}
+                <div class="panel-copy">Accepted means the mail provider accepted submission; inbox delivery is not confirmed. Uncertain submissions are never automatically resent.</div>
+              </div>
+              <div>
                 <h4>Audit</h4>
                 {% if share_audit["items"] %}
                 <pre class="json-pre">{{ share_audit["items"] | tojson(indent=2) }}</pre>

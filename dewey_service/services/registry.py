@@ -36,7 +36,10 @@ from dewey_service.tapdb_backend import (
 )
 
 
-class RegistryServiceMixin:
+from dewey_service.services.share_notifications import ShareNotificationMixin
+
+
+class RegistryServiceMixin(ShareNotificationMixin):
     def _registry_event(self, session, record, action):
         receipt = self.backend.create_instance(
             session,

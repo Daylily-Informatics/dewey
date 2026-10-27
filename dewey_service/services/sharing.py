@@ -685,7 +685,12 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
                             raise
         raise HTTPException(403, "No current share permits this S3 path")
 
-    def create_share(
+    def create_share(self, **kwargs):
+        code, body = self._create_share(**kwargs)
+        body["notifications"] = self._dispatch_share_notifications(body["euid"])
+        return code, body
+
+    def _create_share(
         self,
         *,
         target_kind,
@@ -820,6 +825,7 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
                 decision="change",
                 details={"policy_revision": 1},
             )
+            self._prepare_share_notifications(session, share, grant_values)
             body = self._canonical_response(session, share, manager=True)
             self._store_idempotency(
                 session,
@@ -848,6 +854,7 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
             "schema_version": 3,
         }
         if manager:
+            value["notifications"] = self._share_notification_status(session, share)
             value["aliases"] = self._share_aliases(session, share)
             value["denied_emails"] = data["denied_emails"]
             value["grants"] = [
@@ -1101,6 +1108,11 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
             ]
 
     def modify_registry_share(self, euid, changes):
+        body = self._modify_registry_share(euid, changes)
+        body["notifications"] = self._dispatch_share_notifications(euid)
+        return body
+
+    def _modify_registry_share(self, euid, changes):
         from dewey_service.services.share_policy import expiry, normalized_policy
 
         self._require_sharing()
@@ -1137,6 +1149,10 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
                 timezone.utc
             ):
                 raise ValueError("Expired or revoked shares cannot be reactivated")
+            old_emails = self._explicit_notification_emails(
+                [normalize_instance_payload(g) for g in self._share_grants(session, share)
+                 if normalize_instance_payload(g).get("policy_revision") == data["policy_revision"]],
+                data["denied_emails"])
             old_members = self._share_members(session, share)
             merged = {**data, **changes}
             target_change = bool({"targets", "target_kind", "target_euid"} & changes.keys())
@@ -1226,6 +1242,7 @@ class SharingServiceMixin(ShareRevisionMixin, ShareRebindMixin, ShareReportMixin
                 details={"policy_revision": revision},
             )
             session.refresh(share)
+            self._prepare_share_notifications(session, share, grants, old_emails)
             return self._canonical_response(session, share, manager=True)
 
     def revoke_share_grant(self, share_euid, grant_euid, *, policy_revision, reason=None):
