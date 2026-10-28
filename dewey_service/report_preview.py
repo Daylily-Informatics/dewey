@@ -13,6 +13,7 @@ import secrets
 from contextlib import contextmanager
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from urllib.parse import parse_qs, quote
 
 from daylily_tapdb import generic_instance, generic_instance_lineage
@@ -230,7 +231,7 @@ def report_entry_page(request, resolved, receipt):
         },
         separators=(",", ":"),
     ).replace("<", "\\u003c")
-    script = """
+    script = (Path(__file__).parent / "static" / "report-section-host.js").read_text() + "\n" + """
 const config = CONFIG;
 const frame = document.getElementById('report');
 const status = document.getElementById('status');
@@ -261,6 +262,7 @@ async function post(path, body) {
       origin.href!==origin.origin+'/' || challenge.origin!==origin.origin || challenge.pathname!=='/__dewey_preview/challenge' ||
       handoffEndpoint.origin!==location.origin || !handoffEndpoint.pathname.startsWith(config.endpoint+'/'))
     throw new Error('Invalid report host configuration');
+  retainReportSections(origin.origin, frame, reportError, hideNotice, status);
   let used=false;
   window.addEventListener('message', async event => {
     if (used || event.origin!==origin.origin || event.source!==frame.contentWindow ||
@@ -288,7 +290,7 @@ async function post(path, body) {
         "header{flex:0 0 auto;display:flex;align-items:flex-start;gap:12px;padding:8px 12px;border-bottom:1px solid #dfe6e0}"
         "header[hidden]{display:none}.notice-text{flex:1;min-width:0}h1{font-size:14px;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}"
         "#status{font-size:12px;margin:3px 0 0;overflow-wrap:anywhere}#dismiss-notice{flex:0 0 auto;border:0;background:transparent;padding:0 4px;font:22px system-ui;cursor:pointer}"
-        "iframe{display:block;width:100%;flex:1 1 0;min-height:0;border:0}</style>"
+        "iframe{display:block;width:100%;flex:1 1 0;min-height:0;border:0}iframe[hidden]{display:none}</style>"
         f'<header id="report-notice"><div class="notice-text"><h1 title="{title}">{title}</h1><p id="status" role="status">Opening your authorized report…</p></div>'
         '<button id="dismiss-notice" type="button" aria-label="Dismiss report notice">×</button></header>'
         '<iframe id="report" name="dewey-isolated-report" title="Shared report" sandbox="allow-scripts allow-same-origin allow-forms allow-downloads" '
@@ -585,6 +587,7 @@ def attach_report_preview(app, router, service):
                 return await run_in_threadpool(
                     object_delivery, request, service, receipt,
                     inline=True, extra_headers=headers, reservation=reservation,
+                    preview=True,
                 )
             except BaseException:
                 reservation()

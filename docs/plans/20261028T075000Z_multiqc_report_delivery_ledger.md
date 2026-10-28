@@ -1,4 +1,19 @@
 # Current continuation state
+Updated: 2026-10-28, performance implementation after user: make your recommended changes please and deploy.
+Objective: deploy pooled Login transport, HTTP/2 for selected Dewey ingress, compressed report delivery with correct validators, and persistent section views. Native build/deploy/reload receipts control completion. No tests, CI, PR/merge, extra QC, new controls, sibling deployment, analysis rerun, or S3 report mutation.
+Gate 0: clean Dewey 1f6d508, branch codex/dewey-report-performance-12.0.17-20261028; clean Dayhoff 3fbb2f0b, branch codex/dewey-report-ingress-10.0.13-20261028. Tags 12.0.17 and 10.0.13 absent remotely. Existing image ea0fe193 confirmed in live container via interactive Ubuntu SSM99969; i-07df3a933e4839f52/us-west-2/account108782052779. Apache event MPM, mod_deflate present, mod_http2 not loaded. Existing 3/viewer and 12/process controls unchanged. Performance inventory obtained using activated DEWEY-day environment (system Python lacked yaml); saved workspace work/dewey-performance-knobs-20261028.json.
+Implementation choice: retain an initialized isolated frame per visited MultiQC section. This avoids fragile reuse of section-specific global JavaScript state, preserves existing scientific artifacts, and eliminates rerendering on revisits. First visits still initialize that section; common assets retain mandatory browser revalidation. Revisit authorization uses the existing conditional HEAD asset request before displaying retained content. Streamed gzip reduces first-load transfer without changing stored artifacts. No claim of a measured speedup until user acceptance.
+Current: implementation and manual source review complete; no tests run and no new release/deployment yet. General pooled Login/HTTP2/gzip improvements apply to matrix and other HTML reports; retention activates only for MultiQCBundle/data-bundle-nav. Original S3 artifacts and all existing limits remain unchanged. Next: finish scoped application and host operator, publish annotated tags, native EC2 final build/deploy and Apache graceful reload. No additional Slack post requested.
+
+|ID|Requirement|Status|Evidence|
+|---|---|---|---|
+|F1|Reuse Login transport, retain live identity checks|SUCCESS|recipient_identity.py, app lifespan|
+|F2|Persistent section views and compressed report delivery|SUCCESS|Scoped preview response and shell; no S3 mutation|
+|F3|HTTP/2 selected Dewey application/content ingress|IN_PROGRESS|event MPM baseline; native module enable and selected vhosts|
+|F4|Publish tagged source and deploy selected service|OPEN|Only EC2 final build, native Compose and graceful receipts|
+
+## Earlier continuation, superseded by explicit implementation approval
+# Current continuation state
 Updated: 2026-10-28T17:24:21.741518+00:00.
 
 Follow-up diagnosis COMPLETE. User asked why initial MultiQC opening and section changes remain slow, and how to improve them. Read-only browser/source investigation; no software tests, source implementation, deployment, permission/limit changes, extra controls or monitors. Existing12.0.16/81690f9 build/deploy/proxy successes remain valid, 3/user12/process unchanged. These new task records are included in this versioned-branch publication.
@@ -51,3 +66,8 @@ FreshdurableURL/normalGoogleSSO opened newcontext711622..., Overview→Coverage 
 
 ## Completion
 All four rows SUCCESS, objective complete. Native build/deploy/proxy results0; requested browser observations complete, including visible plots and conditional reuse on the original share. No independent extraQC, softwaretests, PR/merge or monitors. Final3/viewer and12/process limits are explicit user changes to existing controls.
+
+## Implementation details for 12.0.17
+Settings owns one thread-safe HTTPX transport, closed at application shutdown; no identity response caching, cookies carried between recipient requests, timeout or CA changes. Preview delivery streams gzip and uses renderer-versioned weak ETags translated into S3 conditions; native provider condition headers are retained. Stored/download/range representations stay under their existing path. MultiQC uses initialized isolated sibling frames, keyed by URL including selector query state. Every return visit goes through existing live context, identity, grant and S3 conditional HEAD before cached frame display; changed documents reload, errors remain explicit. No prefetch, periodic polling, new expiry limit or concurrency layer. Matrix and other non-MultiQC pages retain their original navigation. Tradeoff: visited sections consume browser memory until closing/reloading the report; first visits still initialize independent MultiQC globals. This intentionally replaces the proposed single shared JavaScript-global renderer with retained per-section renderers.
+
+References: https://www.python-httpx.org/advanced/clients/ ; https://httpd.apache.org/docs/2.4/mod/mod_http2.html . Existing no-gzip proxy rule is kept because the application now owns streaming gzip and validators. No Apache ETag rewriting.

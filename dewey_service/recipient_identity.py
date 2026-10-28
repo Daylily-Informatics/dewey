@@ -9,6 +9,23 @@ import httpx
 from fastapi import HTTPException
 
 
+def close_recipient_client(settings):
+    with settings._recipient_http_lock:
+        if settings._recipient_http_client is not None:
+            settings._recipient_http_client.close()
+            settings._recipient_http_client = None
+
+
+def _client(settings):
+    with settings._recipient_http_lock:
+        if settings._recipient_http_client is None:
+            settings._recipient_http_client = httpx.Client(
+                timeout=10, follow_redirects=False,
+                verify=settings.external_broker_ca_bundle or True,
+            )
+        return settings._recipient_http_client
+
+
 def _request(settings, field, body):
     endpoint = str(getattr(settings, field, "") or "").strip()
     parsed = urlsplit(endpoint)
@@ -22,17 +39,18 @@ def _request(settings, field, body):
     ):
         raise HTTPException(503, "Registered Dewey recipient identity endpoint is not configured")
     try:
-        with httpx.Client(
-            timeout=10, follow_redirects=False, verify=settings.external_broker_ca_bundle or True
-        ) as client:
-            response = client.post(
-                endpoint,
-                json=body,
-                headers={
-                    "Authorization": "Bearer " + settings.external_broker_service_token,
-                    "X-LSMC-Service-ID": "dewey",
-                },
-            )
+        client = _client(settings)
+        request = client.build_request(
+            "POST", endpoint, json=body,
+            headers={
+                "Authorization": "Bearer " + settings.external_broker_service_token,
+                "X-LSMC-Service-ID": "dewey",
+            },
+        )
+        # These are independent service-authenticated identity checks. Never
+        # carry a previous recipient's broker cookie into another request.
+        request.headers.pop("cookie", None)
+        response = client.send(request)
     except httpx.HTTPError as exc:
         raise HTTPException(503, "Current recipient identity is unavailable") from exc
     if response.status_code in (400, 401, 403, 404, 409, 422):

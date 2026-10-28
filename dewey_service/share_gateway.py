@@ -6,6 +6,7 @@ import asyncio
 import logging
 import re
 import threading
+import zlib
 from collections import Counter
 from datetime import timezone
 from email.utils import format_datetime, parsedate_to_datetime
@@ -147,6 +148,8 @@ class AuditedObjectResponse(StreamingResponse):
         context,
         release,
         method,
+        gzip_body=False,
+        suffix=b"",
     ):
         self.body_stream, self.release = body, release
         self.service, self.receipt, self.actor, self.context = service, receipt, actor, context
@@ -155,11 +158,20 @@ class AuditedObjectResponse(StreamingResponse):
 
         async def chunks():
             if body is not None:
+                compressor = zlib.compressobj(wbits=31) if gzip_body else None
                 while True:
                     chunk = await run_in_threadpool(body.read, _CHUNK)
                     if not chunk:
                         break
-                    yield chunk
+                    output = compressor.compress(chunk) if compressor else chunk
+                    if output:
+                        yield output
+                if suffix:
+                    output = compressor.compress(suffix) if compressor else suffix
+                    if output:
+                        yield output
+                if compressor:
+                    yield compressor.flush()
 
         super().__init__(chunks(), status_code=status_code, headers=headers)
 
@@ -229,6 +241,7 @@ def object_delivery(
     inline: bool = False,
     extra_headers: dict | None = None,
     reservation=None,
+    preview=False,
 ):
     context = require_share_context()
     actor = principal()
@@ -255,7 +268,14 @@ def object_delivery(
                 raise HTTPException(416, "Invalid byte range")
         if_match = request.headers.get("if-match")
         if_none_match = request.headers.get("if-none-match")
+        representation = preview and not range_value
+        if representation:
+            from dewey_service.report_delivery import provider_validator
+
+            if_none_match = provider_validator(if_none_match)
         modified = _date(request.headers.get("if-modified-since")) if not if_none_match else None
+        if representation:
+            modified = None  # The renderer revision is part of its ETag.
         unmodified = _date(request.headers.get("if-unmodified-since")) if not if_match else None
         with storage_authorization_context(exact_read_authorizer(receipt)):
             if range_value and request.headers.get("if-range"):
@@ -331,6 +351,26 @@ def object_delivery(
         if metadata.get("ContentRange"):
             headers["Content-Range"] = metadata["ContentRange"]
         headers.update(extra_headers or {})
+        gzip_body, suffix = False, b""
+        if representation:
+            from dewey_service.report_delivery import accepts_gzip, preview_etag, section_bridge
+
+            media = headers["Content-Type"].split(";", 1)[0]
+            if metadata.get("ETag"):
+                headers["ETag"] = preview_etag(metadata["ETag"])
+            headers["Vary"] = "Accept-Encoding"
+            # Range requests retain the original stored representation. A full
+            # preview is streamed with weak validators because its bytes differ.
+            headers.pop("Accept-Ranges", None)
+            if media == "text/html" and metadata.get("ETag"):
+                suffix = section_bridge(headers["ETag"], request.app.state.settings.share_application_origin)
+            gzip_body = accepts_gzip(request.headers.get("accept-encoding", "")) and (
+                media.startswith("text/") or media in {"application/javascript", "application/json", "image/svg+xml"}
+            )
+            if suffix or gzip_body:
+                headers.pop("Content-Length", None)
+            if gzip_body:
+                headers["Content-Encoding"] = "gzip"
         status = 206 if metadata.get("ContentRange") else 200
         service.append_share_event(
             receipt["share_euid"],
@@ -360,6 +400,8 @@ def object_delivery(
             context=context,
             release=release,
             method=request.method,
+            gzip_body=gzip_body,
+            suffix=suffix,
         )
     except Exception as exc:
         close_failed = False
@@ -406,9 +448,18 @@ def object_delivery(
         if isinstance(exc, StoragePermissionError):
             raise HTTPException(403, "Object storage access denied") from exc
         if isinstance(exc, HTTPException) and exc.status_code == 304:
+            headers = {"Cache-Control": "no-store", **(extra_headers or {}), **(exc.headers or {})}
+            if representation:
+                from dewey_service.report_delivery import preview_etag
+
+                headers["Vary"] = "Accept-Encoding"
+                # Provider condition metadata includes the stored validator.
+                for name in list(headers):
+                    if name.lower() == "etag":
+                        headers[name] = preview_etag(headers[name])
             return Response(
                 status_code=304,
-                headers={"Cache-Control": "no-store", **(extra_headers or {}), **(exc.headers or {})},
+                headers=headers,
             )
         raise
 

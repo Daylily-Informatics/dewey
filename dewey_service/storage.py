@@ -216,6 +216,11 @@ class S3StorageClient:
                     if http in {304, 412, 416}
                     else {"NotModified": 304, "PreconditionFailed": 412, "InvalidRange": 416}[code],
                     "Object condition was not satisfied",
+                    headers={
+                        name: value
+                        for name, value in exc.response.get("ResponseMetadata", {}).get("HTTPHeaders", {}).items()
+                        if name.lower() in {"etag", "last-modified"}
+                    },
                 ) from exc
             raise self._translate_error(exc, bucket=bucket, key=key) from exc
 

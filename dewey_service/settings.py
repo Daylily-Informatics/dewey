@@ -9,11 +9,12 @@ import os
 import re
 from functools import lru_cache
 from pathlib import Path
+from threading import Lock
 from typing import Any
 from urllib.parse import urlsplit
 
 import yaml
-from pydantic import Field, field_validator, model_validator
+from pydantic import Field, PrivateAttr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from dewey_service.defaults import (
@@ -466,6 +467,10 @@ def build_effective_config_rows(settings: "Settings", *, config_path: Path) -> l
 
 
 class Settings(BaseSettings):
+    # Runtime-only transport, never serialized into configuration or audit data.
+    _recipient_http_client: Any = PrivateAttr(default=None)
+    _recipient_http_lock: Any = PrivateAttr(default_factory=Lock)
+
     model_config = SettingsConfigDict(
         env_prefix="DEWEY_",
         case_sensitive=False,

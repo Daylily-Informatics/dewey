@@ -7,6 +7,7 @@ import io
 import json
 import logging
 import os
+from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from time import monotonic, time_ns
@@ -470,8 +471,18 @@ def create_app(
         )
         service.verify_existing()
 
+    @asynccontextmanager
+    async def lifespan(app):
+        from dewey_service.recipient_identity import close_recipient_client
+
+        try:
+            yield
+        finally:
+            await run_in_threadpool(close_recipient_client, settings)
+
     app = FastAPI(
         title="Dewey Artifact Service",
+        lifespan=lifespan,
         version=resolve_package_version(),
         description="Canonical artifact registry and resolver for LSMC",
     )
