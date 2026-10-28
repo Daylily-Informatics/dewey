@@ -2,28 +2,15 @@
 
 ## Current continuation state
 
-Objective: share-only browser `/` must provide an identity-scoped share table
-and an explicit logout/account-change path; full authorized `/ui` must also show
-a polished Shares section. Stop condition for this worker: source ready for
-coordinator review and exact next release. Deployment and user acceptance remain
-separate.
+DEPLOYED: Dewey12.0.14/source818ea7e8f7aa53eddb26f4cfec8b19e95fa0e345, annotated numeric tag pushed on codex/dewey-share-mail-20261027. Native final-image build0 at2026-10-28T04:08:14.880228Z; selected Compose0/Recreated/Started at04:13:50.200819Z. Image108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:f884c547ac58e4f0b03ee4d3af5f238f8e9eceb91870aa1f31d4a8898a4cab2d. Targeti-07df3a933e4839f52/us-west-2, ubuntuSSM82422, /home/ubuntu/dewey-recipient-home-release-12.0.14. No sibling deployment.
 
-Repo: `/Users/jmajor/projects/dewey-sharing-docs-20261025`, branch
-`codex/dewey-share-mail-20261027`. Intended annotated numeric release12.0.14.
-Package version is dynamically owned by setuptools_scm/the immutable release
-tag; no duplicate manual version constant is introduced.
+Implemented: share-only browser root provides its verified-recipient share table, EUID/name/shared date/effective expiry/status, expired toggle and Logout/account switching. Full authorized /ui homepage has polished Shares section with native Open/Manage controls. Restricted API root remains403. No grant/credential/expiry mutation, new mail or broadened management access.
 
-Authority: user's explicit recipient-home request and subsequent full-home
-Shares amendment, relayed by coordinator2026-10-28. Source edits/docs only:
-no tests, lint, syntax/browser checks, checksum/readback/HEAD/QC, commit, build or
-deployment by this worker. No credential changes, management access expansion,
-share mutation or notification was requested or performed.
+Authority: user's explicit recipient-home request and subsequent full-home Shares amendment. Root completed source review/commit/tag/build/deploy. Tests, lint, syntax/browser checks, hashing/readback/HEAD/QC were not run. Native successful operations are authoritative; user acceptance remains the user's observation.
 
-Current state: SOURCE_READY_FOR_REVIEW. Implemented recipient root, narrowly
-scoped recipient index, home table/toggle/logout, and management homepage Shares
-card with pagination and existing Open/Manage controls. Source-only review is the
-authorized validation method; no tests/checks were run. Coordinator owns the
-next commit/tag, final EC2 image and selected Dewey-only deployment.
+Ingress: Dayhoff source7ce0b75b pushed, exact3home/index/JS route allowances; native CloudFormation UPDATE_COMPLETE. Selected Apache recipient vhost insertion and native graceful0/GRACEFUL_SUCCEEDED completed2026-10-28T04:14:37.035525Z; no configtest/health or secondary success gate. Installed origin /etc/apache2/sites-available/dewey12-recipient.conf. Final ingress result: /Users/jmajor/projects/lsmc/dayhoff/docs/plans/20261028T041105Z_dewey_recipient_home_ingress_ledger.md, pushed throughbe6f55cd.
+
+Receipt: /Users/jmajor/projects/lsmc/product-definitions/matrix/v2/evidence/deployment/20261028_recipient_home_execution.json. Root waited for R35 nativeupload/register/share0 before Compose. New Matrix review https://dewey.day.lsmc.bio/fetch/M-DGX-16SW8; all previous publications preserved. This requested feature/release is complete through native successful build/deploy/ingress controls. User acceptance remains separate. No further build, tests, replay checks or probes are pending.
 
 ## Owning contracts and boundaries
 
@@ -69,6 +56,4 @@ allowance is needed. This worker did not alter Dayhoff or live ingress.
 `templates/recipient_home.html`, `static/recipient-home.js`, `static/registry.js`,
 `static/registry.css`, and `docs/sharing.md`.
 
-No runtime release result is claimed here. Coordinator's source review,
-commit/tag, final-image command outcome and selected deployment outcome should
-be recorded as subsequent entries without inventing tests or user acceptance.
+Historical source handoff above preceded the actual native release recorded in the current continuation state. No user acceptance is inferred.
