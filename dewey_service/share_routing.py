@@ -11,9 +11,11 @@ from starlette.responses import JSONResponse
 
 # Closed application-side counterpart to the public proxy allowlist.
 PUBLIC_RECIPIENT_ROUTES = (
+    ({"GET"}, r"/"),
     ({"GET", "HEAD"}, r"/fetch/[^/]+(?:/.*)?"),
     ({"GET"}, r"/shares/[^/]+"),
     ({"GET"}, r"/api/v2/recipient/shares/[^/]+(?:/contents)?"),
+    ({"GET"}, r"/api/v2/recipient/shares"),
     ({"POST"}, r"/api/v2/recipient/shares/[^/]+/preview(?:/[^/]+/handoff)?"),
     ({"GET"}, r"/recipient/account"),
     ({"GET", "POST"}, r"/api/v2/recipient/tokens"),
@@ -22,7 +24,7 @@ PUBLIC_RECIPIENT_ROUTES = (
     ({"GET", "POST"}, r"/auth/logout"),
     (
         {"GET", "HEAD"},
-        r"/static/(?:favicon\.svg|console\.css|lsmc_ui\.js|recipient\.js|recipient\.css|recipient-account\.js)",
+        r"/static/(?:favicon\.svg|console\.css|lsmc_ui\.js|recipient\.js|recipient\.css|recipient-account\.js|recipient-home\.js)",
     ),
 )
 

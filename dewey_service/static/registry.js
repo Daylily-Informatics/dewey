@@ -67,6 +67,31 @@
     const result = await api("/api/v1/registry/search", "POST", query); libraryQuery = query;
     content.innerHTML = `<div class="toolbar"><form id="search-form"><input type="search" name="q" value="${esc(q)}" aria-label="Search library" placeholder="Search names, EUIDs, metadata, identifiers…">${section === "Library" ? `<select name="kind" aria-label="Kind"><option value="">All kinds</option><option value="object" ${p.get("kind")==="object"?"selected":""}>Objects</option><option value="prefix" ${p.get("kind")==="prefix"?"selected":""}>Prefixes</option></select>` : ""}<select name="sort" aria-label="Sort"><option value="created_at">Newest first</option><option value="name" ${p.get("sort")==="name"?"selected":""}>Name</option></select><button class="primary">Search</button></form>${action("Filters", "filters")}</div><div class="toolbar"><span class="muted">${result.items.length} accessible ${section === "Sharing" ? "shares" : "records"} on this page <span id="exact-total">${action("Show exact total", "counts")}</span> ${action("Refresh", "refresh")}</span><div class="actions">${writable && section === "Library" ? action("Create set from selection", "selection-set") : ""}${writable && section !== "Sharing"?'<a class="button" href="/add?kind=set">New set</a>':""}</div></div>${table(recordRows(result.items, section==="Library"), section==="Sharing"?["Name / EUID","Audience / recipients","Status","Expires","Owner","Last access"]:section==="Sets"?["Name / EUID","Visible members","Created"]:["","Name / EUID","Kind","Producer","Created"])}<div class="pagination"><span>Page ${page} · ${result.page_size} per page</span><div class="actions">${page>1?action("Previous","page",page-1):""}${result.has_more?action("Next","page",page+1):""}</div></div>`;
     $("#search-form").onsubmit = event => { event.preventDefault(); const form = values(event.target); safe(() => navigate({...form,page:1})); };
+    if (section === "Library") await homeShares();
+  }
+  async function homeShares() {
+    content.insertAdjacentHTML("beforeend", `<section class="home-shares" aria-labelledby="home-shares-title"><div class="home-shares-heading"><div><p class="eyebrow">SHARING / AUTHORIZED ACCESS</p><h2 id="home-shares-title">Shares</h2><p class="muted">Open shared content or manage the shares available to your account.</p></div><a class="button" href="/shares">Manage all shares</a></div><div class="toolbar"><label class="home-shares-toggle"><input id="home-shares-expired" type="checkbox"> Show expired and inactive shares</label><button id="home-shares-refresh" type="button">Refresh shares</button></div><div id="home-shares-list" aria-live="polite">Loading shares…</div></section>`);
+    const panel = $("#home-shares-list"), toggle = $("#home-shares-expired"), refresh = $("#home-shares-refresh");
+    let page = 1;
+    async function load(nextPage) {
+      toggle.disabled = true; refresh.disabled = true; panel.setAttribute("aria-busy", "true");
+      try {
+        const result = await api("/api/v1/registry/shares?" + new URLSearchParams({page: String(nextPage), page_size: "25", sort: "created_at", include_expired: String(toggle.checked)}));
+        page = result.page;
+        const rows = result.items.map(item => {
+          const status = item.status === "active" && item.expires_at !== null && new Date(item.expires_at) <= new Date() ? "expired" : item.status;
+          return `<tr><td><a class="mono" href="/shares/${enc(item.euid)}">${esc(item.euid)}</a></td><td><a class="name" href="/shares/${enc(item.euid)}">${esc(item.name)}</a><span class="sub">${esc(item.content_mode)} · ${esc(item.audience)}</span></td><td title="${esc(item.created_at)}">${date(item.created_at)}</td><td title="${esc(item.expires_at)}">${item.expires_at === null ? "No expiration" : new Date(item.expires_at).toLocaleString()}</td><td><span class="badge share-state-${status === "active" ? "active" : "inactive"}">${esc(status)}</span></td><td><a class="button" href="/shares/${enc(item.euid)}">${item.can_manage ? "Manage" : "Open"}</a></td></tr>`;
+        }).join("");
+        panel.innerHTML = table(rows, ["Share EUID", "Name", "Date shared", "Expires", "Status", ""]) + `<div class="pagination"><span>Page ${page} · ${result.items.length} authorized shares shown</span><div class="actions">${page > 1 ? '<button id="home-shares-previous" type="button">Previous</button>' : ""}${result.has_more ? '<button id="home-shares-next" type="button">Next</button>' : ""}</div></div>`;
+        const previous = $("#home-shares-previous"), next = $("#home-shares-next");
+        if (previous) previous.onclick = () => load(page - 1);
+        if (next) next.onclick = () => load(page + 1);
+      } catch (error) {
+        if (error.name !== "AbortError") panel.textContent = `Shares unavailable: ${error.message}`;
+      } finally { toggle.disabled = false; refresh.disabled = false; panel.setAttribute("aria-busy", "false"); }
+    }
+    toggle.onchange = () => load(1); refresh.onclick = () => load(page);
+    await load(1);
   }
   async function shareIndex() {
     const p=params(),page=Number(p.get("page")||1),q=p.get("q")||"",sort=p.get("sort")||"created_at";

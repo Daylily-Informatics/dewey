@@ -941,7 +941,7 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
                 self._require_recipient(session, share)
             return self._canonical_response(session, share, manager=manager)
 
-    def _authorized_share_index_query(self, session):
+    def _authorized_share_index_query(self, session, *, recipient_index=False, include_expired=False):
         """Native recipient predicates precede search, ordering and pagination.
 
         This discovers share containers only. Every disclosed file still passes
@@ -989,18 +989,20 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
                 grant.domain_code == generic_instance.domain_code,
                 rule["status"].astext == "active",
                 rule["policy_revision"].astext == data["policy_revision"].astext,
-                or_(
+                literal(True) if include_expired else or_(
                     rule["expires_at"].astext.is_(None),
                     cast(rule["expires_at"].astext, DateTime(timezone=True)) > now,
                 ),
                 recipient,
             )
         ).correlate(generic_instance)
-        manage = literal(True) if actor.admin else owner_clause(data, actor)
+        manage = literal(False) if recipient_index else (
+            literal(True) if actor.admin else owner_clause(data, actor)
+        )
         current_recipient = and_(
             generic_instance.bstatus != "archived",
             data["status"].astext == "active",
-            or_(
+            literal(True) if include_expired else or_(
                 data["expires_at"].astext.is_(None),
                 cast(data["expires_at"].astext, DateTime(timezone=True)) > now,
             ),
@@ -1014,9 +1016,52 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
             data["schema_version"].astext == "3", or_(manage, current_recipient)
         )
 
-    def list_registry_shares(self, *, page=1, page_size=25, q="", sort="created_at"):
+    def list_recipient_shares(self, *, page=1, page_size=50, include_expired=False):
+        """Recipient metadata only; expired visibility never authorizes content."""
         from daylily_tapdb import generic_instance
-        from sqlalchemy import or_
+        from dewey_service.services.share_policy import expiry, recipient_matches
+
+        self._require_sharing()
+        actor = principal()
+        if actor.service or not actor.email or not actor.email_verified:
+            raise HTTPException(403, "A current verified recipient identity is required")
+        if type(page) is not int or page < 1 or type(page_size) is not int or not 1 <= page_size <= 100:
+            raise ValueError("Recipient share page must be positive and page_size must be 1..100")
+        if type(include_expired) is not bool:
+            raise ValueError("include_expired must be a boolean")
+        now = datetime.now(timezone.utc)
+        with self.backend.session_scope(commit=False) as session:
+            query = self._authorized_share_index_query(
+                session, recipient_index=True, include_expired=include_expired
+            ).order_by(generic_instance.created_dt.desc(), generic_instance.euid)
+            rows = query.offset((page - 1) * page_size).limit(page_size + 1).all()
+            items = []
+            for share in rows[:page_size]:
+                data = normalize_instance_payload(share)
+                grants = [g for g in self._share_grants(session, share)
+                          if normalize_instance_payload(g).get("status") == "active"
+                          and normalize_instance_payload(g).get("policy_revision") == data["policy_revision"]
+                          and recipient_matches(normalize_instance_payload(g), actor.email)]
+                # SQL filters the same verified audience before pagination. Do
+                # not disclose a container if its grant changed during this read.
+                if not grants:
+                    continue
+                deadline = max(min(expiry(data["expires_at"]),
+                                   expiry(normalize_instance_payload(g)["expires_at"])) for g in grants)
+                items.append({
+                    "euid": share.euid,
+                    "name": share.name,
+                    "shared_at": min(g.created_dt for g in grants).isoformat(),
+                    "expires_at": None if deadline == expiry(None) else deadline.isoformat(),
+                    "status": "expired" if deadline <= now else "active",
+                    "web_path": f"/shares/{share.euid}",
+                })
+            return {"items": items, "has_more": len(rows) > page_size,
+                    "page": page, "page_size": page_size, "include_expired": include_expired}
+
+    def list_registry_shares(self, *, page=1, page_size=25, q="", sort="created_at", include_expired=True):
+        from daylily_tapdb import generic_instance
+        from sqlalchemy import DateTime, cast, or_
 
         self._require_sharing()
         if (
@@ -1028,6 +1073,8 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
             raise ValueError("Share page must be positive and page_size must be 1..100")
         if not isinstance(q, str) or len(q) > 200:
             raise ValueError("Share search must contain at most 200 characters")
+        if type(include_expired) is not bool:
+            raise ValueError("include_expired must be a boolean")
         columns = {
             "created_at": generic_instance.created_dt,
             "modified_at": generic_instance.modified_dt,
@@ -1040,6 +1087,13 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
             raise ValueError("Unsupported share sort")
         with self.backend.session_scope(commit=False) as session:
             query = self._authorized_share_index_query(session)
+            if not include_expired:
+                data = generic_instance.json_addl
+                query = query.filter(
+                    data["status"].astext == "active",
+                    or_(data["expires_at"].astext.is_(None),
+                        cast(data["expires_at"].astext, DateTime(timezone=True)) > datetime.now(timezone.utc)),
+                )
             if q:
                 literal_query = (
                     "%" + q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"

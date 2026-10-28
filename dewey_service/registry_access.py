@@ -503,6 +503,10 @@ class RegistryPrincipalMiddleware(BaseHTTPMiddleware):
             if actor is not None and actor.recipient_only:
                 from dewey_service.share_routing import public_recipient_route
 
+                if path == "/" and "text/html" not in request.headers.get("accept", ""):
+                    return JSONResponse(
+                        {"detail": "This credential is limited to shared content"}, status_code=403
+                    )
                 if not public_recipient_route(request.method, path) and not path.startswith(
                     "/__dewey_preview/"
                 ):
@@ -539,4 +543,10 @@ class RegistryPrincipalMiddleware(BaseHTTPMiddleware):
             finally:
                 _PRINCIPAL.reset(context)
         except HTTPException as exc:
+            if (
+                exc.status_code == 401
+                and request.url.path == "/"
+                and "text/html" in request.headers.get("accept", "")
+            ):
+                return RedirectResponse("/login?next=%2F", status_code=303)
             return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)

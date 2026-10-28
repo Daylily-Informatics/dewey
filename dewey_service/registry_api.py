@@ -346,8 +346,11 @@ def attach_registry_api(app, *, templates):
         page_size: int = Query(25, ge=1, le=100),
         q: str = "",
         sort: Literal["created_at", "name"] = "created_at",
+        include_expired: bool = True,
     ):
-        return service.list_registry_shares(page=page, page_size=page_size, q=q, sort=sort)
+        return service.list_registry_shares(
+            page=page, page_size=page_size, q=q, sort=sort, include_expired=include_expired
+        )
 
     @router.get("/registry/shares/{euid}")
     def share_detail(euid: str):

@@ -20,6 +20,44 @@ session without widening any share grant; separate profiles keep the two session
 
 ## Authority, recipients and selection
 
+### Your share home
+
+A share-only browser session opens **Shared with me** at `/`. It lists only
+shares matching the current verified email identity, with their persisted EUID,
+name, date shared, access deadline and active/expired status. **Show expired
+shares** is off initially; expired entries do not authorize opening content.
+Revoked grants, denied recipients, obsolete policy revisions and archived or
+revoked shares do not appear. Active links use the normal managed share viewer.
+The displayed recipient deadline accounts for both share and matching-grant
+expiration; the date shared is the creation date of the current matching grant.
+
+**Logout / use a different account** uses Dewey's existing `POST /auth/logout`,
+which clears the browser session, revokes its browser identity binding and
+continues through the configured shared-login logout. Personal download
+credentials remain separately managed. Sign in again through the normal login
+page to choose another identity. A browser root request whose session has ended
+returns to login; restricted non-HTML/API root requests still receive403.
+
+The full authorized `/ui` library includes a separate **Shares** section with
+persisted EUIDs, names, share creation dates, expiration, status and Open/Manage
+links. Expired/inactive shares are hidden initially and can be included with the
+toggle. Its paginated index uses existing management authorization; **Manage all
+shares** preserves the complete sharing workflow. Share-only sessions cannot
+open `/ui` or management APIs.
+
+`GET /api/v2/recipient/shares?page=1&page_size=50&include_expired=false` is the
+recipient index. It requires verified sharing ingress and current verified email
+identity; permission filtering precedes pagination. Its response contains only
+`euid`, `name`, `shared_at`, `expires_at`, `status`, and the managed `web_path`,
+plus pagination fields. It does not expose targets, S3 locations, other
+recipients or management authority. `include_expired=true` changes metadata
+visibility only; normal content authorization remains in force.
+
+The existing management index accepts `include_expired=false` for the homepage;
+its default remains true for existing management clients. This is separate from
+the recipient index and retains the existing owner/admin/current-recipient
+authorization contract.
+
 A creator needs delegation authority over every selected target. An active share then authorizes its verified recipient without a separate artifact ACL, S3 permission or tenant membership. Owners/managers still need a recipient grant to read bytes. Management stays on trusted ingress; public ingress exposes only recipient, authentication and isolated-report routes.
 
 Choose `audience: recipients` for mixed internal/external email or deliberate domain grants, or `audience: public_registered` for any current verified registered email. Neither permits anonymous access. A pending grant can name an unregistered person. Login creates share-only identities without automatic tenant admission. Domain grants match exactly unless `include_subdomains` is true; a domain predicate does not confer organization membership.
