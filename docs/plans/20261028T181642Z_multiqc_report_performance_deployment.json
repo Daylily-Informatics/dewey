@@ -1,0 +1,47 @@
+{
+  "recorded_at": "2026-10-28T18:24:18.047524+00:00",
+  "version": "12.0.17",
+  "source_commit": "97a5467cf4b121d7a0db2d6c14b98e436c528e5c",
+  "source_branch": "codex/dewey-report-performance-12.0.17-20261028",
+  "dayhoff_tag": "10.0.13",
+  "dayhoff_commit": "37ff3f56",
+  "target_instance": "i-07df3a933e4839f52",
+  "region": "us-west-2",
+  "build": {
+    "phase": "build",
+    "exit_code": 0,
+    "service": "dewey",
+    "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:2426b04fe3f96eef441372d895d5adcf992b46aac52fcee317aa41e371a58739",
+    "started_at": "2026-10-28T18:18:25.547141+00:00",
+    "finished_at": "2026-10-28T18:22:11.421593+00:00"
+  },
+  "deploy": {
+    "phase": "deploy",
+    "exit_code": 0,
+    "service": "dewey",
+    "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:2426b04fe3f96eef441372d895d5adcf992b46aac52fcee317aa41e371a58739",
+    "started_at": "2026-10-28T18:24:14.400581+00:00",
+    "finished_at": "2026-10-28T18:24:18.047524+00:00"
+  },
+  "http2": {
+    "started_at": "2026-10-28T18:19:46.479117+00:00",
+    "finished_at": "2026-10-28T18:19:46.670698+00:00",
+    "module_returncode": 0,
+    "graceful_returncode": 0,
+    "vhosts": [
+      "dewey.day.lsmc.bio",
+      "dewey-content.day.lsmc.bio"
+    ]
+  },
+  "remote_stage": "/home/ubuntu/dewey-report-performance-20261028t181642z",
+  "tmux": "dewey-performance-12017-20261028",
+  "tests": false,
+  "extra_probes": false,
+  "benchmarked_speedup": false,
+  "download_limits": {
+    "per_subject": 3,
+    "per_process": 12
+  },
+  "s3_artifacts_changed": false,
+  "scope": "General preview transport for all HTML reports; retained sections only for MultiQCBundle/data-bundle-nav"
+}
