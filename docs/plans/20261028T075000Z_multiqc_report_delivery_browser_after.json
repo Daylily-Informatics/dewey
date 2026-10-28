@@ -1,0 +1,36 @@
+{
+  "share_url": "https://dewey.day.lsmc.bio/fetch/M-DGX-1801M",
+  "request_scope": "User-requested navigation and rendering observations, no software test campaign",
+  "release15": {
+    "coverage_assets": "17/17 HTTP200",
+    "visible_plots": [
+      "Mosdepth cumulative coverage curve",
+      "FastQC Mean Quality Scores,224 lines after Show plot",
+      "Bcftools variant quality and substitution plots"
+    ],
+    "raw_read_plot_control": "Show plot is native MultiQC deferred rendering for large plots"
+  },
+  "release16": {
+    "navigation": [
+      "Report index",
+      "Coverage",
+      "Raw Reads",
+      "Coverage revisit"
+    ],
+    "complete_repeat_navigation": "SUCCESS",
+    "coverage_revisit_requests": 16,
+    "coverage_revisit_status_counts": {
+      "304": 13,
+      "200": 3,
+      "429": 0
+    },
+    "coverage_revisit_transfer_bytes": 11929,
+    "coverage_resource_bytes": 4094842,
+    "prior_repeat_transfer_bytes": 1456491,
+    "visible_after_revisit": "Mosdepth cumulative coverage chart rendered with all curves",
+    "devtools": "closed; prior /api/seqnas/runs filter restored; Disable cache left unchecked",
+    "notes": "200 entries without network transfer were browser memory/data assets; native304 responses retained cached bodies. No timing speedup percentage claimed."
+  },
+  "no_source_data_or_share_policy_changes": true,
+  "observed_at": "2026-10-28T07:56:58.382281+00:00"
+}
