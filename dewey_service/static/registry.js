@@ -13,7 +13,8 @@
   let selected = new Set(), storageSelected = new Map(), current = null, listing = [];
   let generation = 0, refreshNext = false, libraryQuery = null, loadedStorage = null, storageLoading = false;
   const readControllers = new Set(), inFlightReads = new Map();
-  function notice(message, error = false) { const n = $("#notice"); n.hidden = false; n.className = error ? "error" : ""; n.textContent = message; }
+  let noticeTimer;
+  function notice(message, error = false) { clearTimeout(noticeTimer); const n = $("#notice"); n.hidden = false; n.className = error ? "error" : ""; n.textContent = message; if (!error) noticeTimer = setTimeout(() => { n.hidden = true; }, 10000); }
   async function api(path, method = "GET", body, headers = {}) {
     const read = method === "GET" || (method === "POST" && ["/api/v1/registry/search", "/api/v1/registry/search/counts", "/api/v1/literature/search"].includes(path));
     const startedGeneration = generation, key = JSON.stringify([generation, path, method, body]);

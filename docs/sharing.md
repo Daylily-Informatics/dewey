@@ -7,6 +7,12 @@ recipient notification from `dewey@lsmc.com`. Release-specific build/deployment
 results belong in the dated release ledgers; the 12.0.8 closeout below is historical,
 not the current deployed-version record.
 
+The shared-report viewer shows a compact title/session notice that can be
+dismissed and disappears10seconds after page load. The report then fills the
+available viewport, including on mobile. Access or handoff errors remain visible
+and reappear if the notice has already disappeared. Ordinary registry success
+notices also disappear after10seconds; errors remain visible.
+
 A sharing session is restricted even when the account also has ordinary management
 rights. An entitled manager can use [normal management sign-in](https://dewey.day.lsmc.bio/auth/login?next=%2Fui)
 from an approved network to restore console access. This replaces that profile's

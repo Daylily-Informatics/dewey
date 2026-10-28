@@ -233,6 +233,16 @@ def report_entry_page(request, resolved, receipt):
 const config = CONFIG;
 const frame = document.getElementById('report');
 const status = document.getElementById('status');
+const banner = document.getElementById('report-notice');
+const dismiss = document.getElementById('dismiss-notice');
+let noticeTimer, noticeError=false;
+function hideNotice() { if (!noticeError) banner.hidden=true; }
+function reportError(error) {
+  noticeError=true; clearTimeout(noticeTimer); banner.hidden=false; dismiss.hidden=true;
+  status.setAttribute('role','alert'); status.textContent=error.message;
+}
+dismiss.addEventListener('click', hideNotice);
+window.addEventListener('load', () => { noticeTimer=setTimeout(hideNotice, 10000); }, {once:true});
 async function post(path, body) {
   const response = await fetch(path, {method:'POST', credentials:'same-origin',
     headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
@@ -264,17 +274,22 @@ async function post(path, body) {
       form.method='POST'; form.action=handoff.handoff_url; form.target=frame.name; form.hidden=true;
       token.name='token'; token.value=handoff.token; form.append(token); document.body.append(form);
       form.submit(); form.remove(); status.textContent='Report session expires '+view.expires_at+'. Reopen this URL to renew.';
-    } catch (error) { status.textContent=error.message; }
+    } catch (error) { reportError(error); }
   });
   frame.src=challenge.href;
-})().catch(error => { status.textContent=error.message; });
+})().catch(reportError);
 """.replace("CONFIG", config, 1)
     title = html.escape(resolved.get("name") or "Shared report")
     content = (
         f'<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
-        f'<title>{title} · Dewey</title><style nonce="{nonce}">body{{margin:0;font:15px system-ui}}header{{padding:12px 18px}}'
-        "h1{font-size:18px;margin:0}iframe{display:block;width:100%;height:calc(100vh - 110px);border:0}</style>"
-        f'<header><h1>{title}</h1><p id="status" role="status">Opening your authorized report…</p></header>'
+        f'<title>{title} · Dewey</title><style nonce="{nonce}">'
+        "html{height:100%}body{margin:0;height:100dvh;display:flex;flex-direction:column;overflow:hidden;font:15px system-ui}"
+        "header{flex:0 0 auto;display:flex;align-items:flex-start;gap:12px;padding:8px 12px;border-bottom:1px solid #dfe6e0}"
+        "header[hidden]{display:none}.notice-text{flex:1;min-width:0}h1{font-size:14px;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}"
+        "#status{font-size:12px;margin:3px 0 0;overflow-wrap:anywhere}#dismiss-notice{flex:0 0 auto;border:0;background:transparent;padding:0 4px;font:22px system-ui;cursor:pointer}"
+        "iframe{display:block;width:100%;flex:1 1 0;min-height:0;border:0}</style>"
+        f'<header id="report-notice"><div class="notice-text"><h1 title="{title}">{title}</h1><p id="status" role="status">Opening your authorized report…</p></div>'
+        '<button id="dismiss-notice" type="button" aria-label="Dismiss report notice">×</button></header>'
         '<iframe id="report" name="dewey-isolated-report" title="Shared report" sandbox="allow-scripts allow-same-origin allow-forms allow-downloads" '
         f'referrerpolicy="no-referrer"></iframe><script nonce="{nonce}">{script}</script></html>'
     )
