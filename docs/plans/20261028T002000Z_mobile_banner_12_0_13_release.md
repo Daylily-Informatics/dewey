@@ -1,6 +1,13 @@
 # Dewey12.0.13 mobile report banner
 
 ## Current continuation state
+DEPLOYED2026-10-28T01:09:50.758278Z. Reviewed source12.0.13/824f8028cb531d7649ec14f1652c4eeaa0a83745 was committed, annotated-tagged and pushed by coordinator. One final selected-Dewey native registry-cache build returned0 (01:06:19.483141–01:09:17.403608UTC), then native selected Compose returned0/Started (01:09:47.920889–01:09:50.758278UTC). Image: `108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:a9abe2419397d5c06886f5893eadeb11b1be5176c4738f8f922391b1009405a9`. This is the native returned image identity, not an added hash check.
+Target: existing ubuntu SSM23343, EC2i-07df3a933e4839f52/us-west-2/profilelsmc. Workdir /home/ubuntu/dewey-mobile-banner-release-12.0.13. The established targeted privileged read supplied the native current base-manifest input; only returned images.dewey was merged into the then-current live manifest on deployment. No service configuration, credentials or sibling deployments were changed by this task. Existing orphan-container warning caused no cleanup action.
+Authority: coordinator explicitly authorized final tag/commit build and selected deployment after source review; deployment waited for coordinator's R30 native upload/registration/share completion and confirmation no Dewey mutations remained active. No external upload checks were run.
+Source behavior: compact dismissible report notice, ten-second page-load auto-hide, persistent/reappearing errors, flex100dvh iframe fill and success-only registry notice timeout. Auth/isolation/handshake and functional navigation remain unchanged. No tests, syntax/browser checks, QC, probes, hashes, HEAD/readback, post-success private-log reads, recipient mail or extra success verification were run. Native build0/Compose0 establish the requested deployment result.
+Exact commands/results/timestamps are in product-definitions matrix/v2/evidence/deployment/20261028_mobile_banner_execution.json. All feature/release requirements are terminal; no further build/deployment work is pending under this task. Root owns the final bookkeeping commit and R30 publication. No commit was made by this worker after ledger update.
+
+## Historical source phase
 Objective: make the isolated shared-report title/status announcement compact and dismissible, automatically hide it10seconds after page load, and let the report use the reclaimed viewport space. Report errors must remain visible even if they occur after the timer. Ordinary registry success notices also disappear after10seconds; registry errors persist. Functional navigation/account bars and deployment chrome stay unchanged.
 Source: /Users/jmajor/projects/dewey-sharing-docs-20261025, branch codex/dewey-share-mail-20261027, current production12.0.12/source86b0189d4c6854601d21f598414f13b1b67da931. Intended next immutable annotated12.0.13; no commit/tag/build/deployment until coordinator reviews source and authorizes the final tag/commit.
 Authority: explicit user request delegated by coordinator for this banner behavior. Preserve auth, sandbox, CSP, allowed origins and handshake unchanged. No tests, browser/syntax checks, QC, success-result audits, test mail or sibling/config/credential changes. Native build/Compose exit0 will suffice when deployment is authorized.
@@ -11,8 +18,8 @@ Stop condition: coordinator reviews source; then separate final source/tag build
 ## Requirements
 | Item | State | Evidence |
 |---|---|---|
-| Compact auto-dismiss report notice and viewport fill | SOURCE_READY | report_preview.py |
-| Errors persist/reappear, auth/isolation unchanged | SOURCE_READY | report_preview.py |
-| Registry success10seconds/errors persist | SOURCE_READY | static/registry.js |
-| Docs and selected12.0.13 release runner preparation | SOURCE_READY | pending source handoff |
-| Commit/tag/build/deploy | PENDING_COORDINATOR_REVIEW | not authorized in source phase |
+| Compact auto-dismiss report notice and viewport fill | SUCCESS | report_preview.py |
+| Errors persist/reappear, auth/isolation unchanged | SUCCESS | report_preview.py |
+| Registry success10seconds/errors persist | SUCCESS | static/registry.js |
+| Docs and selected12.0.13 release runner preparation | SUCCESS | pending source handoff |
+| Commit/tag/build/deploy | SUCCESS | Exact annotated12.0.13 source; native cached build0 and selected Compose0/Started, timestamps above |
