@@ -2,7 +2,10 @@
 function retainReportSections(origin, firstFrame, reportError, hideNotice, status) {
   const frames = new Map();
   let active = firstFrame, pending = null, sequence = 0;
-  const key = url => url.pathname + url.search;
+  // MultiQC carries scientific selector state in the fragment. Distinct
+  // filters require distinct initialized views; output anchors do not.
+  const key = url => url.pathname + url.search + '\u0000' +
+    (url.hash.startsWith('#mqc-state=') ? new URLSearchParams(url.hash.slice(1)).get('mqc-state') : '');
   const parse = value => {
     const url = new URL(value);
     if (url.origin !== origin || url.username || url.password ||
