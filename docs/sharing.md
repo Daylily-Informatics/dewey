@@ -2,11 +2,10 @@
 
 This is the schema-3 source contract. The [release ledger](plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) separates implementation, tests, tagged images, deployment and acceptance. The [11.0.10 analysis](dev-docs/20261025_dewey_capabilities.md) remains a historical baseline.
 
-The recorded deployed versions are **Dewey 12.0.8 / Login 4.1.1**. All 113 application
-files match the published Dewey tag and merged main byte-for-byte. Internal and
-external functional acceptance pass; formal user signoff is recorded separately.
-The [closeout receipt](plans/evidence/20261026_dewey12/release-closeout-12.0.8.json)
-includes internal report return, sidecars, complete set access and management denial.
+The current sharing behavior includes scoped expiration, explicit revival, and
+recipient notification from `dewey@lsmc.com`. Release-specific build/deployment
+results belong in the dated release ledgers; the 12.0.8 closeout below is historical,
+not the current deployed-version record.
 
 A sharing session is restricted even when the account also has ordinary management
 rights. An entitled manager can use [normal management sign-in](https://dewey.day.lsmc.bio/auth/login?next=%2Fui)
@@ -23,7 +22,7 @@ Objects are fixed targets. A selection/set freezes persisted member targets; pre
 
 Filters are case-sensitive and target-relative: `*` stays within a segment, `**` crosses segments, and `?` matches one non-separator. Share-wide exclusions constrain every grant; grant exclusions narrow that grant only. `denied_emails` overrides all grants for that address. Grant `target_euids` limits the applicable native members. Preview is bounded; a partial count or empty filtered page is not complete enumeration.
 
-Omitted `expires_at` means 30 days; explicit `expires_at: null` means indefinite. Finite timestamps must be future, timezone-bearing ISO 8601, within the configured ceiling. Grant expiry cannot exceed share expiry. Credentials remain finite. Atomic edits use the current `policy_revision` and can change recipients, targets, filters, deadline and content settings; stale edits return 409. Removing a target retains its artifact/S3 bytes. Native revisions and lineage preserve history; revoked shares cannot be silently revived.
+Omitted `expires_at` defaults to no expiration only for a verified exact `lsmc.com`/`lsmc.bio` original creator and an entirely exact internal audience. Other shares default to 14 days, have a maximum of 365 days, and cannot use indefinite access. Eligible internal shares may also set a finite date. Explicit `expires_at: null` is allowed only for the eligible internal scope. Finite timestamps must be future and timezone-bearing ISO 8601. Grant expiry cannot exceed share expiry. Credentials remain finite. Atomic edits use the current `policy_revision`; stale edits return 409. Removing a target retains its artifact/S3 bytes. Inactive shares can be explicitly revived with a new finite expiration and reviewed recipients; old aliases/contexts and revoked individual grants are not silently restored.
 
 ## URLs and delivery
 
@@ -68,7 +67,7 @@ At `/recipient/account`, issue a separately revocable personal credential for 1â
 
 For CLI, set `DEWEY_API_URL` to the exact HTTPS origin and `DEWEY_API_TOKEN_FILE` to an absolute mode-600 file. Curl/wget send the credential through `Authorization: Bearer â€¦`. Never put it in a durable URL.
 
-Creating a grant sends no email. Explicit invitation requests use SES and record accepted, failed or uncertain submission; acceptance is not inbox delivery. Cognito owns verification/recovery and retains its existing default-email quota. Failures keep the pending grant/destination and do not start resend loops.
+Creating or adding an explicit email recipient sends a share notification from `dewey@lsmc.com` for internal and external addresses. An unknown recipient also receives account-creation instructions in the invitation. Domain grants do not broadcast email. Native notification records distinguish accepted, failed or uncertain submission; acceptance means the mail provider accepted the request. Cognito owns verification/recovery. Failures retain the grant/destination without automatic resend loops.
 
 ## API and CLI
 
@@ -104,13 +103,13 @@ dewey artifacts location-rebind '<artifact-euid>' --storage-uri 's3://bucket/equ
 
 The downloader retains `.dewey-download-state` validators, partial bytes and receipts. `--resume` checks completed files and resumes partial files conditionally. It never adopts/overwrites unrelated output; changed validators, unsafe paths and incomplete enumeration fail. TAR restarts.
 
-Example named-recipient policy (omitted expiry means 30 days):
+Example named-recipient policy (omitted expiry follows the creator/audience policy):
 
 ```json
 {"name":"Reviewed reports","audience":"recipients","content_mode":"download","include_patterns":["reports/**"],"exclude_patterns":["reports/internal/**"],"grants":[{"recipient_type":"email","recipient":"recipient@example.org"}]}
 ```
 
-For registration-open indefinite access, use `audience: public_registered` and `expires_at: null` without named grants. Edits carry `policy_revision` and all replacement restrictions intended to remain.
+For registration-open access, use `audience: public_registered` without named grants. It defaults to 14 days and requires a finite expiration within 365 days; indefinite public access is not supported. Edits carry `policy_revision` and all replacement restrictions intended to remain.
 
 ## Reports and storage references
 
@@ -129,3 +128,29 @@ Use explicit configuration and independent public/private proxy assertions. Stri
 `dewey config prepare-sharing-v12` writes a reviewed new configuration. Enable Login's optional `recipient_access` contract and run `lsmc-login state init-recipients` against its existing explicit state database. Preserve Cognito pool/app clients/providers and shared-library pins. Install only `sharing3.repository-pack.json` through `dewey db registry-templates` with the reviewed operator config.
 
 Run `dewey db upgrade-sharing-v3 --phase inventory|apply|verify` with private inventory, exact digest and attribution. Fence sharing writes, drain delivery, recheck inventory, convert and reconcile before starting Dewey 12. Preserve identities, grants, scope, inactive history and lineage; ambiguity blocks cutover. **Never rerun historical `upgrade-sharing` retirement logic.** After schema 3/new writes, image-only rollback is invalid: fence and repair forward or separately review a restoration preserving intervening writes/history.
+
+## Create or edit a share
+
+The share form starts with its name, recipient email addresses (one per line), and
+expiration. Recipients sign in using their verified email address.
+
+No expiration is the default only when the original creator has a verified exact
+`lsmc.com` or `lsmc.bio` address and the entire audience is also exact
+`lsmc.com`/`lsmc.bio`. Other audiences default to 14 days and require a finite
+expiration within 365 days. Dates use your local time zone; manual UTC offsets are
+in Advanced for daylight-saving ambiguity. Existing expiration values are retained
+unless you edit them.
+
+For an HTML object or an existing WWW share, the form offers **Open as web report**.
+The report-file field appears when WWW is selected. It requires an explicit relative
+HTML path; Dewey does not discover report files. Other targets can select WWW in
+Advanced. The share must include the report's permitted sidecars.
+
+**Advanced** contains public/domain audiences, file patterns, excluded addresses,
+per-recipient deadlines and target scopes, report-folder settings and manual time
+zone offsets. Existing complex shares retain their recipient rules; their simple
+email list is read-only. Editing individual rules switches recipient editing to
+Advanced rather than flattening those rules into an email list.
+
+The `?` help disclosures work by keyboard or tap. **Sharing help** in the dialog
+contains a short guide without requiring a separate documentation page.

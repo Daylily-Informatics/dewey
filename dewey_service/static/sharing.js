@@ -9,6 +9,7 @@ window.DeweySharing = (() => {
   const field = (name, label, value = "", type = "text", required = false) => `<label class="field">${esc(label)}<input name="${esc(name)}" type="${type}" value="${esc(value)}" ${required ? "required" : ""}></label>`;
   const area = (name, label, value) => `<label class="field">${esc(label)}<textarea name="${esc(name)}">${esc(value)}</textarea></label>`;
   const button = (text, action, value = "", cls = "") => `<button type="button" data-action="${action}" data-value="${esc(value)}" class="${cls}">${esc(text)}</button>`;
+  const help = (title, text) => `<details class="share-help"><summary aria-label="${esc(title)}">?</summary><span class="share-help-text">${esc(text)}</span></details>`;
   const stamp = value => value ? `${new Date(value).toLocaleString()} · ${new Date(value).toISOString()}` : "No expiry";
   const pad = n => String(n).padStart(2, "0");
   const localValue = date => `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
@@ -26,11 +27,17 @@ window.DeweySharing = (() => {
   function setExpiryValue(form,prefix,value) {
     const d=new Date(value);form.elements[prefix+"_local"].value=localValue(d);form.elements[prefix+"_offset"].value=offsetValue(d);
   }
-  function expiryMarkup(prefix, value) {
+  function expiryMarkup(prefix, value, compact = false) {
     const d = value===null ? null : new Date(value), zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    return `<label><input type="checkbox" name="${prefix}_indefinite" ${value===null?"checked":""}> No expiry · verified internal creator and exact internal audience only</label><div class="expiry-grid">${field(prefix+"_local", "Expiry in "+zone, d===null?"":localValue(d), "datetime-local", true)}${field(prefix+"_offset", "UTC offset (±HH:MM)", offsetValue(d===null?new Date():d), "text", true)}</div><output class="expiry-resolved" data-expiry="${prefix}"></output>`;
+    return `<div class="share-expiry"><label><input type="checkbox" name="${prefix}_indefinite" ${value===null?"checked":""}> No expiration</label><div class="expiry-grid">${field(prefix+"_local", "Expiration · "+zone, d===null?"":localValue(d), "datetime-local", true)}${compact?"":field(prefix+"_offset", "UTC offset (±HH:MM)", offsetValue(d===null?new Date():d), "text", true)}</div><output class="expiry-resolved" data-expiry="${prefix}" aria-live="polite"></output></div>`;
   }
+
   function expiry(form, prefix) {
+    const original=form._sharing?.originalExpiries;
+    if(original&&Object.hasOwn(original,prefix)&&!form._sharing.expiryDirty.has(prefix)) {
+      if(original[prefix]===null&&!form._expiryScope?.indefinite_allowed)throw Error("Choose a finite expiration for this audience.");
+      return original[prefix];
+    }
     if(form.elements[prefix+"_indefinite"].checked) {
       if(!form._expiryScope?.indefinite_allowed)throw Error("No expiry requires the original verified internal creator and an entirely exact lsmc.com/lsmc.bio audience.");
       return null;
@@ -48,27 +55,73 @@ window.DeweySharing = (() => {
   }
   function updateExpiry(form) {
     if(form._sharing) {
-      const scope=formLifetime(form);form._expiryScope=scope;
-      const shareBox=form.elements.share_indefinite;
-      if(!scope.indefinite_allowed&&shareBox.checked){shareBox.checked=false;setExpiryValue(form,"share",Date.now()+14*86400000);}
-      if(scope.indefinite_allowed&&!form._sharing.existing&&!form._sharing.expiryTouched)shareBox.checked=true;
+      const state=form._sharing,scope=formLifetime(form);form._expiryScope=scope;
       form.querySelectorAll("[data-expiry]").forEach(out=>{
         const prefix=out.dataset.expiry,box=form.elements[prefix+"_indefinite"];
-        if(!scope.indefinite_allowed&&box.checked){box.checked=false;setExpiryValue(form,prefix,form.elements.share_local.value+form.elements.share_offset.value);}
-        if(scope.indefinite_allowed&&!form._sharing.existing&&!form._sharing.expiryTouched)box.checked=true;
-        box.disabled=!scope.indefinite_allowed;
+        if(!state.existing&&!scope.indefinite_allowed&&box.checked){box.checked=false;setExpiryValue(form,prefix,prefix==="share"?Date.now()+14*86400000:form.elements.share_local.value+form.elements.share_offset.value);}
+        if(scope.indefinite_allowed&&!state.existing&&!state.expiryTouched&&!state.expiryDirty.has(prefix))box.checked=true;
+        box.disabled=!scope.indefinite_allowed&&!box.checked;
+        if(!box.checked&&!form.elements[prefix+"_local"].value&&state.expiryDirty.has(prefix))setExpiryValue(form,prefix,Date.now()+14*86400000);
       });
-      const note=form.querySelector("#share-expiry-policy");if(note)note.textContent=scope.indefinite_allowed?"Original verified lsmc.com/lsmc.bio creator and exact internal audience: no expiry by default; an explicit finite expiration is also allowed.":"This creator/audience is bounded: default 14 days, maximum 365 days. External recipients, subdomains and public registration cannot have no expiry.";
+      const note=form.querySelector("#share-expiry-policy");
+      if(note)note.textContent=scope.indefinite_allowed?"Internal creator and internal recipients: no expiration by default. You can set a date.":"Default: 14 days. External, mixed or public audiences require an expiration within 365 days.";
     }
-    form.querySelectorAll("[data-expiry]").forEach(out => {
-      const prefix=out.dataset.expiry, indefinite=form.elements[prefix+"_indefinite"].checked;
+    form.querySelectorAll("[data-expiry]").forEach(out=>{
+      const prefix=out.dataset.expiry,indefinite=form.elements[prefix+"_indefinite"].checked;
       form.elements[prefix+"_local"].disabled=indefinite;form.elements[prefix+"_offset"].disabled=indefinite;
-      try { const value=expiry(form,prefix);out.textContent = value===null?"No expiry. Access still requires a current verified identity and grant.":"Resolved UTC: "+new Date(value).toISOString(); out.classList.remove("error"); }
-      catch(e) {out.textContent=e.message;out.classList.add("error");}
+      try {const value=expiry(form,prefix);out.textContent=value===null?"Access has no scheduled expiration.":"Expires "+new Date(value).toLocaleString();out.classList.remove("error");}
+      catch(e){out.textContent=e.message;out.classList.add("error");}
     });
   }
+  function useAdvancedRecipients(form) {
+    form._sharing.advancedRecipients=true;form.elements.recipient_emails.readOnly=true;
+    $("#share-recipient-note",form).textContent="Recipient-specific rules are preserved below in Advanced. Edit them there.";
+  }
+  function syncBasicRecipients(form) {
+    const state=form._sharing;if(state.advancedRecipients)return;
+    const existing=new Map(Array.from(form.querySelectorAll("[data-grant]"),row=>[form.elements[`g${row.dataset.grant}_recipient`].value.trim().toLowerCase(),row]));
+    const recipients=[...new Map(lines(form.elements.recipient_emails.value).map(email=>[email.toLowerCase(),email])).values()];
+    const container=$("#share-grants",form),nodes=[];
+    for(const email of recipients) {
+      let row=existing.get(email.toLowerCase());
+      if(!row){const holder=document.createElement("div"),index=state.next++;holder.innerHTML=grantMarkup({recipient_type:"email",recipient:email,expires_at:state.deadline},index,state.targets,state.deadline);row=holder.firstElementChild;for(const suffix of ["local","offset"])row.querySelector(`[name="g${index}_${suffix}"]`).value=form.elements["share_"+suffix].value;row.querySelector(`[name="g${index}_indefinite"]`).checked=form.elements.share_indefinite.checked;}
+      nodes.push(row);
+    }
+    container.replaceChildren(...nodes);
+    form.querySelectorAll('input[type="datetime-local"]').forEach(input=>input.step=1);
+  }
+  function editorInput(form,event) {
+    const state=form._sharing,name=event.target.name||"",match=name.match(/^(share|g\d+)_(local|offset|indefinite)$/);
+    if(event.target.closest("[data-grant]"))useAdvancedRecipients(form);
+    if(match){
+      const prefix=match[1];state.expiryDirty.add(prefix);
+      if(prefix==="share")state.expiryTouched=true;
+      if(match[2]==="offset"){state.manualOffsets.add(prefix);if(prefix==="share")form.elements.share_manual_offset.checked=true;}
+      if(match[2]==="local"&&!state.manualOffsets.has(prefix)) {
+        const date=new Date(event.target.value);if(Number.isFinite(date.getTime()))form.elements[prefix+"_offset"].value=offsetValue(date);
+      }
+    }
+    if(name==="recipient_emails")syncBasicRecipients(form);
+    if(name==="share_manual_offset") {
+      if(event.target.checked)state.manualOffsets.add("share");
+      else {state.manualOffsets.delete("share");const date=new Date(form.elements.share_local.value);if(Number.isFinite(date.getTime()))form.elements.share_offset.value=offsetValue(date);}
+    }
+    if(match&&match[1]==="share"&&!state.advancedRecipients) {
+      if(!form.elements.share_indefinite.checked&&!form.elements.share_local.value)setExpiryValue(form,"share",Date.now()+14*86400000);
+      for(const row of form.querySelectorAll("[data-grant]")) {
+        const prefix="g"+row.dataset.grant;state.expiryDirty.add(prefix);
+        for(const suffix of ["local","offset"])form.elements[prefix+"_"+suffix].value=form.elements["share_"+suffix].value;
+        form.elements[prefix+"_indefinite"].checked=form.elements.share_indefinite.checked;
+      }
+    }
+    form.elements.share_offset.readOnly=!form.elements.share_manual_offset.checked;
+    const www=form.elements.content_mode.value==="www";
+    form.querySelectorAll("[data-www-settings]").forEach(node=>node.hidden=!www);
+    form.elements.report_entrypoint.required=www;
+    updateExpiry(form);
+  }
   function grantMarkup(grant, index, targets, deadline) {
-    const scoped=(grant.target_euids||[]).length===targets.length?[]:(grant.target_euids||[]);
+    const scoped=grant.target_euids||[];
     return `<fieldset class="share-grant" data-grant="${index}" data-grant-euid="${esc(grant.grant_euid||'')}"><legend>Recipient grant ${index+1}</legend><div class="grid-equal"><label class="field">Recipient type<select name="g${index}_type"><option value="email" ${grant.recipient_type==="email"?"selected":""}>Email</option><option value="domain" ${grant.recipient_type==="domain"?"selected":""}>Exact domain</option></select></label>${field(`g${index}_recipient`,"Recipient",grant.recipient,"text",false)}</div><label><input type="checkbox" name="g${index}_subdomains" ${grant.include_subdomains?"checked":""}> Include subdomains for this domain grant</label>${area(`g${index}_include`,"Include patterns · one per line",(grant.include_patterns||["**"]).join("\n"))}${area(`g${index}_exclude`,"Exclude patterns · one per line",(grant.exclude_patterns||[]).join("\n"))}${expiryMarkup(`g${index}`,Object.hasOwn(grant,"expires_at")?grant.expires_at:deadline)}<label class="field">Limit to persisted targets (optional)<select name="g${index}_targets" multiple>${targets.map(t=>`<option value="${esc(t.euid)}" ${scoped.includes(t.euid)?"selected":""}>${esc(t.name||t.euid)} · ${esc(t.euid)}</option>`).join("")}</select><small>No selected targets means all reviewed share targets.</small></label>${button("Remove grant","sharing-remove-grant",index)}</fieldset>`;
   }
   async function editor(target, existing = null) {
@@ -81,12 +134,19 @@ window.DeweySharing = (() => {
     if (!Array.isArray(targets)||!targets.length||targets.some(t=>typeof t.euid!=="string"||!t.euid)) throw Error("Persisted share targets are required to edit grants.");
     const grants = existing ? existing.grants.filter(g=>g.status==="active"&&g.recipient_type!=="registered") : [{recipient_type:"email",recipient:"",include_patterns:["**"]}];
     if (existing && !Number.isInteger(existing.policy_revision)) throw Error("Current policy revision is required to edit this share.");
-    h.modal(`<h2>${existing?"Edit share":"Create managed share"}</h2><p class="hint">Share with verified email addresses inside or outside LSMC. Recipients can register after you add them. Every file request checks current access.</p><form id="managed-share-form">${field("name","Share name",existing?.name||record?.name||"","text",true)}${area("purpose","Purpose",existing?.purpose||"")}<label class="field">Audience<select name="audience"><option value="recipients">Named recipients</option><option value="public_registered" ${existing?.audience==="public_registered"?"selected":""}>Public with registration</option></select></label><p class="muted">Public with registration permits anyone after email verification. Anonymous access is never allowed.</p><p id="share-expiry-policy" class="hint"></p>${expiryMarkup("share",deadline)}<label class="field">Share type<select name="content_mode"><option value="download">File downloads</option><option value="www" ${existing?.content_mode==="www"?"selected":""}>WWW report</option></select></label>${field("report_entrypoint","WWW entrypoint relative to the share",existing?.report_entrypoint||"","text")}${field("report_bundle_root","WWW bundle root relative to its target (empty or directory ending in /)",existing?.report_bundle_root||"")}<p class="muted">For multiple targets, the entrypoint begins with the target's persisted EUID. Share the containing prefix to include report sidecars.</p>${existing?area("target_euids","Shared Object or Prefix EUIDs · one per line",targets.map(t=>t.euid).join("\n")):""}<p class="hint">Prefix shares include future matching descendants. Patterns are case-sensitive and relative to each prefix target; objects use their stable filename. * stays within a segment; ** crosses segments; exclusions win.</p>${area("include_patterns","Share-wide include patterns",(existing?.include_patterns||["**"]).join("\n"))}${area("exclude_patterns","Share-wide exclusions",(existing?.exclude_patterns||[]).join("\n"))}${area("denied_emails","Excluded emails · one per line",(existing?.denied_emails||[]).join("\n"))}<div id="share-grants">${grants.map((g,i)=>grantMarkup(g,i,targets,deadline)).join("")}</div>${button("Add recipient grant","sharing-add-grant")}<div class="actions">${!existing?button("Preview matching selection","sharing-selection-preview",target):""}<button class="primary" type="submit">${existing?"Save policy":"Create share"}</button></div><div id="selection-preview" aria-live="polite"></div></form>`);
+    const simpleGrant=g=>g.recipient_type==="email"&&!g.include_subdomains&&(g.include_patterns||["**"]).join("\n")==="**"&&!(g.exclude_patterns||[]).length&&(!(g.target_euids||[]).length||((g.target_euids||[]).length===targets.length&&targets.every(t=>g.target_euids.includes(t.euid))))&&(!Object.hasOwn(g,"expires_at")||g.expires_at===deadline);
+    const advancedRecipients=Boolean(existing&&(existing.audience!=="recipients"||grants.some(g=>!simpleGrant(g))||new Set(grants.map(g=>g.recipient.trim().toLowerCase())).size!==grants.length));
+    const basicType=existing?.content_mode==="www"||(!existing&&record.kind==="object"&&/\.html?$/i.test(record.original_filename||record.name||""));
+    const typeMarkup=`<label class="field">Share format<select name="content_mode"><option value="download">File downloads</option><option value="www" ${existing?.content_mode==="www"?"selected":""}>Open as web report</option></select></label>`;
+    h.modal(`<h2>${existing?"Edit share":"Create share"}</h2><p class="muted">Recipients sign in with their verified email address.</p><form id="managed-share-form">${field("name","Share name",existing?.name||record?.name||"","text",true)}<div class="share-label-help"><span>Recipients</span>${help("Recipient help","Enter one email address per line. Each address receives an email from dewey@lsmc.com; new recipients receive account-creation instructions. Domain and public-registration access are available in Advanced.")}</div>${area("recipient_emails","Email addresses · one per line",grants.filter(g=>g.recipient_type==="email").map(g=>g.recipient).filter(Boolean).join("\n"))}<p id="share-recipient-note" class="muted">${advancedRecipients?"This share has recipient-specific or domain/public rules. They are preserved in Advanced.":"Each address receives the same files and share expiration."}</p><div class="share-label-help"><span>Expiration</span>${help("Expiration help","No expiration is allowed only when the original creator has a verified exact lsmc.com or lsmc.bio address and the entire audience is also exact lsmc.com/lsmc.bio. Other audiences default to 14 days and must expire within 365 days.")}</div><p id="share-expiry-policy" class="muted" aria-live="polite"></p>${expiryMarkup("share",deadline,true)}${basicType?typeMarkup:""}<div data-www-settings hidden>${field("report_entrypoint","Report file · relative HTML path",existing?.report_entrypoint||(!existing&&record.kind==="object"?record.original_filename||"":""))}<p class="muted">Enter the HTML file to open. Its folder and permitted sidecars must be included in the share.</p></div><details class="share-advanced"><summary>Advanced <span>Recipient rules, file selection and web-report settings</span></summary>${area("purpose","Purpose (optional)",existing?.purpose||"")}${!basicType?typeMarkup:""}<label class="field">Audience<select name="audience"><option value="recipients">Named recipients</option><option value="public_registered" ${existing?.audience==="public_registered"?"selected":""}>Anyone with a verified registration</option></select></label><p class="muted">Public registration permits any verified user, including outside LSMC. Anonymous access is never allowed.</p><details class="share-timezone"><summary>Advanced time zone</summary><label><input type="checkbox" name="share_manual_offset"> Specify the UTC offset manually</label>${field("share_offset","UTC offset (±HH:MM)",offsetValue(deadline===null?new Date():new Date(deadline)),"text",true)}<p class="muted">Dates normally use your local time zone, including daylight saving. Set an offset only to choose between repeated local times.</p></details><div data-www-settings hidden>${field("report_bundle_root","Report folder · relative path ending in /",existing?.report_bundle_root||"")}<p class="muted">Leave empty for the selected target's root. With multiple targets, begin the report file path with its target EUID.</p></div>${existing?area("target_euids","Shared Object or Prefix EUIDs · one per line",targets.map(t=>t.euid).join("\n")):""}<div class="share-label-help"><span>File selection</span>${help("File pattern help","Patterns are case-sensitive and relative to each prefix target. * stays within one path segment; ** crosses folders. Exclusions win. A prefix includes future matching files.")}</div>${area("include_patterns","Include patterns · one per line",(existing?.include_patterns||["**"]).join("\n"))}${area("exclude_patterns","Exclude patterns · one per line",(existing?.exclude_patterns||[]).join("\n"))}${area("denied_emails","Excluded email addresses · one per line",(existing?.denied_emails||[]).join("\n"))}<h3>Individual recipient rules</h3><p class="muted">Editing these controls switches recipient editing to Advanced. Existing per-recipient patterns, targets and expirations are retained.</p><div id="share-grants">${grants.map((g,i)=>grantMarkup(g,i,targets,deadline)).join("")}</div>${button("Add recipient rule","sharing-add-grant")}${!existing?button("Preview file selection","sharing-selection-preview",target):""}<div id="selection-preview" aria-live="polite"></div></details><details class="share-inline-help"><summary>Sharing help</summary><p>Give the share a name, enter email addresses one per line, and choose an expiration if needed. Dewey emails each address from dewey@lsmc.com, with account-creation instructions for new recipients. Recipients sign in with their verified email address.</p><p>Use Advanced for domain or public access, file patterns, individual recipient deadlines and target restrictions. WWW reports require an explicit HTML path and access to its sidecars.</p><p>Changing a policy applies to future requests. Files already downloaded cannot be recalled.</p></details><div class="actions"><button class="primary" type="submit">${existing?"Save changes":"Create share"}</button></div></form>`);
     const form=$("#managed-share-form");
-    form._sharing={target,existing,targets,deadline,next:grants.length,creator:scope.creator,expiryTouched:false};
-    form.addEventListener("input",event=>{if(event.target.name?.startsWith("share_"))form._sharing.expiryTouched=true;updateExpiry(form);});
+    const originalExpiries=existing?{share:existing.expires_at}:{};
+    if(existing)grants.forEach((g,i)=>{if(Object.hasOwn(g,"expires_at"))originalExpiries["g"+i]=g.expires_at;});
+    form._sharing={target,existing,targets,deadline,next:grants.length,creator:scope.creator,expiryTouched:false,expiryDirty:new Set(),manualOffsets:new Set(),originalExpiries,advancedRecipients};
+    form.elements.recipient_emails.readOnly=advancedRecipients;
+    form.addEventListener("input",event=>editorInput(form,event));
     form.querySelectorAll('input[type="datetime-local"]').forEach(input=>input.step=1);
-    updateExpiry(form);
+    editorInput(form,{target:form.elements.name});
     form.onsubmit=event=>{event.preventDefault();if(form._saving)return;h.safe(async()=>{
       const data=policyData(form);form._saving=true;form.querySelector('button[type="submit"]').disabled=true;
       try {
@@ -97,7 +157,8 @@ window.DeweySharing = (() => {
     });};
   }
   function policyData(form) {
-    const data={name:form.elements.name.value,purpose:form.elements.purpose.value,audience:form.elements.audience.value,content_mode:form.elements.content_mode.value,report_entrypoint:form.elements.report_entrypoint.value||null,report_bundle_root:form.elements.report_bundle_root.value,expires_at:expiry(form,"share"),include_patterns:lines(form.elements.include_patterns.value),exclude_patterns:lines(form.elements.exclude_patterns.value),denied_emails:lines(form.elements.denied_emails.value),delivery_modes:["gateway"],grants:[]};
+    syncBasicRecipients(form);updateExpiry(form);
+    const data={name:form.elements.name.value,purpose:form.elements.purpose.value,audience:form.elements.audience.value,content_mode:form.elements.content_mode.value,report_entrypoint:form.elements.report_entrypoint.value||null,report_bundle_root:form.elements.report_bundle_root.value,expires_at:expiry(form,"share"),include_patterns:lines(form.elements.include_patterns.value),exclude_patterns:lines(form.elements.exclude_patterns.value),denied_emails:lines(form.elements.denied_emails.value),delivery_modes:form._sharing.existing?.delivery_modes||["gateway"],grants:[]};
     if(data.content_mode==="www"&&!data.report_entrypoint)throw Error("WWW shares require an exact HTML entrypoint.");
     if (!data.include_patterns.length) throw Error("At least one share-wide include pattern is required; use ** for all.");
     form.querySelectorAll("[data-grant]").forEach(row=>{
@@ -190,8 +251,8 @@ window.DeweySharing = (() => {
   }
   async function handle(name,value) {
     if(!name.startsWith("sharing-")) return false;
-    if(name==="sharing-add-grant") {const form=$("#managed-share-form"),state=form._sharing;$("#share-grants").insertAdjacentHTML("beforeend",grantMarkup({recipient_type:"email",recipient:""},state.next++,state.targets,state.deadline));form.querySelectorAll('input[type="datetime-local"]').forEach(i=>i.step=1);updateExpiry(form);}
-    else if(name==="sharing-remove-grant") {const form=$("#managed-share-form");$(`[data-grant="${Number(value)}"]`).remove();updateExpiry(form);}
+    if(name==="sharing-add-grant") {const form=$("#managed-share-form"),state=form._sharing;useAdvancedRecipients(form);$("#share-grants").insertAdjacentHTML("beforeend",grantMarkup({recipient_type:"email",recipient:"",expires_at:expiry(form,"share")},state.next++,state.targets,state.deadline));form.querySelectorAll('input[type="datetime-local"]').forEach(i=>i.step=1);updateExpiry(form);}
+    else if(name==="sharing-remove-grant") {const form=$("#managed-share-form");useAdvancedRecipients(form);$(`[data-grant="${Number(value)}"]`).remove();updateExpiry(form);}
     else if(name==="sharing-selection-preview") {const form=$("#managed-share-form"), result=await h.api(`/api/v1/records/${enc(value)}/shares/preview`,"POST",policyData(form));$("#selection-preview").innerHTML=`<h3>Bounded selection preview</h3><p class="hint">${result.incomplete?"Incomplete: this is a bounded preview and is not a complete inventory.":"Bounded metadata selection preview."}</p><pre>${esc(JSON.stringify(result,null,2))}</pre>`;}
     else if(name==="sharing-root") await browse();
     else if(name==="sharing-open") {const item=rows[Number(value)];await browse(item.target_euid,item.relative_key);}
