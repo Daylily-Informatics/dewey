@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import re
 import threading
@@ -26,6 +27,7 @@ from dewey_service.storage import (
 
 _LOCK = threading.Lock()
 _ACTIVE: Counter = Counter()
+_REPORT_WAITERS: dict[asyncio.Future, asyncio.AbstractEventLoop] = {}
 _CHUNK = 256 * 1024
 _LOG = logging.getLogger(__name__)
 
@@ -76,19 +78,57 @@ def _date(value):
         raise HTTPException(400, "Invalid HTTP conditional date")
 
 
-def _reserve(subject):
-    with _LOCK:
-        if sum(_ACTIVE.values()) >= 8 or _ACTIVE[subject] >= 2:
-            raise HTTPException(429, "Download capacity reached", headers={"Retry-After": "5"})
-        _ACTIVE[subject] += 1
+def _wake_report(waiter):
+    if not waiter.done():
+        waiter.set_result(None)
+
+
+def _admit_locked(subject):
+    if sum(_ACTIVE.values()) >= 8 or _ACTIVE[subject] >= 2:
+        return None
+    _ACTIVE[subject] += 1
+    released = False
 
     def release():
+        nonlocal released
         with _LOCK:
+            if released:
+                return
+            released = True
             _ACTIVE[subject] -= 1
             if not _ACTIVE[subject]:
                 del _ACTIVE[subject]
+            waiters = tuple(_REPORT_WAITERS.items())
+        for waiter, loop in waiters:
+            if not loop.is_closed():
+                loop.call_soon_threadsafe(_wake_report, waiter)
 
     return release
+
+
+def _reserve(subject):
+    with _LOCK:
+        release = _admit_locked(subject)
+    if release is None:
+        raise HTTPException(429, "Download capacity reached", headers={"Retry-After": "5"})
+    return release
+
+
+async def reserve_report_delivery(subject):
+    """Queue browser assets within the existing download capacity, without tying up workers."""
+    loop = asyncio.get_running_loop()
+    while True:
+        with _LOCK:
+            release = _admit_locked(subject)
+            if release is not None:
+                return release
+            waiter = loop.create_future()
+            _REPORT_WAITERS[waiter] = loop
+        try:
+            await waiter
+        finally:
+            with _LOCK:
+                _REPORT_WAITERS.pop(waiter, None)
 
 
 class AuditedObjectResponse(StreamingResponse):
@@ -188,13 +228,15 @@ def object_delivery(
     *,
     inline: bool = False,
     extra_headers: dict | None = None,
+    reservation=None,
 ):
     context = require_share_context()
     actor = principal()
-    release = None
+    release = reservation
     body = None
     try:
-        release = _reserve(actor.subject)
+        if release is None:
+            release = _reserve(actor.subject)
         storage = service._require_storage()
         request_payer = service._request_payer_for_bucket(receipt["bucket"])
         # HTTP Range applies to GET; HEAD reports the full selected object's
@@ -365,7 +407,8 @@ def object_delivery(
             raise HTTPException(403, "Object storage access denied") from exc
         if isinstance(exc, HTTPException) and exc.status_code == 304:
             return Response(
-                status_code=304, headers={"Cache-Control": "no-store", **(exc.headers or {})}
+                status_code=304,
+                headers={"Cache-Control": "no-store", **(extra_headers or {}), **(exc.headers or {})},
             )
         raise
 

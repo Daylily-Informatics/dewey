@@ -18,6 +18,7 @@ from urllib.parse import parse_qs, quote
 from daylily_tapdb import generic_instance, generic_instance_lineage
 from fastapi import Body, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
+from starlette.concurrency import run_in_threadpool
 
 from dewey_service.audit import authenticated_user_email_context
 from dewey_service.preview_sessions import (
@@ -29,7 +30,7 @@ from dewey_service.preview_sessions import (
 )
 from dewey_service.registry_access import OPERATION_TEMPLATE, principal, principal_context
 from dewey_service.share_context import require_share_context, require_share_ingress
-from dewey_service.share_gateway import exact_relative_key, object_delivery
+from dewey_service.share_gateway import exact_relative_key, object_delivery, reserve_report_delivery
 from dewey_service.tapdb_backend import normalize_instance_payload, utc_now_iso
 
 _COOKIE = "__Host-dewey_preview"
@@ -551,24 +552,40 @@ def attach_report_preview(app, router, service):
         methods=["GET", "HEAD"],
         include_in_schema=False,
     )
-    def preview_asset(asset_path: str, request: Request):
+    async def preview_asset(asset_path: str, request: Request):
         exact_relative_key(asset_path, allow_empty=False)
-        with service.backend.session_scope(commit=False) as session:
-            row, (data, binding, _, share, target) = _host_context(request, service, session)
-            _cookie_matches(request, data)
-            if data["status"] != "active":
-                raise HTTPException(401, "Preview handoff has not completed")
-        relative = data["bundle_root"] + asset_path
-        actor = binding_principal(binding, request.app.state.settings)
+
+        def authorize_asset():
+            with service.backend.session_scope(commit=False) as session:
+                row, (data, binding, _, share, target) = _host_context(request, service, session)
+                _cookie_matches(request, data)
+                if data["status"] != "active":
+                    raise HTTPException(401, "Preview handoff has not completed")
+            relative = data["bundle_root"] + asset_path
+            actor = binding_principal(binding, request.app.state.settings)
+            with principal_context(actor), authenticated_user_email_context(actor.email):
+                if data["object_only"]:
+                    receipt = service.authorize_share_object(share, target, "", action="report")
+                    if asset_path != receipt["key"].rsplit("/", 1)[-1]:
+                        raise HTTPException(403, "Object-only report has no authorized bundle assets")
+                else:
+                    receipt = service.authorize_share_object(share, target, relative, action="report")
+            return actor, receipt
+
+        actor, receipt = await run_in_threadpool(authorize_asset)
         with principal_context(actor), authenticated_user_email_context(actor.email):
-            if data["object_only"]:
-                receipt = service.authorize_share_object(share, target, "", action="report")
-                if asset_path != receipt["key"].rsplit("/", 1)[-1]:
-                    raise HTTPException(403, "Object-only report has no authorized bundle assets")
-            else:
-                receipt = service.authorize_share_object(share, target, relative, action="report")
-            headers = _headers(request.app.state.settings)
-            media = mimetypes.guess_type(receipt["key"])[0]
-            if media:
-                headers["Content-Type"] = media
-            return object_delivery(request, service, receipt, inline=True, extra_headers=headers)
+            reservation = await reserve_report_delivery(actor.subject)
+            try:
+                # Every conditional request retains live authorization. Only
+                # unchanged body transfer is avoided by the provider's 304.
+                headers = {**_headers(request.app.state.settings), "Cache-Control": "private, no-cache"}
+                media = mimetypes.guess_type(receipt["key"])[0]
+                if media:
+                    headers["Content-Type"] = media
+                return await run_in_threadpool(
+                    object_delivery, request, service, receipt,
+                    inline=True, extra_headers=headers, reservation=reservation,
+                )
+            except BaseException:
+                reservation()
+                raise

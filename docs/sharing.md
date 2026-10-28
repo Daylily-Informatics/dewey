@@ -99,6 +99,15 @@ Report HTML/CSS/JavaScript/data execute on a unique `pv-<context>.dewey-content.
 
 The isolated iframe allows scripts and same-origin within its separate content host. The iframe and content policy permit local form-driven exports and generated downloads. CSP still blocks network form submissions, workers and nested frames. Application cookies/APIs are unavailable to report scripts. Chrome may ask you to allow multiple downloads when MultiQC saves one file per selected plot. Reports requiring additional browser capabilities need a separate product decision.
 
+Isolated report assets wait asynchronously for the existing delivery slots (two
+per viewer, eight per process). A browser's parallel script requests therefore
+wait for capacity instead of losing plot dependencies to a download-capacity
+429. Ordinary download admission retains its existing behavior. Report assets
+use private, mandatory-revalidation caching: every request is authorized and
+audited, and unchanged objects may return the provider's conditional 304 rather
+than retransferring JavaScript, styles, fonts and plot data. Preview handoff and
+application responses remain non-cacheable.
+
 After allowing multiple downloads, click the report's download button again if
 Chrome withheld the remaining files. Reopen the durable report URL to renew an
 expired context or load a viewer update. Generated plot exports use data already
