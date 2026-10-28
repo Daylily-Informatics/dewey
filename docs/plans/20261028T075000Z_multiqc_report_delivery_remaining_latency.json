@@ -1,0 +1,86 @@
+{
+  "observed_at": "2026-10-28T17:24:21.740747+00:00",
+  "scope": "User requested explanation and improvements for initial report opening and changing sections; read-only browser/source investigation, no code/runtime changes",
+  "url": "https://dewey.day.lsmc.bio/fetch/M-DGX-1801M",
+  "browser": "Native Chrome/CUA; read-only Performance API via DevTools in isolated report frame; normal cache settings, no cache clearing or throttling",
+  "timings_ms": {
+    "qc_metrics": {
+      "html_ttfb": 673,
+      "html_response_end": 2179,
+      "dom_interactive": 4511,
+      "dom_content_loaded": 4529,
+      "load_event_end": 4949
+    },
+    "coverage_tab_navigation": {
+      "protocol": "http/1.1",
+      "html_ttfb": 1364,
+      "html_response_end": 1659,
+      "dom_interactive": 5169,
+      "dom_content_loaded": 5185,
+      "load_event_end": 5888,
+      "asset_requests": 12,
+      "asset_transfer_bytes": 3600,
+      "navigation_bytes_not_recorded": true,
+      "asset_duration_range_ms": [
+        670,
+        3428
+      ],
+      "javascript_asset_duration_range_ms": [
+        1842,
+        3428
+      ],
+      "asset_ttfb_range_ms": [
+        668,
+        1933
+      ]
+    }
+  },
+  "declared_bundle_bytes": {
+    "entry_html": 1215633,
+    "shared_assets": 2785869,
+    "shared_asset_count": 15,
+    "coverage_html": 1606735,
+    "raw_reads_html": 3032896,
+    "qc_metrics_html": 1397298,
+    "plotly_js": 1167505,
+    "multiqc_js": 468175
+  },
+  "source_findings": [
+    {
+      "path": "dewey_service/report_preview.py",
+      "finding": "Each create_preview generates new pv- hostname, creates context/lineage/audit, challenge/handoff steps; each preview_asset resolves live context/session/target/share, verifies identity and share policy, reserves native 3/user 12/process pool, then conditional S3 delivery."
+    },
+    {
+      "path": "dewey_service/recipient_identity.py",
+      "finding": "_request constructs and closes a new httpx.Client for every identity request; no cross-request connection reuse."
+    },
+    {
+      "path": "dewey_service/services/sharing.py",
+      "finding": "authorize_share_object re-queries grant and target and writes authorization event; object_delivery adds response audit even for 304."
+    },
+    {
+      "path": "docs/plans/20261028T075000Z_multiqc_report_delivery_release.py",
+      "finding": "Deployed private proxy rule disables gzip for report assets to preserve prior S3 ETag revalidation behavior."
+    }
+  ],
+  "inferences": [
+    "Measured warm Coverage navigation is dominated by waiting for multiple requests; exact individual broker/DB/S3 portions were not instrumented.",
+    "HTTP/1.1 connection queueing plus repeated protected-asset authorization/revalidation are likely contributors; browser timing alone does not isolate each server phase.",
+    "Fresh cold-open wall time was not captured; initial-path findings are source and declared bundle-size based. Browser input stopped when active-user interference was detected."
+  ],
+  "recommended_next_changes": [
+    "Reuse an application-lifetime HTTPX client for Login identity calls; preserve live checks, CA validation, explicit endpoint and existing timeout.",
+    "Enable HTTP/2 on the selected report-content HTTPS vhost and application ingress; keep existing download limits.",
+    "Keep one renderer alive across sections and fetch section data on demand; load common libraries once. This involves the generated DayOA/MultiQC bundle as well as Dewey delivery.",
+    "Reduce initial payload and restore compression with validator-correct behavior; avoid undoing the working conditional-cache fix."
+  ],
+  "references": [
+    "https://www.python-httpx.org/advanced/clients/",
+    "https://httpd.apache.org/docs/2.4/mod/mod_http2.html",
+    "https://developer.chrome.com/docs/devtools/network/reference#timing-breakdown-phases-explained",
+    "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control"
+  ],
+  "tests": false,
+  "new_deployment": false,
+  "permissions_or_limits_changed": false
+}

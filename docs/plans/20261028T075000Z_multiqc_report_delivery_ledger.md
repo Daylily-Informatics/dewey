@@ -1,4 +1,18 @@
 # Current continuation state
+Updated: 2026-10-28T17:24:21.741518+00:00.
+
+Follow-up diagnosis COMPLETE. User asked why initial MultiQC opening and section changes remain slow, and how to improve them. Read-only browser/source investigation; no software tests, source implementation, deployment, permission/limit changes, extra controls or monitors. Existing12.0.16/81690f9 build/deploy/proxy successes remain valid, 3/user12/process unchanged. These new task records are included in this versioned-branch publication.
+
+Current findings: actual Coverage tab navigation took5888ms (interactive5169ms), with12resource requests transferring3600assetbytes (navigation-body bytes not recorded). Actual negotiated protocolhttp/1.1; JavaScript asset requests1842–3428ms, TTFB roughly1.1–1.9s. Existing QC Metrics navigation load4949ms. Timings from browser Performance API via DevTools in the isolated frame, normal cache settings. No exact cold-open wall time obtained: stopped further native browser input when the user's concurrent Chrome input was detected; browser access host unavailable. No credentials/cookies/headers captured.
+
+Source trace: every section opens another HTML document and reinitializes MultiQC. private,no-cache retains live revalidation. Each asset goes through context/session/lineage, Login identity, share authorization and audit, native delivery reservation and S3conditional response. recipient_identity._request creates/closes a new httpx.Client each time, preventing connection reuse across asset checks. create_preview always creates a new pv-hostname; cache from previous preview hostname cannot be reused on a fresh opening. EntryHTML1215633bytes,15commonassets2785869bytes; sectionHTML1.4–3.0MB declared. Private-proxy no-gzip rule from16 preserves validators but increases cold payload. Individual Login/DB/S3 timing fractions were not instrumented; avoid attributing exact elapsed time to any single one.
+
+Recommended next work, PROPOSED ONLY: application-lifetime pooled Login HTTP client retaining current verification/CA/endpoint/timeout; HTTP/2 on selected report ingress with existing3/12limits; persistent section renderer with commonlibrariesloadedonce and on-demand sectiondata (DayOA/MultiQC bundle + Dewey); smaller initial payload and validator-correct compression. No request has yet been interpreted as authority to deploy these further changes. No Slack updates requested for this follow-up.
+
+Evidence: docs/plans/20261028T075000Z_multiqc_report_delivery_remaining_latency.json. Existing source/release/deployment/browser receipts below preserved. Repo /Users/jmajor/projects/dewey-sharing-docs-20261025, branch codex/dewey-multiqc-delivery-12.0.16-20261028. No operational work running; provide measured explanation and prioritized recommendation.
+
+## Earlier deployed-fix continuation (historical)
+# Current continuation state
 Updated: 2026-10-28T07:56:58.382885+00:00.
 Objective COMPLETE: diagnosed/repaired missing plots and slow repeat navigation at https://dewey.day.lsmc.bio/fetch/M-DGX-1801M, then performed the user-requested browser exploration. User further explicitly requested per-user concurrent downloads2→3 and global8→12. Both increases are live in the existing native pool (global means all subjects per process).
 
