@@ -84,7 +84,7 @@ def _wake_report(waiter):
 
 
 def _admit_locked(subject):
-    if sum(_ACTIVE.values()) >= 8 or _ACTIVE[subject] >= 2:
+    if sum(_ACTIVE.values()) >= 12 or _ACTIVE[subject] >= 3:
         return None
     _ACTIVE[subject] += 1
     released = False

@@ -94,13 +94,37 @@ def deploy(args):
     return 0
 
 
+def content_proxy(args):
+    """Apply the existing byte-preserving delivery rule to the private content vhost."""
+    started_at = datetime.now(timezone.utc).isoformat()
+    os.umask(0o077)
+    path = Path('/etc/apache2/sites-available/dewey-content-day.conf')
+    original = path.read_text()
+    marker = '    ServerAlias *.dewey-content.day.lsmc.bio\n'
+    directive = '    SetEnvIf Request_URI "^/__dewey_preview/assets/" no-gzip=1\n'
+    if original.count(marker) != 1 or directive in original:
+        raise ValueError('Expected the selected private Dewey content vhost without this delivery rule')
+    (args.work_dir / 'private-content-before.conf').write_text(original)
+    temporary = path.with_name(path.name + '.multiqc-delivery-selected')
+    with temporary.open('x') as stream:
+        stream.write(original.replace(marker, marker + directive, 1))
+    temporary.chmod(path.stat().st_mode & 0o777)
+    os.replace(temporary, path)
+    result = subprocess.run(['apache2ctl', 'graceful'], capture_output=True, text=True)
+    (args.work_dir / 'content-proxy-graceful.log').write_text(result.stdout + result.stderr)
+    print(json.dumps({'phase': 'content-proxy', 'exit_code': result.returncode,
+                      'file': str(path), 'native_operation': 'apache2ctl graceful',
+                      'started_at': started_at, 'finished_at': datetime.now(timezone.utc).isoformat()}))
+    return result.returncode
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('phase', choices=['build', 'deploy'])
+    parser.add_argument('phase', choices=['build', 'deploy', 'content-proxy'])
     parser.add_argument('--tag', required=True)
     parser.add_argument('--commit', required=True)
     parser.add_argument('--work-dir', required=True, type=Path)
     args = parser.parse_args()
-    if args.tag != '12.0.15' or not re.fullmatch(r'[0-9a-f]{40}', args.commit) or not args.work_dir.is_absolute():
-        parser.error('Provide the coordinator-authorized final12.0.15 commit and explicit absolute work directory')
-    raise SystemExit({'build': build, 'deploy': deploy}[args.phase](args))
+    if args.tag != '12.0.16' or not re.fullmatch(r'[0-9a-f]{40}', args.commit) or not args.work_dir.is_absolute():
+        parser.error('Provide the coordinator-authorized final12.0.16 commit and explicit absolute work directory')
+    raise SystemExit({'build': build, 'deploy': deploy, 'content-proxy': content_proxy}[args.phase](args))

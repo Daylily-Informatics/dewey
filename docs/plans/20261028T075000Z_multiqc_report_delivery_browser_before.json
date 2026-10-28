@@ -1,0 +1,23 @@
+{
+  "share_url": "https://dewey.day.lsmc.bio/fetch/M-DGX-1801M",
+  "surface": "native Chrome via CUA; browser access host unavailable",
+  "navigation": [
+    "Raw Reads",
+    "Coverage",
+    "Mosdepth cumulative coverage distribution",
+    "SNVs & Indels"
+  ],
+  "observed_plot": "Mosdepth cumulative coverage distribution blank rectangle",
+  "console_errors": [
+    "429 Too Many Requests: jquery-3.1.1.min.js",
+    "429 Too Many Requests: pako_inflate.min.js",
+    "429 Too Many Requests: multiqc.min.js",
+    "429 Too Many Requests: plotly-3.1.2.custom.min.js",
+    "429 Too Many Requests: bundle-index.js",
+    "ReferenceError: jQuery is not defined",
+    "ReferenceError: pako is not defined",
+    "ReferenceError: Plotly is not defined"
+  ],
+  "console_error_count": 19,
+  "numeric_page_load_timing": "not measured; section observed after14.6seconds with plots still blank; this is an observation window, not measured time to first render"
+}

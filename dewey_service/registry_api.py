@@ -143,7 +143,14 @@ def attach_registry_api(app, *, templates):
     @app.middleware("http")
     async def private_registry_responses(request, call_next):
         response = await call_next(request)
-        response.headers["Cache-Control"] = "no-store"
+        if request.method in {"GET", "HEAD"} and request.url.path.startswith(
+            "/__dewey_preview/assets/"
+        ):
+            # The authorized report handler owns mandatory revalidation for
+            # its assets. Errors without an explicit policy remain no-store.
+            response.headers.setdefault("Cache-Control", "no-store")
+        else:
+            response.headers["Cache-Control"] = "no-store"
         # Native same-origin forms need their Origin for the allowlist check.
         # Preserve the stricter policy set by isolated preview responses.
         response.headers.setdefault("Referrer-Policy", "same-origin")
