@@ -37,9 +37,10 @@ from dewey_service.tapdb_backend import (
 
 
 from dewey_service.services.share_notifications import ShareNotificationMixin
+from dewey_service.services.access_administration import AccessAdministrationMixin
 
 
-class RegistryServiceMixin(ShareNotificationMixin):
+class RegistryServiceMixin(AccessAdministrationMixin, ShareNotificationMixin):
     def _registry_event(self, session, record, action):
         receipt = self.backend.create_instance(
             session,
@@ -1171,9 +1172,9 @@ class RegistryServiceMixin(ShareNotificationMixin):
         recipient_only: bool = False,
     ):
         actor = principal()
-        if actor.service or not actor.email or not name.strip() or not 1 <= lifetime_days <= 30:
+        if actor.service or not actor.email or not name.strip() or not 1 <= lifetime_days <= 365:
             raise ValueError(
-                "A signed-in user, token name, and lifetime of 1..30 days are required"
+                "A signed-in user, token name, and lifetime of 1..365 days are required"
             )
         permitted = {"READ_ONLY"}
         if actor.writable:
@@ -1226,6 +1227,7 @@ class RegistryServiceMixin(ShareNotificationMixin):
                     "recipient_only": recipient_only,
                 },
             )
+            self._registry_event(session, row, "personal_token_issued")
             return {
                 "euid": row.euid,
                 "token": token,
@@ -1253,6 +1255,7 @@ class RegistryServiceMixin(ShareNotificationMixin):
             )
             if row is None:
                 raise HTTPException(401, "Invalid Dewey user token")
+            token_euid = row.euid
             data = normalize_instance_payload(row)
             if data["status"] != "active" or datetime.fromisoformat(
                 data["expires_at"]
@@ -1272,6 +1275,7 @@ class RegistryServiceMixin(ShareNotificationMixin):
                 raise HTTPException(401, "Recipient identity changed; renew the personal token")
         recipient_only = data.get("recipient_only", False)
         return Principal(
+            token_euid=token_euid,
             subject=data["subject"],
             email=data["email"],
             roles=("READ_ONLY",) if recipient_only else tuple(data["roles"]),
@@ -1314,8 +1318,10 @@ class RegistryServiceMixin(ShareNotificationMixin):
                 raise DeweyNotFoundError("Token not found")
             data = normalize_instance_payload(row)
             self.backend.update_instance_json(
-                session, row, {"status": "revoked", "revoked_at": utc_now_iso()}
+                session, row, {"status": "revoked", "revoked_at": utc_now_iso(),
+                               "revoked_by": actor.subject, "revoked_by_email": actor.email}
             )
+            self._registry_event(session, row, "personal_token_revoked")
         # Local revocation takes effect even if the identity service is unavailable.
         if data.get("identity_grant_id"):
             from dewey_service.recipient_identity import revoke_recipient_identity

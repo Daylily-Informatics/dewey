@@ -116,7 +116,7 @@ files or a recursive TAR and cannot be recalled after delivery.
 
 ## Credentials and invitations
 
-At `/recipient/account`, issue a separately revocable personal credential for 1–30 days, capped by the provider grant. Normal browser logout preserves personal credentials. Login stores encrypted provider tokens server-side; Dewey holds opaque bindings. Private introspection checks current enabled/verified-email state and provider revocation, with positive caching capped at 60 seconds. A locally valid JWT alone is insufficient.
+At `/recipient/account`, issue a separately revocable personal credential for 1–365 days, capped by the provider grant. Normal browser logout preserves personal credentials. Login stores encrypted provider tokens server-side; Dewey holds opaque bindings. Private introspection checks current enabled/verified-email state and provider revocation, with positive caching capped at 60 seconds. A locally valid JWT alone is insufficient.
 
 For CLI, set `DEWEY_API_URL` to the exact HTTPS origin and `DEWEY_API_TOKEN_FILE` to an absolute mode-600 file. Curl/wget send the credential through `Authorization: Bearer …`. Never put it in a durable URL.
 

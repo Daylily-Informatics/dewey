@@ -250,7 +250,7 @@ with registration still requires sign-in and email verification.
 | `GET` | `/api/v2/recipient/shares/{identifier}/contents` | Manifest page; `path`, `limit` 1–200, `continuation_token` |
 | `POST` | `/api/v2/recipient/shares/{identifier}/preview` | Creates an isolated report context for an authorized HTML entrypoint/bundle |
 | `POST` | `/api/v2/recipient/shares/{identifier}/preview/{context_euid}/handoff` | One-time viewer handoff; not a durable shared credential |
-| `GET`, `POST` | `/api/v2/recipient/tokens` | List own credentials; create with `name`, `lifetime_days` 1–30, fixed read-only role |
+| `GET`, `POST` | `/api/v2/recipient/tokens` | List own credentials; create with `name`, `lifetime_days` 1–365, fixed read-only role |
 | `POST` | `/api/v2/recipient/tokens/{token_euid}/revoke` | Revoke only the caller's credential |
 
 `?format=manifest` is paginated; follow every continuation to establish

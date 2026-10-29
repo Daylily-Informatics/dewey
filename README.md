@@ -66,7 +66,7 @@ their email domain does not admit them to an organization. The global default is
 expirations remain available for `lsmc.com`, `lsmc.bio`, and every other domain;
 there are no domain exemptions. Existing finite shares and grants keep their saved
 deadlines. Recipient credentials issued
-at `/recipient/account` last 1–30 days, can be shortened by provider-grant expiry,
+at `/recipient/account` last 1–365 days, can be shortened by provider-grant expiry,
 and remain separately revocable.
 
 | Operation | Dewey 12 behavior |

@@ -442,6 +442,7 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
                 "decision": str(decision),
                 "actor": principal().subject,
                 "actor_email_verified": bool(principal().email_verified),
+                "actor_email": principal().email,
                 "actor_service": bool(principal().service),
                 "created_at": utc_now_iso(),
                 "details": clean,
@@ -454,6 +455,15 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
         self.backend.create_lineage(
             session, parent=share, child=row, relationship_type="share_event"
         )
+        if principal().token_euid:
+            from dewey_service.registry_access import TOKEN_TEMPLATE
+
+            token = self.backend.find_by_euid(
+                session, template_code=TOKEN_TEMPLATE, euid=principal().token_euid)
+            if token is None:
+                raise HTTPException(401, "Token record unavailable")
+            self.backend.create_lineage(
+                session, parent=token, child=row, relationship_type="token_share_event")
         if grant is not None:
             self.backend.create_lineage(
                 session, parent=grant, child=row, relationship_type="grant_event"

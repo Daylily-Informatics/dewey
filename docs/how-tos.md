@@ -107,7 +107,7 @@ A slug has 3–63 lowercase ASCII letters/digits/hyphens with alphanumeric ends.
 
 ## Use curl, wget And The CLI
 
-Sign in at `/recipient/account`, create a finite read-only credential, and save its one-time value in a private file with mode 0600. Credentials last 1–30 days and remain separately revocable. Share lifetime does not extend a credential.
+Sign in at `/recipient/account`, create a finite read-only credential, and save its one-time value in a private file with mode 0600. Credentials last 1–365 days and remain separately revocable. Share lifetime does not extend a credential.
 
 The CLI requires both an explicit HTTPS origin and an absolute token-file path. It does not read the shell variable used by the adjacent curl/wget examples:
 

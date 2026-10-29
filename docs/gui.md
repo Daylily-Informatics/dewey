@@ -54,7 +54,7 @@ Revocation applies to subsequent requests, sidecars and TAR members. An already 
 
 ## Personal Credentials
 
-Recipients use `/recipient/account` to create and revoke their own read-only credentials. Lifetime is 1–30 days even for indefinite shares. Copy the token once into a private file; never add it to a durable link. Each request evaluates current identity and share rights. Management Account (`/account`) provides corresponding controls within the caller's authorized role.
+Recipients use `/recipient/account` to create and revoke their own read-only credentials. Lifetime is 1–365 days even for indefinite shares. Copy the token once into a private file; never add it to a durable link. Each request evaluates current identity and share rights. Management Account (`/account`) provides corresponding controls within the caller's authorized role.
 
 See [How-tos](how-tos.md#use-curl-wget-and-the-cli) for the CLI's explicit HTTPS origin and private token-file configuration.
 

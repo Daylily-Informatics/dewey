@@ -32,6 +32,13 @@ class RegistryDefaultsUpdate(BaseModel):
     listing_cache_ttl_seconds: int = Field(default=None, ge=0, le=300, strict=True)
 
 
+class PersonalTokenRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    name: str = Field(min_length=1, max_length=120)
+    lifetime_days: int = Field(default=30, ge=1, le=365, strict=True)
+    role: Literal["READ_ONLY", "READ_WRITE", "ADMIN"] | None = None
+
+
 class MetadataUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str | None = None
@@ -568,6 +575,12 @@ def attach_registry_api(app, *, templates):
             "tokens": service.registry_tokens(),
         }
 
+    @router.get("/registry/admin/access/{kind}")
+    def access_inventory(kind: Literal["users", "tokens", "shares", "usage"],
+                         page: int = Query(1, ge=1), page_size: int = Query(50, ge=1, le=100),
+                         euid: str | None = None):
+        return service.access_administration(kind, page=page, page_size=page_size, euid=euid)
+
     @router.get("/registry/share-expiry-policy")
     def scoped_share_expiry_policy():
         return service.share_expiry_policy()
@@ -581,12 +594,8 @@ def attach_registry_api(app, *, templates):
         return service.update_registry_defaults(data.model_dump(exclude_unset=True))
 
     @router.post("/account/tokens", status_code=201)
-    def token_create(data: dict[str, Any] = Body(...)):
-        return service.issue_registry_token(
-            name=data["name"],
-            lifetime_days=int(data.get("lifetime_days", 30)),
-            role=data.get("role"),
-        )
+    def token_create(data: PersonalTokenRequest):
+        return service.issue_registry_token(**data.model_dump())
 
     @router.post("/account/tokens/{euid}/revoke")
     def token_revoke(euid: str):

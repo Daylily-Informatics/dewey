@@ -41,6 +41,7 @@ class Principal:
     identity_expires_at: str = ""
     email_verified: bool = False
     recipient_only: bool = False
+    token_euid: str = ""
 
     @property
     def admin(self) -> bool:
@@ -424,9 +425,25 @@ def validate_policy(value: dict[str, Any]) -> dict[str, Any]:
 
 
 class RegistryPrincipalMiddleware(BaseHTTPMiddleware):
-    """Runs inside SessionMiddleware, before route dependencies and worker threads."""
-
+    """Runs inside SessionMiddleware; records authenticated personal-token requests."""
     async def dispatch(self, request: Request, call_next):
+        response = await self._dispatch(request, call_next)
+        actor = getattr(request.state, "registry_principal", None)
+        if actor is not None and actor.token_euid:
+            from starlette.concurrency import run_in_threadpool
+            from dewey_service.audit import authenticated_user_email_context
+
+            def record():
+                with principal_context(actor), authenticated_user_email_context(actor.email):
+                    request.app.state.service.record_token_request(
+                        actor, method=request.method,
+                        route=request.scope.get("route").path if request.scope.get("route") else "unmatched",
+                        status_code=response.status_code,
+                    )
+            await run_in_threadpool(record)
+        return response
+
+    async def _dispatch(self, request: Request, call_next):
         from dewey_service.auth import _load_ui_profile
 
         settings = request.app.state.settings
@@ -499,6 +516,7 @@ class RegistryPrincipalMiddleware(BaseHTTPMiddleware):
                     actor = await run_in_threadpool(
                         request.app.state.service.authenticate_registry_token, token
                     )
+            request.state.registry_principal = actor
             path = request.url.path
             if actor is not None and actor.recipient_only:
                 from dewey_service.share_routing import public_recipient_route

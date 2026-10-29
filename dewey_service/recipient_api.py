@@ -11,7 +11,7 @@ from dewey_service.share_context import require_share_context, require_share_ing
 class RecipientTokenRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str = Field(min_length=1, max_length=120)
-    lifetime_days: int = Field(default=30, ge=1, le=30)
+    lifetime_days: int = Field(default=30, ge=1, le=365)
 
 
 def recipient_home(request, templates):
