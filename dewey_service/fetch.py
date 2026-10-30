@@ -133,6 +133,8 @@ def attach_fetch_routes(app, service):
         if format not in {None, "manifest", "tar"}:
             raise HTTPException(400, "format must be manifest or tar")
         resolved = service.resolve_share_identifier(identifier)
+        from dewey_service.services.share_expiry import validate_access_package
+        validate_access_package(request.query_params, resolved)
         if format == "tar":
             if continuation_token:
                 raise HTTPException(400, "A TAR archive always begins with a complete inventory")
@@ -181,6 +183,8 @@ def attach_fetch_routes(app, service):
     def recipient_share(identifier: str, request: Request):
         _recipient(request)
         resolved = service.resolve_share_identifier(identifier)
+        from dewey_service.services.share_expiry import validate_access_package
+        validate_access_package(request.query_params, resolved)
         # Storage locations and management-only details do not cross this API.
         return {
             key: resolved[key]
@@ -208,6 +212,8 @@ def attach_fetch_routes(app, service):
     ):
         _recipient(request)
         resolved = service.resolve_share_identifier(identifier)
+        from dewey_service.services.share_expiry import validate_access_package
+        validate_access_package(request.query_params, resolved)
         return _json_response(
             manifest_page(
                 service, resolved, path=path, limit=limit, continuation_token=continuation_token

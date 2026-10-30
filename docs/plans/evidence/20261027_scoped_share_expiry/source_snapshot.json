@@ -1,0 +1,102 @@
+{
+  "observed_at": "2026-10-27T22:40:44.865674+00:00",
+  "planned_tag": "12.0.11",
+  "base_commit": "6a314f7272074e9779674394b6f01781570b7718",
+  "files": [
+    {
+      "path": "dewey_service/fetch.py",
+      "bytes": 8697,
+      "sha256": "d7beacf2649bf383f5b32cf0163f3bc3af2311a40b660e18cec843e110189b53"
+    },
+    {
+      "path": "dewey_service/registry_api.py",
+      "bytes": 24837,
+      "sha256": "d8cad2b910c31b1ea577dd8668ac3ce34073c33b120be4b77157f57c5c159d3b"
+    },
+    {
+      "path": "dewey_service/report_preview.py",
+      "bytes": 27116,
+      "sha256": "81bea625d162432f7825138d04fbd25f6820e390b25731c00fb550286e2da7bd"
+    },
+    {
+      "path": "dewey_service/services/registry.py",
+      "bytes": 61084,
+      "sha256": "d1e3a117cf9267b92c92511ab166f001729d0229067a58fcd2ccc9b39187312a"
+    },
+    {
+      "path": "dewey_service/services/share_revisions.py",
+      "bytes": 17402,
+      "sha256": "75b68cc8f0449bc2b41c60a0f496d4ac443aa249136395c979486ceedb9c0d66"
+    },
+    {
+      "path": "dewey_service/services/sharing.py",
+      "bytes": 84758,
+      "sha256": "040e9f867fb1b8b2a56d7fb1824c9ad47055a5da4b441d7913d53fed3ac781c7"
+    },
+    {
+      "path": "dewey_service/static/registry.js",
+      "bytes": 45001,
+      "sha256": "ef751b418f49a1c43b8695715027047de84be0e44ee04d4bd66abcf43f0257b7"
+    },
+    {
+      "path": "dewey_service/static/sharing.js",
+      "bytes": 36379,
+      "sha256": "1c65d3914344ed559339e9bf4ccc9b851352976215b4222f75a69e7cccff2b70"
+    },
+    {
+      "path": "dewey_service/templates/admin.html",
+      "bytes": 9285,
+      "sha256": "a86e93ced1614b69e453e6723da832ce1fefb162bd173cf4276ee63160f79af4"
+    },
+    {
+      "path": "docs/apis.md",
+      "bytes": 23725,
+      "sha256": "3215d03da21e80ef81bb95ee79952da3396da97f2f1d5998bf7e530bd3332e26"
+    },
+    {
+      "path": "dewey_service/services/share_expiry.py",
+      "bytes": 12917,
+      "sha256": "004dc9dbadfef4ca2d3e1bc60e03ef57ef4601a28c9f4b33e1848a312586f6cb"
+    },
+    {
+      "path": "docs/plans/20261027T224044Z_scoped_share_expiry_12_0_11_release.md",
+      "bytes": 3499,
+      "sha256": "d174b56166cee61ab99be1e54d5d8be1ae5e0a88c10c08df5432ae2650dfe642"
+    },
+    {
+      "path": "docs/plans/evidence/20261027_scoped_share_expiry/capture_routes.py",
+      "bytes": 21663,
+      "sha256": "5787e35ea09a954c0c0e6314157f0d564317c35e12460204cc155150e05f0783"
+    },
+    {
+      "path": "docs/plans/evidence/20261027_scoped_share_expiry/capture_ui.cjs",
+      "bytes": 5767,
+      "sha256": "0d0d24896cd761fcf750bb315caa46f82ea0a16254d2e71d75e1517df604c06e"
+    },
+    {
+      "path": "docs/plans/evidence/20261027_scoped_share_expiry/route_capture_receipt.json",
+      "bytes": 3709,
+      "sha256": "16d2d6a2dc6e2ed4867d0277f58de7693f49aa3636099cc2093860631f655f1d"
+    },
+    {
+      "path": "docs/plans/evidence/20261027_scoped_share_expiry/route_capture_stderr.txt",
+      "bytes": 101,
+      "sha256": "44be3f5625d0971332308954d6cc4cc01645cd6d0eda0a3d489d57f0dd807c29"
+    },
+    {
+      "path": "docs/plans/evidence/20261027_scoped_share_expiry/route_capture_stdout.txt",
+      "bytes": 3709,
+      "sha256": "16d2d6a2dc6e2ed4867d0277f58de7693f49aa3636099cc2093860631f655f1d"
+    },
+    {
+      "path": "docs/plans/evidence/20261027_scoped_share_expiry/ui_capture_receipt.json",
+      "bytes": 1278,
+      "sha256": "af78f8cfabc244516dcd1942d8a754aa651519f7a537d0f2982a3e1bee3d1b89"
+    },
+    {
+      "path": "docs/plans/evidence/20261027_scoped_share_expiry/ui_capture_stdout.json",
+      "bytes": 1278,
+      "sha256": "af78f8cfabc244516dcd1942d8a754aa651519f7a537d0f2982a3e1bee3d1b89"
+    }
+  ]
+}

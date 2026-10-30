@@ -1,0 +1,35 @@
+{
+  "recorded_at": "2026-10-28T07:51:15.894977+00:00",
+  "version": "12.0.16",
+  "source_commit": "81690f92c11d8bd9f6664759f7a5af04052cd785",
+  "source_branch": "codex/dewey-multiqc-delivery-12.0.16-20261028",
+  "target_instance": "i-07df3a933e4839f52",
+  "region": "us-west-2",
+  "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:ea0fe1930cf6cccc6e662a938bb1de8ed3831b5e799d3d0792966d5cf045fc65",
+  "limits": {
+    "per_subject": 3,
+    "all_subjects_per_process": 12,
+    "authority": "user explicitly requested both increases in this chat"
+  },
+  "build": {
+    "exit_code": 0,
+    "started_at": "2026-10-28T07:45:22.518164+00:00",
+    "finished_at": "2026-10-28T07:48:41.238932+00:00"
+  },
+  "deploy": {
+    "exit_code": 0,
+    "started_at": "2026-10-28T07:49:45.013878+00:00",
+    "finished_at": "2026-10-28T07:49:48.675315+00:00"
+  },
+  "content_proxy": {
+    "exit_code": 0,
+    "native_operation": "apache2ctl graceful",
+    "started_at": "2026-10-28T07:50:15.383356+00:00",
+    "finished_at": "2026-10-28T07:50:15.473931+00:00",
+    "file": "/etc/apache2/sites-available/dewey-content-day.conf",
+    "change": "Add existing byte-preserving no-gzip rule only for /__dewey_preview/assets/"
+  },
+  "additional_controls_or_post_success_checks": false,
+  "tests": false,
+  "browser_observation": "User-requested navigation and plots completed; cached Coverage revisit16requests,13HTTP304,0HTTP429,11929bytes; visibleMosdepthplot"
+}

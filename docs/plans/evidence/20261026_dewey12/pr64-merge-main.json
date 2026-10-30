@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "repository": "Daylily-Informatics/dewey",
+  "pull_request": {
+    "number": 64,
+    "url": "https://github.com/Daylily-Informatics/dewey/pull/64",
+    "state": "closed",
+    "merged": true,
+    "merged_at": "2026-10-26T20:52:10Z",
+    "merged_by": "iamh2o",
+    "base_branch": "main",
+    "previous_base": "818bf15c7cfd65a351acf6816293057ee2ba8bf6",
+    "head": "d617b9a147fa06e203f3def706aec65da132460b",
+    "merge_commit": "74b426b82829be852f128b9541c38d49ea05c983",
+    "merge_tree": "35b6dc6e1673628b3e994f495b50fb3112f8db14",
+    "parents": [
+      "818bf15c7cfd65a351acf6816293057ee2ba8bf6",
+      "d617b9a147fa06e203f3def706aec65da132460b"
+    ],
+    "method": "merge"
+  },
+  "authorization": {
+    "first_request": "please update all of the docs to be in line with the current state of code, commit push make PR merg vs main",
+    "second_confirmation": "confirm **merge PR #64 into main**.",
+    "scope": "PR 64 into main; no Login/Dayhoff merges, new release tag, image build or production deployment"
+  },
+  "pre_merge_checks": {
+    "run_id": 40362088888,
+    "url": "https://github.com/Daylily-Informatics/dewey/actions/runs/40362088888",
+    "head": "d617b9a147fa06e203f3def706aec65da132460b",
+    "conclusion": "success",
+    "checks": [
+      {
+        "name": "Isolated PostgreSQL sharing contracts",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Tests and Build",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Code Quality (Ruff)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Security Scanning (Bandit)",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "invariants": {
+    "release_tag": "12.0.7",
+    "release_source": "3adc81c622d3a8e81fa31b91a2d3ce43690c8202",
+    "release_is_ancestor_of_main": true,
+    "main_tree_equals_reviewed_head": true,
+    "force": false,
+    "admin_override": false,
+    "branch_deleted": false,
+    "production_mutation": false,
+    "annotated_tag_object_unchanged": "898668b4b69925bc9631fa6f6325ebeb71102b6e"
+  },
+  "post_merge_ci": {
+    "run_id": 40399463503,
+    "url": "https://github.com/Daylily-Informatics/dewey/actions/runs/40399463503",
+    "event": "push",
+    "head": "74b426b82829be852f128b9541c38d49ea05c983",
+    "status": "completed",
+    "conclusion": "success",
+    "checks": [
+      {
+        "name": "Tests and Build",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Isolated PostgreSQL sharing contracts",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Code Quality (Ruff)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Security Scanning (Bandit)",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "python": {
+      "passed": 1296,
+      "skipped": 2,
+      "warnings": 11,
+      "duration_seconds": 162.84,
+      "skip_reason": "Cognito E2E pool not configured in CI"
+    },
+    "postgresql": {
+      "passed": 5,
+      "duration_seconds": 2.94
+    },
+    "browser": {
+      "passed": 45,
+      "failed": 0
+    },
+    "python_changed_coverage": {
+      "lines": {
+        "covered": 2304,
+        "total": 2755,
+        "percent": 83.62976406533575
+      },
+      "branches": {
+        "covered": 887,
+        "total": 1076,
+        "percent": 82.43494423791822
+      },
+      "unmeasured_files": 0
+    },
+    "browser_changed_coverage": {
+      "lines": {
+        "covered": 109,
+        "total": 109,
+        "percent": 100
+      },
+      "branches": {
+        "covered": 190,
+        "total": 214,
+        "percent": 88.78504672897196
+      },
+      "unmeasured_files": 0
+    },
+    "package_build": {
+      "status": "success",
+      "artifacts": [
+        "dewey_service-12.0.8.dev8.tar.gz",
+        "dewey_service-12.0.8.dev8-py3-none-any.whl"
+      ],
+      "disposition": "CI development packages only; no version tag, image or deployment"
+    }
+  },
+  "acceptance": "Original production objective remains open for internal first-use/scoped-access proof and separate user acceptance. Merge is not a new production deployment.",
+  "closeout": "Post-merge ledger and receipt are committed/pushed on the existing working branch. Main remains the reviewed merge commit; no further PR or direct main push is inferred."
+}

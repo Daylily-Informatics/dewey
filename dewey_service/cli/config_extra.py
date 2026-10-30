@@ -288,7 +288,7 @@ def _prepare_registry_release(
         **payload.get("registry", {}),
         "internal_domains": ["lsmc.com"],
         "service_principals": identities,
-        "default_share_lifetime_days": 30,
+        "default_share_lifetime_days": None,
     }
     payload["share"] = {**payload.get("share", {}), "default_signed_ttl_seconds": 900}
     content = yaml.safe_dump(payload, sort_keys=False).encode()

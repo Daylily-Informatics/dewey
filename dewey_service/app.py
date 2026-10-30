@@ -7,6 +7,7 @@ import io
 import json
 import logging
 import os
+from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from time import monotonic, time_ns
@@ -470,8 +471,18 @@ def create_app(
         )
         service.verify_existing()
 
+    @asynccontextmanager
+    async def lifespan(app):
+        from dewey_service.recipient_identity import close_recipient_client
+
+        try:
+            yield
+        finally:
+            await run_in_threadpool(close_recipient_client, settings)
+
     app = FastAPI(
         title="Dewey Artifact Service",
+        lifespan=lifespan,
         version=resolve_package_version(),
         description="Canonical artifact registry and resolver for LSMC",
     )
@@ -1478,7 +1489,12 @@ def create_app(
         return HTMLResponse(status_code=exc.status_code, content=exc.detail or "")
 
     @app.get("/", include_in_schema=False)
-    async def root(request: Request) -> RedirectResponse:
+    async def root(request: Request):
+        actor = getattr(request.state, "registry_principal", None)
+        if actor is not None and actor.recipient_only:
+            from dewey_service.recipient_api import recipient_home
+
+            return recipient_home(request, templates)
         if has_ui_session(request):
             return RedirectResponse(url="/ui", status_code=status.HTTP_303_SEE_OTHER)
         return RedirectResponse(url="/login?next=/", status_code=status.HTTP_303_SEE_OTHER)

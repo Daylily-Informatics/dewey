@@ -1,0 +1,12 @@
+{
+  "version": "12.0.8",
+  "release_commit": "c8a73360fcb6b908c2e575cb381e359dd425f838",
+  "main_commit": "74b426b82829be852f128b9541c38d49ea05c983",
+  "verified_installed_files": 113,
+  "all_installed_package_bytes_equal_main": true,
+  "readyz_matches_unchanged_canonical_schema": true,
+  "unchanged_main_ci_run": 40399463503,
+  "line_coverage_percent": 83.62976406533575,
+  "branch_coverage_percent": 82.43494423791822,
+  "extra_test_runs": 0
+}

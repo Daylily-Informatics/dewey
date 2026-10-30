@@ -1,0 +1,63 @@
+{
+  "observed_at": "2026-10-26T22:01:48.061Z",
+  "version": "12.0.8",
+  "identity": {
+    "role": "approved_internal_recipient",
+    "profile": "John",
+    "email_matched_expected": true,
+    "source": "Actual Account link and subsequent signed-in recipient account page"
+  },
+  "share_euid": "M-DGX-14D1F",
+  "canonical_path": "/fetch/M-DGX-14D1F/multiqc.html",
+  "native_cognito_share_flow": true,
+  "exact_deep_return_verified": true,
+  "isolated_content_host": true,
+  "sidecars": {
+    "css": true,
+    "nested_javascript": true,
+    "nested_json": true,
+    "fixture_marker": "PASS: real MultiQC report with sibling CSS, nested JavaScript and nested JSON. All QC values are synthetic."
+  },
+  "management": {
+    "path": "/api/v1/registry/defaults",
+    "denied": true,
+    "message": "This credential is limited to shared content",
+    "observed_at": "2026-10-26T21:59:09.617Z",
+    "http_status_from_source_contract": 403,
+    "network_status_capture": false
+  },
+  "normal_manager_session": {
+    "profile": "John (lsmc.com)",
+    "normal_google_signin": true,
+    "expected_identity_matched": true,
+    "root_returns_library": true,
+    "admin_navigation_visible": true,
+    "agent_permission_edits": false,
+    "entitlement_state_diff_collected": false
+  },
+  "credentials_entered_or_extracted_by_agent": false,
+  "new_password_or_personal_credential_created": false,
+  "share_or_artifact_policy_mutations": false,
+  "source_changes": false,
+  "builds": 0,
+  "scope_note": "Ordinary internal management login remains governed by its existing configured domain policy. The explicit share login narrows the browser session without changing stored management entitlements.",
+  "set_inventory": {
+    "share_euid": "M-DGX-14CVV",
+    "files": 5,
+    "bytes": 2195946,
+    "enumeration_complete": true,
+    "continuation_token": null,
+    "receipt": "internal-set-contents-12.0.8.json",
+    "sha256": "75a79393b73a975d2e0e4a7f7fe68f41ae568e959ab745683087acb0bd24ea6a"
+  },
+  "screenshots": [
+    "internal-report-12.0.8.png",
+    "internal-report-share-session-12.0.8.png"
+  ],
+  "limitations": [
+    "Registration/confirmation was completed by the user earlier; this pass observed the confirmed account, fresh native share sign-in and exact deep return.",
+    "The management denial was observed in the browser;403 is the bound source contract, not a captured network status.",
+    "Ordinary internal management access remains governed by existing Login policies; explicit share login is a separate restricted session.",
+    "Formal user acceptance remains independent of the completed functional acceptance."
+  ]
+}

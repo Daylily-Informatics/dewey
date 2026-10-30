@@ -1,6 +1,6 @@
 # Dewey As A Discoverable Service
 
-This page describes how Dewey 12.0.7 fits the Dayhoff-managed service contract.
+This page describes how Dewey 12.0.8 fits the Dayhoff-managed service contract.
 
 The goal is not to restate Dayhoff's generic guidance. The goal is to show how Dewey already satisfies that contract in concrete, repo-local terms.
 

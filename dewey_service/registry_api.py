@@ -26,6 +26,19 @@ class Registration(BaseModel):
     version_id: str | None = None
 
 
+class RegistryDefaultsUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    delivery_lifetime_seconds: int = Field(default=None, ge=1, le=3600, strict=True)
+    listing_cache_ttl_seconds: int = Field(default=None, ge=0, le=300, strict=True)
+
+
+class PersonalTokenRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    name: str = Field(min_length=1, max_length=120)
+    lifetime_days: int = Field(default=30, ge=1, le=365, strict=True)
+    role: Literal["READ_ONLY", "READ_WRITE", "ADMIN"] | None = None
+
+
 class MetadataUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str | None = None
@@ -58,7 +71,7 @@ class ShareRequest(BaseModel):
     allowed_users: list[str] = Field(default_factory=list)
     allowed_domains: list[str] = Field(default_factory=list)
     expires_at: str | None = None
-    lifetime_days: int | None = Field(default=None, ge=1)
+    lifetime_days: int | None = Field(default=None, ge=1, strict=True)
     grants: list[RecipientGrantRequest] | None = None
     include_patterns: list[str] = Field(default_factory=lambda: ["**"])
     exclude_patterns: list[str] = Field(default_factory=list)
@@ -73,6 +86,15 @@ class GrantRevocationRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     policy_revision: int = Field(ge=1)
     reason: str | None = None
+
+
+class ShareRevivalRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    policy_revision: int = Field(ge=1)
+    expires_at: str = Field(min_length=1)
+    grant_euids: list[str]
+    reason: str = Field(min_length=1)
+    reauthorize_public_registered: bool = False
 
 
 class SlugClaimRequest(BaseModel):
@@ -128,7 +150,14 @@ def attach_registry_api(app, *, templates):
     @app.middleware("http")
     async def private_registry_responses(request, call_next):
         response = await call_next(request)
-        response.headers["Cache-Control"] = "no-store"
+        if request.method in {"GET", "HEAD"} and request.url.path.startswith(
+            "/__dewey_preview/assets/"
+        ):
+            # The authorized report handler owns mandatory revalidation for
+            # its assets. Errors without an explicit policy remain no-store.
+            response.headers.setdefault("Cache-Control", "no-store")
+        else:
+            response.headers["Cache-Control"] = "no-store"
         # Native same-origin forms need their Origin for the allowlist check.
         # Preserve the stricter policy set by isolated preview responses.
         response.headers.setdefault("Referrer-Policy", "same-origin")
@@ -331,8 +360,11 @@ def attach_registry_api(app, *, templates):
         page_size: int = Query(25, ge=1, le=100),
         q: str = "",
         sort: Literal["created_at", "name"] = "created_at",
+        include_expired: bool = True,
     ):
-        return service.list_registry_shares(page=page, page_size=page_size, q=q, sort=sort)
+        return service.list_registry_shares(
+            page=page, page_size=page_size, q=q, sort=sort, include_expired=include_expired
+        )
 
     @router.get("/registry/shares/{euid}")
     def share_detail(euid: str):
@@ -438,6 +470,10 @@ def attach_registry_api(app, *, templates):
     def share_edit(euid: str, data: dict[str, Any] = Body(...)):
         return service.modify_registry_share(euid, data)
 
+    @router.post("/registry/shares/{euid}/revive")
+    def share_revive(euid: str, data: ShareRevivalRequest):
+        return service.revive_share(euid, **data.model_dump())
+
     @router.post("/registry/shares/{euid}/revoke")
     def share_revoke(euid: str, data: GrantRevocationRequest):
         return service.revoke_share(
@@ -539,21 +575,27 @@ def attach_registry_api(app, *, templates):
             "tokens": service.registry_tokens(),
         }
 
+    @router.get("/registry/admin/access/{kind}")
+    def access_inventory(kind: Literal["users", "tokens", "shares", "usage"],
+                         page: int = Query(1, ge=1), page_size: int = Query(50, ge=1, le=100),
+                         euid: str | None = None):
+        return service.access_administration(kind, page=page, page_size=page_size, euid=euid)
+
+    @router.get("/registry/share-expiry-policy")
+    def scoped_share_expiry_policy():
+        return service.share_expiry_policy()
+
     @router.get("/registry/defaults")
     def defaults():
         return service.registry_defaults()
 
     @router.patch("/registry/defaults")
-    def change_defaults(data: dict[str, int] = Body(...)):
-        return service.update_registry_defaults(data)
+    def change_defaults(data: RegistryDefaultsUpdate):
+        return service.update_registry_defaults(data.model_dump(exclude_unset=True))
 
     @router.post("/account/tokens", status_code=201)
-    def token_create(data: dict[str, Any] = Body(...)):
-        return service.issue_registry_token(
-            name=data["name"],
-            lifetime_days=int(data.get("lifetime_days", 30)),
-            role=data.get("role"),
-        )
+    def token_create(data: PersonalTokenRequest):
+        return service.issue_registry_token(**data.model_dump())
 
     @router.post("/account/tokens/{euid}/revoke")
     def token_revoke(euid: str):

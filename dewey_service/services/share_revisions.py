@@ -351,6 +351,7 @@ class ShareRevisionMixin:
                     "fetch_path": "/fetch/" + share.euid,
                     "name": share.name,
                     "policy_revision": data["policy_revision"],
+                    "activation_generation": data.get("activation_generation", 0),
                     "content_mode": data["content_mode"],
                     "report_entrypoint": data.get("report_entrypoint"),
                     "report_bundle_root": data.get("report_bundle_root", ""),

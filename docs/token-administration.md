@@ -1,0 +1,23 @@
+# Dewey access administration
+
+Personal API tokens can be requested for 1–365 days, with a default of 30. A user with write access can select READ_WRITE. A token cannot exceed its issuer's role, current identity grant deadline, or recipient-only restrictions. Recipient credentials remain READ_ONLY. Token values are displayed once; global inventories never return token hashes or secrets. Existing tokens keep their recorded expiry.
+
+The administrator page at https://dewey.day.lsmc.bio/admin has global Users, Tokens and Shares views with server-side pagination. Users are identities recorded in Dewey browser bindings or issued tokens, with token/share activity counts. Shared Login remains the authoritative identity directory. These views include other owners' records only for the ADMIN role. The normal account and recipient pages retain their own-account behavior.
+
+Tokens show issuer, assigned roles, issue/expiry/status, request count and last use. Usage opens a paginated request history: timestamp, HTTP method, route template and response status. The Revoke action uses the existing individual-token endpoint and server permission check. Local revocation is effective even if upstream identity revocation subsequently fails; such a failure remains explicit. Issuance and revocation add typed operational audit events.
+
+Shares show owner, status, expiry, audit-event count and last event. Their detail page provides existing audit activity, recipient-grant revocation and whole-share revocation with the current policy revision. Revocation does not recall bytes already delivered. Share events from personal-token requests additionally link to their issuing token through typed lineage.
+
+The paginated global inventory API is https://dewey.day.lsmc.bio/api/v1/registry/admin/access/users (or `tokens`, `shares`, `usage` as the final route segment). It accepts page and page_size, and usage selects a token with euid. Every inventory request independently requires ADMIN. Token request history uses the existing operational storage-operation template, with `token_request` lineage from the token; share-event attribution uses `token_share_event` lineage. No app-specific table, raw object-reference relationship or fabricated EUID is introduced.
+
+Usage coverage starts when request auditing is deployed. Earlier requests are not fabricated or retroactively attributed. Counts represent authenticated HTTP requests with recorded response status, not complete downloads or scientific acceptance. Existing share activity remains available. Unrecognized/revoked tokens rejected during authentication cannot be attributed as an authenticated request. Current request auditing covers returned HTTP responses; uncaught server/transport exceptions have the owning service logs rather than a fabricated response status.
+
+## Current release boundary
+
+Dewey12.0.18 publishes token governance and the request ceiling without changing shared Login or Cognito. Effective lifetime remains bounded by the currently deployed provider/issuer grant. The longer shared-provider rollout remains paused; this release does not claim working365-day credentials.
+
+## Deployment prerequisite for the one-year horizon
+
+Both Dewey and Login enforce lifetime bounds. Login's Dewey-specific recipient identity request schema, minting service and provider-grant setting must allow 365 days. Set the configured provider_grant_lifetime_seconds to 31536000 and retain browser_grant_lifetime_seconds at 28800. The two configured Cognito app clients currently have 30-day refresh tokens; their owning shared Login configuration must support the longer refresh horizon before this is claimed as an effective one-year production feature. The shared-client change is pending the user's explicit scope choice because those clients also serve other services.
+
+Fresh sign-in after the rollout establishes a new provider grant. Existing sign-in grants are not silently extended, so their remaining deadline can shorten a newly requested token. Current provider enabled/verified identity, source revision, refresh and userinfo checks remain active; extending token lifetime does not bypass revocation.

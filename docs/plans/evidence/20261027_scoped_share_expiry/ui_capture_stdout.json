@@ -1,0 +1,33 @@
+{
+  "observed_at": "2026-10-27T22:38:37.947Z",
+  "status": "PASS",
+  "checks": [
+    "native UI scope exact internal email",
+    "native UI scope exact internal domains",
+    "native UI scope mixed",
+    "native UI scope external creator",
+    "native UI scope subdomain",
+    "native UI scope include subdomains",
+    "native UI scope public registration",
+    "native UI scope unverified creator",
+    "native UI scope service creator",
+    "new eligible internal share auto noexpiry",
+    "switch to external forces finite14day and disables infinity",
+    "existing internal finite800days retained",
+    "original external creator stays bounded in editor",
+    "UI rejects bounded expiry beyond365days",
+    "UI rejects explicit null for bounded scope",
+    "native admin dialog has no mutable global lifetime field",
+    "native admin JS describes both scopes",
+    "native server admin template describes both scopes",
+    "revive UI requires explicit recipient selections",
+    "existing policy exceptions visibly require explicit review"
+  ],
+  "check_count": 20,
+  "network_calls": 0,
+  "mail_sends": 0,
+  "source": "dewey_service/static/sharing.js",
+  "limits": [
+    "Native UI functions evaluated in captured DOM; deployed browser acceptance remains separate."
+  ]
+}

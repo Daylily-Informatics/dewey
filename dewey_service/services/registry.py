@@ -36,7 +36,11 @@ from dewey_service.tapdb_backend import (
 )
 
 
-class RegistryServiceMixin:
+from dewey_service.services.share_notifications import ShareNotificationMixin
+from dewey_service.services.access_administration import AccessAdministrationMixin
+
+
+class RegistryServiceMixin(AccessAdministrationMixin, ShareNotificationMixin):
     def _registry_event(self, session, record, action):
         receipt = self.backend.create_instance(
             session,
@@ -72,23 +76,36 @@ class RegistryServiceMixin:
                 raise HTTPException(
                     503, "Dewey performance settings have not been explicitly initialized"
                 )
+            if data["share_lifetime_days"] is not None and (
+                type(data["share_lifetime_days"]) is not int
+                or not 1 <= data["share_lifetime_days"] <= self.share_max_lifetime_days
+            ):
+                raise HTTPException(503, "Invalid persisted share lifetime default")
             if (
                 type(data["listing_cache_ttl_seconds"]) is not int
                 or not 0 <= data["listing_cache_ttl_seconds"] <= 300
             ):
                 raise HTTPException(503, "Invalid persisted listing cache TTL")
-            return {key: data[key] for key in keys}
+            return {**{key: data[key] for key in keys}, "share_expiry_policy": {
+                "scope": "original_creator_and_entire_audience",
+                "internal_domains": ["lsmc.com", "lsmc.bio"],
+                "internal_default_lifetime_days": None, "bounded_default_lifetime_days": 14,
+                "bounded_max_lifetime_days": 365,
+                "configured_share_lifetime_is_scoped_override": False,
+                "share_lifetime_days_field_scope": "historical_persisted_setting_not_used_for_creation",
+                "description": "Persisted legacy lifetime is not a global authorization. Creator/audience policy determines defaults and no-expiry eligibility."}}
 
     def update_registry_defaults(self, changes):
         if not principal().admin:
             raise HTTPException(403, "Admin access required")
+        if "share_lifetime_days" in changes:
+            raise ValueError("Global share lifetime edits are unsupported; creator/audience scoped rules are fixed")
         if not changes or set(changes) - {
-            "share_lifetime_days",
             "delivery_lifetime_seconds",
             "listing_cache_ttl_seconds",
         }:
             raise ValueError(
-                "Only share lifetime, delivery lifetime and listing cache TTL may be changed"
+                "Only delivery lifetime and listing cache TTL may be changed; share expiry follows fixed creator/audience rules"
             )
         with self.backend.session_scope(commit=True) as session:
             self.backend.lock_external_key(
@@ -106,7 +123,7 @@ class RegistryServiceMixin:
                     503, "Dewey performance settings have not been explicitly initialized"
                 )
             data = {**normalize_instance_payload(row), **changes}
-            if (
+            if data["share_lifetime_days"] is not None and (
                 type(data["share_lifetime_days"]) is not int
                 or not 1 <= data["share_lifetime_days"] <= self.share_max_lifetime_days
             ):
@@ -639,10 +656,16 @@ class RegistryServiceMixin:
         if "expires_at" in data and "lifetime_days" in data:
             raise ValueError("Supply expires_at or lifetime_days, not both")
         if "lifetime_days" in data:
-            days = int(data["lifetime_days"])
-            if not 1 <= days <= self.share_max_lifetime_days:
-                raise ValueError("Invalid share lifetime")
-            args["expires_at"] = (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
+            days = data["lifetime_days"]
+            if days is None:
+                args["expires_at"] = None
+            else:
+                if type(days) is not int or days < 1:
+                    raise ValueError("Invalid share lifetime")
+                try:
+                    args["expires_at"] = (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
+                except OverflowError as exc:
+                    raise ValueError("Share lifetime exceeds the supported calendar") from exc
         return self.create_share(
             target_kind=kind, target_euid=euid, idempotency_key=idempotency_key, **args
         )
@@ -1149,9 +1172,9 @@ class RegistryServiceMixin:
         recipient_only: bool = False,
     ):
         actor = principal()
-        if actor.service or not actor.email or not name.strip() or not 1 <= lifetime_days <= 30:
+        if actor.service or not actor.email or not name.strip() or not 1 <= lifetime_days <= 365:
             raise ValueError(
-                "A signed-in user, token name, and lifetime of 1..30 days are required"
+                "A signed-in user, token name, and lifetime of 1..365 days are required"
             )
         permitted = {"READ_ONLY"}
         if actor.writable:
@@ -1204,6 +1227,7 @@ class RegistryServiceMixin:
                     "recipient_only": recipient_only,
                 },
             )
+            self._registry_event(session, row, "personal_token_issued")
             return {
                 "euid": row.euid,
                 "token": token,
@@ -1231,6 +1255,7 @@ class RegistryServiceMixin:
             )
             if row is None:
                 raise HTTPException(401, "Invalid Dewey user token")
+            token_euid = row.euid
             data = normalize_instance_payload(row)
             if data["status"] != "active" or datetime.fromisoformat(
                 data["expires_at"]
@@ -1250,6 +1275,7 @@ class RegistryServiceMixin:
                 raise HTTPException(401, "Recipient identity changed; renew the personal token")
         recipient_only = data.get("recipient_only", False)
         return Principal(
+            token_euid=token_euid,
             subject=data["subject"],
             email=data["email"],
             roles=("READ_ONLY",) if recipient_only else tuple(data["roles"]),
@@ -1292,8 +1318,10 @@ class RegistryServiceMixin:
                 raise DeweyNotFoundError("Token not found")
             data = normalize_instance_payload(row)
             self.backend.update_instance_json(
-                session, row, {"status": "revoked", "revoked_at": utc_now_iso()}
+                session, row, {"status": "revoked", "revoked_at": utc_now_iso(),
+                               "revoked_by": actor.subject, "revoked_by_email": actor.email}
             )
+            self._registry_event(session, row, "personal_token_revoked")
         # Local revocation takes effect even if the identity service is unavailable.
         if data.get("identity_grant_id"):
             from dewey_service.recipient_identity import revoke_recipient_identity

@@ -1,0 +1,34 @@
+{
+  "version": "12.0.8",
+  "url": "https://dewey.day.lsmc.bio/fetch/M-DGX-14D1F/multiqc.html",
+  "requests": 2,
+  "results": [
+    {
+      "client": "machine",
+      "status": 401,
+      "headers": {
+        "content-type": "text/html; charset=utf-8"
+      },
+      "body_bytes": 50,
+      "body_sha256": "4886d2828fa046a080a2531d4b496bc94e466e099dfa78b28bbeea50c05f517e",
+      "login_page_downloaded": false
+    },
+    {
+      "client": "browser",
+      "status": 303,
+      "headers": {
+        "location": "/auth/login?next=%2Ffetch%2FM-DGX-14D1F%2Fmultiqc.html",
+        "content-type": "text/html"
+      },
+      "body_bytes": 0,
+      "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "resolved_location": "https://dewey.day.lsmc.bio/auth/login?next=%2Ffetch%2FM-DGX-14D1F%2Fmultiqc.html"
+    }
+  ],
+  "scope": "Anonymous availability and deep-link contract only; not authenticated internal acceptance",
+  "initial_receipt_stop": {
+    "kind": "helper_assertion",
+    "reason": "Helper assumed a JSON MIME and an absolute Location. Actual machine response is an explicit401 with a plain authentication message, and browser303 preserves the exact same-origin return in a relative Location.",
+    "reconciliation": "Used retained responses only; no HTTP replay or production change"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "recorded_at": "2026-10-28T07:35:11.952683+00:00",
+  "version": "12.0.15",
+  "commit": "f01fab033c55f5797a4679d298157fa685d8e29a",
+  "branch": "codex/dewey-multiqc-delivery-12.0.15-20261028",
+  "target_instance": "i-07df3a933e4839f52",
+  "region": "us-west-2",
+  "service": "dewey",
+  "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:7139e3200629d8f086b7585d0e34b3f6c27b4b501ecb8b9453258fb2467146db",
+  "build": {
+    "exit_code": 0,
+    "started_at": "2026-10-28T07:13:10.955601+00:00",
+    "finished_at": "2026-10-28T07:16:06.077903+00:00"
+  },
+  "deploy": {
+    "exit_code": 0,
+    "started_at": "2026-10-28T07:33:23.828062+00:00",
+    "finished_at": "2026-10-28T07:33:27.722140+00:00",
+    "command": "docker compose -p dayhoff-day -f /opt/dayhoff/deployments/day/compose/docker-compose.yml up -d --no-deps --no-build --pull never dewey"
+  },
+  "additional_checks": false,
+  "software_tests": false,
+  "browser_observation": "user-requested, pending post-deployment sign-in",
+  "share_url": "https://dewey.day.lsmc.bio/fetch/M-DGX-1801M"
+}

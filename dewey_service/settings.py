@@ -9,11 +9,12 @@ import os
 import re
 from functools import lru_cache
 from pathlib import Path
+from threading import Lock
 from typing import Any
 from urllib.parse import urlsplit
 
 import yaml
-from pydantic import Field, field_validator, model_validator
+from pydantic import Field, PrivateAttr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from dewey_service.defaults import (
@@ -453,6 +454,7 @@ def build_effective_config_rows(settings: "Settings", *, config_path: Path) -> l
                 "path": display_path,
                 "value": "<redacted>"
                 if _is_sensitive_config_path(display_path)
+                else "No expiry (null)" if path == "registry_default_share_lifetime_days" and value is None
                 else _display_config_value(redact_config(value, display_path)),
             }
         )
@@ -465,6 +467,10 @@ def build_effective_config_rows(settings: "Settings", *, config_path: Path) -> l
 
 
 class Settings(BaseSettings):
+    # Runtime-only transport, never serialized into configuration or audit data.
+    _recipient_http_client: Any = PrivateAttr(default=None)
+    _recipient_http_lock: Any = PrivateAttr(default_factory=Lock)
+
     model_config = SettingsConfigDict(
         env_prefix="DEWEY_",
         case_sensitive=False,
@@ -479,7 +485,7 @@ class Settings(BaseSettings):
     dag_read_actor: str = ""
     registry_internal_domains: list[str] = Field(default_factory=lambda: ["lsmc.com"])
     registry_service_principals: dict[str, dict[str, Any]] = Field(default_factory=dict)
-    registry_default_share_lifetime_days: int = 30
+    registry_default_share_lifetime_days: int | None = Field(default=None, ge=1)
     # Dedicated read-only QEO resolver. Never add this token to api_bearer_tokens.
     qeo_resolver_token_sha256: str = ""
     qeo_resolver_token_expires_at: str = ""
@@ -899,6 +905,8 @@ class Settings(BaseSettings):
             )
         self.share_default_signed_ttl_seconds = max(60, int(self.share_default_signed_ttl_seconds))
         self.share_max_lifetime_days = max(1, int(self.share_max_lifetime_days))
+        if self.registry_default_share_lifetime_days is not None and self.registry_default_share_lifetime_days > self.share_max_lifetime_days:
+            raise ValueError("Registry default share lifetime exceeds configured maximum")
         self.cognito_allowed_email_domains = _normalize_email_domains(
             self.cognito_allowed_email_domains,
             default=DEFAULT_COGNITO_ALLOWED_EMAIL_DOMAINS,

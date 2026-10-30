@@ -282,7 +282,7 @@ successful file responses, report entries/assets, archive outcomes and bytes.
 Server completion is not proof that a client saved the file. Complete inventory
 exports bind an observation time and inventory digest across pages.
 
-This guide describes the 12.0.7 source contract. Release provenance, changed-code
+This guide describes the 12.0.8 source contract. Release provenance, changed-code
 coverage and live acceptance have separate receipts in the
 [execution ledger](plans/20261026T010947Z_dewey_12_sharing_release_ledger.md).
 Internal signup is confirmed; internal application admission/scoped-access proof

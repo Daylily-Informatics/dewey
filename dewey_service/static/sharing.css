@@ -1,1 +1,19 @@
 .share-grant{border:1px solid var(--line);border-radius:7px;padding:18px;margin:20px 0}.share-grant legend{font-weight:650;color:var(--ink)}.share-grant textarea{min-height:75px}.share-grant select[multiple]{min-height:95px}.expiry-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(100px,1fr);gap:12px}.expiry-resolved{display:block;font-size:12px;overflow-wrap:anywhere;margin:-5px 0 15px;color:var(--muted)}.expiry-resolved.error{color:#a33226}.grant-summary{padding:12px 0;border-bottom:1px solid var(--line)}.share-report-frame{width:100%;height:70vh;border:0}dialog:has(.share-report-frame){width:1200px}#managed-share-form textarea{min-height:70px}#share-browser td{overflow-wrap:anywhere}@media(max-width:660px){.expiry-grid{grid-template-columns:1fr}}
+
+/* Essential share fields first; native details keep power controls keyboard/tap accessible. */
+#managed-share-form .share-label-help{display:flex;align-items:center;gap:8px;margin:16px 0 7px;font-size:12px;font-weight:650;color:var(--ink)}
+#managed-share-form .share-expiry .expiry-grid{grid-template-columns:1fr}
+#managed-share-form .share-advanced{border:1px solid var(--line);border-radius:7px;padding:14px;margin:20px 0}
+#managed-share-form .share-advanced>summary{font-size:14px;padding:2px 0}
+#managed-share-form .share-advanced>summary span{display:block;font-size:11px;font-weight:400;color:var(--muted);margin-top:4px}
+#managed-share-form .share-advanced[open]>summary{margin-bottom:18px}
+#managed-share-form .share-timezone{margin:12px 0 20px}
+#managed-share-form .share-timezone[open]>summary{margin-bottom:12px}
+#managed-share-form .share-inline-help{margin:14px 0 20px;font-size:12px}
+#managed-share-form [hidden]{display:none!important}
+#managed-share-form textarea[readonly]{background:#f5f7f5;color:var(--muted)}
+.share-help{display:inline-block;position:relative;margin:0;font-weight:400}
+.share-help>summary{display:inline-flex;align-items:center;justify-content:center;width:23px;height:23px;padding:0;border:1px solid #aebfb4;border-radius:50%;list-style:none;background:white;font-weight:700;cursor:pointer}
+.share-help>summary::-webkit-details-marker{display:none}
+.share-help>summary:focus-visible,.share-advanced>summary:focus-visible,.share-timezone>summary:focus-visible,.share-inline-help>summary:focus-visible{outline:2px solid #77ad95;outline-offset:3px}
+.share-help-text{position:absolute;top:29px;left:0;width:min(310px,65vw);padding:12px;border:1px solid #b7cbbd;border-radius:6px;background:#fff;color:var(--ink);box-shadow:0 5px 16px #18332620;z-index:20;line-height:1.5;font-size:12px}

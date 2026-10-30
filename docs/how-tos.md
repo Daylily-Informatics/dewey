@@ -1,6 +1,22 @@
 # Dewey How-Tos
 
-These workflows describe release 12.0.7. The day service uses shared Login; management remains on approved-network ingress, while verified recipients use the explicit public fetch/auth/content surfaces. See [Managed sharing](sharing.md) for the full contract and [the release ledger](plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) for acceptance status.
+These workflows describe release 12.0.8. The day service uses shared Login; management remains on approved-network ingress, while verified recipients use the explicit public fetch/auth/content surfaces. See [Managed sharing](sharing.md) for the full contract and [the release ledger](plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) for acceptance status.
+
+## Recover Management Access After a Shared Link
+
+Sharing sign-in creates a session restricted to shared content, including for
+an existing manager. Visiting the console with that session can return
+`This credential is limited to shared content`. From an approved management
+network, open [normal Dewey sign-in](https://dewey.day.lsmc.bio/auth/login?next=%2Fui)
+and authenticate with your management account. This replaces the restricted
+browser session; management remains governed by existing Login entitlement and
+domain policies. It does not widen the share grant. Separate browser profiles
+keep manager and recipient sessions independent.
+
+The controlled 12.0.8 closeout verified normal management recovery, native
+recipient sign-in with exact report return, isolated CSS/JavaScript/JSON sidecars,
+a complete five-file shared set, and management denial in the restricted session.
+See the [acceptance receipt](plans/evidence/20261026_dewey12/internal-acceptance-12.0.8.json).
 
 ## Activate And Inspect The Repo Environment
 
@@ -19,7 +35,7 @@ Root-global `--json` is supported only by commands that declare it. Business CLI
 
 ## Configure Existing Storage And Start The Service
 
-Release 12.0.7 pins TapDB 11.0.9, `meridian-euid==0.4.8` and `daylily-auth-cognito==2.1.5` on Python >=3.12. All Python dependencies live in `project.dependencies` and the frozen lock. Pass every service/TapDB config path explicitly as an absolute path.
+Release 12.0.8 pins TapDB 11.0.9, `meridian-euid==0.4.8` and `daylily-auth-cognito==2.1.5` on Python >=3.12. All Python dependencies live in `project.dependencies` and the frozen lock. Pass every service/TapDB config path explicitly as an absolute path.
 
 ```bash
 dewey config init
@@ -91,7 +107,7 @@ A slug has 3–63 lowercase ASCII letters/digits/hyphens with alphanumeric ends.
 
 ## Use curl, wget And The CLI
 
-Sign in at `/recipient/account`, create a finite read-only credential, and save its one-time value in a private file with mode 0600. Credentials last 1–30 days and remain separately revocable. Share lifetime does not extend a credential.
+Sign in at `/recipient/account`, create a finite read-only credential, and save its one-time value in a private file with mode 0600. Credentials last 1–365 days and remain separately revocable. Share lifetime does not extend a credential.
 
 The CLI requires both an explicit HTTPS origin and an absolute token-file path. It does not read the shell variable used by the adjacent curl/wget examples:
 

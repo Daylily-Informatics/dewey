@@ -1,7 +1,7 @@
 # Dewey API Surface
 
 This page indexes the HTTP contract in `dewey_service/app.py`, `registry_api.py`,
-`fetch.py`, `recipient_api.py` and `report_preview.py` at release 12.0.7. The
+`fetch.py`, `recipient_api.py` and `report_preview.py` at release 12.0.8. The
 configured service's OpenAPI document supplies request schemas; hidden browser
 routes are described separately below.
 
@@ -46,10 +46,10 @@ Current auth modes used in this document:
 | `GET` | `/api/anomalies` | `bearer token` | Local anomaly list |
 | `GET` | `/api/anomalies/{anomaly_id}` | `bearer token` | Local anomaly detail |
 
-The integration branch keeps sharing readiness inside
+Release 12.0.8 keeps sharing readiness inside
 `checks.database.details.sharing_schema` (`verified` or `conversion_required`),
-within the pinned Dayhoff readiness schema. The deployed 12.0.7 response still
-has that diagnostic at the top level; moving it is a PR-only contract correction.
+within the pinned Dayhoff readiness schema. This corrects the top-level diagnostic
+in 12.0.7; the deployed response passes the unchanged canonical schema.
 Readiness still requires both a healthy database and the verified sharing schema.
 
 ## Auth Pages And Session UX
@@ -211,11 +211,21 @@ Create fields include `name`, `purpose`, `audience` (`recipients` or
 `public_registered`), `allowed_users`, `allowed_domains`, or explicit `grants`,
 `include_patterns`, `exclude_patterns`, `denied_emails`, `expires_at`,
 `content_mode` (`download` or `www`), `report_entrypoint`, and
-`report_bundle_root`. `delivery_modes` admits only `["gateway"]`. Omitted expiry
-defaults to 30 days; explicit `null` is indefinite. Record-scoped creation also
-accepts `lifetime_days` when no explicit expiry is supplied. Owner identity is
-derived from the authenticated creator. Arbitrary owner/group/TTL and old
-transport payloads are not the 12.x share contract.
+`report_bundle_root`. `delivery_modes` admits only `["gateway"]`.
+
+Expiry is scoped to the **original creator and entire audience**. A verified
+`lsmc.com`/`lsmc.bio` account creator sharing only with exact `lsmc.com`/`lsmc.bio`
+email addresses or domains defaults to no expiry and may choose an explicit finite
+expiration. Included subdomains, outside recipients, public registration,
+service/unknown creators, and all other creators default to **14 days**, require a
+finite future expiration, and have an explicit maximum of **365 days from now**.
+An internal administrator editing an external-created share does not change the
+original creator's eligibility. Explicit `expires_at: null` or
+`lifetime_days: null` is accepted only for eligible internal shares. Positive
+`lifetime_days` is validated under the same scope. Grant deadlines cannot outlive
+a finite share; omission inherits its deadline. Preview, create, edit and revival
+use the same native rules. Ownership and creator verification come from native
+authenticated creation/audit records, not client fields.
 
 PATCH can change recipients, targets, filters, content mode and expiry atomically.
 For replacement targets, provide a reviewed `targets` list; each entry has
@@ -240,7 +250,7 @@ with registration still requires sign-in and email verification.
 | `GET` | `/api/v2/recipient/shares/{identifier}/contents` | Manifest page; `path`, `limit` 1–200, `continuation_token` |
 | `POST` | `/api/v2/recipient/shares/{identifier}/preview` | Creates an isolated report context for an authorized HTML entrypoint/bundle |
 | `POST` | `/api/v2/recipient/shares/{identifier}/preview/{context_euid}/handoff` | One-time viewer handoff; not a durable shared credential |
-| `GET`, `POST` | `/api/v2/recipient/tokens` | List own credentials; create with `name`, `lifetime_days` 1–30, fixed read-only role |
+| `GET`, `POST` | `/api/v2/recipient/tokens` | List own credentials; create with `name`, `lifetime_days` 1–365, fixed read-only role |
 | `POST` | `/api/v2/recipient/tokens/{token_euid}/revoke` | Revoke only the caller's credential |
 
 `?format=manifest` is paginated; follow every continuation to establish
@@ -281,9 +291,9 @@ subset routes retain their declared auth requirements. Access packages now retur
 authenticated `/fetch/` paths for gateway/manifest/TAR; they do not return S3
 presigns or CloudFront cookies. Removed delivery modes fail explicitly.
 
-See [Managed sharing](sharing.md) for limits and examples. This API description
-does not close the remaining internal scoped-access or final user-acceptance gates
-in the [release ledger](plans/20261026T010947Z_dewey_12_sharing_release_ledger.md).
+See [Managed sharing](sharing.md) for limits and examples. The internal and external functional journeys now pass, including restricted
+management denial. The [release ledger](plans/20261026T010947Z_dewey_12_sharing_release_ledger.md)
+records functional completion separately from formal user signoff.
 
 ## Search API
 
@@ -291,8 +301,7 @@ in the [release ledger](plans/20261026T010947Z_dewey_12_sharing_release_ledger.m
 
 Omitted or null `scopes` uses the declared artifact/artifact-set default. An
 explicit empty list or an unsupported scope is invalid; it does not broaden the
-query to default scopes. Empty-list rejection is an integration-branch correction
-after 12.0.7 and is not part of the currently deployed tag.
+query to default scopes. Empty-list rejection is deployed in 12.0.8.
 
 | Method | Path | Auth | `Idempotency-Key` |
 | --- | --- | --- | --- |
@@ -403,3 +412,56 @@ Current Dewey code does not expose:
 - a queue-consumer management surface
 
 Historical governance documents may describe event families conceptually for the broader platform, but those are not implemented here as a public runtime API.
+
+
+### Scoped expiry policy and explicit revival
+
+`GET /api/v1/registry/share-expiry-policy` returns the authenticated prospective
+creator's proof and scoped rule description. Share-manager detail returns
+`expiry_policy` for the **original persisted creator**, including whether the
+current no-expiry policy requires explicit review. Historical original-creator
+proof may be recovered from the native creation audit; missing proof is bounded.
+
+`GET /api/v1/registry/defaults` preserves the stored `share_lifetime_days` as a
+historical setting and explicitly describes its non-authoritative scope in
+`share_expiry_policy`. It is not a mutable global no-expiry authorization.
+`PATCH /api/v1/registry/defaults` rejects the unsupported `share_lifetime_days`
+field; it still supports `delivery_lifetime_seconds` and
+`listing_cache_ttl_seconds`. Admin API, server-rendered summary and editor show
+the fixed creator/audience rules rather than a global no-expiry toggle.
+
+Inactive shares are not reactivated by PATCH. A manager explicitly calls
+`POST /api/v1/registry/shares/{euid}/revive` with:
+
+```json
+{
+  "policy_revision": 3,
+  "expires_at": "2026-11-10T18:00:00+00:00",
+  "grant_euids": ["<actual persisted previously-active grant identity>"],
+  "reason": "Reviewed recipient and new expiration",
+  "reauthorize_public_registered": false
+}
+```
+
+Revival requires a new **finite** future expiration, the current revision, current
+target delegation authority, and explicit selection of existing recipients.
+The same original-creator/audience cap applies; an eligible internal finite
+expiration may exceed 365 days. Previously revoked individual grants cannot be
+selected. A public-with-registration audience requires its separate explicit
+reauthorization flag. Targets, patterns and denied rules are retained; revival
+cannot add recipients or broaden permissions. It increments policy revision and
+activation generation, retains prior revoked/expired audit evidence, retires old
+aliases and revokes old report contexts. It creates no automatic notification or
+resend. Later recipient additions are separate reviewed policy edits.
+
+New access-package paths carry policy-revision/activation pins; stale pins are
+rejected by `/fetch`. Listing cursors and TAR inventories retain revision fences;
+report contexts additionally retain permanent activation-generation fences.
+Ordinary unversioned canonical URLs remain locators requiring current verified
+identity and current grants on every request; they are not bearer credentials.
+Personal/API identity credentials retain their separate finite lifetimes.
+
+No source deployment automatically rewrites existing shares. A pre-existing
+outside-audience no-expiry policy is a visible exception requiring explicit
+review, not an endorsed grandfathered policy. Actual existing-share corrections
+or revivals require their separately authorized action and native audit receipt.

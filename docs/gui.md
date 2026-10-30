@@ -1,6 +1,6 @@
 # Dewey GUI Guide
 
-This guide describes release 12.0.7. Main navigation is **Library**, **S3 Browser**, **Sets**, **Sharing** and **Literature**. Writable principals see **Add**; administrators see **Admin**. The day deployment uses shared Login. Management remains on approved-network ingress; outside recipients use the configured fetch, authentication and isolated content surfaces.
+This guide describes release 12.0.8. Main navigation is **Library**, **S3 Browser**, **Sets**, **Sharing** and **Literature**. Writable principals see **Add**; administrators see **Admin**. The day deployment uses shared Login. Management remains on approved-network ingress; outside recipients use the configured fetch, authentication and isolated content surfaces.
 
 ## Roles And Record Capabilities
 
@@ -54,7 +54,7 @@ Revocation applies to subsequent requests, sidecars and TAR members. An already 
 
 ## Personal Credentials
 
-Recipients use `/recipient/account` to create and revoke their own read-only credentials. Lifetime is 1–30 days even for indefinite shares. Copy the token once into a private file; never add it to a durable link. Each request evaluates current identity and share rights. Management Account (`/account`) provides corresponding controls within the caller's authorized role.
+Recipients use `/recipient/account` to create and revoke their own read-only credentials. Lifetime is 1–365 days even for indefinite shares. Copy the token once into a private file; never add it to a durable link. Each request evaluates current identity and share rights. Management Account (`/account`) provides corresponding controls within the caller's authorized role.
 
 See [How-tos](how-tos.md#use-curl-wget-and-the-cli) for the CLI's explicit HTTPS origin and private token-file configuration.
 

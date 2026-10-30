@@ -18,12 +18,15 @@ Dayhoff release inputs are maintained in its `services/pins.toml`. Dewey 12 reta
 
 The GUI centers on Library, S3 Browser, Sets, Sharing and Literature. Metadata and download permissions are independent; every share requires authentication. Prefix browsing is bounded and does not register descendants. Physical S3 deletion is prohibited. See the [Dewey 12 release ledger](docs/plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) for source, validation, deployment and acceptance states.
 
-The recorded production release is **Dewey 12.0.7** with **Login 4.1.1**. All 113
-installed Dewey application files and assets match the published `12.0.7` tag;
-the [running-source receipt](docs/plans/evidence/20261026_dewey12/running-source-pr-binding-12.0.7.json)
-binds that source to the deployed image. Internal registration is confirmed.
-Internal first-use/scoped-access verification and final acceptance remain open in
-the ledger.
+The recorded production release is **Dewey 12.0.8** with **Login 4.1.1**. All 113
+installed Dewey application files and assets match the published `12.0.8` tag
+and merged `main`; the [running-source receipt](docs/plans/evidence/20261026_dewey12/running-source-binding-12.0.8.json)
+binds that source to the deployed image. The final patch deploys the tested search
+validation and canonical readiness-schema corrections. Internal and external
+functional acceptance now pass, including recipient report/sidecars, shared-set
+access and management denial. Formal user acceptance remains a separate record;
+the [closeout receipt](docs/plans/evidence/20261026_dewey12/release-closeout-12.0.8.json)
+records the completed production objective.
 
 Dewey management remains on approved networks. The scoped recipient ingress exposes authenticated fetch, report and recipient-account routes to external users.
 
@@ -58,9 +61,12 @@ organization membership. There are **no anonymous shares**.
 
 Choose **Named recipients** or **Public with registration**. Both require an active,
 verified email through shared Login. New recipients receive share-only access;
-their email domain does not admit them to an organization. The default lifetime is
-30 days; explicit `expires_at: null` is indefinite. Recipient credentials issued
-at `/recipient/account` last 1–30 days, can be shortened by provider-grant expiry,
+their email domain does not admit them to an organization. The global default is
+**No expiration** (`null`). Explicit finite share and individual email/domain-grant
+expirations remain available for `lsmc.com`, `lsmc.bio`, and every other domain;
+there are no domain exemptions. Existing finite shares and grants keep their saved
+deadlines. Recipient credentials issued
+at `/recipient/account` last 1–365 days, can be shortened by provider-grant expiry,
 and remain separately revocable.
 
 | Operation | Dewey 12 behavior |
@@ -218,3 +224,7 @@ or tokens retains their records and remains available as an access-security cont
 The prohibition has no configuration switch or administrator exemption.
 Removing a target from a managed share is an access-policy edit and remains
 available; it does not remove the registered artifact, set member or S3 bytes.
+
+## Analysis pipelines through Ursa
+
+See [the eleven-command API guide and service responsibilities](docs/analysis-pipelines-via-ursa.md).

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en" data-lsmc-service="dewey" data-theme="dark">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Shared with me · Dewey</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/console.css">
+  <style>
+    .recipient-home{max-width:1100px;margin:auto;padding:24px 16px}
+    .recipient-home header,.recipient-actions{display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap}
+    .recipient-home h1{margin:0}.recipient-home .identity{overflow-wrap:anywhere}
+    .recipient-home .table-scroll{overflow-x:auto}.recipient-home table{width:100%;border-collapse:collapse}
+    .recipient-home th,.recipient-home td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+    .recipient-home code{overflow-wrap:anywhere}.recipient-home .expired{opacity:.75}
+    .recipient-home #message{min-height:1.5em}.recipient-home #more{margin-top:16px}
+    @media(max-width:600px){.recipient-home{padding:16px 10px}.recipient-home h1{font-size:24px}}
+  </style>
+</head>
+<body>
+<main class="recipient-home">
+  <header>
+    <div><h1>Shared with me</h1><p class="identity">Signed in as <strong>{{ email }}</strong></p></div>
+    <form method="post" action="/auth/logout"><button type="submit">Logout / use a different account</button></form>
+  </header>
+  <section class="panel" aria-labelledby="share-list-title">
+    <div class="recipient-actions">
+      <h2 id="share-list-title">Your shares</h2>
+      <label><input id="show-expired" type="checkbox"> Show expired shares</label>
+    </div>
+    <p>Only shares granted to your current verified identity appear here. Expired shares cannot be opened; ask the owner to renew access.</p>
+    <p id="message" role="status" aria-live="polite">Loading your shares…</p>
+    <div class="table-scroll">
+      <table><thead><tr><th scope="col">Share EUID</th><th scope="col">Name</th><th scope="col">Date shared</th><th scope="col">Your access expires</th><th scope="col">Status</th></tr></thead><tbody id="recipient-shares"></tbody></table>
+    </div>
+    <button id="more" type="button" hidden>Load more shares</button>
+    <noscript>Enable JavaScript to list your shares, or open a share link from its invitation. Logout remains available above.</noscript>
+  </section>
+  <p><a href="/recipient/account">Download credentials</a> · Share access and personal credential expiration are separate.</p>
+</main>
+<script src="/static/recipient-home.js"></script>
+</body></html>

@@ -13,11 +13,13 @@ import secrets
 from contextlib import contextmanager
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from urllib.parse import parse_qs, quote
 
 from daylily_tapdb import generic_instance, generic_instance_lineage
 from fastapi import Body, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
+from starlette.concurrency import run_in_threadpool
 
 from dewey_service.audit import authenticated_user_email_context
 from dewey_service.preview_sessions import (
@@ -29,7 +31,7 @@ from dewey_service.preview_sessions import (
 )
 from dewey_service.registry_access import OPERATION_TEMPLATE, principal, principal_context
 from dewey_service.share_context import require_share_context, require_share_ingress
-from dewey_service.share_gateway import exact_relative_key, object_delivery
+from dewey_service.share_gateway import exact_relative_key, object_delivery, reserve_report_delivery
 from dewey_service.tapdb_backend import normalize_instance_payload, utc_now_iso
 
 _COOKIE = "__Host-dewey_preview"
@@ -111,6 +113,8 @@ def _live_context(service, settings, session, row):
     )
     if len(targets) != 1 or len(shares) != 1:
         raise HTTPException(409, "Preview source relationship unavailable")
+    from dewey_service.services.share_expiry import validate_activation_generation
+    validate_activation_generation(data, normalize_instance_payload(shares[0]))
     return data, binding, bindings[0].euid, shares[0].euid, targets[0].euid
 
 
@@ -227,10 +231,20 @@ def report_entry_page(request, resolved, receipt):
         },
         separators=(",", ":"),
     ).replace("<", "\\u003c")
-    script = """
+    script = (Path(__file__).parent / "static" / "report-section-host.js").read_text() + "\n" + """
 const config = CONFIG;
 const frame = document.getElementById('report');
 const status = document.getElementById('status');
+const banner = document.getElementById('report-notice');
+const dismiss = document.getElementById('dismiss-notice');
+let noticeTimer, noticeError=false;
+function hideNotice() { if (!noticeError) banner.hidden=true; }
+function reportError(error) {
+  noticeError=true; clearTimeout(noticeTimer); banner.hidden=false; dismiss.hidden=true;
+  status.setAttribute('role','alert'); status.textContent=error.message;
+}
+dismiss.addEventListener('click', hideNotice);
+window.addEventListener('load', () => { noticeTimer=setTimeout(hideNotice, 10000); }, {once:true});
 async function post(path, body) {
   const response = await fetch(path, {method:'POST', credentials:'same-origin',
     headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
@@ -248,6 +262,7 @@ async function post(path, body) {
       origin.href!==origin.origin+'/' || challenge.origin!==origin.origin || challenge.pathname!=='/__dewey_preview/challenge' ||
       handoffEndpoint.origin!==location.origin || !handoffEndpoint.pathname.startsWith(config.endpoint+'/'))
     throw new Error('Invalid report host configuration');
+  retainReportSections(origin.origin, frame, reportError, hideNotice, status);
   let used=false;
   window.addEventListener('message', async event => {
     if (used || event.origin!==origin.origin || event.source!==frame.contentWindow ||
@@ -262,17 +277,22 @@ async function post(path, body) {
       form.method='POST'; form.action=handoff.handoff_url; form.target=frame.name; form.hidden=true;
       token.name='token'; token.value=handoff.token; form.append(token); document.body.append(form);
       form.submit(); form.remove(); status.textContent='Report session expires '+view.expires_at+'. Reopen this URL to renew.';
-    } catch (error) { status.textContent=error.message; }
+    } catch (error) { reportError(error); }
   });
   frame.src=challenge.href;
-})().catch(error => { status.textContent=error.message; });
+})().catch(reportError);
 """.replace("CONFIG", config, 1)
     title = html.escape(resolved.get("name") or "Shared report")
     content = (
         f'<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
-        f'<title>{title} · Dewey</title><style nonce="{nonce}">body{{margin:0;font:15px system-ui}}header{{padding:12px 18px}}'
-        "h1{font-size:18px;margin:0}iframe{display:block;width:100%;height:calc(100vh - 110px);border:0}</style>"
-        f'<header><h1>{title}</h1><p id="status" role="status">Opening your authorized report…</p></header>'
+        f'<title>{title} · Dewey</title><style nonce="{nonce}">'
+        "html{height:100%}body{margin:0;height:100dvh;display:flex;flex-direction:column;overflow:hidden;font:15px system-ui}"
+        "header{flex:0 0 auto;display:flex;align-items:flex-start;gap:12px;padding:8px 12px;border-bottom:1px solid #dfe6e0}"
+        "header[hidden]{display:none}.notice-text{flex:1;min-width:0}h1{font-size:14px;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}"
+        "#status{font-size:12px;margin:3px 0 0;overflow-wrap:anywhere}#dismiss-notice{flex:0 0 auto;border:0;background:transparent;padding:0 4px;font:22px system-ui;cursor:pointer}"
+        "iframe{display:block;width:100%;flex:1 1 0;min-height:0;border:0}iframe[hidden]{display:none}</style>"
+        f'<header id="report-notice"><div class="notice-text"><h1 title="{title}">{title}</h1><p id="status" role="status">Opening your authorized report…</p></div>'
+        '<button id="dismiss-notice" type="button" aria-label="Dismiss report notice">×</button></header>'
         '<iframe id="report" name="dewey-isolated-report" title="Shared report" sandbox="allow-scripts allow-same-origin allow-forms allow-downloads" '
         f'referrerpolicy="no-referrer"></iframe><script nonce="{nonce}">{script}</script></html>'
     )
@@ -340,6 +360,8 @@ def attach_report_preview(app, router, service):
             session_data = live_session_binding(service, settings, session, binding_euid)
             expires = _context_expiry(now, receipt["expires_at"], session_data["expires_at"])
             share = service._canonical_share(session, share_euid)
+            if normalize_instance_payload(share)["policy_revision"] != receipt["policy_revision"]:
+                raise HTTPException(409, "Share policy changed before preview creation; reopen from Dewey")
             target_row = next(
                 (v for v in service._share_members(session, share) if v.euid == target), None
             )
@@ -357,6 +379,7 @@ def attach_report_preview(app, router, service):
                     "bundle_root": root,
                     "report_relative_key": relative,
                     "object_only": not relative,
+                    "share_activation_generation": normalize_instance_payload(share).get("activation_generation", 0),
                     "created_at": utc_now_iso(),
                     "expires_at": expires.isoformat(),
                 },
@@ -531,24 +554,41 @@ def attach_report_preview(app, router, service):
         methods=["GET", "HEAD"],
         include_in_schema=False,
     )
-    def preview_asset(asset_path: str, request: Request):
+    async def preview_asset(asset_path: str, request: Request):
         exact_relative_key(asset_path, allow_empty=False)
-        with service.backend.session_scope(commit=False) as session:
-            row, (data, binding, _, share, target) = _host_context(request, service, session)
-            _cookie_matches(request, data)
-            if data["status"] != "active":
-                raise HTTPException(401, "Preview handoff has not completed")
-        relative = data["bundle_root"] + asset_path
-        actor = binding_principal(binding, request.app.state.settings)
+
+        def authorize_asset():
+            with service.backend.session_scope(commit=False) as session:
+                row, (data, binding, _, share, target) = _host_context(request, service, session)
+                _cookie_matches(request, data)
+                if data["status"] != "active":
+                    raise HTTPException(401, "Preview handoff has not completed")
+            relative = data["bundle_root"] + asset_path
+            actor = binding_principal(binding, request.app.state.settings)
+            with principal_context(actor), authenticated_user_email_context(actor.email):
+                if data["object_only"]:
+                    receipt = service.authorize_share_object(share, target, "", action="report")
+                    if asset_path != receipt["key"].rsplit("/", 1)[-1]:
+                        raise HTTPException(403, "Object-only report has no authorized bundle assets")
+                else:
+                    receipt = service.authorize_share_object(share, target, relative, action="report")
+            return actor, receipt
+
+        actor, receipt = await run_in_threadpool(authorize_asset)
         with principal_context(actor), authenticated_user_email_context(actor.email):
-            if data["object_only"]:
-                receipt = service.authorize_share_object(share, target, "", action="report")
-                if asset_path != receipt["key"].rsplit("/", 1)[-1]:
-                    raise HTTPException(403, "Object-only report has no authorized bundle assets")
-            else:
-                receipt = service.authorize_share_object(share, target, relative, action="report")
-            headers = _headers(request.app.state.settings)
-            media = mimetypes.guess_type(receipt["key"])[0]
-            if media:
-                headers["Content-Type"] = media
-            return object_delivery(request, service, receipt, inline=True, extra_headers=headers)
+            reservation = await reserve_report_delivery(actor.subject)
+            try:
+                # Every conditional request retains live authorization. Only
+                # unchanged body transfer is avoided by the provider's 304.
+                headers = {**_headers(request.app.state.settings), "Cache-Control": "private, no-cache"}
+                media = mimetypes.guess_type(receipt["key"])[0]
+                if media:
+                    headers["Content-Type"] = media
+                return await run_in_threadpool(
+                    object_delivery, request, service, receipt,
+                    inline=True, extra_headers=headers, reservation=reservation,
+                    preview=True,
+                )
+            except BaseException:
+                reservation()
+                raise
