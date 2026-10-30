@@ -224,3 +224,7 @@ or tokens retains their records and remains available as an access-security cont
 The prohibition has no configuration switch or administrator exemption.
 Removing a target from a managed share is an access-policy edit and remains
 available; it does not remove the registered artifact, set member or S3 bytes.
+
+## Analysis pipelines through Ursa
+
+See [the eleven-command API guide and service responsibilities](docs/analysis-pipelines-via-ursa.md).

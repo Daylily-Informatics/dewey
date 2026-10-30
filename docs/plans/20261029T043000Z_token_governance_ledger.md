@@ -1,5 +1,11 @@
 # Current continuation state
 
+2026-10-30 scope amendment: user explicitly selected “campaign, new api guide and dewey token governance” for new versioned releases in the OWY/Ursa campaign. This authorizes Dewey feature publication/deployment only. Shared Login/Cognito remains unchanged; no365-day effective-token claim, no live credential revocation tests. Coordinated release is tracked in /Users/jmajor/projects/lsmc/offwithyou-seqnas-xfer/docs/plans/20261030T041310Z_owy_ursa_dyec22_catalog_ledger.md. Earlier pause below remains historical and still applies to shared Login.
+
+## Historical pause (Dewey release portion superseded above)
+
+ROLLOUT PAUSED by explicit user response: "Keep shared Login unchanged; pause rollout" to the question about raising both shared Cognito clients from30 to365 days. Do not change either Cognito client, provider-grant runtime configuration, browser-session lifetime, or deploy this feature without a new instruction to resume. Production remains unchanged. Source only is committed/pushed: Dewey f12b5fd on codex/dewey-token-governance-20261029; Login725f286 on codex/dewey-year-tokens-20261029. No release tags, builds, deployments or live credential/share mutations occurred. Source branches are retained; this decision does not request their deletion or reversion. No operational work is running. Next action: wait for user direction; earlier rollout steps below are superseded while paused.
+
 User requests Dewey tokens up to one year (including READ_WRITE), a global admin overview of all Dewey users/tokens/shares and usage, and per-token/per-share revocation. Implement through existing typed TapDB objects/lineage and existing role checks. Never expose token secrets/hashes. Ordinary users retain own-token access; recipient tokens retain READ_ONLY scope. This is implementation authority, not permission to revoke real credentials or shares as a test.
 
 Baseline: clean Dewey bc5a4515 on codex/dewey-report-performance-12.0.17-20261028; new branch codex/dewey-token-governance-20261029. Login clean c862635d8b9af043424873516e0e937d94b7f58d / 4.1.2. No tests/lint/CI/PR/merge, live revocation, container build or deployment performed. Do not call source changes deployed.

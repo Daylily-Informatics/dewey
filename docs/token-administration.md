@@ -12,6 +12,10 @@ The paginated global inventory API is https://dewey.day.lsmc.bio/api/v1/registry
 
 Usage coverage starts when request auditing is deployed. Earlier requests are not fabricated or retroactively attributed. Counts represent authenticated HTTP requests with recorded response status, not complete downloads or scientific acceptance. Existing share activity remains available. Unrecognized/revoked tokens rejected during authentication cannot be attributed as an authenticated request. Current request auditing covers returned HTTP responses; uncaught server/transport exceptions have the owning service logs rather than a fabricated response status.
 
+## Current release boundary
+
+Dewey12.0.18 publishes token governance and the request ceiling without changing shared Login or Cognito. Effective lifetime remains bounded by the currently deployed provider/issuer grant. The longer shared-provider rollout remains paused; this release does not claim working365-day credentials.
+
 ## Deployment prerequisite for the one-year horizon
 
 Both Dewey and Login enforce lifetime bounds. Login's Dewey-specific recipient identity request schema, minting service and provider-grant setting must allow 365 days. Set the configured provider_grant_lifetime_seconds to 31536000 and retain browser_grant_lifetime_seconds at 28800. The two configured Cognito app clients currently have 30-day refresh tokens; their owning shared Login configuration must support the longer refresh horizon before this is claimed as an effective one-year production feature. The shared-client change is pending the user's explicit scope choice because those clients also serve other services.
