@@ -1,0 +1,21 @@
+{
+  "service": "dewey",
+  "version": "12.0.18",
+  "source_commit": "14f63f2d982ac4b479de2a81a88f225283357c7c",
+  "source_branch": "codex/dewey-token-governance-20261029",
+  "target_instance": "i-07df3a933e4839f52",
+  "region": "us-west-2",
+  "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:1a10f323d96e9b7c5d19cd6bc523ed2844bbe93a0e2a83600fcacb70ff440156",
+  "build_native_manifest": "/home/ubuntu/dewey-token-governance-12.0.18-20261030T155200Z/manifest.json",
+  "deploy": {
+    "phase": "deploy",
+    "exit_code": 0,
+    "service": "dewey",
+    "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:1a10f323d96e9b7c5d19cd6bc523ed2844bbe93a0e2a83600fcacb70ff440156",
+    "started_at": "2026-10-30T16:26:04.795147+00:00",
+    "finished_at": "2026-10-30T16:26:07.852078+00:00"
+  },
+  "shared_login_changed": false,
+  "effective_365_day_lifetime_established": false,
+  "tests_run": false
+}

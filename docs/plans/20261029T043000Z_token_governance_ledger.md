@@ -1,5 +1,7 @@
 # Current continuation state
 
+2026-10-30 deployment: Dewey12.0.18 annotated release14f63f2d982ac4b479de2a81a88f225283357c7c published and deployed on i-07df3a933e4839f52/us-west-2. Final image sha256:1a10f323d96e9b7c5d19cd6bc523ed2844bbe93a0e2a83600fcacb70ff440156; native selected-service Compose returned0 at16:26:07.852078Z. Docker reports running. No tests, live token issuance/revocation, shared Login/Cognito change or365-day effective lifetime claim. Native evidence: /home/ubuntu/dewey-token-governance-12.0.18-20261030T155200Z/deploy-result.log; public receipt checked in beside this ledger.
+
 2026-10-30 scope amendment: user explicitly selected “campaign, new api guide and dewey token governance” for new versioned releases in the OWY/Ursa campaign. This authorizes Dewey feature publication/deployment only. Shared Login/Cognito remains unchanged; no365-day effective-token claim, no live credential revocation tests. Coordinated release is tracked in /Users/jmajor/projects/lsmc/offwithyou-seqnas-xfer/docs/plans/20261030T041310Z_owy_ursa_dyec22_catalog_ledger.md. Earlier pause below remains historical and still applies to shared Login.
 
 ## Historical pause (Dewey release portion superseded above)
@@ -19,7 +21,7 @@ Next: implement paginated admin views and typed per-token request audit, increas
 |T1|365-day token limits across Dewey and Login|SOURCE COMPLETE; runtime horizon pending|
 |T2|Global Dewey user/token/share inventory and usage|SOURCE COMPLETE|
 |T3|Per-token/share revocation from admin UI, existing server role checks|SOURCE COMPLETE|
-|T4|Provider/runtime expiry alignment and versioned publication|AWAITING USER SCOPE CHOICE|
+|T4|Provider/runtime expiry alignment and versioned publication|Dewey12.0.18 RELEASED/DEPLOYED; shared Login/Cognito horizon remains PAUSED|
 
 Historical usage cannot be retroactively attributed to a token if its identity was not recorded. Label coverage start and retain existing share audit. Shared Login remains the authority for identity/user administration; this dashboard inventories Dewey activity and issued access.
 
