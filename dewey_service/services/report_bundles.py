@@ -45,7 +45,8 @@ class ReportBundleServiceMixin:
                     generic_instance.json_addl["bucket"].astext == bucket,
                     generic_instance.json_addl["key"].astext == key).first()
                 return saved_bundle(normalize_instance_payload(row)) if row is not None else None
-            bundle = inspect_bundle(payload["key"], read_document, lambda key: response(key, head=True), registered_parent)
+            bundle = inspect_bundle(payload["key"], read_document, lambda key: response(key, head=True), registered_parent,
+                                    declared_multiqc=multiqc_candidate(payload))
             for asset in bundle["required_assets"]:
                 self.require_storage_access(bucket, bundle["root_key"] + asset, action="download", session=session)
         except NotMultiQCReport:

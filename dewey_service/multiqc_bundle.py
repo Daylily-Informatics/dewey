@@ -34,9 +34,11 @@ class _References(HTMLParser):
         self.title = False
         self.multiqc = False
         self.errors = []
+        self.html_markup = False
 
     def handle_starttag(self, tag, attributes):
         attrs = dict(attributes)
+        self.html_markup |= tag in {"html", "head", "body", "title", "meta", "script", "style", "div", "table", "h1"}
         if tag == "base":
             self.errors.append("MultiQC bundle must use document-relative paths, without a base element")
         if tag == "title":
@@ -80,7 +82,7 @@ def relative_asset(document, reference, *, required):
     return result
 
 
-def inspect_bundle(key, read_document, require_asset, registered_bundle=None):
+def inspect_bundle(key, read_document, require_asset, registered_bundle=None, *, declared_multiqc=False):
     """Read only declared HTML/CSS and inspect each referenced exact asset once.
 
     The callbacks retain the owning service's authorization and storage controls.
@@ -97,7 +99,7 @@ def inspect_bundle(key, read_document, require_asset, registered_bundle=None):
     source, source_etag = read_document(key)
     source_parser = _References()
     source_parser.feed(source[:MAX_DOCUMENT_BYTES].decode("utf-8-sig", errors="replace"))
-    if not source_parser.multiqc:
+    if not (source_parser.multiqc or (declared_multiqc and source_parser.html_markup)):
         raise NotMultiQCReport("The selected HTML is not identified as a MultiQC report")
     if len(source) > MAX_DOCUMENT_BYTES:
         raise ValueError("MultiQC document exceeds the supported 64 MiB inspection limit")
@@ -168,7 +170,7 @@ def inspect_bundle(key, read_document, require_asset, registered_bundle=None):
             parser.feed(text)
             references = parser.references
             if document == entrypoint:
-                detected = parser.multiqc
+                detected = parser.multiqc or (declared_multiqc and parser.html_markup)
                 source_etag = etag
                 if not detected:
                     raise NotMultiQCReport("The selected HTML is not identified as a MultiQC report")

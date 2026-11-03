@@ -156,3 +156,11 @@ def test_registered_section_uses_its_explicit_parent_bundle_and_custom_multiqc_t
     assert bundle["root_key"]=="reports/"
     assert bundle["entrypoint"]=="report_files/sections/one.html"
     assert bundle["include_patterns"]==["report.html","report_files/**"]
+
+
+def test_explicit_multiqc_declaration_supports_custom_report_titles_without_generator_metadata():
+    raw=b"<html><title>Ultima FASTQ quality</title><body><table><tr><td>embedded</td></tr></table></body></html>"
+    with pytest.raises(NotMultiQCReport):
+        inspect_bundle("report.html",lambda path:(raw,"etag"),lambda path:None)
+    bundle=inspect_bundle("report.html",lambda path:(raw,"etag"),lambda path:None,declared_multiqc=True)
+    assert bundle["mode"]=="standalone" and bundle["required_assets"]==[]
