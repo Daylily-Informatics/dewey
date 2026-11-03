@@ -28,6 +28,7 @@ class Element {
     document.nodes.push(this);
   }
   append(...nodes) { for (const node of nodes) { node.parentElement = this; this.children.push(node); } }
+  appendChild(node) { this.append(node); return node; }
   prepend(node) { node.parentElement = this; this.children.unshift(node); }
   replaceChildren(...nodes) { this.children = []; this.append(...nodes); }
   remove() { this.removed = true; if (this.parentElement) this.parentElement.children = this.parentElement.children.filter(n => n !== this); }

@@ -93,7 +93,7 @@ New managed-share raw S3 presigns are disabled. Obsolete modes/payloads fail exp
 
 ## WWW reports
 
-Declare `content_mode: www`, `report_entrypoint` and `report_bundle_root`. `/fetch/<identifier>/multiqc.html` opens a trusted application wrapper. Include the sibling/subdirectory assets in the selected prefix and bundle; sharing just the HTML object does not authorize siblings.
+Declare `content_mode: www`, `report_entrypoint` and `report_bundle_root` when creating or editing the share. The shared-files View report link opens that configured entrypoint through its durable recipient URL; viewers do not choose a bundle root. Other HTML files remain available as downloads. `/fetch/<identifier>/multiqc.html` opens a trusted application wrapper. Include the sibling/subdirectory assets in the selected prefix and bundle; sharing just the HTML object does not authorize siblings.
 
 Report HTML/CSS/JavaScript/data execute on a unique `pv-<context>.dewey-content.day.lsmc.bio` host. A one-use POST handoff and Secure HttpOnly host cookie bind the viewer and finite context. Every asset checks current identity/policy and stays within its bundle. Logout, expiry, revocation or session invalidation prevents subsequent assets.
 

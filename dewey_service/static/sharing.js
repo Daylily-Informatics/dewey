@@ -2,7 +2,7 @@
 "use strict";
 window.DeweySharing = (() => {
   const enc = encodeURIComponent;
-  let h, share, rows = [], activity = [], activityCursor = null, activityLoaded = false, activityLoading = false, browseGeneration = 0, reportCleanup = null, auditState = null;
+  let h, share, rows = [], activity = [], activityCursor = null, activityLoaded = false, activityLoading = false, browseGeneration = 0, auditState = null;
   const $ = (s, root = document) => root.querySelector(s);
   const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const lines = v => String(v).split(/\r?\n/).map(x => x.trim()).filter(Boolean);
@@ -208,23 +208,7 @@ window.DeweySharing = (() => {
     rows=append?rows.concat(result.items):result.items;
     const root=$("#share-browser");
     root.dataset.target=target;root.dataset.prefix=prefix;root.dataset.token=result.continuation_token||"";
-    root.innerHTML=`<div class="toolbar"><span class="mono">${esc(prefix||"Share root")}</span>${target||prefix?button("Share root","sharing-root"):""}</div><p class="muted">${rows.length} authorized entries loaded${result.incomplete?" · More pages remain.":" · Final page loaded."}</p><div class="table-panel"><table><thead><tr><th>Name</th><th>Size</th><th>Action</th></tr></thead><tbody>${rows.map((item,i)=>{const path=(share.member_count>1?item.target_euid+"/":"")+(item.relative_key||item.name);return `<tr><td class="mono">${esc(item.name)}</td><td>${item.size==null?"—":esc(item.size)+" B"}</td><td><a class="button primary" href="/fetch/${enc(share.euid)}/${path.split("/").map(enc).join("/")}?download=true">Download</a> ${/\.html?$/i.test(item.name)?button("View report","sharing-report",i):""}</td></tr>`;}).join("")||'<tr><td colspan="3">No permitted entries on this page.</td></tr>'}</tbody></table></div>${result.continuation_token?button("Load next page","sharing-next"):""}`;
-  }
-  async function report(item,bundleRoot) {
-    const result=await h.api(`/api/v1/registry/shares/${enc(share.euid)}/preview`,"POST",{target_euid:item.target_euid,relative_key:item.relative_key,bundle_root:bundleRoot});
-    const origin=new URL(result.preview_origin),challenge=new URL(result.challenge_url),endpoint=new URL(result.handoff_endpoint,location.origin);
-    if(origin.protocol!=="https:"||origin.origin===location.origin||origin.href!==origin.origin+"/"||challenge.origin!==origin.origin||challenge.pathname!=="/__dewey_preview/challenge"||endpoint.origin!==location.origin) throw Error("Invalid isolated report handoff configuration.");
-    if(reportCleanup) reportCleanup();
-    h.modal(`<h2>Report preview</h2><p class="muted">Current viewer · expires ${esc(stamp(result.expires_at))}. Each linked asset is authorized within the selected report root.</p><iframe id="share-report-frame" name="dewey-report-${esc(crypto.randomUUID())}" title="Isolated shared report" sandbox="allow-scripts allow-same-origin allow-forms allow-downloads" referrerpolicy="no-referrer" class="share-report-frame"></iframe>`);
-    const iframe=$("#share-report-frame"); let used=false;
-    const listener=event=>{if(used||event.origin!==origin.origin||event.source!==iframe.contentWindow||event.data?.type!=="dewey-preview-challenge"||event.data.context_euid!==result.context_euid||typeof event.data.challenge!=="string") return;used=true;h.safe(async()=>{
-      const handoff=await h.api(endpoint.pathname+endpoint.search,"POST",{challenge:event.data.challenge});
-      if(typeof handoff.token!=="string"||!handoff.token) throw Error("Report handoff token missing.");
-      const form=document.createElement("form");form.method="POST";form.action=origin.origin+"/__dewey_preview/handoff";form.target=iframe.name;form.hidden=true;
-      const input=document.createElement("input");input.name="token";input.value=handoff.token;form.append(input);document.body.append(form);form.submit();form.remove();
-    });};
-    const close=()=>{window.removeEventListener("message",listener);$("#editor").removeEventListener("close",close);reportCleanup=null;};
-    reportCleanup=close;window.addEventListener("message",listener);$("#editor").addEventListener("close",close,{once:true});iframe.src=challenge.href;
+    root.innerHTML=`<div class="toolbar"><span class="mono">${esc(prefix||"Share root")}</span>${target||prefix?button("Share root","sharing-root"):""}</div><p class="muted">${rows.length} authorized entries loaded${result.incomplete?" · More pages remain.":" · Final page loaded."}</p><div class="table-panel"><table><thead><tr><th>Name</th><th>Size</th><th>Action</th></tr></thead><tbody>${rows.map(item=>{const path=(share.member_count>1?item.target_euid+"/":"")+(item.relative_key||item.name);return `<tr><td class="mono">${esc(item.name)}</td><td>${item.size==null?"—":esc(item.size)+" B"}</td><td><a class="button primary" href="/fetch/${enc(share.euid)}/${path.split("/").map(enc).join("/")}?download=true">Download</a> ${share.content_mode==="www"&&path===share.report_entrypoint?`<a class="button" href="/fetch/${enc(share.euid)}/${path.split("/").map(enc).join("/")}">View report</a>`:""}</td></tr>`;}).join("")||'<tr><td colspan="3">No permitted entries on this page.</td></tr>'}</tbody></table></div>${result.continuation_token?button("Load next page","sharing-next"):""}`;
   }
   async function auditPage(page) {
     if(!auditState||auditState.loading)return;
@@ -257,7 +241,6 @@ window.DeweySharing = (() => {
     else if(name==="sharing-root") await browse();
     else if(name==="sharing-open") {const item=rows[Number(value)];await browse(item.target_euid,item.relative_key);}
     else if(name==="sharing-next") {const root=$("#share-browser");await browse(root.dataset.target,root.dataset.prefix,root.dataset.token,true);}
-    else if(name==="sharing-report") {const item=rows[Number(value)];h.modal(`<h2>View report</h2><p>Choose the exact report bundle directory relative to this target. Linked assets are restricted to this directory and current grants.</p><form id="report-root-form">${field("bundle_root","Report bundle root (directory ending in /; empty for target root)",item.relative_key.slice(0,item.relative_key.lastIndexOf("/")+1))}<button class="primary">View report</button></form>`);$("#report-root-form").onsubmit=e=>{e.preventDefault();h.safe(()=>report(item,e.target.elements.bundle_root.value));};}
     else if(name==="sharing-alias-add") {h.modal(`<h2>Claim readable URL</h2><p>Use 3–63 lowercase letters, digits and hyphens, starting with a letter. A claimed or retired slug cannot be reassigned.</p><form id="alias-form">${field("slug","URL slug","","text",true)}<button class="primary">Claim slug</button></form>`);$("#alias-form").onsubmit=e=>{e.preventDefault();h.safe(async()=>{await h.api(`/api/v1/registry/shares/${enc(share.euid)}/aliases`,"POST",{slug:e.target.elements.slug.value,policy_revision:share.policy_revision});$("#editor").close();await h.render();});};}
     else if(name==="sharing-alias-copy") await navigator.clipboard.writeText(`${location.origin}/fetch/${enc(value)}${share.report_entrypoint?"/"+share.report_entrypoint.split("/").map(enc).join("/"):""}`);
     else if(name==="sharing-alias-retire") {h.modal(`<h2>Retire URL slug</h2><p>${esc(value)} will stop resolving and can never be claimed again. The share EUID URL remains available.</p>${button("Retire this slug","sharing-alias-retire-confirmed",value,"danger")}`);}
