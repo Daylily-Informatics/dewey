@@ -172,3 +172,13 @@ def test_external_dependency_error_reports_complete_declared_asset_list():
     with pytest.raises(RequiredExternalAssets) as error:
         inspect_bundle("report.html",lambda path:(raw,"etag"),lambda path:None)
     assert error.value.assets==["https://cdn.example.test/plot.js","https://cdn.example.test/site.css"]
+
+
+def test_vep_summary_under_multiqc_inputs_is_not_a_multiqc_registration():
+    h=Harness()
+    key="reports/multiqc_inputs/final/native/vep/summary.html"
+    raw=b'<html><title>VEP Summary</title><script src="http://www.google.com/jsapi"></script></html>'
+    storage(h,{key:raw})
+    payload={"storage_kind":"object","storage_backend":"s3","bucket":"fixture-source","key":key,"artifact_type":"html"}
+    with actor():
+        assert h.service._prepare_multiqc_payload(h.session,payload)==payload

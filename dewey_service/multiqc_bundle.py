@@ -28,7 +28,7 @@ def html_candidate(payload):
 
 def multiqc_candidate(payload):
     key = str(payload.get("key", ""))
-    return (html_candidate(payload) and ("multiqc" in key.lower()
+    return (html_candidate(payload) and ("multiqc" in posixpath.basename(key).lower()
                  or "multiqc" in str(payload.get("artifact_type", "")).lower()
                  or payload.get("metadata", {}).get("report_kind") == "multiqc"))
 
