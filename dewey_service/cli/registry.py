@@ -124,6 +124,22 @@ def _access(
     )
 
 
+def _multiqc_candidates(page: int = typer.Option(1, min=1), limit: int = typer.Option(100, min=1, max=1000)):
+    _emit(lambda: _request("GET", "/api/v1/registry/multiqc-candidates", params={"page": page, "limit": limit}))
+
+
+def _multiqc_bundle(euid: str = typer.Argument(...), apply: bool = typer.Option(False, "--apply"),
+                    repair_shares: bool = typer.Option(False, "--repair-shares")):
+    def run():
+        path = f"/api/v1/records/{quote(euid, safe='')}/multiqc-bundle"
+        plan = _request("GET", path)
+        if not apply:
+            return plan
+        return _request("POST", path, data={"expected_bundle_digest": plan["bundle_digest"],
+                                            "repair_shares": repair_shares})
+    _emit(run)
+
+
 def _register(
     manifest: Path = typer.Option(..., exists=True, dir_okay=False),
     idempotency_key: str = typer.Option(...),
@@ -660,7 +676,9 @@ def register(registry, spec):
             registry.add_command(group, name, command, help_text=help_text, policy=policy)
     for group, commands in {
         "sets": [("add-member", _member_add, write), ("remove-member", _member_remove, write)],
-        "artifacts": [("location-rebind", _rebind, write)],
+        "artifacts": [("location-rebind", _rebind, write),
+                      ("multiqc-candidates", _multiqc_candidates, read),
+                      ("multiqc-bundle", _multiqc_bundle, write)],
         "shares": [
             ("list", _share_list, read),
             ("get", _share_get, read),

@@ -41,7 +41,16 @@ def normalize_slug(value):
 
 
 class ShareRevisionMixin:
-    def _validate_report_selection(self, policy, members):
+    def _validate_report_selection(self, policy, members, *, session=None):
+        from dewey_service.multiqc_bundle import saved_bundle
+        by_euid = {member.euid: member for member in members}
+        for euid, bundle in policy.get("report_bundles", {}).items():
+            if euid not in by_euid or saved_bundle(normalize_instance_payload(by_euid[euid])) != bundle:
+                raise ValueError("Share report configuration must match the validated registered bundle")
+            payload = normalize_instance_payload(by_euid[euid])
+            for path in [bundle["entrypoint"], *bundle["required_assets"]]:
+                self.require_storage_access(payload["bucket"], bundle["root_key"] + path,
+                                            action="download", session=session)
         if policy["content_mode"] != "www":
             return
         from dewey_service.services.share_policy import selected
@@ -56,7 +65,7 @@ class ShareRevisionMixin:
                 raise ValueError(
                     "A multi-target WWW entrypoint must begin with its persisted target EUID"
                 )
-        member = self._artifact_member_from_instance(target)
+        member = self._artifact_member_from_instance(target, bundle_policy=policy)
         if member["target_kind"] == "artifact_object":
             if path != member["filename"] or policy["report_bundle_root"]:
                 raise ValueError(
@@ -341,7 +350,7 @@ class ShareRevisionMixin:
                         targets.update(t.euid for t in self._grant_targets(session, grant))
                 scope_members = self._share_members(session, share)
                 members = [
-                    self._artifact_member_from_instance(t)
+                    self._artifact_member_from_instance(t, bundle_policy=data)
                     for t in scope_members
                     if t.euid in targets
                 ]

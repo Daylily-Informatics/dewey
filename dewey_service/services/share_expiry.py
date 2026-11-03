@@ -160,7 +160,7 @@ class ShareExpiryMixin:
             deadline=normalize_lifetime(expires_at,scope)
             policy=normalized_policy({**data,'grants':grants},share_expiry=deadline,
                                      member_euids=[m.euid for m in members])
-            self._validate_report_selection(policy,members)
+            self._validate_report_selection(policy,members,session=session)
             grants=policy.pop('grants');revision=policy_revision+1
             generation=data.get('activation_generation',0)+1
             for grant in self._share_grants(session,share):

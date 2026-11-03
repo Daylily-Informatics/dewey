@@ -397,6 +397,7 @@ class ArtifactServiceMixin:
             from dewey_service.services.share_rebind import lock_storage_coordinate
 
             lock_storage_coordinate(session, payload["storage_uri"], payload.get("version_id"))
+        payload = self._prepare_multiqc_payload(session, payload)
         self.backend.lock_external_key(
             session, operation="artifact.identity", key=payload["artifact_identity_key"]
         )
@@ -410,6 +411,9 @@ class ArtifactServiceMixin:
         )
         if existing is not None:
             require_record(self.backend, session, existing, "metadata")
+            if payload.get("report_bundle") is not None and payload["report_bundle"] != normalize_instance_payload(existing).get("report_bundle"):
+                require_record(self.backend, session, existing, "edit")
+                self.backend.update_instance_json(session, existing, {"report_bundle": payload["report_bundle"]})
             if refresh_existing:
                 updates = dict(payload)
                 updates["created_at"] = str(

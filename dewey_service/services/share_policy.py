@@ -216,6 +216,11 @@ def normalized_policy(data, *, share_expiry, member_euids):
         raise ValueError(
             "report_bundle_root must be an exact relative directory ending with / or empty"
         )
+    bundles = data.get("report_bundles", {})
+    if not isinstance(bundles, dict) or set(bundles) - set(member_euids) or any(not isinstance(v, dict) for v in bundles.values()):
+        raise ValueError("Report bundles must describe persisted share targets")
+    if bundles and content_mode != "www":
+        raise ValueError("Report bundles require a WWW share")
     denied = data.get("denied_emails", [])
     if not isinstance(denied, list) or any(
         not isinstance(e, str) or e.count("@") != 1 for e in denied
@@ -225,6 +230,7 @@ def normalized_policy(data, *, share_expiry, member_euids):
         "schema_version": SCHEMA_VERSION,
         "audience": audience,
         "content_mode": content_mode,
+        "report_bundles": bundles,
         "report_entrypoint": entrypoint if content_mode == "www" else None,
         "report_bundle_root": bundle if content_mode == "www" else "",
         "include_patterns": patterns(data.get("include_patterns"), default=["**"]),

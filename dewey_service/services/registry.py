@@ -40,7 +40,10 @@ from dewey_service.services.share_notifications import ShareNotificationMixin
 from dewey_service.services.access_administration import AccessAdministrationMixin
 
 
-class RegistryServiceMixin(AccessAdministrationMixin, ShareNotificationMixin):
+from dewey_service.services.report_bundles import ReportBundleServiceMixin
+
+
+class RegistryServiceMixin(ReportBundleServiceMixin, AccessAdministrationMixin, ShareNotificationMixin):
     def _registry_event(self, session, record, action):
         receipt = self.backend.create_instance(
             session,
@@ -294,6 +297,10 @@ class RegistryServiceMixin(AccessAdministrationMixin, ShareNotificationMixin):
                     require_record(self.backend, session, match, "metadata")
                 if existing:
                     record, code = existing[0], 200
+                    prepared = self._prepare_multiqc_payload(session, payload)
+                    if prepared.get("report_bundle") != normalize_instance_payload(record).get("report_bundle"):
+                        require_record(self.backend, session, record, "edit")
+                        self.backend.update_instance_json(session, record, {"report_bundle": prepared["report_bundle"]})
                 else:
                     code, result = self._upsert_artifact_record(
                         session, payload=payload, created_at=utc_now_iso()
@@ -412,6 +419,8 @@ class RegistryServiceMixin(AccessAdministrationMixin, ShareNotificationMixin):
             kind = "share"
         else:
             raise ValueError("Unsupported registry record")
+        if record.type == "artifact" and normalize_instance_payload(record).get("report_bundle") is not None:
+            value["report_bundle"] = normalize_instance_payload(record)["report_bundle"]
         value.update(
             {
                 "euid": record.euid,

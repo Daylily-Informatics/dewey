@@ -81,6 +81,7 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
         artifact_instance,
         *,
         expected_kind: str | None = None,
+        bundle_policy: dict | None = None,
     ) -> dict[str, Any]:
         payload = normalize_instance_payload(artifact_instance)
         storage_kind = str(payload.get("storage_kind") or "object").strip().lower()
@@ -95,7 +96,7 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
         if not bucket or not key and storage_kind != "prefix":
             raise ValueError("share target artifact is missing bucket/key")
         target_kind = "artifact_prefix" if storage_kind == "prefix" else "artifact_object"
-        return {
+        member = {
             "target_kind": target_kind,
             "artifact_euid": artifact_instance.euid,
             "bucket": bucket,
@@ -109,6 +110,17 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
             "size": payload.get("size"),
             "location_revision": int(payload.get("location_revision", 1)),
         }
+
+        snapshot = (bundle_policy or {}).get("report_bundles", {}).get(artifact_instance.euid)
+        if snapshot is not None:
+            from dewey_service.multiqc_bundle import saved_bundle
+            bundle = saved_bundle({"key": payload["key"], "report_bundle": snapshot})
+            member["filename"] = bundle["entrypoint"]
+            if bundle["mode"] == "bundle":
+                member.update(target_kind="artifact_prefix", key=bundle["root_key"],
+                              version_id=None, report_bundle=bundle,
+                              report_version_id=payload.get("version_id"))
+        return member
 
     def _expand_share_targets(
         self,
@@ -576,7 +588,7 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
         )
         if target is None or target.bstatus == "archived":
             raise HTTPException(403, "Target is not a current available share member")
-        member = self._artifact_member_from_instance(target)
+        member = self._artifact_member_from_instance(target, bundle_policy=data)
         if member["target_kind"] == "artifact_object":
             if relative_key:
                 raise ValueError("An object target does not accept relative_key")
@@ -585,6 +597,8 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
             if not isinstance(relative_key, str) or "\x00" in relative_key:
                 raise ValueError("relative_key must be a literal root-relative S3 key")
             path, key = relative_key, member["key"] + relative_key
+        if member.get("report_bundle") and not selected(path, member["report_bundle"]["include_patterns"], []):
+            raise HTTPException(403, "Path is outside this report bundle")
         if not selected(path, data["include_patterns"], data["exclude_patterns"]):
             raise HTTPException(403, "Path is excluded from this share")
         candidates = []
@@ -608,7 +622,7 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
         return {
             "bucket": member["bucket"],
             "key": key,
-            "version_id": member.get("version_id"),
+            "version_id": (member.get("report_version_id") if member.get("report_bundle") and path == member["report_bundle"]["entrypoint"] else member.get("version_id")),
             "share_euid": share.euid,
             "target_euid": target.euid,
             "grant_euid": grant.euid,
@@ -671,7 +685,7 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
                 if normalize_instance_payload(share).get("schema_version") != 3:
                     continue
                 for target in self._share_members(session, share):
-                    member = self._artifact_member_from_instance(target)
+                    member = self._artifact_member_from_instance(target, bundle_policy=normalize_instance_payload(share))
                     if member["bucket"] != bucket:
                         continue
                     relative = (
@@ -786,6 +800,19 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
             ]
             if not records:
                 raise ValueError("Share requires selected S3 targets")
+            if content_mode == "www":
+                from dewey_service.multiqc_bundle import multiqc_candidate, saved_bundle
+                snapshots = {}
+                for record in records:
+                    payload = normalize_instance_payload(record)
+                    if multiqc_candidate(payload) or payload.get("report_bundle"):
+                        bundle = saved_bundle(payload)
+                        if bundle is None:
+                            raise ValueError("Register or repair the complete MultiQC bundle before creating a web share")
+                        snapshots[record.euid] = bundle
+                source["report_bundles"] = snapshots
+                if len(records) == 1 and snapshots and not source["report_entrypoint"]:
+                    source["report_entrypoint"] = snapshots[records[0].euid]["entrypoint"]
             self._assert_share_delegation(session, records)
             root = (
                 self._registry_record(session, target_euid, action="share")
@@ -795,7 +822,7 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
             policy = normalized_policy(
                 source, share_expiry=deadline, member_euids=[r.euid for r in records]
             )
-            self._validate_report_selection(policy, records)
+            self._validate_report_selection(policy, records, session=session)
             grant_values = policy.pop("grants")
             share = self.backend.create_instance(
                 session,
@@ -860,6 +887,7 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
             "content_mode": data["content_mode"],
             "report_entrypoint": data.get("report_entrypoint"),
             "report_bundle_root": data.get("report_bundle_root", ""),
+            "report_bundles": data.get("report_bundles", {}),
             "fetch_path": f"/fetch/{share.euid}",
             "policy_revision": data["policy_revision"],
             "activation_generation": data.get("activation_generation", 0),
@@ -894,7 +922,7 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
                 if normalize_instance_payload(g).get("policy_revision") == data["policy_revision"]
             ]
             value["members"] = [
-                self._artifact_member_from_instance(t) for t in self._share_members(session, share)
+                self._artifact_member_from_instance(t, bundle_policy=data) for t in self._share_members(session, share)
             ]
             value["targets"] = [
                 {
@@ -1198,6 +1226,7 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
 
         self._require_sharing()
         allowed = {
+            "report_bundles",
             "name",
             "purpose",
             "grants",
@@ -1296,7 +1325,7 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
             policy = normalized_policy(
                 merged, share_expiry=deadline, member_euids=[m.euid for m in members]
             )
-            self._validate_report_selection(policy, members)
+            self._validate_report_selection(policy, members, session=session)
             grants = policy.pop("grants")
             revision = data["policy_revision"] + 1
             for grant in self._share_grants(session, share):
@@ -1587,7 +1616,7 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
                     "locations": [
                         {
                             key: value
-                            for key, value in self._artifact_member_from_instance(member).items()
+                            for key, value in self._artifact_member_from_instance(member, bundle_policy=data).items()
                             if key
                             in {"artifact_euid", "location_revision", "bucket", "key", "version_id"}
                         }
@@ -1600,7 +1629,7 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
             items = []
             scanned = 0
             while index < len(members) and len(items) < limit and scanned < 1000:
-                member = self._artifact_member_from_instance(members[index])
+                member = self._artifact_member_from_instance(members[index], bundle_policy=data)
                 if member["target_kind"] == "artifact_object":
                     candidates = [
                         {"key": member["key"], "size": member.get("size"), "relative_key": ""}

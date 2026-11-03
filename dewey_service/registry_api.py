@@ -26,6 +26,12 @@ class Registration(BaseModel):
     version_id: str | None = None
 
 
+class MultiQCBundleRepair(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    expected_bundle_digest: str = Field(min_length=64, max_length=64)
+    repair_shares: bool = False
+
+
 class RegistryDefaultsUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
     delivery_lifetime_seconds: int = Field(default=None, ge=1, le=3600, strict=True)
@@ -256,6 +262,18 @@ def attach_registry_api(app, *, templates):
             data.model_dump(exclude_none=True), idempotency_key=idempotency_key
         )
         return JSONResponse(result, status_code=code)
+
+    @router.get("/registry/multiqc-candidates")
+    def multiqc_candidates(page: int = Query(1, ge=1), limit: int = Query(100, ge=1, le=1000)):
+        return service.multiqc_registration_candidates(page=page, limit=limit)
+
+    @router.get("/records/{euid}/multiqc-bundle")
+    def multiqc_bundle_plan(euid: str):
+        return service.inspect_multiqc_registration(euid)
+
+    @router.post("/records/{euid}/multiqc-bundle")
+    def multiqc_bundle_repair(euid: str, data: MultiQCBundleRepair):
+        return service.repair_multiqc_registration(euid, **data.model_dump())
 
     @router.get("/records/{euid}")
     def resolve(euid: str, projection: str = "full"):
