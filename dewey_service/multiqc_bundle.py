@@ -41,8 +41,9 @@ class _References(HTMLParser):
             self.errors.append("MultiQC bundle must use document-relative paths, without a base element")
         if tag == "title":
             self.title = True
-        if tag == "meta" and attrs.get("name", "").lower() == "generator":
-            self.multiqc |= "multiqc" in attrs.get("content", "").lower()
+        if tag == "meta":
+            name, content = attrs.get("name", "").lower(), attrs.get("content", "").lower()
+            self.multiqc |= (name in {"generator", "author"} and "multiqc" in content) or (name == "description" and content.startswith("multiqc:"))
         for attribute in ("src", "href"):
             if attrs.get(attribute):
                 required = tag != "a" and not (tag == "link" and "stylesheet" not in attrs.get("rel", ""))
@@ -79,13 +80,70 @@ def relative_asset(document, reference, *, required):
     return result
 
 
-def inspect_bundle(key, read_document, require_asset):
+def inspect_bundle(key, read_document, require_asset, registered_bundle=None):
     """Read only declared HTML/CSS and inspect each referenced exact asset once.
 
     The callbacks retain the owning service's authorization and storage controls.
     Report-specific *_files/*_data directories may include future descendants;
     generic asset directories are represented by exact declared paths only.
     """
+    original_read = read_document
+    cache = {}
+    def read_document(path):
+        if path not in cache:
+            cache[path] = original_read(path)
+        return cache[path]
+
+    source, source_etag = read_document(key)
+    source_parser = _References()
+    source_parser.feed(source[:MAX_DOCUMENT_BYTES].decode("utf-8-sig", errors="replace"))
+    if not source_parser.multiqc:
+        raise NotMultiQCReport("The selected HTML is not identified as a MultiQC report")
+    if len(source) > MAX_DOCUMENT_BYTES:
+        raise ValueError("MultiQC document exceeds the supported 64 MiB inspection limit")
+    if source_parser.errors:
+        raise ValueError(source_parser.errors[0])
+
+    # Section exports declare their parent index explicitly. The named *_files
+    # directory and reciprocal index link establish the report boundary.
+    pieces = key.split("/")
+    for position in range(len(pieces)-2, -1, -1):
+        directory = pieces[position]
+        if not directory.endswith("_files"):
+            continue
+        owner_stem = directory[:-6]
+        owner_root = "/".join(pieces[:position])
+        owner_root = owner_root + "/" if owner_root else ""
+        possible = {owner_root + owner_stem + suffix for suffix in (".html", ".htm")}
+        parent = next((resolved for ref, necessary in source_parser.references
+                       if (resolved := relative_asset(key, ref, required=necessary)) in possible), None)
+        if not parent:
+            continue
+        index, index_etag = read_document(parent)
+        index_parser = _References()
+        index_parser.feed(index[:MAX_DOCUMENT_BYTES].decode("utf-8-sig", errors="replace"))
+        if not index_parser.multiqc or key not in {
+                relative_asset(parent, ref, required=necessary) for ref, necessary in index_parser.references}:
+            raise ValueError("MultiQC section must be declared by its linked parent report index")
+        parent_bundle = registered_bundle(parent) if registered_bundle else None
+        relative = key[len(owner_root):]
+        if not (parent_bundle and parent_bundle["source_etag"] == index_etag
+                and relative in parent_bundle["required_assets"]):
+            parent_bundle = inspect_bundle(parent, read_document, require_asset)
+        from dewey_service.services.share_policy import selected
+        for reference, necessary in source_parser.references:
+            asset = relative_asset(relative, reference, required=necessary)
+            if asset is None:
+                continue
+            if not selected(asset, parent_bundle["include_patterns"], []):
+                raise ValueError("MultiQC section dependency is outside its validated parent bundle: " + asset)
+            if asset not in parent_bundle["required_assets"] and asset != parent_bundle["entrypoint"]:
+                require_asset(owner_root + asset)
+        required = set(parent_bundle["required_assets"]) | {parent_bundle["entrypoint"]}
+        required.discard(relative)
+        return {**parent_bundle, "source_key": key, "source_etag": source_etag,
+                "entrypoint": relative, "required_assets": sorted(required)}
+
     root, _, entrypoint = key.rpartition("/")
     root = root + "/" if root else ""
     stem = entrypoint.rsplit(".", 1)[0]

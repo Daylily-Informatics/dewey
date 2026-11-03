@@ -146,3 +146,13 @@ def test_cli_uses_supported_review_then_expected_digest_mutation(monkeypatch):
     cli._multiqc_bundle("fixture-report", apply=True, repair_shares=True)
     assert [call[0] for call in calls] == ["GET","POST"]
     assert calls[1][2]["data"] == {"expected_bundle_digest":"d"*64,"repair_shares":True}
+
+
+def test_registered_section_uses_its_explicit_parent_bundle_and_custom_multiqc_title():
+    files={"reports/report.html": b'<title>Project title</title><meta name="author" content="MultiQC"><script src="report_files/app.js"></script><a href="report_files/sections/one.html">section</a>',
+           "reports/report_files/app.js":b"ok",
+           "reports/report_files/sections/one.html":b'<meta name="author" content="MultiQC"><script src="../app.js"></script><a href="../../report.html">index</a>'}
+    bundle=inspect(files,"reports/report_files/sections/one.html")
+    assert bundle["root_key"]=="reports/"
+    assert bundle["entrypoint"]=="report_files/sections/one.html"
+    assert bundle["include_patterns"]==["report.html","report_files/**"]

@@ -40,7 +40,14 @@ class ReportBundleServiceMixin:
             return content, value.get("ETag")
 
         try:
-            bundle = inspect_bundle(payload["key"], read_document, lambda key: response(key, head=True))
+            def registered_parent(key):
+                row = self._registry_query(session, scopes=("artifact",)).filter(
+                    generic_instance.json_addl["bucket"].astext == bucket,
+                    generic_instance.json_addl["key"].astext == key).first()
+                return saved_bundle(normalize_instance_payload(row)) if row is not None else None
+            bundle = inspect_bundle(payload["key"], read_document, lambda key: response(key, head=True), registered_parent)
+            for asset in bundle["required_assets"]:
+                self.require_storage_access(bucket, bundle["root_key"] + asset, action="download", session=session)
         except NotMultiQCReport:
             if multiqc_candidate(payload) or payload.get("report_bundle"):
                 raise
@@ -102,6 +109,11 @@ class ReportBundleServiceMixin:
                 continue
             if detail["content_mode"] != "www" or detail["status"] != "active":
                 result["shares"].append({"euid": detail["euid"], "status": "unchanged_inactive_or_download"})
+                continue
+            if len(detail.get("targets", [])) == 1 and detail["report_entrypoint"] != bundle["entrypoint"]:
+                result["shares"].append({"euid": detail["euid"], "status": "blocked_entrypoint_migration",
+                                        "reason": "Preserving the existing direct report path requires a reviewed entrypoint migration",
+                                        "current_entrypoint": detail["report_entrypoint"], "bundle_entrypoint": bundle["entrypoint"]})
                 continue
             if detail.get("expiry_policy", {}).get("requires_explicit_review"):
                 result["shares"].append({"euid": detail["euid"], "status": "blocked_expiry_policy_review",
