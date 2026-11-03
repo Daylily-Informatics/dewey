@@ -188,7 +188,7 @@
         if(!candidates.length)while(more){const result=await api(`/api/v1/registry/multiqc-candidates?page=${page}&limit=100`);candidates.push(...result.items);more=result.has_more;page++;}
         for(const item of candidates){
           $("#multiqc-progress").textContent=`Reviewing ${reviewed.length+1} of ${candidates.length}: ${item.euid}`;
-          try {const plan=await api(`/api/v1/records/${enc(item.euid)}/multiqc-bundle`);reviewed.push({euid:item.euid,name:item.name,status:!plan.bundle?"other_html":plan.bundle.mode==="standalone"?"standalone":"reviewed",plan});}
+          try {const plan=await api(`/api/v1/records/${enc(item.euid)}/multiqc-bundle`);reviewed.push({euid:item.euid,name:item.name,status:plan.blocked_reason?"blocked":!plan.bundle?"other_html":plan.bundle.mode==="standalone"?"standalone":"reviewed",error:plan.blocked_reason,plan});}
           catch(error){reviewed.push({euid:item.euid,name:item.name,status:"blocked",error:error.message});}
           output();
         }

@@ -5,7 +5,7 @@ from fastapi import HTTPException
 from sqlalchemy import func, or_
 from daylily_tapdb import generic_instance
 
-from dewey_service.multiqc_bundle import MAX_DOCUMENT_BYTES, NotMultiQCReport, html_candidate, inspect_bundle, multiqc_candidate, saved_bundle
+from dewey_service.multiqc_bundle import MAX_DOCUMENT_BYTES, NotMultiQCReport, RequiredExternalAssets, html_candidate, inspect_bundle, multiqc_candidate, saved_bundle
 from dewey_service.storage import StorageObjectNotFoundError, storage_authorization_context
 from dewey_service.tapdb_backend import normalize_instance_payload
 
@@ -73,7 +73,12 @@ class ReportBundleServiceMixin:
             payload = normalize_instance_payload(record)
             if not html_candidate(payload):
                 raise ValueError("Select an S3 HTML object registration")
-            prepared = self._prepare_multiqc_payload(session, payload)
+            try:
+                prepared = self._prepare_multiqc_payload(session, payload)
+            except RequiredExternalAssets as error:
+                return {"euid": euid, "bundle": None, "blocked_reason": str(error),
+                        "required_external_assets": error.assets, "storage_uri": payload.get("storage_uri"),
+                        "shares": self.list_shares(limit=2000, target_euid=euid)}
             if not prepared.get("report_bundle"):
                 return {"euid": euid, "bundle": None, "classification": "other_html", "shares": []}
             return {"euid": euid, "bundle": prepared["report_bundle"],

@@ -164,3 +164,11 @@ def test_explicit_multiqc_declaration_supports_custom_report_titles_without_gene
         inspect_bundle("report.html",lambda path:(raw,"etag"),lambda path:None)
     bundle=inspect_bundle("report.html",lambda path:(raw,"etag"),lambda path:None,declared_multiqc=True)
     assert bundle["mode"]=="standalone" and bundle["required_assets"]==[]
+
+
+def test_external_dependency_error_reports_complete_declared_asset_list():
+    from dewey_service.multiqc_bundle import RequiredExternalAssets
+    raw=b'<title>MultiQC</title><script src="https://cdn.example.test/plot.js"></script><link rel="stylesheet" href="https://cdn.example.test/site.css">'
+    with pytest.raises(RequiredExternalAssets) as error:
+        inspect_bundle("report.html",lambda path:(raw,"etag"),lambda path:None)
+    assert error.value.assets==["https://cdn.example.test/plot.js","https://cdn.example.test/site.css"]

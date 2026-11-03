@@ -10,6 +10,12 @@ MAX_DOCUMENT_BYTES = 64 * 1024 * 1024
 MAX_DEPENDENCIES = 10000
 
 
+class RequiredExternalAssets(ValueError):
+    def __init__(self, assets):
+        self.assets = sorted(set(assets))
+        super().__init__("MultiQC report requires external assets in its local report bundle: " + ", ".join(self.assets))
+
+
 class NotMultiQCReport(ValueError):
     """An inspected HTML document belongs to another report type."""
 
@@ -69,7 +75,7 @@ def relative_asset(document, reference, *, required):
     parsed = urlsplit(value)
     if parsed.scheme or parsed.netloc:
         if required:
-            raise ValueError("MultiQC report requires an external asset; include it in the report bundle")
+            raise RequiredExternalAssets([value])
         return None
     path = unquote(parsed.path)
     if not path:
@@ -105,6 +111,11 @@ def inspect_bundle(key, read_document, require_asset, registered_bundle=None, *,
         raise ValueError("MultiQC document exceeds the supported 64 MiB inspection limit")
     if source_parser.errors:
         raise ValueError(source_parser.errors[0])
+    external = [reference for reference, required in source_parser.references
+                if required and not reference.startswith(("data:", "blob:", "javascript:", "mailto:"))
+                and (urlsplit(reference).scheme or urlsplit(reference).netloc)]
+    if external:
+        raise RequiredExternalAssets(external)
 
     # Section exports declare their parent index explicitly. The named *_files
     # directory and reciprocal index link establish the report boundary.

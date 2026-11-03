@@ -135,6 +135,8 @@ def _multiqc_bundle(euid: str = typer.Argument(...), apply: bool = typer.Option(
         plan = _request("GET", path)
         if not apply:
             return plan
+        if plan.get("blocked_reason"):
+            raise typer.BadParameter(plan["blocked_reason"])
         return _request("POST", path, data={"expected_bundle_digest": plan["bundle_digest"],
                                             "repair_shares": repair_shares})
     _emit(run)
