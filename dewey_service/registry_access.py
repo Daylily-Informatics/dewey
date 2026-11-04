@@ -20,6 +20,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse, RedirectResponse
 
 from dewey_service.dag_auth import dedicated_dag_actor, is_canonical_dag_get
+from dewey_service.ui_errors import access_error_response
 
 POLICY_TEMPLATE = "access/registry_policy/generic/1.0/"
 TOKEN_TEMPLATE = "access/api_client/generic/1.0/"
@@ -528,8 +529,8 @@ class RegistryPrincipalMiddleware(BaseHTTPMiddleware):
                 if not public_recipient_route(request.method, path) and not path.startswith(
                     "/__dewey_preview/"
                 ):
-                    return JSONResponse(
-                        {"detail": "This credential is limited to shared content"}, status_code=403
+                    return access_error_response(
+                        request, "This credential is limited to shared content", status_code=403
                     )
             dag_reader = None
             if is_canonical_dag_get(request):
@@ -543,13 +544,13 @@ class RegistryPrincipalMiddleware(BaseHTTPMiddleware):
                 or path == "/graph"
             )
             if path.startswith("/tapdb/change-password"):
-                return JSONResponse(
-                    {"detail": "Credentials are managed by shared LSMC login"}, status_code=410
+                return access_error_response(
+                    request, "Credentials are managed by shared LSMC login", status_code=410
                 )
             if admin_path and dag_reader is None and (actor is None or not actor.admin):
                 if actor is None and not path.startswith("/api/"):
                     return RedirectResponse("/login", status_code=303)
-                return JSONResponse({"detail": "Dewey admin access required"}, status_code=403)
+                return access_error_response(request, "Dewey admin access required", status_code=403)
             # Token and cookie are never forwarded to another host or logged.
             context = _PRINCIPAL.set(actor)
             request.state.registry_principal = actor
@@ -567,4 +568,4 @@ class RegistryPrincipalMiddleware(BaseHTTPMiddleware):
                 and "text/html" in request.headers.get("accept", "")
             ):
                 return RedirectResponse("/login?next=%2F", status_code=303)
-            return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
+            return access_error_response(request, exc.detail, status_code=exc.status_code)

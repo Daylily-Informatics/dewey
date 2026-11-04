@@ -109,6 +109,7 @@ from dewey_service.settings import (
 )
 from dewey_service.storage import S3StorageClient, StorageObjectNotFoundError
 from dewey_service.tapdb_backend import TapDBBackend
+from dewey_service.ui_errors import standalone_error_response
 from dewey_service.ui_metadata import resolve_git_metadata, resolve_package_version
 
 
@@ -1403,7 +1404,7 @@ def create_app(
             additional_hosts=configured_allowed_hosts,
             excluded_host_suffix=settings.share_content_host_suffix,
         ):
-            return HTMLResponse(status_code=403, content="Origin not allowed")
+            return standalone_error_response(request, "Origin not allowed", status_code=403)
         return await call_next(request)
 
     @app.middleware("http")
@@ -1461,13 +1462,13 @@ def create_app(
     async def _not_found_handler(_request: Request, exc: DeweyNotFoundError):
         if _request.url.path.startswith("/api/"):
             return JSONResponse(status_code=404, content={"detail": str(exc)})
-        return HTMLResponse(status_code=404, content=str(exc))
+        return standalone_error_response(_request, str(exc), status_code=404)
 
     @app.exception_handler(LiteratureUnavailableError)
     async def _literature_unavailable_handler(_request: Request, exc: LiteratureUnavailableError):
         if _request.url.path.startswith("/api/"):
             return JSONResponse(status_code=503, content={"detail": str(exc)})
-        return HTMLResponse(status_code=503, content=str(exc))
+        return standalone_error_response(_request, str(exc), status_code=503)
 
     @app.exception_handler(HTTPException)
     async def _http_exception_handler(request: Request, exc: HTTPException):
@@ -1486,7 +1487,7 @@ def create_app(
                 )
         if request.url.path.startswith("/api/"):
             return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail or ""})
-        return HTMLResponse(status_code=exc.status_code, content=exc.detail or "")
+        return standalone_error_response(request, exc.detail, status_code=exc.status_code)
 
     @app.get("/", include_in_schema=False)
     async def root(request: Request):

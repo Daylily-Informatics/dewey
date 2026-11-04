@@ -32,6 +32,9 @@
             {% endif %}
             <div class="form-actions" style="margin-top: 1.5rem;">
               <a class="button button-primary" href="{{ auth_primary_href|default(cognito_login_url) }}">{{ auth_primary_label|default("Continue with LSMC Login") }}</a>
+              {% if auth_error %}
+              <a class="button" href="/auth/logout">Log out of Dewey / switch accounts</a>
+              {% endif %}
               <span class="pill">Control Room UI</span>
             </div>
           </div>

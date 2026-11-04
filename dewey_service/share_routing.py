@@ -7,7 +7,9 @@ import re
 from urllib.parse import urlsplit
 
 from starlette.datastructures import Headers
-from starlette.responses import JSONResponse
+from starlette.requests import Request
+
+from dewey_service.ui_errors import access_error_response
 
 # Closed application-side counterpart to the public proxy allowlist.
 PUBLIC_RECIPIENT_ROUTES = (
@@ -94,8 +96,9 @@ class ShareHostBoundaryMiddleware:
         )
 
         async def deny(status, detail):
-            await JSONResponse(
-                {"detail": detail}, status_code=status, headers={"Cache-Control": "no-store"}
+            await access_error_response(
+                Request(scope), detail, status_code=status, headers={"Cache-Control": "no-store"},
+                application_origin=self.settings.share_application_origin,
             )(scope, receive, send)
 
         if content_host:
