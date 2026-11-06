@@ -32,7 +32,7 @@ def parse_s3_uri(uri: str, *, prefix: bool = False):
 
 
 class RegistryStorageServiceMixin:
-    def _storage_locations_batch(self, session, locations, *, action="metadata"):
+    def _storage_locations_batch(self, session, locations, *, action="metadata", indicators=None):
         """Evaluate each relevant registered ancestor once, preserving the SQL policy contract."""
         actor = principal()
         locations = list(dict.fromkeys(locations))
@@ -50,7 +50,7 @@ class RegistryStorageServiceMixin:
             paths.append(
                 and_(
                     generic_instance.json_addl["bucket"].astext == bucket,
-                    or_(
+                    key_column.in_(keys) if actor.admin else or_(
                         key_column.in_(keys),
                         and_(
                             generic_instance.json_addl["storage_kind"].astext == "prefix",
@@ -67,9 +67,15 @@ class RegistryStorageServiceMixin:
         query = self._registry_query(session, scopes=("artifact",), authorize=False).filter(
             generic_instance.json_addl["storage_backend"].astext == "s3", or_(*paths)
         )
-        records = query.with_entities(
-            generic_instance, record_clause(session, generic_instance, action_key)
-        ).all()
+        columns = [generic_instance, record_clause(session, generic_instance, action_key)]
+        if indicators is not None:
+            from dewey_service.services.storage_indicators import storage_indicator_columns
+
+            columns.extend(storage_indicator_columns(session))
+        projected = query.with_entities(*columns).all()
+        records = [(row[0], row[1]) for row in projected]
+        flags = {row[0].uid: 1 | (2 if row[2] else 0) | int(row[3])
+                 for row in projected} if indicators is not None else {}
         policies = {}
         if records and not actor.admin:
             # Policy objects themselves have no independent registry visibility restriction.
@@ -108,8 +114,15 @@ class RegistryStorageServiceMixin:
                 else normalize_instance_payload(next(iter(policies[record.uid].values())))
             )
             location = (data["bucket"], path)
-            if allowed and location in authorized and location not in registered:
-                registered[location] = record
+            if allowed and location in authorized:
+                if location not in registered:
+                    registered[location] = record
+                if indicators is not None:
+                    indicators[location] = indicators.get(location, 0) | flags[record.uid]
+            # Administrators already have the same unconditional allow result;
+            # avoid repeatedly scanning the page for every registered record.
+            if actor.admin:
+                continue
             for bucket, key in locations:
                 if bucket != data["bucket"]:
                     continue
@@ -125,9 +138,9 @@ class RegistryStorageServiceMixin:
             authorized[key] = False
         return authorized, registered
 
-    def _storage_access_batch(self, session, bucket, keys, *, action="metadata"):
+    def _storage_access_batch(self, session, bucket, keys, *, action="metadata", indicators=None):
         allowed, registered = self._storage_locations_batch(
-            session, [(bucket, key) for key in keys], action=action
+            session, [(bucket, key) for key in keys], action=action, indicators=indicators
         )
         return (
             {key: value for (_, key), value in allowed.items()},
@@ -223,7 +236,10 @@ class RegistryStorageServiceMixin:
         entries += [("object", item.key, item) for item in result["objects"]]
         keys = [prefix, *(key for _, key, _ in entries), *(c["key"] for c in crumbs)]
         with self.backend.session_scope(commit=False) as session:
-            authorized, registered = self._storage_access_batch(session, bucket, keys)
+            indicators = {}
+            authorized, registered = self._storage_access_batch(
+                session, bucket, keys, indicators=indicators
+            )
             if not authorized[prefix]:
                 raise HTTPException(
                     403, "This S3 path is restricted or has not been shared with you"
@@ -239,6 +255,7 @@ class RegistryStorageServiceMixin:
                     "key": key,
                     "uri": f"s3://{bucket}/{key}",
                     "euid": registration.euid if registration is not None else None,
+                    "indicators": indicators.get((bucket, key), 0),
                 }
                 if kind == "object":
                     row.update(

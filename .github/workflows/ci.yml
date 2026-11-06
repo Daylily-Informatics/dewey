@@ -84,7 +84,7 @@ jobs:
 
       - name: Run tests
         run: >-
-          uv run --frozen pytest --ignore=tests/test_sharing_v3_postgres.py
+          uv run --frozen pytest --ignore=tests/test_sharing_v3_postgres.py --ignore=tests/test_storage_indicators_native.py
           --cov=dewey_service --cov-branch --cov-report=json:sharing-coverage.json
 
       - name: Require 80 percent changed sharing lines and branches
@@ -160,7 +160,7 @@ jobs:
         env:
           DEWEY_TEST_TAPDB_CONFIG: ${{ runner.temp }}/dewey-sharing-contract/tapdb.yaml
           XDG_STATE_HOME: ${{ runner.temp }}/dewey-sharing-contract/state
-        run: uv run --frozen pytest tests/test_sharing_v3_postgres.py --junitxml=native-sharing-contracts.xml
+        run: uv run --frozen pytest tests/test_sharing_v3_postgres.py tests/test_storage_indicators_native.py -m "not performance" --junitxml=native-sharing-contracts.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:

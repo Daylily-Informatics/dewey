@@ -62,7 +62,7 @@ def test_browser_response_preserves_metadata_and_filters_unauthorized_rows():
     service._require_storage = lambda: SimpleNamespace(browse_prefix=browse)
     service.backend = SimpleNamespace(session_scope=lambda **kwargs: nullcontext(object()))
     service.registry_defaults = lambda: {"listing_cache_ttl_seconds": 30}
-    service._storage_access_batch = lambda session, bucket, keys: (
+    service._storage_access_batch = lambda session, bucket, keys, indicators=None: (
         {key: key != "docs/private.tsv" for key in keys}, {},
     )
     result = service.registry_browse("s3://fixture/docs/", limit=25)

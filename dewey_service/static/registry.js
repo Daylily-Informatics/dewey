@@ -126,8 +126,29 @@
   const storageColumns = [
     ["kind", "Kind"], ["name", "Name"], ["size", "Size"],
     ["modified", "Last modified (UTC)"], ["storage_class", "Storage class"],
-    ["etag", "ETag"], ["euid", "Registration"], ["uri", "S3 URI"]
+    ["etag", "ETag"], ["euid", "Registration"], ["uri", "S3 URI"], ["indicators", "Status"]
   ];
+  function storageIndicatorLabels(item) {
+    const bits = item.indicators || 0, labels = [];
+    if (bits & 1) labels.push("Explicit Dewey registration");
+    if (bits & 2) labels.push("Member of a visible Dewey set");
+    if (bits & 12) labels.push("Explicit target of an active share you manage");
+    if (bits & 8) labels.push("Share includes recipients beyond exact lsmc.com");
+    else if (bits & 4) labels.push("Share recipients limited to exact lsmc.com");
+    return labels;
+  }
+  function storageIndicatorIcons(item, index) {
+    const bits = item.indicators || 0, labels = storageIndicatorLabels(item);
+    if (!labels.length) return '<span class="muted" title="No visible explicit Dewey relationships">—</span>';
+    const svg = path => `<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
+    const icons = [];
+    if (bits & 1) icons.push(svg('<path d="M5 3h10l4 4v14H5zM14 3v5h5M8 12h8M8 16h6"/>'));
+    if (bits & 2) icons.push(svg('<path d="m3 7 9-4 9 4-9 4zM3 12l9 4 9-4M3 17l9 4 9-4"/>'));
+    if (bits & 12) icons.push(svg('<path d="m9 15 6-6M8 17l-1 1a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0M16 7l1-1a4 4 0 0 1 6 6l-4 4a4 4 0 0 1-6 0"/>'));
+    if (bits & 8) icons.push(svg('<circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18M5 7h14M5 17h14"/>'));
+    else if (bits & 4) icons.push(svg('<path d="M4 21V3h16v18M2 21h20M8 7h1m6 0h1M8 11h1m6 0h1M10 21v-6h4v6"/>'));
+    return `<button type="button" class="storage-indicators" data-action="storage-indicators" data-value="${index}" aria-label="${esc(labels.join('; '))} for ${esc(item.name)}" title="${esc(labels.join('; '))}"><span class="storage-indicator-grid">${icons.join('')}</span></button>`;
+  }
   const storageModified = item => item.kind === "prefix" ? item.marker_last_modified : item.last_modified;
   function storageDate(item) {
     const value = storageModified(item);
@@ -159,19 +180,19 @@
     const body = rows.map(({item, index}) => {
       const modified = storageModified(item), stamp = storageDate(item);
       const timestamp = modified ? `<time datetime="${esc(modified)}"${item.kind === "prefix" ? ' title="Directory marker timestamp only; not recursive or latest child"' : ""}>${esc(stamp)}</time>` : "Unknown";
-      return `<tr data-storage-index="${index}"><td data-label="Kind">${writable ? `<input type="checkbox" data-storage-select="${index}" aria-label="Select ${esc(item.name)}" ${storageSelected.has(item.uri) ? "checked" : ""}>` : ""}${badge(item.kind)}</td><td data-label="Name">${item.kind === "prefix" ? `<a class="name" href="${root ? `/records/${enc(euid)}?relative=${enc(item.uri.slice(root.length))}` : `/storage?uri=${enc(item.uri)}`}">${esc(item.name)}</a>` : `<button data-action="object" data-value="${index}">${esc(item.name)}</button>`}</td><td data-label="Size" class="nowrap"${item.size != null ? ` title="${esc(item.size)} bytes"` : ""}>${bytes(item.size)}</td><td data-label="Last modified (UTC)" class="nowrap">${timestamp}</td><td data-label="Storage class">${esc(item.storage_class || "—")}</td><td data-label="ETag" class="mono storage-etag" title="ETag is not necessarily an MD5 checksum">${esc(item.etag || "—")}</td><td data-label="Registration">${item.euid ? `<a class="mono" href="/records/${enc(item.euid)}">${esc(item.euid)}</a>` : writable ? `<a href="/add?uri=${enc(item.uri)}&kind=${item.kind}">Register</a>` : ""}</td><td data-label="S3 URI"><button type="button" class="storage-copy" data-action="storage-copy" data-value="${index}" aria-label="Copy S3 URI for ${esc(item.name)}" title="Copy ${esc(item.uri)}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/></svg></button></td></tr>`;
+      return `<tr data-storage-index="${index}"><td data-label="Kind">${writable ? `<input type="checkbox" data-storage-select="${index}" aria-label="Select ${esc(item.name)}" ${storageSelected.has(item.uri) ? "checked" : ""}>` : ""}${badge(item.kind)}</td><td data-label="Name">${item.kind === "prefix" ? `<a class="name" href="${root ? `/records/${enc(euid)}?relative=${enc(item.uri.slice(root.length))}` : `/storage?uri=${enc(item.uri)}`}">${esc(item.name)}</a>` : `<button data-action="object" data-value="${index}">${esc(item.name)}</button>`}</td><td data-label="Size" class="nowrap"${item.size != null ? ` title="${esc(item.size)} bytes"` : ""}>${bytes(item.size)}</td><td data-label="Last modified (UTC)" class="nowrap">${timestamp}</td><td data-label="Storage class">${esc(item.storage_class || "—")}</td><td data-label="ETag" class="mono storage-etag" title="ETag is not necessarily an MD5 checksum">${esc(item.etag || "—")}</td><td data-label="Registration">${item.euid ? `<a class="mono" href="/records/${enc(item.euid)}">${esc(item.euid)}</a>` : writable ? `<a href="/add?uri=${enc(item.uri)}&kind=${item.kind}">Register</a>` : ""}</td><td data-label="S3 URI"><button type="button" class="storage-copy" data-action="storage-copy" data-value="${index}" aria-label="Copy S3 URI for ${esc(item.name)}" title="Copy ${esc(item.uri)}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/></svg></button></td><td data-label="Status">${storageIndicatorIcons(item, index)}</td></tr>`;
     }).join("");
-    return `<p class="muted" role="status">Showing ${rows.length} of ${listing.length} loaded rows.${loadedStorage.result.next_continuation_token ? " More pages available." : ""} Sorting and TSV export use only the loaded, filtered rows.</p><div class="panel table-panel"><table class="storage-browser-table" role="table" aria-label="S3 objects and prefixes"><thead><tr>${headers}</tr></thead><tbody>${body || '<tr><td colspan="8" class="empty">No matching items.</td></tr>'}</tbody></table></div>`;
+    return `<p class="muted" role="status">Showing ${rows.length} of ${listing.length} loaded rows.${loadedStorage.result.next_continuation_token ? " More pages available." : ""} Sorting and TSV export use only the loaded, filtered rows.</p><div class="panel table-panel"><table class="storage-browser-table" role="table" aria-label="S3 objects and prefixes"><thead><tr>${headers}</tr></thead><tbody>${body || '<tr><td colspan="9" class="empty">No matching items.</td></tr>'}</tbody></table></div>`;
   }
   function exportStorageView() {
     const cell = value => {
       const text = String(value ?? "");
       return /[\t\r\n"]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
     };
-    const rows = [["Kind", "Name", "Size (bytes)", "Last modified (UTC)", "Storage class", "ETag", "Registration", "S3 URI", "Timestamp meaning"]];
+    const rows = [["Kind", "Name", "Size (bytes)", "Last modified (UTC)", "Storage class", "ETag", "Registration", "S3 URI", "Timestamp meaning", "Dewey status"]];
     for (const {item} of storageView()) rows.push([
       item.kind, item.name, item.size, storageDate(item), item.storage_class, item.etag, item.euid, item.uri,
-      item.kind === "prefix" ? "Directory marker only; not recursive or latest child" : "S3 object last modified"
+      (item.kind === "prefix" ? "Directory marker only; not recursive or latest child" : "S3 object last modified"), storageIndicatorLabels(item).join("; ")
     ]);
     const blob = new Blob([rows.map(row => row.map(cell).join("\t")).join("\r\n") + "\r\n"], {type:"text/tab-separated-values;charset=utf-8"});
     const link = document.createElement("a"), url = URL.createObjectURL(blob);
@@ -325,6 +346,11 @@
       return;
     }
     if(name==="storage-export")return exportStorageView();
+    if(name==="storage-indicators") {
+      const item=listing[Number(value)], labels=storageIndicatorLabels(item);
+      modal(`<h2>Dewey relationships</h2><p class="mono">${esc(item.name)}</p><ul>${labels.map(label=>`<li>${esc(label)}</li>`).join("")}</ul><p>Only explicit registrations and visible set membership are shown. Share scope is shown only to its owner or an administrator with verified sharing access. A target relationship does not guarantee every descendant or delivery is permitted. Missing icons do not prove that no private relationships exist.</p>`);
+      return;
+    }
     if(name==="storage-copy"){
       await navigator.clipboard.writeText(listing[Number(value)].uri);
       notice("S3 URI copied.");return;

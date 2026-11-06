@@ -85,3 +85,12 @@ Click a column heading to sort ascending or descending across loaded rows. Filte
 The shared registry and console skins adapt navigation, forms, dialogs and grids to narrow screens. The S3 table fits the content width on desktop and becomes labeled stacked rows on mobile; its sort buttons and every metadata value remain available. Other wide data tables scroll inside their own panel rather than widening the page.
 
 The registered test CLI accepts focused paths as positional arguments. Put pytest flags after the standard separator, for example `dewey test run -- tests/test_storage_unit.py tests/test_storage_browser.py -q`. The same separator works for `dewey test cov`; CLI runtime guards remain active.
+
+
+### Compact explicit relationship status
+
+The S3 browser has one compact Status column immediately after Copy S3 URI. Its inline glyphs represent explicit registration, a visible set membership, an active share target the viewer manages, and exact lsmc.com-only or broader recipients. Broader includes external named recipients and does not imply public access. Tap or focus the combined control for accessible descriptions. Missing icons do not prove that no private relationships exist.
+
+The indicators use the existing listing/authorization request, with no extra S3 call or per-row HTTP/SQL request. Native lineage and current grants supply authority; permission-filtered flags contain no recipient addresses or private relationship identities. Local status sorting and TSV export use those same loaded flags.
+
+This candidate's <=4% performance condition remains unmet; see the20261106T184656Z indicator ledger before release.

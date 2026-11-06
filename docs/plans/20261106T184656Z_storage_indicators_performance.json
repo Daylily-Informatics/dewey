@@ -1,0 +1,175 @@
+{
+  "dataset": {
+    "registered_page_objects": 250,
+    "background_objects": 750,
+    "sets": 2,
+    "active_shares": 3,
+    "scope": "Each run adds its own isolated 1000-object fixture; prior fixtures retained, no data deleted. Final database also contains the earlier trial fixtures."
+  },
+  "extra_s3_requests": 0,
+  "method": "Alternating paired warmed native PostgreSQL service calls; cached listing stand-in, no artificial network delay; 5 warmups then 50 measured pairs per case.",
+  "limits": "Local DB and synthetic explicit memberships; not production network, device paint or all workloads.",
+  "results": [
+    {
+      "actor": "admin",
+      "rows": 25,
+      "samples_per_variant": 50,
+      "before": {
+        "median_ms": 6.97635393589735,
+        "mean_ms": 7.2770091984421015,
+        "p95_ms": 8.639749838039279,
+        "sql_request_counts": [
+          15
+        ]
+      },
+      "after": {
+        "median_ms": 10.564415948465466,
+        "mean_ms": 10.745242405682802,
+        "p95_ms": 11.937790783122182,
+        "sql_request_counts": [
+          15
+        ]
+      },
+      "paired_mean_ratio": 1.4766014598391874,
+      "paired_bootstrap_95pct_ratio": [
+        1.451367043900162,
+        1.5022209682891192
+      ]
+    },
+    {
+      "actor": "admin",
+      "rows": 100,
+      "samples_per_variant": 50,
+      "before": {
+        "median_ms": 10.360791580751538,
+        "mean_ms": 10.549091598950326,
+        "p95_ms": 12.232791865244508,
+        "sql_request_counts": [
+          15
+        ]
+      },
+      "after": {
+        "median_ms": 13.261770945973694,
+        "mean_ms": 14.14364657830447,
+        "p95_ms": 16.818958101794124,
+        "sql_request_counts": [
+          15
+        ]
+      },
+      "paired_mean_ratio": 1.3407454514578123,
+      "paired_bootstrap_95pct_ratio": [
+        1.2825795313321728,
+        1.442300325224317
+      ]
+    },
+    {
+      "actor": "admin",
+      "rows": 250,
+      "samples_per_variant": 50,
+      "before": {
+        "median_ms": 18.132353900000453,
+        "mean_ms": 18.1718149734661,
+        "p95_ms": 18.711833050474524,
+        "sql_request_counts": [
+          15
+        ]
+      },
+      "after": {
+        "median_ms": 18.368062563240528,
+        "mean_ms": 21.254368359223008,
+        "p95_ms": 47.055749921128154,
+        "sql_request_counts": [
+          15
+        ]
+      },
+      "paired_mean_ratio": 1.1696337647206927,
+      "paired_bootstrap_95pct_ratio": [
+        1.0467884109819965,
+        1.2997277445500777
+      ]
+    },
+    {
+      "actor": "internal_reader",
+      "rows": 25,
+      "samples_per_variant": 50,
+      "before": {
+        "median_ms": 34.11306196358055,
+        "mean_ms": 34.656785763800144,
+        "p95_ms": 38.41724991798401,
+        "sql_request_counts": [
+          16
+        ]
+      },
+      "after": {
+        "median_ms": 39.107291493564844,
+        "mean_ms": 47.24167257081717,
+        "p95_ms": 83.29020789824426,
+        "sql_request_counts": [
+          16
+        ]
+      },
+      "paired_mean_ratio": 1.363129082217493,
+      "paired_bootstrap_95pct_ratio": [
+        1.2373835726005245,
+        1.5009062240129478
+      ]
+    },
+    {
+      "actor": "internal_reader",
+      "rows": 100,
+      "samples_per_variant": 50,
+      "before": {
+        "median_ms": 96.10160463489592,
+        "mean_ms": 98.3414825052023,
+        "p95_ms": 103.50295901298523,
+        "sql_request_counts": [
+          16
+        ]
+      },
+      "after": {
+        "median_ms": 103.06722950190306,
+        "mean_ms": 113.31191917415708,
+        "p95_ms": 150.40466701611876,
+        "sql_request_counts": [
+          16
+        ]
+      },
+      "paired_mean_ratio": 1.1522291131635407,
+      "paired_bootstrap_95pct_ratio": [
+        1.0865203431983381,
+        1.2179556224860302
+      ]
+    },
+    {
+      "actor": "internal_reader",
+      "rows": 250,
+      "samples_per_variant": 50,
+      "before": {
+        "median_ms": 205.61181206721812,
+        "mean_ms": 219.16018328163773,
+        "p95_ms": 259.3050410505384,
+        "sql_request_counts": [
+          16
+        ]
+      },
+      "after": {
+        "median_ms": 215.27597901877016,
+        "mean_ms": 222.22082747146487,
+        "p95_ms": 266.0545841790736,
+        "sql_request_counts": [
+          16
+        ]
+      },
+      "paired_mean_ratio": 1.013965329577654,
+      "paired_bootstrap_95pct_ratio": [
+        0.9739520908672902,
+        1.055720117329841
+      ]
+    }
+  ],
+  "created_at": "2026-11-06 19:05:58 UTC",
+  "baseline_source": "12.0.27",
+  "candidate": "compact authoritative S3 relationship indicators; cached SQL expressions, live data",
+  "performance_gate": "NOT_ESTABLISHED: representative cached-service increases exceed 4%; no release authorized under the retained bound",
+  "cost_scope": "No new S3 calls, browser requests, or SQL request-count increase. Additional database CPU is measured; billing equivalence and end-to-end production page-load impact are not independently established."
+}

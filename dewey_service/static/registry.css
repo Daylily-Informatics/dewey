@@ -11,13 +11,13 @@ h2,h3,.mono,pre,.storage-uri,.breadcrumbs,.definition dd,.account-nav{overflow-w
 .storage-browser-table{table-layout:fixed;width:100%}
 .storage-browser-table th,.storage-browser-table td{padding:10px 8px;overflow-wrap:anywhere;white-space:normal}
 .storage-browser-table th:nth-child(1){width:9%}
-.storage-browser-table th:nth-child(2){width:23%}
+.storage-browser-table th:nth-child(2){width:20%}
 .storage-browser-table th:nth-child(3){width:8%}
-.storage-browser-table th:nth-child(4){width:17%}
-.storage-browser-table th:nth-child(5){width:11%}
-.storage-browser-table th:nth-child(6){width:14%}
+.storage-browser-table th:nth-child(4){width:16%}
+.storage-browser-table th:nth-child(5){width:10%}
+.storage-browser-table th:nth-child(6){width:13%}
 .storage-browser-table th:nth-child(7){width:11%}
-.storage-browser-table th:nth-child(8){width:7%}
+.storage-browser-table th:nth-child(8){width:6.5%}
 .storage-browser-table td>button:not(.storage-copy){max-width:100%;text-align:left;overflow-wrap:anywhere}
 .storage-browser-table .storage-sort{white-space:normal;text-align:left;letter-spacing:0}
 .storage-browser-table .storage-etag{min-width:0}
@@ -44,4 +44,17 @@ h2,h3,.mono,pre,.storage-uri,.breadcrumbs,.definition dd,.account-nav{overflow-w
   .storage-browser-table tbody td:first-child:before{width:105px;flex:none}
   .storage-browser-table tbody td>*{min-width:0;max-width:100%}
   .storage-browser-table tbody td.empty{display:block}.storage-browser-table tbody td.empty:before{content:none}
+}
+
+/* One compact status cell follows the exact-URI copy cell. Inline SVG adds no requests. */
+.storage-browser-table th:nth-child(9){width:6.5%}
+.storage-indicators{padding:4px;min-width:34px;min-height:34px;vertical-align:middle}
+.storage-indicator-grid{display:grid;grid-template-columns:12px 12px;grid-auto-rows:12px;gap:1px}
+.storage-indicator-grid svg{width:12px;height:12px}
+@media(max-width:760px){
+  .storage-browser-table thead th:nth-child(9){width:auto}
+  .storage-browser-table tbody tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .storage-browser-table tbody td{grid-column:1/-1}
+  .storage-browser-table tbody td:nth-child(8),.storage-browser-table tbody td:nth-child(9){grid-column:auto;display:flex;align-items:center;flex-wrap:wrap}
+  .storage-browser-table .storage-copy,.storage-browser-table .storage-indicators{min-width:44px;min-height:44px}
 }

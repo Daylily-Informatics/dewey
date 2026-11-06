@@ -5,7 +5,7 @@ const {createEnvironment, flush} = require('./dom_fixture.cjs');
 const root = 's3://fixture/docs/';
 const stamp = '2026-07-11T04:36:36+00:00';
 const items = [
-  {kind:'object',name:'z.tsv',uri:root+'z.tsv',size:100,etag:'multi-2',storage_class:'GLACIER',last_modified:stamp,euid:'Z-file'},
+  {kind:'object',name:'z.tsv',uri:root+'z.tsv',size:100,etag:'multi-2',storage_class:'GLACIER',last_modified:stamp,euid:'Z-file',indicators:7},
   {kind:'object',name:'a.tsv',uri:root+'a.tsv',size:9,etag:'single',storage_class:'STANDARD',last_modified:'2026-01-01T00:00:00Z'},
   {kind:'prefix',name:'known/',uri:root+'known/',marker_last_modified:stamp},
   {kind:'prefix',name:'unknown/',uri:root+'unknown/'},
@@ -42,7 +42,7 @@ test('metadata, marker meaning, local ascending/descending numeric sorting and e
   await env.click('storage-sort','size');
   assert.deepEqual(order(env.node('storage-table').innerHTML),[0,1,2,3]);
   assert.match(env.node('storage-table').innerHTML,/aria-sort="descending"/);
-  for(const key of ['kind','name','modified','storage_class','etag','euid','uri']) {
+  for(const key of ['kind','name','modified','storage_class','etag','euid','uri','indicators']) {
     await env.click('storage-sort',key);await env.click('storage-sort',key);
   }
   await env.click('storage-copy','0');
@@ -86,4 +86,23 @@ test('new-file upload UI has no replacement path',async()=>{
   const html=env.node('editor-body').innerHTML;
   assert.match(html,/Existing objects cannot be replaced or deleted, including by administrators/);
   assert.doesNotMatch(html,/Exact replacement|Admin replacement/);
+});
+
+
+test('compact explicit relationship icons follow URI copy and disclose only returned flags',async()=>{
+  const env=setup([...items,{kind:'object',name:'external.tsv',uri:root+'external.tsv',indicators:11}]);
+  await flush();
+  const html=env.node('content').innerHTML;
+  assert.match(html,/data-label="S3 URI">[\s\S]*?<td data-label="Status">/);
+  assert.match(html,/Explicit Dewey registration/);
+  assert.match(html,/Member of a visible Dewey set/);
+  assert.match(html,/Share recipients limited to exact lsmc.com/);
+  assert.match(html,/Share includes recipients beyond exact lsmc.com/);
+  assert.match(html,/storage-indicator-grid/);
+  assert.doesNotMatch(html,/<img[^>]+src=/);
+  await env.click('storage-indicators','0');
+  assert.match(env.node('editor-body').innerHTML,/Missing icons do not prove/);
+  await env.click('storage-export');
+  assert.match(await env.blobs[0].text(),/Dewey status/);
+  assert.equal(env.calls.length,1);
 });
