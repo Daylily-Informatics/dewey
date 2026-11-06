@@ -43,6 +43,7 @@ class Element {
   removeEventListener(type, fn) { this.listeners[type] = (this.listeners[type] || []).filter(item => item !== fn); }
   showModal() { this.open = true; }
   close() { this.open = false; for (const fn of this.listeners.close || []) fn({target: this}); }
+  focus() { this.document.activeElement = this; }
   click() { this.document.clicks.push(this); }
   submit() { this.document.submissions.push(this); }
   closest(selector) { return this.document.matches(this, selector) ? this : this.parentElement?.closest(selector) || null; }

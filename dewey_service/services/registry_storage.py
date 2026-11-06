@@ -241,7 +241,14 @@ class RegistryStorageServiceMixin:
                     "euid": registration.euid if registration is not None else None,
                 }
                 if kind == "object":
-                    row.update(size=item.size, etag=item.etag)
+                    row.update(
+                        size=item.size,
+                        etag=item.etag,
+                        storage_class=item.storage_class,
+                        last_modified=item.last_modified,
+                    )
+                else:
+                    row["marker_last_modified"] = item.marker_last_modified
                 rows.append(row)
             current = registered.get(prefix)
             current_artifact = self._artifact_response(current) if current is not None else None

@@ -75,3 +75,13 @@ Configured deployments mount the pinned TapDB operator UI under `/tapdb`, with n
 ## Evidence Boundary
 
 This guide documents source behavior. The [release ledger](plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) separates software checks, deployed provenance, actual browser/client acceptance and user acceptance. Internal signup is confirmed; internal application admission/scoped access and final user acceptance remain unverified. The release objective is not declared complete here.
+
+## S3 Browser Metadata And Local View Controls
+
+The S3 Browser displays object size, S3 last-modified time in UTC, storage class and ETag from the existing listing response. No extra S3 requests are made for these columns. S3 modification time is separate from filesystem creation/modification time; an ETag is not necessarily an MD5 checksum. Folder rows are prefixes. A parenthesized date is the timestamp of that exact zero-byte directory marker, only when returned in the same listing page; otherwise the date is Unknown. It never represents the latest descendant or a recursive scan.
+
+Click a column heading to sort ascending or descending across loaded rows. Filter names locally, export the currently loaded and filtered view as quoted TSV, or copy the exact S3 URI using its row icon. Load more explicitly fetches another page and retains the filter and sort; export does not fetch additional pages. A partial listing is not a full inventory. Upload permits new keys only: the backend rejects replacement and S3 completion uses a create-only condition. Deletion is prohibited for every user, including administrators.
+
+The shared registry and console skins adapt navigation, forms, dialogs and grids to narrow screens. The S3 table fits the content width on desktop and becomes labeled stacked rows on mobile; its sort buttons and every metadata value remain available. Other wide data tables scroll inside their own panel rather than widening the page.
+
+The registered test CLI accepts focused paths as positional arguments. Put pytest flags after the standard separator, for example `dewey test run -- tests/test_storage_unit.py tests/test_storage_browser.py -q`. The same separator works for `dewey test cov`; CLI runtime guards remain active.

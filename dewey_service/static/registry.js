@@ -39,6 +39,7 @@
   const badge = value => `<span class="badge">${esc(value)}</span>`;
   const bytes = value => value == null ? "—" : new Intl.NumberFormat(undefined, {notation:"compact",maximumFractionDigits:1}).format(value) + " B";
   const date = value => value ? new Date(value).toLocaleDateString() : "—";
+  let storageSort = {key: null, direction: "ascending"}, storageFilter = "";
   let fieldSequence = 0;
   function field(name, label, value = "", type = "text", hint = "") { const id = `f-${name}-${++fieldSequence}`; return `<div class="field"><label for="${id}">${label}</label><input id="${id}" name="${name}" type="${type}" value="${esc(value)}">${hint ? `<small>${hint}</small>` : ""}</div>`; }
   function area(name, label, value = "", hint = "") { const id = `f-${name}-${++fieldSequence}`; return `<div class="field"><label for="${id}">${label}</label><textarea id="${id}" name="${name}">${esc(value)}</textarea>${hint ? `<small>${hint}</small>` : ""}</div>`; }
@@ -122,9 +123,66 @@
       $("#contents").innerHTML=`<section class="panel"><h2>Folder contents</h2><p class="muted">Browsing does not register descendants.</p><div id="storage-list">${storageRows(result, value.storage_uri)}</div></section>`;
     } else $("#contents").innerHTML=`<section class="panel"><h2>Object</h2><p>${bytes(value.size)} · ${esc(value.content_type||value.artifact_type)}</p></section>`;
   }
+  const storageColumns = [
+    ["kind", "Kind"], ["name", "Name"], ["size", "Size"],
+    ["modified", "Last modified (UTC)"], ["storage_class", "Storage class"],
+    ["etag", "ETag"], ["euid", "Registration"], ["uri", "S3 URI"]
+  ];
+  const storageModified = item => item.kind === "prefix" ? item.marker_last_modified : item.last_modified;
+  function storageDate(item) {
+    const value = storageModified(item);
+    if (!value) return "Unknown";
+    const timestamp = new Date(value).toISOString().replace("T", " ").replace(/\.\d{3}Z$/, " UTC");
+    return item.kind === "prefix" ? `(${timestamp})` : timestamp;
+  }
+  function storageView() {
+    const query = storageFilter.toLowerCase();
+    const rows = listing.map((item, index) => ({item, index})).filter(({item}) => item.name.toLowerCase().includes(query));
+    if (storageSort.key) rows.sort((a, b) => {
+      const value = item => storageSort.key === "modified"
+        ? (storageModified(item) ? Date.parse(storageModified(item)) : null)
+        : item[storageSort.key];
+      const left = value(a.item), right = value(b.item);
+      // Unknown values stay last in either direction; equal values retain listing order.
+      if (left == null || right == null) return left == null ? (right == null ? a.index - b.index : 1) : -1;
+      const compared = typeof left === "number" ? left - right : String(left).localeCompare(String(right));
+      return compared * (storageSort.direction === "ascending" ? 1 : -1) || a.index - b.index;
+    });
+    return rows;
+  }
+  function storageTable() {
+    const root = loadedStorage.root, rows = storageView();
+    const headers = storageColumns.map(([key, label]) => {
+      const active = storageSort.key === key, next = active && storageSort.direction === "ascending" ? "descending" : "ascending";
+      return `<th scope="col" aria-sort="${active ? storageSort.direction : "none"}"><button type="button" class="storage-sort" data-action="storage-sort" data-value="${key}" data-storage-sort-focus="${key}" aria-label="Sort by ${esc(label)}, ${next}">${esc(label)} <span aria-hidden="true">${active ? (storageSort.direction === "ascending" ? "↑" : "↓") : "↕"}</span></button></th>`;
+    }).join("");
+    const body = rows.map(({item, index}) => {
+      const modified = storageModified(item), stamp = storageDate(item);
+      const timestamp = modified ? `<time datetime="${esc(modified)}"${item.kind === "prefix" ? ' title="Directory marker timestamp only; not recursive or latest child"' : ""}>${esc(stamp)}</time>` : "Unknown";
+      return `<tr data-storage-index="${index}"><td data-label="Kind">${writable ? `<input type="checkbox" data-storage-select="${index}" aria-label="Select ${esc(item.name)}" ${storageSelected.has(item.uri) ? "checked" : ""}>` : ""}${badge(item.kind)}</td><td data-label="Name">${item.kind === "prefix" ? `<a class="name" href="${root ? `/records/${enc(euid)}?relative=${enc(item.uri.slice(root.length))}` : `/storage?uri=${enc(item.uri)}`}">${esc(item.name)}</a>` : `<button data-action="object" data-value="${index}">${esc(item.name)}</button>`}</td><td data-label="Size" class="nowrap"${item.size != null ? ` title="${esc(item.size)} bytes"` : ""}>${bytes(item.size)}</td><td data-label="Last modified (UTC)" class="nowrap">${timestamp}</td><td data-label="Storage class">${esc(item.storage_class || "—")}</td><td data-label="ETag" class="mono storage-etag" title="ETag is not necessarily an MD5 checksum">${esc(item.etag || "—")}</td><td data-label="Registration">${item.euid ? `<a class="mono" href="/records/${enc(item.euid)}">${esc(item.euid)}</a>` : writable ? `<a href="/add?uri=${enc(item.uri)}&kind=${item.kind}">Register</a>` : ""}</td><td data-label="S3 URI"><button type="button" class="storage-copy" data-action="storage-copy" data-value="${index}" aria-label="Copy S3 URI for ${esc(item.name)}" title="Copy ${esc(item.uri)}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/></svg></button></td></tr>`;
+    }).join("");
+    return `<p class="muted" role="status">Showing ${rows.length} of ${listing.length} loaded rows.${loadedStorage.result.next_continuation_token ? " More pages available." : ""} Sorting and TSV export use only the loaded, filtered rows.</p><div class="panel table-panel"><table class="storage-browser-table" role="table" aria-label="S3 objects and prefixes"><thead><tr>${headers}</tr></thead><tbody>${body || '<tr><td colspan="8" class="empty">No matching items.</td></tr>'}</tbody></table></div>`;
+  }
+  function exportStorageView() {
+    const cell = value => {
+      const text = String(value ?? "");
+      return /[\t\r\n"]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    };
+    const rows = [["Kind", "Name", "Size (bytes)", "Last modified (UTC)", "Storage class", "ETag", "Registration", "S3 URI", "Timestamp meaning"]];
+    for (const {item} of storageView()) rows.push([
+      item.kind, item.name, item.size, storageDate(item), item.storage_class, item.etag, item.euid, item.uri,
+      item.kind === "prefix" ? "Directory marker only; not recursive or latest child" : "S3 object last modified"
+    ]);
+    const blob = new Blob([rows.map(row => row.map(cell).join("\t")).join("\r\n") + "\r\n"], {type:"text/tab-separated-values;charset=utf-8"});
+    const link = document.createElement("a"), url = URL.createObjectURL(blob);
+    link.href = url; link.download = "dewey-s3-view.tsv";
+    document.body.appendChild(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+    notice(`Exported ${rows.length - 1} loaded, filtered rows.`);
+  }
   function storageRows(result, root="") {
     listing=result.items; loadedStorage={result,root}; const crumbs=result.breadcrumbs.filter(c=>!root||c.uri.startsWith(root));
-    return `<div class="breadcrumbs">${crumbs.map(c=>`<a href="${root?`/records/${enc(euid)}?relative=${enc(c.uri.slice(root.length))}`:`/storage?uri=${enc(c.uri)}`}">${esc(c.label)}</a>`).join("")}</div><div class="toolbar"><input id="storage-name-filter" type="search" placeholder="Filter names on this page" aria-label="Filter names on this page">${writable?action("Register selection as a set","storage-set"):""}</div>${table(result.items.map((item,index)=>`<tr data-storage-name="${esc(item.name.toLowerCase())}"><td>${writable?`<input type="checkbox" data-storage-select="${index}" aria-label="Select ${esc(item.name)}" ${storageSelected.has(item.uri)?"checked":""}>`:""}${badge(item.kind)}</td><td>${item.kind==="prefix"?`<a class="name" href="${root?`/records/${enc(euid)}?relative=${enc(item.uri.slice(root.length))}`:`/storage?uri=${enc(item.uri)}`}">${esc(item.name)}</a>`:`<button data-action="object" data-value="${index}">${esc(item.name)}</button>`}</td><td>${bytes(item.size)}</td><td>${item.euid?`<a class="mono" href="/records/${enc(item.euid)}">${esc(item.euid)}</a>`:writable?`<a href="/add?uri=${enc(item.uri)}&kind=${item.kind}">Register</a>`:""}</td></tr>`).join(""),["Kind","Name","Size","Registration"])}${action("Refresh", "refresh")}${result.next_continuation_token?action("Load more","storage-next",result.next_continuation_token):""}`;
+    return `<div class="breadcrumbs">${crumbs.map(c=>`<a href="${root?`/records/${enc(euid)}?relative=${enc(c.uri.slice(root.length))}`:`/storage?uri=${enc(c.uri)}`}">${esc(c.label)}</a>`).join("")}</div><div class="toolbar"><input id="storage-name-filter" type="search" value="${esc(storageFilter)}" placeholder="Filter loaded names" aria-label="Filter loaded names"><div class="actions">${action("Export view TSV", "storage-export", "", "storage-export")}${writable?action("Register selection as a set","storage-set"):""}</div></div><p class="muted">Parenthesized dates are directory marker timestamps, not recursive or latest-child dates. Unknown means no marker date was returned. ETag is not necessarily an MD5 checksum.</p><div id="storage-table">${storageTable()}</div>${action("Refresh", "refresh")}${result.next_continuation_token?action("Load more","storage-next",result.next_continuation_token):""}`;
   }
   async function storage() {
     const p=params(), uri=p.get("uri");
@@ -173,9 +231,9 @@
   }
   async function shareDialog(id) { return window.DeweySharing.editor(id); }
   async function sharePage() { return window.DeweySharing.page(euid); }
-  function uploadDialog(uri, replaceEtag = null) {
-    modal(`<h2>Upload new files</h2><form id="upload-form">${field("uri",replaceEtag?"Exact replacement S3 object":"Destination S3 folder",uri,"text",replaceEtag?"Admin replacement of the reviewed ETag: "+esc(replaceEtag):"Each filename is appended exactly. Existing objects are never silently overwritten.")}<div class="field"><label for="files">Files</label><input id="files" type="file" ${replaceEtag?"":"multiple"} required></div><label><input type="checkbox" name="register" checked> Register completed uploads in Dewey</label><progress id="progress" value="0" max="100"></progress><p id="upload-status" class="muted"></p><button class="primary">Upload</button></form>`);
-    $("#upload-form").onsubmit=event=>{event.preventDefault();safe(async()=>{const form=event.target,d=values(form),dest=d.uri;if(!dest.startsWith("s3://")||(!replaceEtag&&!dest.endsWith("/"))||(replaceEtag&&dest!==uri))throw Error("Choose an explicit S3 folder ending in /.");const files=[...$("#files").files];$("button.primary",form).disabled=true;let total=files.reduce((n,f)=>n+f.size,0),done=0;for(const file of files){const target=replaceEtag?dest:dest+file.name;$("#upload-status").textContent=`Uploading ${file.name}`;const op=await api("/api/v1/storage/uploads","POST",{uri:target,size:file.size,content_type:file.type||"application/octet-stream",replace_etag:replaceEtag});try{for(let start=0,part=1;start<file.size||part===1;start+=op.part_size,part++){const blob=file.slice(start,start+op.part_size);const r=await fetch(`/api/v1/storage/uploads/${enc(op.operation_euid)}/parts/${part}`,{method:"PUT",credentials:"same-origin",redirect:"error",headers:{"Content-Type":"application/octet-stream"},body:blob});if(!r.ok){const error=await r.json();throw Error(error.detail||`Upload part failed: ${r.status}`);}done+=blob.size;$("#progress").value=total?done/total*100:100;}await api(`/api/v1/storage/uploads/${enc(op.operation_euid)}/complete`,"POST",{});if(d.register)await api("/api/v1/records","POST",{kind:"object",uri:target,name:file.name});}catch(error){$("#upload-status").textContent=`${file.name}: ${error.message}. Operation ${op.operation_euid}.`;throw error;}}dialog.close();notice(`${files.length} file(s) uploaded${d.register?" and registered":""}.`);await render();});};
+  function uploadDialog(uri) {
+    modal(`<h2>Upload new files</h2><form id="upload-form">${field("uri","Destination S3 folder",uri,"text","Each filename is appended exactly. Existing objects cannot be replaced or deleted, including by administrators.")}<div class="field"><label for="files">Files</label><input id="files" type="file" multiple required></div><label><input type="checkbox" name="register" checked> Register completed uploads in Dewey</label><progress id="progress" value="0" max="100"></progress><p id="upload-status" class="muted"></p><button class="primary">Upload</button></form>`);
+    $("#upload-form").onsubmit=event=>{event.preventDefault();safe(async()=>{const form=event.target,d=values(form),dest=d.uri;if(!dest.startsWith("s3://")||!dest.endsWith("/"))throw Error("Choose an explicit S3 folder ending in /.");const files=[...$("#files").files];$("button.primary",form).disabled=true;let total=files.reduce((n,f)=>n+f.size,0),done=0;for(const file of files){const target=dest+file.name;$("#upload-status").textContent=`Uploading ${file.name}`;const op=await api("/api/v1/storage/uploads","POST",{uri:target,size:file.size,content_type:file.type||"application/octet-stream"});try{for(let start=0,part=1;start<file.size||part===1;start+=op.part_size,part++){const blob=file.slice(start,start+op.part_size);const r=await fetch(`/api/v1/storage/uploads/${enc(op.operation_euid)}/parts/${part}`,{method:"PUT",credentials:"same-origin",redirect:"error",headers:{"Content-Type":"application/octet-stream"},body:blob});if(!r.ok){const error=await r.json();throw Error(error.detail||`Upload part failed: ${r.status}`);}done+=blob.size;$("#progress").value=total?done/total*100:100;}await api(`/api/v1/storage/uploads/${enc(op.operation_euid)}/complete`,"POST",{});if(d.register)await api("/api/v1/records","POST",{kind:"object",uri:target,name:file.name});}catch(error){$("#upload-status").textContent=`${file.name}: ${error.message}. Operation ${op.operation_euid}.`;throw error;}}dialog.close();notice(`${files.length} file(s) uploaded${d.register?" and registered":""}.`);await render();});};
   }
   async function multiqcBundleReview() {
     modal(`<h2>MultiQC bundle registrations</h2><p>Review declared report dependencies and existing shares. Repair preserves report/share identities, recipients and expiration. Only report-specific paths are admitted; missing assets and custom file restrictions remain blocked.</p>${area("multiqc_euids","Limit review to these HTML EUIDs (optional)","","One EUID per line. Leave blank to inventory all registered HTML.")}<button id="multiqc-review">Review registrations</button> <button id="multiqc-repair" disabled>Repair reviewed registrations and web shares</button><p id="multiqc-progress" role="status"></p><pre id="multiqc-results"></pre>`);
@@ -248,7 +306,7 @@
     if(writable)content.insertAdjacentHTML("afterbegin",`<section class="panel"><h2>MultiQC reports</h2>${action("Review and repair MultiQC bundles","multiqc-bundles")}</section>`);
     await accessAdministration();
   }
-  document.addEventListener("input",event=>{if(event.target.id==="storage-name-filter"){const query=event.target.value.toLowerCase();document.querySelectorAll("[data-storage-name]").forEach(row=>row.hidden=!row.dataset.storageName.includes(query));}});
+  document.addEventListener("input",event=>{if(event.target.id==="storage-name-filter"){storageFilter=event.target.value;$("#storage-table").innerHTML=storageTable();}});
   document.addEventListener("change",event=>{if(event.target.dataset.storageSelect!==undefined){const item=listing[Number(event.target.dataset.storageSelect)];if(event.target.checked)storageSelected.set(item.uri,item);else storageSelected.delete(item.uri);}});
   async function handle(name,value) {
     if(name==='admin-access')return navigate({access_kind:value,access_page:1,access_euid:null});
@@ -259,6 +317,18 @@
     if(name==="save-paper"){const result=await api("/api/v1/literature/save","POST",{pmid:value,save_mode:"external_reference",visibility_scope:"all_users",allowed_users:[],allowed_groups:[]});notice("Paper registered with EUID "+result.artifact.artifact_euid);return render();}
     if(name==="page")return navigate({page:value});
     if(name==="storage-next")return moreStorage(value);
+    if(name==="storage-sort"){
+      if(!storageColumns.some(([key])=>key===value))return;
+      storageSort={key:value,direction:storageSort.key===value&&storageSort.direction==="ascending"?"descending":"ascending"};
+      $("#storage-table").innerHTML=storageTable();
+      document.querySelector(`[data-storage-sort-focus="${value}"]`).focus();
+      return;
+    }
+    if(name==="storage-export")return exportStorageView();
+    if(name==="storage-copy"){
+      await navigator.clipboard.writeText(listing[Number(value)].uri);
+      notice("S3 URI copied.");return;
+    }
     if(name==="section-more"){const next=JSON.parse(value);return loadSection(next.name,next.page);}
     if(name==="counts"){const result=await api("/api/v1/registry/search/counts","POST",libraryQuery);$("#exact-total").textContent=`${result.total.toLocaleString()} total accessible records`;return;}
     if(name==="refresh"){refreshNext=true;return navigate({token:null,page:1});}
@@ -292,7 +362,7 @@
     if(name==="filters"){modal(`<h2>Advanced metadata filters</h2><form id="filters-form">${area("filters","JSON filters",params().get("filters")||"[]","Use paths such as metadata.project, producer_system, or storage_kind. Operators: eq, neq, contains, in, exists, gte, lte.")}<button class="primary">Apply</button></form>`);$("#filters-form").onsubmit=event=>{event.preventDefault();safe(async()=>{const filters=JSON.parse(values(event.target).filters);if(!Array.isArray(filters))throw Error("Filters must be a JSON array");dialog.close();await navigate({filters:JSON.stringify(filters),page:1});});};return;}
     if(name==="share-edit") return window.DeweySharing.editor(current.target_euid,current);
   }
-  async function render(){const activeGeneration=++generation;readControllers.forEach(controller=>controller.abort());readControllers.clear();inFlightReads.clear();loadedStorage=null;storageLoading=false;content.setAttribute("aria-busy","true");try{if(["Library","Sets","Sharing"].includes(section))await library();else if(section==="Record")await record();else if(section==="S3 Browser")await storage();else if(section==="Add")await add();else if(section==="Share")await sharePage();else if(section==="Account")await account();else if(section==="Literature")await literature();else if(section==="Admin")await administration();}finally{if(activeGeneration===generation)content.setAttribute("aria-busy","false");}}
+  async function render(){const activeGeneration=++generation;readControllers.forEach(controller=>controller.abort());readControllers.clear();inFlightReads.clear();loadedStorage=null;storageLoading=false;storageFilter="";content.setAttribute("aria-busy","true");try{if(["Library","Sets","Sharing"].includes(section))await library();else if(section==="Record")await record();else if(section==="S3 Browser")await storage();else if(section==="Add")await add();else if(section==="Share")await sharePage();else if(section==="Account")await account();else if(section==="Literature")await literature();else if(section==="Admin")await administration();}finally{if(activeGeneration===generation)content.setAttribute("aria-busy","false");}}
   async function safe(fn){try{await fn();}catch(error){if(error.name==="AbortError")return;notice(error.message||"Dewey could not complete this operation.",true);if(dialog.open){let n=$(".dialog-error",editor);if(!n){n=document.createElement("p");n.className="dialog-error";n.setAttribute("role","alert");editor.prepend(n);}n.textContent=error.message;}if(content.textContent.trim()==="Loading…")content.innerHTML='<section class="panel"><h2>Unable to load this view</h2><p>See the error above. You can use the navigation to return to the Library.</p></section>';}}
   document.addEventListener("click",event=>{const button=event.target.closest("[data-action]");if(button){event.preventDefault();safe(()=>handle(button.dataset.action,button.dataset.value));}});
   document.addEventListener("change",event=>{if(event.target.dataset.select){if(event.target.checked)selected.add(event.target.dataset.select);else selected.delete(event.target.dataset.select);}});

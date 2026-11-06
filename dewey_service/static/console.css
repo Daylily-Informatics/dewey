@@ -1993,3 +1993,21 @@ html[data-theme="viridis-dark"] .lsmc-action-help-panel {
   color: var(--lsmc-dashboard-text) !important;
   border-color: var(--lsmc-dashboard-border) !important;
 }
+
+/* Responsive shared console, authentication and observability surfaces. */
+.shell,.page,.panel,.content-grid>*,.form-grid>*,.explorer-layout>*,.table-wrap,.stack{min-width:0;max-width:100%}
+.brandline,.navlinks,.footer-grid>*,.panel-copy,.mono,.json-block,.long-value{min-width:0;overflow-wrap:anywhere}
+.topbar,.navlinks,.form-actions,.action-cluster{flex-wrap:wrap}
+.table-wrap{overflow-x:auto}pre{max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:760px){
+  .topbar{position:static;padding:1rem}.page,.page-footer{padding:1rem}
+  .content-grid,.form-grid,.explorer-layout,.artifact-detail-grid{grid-template-columns:minmax(0,1fr)!important}
+  .navlinks,.form-actions,.action-cluster{min-width:0;max-width:100%;gap:.5rem}
+  .button,button,.navlink,summary,input:not([type=checkbox]),select{min-height:44px}
+  input,select,textarea{min-width:0;max-width:100%;font-size:16px}
+  .panel{padding:1rem}.title{overflow-wrap:anywhere}
+  .kv-table{table-layout:fixed}.kv-table th{width:35%}.kv-table td{overflow-wrap:anywhere}
+  .shell>.page[style]>.panel[style]{padding:1rem!important;grid-template-columns:minmax(0,1fr)!important;gap:1rem!important}
+  .shell>.page[style]>.panel>.panel[style]{padding:1rem!important}
+  dialog{max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px)}
+}

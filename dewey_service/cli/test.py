@@ -5,7 +5,7 @@ from __future__ import annotations
 import importlib.util
 import subprocess
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Annotated
 
 if TYPE_CHECKING:
     from cli_core_yo.registry import CommandRegistry
@@ -21,9 +21,12 @@ test_app = typer.Typer(help="Test commands")
 _PYTEST_PASSTHROUGH = {"allow_extra_args": True, "ignore_unknown_options": True}
 
 
-def _pytest_passthrough_args(ctx: typer.Context, default_args: list[str]) -> list[str]:
-    """Return passthrough pytest arguments or a default invocation."""
-    return list(ctx.args) if ctx.args else list(default_args)
+def _pytest_passthrough_args(
+    ctx: typer.Context, default_args: list[str], explicit_args: list[str] | None = None
+) -> list[str]:
+    """Preserve registered positional arguments and standalone Typer passthrough."""
+    args = [*(explicit_args or []), *ctx.args]
+    return args or list(default_args)
 
 
 def _require_pytest_cov() -> None:
@@ -37,9 +40,12 @@ def _require_pytest_cov() -> None:
 @test_app.command("run", context_settings=_PYTEST_PASSTHROUGH)
 def run_tests(
     ctx: typer.Context,
+    pytest_args: Annotated[
+        list[str] | None, typer.Argument(help="Pytest arguments; precede pytest options with --.")
+    ] = None,
 ) -> None:
     """Run the Dewey test suite."""
-    args = _pytest_passthrough_args(ctx, ["-q"])
+    args = _pytest_passthrough_args(ctx, ["-q"], pytest_args)
     proc = subprocess.run(
         [sys.executable, "-m", "pytest", *args],
         cwd=PROJECT_ROOT,
@@ -53,6 +59,9 @@ def run_tests(
 def run_coverage(
     ctx: typer.Context,
     html: bool = typer.Option(False, "--html", help="Generate HTML coverage report"),
+    pytest_args: Annotated[
+        list[str] | None, typer.Argument(help="Pytest arguments; precede pytest options with --.")
+    ] = None,
 ) -> None:
     """Run the Dewey test suite with coverage assessment."""
     _require_pytest_cov()
@@ -60,7 +69,7 @@ def run_coverage(
     cmd = [sys.executable, "-m", "pytest", "--cov=dewey_service", "--cov-report=term-missing"]
     if html:
         cmd.append("--cov-report=html:htmlcov")
-    cmd.extend(_pytest_passthrough_args(ctx, []))
+    cmd.extend(_pytest_passthrough_args(ctx, [], pytest_args))
 
     proc = subprocess.run(cmd, cwd=PROJECT_ROOT, env=project_subprocess_env(), check=False)
     if html and proc.returncode == 0:

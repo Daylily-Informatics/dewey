@@ -1,0 +1,77 @@
+{
+  "service": "dewey",
+  "version": "12.0.20",
+  "source_commit": "4841fe2cd80a491d1f9cfaf7299876e1052db21b",
+  "source_branch": "codex/dewey-token-governance-20261029",
+  "target_instance": "i-07df3a933e4839f52",
+  "region": "us-west-2",
+  "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:aff4ada01eb30b20b5c795b2a5b721d81069f8487baa1d04c9ae01ac5d081470",
+  "build": {
+    "exit_code": 0,
+    "started_at": "2026-11-03T09:12:59.648539+00:00",
+    "finished_at": "2026-11-03T09:15:45.286108+00:00"
+  },
+  "deploy": {
+    "exit_code": 0,
+    "started_at": "2026-11-03T09:16:05.468994+00:00",
+    "finished_at": "2026-11-03T09:16:08.878760+00:00",
+    "native_command": "docker compose -p dayhoff-day -f /opt/dayhoff/deployments/day/compose/docker-compose.yml up -d --no-deps --no-build --pull never dewey"
+  },
+  "focused_tests": {
+    "behavior_groups": 4,
+    "passed": 5,
+    "failed": 0
+  },
+  "browser_acceptance": {
+    "manager_footer": "Dewey 12.0.20",
+    "view_report_href": "https://dewey.day.lsmc.bio/fetch/M-DGX-1GR61/DAY_final_multiqc.html",
+    "bundle_root_prompt": false,
+    "affected_report": "Final LSMC MultiQC Report index rendered; current object-only share still omits sidecar assets",
+    "r60_url": "https://dewey.day.lsmc.bio/fetch/M-DGX-1CBMT",
+    "r60_rendered": [
+      "HG002 matrix",
+      "Publication R60",
+      "74 / 74 configuration rows",
+      "Active Table PDF",
+      "Full Matrix TSV"
+    ],
+    "normal_management_session_restored": true
+  },
+  "shares_modified": false,
+  "network_security_modified": false,
+  "publication_repair_proposal": {
+    "approved": false,
+    "executed": false,
+    "share_euid": "M-DGX-1GR61",
+    "current_object_target": "M-DGX-1GR37",
+    "proposed_prefix_uri": "s3://lsmc-ssf-sequencing-data/derived/ultima-solo/20261015/pclu-2100/ultima-solo-602218-20261015t144000z/daylily-omics-analysis/results/day/hg38_broad/reports/",
+    "include_patterns": [
+      "DAY_final_multiqc.html",
+      "DAY_final_multiqc_files/**",
+      "DAY_final_multiqc_data/**",
+      "DAY_final_multiqc.bundle.json"
+    ],
+    "report_entrypoint": "DAY_final_multiqc.html",
+    "report_bundle_root": "",
+    "preserve_recipient": {
+      "type": "domain",
+      "value": "lsmc.com",
+      "include_subdomains": false,
+      "share_expires_at": null,
+      "grant_expires_at": null
+    },
+    "asset_upload_needed": false,
+    "future_descendants": "Only matching descendants of the two explicitly selected bundle prefixes; exclude unrelated reports/logs/input manifests."
+  },
+  "bookkeeping_publication": {
+    "status": "denied_not_executed",
+    "reason": "Automatic approval review rejected a separate follow-up documentation commit/push as lacking specific authorization for an additional external Git commitment. No retry performed; records retained locally."
+  },
+  "historical_receipt_context": {
+    "as_of": "2026-11-03T09:16:08.878760Z",
+    "later_state": "The completed 12.0.25 MultiQC repair and acceptance are recorded in 20261103T085155Z_report_share_view_ledger.md. This receipt preserves the earlier 12.0.20 state.",
+    "publication_authorized_at": "2026-11-06 16:11:00 UTC",
+    "release": "12.0.27",
+    "authority": "User requested all deployed Dewey changes and ready local work pushed to GitHub in a new tagged deployment."
+  }
+}

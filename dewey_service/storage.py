@@ -58,6 +58,7 @@ class StorageObject:
 class StoragePrefix:
     bucket: str
     prefix: str
+    marker_last_modified: str | None = None
 
 
 class S3StorageClient:
@@ -396,14 +397,25 @@ class S3StorageClient:
             )
         except self._client_error as exc:
             raise self._translate_error(exc, bucket=bucket, key=prefix) from exc
+        # Reuse only exact, zero-byte directory markers in this listing page.
+        # CommonPrefixes alone has no timestamp; never inspect descendants or HEAD markers.
+        marker_dates = {
+            str(item["Key"]): item["LastModified"].isoformat()
+            for item in response.get("Contents", [])
+            if str(item.get("Key") or "").endswith("/")
+            and item.get("Size") == 0
+            and item.get("LastModified") is not None
+        }
         prefixes = [
             StoragePrefix(
                 bucket=bucket,
                 prefix=str(item.get("Prefix") or ""),
+                marker_last_modified=marker_dates.get(str(item.get("Prefix") or "")),
             )
             for item in response.get("CommonPrefixes", [])
             if item.get("Prefix") is not None
         ]
+        prefix_keys = {item.prefix for item in prefixes}
         objects = [
             StorageObject(
                 bucket=bucket,
@@ -413,9 +425,14 @@ class S3StorageClient:
                 content_type=None,
                 storage_class=item.get("StorageClass"),
                 etag=str(item.get("ETag") or "").strip('"') or None,
+                last_modified=item["LastModified"].isoformat()
+                if item.get("LastModified") is not None
+                else None,
             )
             for item in response.get("Contents", [])
-            if item.get("Key") is not None and str(item["Key"]) != prefix
+            if item.get("Key") is not None
+            and str(item["Key"]) != prefix
+            and str(item["Key"]) not in prefix_keys
         ]
         return {
             "prefixes": prefixes,

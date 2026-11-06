@@ -128,3 +128,34 @@ def test_run_coverage_builds_pytest_cov_command(monkeypatch: pytest.MonkeyPatch)
         ]
     ]
     assert success_messages == ["HTML report: htmlcov/index.html"]
+
+
+@pytest.mark.parametrize("command, arguments, expected", [
+    ("run", ["tests/test_storage_unit.py"], ["tests/test_storage_unit.py"]),
+    ("run", ["--", "tests/test_storage_unit.py", "-q", "-p", "no:cacheprovider"],
+     ["tests/test_storage_unit.py", "-q", "-p", "no:cacheprovider"]),
+    ("cov", ["tests/test_storage_unit.py"],
+     ["--cov=dewey_service", "--cov-report=term-missing", "tests/test_storage_unit.py"]),
+    ("cov", ["--html", "--", "tests/test_storage_unit.py", "-q"],
+     ["--cov=dewey_service", "--cov-report=term-missing", "--cov-report=html:htmlcov",
+      "tests/test_storage_unit.py", "-q"]),
+])
+def test_registered_cli_forwards_pytest_arguments_and_exit_code(monkeypatch, command, arguments, expected):
+    from cli_core_yo.registry import CommandRegistry
+    from typer.testing import CliRunner
+
+    registry = CommandRegistry()
+    test_cli.register(registry, SimpleNamespace())
+    app = typer.Typer()
+    registry.apply(app)
+    calls = []
+    monkeypatch.setattr(test_cli.importlib.util, "find_spec", lambda name: object())
+
+    def fake_run(cmd, **kwargs):
+        calls.append(cmd)
+        return _proc(7)
+
+    monkeypatch.setattr(test_cli.subprocess, "run", fake_run)
+    result = CliRunner().invoke(app, ["test", command, *arguments])
+    assert result.exit_code == 7, result.output
+    assert calls == [[sys.executable, "-m", "pytest", *expected]]
