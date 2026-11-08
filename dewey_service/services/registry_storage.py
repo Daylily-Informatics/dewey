@@ -7,11 +7,14 @@ from dataclasses import asdict
 
 from daylily_tapdb import generic_instance, generic_instance_lineage
 from fastapi import HTTPException
-from sqlalchemy import and_, func, literal, or_
+from sqlalchemy import and_, exists, func, literal, or_, select
+from sqlalchemy.orm import aliased
 
 from dewey_service.deletion_policy import reject_deletion
 from dewey_service.registry_access import (
     OPERATION_TEMPLATE,
+    direct_record_clause,
+    maintenance_mode,
     principal,
     record_clause,
 )
@@ -32,6 +35,120 @@ def parse_s3_uri(uri: str, *, prefix: bool = False):
 
 
 class RegistryStorageServiceMixin:
+    def _storage_record_access_batch(self, session, query, action):
+        """Evaluate canonical grants once over a phase-local ancestor closure.
+
+        Both CTEs are materialized in one PostgreSQL statement/snapshot. Only
+        original template-selected targets are returned; other artifact rows are
+        inputs to the same alias/ancestor rules as record_clause, never targets.
+        Audience/owner JSON and SQL NULL semantics remain evaluated by SQL.
+        """
+        if principal().admin or maintenance_mode():
+            return query.with_entities(
+                generic_instance, direct_record_clause(session, generic_instance, action)
+            ).all()
+
+        targets = query.with_entities(
+            generic_instance.uid,
+            generic_instance.domain_code,
+            generic_instance.issuer_app_code,
+            generic_instance.json_addl["bucket"].astext.label("bucket"),
+            generic_instance.json_addl["key"].astext.label("key"),
+        ).cte("storage_access_targets").prefix_with("MATERIALIZED")
+        key = generic_instance.json_addl["key"].astext
+        relevant_to_target = exists(
+            select(literal(1)).select_from(targets).where(
+                targets.c.domain_code == generic_instance.domain_code,
+                targets.c.issuer_app_code == generic_instance.issuer_app_code,
+                targets.c.bucket == generic_instance.json_addl["bucket"].astext,
+                or_(
+                    targets.c.key == key,
+                    and_(
+                        generic_instance.json_addl["storage_kind"].astext == "prefix",
+                        func.left(targets.c.key, func.length(key)) == key,
+                    ),
+                ),
+            )
+        ).correlate(generic_instance)
+        relevant = session.query(generic_instance).filter(
+            or_(
+                generic_instance.uid.in_(select(targets.c.uid)),
+                and_(
+                    generic_instance.type == "artifact",
+                    generic_instance.is_deleted.is_(False),
+                    generic_instance.json_addl["storage_backend"].astext == "s3",
+                    relevant_to_target,
+                ),
+            )
+        ).cte("storage_access_relevant").prefix_with("MATERIALIZED")
+        record = aliased(generic_instance, relevant)
+        policy = aliased(generic_instance)
+        edge = aliased(generic_instance_lineage)
+        explicitly_restricted = exists(
+            select(literal(1)).select_from(edge).join(
+                policy, policy.uid == edge.child_instance_uid
+            ).where(
+                edge.parent_instance_uid == record.uid,
+                edge.relationship_type == "registry_policy",
+                edge.is_deleted.is_(False),
+                policy.is_deleted.is_(False),
+                # Intentionally no policy.type filter, matching record_clause.
+                policy.json_addl["explicit_restriction"].astext == "true",
+            )
+        ).correlate(record)
+        columns = [
+            record,
+            record.json_addl["bucket"].astext.label("bucket"),
+            record.json_addl["key"].astext.label("key"),
+            record.json_addl["storage_kind"].astext.label("kind"),
+            record.bstatus.label("status"),
+            record.domain_code.label("domain"),
+            record.issuer_app_code.label("issuer"),
+            direct_record_clause(session, record, action).label("direct_allowed"),
+            explicitly_restricted.label("restricted"),
+            record.uid.in_(select(targets.c.uid)).label("is_target"),
+        ]
+        veto_action = "download" if action == "download" else "metadata"
+        if veto_action != action:
+            columns.append(direct_record_clause(session, record, veto_action).label("veto_allowed"))
+        rows = session.query(*columns).all()
+
+        def related(parent, child):
+            # SQL equality on NULL tenant/issuer never produces a match. Use
+            # textual SQL-extracted coordinates, not JSON/Python coercion.
+            return (
+                parent[0].uid != child[0].uid
+                and parent.domain is not None and parent.domain == child.domain
+                and parent.issuer is not None and parent.issuer == child.issuer
+                and parent.bucket is not None and parent.bucket == child.bucket
+                and parent.key is not None and child.key is not None
+                and (parent.key == child.key or (
+                    parent.kind == "prefix" and child.key.startswith(parent.key)
+                ))
+            )
+
+        results = []
+        for row in rows:
+            if not row.is_target:
+                continue
+            ancestors = [parent for parent in rows if related(parent, row)]
+            allowed = row.direct_allowed is True
+            if action in {"metadata", "download"}:
+                allowed = allowed or (
+                    row.status is not None and row.status != "archived"
+                    and not row.restricted
+                    and any(parent.kind == "prefix" and parent.direct_allowed is True
+                            for parent in ancestors)
+                )
+            denied = any(
+                (parent.status == "archived" or parent.restricted)
+                # NOT NULL is NULL, not TRUE: only SQL FALSE grants veto here.
+                and (parent.direct_allowed if veto_action == action else parent.veto_allowed) is False
+                for parent in ancestors
+            )
+            results.append((row[0], bool(allowed and not denied)))
+        return results
+
     def _storage_locations_batch(self, session, locations, *, action="metadata"):
         """Evaluate each relevant registered ancestor once, preserving the SQL policy contract."""
         actor = principal()
@@ -67,9 +184,7 @@ class RegistryStorageServiceMixin:
         query = self._registry_query(session, scopes=("artifact",), authorize=False).filter(
             generic_instance.json_addl["storage_backend"].astext == "s3", or_(*paths)
         )
-        records = query.with_entities(
-            generic_instance, record_clause(session, generic_instance, action_key)
-        ).all()
+        records = self._storage_record_access_batch(session, query, action_key)
         policies = {}
         if records and not actor.admin:
             # Policy objects themselves have no independent registry visibility restriction.
