@@ -39,3 +39,14 @@ The current image/Compose has no Docker healthcheck, so native Compose wait esta
 ## Status
 
 Implementation and source review complete. Source publication, EC2 build, deployment and application readiness remain pending. Release provenance and native outcomes will be appended after completion.
+
+
+## Deployment completion, 2026-11-08 13:16 UTC
+
+- Published branch and annotated immutable tag `12.0.28` at `c380e302eb2a0baa1f0e6109a6b94afb3f54cbe2`.
+- Native Dewey-only EC2 build exited 0, 13:13:04–13:15:27 UTC. Image digest: `sha256:ea16bc51e3d44db9ca7959a0bb8f122426fc1f664e77408745262f11dec21944`.
+- Selected Compose update exited 0, 13:15:59–13:16:03 UTC. No dependencies, builds, pulls or sibling restarts were requested. Preexisting orphan-container warning was informational; no cleanup was performed.
+- One application readiness request at 13:16:38 UTC returned HTTP 200, `ready=true`, exact version/commit, database status `ok` with 24.137 ms probe latency, and verified sharing schema. No further success recheck was run.
+- Prior Compose and manifest are retained in the private EC2 release directory. Build/deployment logs and the named tmux session are retained there as well.
+- Implementation and deployment are complete. Actual registration throughput remains unmeasured. The publication owner may resume its existing authorized work against this release and use resulting receipts to quantify latency.
+- Structured receipt: [deployment](20261108T131500Z_registration_performance_deployment.json). The release tag remains on the source commit; this later receipt does not move it.

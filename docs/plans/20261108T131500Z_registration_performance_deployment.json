@@ -1,0 +1,50 @@
+{
+  "service": "dewey",
+  "deployment": "day",
+  "version": "12.0.28",
+  "source_commit": "c380e302eb2a0baa1f0e6109a6b94afb3f54cbe2",
+  "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:ea16bc51e3d44db9ca7959a0bb8f122426fc1f664e77408745262f11dec21944",
+  "build": {
+    "exit_code": 0,
+    "started_at": "2026-11-08T13:13:04.549021+00:00",
+    "finished_at": "2026-11-08T13:15:27.999131+00:00"
+  },
+  "deploy": {
+    "exit_code": 0,
+    "started_at": "2026-11-08T13:15:59.160479+00:00",
+    "finished_at": "2026-11-08T13:16:03.171857+00:00",
+    "scope": "Dewey only, no dependencies, no build or pull during Compose update"
+  },
+  "readiness": {
+    "http_status": 200,
+    "observed_at": "2026-11-08T13:16:38.891045+00:00",
+    "status": "ok",
+    "ready": true,
+    "version": "12.0.28",
+    "sha": "c380e302eb2a0baa1f0e6109a6b94afb3f54cbe2",
+    "database_status": "ok",
+    "database_latency_ms": 24.137,
+    "sharing_schema": "verified",
+    "observation_count": 1
+  },
+  "tests_lint_coverage_ci": "Not run per user release policy",
+  "registration_speedup": "Not measured; observe normal resumed publication without synthetic load",
+  "ec2_instance": "i-07df3a933e4839f52",
+  "region": "us-west-2",
+  "release_work_dir": "/home/ubuntu/dewey-registration-performance-12.0.28-20261108",
+  "rollback_inputs": [
+    "previous-compose.yml",
+    "previous-manifest.json"
+  ],
+  "remote_logs": [
+    "/home/ubuntu/dewey-registration-performance-12.0.28-build-20261108.log",
+    "/home/ubuntu/dewey-registration-performance-12.0.28-deploy-20261108.log",
+    "/home/ubuntu/dewey-registration-performance-12.0.28-readiness-20261108.json"
+  ],
+  "retained_tmux_session": "dewey-registration-12-0-28-20261108",
+  "notes": [
+    "No pool, schema/index, credential, permission or sibling-service changes.",
+    "Compose warned about three preexisting dewey-performance-settings orphan containers; they were left untouched.",
+    "Source tag is immutable; this receipt is a later branch-only documentation commit."
+  ]
+}
