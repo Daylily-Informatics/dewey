@@ -88,12 +88,16 @@ def relative_asset(document, reference, *, required):
     return result
 
 
-def inspect_bundle(key, read_document, require_asset, registered_bundle=None, *, declared_multiqc=False):
+def inspect_bundle(key, read_document, require_asset, registered_bundle=None, *, declared_multiqc=False, prepare_batch=None):
     """Read only declared HTML/CSS and inspect each referenced exact asset once.
 
     The callbacks retain the owning service's authorization and storage controls.
     Report-specific *_files/*_data directories may include future descendants;
     generic asset directories are represented by exact declared paths only.
+    Optional prepare_batch receives each discovered frontier as (exact key,
+    head_only) pairs before the read/HEAD callbacks consume it. It may arrange
+    lazy batched authorization or prefetch; the consuming callbacks must enforce
+    authorization before every read and must not discover additional objects.
     """
     original_read = read_document
     cache = {}
@@ -102,6 +106,8 @@ def inspect_bundle(key, read_document, require_asset, registered_bundle=None, *,
             cache[path] = original_read(path)
         return cache[path]
 
+    if prepare_batch is not None:
+        prepare_batch([(key, False)])
     source, source_etag = read_document(key)
     source_parser = _References()
     source_parser.feed(source[:MAX_DOCUMENT_BYTES].decode("utf-8-sig", errors="replace"))
@@ -132,6 +138,8 @@ def inspect_bundle(key, read_document, require_asset, registered_bundle=None, *,
                        if (resolved := relative_asset(key, ref, required=necessary)) in possible), None)
         if not parent:
             continue
+        if prepare_batch is not None:
+            prepare_batch([(parent, False)])
         index, index_etag = read_document(parent)
         index_parser = _References()
         index_parser.feed(index[:MAX_DOCUMENT_BYTES].decode("utf-8-sig", errors="replace"))
@@ -142,8 +150,9 @@ def inspect_bundle(key, read_document, require_asset, registered_bundle=None, *,
         relative = key[len(owner_root):]
         if not (parent_bundle and parent_bundle["source_etag"] == index_etag
                 and relative in parent_bundle["required_assets"]):
-            parent_bundle = inspect_bundle(parent, read_document, require_asset)
+            parent_bundle = inspect_bundle(parent, read_document, require_asset, prepare_batch=prepare_batch)
         from dewey_service.services.share_policy import selected
+        extra_assets = []
         for reference, necessary in source_parser.references:
             asset = relative_asset(relative, reference, required=necessary)
             if asset is None:
@@ -151,7 +160,11 @@ def inspect_bundle(key, read_document, require_asset, registered_bundle=None, *,
             if not selected(asset, parent_bundle["include_patterns"], []):
                 raise ValueError("MultiQC section dependency is outside its validated parent bundle: " + asset)
             if asset not in parent_bundle["required_assets"] and asset != parent_bundle["entrypoint"]:
-                require_asset(owner_root + asset)
+                extra_assets.append(owner_root + asset)
+        if prepare_batch is not None:
+            prepare_batch([(asset, True) for asset in extra_assets])
+        for asset in extra_assets:
+            require_asset(asset)
         required = set(parent_bundle["required_assets"]) | {parent_bundle["entrypoint"]}
         required.discard(relative)
         return {**parent_bundle, "source_key": key, "source_etag": source_etag,
@@ -167,42 +180,51 @@ def inspect_bundle(key, read_document, require_asset, registered_bundle=None, *,
     source_etag = None
     detected = False
     while documents:
-        document = documents.pop(0)
-        if document in seen_documents:
-            continue
-        seen_documents.add(document)
-        raw, etag = read_document(root + document)
-        if len(raw) > MAX_DOCUMENT_BYTES:
-            raise ValueError("MultiQC document exceeds the supported 64 MiB inspection limit")
-        text = raw.decode("utf-8-sig")
-        references = []
-        if document.lower().endswith((".html", ".htm")):
-            parser = _References()
-            parser.feed(text)
-            references = parser.references
-            if document == entrypoint:
-                detected = parser.multiqc or (declared_multiqc and parser.html_markup)
-                source_etag = etag
-                if not detected:
-                    raise NotMultiQCReport("The selected HTML is not identified as a MultiQC report")
-            if parser.errors:
-                raise ValueError(parser.errors[0])
-        else:
-            references = [(a or b or c, True) for a, b, c in re.findall(
-                r"url\(\s*(?:'([^']*)'|\"([^\"]*)\"|([^)'\"]+))\s*\)", text)]
-        for reference, necessary in references:
-            asset = relative_asset(document, reference, required=necessary)
-            if asset is None or asset == entrypoint or asset in required:
+        wave, documents = documents, []
+        frontier = []
+        assets = []
+        for document in wave:
+            if document in seen_documents:
                 continue
-            if asset.lower().endswith((".html", ".htm")) and asset.split("/", 1)[0] not in owned_directories:
-                raise ValueError("MultiQC bundle links a different report outside its report-specific assets")
-            required.add(asset)
-            if len(required) > MAX_DEPENDENCIES:
-                raise ValueError("MultiQC bundle exceeds the supported dependency inventory")
-            if asset.lower().endswith((".html", ".htm", ".css")):
-                documents.append(asset)
+            seen_documents.add(document)
+            raw, etag = read_document(root + document)
+            if len(raw) > MAX_DOCUMENT_BYTES:
+                raise ValueError("MultiQC document exceeds the supported 64 MiB inspection limit")
+            text = raw.decode("utf-8-sig")
+            references = []
+            if document.lower().endswith((".html", ".htm")):
+                parser = _References()
+                parser.feed(text)
+                references = parser.references
+                if document == entrypoint:
+                    detected = parser.multiqc or (declared_multiqc and parser.html_markup)
+                    source_etag = etag
+                    if not detected:
+                        raise NotMultiQCReport("The selected HTML is not identified as a MultiQC report")
+                if parser.errors:
+                    raise ValueError(parser.errors[0])
             else:
-                require_asset(root + asset)
+                references = [(a or b or c, True) for a, b, c in re.findall(
+                    r"url\(\s*(?:'([^']*)'|\"([^\"]*)\"|([^)'\"]+))\s*\)", text)]
+            for reference, necessary in references:
+                asset = relative_asset(document, reference, required=necessary)
+                if asset is None or asset == entrypoint or asset in required:
+                    continue
+                if asset.lower().endswith((".html", ".htm")) and asset.split("/", 1)[0] not in owned_directories:
+                    raise ValueError("MultiQC bundle links a different report outside its report-specific assets")
+                required.add(asset)
+                if len(required) > MAX_DEPENDENCIES:
+                    raise ValueError("MultiQC bundle exceeds the supported dependency inventory")
+                if asset.lower().endswith((".html", ".htm", ".css")):
+                    documents.append(asset)
+                    frontier.append((root + asset, False))
+                else:
+                    assets.append(root + asset)
+                    frontier.append((root + asset, True))
+        if prepare_batch is not None:
+            prepare_batch(frontier)
+        for asset in assets:
+            require_asset(asset)
     patterns = {entrypoint}
     for asset in required:
         directory = asset.split("/", 1)[0]

@@ -155,7 +155,7 @@ class RegistryServiceMixin(ReportBundleServiceMixin, AccessAdministrationMixin, 
             self.storage.listing_cache.invalidate()
         return result
 
-    def register_registry(self, data: dict[str, Any], *, idempotency_key: str):
+    def register_registry(self, data: dict[str, Any], *, idempotency_key: str, token_request=None):
         """Register one explicit object, prefix, or set; never discover members."""
         from urllib.parse import urlsplit
 
@@ -187,14 +187,91 @@ class RegistryServiceMixin(ReportBundleServiceMixin, AccessAdministrationMixin, 
             raise ValueError("metadata must be a JSON object")
         name = str(data.get("name") or "").strip()
         fingerprint = self._fingerprint(data)
-        with self.backend.session_scope(commit=True) as session:
-            replay = self._idempotency_replay(
-                session,
-                operation="registry.register",
-                idempotency_key=idempotency_key,
+        payload = None
+        inspected_payload = None
+        observations = None
+        if kind != "set":
+            if data.get("member_euids"):
+                raise ValueError("Only sets accept member_euids")
+            uri = data.get("uri")
+            if not isinstance(uri, str):
+                raise ValueError("An explicit S3 or HTTP(S) URI is required")
+            if uri.startswith("s3://"):
+                bucket, key, uri = parse_s3_uri(uri, prefix=kind == "prefix")
+                if kind == "object" and not key:
+                    raise ValueError("An object requires an exact S3 key")
+                backend = "s3"
+            else:
+                parsed = urlsplit(uri)
+                if (
+                    kind != "object"
+                    or parsed.scheme not in {"http", "https"}
+                    or not parsed.netloc
+                    or parsed.username
+                    or parsed.password
+                ):
+                    raise ValueError(
+                        "URL references require an HTTP(S) object URL without embedded credentials"
+                    )
+                backend, bucket, key = (
+                    parsed.scheme,
+                    parsed.netloc,
+                    parsed.path + ("?" + parsed.query if parsed.query else ""),
+                )
+            payload = {
+                "storage_kind": kind,
+                "node_kind": "folder" if kind == "prefix" else "file",
+                "is_terminal": kind == "object",
+                "artifact_type": data.get("artifact_type") or kind,
+                "storage_backend": backend,
+                "bucket": bucket,
+                "key": key,
+                "storage_uri": uri,
+                "source_uri": uri,
+                "version_id": data.get("version_id"),
+                "metadata": metadata,
+                "description": data.get("description"),
+                "original_filename": name or key.rstrip("/").rpartition("/")[2] or bucket,
+                "producer_system": data.get("producer_system") or "dewey",
+                "checksums": {},
+                "storage_status": "registered",
+                "import_mode": "register",
+            }
+            payload["artifact_identity_key"] = self._artifact_identity_key(payload)
+        from dewey_service.multiqc_bundle import html_candidate
+
+        def audit_success(session, code):
+            if token_request is not None and actor.token_euid:
+                self.record_token_request(actor, **token_request, status_code=code, session=session)
+
+        def replay_registration(session):
+            # Serialize the receipt as well as the storage identity, including
+            # concurrent requests that reuse a key for different coordinates.
+            self.backend.lock_external_key(
+                session, operation="registry.register", key=str(idempotency_key or "").strip()
+            )
+            return self._idempotency_replay(
+                session, operation="registry.register", idempotency_key=idempotency_key,
                 fingerprint=fingerprint,
             )
+
+        if payload is not None and html_candidate(payload):
+            # A completed retry must not re-download a report or require its
+            # original bytes to remain available. No session survives this block.
+            with self.backend.session_scope(commit=True) as session:
+                replay = replay_registration(session)
+                if replay is not None:
+                    audit_success(session, replay.status_code)
+                    return replay.status_code, replay.response
+                self.require_storage_access(
+                    payload["bucket"], payload["key"], action="metadata", session=session
+                )
+            observations = {}
+            inspected_payload = self._prepare_multiqc_payload(None, payload, observations=observations)
+        with self.backend.session_scope(commit=True) as session:
+            replay = replay_registration(session)
             if replay is not None:
+                audit_success(session, replay.status_code)
                 return replay.status_code, replay.response
             if kind == "set":
                 if data.get("uri") or not name:
@@ -228,54 +305,11 @@ class RegistryServiceMixin(ReportBundleServiceMixin, AccessAdministrationMixin, 
                     )
                 code = 201
             else:
-                if data.get("member_euids"):
-                    raise ValueError("Only sets accept member_euids")
-                uri = data.get("uri")
-                if not isinstance(uri, str):
-                    raise ValueError("An explicit S3 or HTTP(S) URI is required")
-                if uri.startswith("s3://"):
-                    bucket, key, uri = parse_s3_uri(uri, prefix=kind == "prefix")
-                    if kind == "object" and not key:
-                        raise ValueError("An object requires an exact S3 key")
-                    backend = "s3"
-                    self.require_storage_access(bucket, key, action="metadata", session=session)
-                else:
-                    parsed = urlsplit(uri)
-                    if (
-                        kind != "object"
-                        or parsed.scheme not in {"http", "https"}
-                        or not parsed.netloc
-                        or parsed.username
-                        or parsed.password
-                    ):
-                        raise ValueError(
-                            "URL references require an HTTP(S) object URL without embedded credentials"
-                        )
-                    backend, bucket, key = (
-                        parsed.scheme,
-                        parsed.netloc,
-                        parsed.path + ("?" + parsed.query if parsed.query else ""),
+                if payload["storage_backend"] == "s3":
+                    self.require_storage_access(
+                        payload["bucket"], payload["key"], action="metadata", session=session
                     )
-                payload = {
-                    "storage_kind": kind,
-                    "node_kind": "folder" if kind == "prefix" else "file",
-                    "is_terminal": kind == "object",
-                    "artifact_type": data.get("artifact_type") or kind,
-                    "storage_backend": backend,
-                    "bucket": bucket,
-                    "key": key,
-                    "storage_uri": uri,
-                    "source_uri": uri,
-                    "version_id": data.get("version_id"),
-                    "metadata": metadata,
-                    "description": data.get("description"),
-                    "original_filename": name or key.rstrip("/").rpartition("/")[2] or bucket,
-                    "producer_system": data.get("producer_system") or "dewey",
-                    "checksums": {},
-                    "storage_status": "registered",
-                    "import_mode": "register",
-                }
-                payload["artifact_identity_key"] = self._artifact_identity_key(payload)
+                uri = payload["storage_uri"]
                 lock_key = int.from_bytes(
                     sha256((uri + "\0" + str(data.get("version_id") or "")).encode()).digest()[:8],
                     "big",
@@ -295,15 +329,18 @@ class RegistryServiceMixin(ReportBundleServiceMixin, AccessAdministrationMixin, 
                 )
                 for match in existing:
                     require_record(self.backend, session, match, "metadata")
+                if inspected_payload is not None:
+                    self._revalidate_multiqc_inspection(session, payload, inspected_payload, observations)
                 if existing:
                     record, code = existing[0], 200
-                    prepared = self._prepare_multiqc_payload(session, payload)
+                    prepared = inspected_payload if inspected_payload is not None else self._prepare_multiqc_payload(session, payload)
                     if prepared.get("report_bundle") != normalize_instance_payload(record).get("report_bundle"):
                         require_record(self.backend, session, record, "edit")
-                        self.backend.update_instance_json(session, record, {"report_bundle": prepared["report_bundle"]})
+                        self.backend.update_instance_json(session, record, {"report_bundle": prepared.get("report_bundle")})
                 else:
                     code, result = self._upsert_artifact_record(
-                        session, payload=payload, created_at=utc_now_iso()
+                        session, payload=inspected_payload if inspected_payload is not None else payload,
+                        created_at=utc_now_iso(), inspect_report=inspected_payload is None,
                     )
                     record = self._registry_record(session, result["artifact_euid"])
             body = self._registry_payload(session, record)
@@ -315,6 +352,7 @@ class RegistryServiceMixin(ReportBundleServiceMixin, AccessAdministrationMixin, 
                 status_code=code,
                 response=body,
             )
+            audit_success(session, code)
             return code, body
 
     def _registry_query(self, session, *, scopes=("artifact", "artifact_set"), authorize=True):

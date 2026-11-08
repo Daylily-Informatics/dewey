@@ -368,6 +368,7 @@ class ArtifactServiceMixin:
         payload: dict[str, Any],
         created_at: str | None = None,
         refresh_existing: bool = False,
+        inspect_report: bool = True,
     ) -> tuple[int, dict[str, Any]]:
         from daylily_tapdb import generic_instance
 
@@ -392,12 +393,17 @@ class ArtifactServiceMixin:
             "is_terminal": payload["storage_kind"] == "object",
         }
         if payload["storage_backend"] == "s3":
-            self.require_storage_access(payload["bucket"], payload["key"], action="metadata")
+            # Reuse the caller's transaction rather than acquiring a second pooled
+            # connection while the registration already holds one.
+            self.require_storage_access(
+                payload["bucket"], payload["key"], action="metadata", session=session
+            )
         if payload["storage_backend"] == "s3":
             from dewey_service.services.share_rebind import lock_storage_coordinate
 
             lock_storage_coordinate(session, payload["storage_uri"], payload.get("version_id"))
-        payload = self._prepare_multiqc_payload(session, payload)
+        if inspect_report:
+            payload = self._prepare_multiqc_payload(session, payload)
         self.backend.lock_external_key(
             session, operation="artifact.identity", key=payload["artifact_identity_key"]
         )

@@ -14,7 +14,7 @@ from typing import Any
 
 from fastapi import HTTPException, Request
 from fastapi.security.utils import get_authorization_scheme_param
-from sqlalchemy import and_, exists, false, func, literal, or_, select, true
+from sqlalchemy import and_, case, exists, false, func, literal, or_, select, true
 from sqlalchemy.orm import aliased
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse, RedirectResponse
@@ -229,22 +229,36 @@ def record_clause(session, model, action: str = "metadata"):
             parent.domain_code == model.domain_code,
             parent.issuer_app_code == model.issuer_app_code,
             parent.is_deleted.is_(False),
-            or_(parent.bstatus == "archived", restricted),
-            parent.json_addl["storage_backend"].astext == "s3",
-            model.json_addl["storage_backend"].astext == "s3",
-            parent.json_addl["bucket"].astext == model.json_addl["bucket"].astext,
-            or_(
-                parent.json_addl["key"].astext == model.json_addl["key"].astext,
-                and_(
-                    parent.json_addl["storage_kind"].astext == "prefix",
-                    func.left(
-                        model.json_addl["key"].astext, func.length(parent.json_addl["key"].astext)
-                    )
-                    == parent.json_addl["key"].astext,
+            # PostgreSQL may otherwise run the correlated policy subplans for
+            # unrelated artifacts before checking their storage coordinates.
+            # Keep indexable tenant/type filters outside CASE; evaluate policy
+            # only for an actual exact alias or prefix ancestor. NULL relevance
+            # never matched the former AND predicate and still does not match.
+            case(
+                (
+                    and_(
+                        parent.json_addl["storage_backend"].astext == "s3",
+                        model.json_addl["storage_backend"].astext == "s3",
+                        parent.json_addl["bucket"].astext == model.json_addl["bucket"].astext,
+                        or_(
+                            parent.json_addl["key"].astext == model.json_addl["key"].astext,
+                            and_(
+                                parent.json_addl["storage_kind"].astext == "prefix",
+                                func.left(
+                                    model.json_addl["key"].astext,
+                                    func.length(parent.json_addl["key"].astext),
+                                ) == parent.json_addl["key"].astext,
+                            ),
+                        ),
+                    ),
+                    and_(
+                        or_(parent.bstatus == "archived", restricted),
+                        ~direct_record_clause(
+                            session, parent, "download" if action == "download" else "metadata"
+                        ),
+                    ),
                 ),
-            ),
-            ~direct_record_clause(
-                session, parent, "download" if action == "download" else "metadata"
+                else_=false(),
             ),
         )
     ).correlate(model)
@@ -431,6 +445,12 @@ class RegistryPrincipalMiddleware(BaseHTTPMiddleware):
         response = await self._dispatch(request, call_next)
         actor = getattr(request.state, "registry_principal", None)
         if actor is not None and actor.token_euid:
+            route = request.scope.get("route").path if request.scope.get("route") else "unmatched"
+            receipt = (actor.token_euid, request.method, route, response.status_code)
+            if getattr(request.state, "registry_token_audit", None) == receipt:
+                # This exact successful response was audited in its registration
+                # transaction; no second post-commit connection is needed.
+                return response
             from starlette.concurrency import run_in_threadpool
             from dewey_service.audit import authenticated_user_email_context
 
@@ -438,7 +458,7 @@ class RegistryPrincipalMiddleware(BaseHTTPMiddleware):
                 with principal_context(actor), authenticated_user_email_context(actor.email):
                     request.app.state.service.record_token_request(
                         actor, method=request.method,
-                        route=request.scope.get("route").path if request.scope.get("route") else "unmatched",
+                        route=route,
                         status_code=response.status_code,
                     )
             await run_in_threadpool(record)

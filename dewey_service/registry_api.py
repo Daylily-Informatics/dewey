@@ -257,11 +257,24 @@ def attach_registry_api(app, *, templates):
         return JSONResponse({"detail": str(exc)}, status_code=400)
 
     @router.post("/records", status_code=201)
-    def register(data: Registration, idempotency_key: str = Header(alias="Idempotency-Key")):
-        code, result = service.register_registry(
-            data.model_dump(exclude_none=True), idempotency_key=idempotency_key
+    def register(request: Request, data: Registration, idempotency_key: str = Header(alias="Idempotency-Key")):
+        actor = principal()
+        token_request = (
+            {"method": request.method, "route": request.scope["route"].path}
+            if actor.token_euid else None
         )
-        return JSONResponse(result, status_code=code)
+        code, result = service.register_registry(
+            data.model_dump(exclude_none=True), idempotency_key=idempotency_key,
+            token_request=token_request,
+        )
+        response = JSONResponse(result, status_code=code)
+        if token_request is not None:
+            # The service returned only after the mutation/receipt and request
+            # audit committed together. Never publish this marker before commit.
+            request.state.registry_token_audit = (
+                actor.token_euid, token_request["method"], token_request["route"], code
+            )
+        return response
 
     @router.get("/registry/multiqc-candidates")
     def multiqc_candidates(page: int = Query(1, ge=1), limit: int = Query(100, ge=1, le=1000)):

@@ -10,18 +10,23 @@ from dewey_service.tapdb_backend import normalize_instance_payload, utc_now_iso
 
 
 class AccessAdministrationMixin:
-    def record_token_request(self, actor, *, method, route, status_code):
-        with self.backend.session_scope(commit=True) as session:
-            token = self.backend.find_by_euid(session, template_code=TOKEN_TEMPLATE, euid=actor.token_euid)
-            if token is None:
-                raise HTTPException(401, "Token record unavailable")
-            event = self.backend.create_instance(
-                session, template_code=OPERATION_TEMPLATE, name="Personal token request",
-                json_addl={"operation": "personal_token_request", "actor": actor.subject,
-                           "email": actor.email, "created_at": utc_now_iso(),
-                           "method": method, "route": route, "status_code": status_code},
-            )
-            self.backend.create_lineage(session, parent=token, child=event, relationship_type="token_request")
+    def record_token_request(self, actor, *, method, route, status_code, session=None):
+        """Persist the request audit, optionally atomically with its mutation."""
+        if session is None:
+            with self.backend.session_scope(commit=True) as opened:
+                return self.record_token_request(
+                    actor, method=method, route=route, status_code=status_code, session=opened
+                )
+        token = self.backend.find_by_euid(session, template_code=TOKEN_TEMPLATE, euid=actor.token_euid)
+        if token is None:
+            raise HTTPException(401, "Token record unavailable")
+        event = self.backend.create_instance(
+            session, template_code=OPERATION_TEMPLATE, name="Personal token request",
+            json_addl={"operation": "personal_token_request", "actor": actor.subject,
+                       "email": actor.email, "created_at": utc_now_iso(),
+                       "method": method, "route": route, "status_code": status_code},
+        )
+        self.backend.create_lineage(session, parent=token, child=event, relationship_type="token_request")
 
     def _token_requests(self, session, token):
         return self.backend._template_query(session, template_code=OPERATION_TEMPLATE).join(
