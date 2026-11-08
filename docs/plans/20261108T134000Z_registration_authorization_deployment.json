@@ -1,0 +1,50 @@
+{
+  "service": "dewey",
+  "deployment": "day",
+  "version": "12.0.29",
+  "source_commit": "886b5cdeb70bb3e1769c51d43c8463fa59885f8c",
+  "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:2b24a82aa35c5351d04a12875eb738b4f18553ab29cd5eca563dee9316544297",
+  "build": {
+    "exit_code": 0,
+    "started_at": "2026-11-08T13:34:21.696816+00:00",
+    "finished_at": "2026-11-08T13:36:50.848712+00:00"
+  },
+  "deploy": {
+    "exit_code": 0,
+    "started_at": "2026-11-08T13:37:55.737316+00:00",
+    "finished_at": "2026-11-08T13:37:59.195046+00:00",
+    "scope": "Dewey only, no dependencies, no build or pull during Compose update"
+  },
+  "readiness": {
+    "http_status": 200,
+    "observed_at": "2026-11-08T13:38:19.459838+00:00",
+    "status": "ok",
+    "ready": true,
+    "version": "12.0.29",
+    "sha": "886b5cdeb70bb3e1769c51d43c8463fa59885f8c",
+    "database_status": "ok",
+    "database_latency_ms": 25.655,
+    "sharing_schema": "verified",
+    "observation_count": 1
+  },
+  "validation": "Independent static source review only; no tests, compilation, benchmark or CI campaign initiated",
+  "performance": "Benefit unmeasured; no registration replay or synthetic workload. Compare SQL time on future normal traffic.",
+  "ec2_instance": "i-07df3a933e4839f52",
+  "region": "us-west-2",
+  "release_work_dir": "/home/ubuntu/dewey-registration-authorization-12.0.29-20261108",
+  "rollback_inputs": [
+    "previous-compose.yml",
+    "previous-manifest.json"
+  ],
+  "remote_logs": [
+    "/home/ubuntu/dewey-registration-authorization-12.0.29-build-20261108.log",
+    "/home/ubuntu/dewey-registration-authorization-12.0.29-deploy-20261108.log",
+    "/home/ubuntu/dewey-registration-authorization-12.0.29-readiness-20261108.json"
+  ],
+  "retained_tmux_session": "dewey-authorization-12-0-29-20261108",
+  "notes": [
+    "No index/schema, pool/concurrency, credential, permission, telemetry or sibling-service change.",
+    "Existing orphan-container warning was left untouched.",
+    "Immutable tag remains on source; this later receipt is a branch-only documentation commit."
+  ]
+}
