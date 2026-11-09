@@ -87,6 +87,7 @@ def share_target_clause(model):
 
 def ensure_source(service, settings, body):
     from dewey_service.multiqc_bundle import saved_bundle
+    from dewey_service.tapdb_backend import normalize_instance_payload
     from dewey_service.registry_access import require_record
     from dewey_service.services.share_policy import expiry
     def allowed(uri):
@@ -104,12 +105,12 @@ def ensure_source(service, settings, body):
         artifact=service.get_artifact(body.value)
         allowed(artifact["storage_uri"])
     euid=artifact["artifact_euid"]
-    if saved_bundle(artifact) is None:
-        raise ValueError("The artifact lacks Dewey's complete MultiQC registration; register its exact S3 report source")
     with target_context(euid):
         # The capability does not override private targets or protected ancestors.
         with service.backend.session_scope(commit=False) as session:
             record=service._registry_record(session,euid,action="download")
+            if saved_bundle(normalize_instance_payload(record)) is None:
+                raise ValueError("The artifact lacks Dewey's complete MultiQC registration; register its exact S3 report source")
             require_record(service.backend,session,record,"share")
         shares=service.list_shares(target_kind="artifact_object",target_euid=euid,limit=2000)
         now=datetime.now(timezone.utc)

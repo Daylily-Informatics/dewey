@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import shutil
 
 import yaml
 
@@ -90,7 +91,15 @@ def deploy(args):
     credential = json.loads((args.work_dir / 'source-credential.json').read_text())
     service['environment']['DEWEY_QEO_SOURCE_TOKEN_SHA256'] = credential['token_sha256']
     service['environment']['DEWEY_QEO_SOURCE_TOKEN_EXPIRES_AT'] = credential['expires_at']
-    service['environment']['DEWEY_QEO_SOURCE_S3_ROOTS'] = 's3://lsmc-ssf-sequencing-data/derived/'
+    config_mount = next(v for v in service['volumes'] if v['target'] == service['environment']['DEWEY_CONFIG'])
+    source_config = Path(config_mount['source'])
+    source_settings = yaml.safe_load(source_config.read_text())
+    source_settings['qeo_source_s3_roots'] = ['s3://lsmc-ssf-sequencing-data/derived/']
+    selected_config = args.work_dir / 'dewey-config.yaml'
+    selected_config.write_text(yaml.safe_dump(source_settings, sort_keys=False))
+    shutil.copymode(source_config, selected_config)
+    config_mount['source'] = str(selected_config)
+    service['environment'].pop('DEWEY_QEO_SOURCE_S3_ROOTS', None)
     temporary = LIVE_COMPOSE.with_name(LIVE_COMPOSE.name + '.dewey-qeo-source-selected')
     with temporary.open('x') as stream:
         yaml.safe_dump(compose, stream, sort_keys=False)
@@ -125,6 +134,6 @@ if __name__ == '__main__':
     parser.add_argument('--commit', required=True)
     parser.add_argument('--work-dir', required=True, type=Path)
     args = parser.parse_args()
-    if args.tag != '12.0.31' or not re.fullmatch(r'[0-9a-f]{40}', args.commit) or not args.work_dir.is_absolute():
-        parser.error('Provide the coordinator-authorized final 12.0.31 commit and explicit absolute work directory')
+    if args.tag != '12.0.32' or not re.fullmatch(r'[0-9a-f]{40}', args.commit) or not args.work_dir.is_absolute():
+        parser.error('Provide the coordinator-authorized final 12.0.32 commit and explicit absolute work directory')
     raise SystemExit({'build': build, 'credential': credential, 'deploy': deploy}[args.phase](args))

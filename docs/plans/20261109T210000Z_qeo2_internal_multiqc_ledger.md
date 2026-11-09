@@ -2,7 +2,7 @@
 
 ## Current continuation state
 
-Status: 12.0.30 built/deployed, then first actual QEO import returned503. Native Dewey traceback: qeo_source_s3_roots environment string lacked native list normalization. Restoring only Dewey to12.0.29 using captured baseline. QEO2 remains2.0.14; no import succeeded. Corrected12.0.31 extends existing string-list parser and uses its comma-delimited format. Final EC2 build/deploy pending; no tests/CI/PR/merge. Repo /Users/jmajor/projects/dewey-registration-pool-20261108, branch codex/qeo2-internal-multiqc-20261109; host i-07df3a933e4839f52, interactive ubuntu session76985.
+Status: Dewey12.0.31 / 58473c0a07110c05bcdd2ff037f0ff16a4460966 deployed, native Compose Healthy. Image sha256:29713f5404aaf0c15cd67e36f07bc5fecd92106e3dbda47749d7aa01b1796073. Both environment list forms failed in separate settings layers; final root list is in native mounted YAML /home/ubuntu/dewey-qeo2-source-12.0.31/dewey-config.yaml, preserving prior config/mode and changing only QEO roots. Dedicated credential issued successfully and retained. Real source call now reaches application and returns403 Trusted Tailscale ingress required; no source records imported. Existing private management gateway10.0.0.222:8444 identified from owning Apache config. QEO2 2.0.15 config/client explicitly selects it with canonical Host and TLS validation, final EC2 build running. No proxy/auth changes. Repo /Users/jmajor/projects/dewey-registration-pool-20261108; branch codex/qeo2-internal-multiqc-20261109; EC2 i-07df3a933e4839f52 us-west-2, interactive ubuntu session76985. Next: QEO2-only deploy and exact17 source jobs, then documentation receipts. No tests/CI/PR/merge.
 
 User authority: explicitly answered “Add scoped QEO2 service support” to the 403 service-account sharing restriction. Scope: one new QEO2 credential/endpoint for MultiQC report registration and internal webshare creation. This supersedes the earlier QEO2-only deployment boundary only for this Dewey capability. No purge, broad service API grant, human impersonation, global sharing-policy relaxation, recipients emails, or source search. Existing resolver credential remains read-only.
 
@@ -30,3 +30,11 @@ flowchart LR
 ## Native operation receipts / correction
 
 12.0.30 native build exit0 (22:15:47–22:18:48Z), image sha256:6038f5aca90094bb0b2b681cbd718bdac7132f5263126861143c0869ddf8b698. Compose Healthy/exit0 at22:20:04Z. First real import exposed startup failure; native status was trusted until that failure. No additional success gate was added. Credential helper first needed the image application user, then explicit DEWEY_DEPLOYMENT_CODE=day; native credential issuance and private docker cp succeeded. Deployment uses targeted sudo for protected Compose/manifest files. Existing credential retained for12.0.31; no extra credential issuance.
+
+12.0.31 / 58473c0a07110c05bcdd2ff037f0ff16a4460966 native EC2 build exit0, 22:21:33–22:24:05Z. Image sha256:29713f5404aaf0c15cd67e36f07bc5fecd92106e3dbda47749d7aa01b1796073. Native12.0.30 credential receipt copied into12.0.31 workdir for deployment; credential remains unchanged.
+
+12.0.31 deployed exit0 at22:24:39Z; initial environment-form setting caused EnvSettingsSource parse failure. Corrected configuration to native YAML list, removed environment override, recreated Dewey-only; Compose Healthy. First real request then403 ingress, triggering QEO2 transport correction instead of weakening sharing controls.
+
+##12.0.32 source response correction
+
+Private management ingress succeeded. First native operation took172.476seconds and returned400 because the new endpoint passed the compact artifact response into saved_bundle; that API deliberately omits report_bundle. Native registration succeeded, but no QEO revision was written. Reissuing the same native idempotent request returned the exact error quickly. Move the required MultiQC type/bundle check into the already-required record policy query using its full payload. No extra readback or generic API behavior change. QEO2 removes its prematurely shorter120-second client timeout and waits for the owning service result. Native source policy remains unchanged.
