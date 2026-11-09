@@ -63,11 +63,13 @@ def build(args):
 
 def credential(args):
     selected=json.loads((args.work_dir/'manifest.json').read_text())['images']['dewey']
-    command=['docker','run','--rm','--user',f'{os.getuid()}:{os.getgid()}',
-        '-v','/opt/qeo2/day/config:/run/qeo2','--entrypoint','dewey',selected['image'],
-        'qeo','source-credential-create','--token-output-file','/run/qeo2/dewey-source.token','--lifetime-days','90']
+    container='qeo2-dewey-source-credential-day-'+args.tag
+    command=['docker','run','--name',container,'-e','DEWEY_DEPLOYMENT_CODE=day','-e','DEWEY_EXECUTION_BACKEND=dewey-container','--entrypoint','dewey',selected['image'],
+        'qeo','source-credential-create','--token-output-file','/tmp/dewey-source.token','--lifetime-days','90']
     with (args.work_dir/'source-credential.json').open('x') as output:
         result=subprocess.run(command,stdout=output)
+    if not result.returncode:
+        subprocess.run(['docker','cp',container+':/tmp/dewey-source.token','/opt/qeo2/day/config/dewey-source.token'],check=True)
     print(json.dumps({'phase':'credential','exit_code':result.returncode,'scope':'multiqc:register-internal-webshare'}))
     return result.returncode
 
@@ -88,7 +90,7 @@ def deploy(args):
     credential = json.loads((args.work_dir / 'source-credential.json').read_text())
     service['environment']['DEWEY_QEO_SOURCE_TOKEN_SHA256'] = credential['token_sha256']
     service['environment']['DEWEY_QEO_SOURCE_TOKEN_EXPIRES_AT'] = credential['expires_at']
-    service['environment']['DEWEY_QEO_SOURCE_S3_ROOTS'] = json.dumps(['s3://lsmc-ssf-sequencing-data/derived/'])
+    service['environment']['DEWEY_QEO_SOURCE_S3_ROOTS'] = 's3://lsmc-ssf-sequencing-data/derived/'
     temporary = LIVE_COMPOSE.with_name(LIVE_COMPOSE.name + '.dewey-qeo-source-selected')
     with temporary.open('x') as stream:
         yaml.safe_dump(compose, stream, sort_keys=False)
@@ -123,6 +125,6 @@ if __name__ == '__main__':
     parser.add_argument('--commit', required=True)
     parser.add_argument('--work-dir', required=True, type=Path)
     args = parser.parse_args()
-    if args.tag != '12.0.30' or not re.fullmatch(r'[0-9a-f]{40}', args.commit) or not args.work_dir.is_absolute():
-        parser.error('Provide the coordinator-authorized final 12.0.30 commit and explicit absolute work directory')
+    if args.tag != '12.0.31' or not re.fullmatch(r'[0-9a-f]{40}', args.commit) or not args.work_dir.is_absolute():
+        parser.error('Provide the coordinator-authorized final 12.0.31 commit and explicit absolute work directory')
     raise SystemExit({'build': build, 'credential': credential, 'deploy': deploy}[args.phase](args))

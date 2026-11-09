@@ -735,7 +735,7 @@ class Settings(BaseSettings):
         normalized = str(value or "").strip().strip("/")
         return normalized or "artifacts"
 
-    @field_validator("requester_pays_buckets", "share_approved_origins", mode="before")
+    @field_validator("requester_pays_buckets", "share_approved_origins", "qeo_source_s3_roots", mode="before")
     @classmethod
     def validate_string_list(cls, value: Any) -> list[str]:
         if value is None:

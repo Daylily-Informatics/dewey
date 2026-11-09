@@ -2,7 +2,7 @@
 
 ## Current continuation state
 
-Status: implementation complete, final release/build/deploy pending. Repo /Users/jmajor/projects/dewey-registration-pool-20261108; clean baseline715d010 (deployment docs after live12.0.29/886b5cd), branch codex/qeo2-internal-multiqc-20261109. Planned annotated12.0.30. Production host i-07df3a933e4839f52 us-west-2, interactive ubuntu SSM session76985. Native selected-service build helper in this directory; final EC2 build only. No tests/lint/CI/PR/merge or sibling changes.
+Status: 12.0.30 built/deployed, then first actual QEO import returned503. Native Dewey traceback: qeo_source_s3_roots environment string lacked native list normalization. Restoring only Dewey to12.0.29 using captured baseline. QEO2 remains2.0.14; no import succeeded. Corrected12.0.31 extends existing string-list parser and uses its comma-delimited format. Final EC2 build/deploy pending; no tests/CI/PR/merge. Repo /Users/jmajor/projects/dewey-registration-pool-20261108, branch codex/qeo2-internal-multiqc-20261109; host i-07df3a933e4839f52, interactive ubuntu session76985.
 
 User authority: explicitly answered “Add scoped QEO2 service support” to the 403 service-account sharing restriction. Scope: one new QEO2 credential/endpoint for MultiQC report registration and internal webshare creation. This supersedes the earlier QEO2-only deployment boundary only for this Dewey capability. No purge, broad service API grant, human impersonation, global sharing-policy relaxation, recipients emails, or source search. Existing resolver credential remains read-only.
 
@@ -10,7 +10,7 @@ Endpoint POST /api/v1/qeo/report-source requires its own hash/expiry credential,
 
 New webshares have exact lsmc.com and lsmc.bio domain recipients, native service lifetime14 days, no user emails. Existing eligible webshare reused; revoked/expired native idempotency is not automatically revived. All writes retain native service attribution and share events. New credential cannot become a generic registry token even if misconfigured in api_tokens.
 
-Next: tag/publish12.0.30 with skip-ci commit, native EC2 build, issue credential via new native dewey qeo source-credential-create, deploy Dewey-only Compose. Then QEO2 2.0.14 build/deploy and 17 source revisions tracked in /Users/jmajor/Documents/ChatGPT/QEO/docs/plans/20261109T061500Z_qeo_requirements_extraction_ledger.md. Trust native results; no secondary probes.
+Next: consume native build result /home/ubuntu/dewey-qeo2-source-12.0.30.result, issue credential via new native dewey qeo source-credential-create, deploy Dewey-only Compose. Then QEO2 2.0.14 build/deploy and 17 source revisions tracked in /Users/jmajor/Documents/ChatGPT/QEO/docs/plans/20261109T061500Z_qeo_requirements_extraction_ledger.md. Trust native results; no secondary probes.
 
 ## Gate 0
 
@@ -26,3 +26,7 @@ flowchart LR
   Policy --> Share[Native internal webshare + audit]
   Share --> Receipt[Persisted artifact/share EUIDs and canonical URL]
 ```
+
+## Native operation receipts / correction
+
+12.0.30 native build exit0 (22:15:47–22:18:48Z), image sha256:6038f5aca90094bb0b2b681cbd718bdac7132f5263126861143c0869ddf8b698. Compose Healthy/exit0 at22:20:04Z. First real import exposed startup failure; native status was trusted until that failure. No additional success gate was added. Credential helper first needed the image application user, then explicit DEWEY_DEPLOYMENT_CODE=day; native credential issuance and private docker cp succeeded. Deployment uses targeted sudo for protected Compose/manifest files. Existing credential retained for12.0.31; no extra credential issuance.
