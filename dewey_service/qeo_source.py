@@ -98,9 +98,22 @@ def ensure_source(service, settings, body):
             raise HTTPException(403,"Report is outside the configured QEO production source roots")
     if body.kind=="source":
         allowed(body.value)
-        _,artifact=service.import_artifact_from_uri(artifact_type="multiqc_report",source_uri=body.value,
-            import_mode="reference",metadata={"registration_purpose":"QEO2 source MultiQC"},producer_system="qeo2",
-            idempotency_key="qeo2-source-report:"+hashlib.sha256(body.value.encode()).hexdigest())
+        from daylily_tapdb import generic_instance
+        # Resolve the exact declared source using native registry visibility.
+        # A persisted complete registration is the owning result: do not read
+        # or register its report/dependencies again merely to create a share.
+        with service.backend.session_scope(commit=False) as session:
+            matches=service._registry_query(session,scopes=("artifact",)).filter(
+                generic_instance.json_addl["storage_uri"].astext==body.value,
+                generic_instance.json_addl["storage_kind"].astext=="object").limit(2).all()
+            if len(matches)>1:
+                raise ValueError("Multiple registered versions exist at this source; specify the exact Dewey artifact EUID")
+            artifact=(service._artifact_response(matches[0]) if matches and
+                      saved_bundle(normalize_instance_payload(matches[0])) is not None else None)
+        if artifact is None:
+            _,artifact=service.import_artifact_from_uri(artifact_type="multiqc_report",source_uri=body.value,
+                import_mode="reference",metadata={"registration_purpose":"QEO2 source MultiQC"},producer_system="qeo2",
+                idempotency_key="qeo2-source-report:"+hashlib.sha256(body.value.encode()).hexdigest())
     else:
         artifact=service.get_artifact(body.value)
         allowed(artifact["storage_uri"])
