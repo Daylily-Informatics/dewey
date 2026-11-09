@@ -89,6 +89,7 @@ from dewey_service.observability import (
     route_template_from_request,
 )
 from dewey_service.qeo_package_contract import PackageRegistration, ResolveMultiqcRequest
+from dewey_service.qeo_source import QeoSourceRequest, require_qeo_source_auth, ensure_source
 from dewey_service.qeo_resolver_auth import require_qeo_resolver_auth
 from dewey_service.rbac import Role, profile_has_role
 from dewey_service.registration_contracts import (
@@ -3989,6 +3990,22 @@ def create_app(
             raise HTTPException(status_code=409, detail=str(exc)) from exc
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.post("/api/v1/qeo/report-source", dependencies=[Depends(require_qeo_source_auth(settings))])
+    def qeo_report_source(body: QeoSourceRequest, request: Request):
+        from dewey_service.share_context import require_trusted_tailnet
+        from dewey_service.registry_access import Principal, principal_context
+        from dewey_service.audit import request_audit_context
+        require_trusted_tailnet(request)
+        try:
+            with principal_context(Principal(subject="qeo2:multiqc-source",roles=("READ_WRITE",),internal=True,service=True)), request_audit_context():
+                return ensure_source(service,settings,body)
+        except DeweyNotFoundError as exc:
+            raise HTTPException(404,str(exc)) from exc
+        except DeweyConflictError as exc:
+            raise HTTPException(409,str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(400,str(exc)) from exc
 
     @app.post(
         "/api/v1/resolve/multiqc",

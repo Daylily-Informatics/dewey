@@ -28,15 +28,15 @@ def share_context_available() -> bool:
     from dewey_service.registry_access import current_principal
 
     actor = current_principal()
+    from dewey_service.qeo_source import current_target
+    qeo_source = bool(current_target())
     return bool(
         value
         and (value.get("trusted_tailnet") is True or value.get("public_recipient") is True)
         and value.get("managed_origin") is True
         and actor
         and actor.subject
-        and actor.email
-        and actor.email_verified
-        and not actor.service
+        and (qeo_source or actor.email and actor.email_verified and not actor.service)
     )
 
 

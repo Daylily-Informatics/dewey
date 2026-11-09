@@ -1037,6 +1037,9 @@ class SharingServiceMixin(ShareExpiryMixin, ShareRevisionMixin, ShareRebindMixin
         manage = literal(False) if recipient_index else (
             literal(True) if actor.admin else owner_clause(data, actor)
         )
+        if not recipient_index:
+            from dewey_service.qeo_source import share_target_clause
+            manage=or_(manage,share_target_clause(generic_instance))
         current_recipient = and_(
             generic_instance.bstatus != "archived",
             data["status"].astext == "active",

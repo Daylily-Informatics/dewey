@@ -489,6 +489,9 @@ class Settings(BaseSettings):
     # Dedicated read-only QEO resolver. Never add this token to api_bearer_tokens.
     qeo_resolver_token_sha256: str = ""
     qeo_resolver_token_expires_at: str = ""
+    qeo_source_token_sha256: str = ""
+    qeo_source_token_expires_at: str = ""
+    qeo_source_s3_roots: list[str] = Field(default_factory=list)
     session_secret_key: str = "dewey-session-secret-change-me"
     host: str = "127.0.0.1"
     port: int = DEFAULT_APP_PORT
@@ -948,6 +951,7 @@ class Settings(BaseSettings):
             and not item.startswith(
                 (
                     "dewey_qeo_resolver_",
+                    "dewey_qeo_source_",
                     "dewey_dag_",
                 )
             )

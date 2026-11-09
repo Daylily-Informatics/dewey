@@ -723,6 +723,12 @@ class RegistryServiceMixin(ReportBundleServiceMixin, AccessAdministrationMixin, 
     def _registry_share_manager(self, session, share):
         actor = principal()
         data = normalize_instance_payload(share)
+        from dewey_service.qeo_source import current_target
+        target=current_target()
+        if target:
+            members=self._share_members(session,share)
+            if len(members)==1 and members[0].euid==target:
+                return True
         if (
             actor.admin
             or data.get("owner_subject") == actor.subject

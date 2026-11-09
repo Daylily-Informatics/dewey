@@ -18,6 +18,7 @@ from dewey_service.cli._registry_v2 import REQUIRED_JSON, REQUIRED_MUTATING
 from dewey_service.cli._service import build_cli_service
 from dewey_service.qeo_package_contract import PackageRegistration
 from dewey_service.qeo_resolver_auth import issue_resolver_credential
+from dewey_service.qeo_source import issue_source_credential
 from dewey_service.settings import clear_settings_cache, get_settings
 
 
@@ -32,6 +33,18 @@ def _resolver_credential_create(
         result = issue_resolver_credential(token_output_file, lifetime_days=lifetime_days)
     except (ValueError, OSError) as exc:
         ccyo_out.error(f"Resolver credential creation failed: {exc}")
+        raise typer.Exit(1) from exc
+    ccyo_out.emit_json(result)
+
+
+def _source_credential_create(
+    token_output_file: Path = typer.Option(..., help="New absolute private QEO2 source token file; never printed."),
+    lifetime_days: int = typer.Option(90, min=1, max=366),
+) -> None:
+    try:
+        result=issue_source_credential(token_output_file,lifetime_days=lifetime_days)
+    except (ValueError,OSError) as exc:
+        ccyo_out.error(f"Source credential creation failed: {exc}")
         raise typer.Exit(1) from exc
     ccyo_out.emit_json(result)
 
@@ -123,6 +136,13 @@ def register(registry: CommandRegistry, spec: CliSpec) -> None:
         "resolver-credential-create",
         _resolver_credential_create,
         help_text="Create a dedicated resolver token in a new private local file.",
+        policy=CommandPolicy(runtime_guard="exempt", mutates_state=True, supports_json=True),
+    )
+    registry.add_command(
+        "qeo",
+        "source-credential-create",
+        _source_credential_create,
+        help_text="Create a scoped QEO2 internal MultiQC source credential in a private file.",
         policy=CommandPolicy(runtime_guard="exempt", mutates_state=True, supports_json=True),
     )
     registry.add_command(
