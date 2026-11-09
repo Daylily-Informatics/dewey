@@ -18,7 +18,7 @@ Dayhoff release inputs are maintained in its `services/pins.toml`. Dewey 12 reta
 
 The GUI centers on Library, S3 Browser, Sets, Sharing and Literature. Metadata and download permissions are independent; every share requires authentication. Prefix browsing is bounded and does not register descendants. Physical S3 deletion is prohibited. See the [Dewey 12 release ledger](docs/plans/20261026T010947Z_dewey_12_sharing_release_ledger.md) for source, validation, deployment and acceptance states.
 
-The recorded production release is **Dewey 12.0.8** with **Login 4.1.1**. All 113
+The November 9, 2026 Dayhoff day deployment manifest selects **Dewey12.0.29** (`886b5cdeb70bb3e1769c51d43c8463fa59885f8c`) and **Login4.1.2**. The following **October 26** source/acceptance record describes Dewey12.0.8 and Login4.1.1; it is preserved as historical evidence. All 113
 installed Dewey application files and assets match the published `12.0.8` tag
 and merged `main`; the [running-source receipt](docs/plans/evidence/20261026_dewey12/running-source-binding-12.0.8.json)
 binds that source to the deployed image. The final patch deploys the tested search
