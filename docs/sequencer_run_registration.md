@@ -74,3 +74,19 @@ Dewey persists outbox events in TapDB:
 - `lsmc.dewey.analysis-results.registered.v1`
 
 Event payloads contain EUIDs, manifest hashes, command/status fields, and platform hints only. They do not include PHI, filesystem paths, sample names, DOB, MRN, or patient-facing identifiers.
+
+## Ursa automatic-mirror results (November 2026)
+
+Ursa 15 binds the cluster's results DRA to its exact S3 prefix and registers
+visible cluster/controller folders through the existing artifact-prefix API.
+Terminal manifest-listed members are registered through
+`POST /api/v1/analysis-results/register` with the actual workflow outcome and
+typed source/run/execution lineage. Folder presence is available before all
+controllers finish; it is not a scientific success claim.
+
+Ursa owns retry of normal mirror lag and explicit reporting of missing declared
+artifacts or malformed manifests. A failed run without produced manifest members
+retains its folder and failure disposition. Automatic-mirror provenance is not an
+FSx explicit-export task. No extra export is needed solely for registration.
+Dewey owns persisted artifact identities and lineage; it does not manage FSx
+cache release, cluster quiescence, drain, or deletion.
