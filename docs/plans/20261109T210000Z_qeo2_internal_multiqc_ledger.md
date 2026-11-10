@@ -2,6 +2,11 @@
 
 ## Current continuation state
 
+November10 extension IN_PROGRESS: final Dewey12.0.34 adds the requested typed report → QEO2 persisted evidence reference. The existing dedicated QEO2 credential is accepted by one additional exact endpoint, /api/v1/qeo/report-evidence, with the same trusted ingress and allowed source roots. The exact report context permits only the native external-reference/lineage write; it does not change report content, broad registry access or sharing policy. Existing credential and native service deployment identity retained. Source publication, EC2 build, deployment and Ursa runtime acceptance tracked separately in the controlling Ursa ledger. No tests/lint, new credential issuance, migrations or local container builds.
+
+### Prior completed source capability
+
+
 Status: Dewey **12.0.33** /54eeffa705feed1712533c9957a8865ac013e933 DEPLOYED. Native EC2 build exit0 (22:48:39–22:51:19Z); final image sha256:9f3326730d5984a2e639965bffa521be337fa6199fe7fe69910bf30421716169. Native Dewey-only Compose Healthy/exit0 at22:52:04Z. QEO2 **2.0.16** /b32fb67421ec177d7ce4921a76e2cc2af8644101 deployed. Its scoped client uses existing private management listener10.0.0.222:8444, canonical Host and TLS validation. No Apache policy change. Dedicated credential unchanged. Allowed S3 roots use native YAML /home/ubuntu/dewey-qeo2-source-12.0.33/dewey-config.yaml. Complete exact existing registrations are reused; absent/incomplete registrations use the native importer. More than one version requires explicit artifact EUID.
 
 Repo /Users/jmajor/projects/dewey-registration-pool-20261108, branch codex/qeo2-internal-multiqc-20261109; annotated tag12.0.33 and branch published. Host i-07df3a933e4839f52,us-west-2; interactive ubuntu SSM session54927. Native release receipt /home/ubuntu/dewey-qeo2-source-12.0.33.result. QEO source batch /opt/qeo2/day/receipts/reinterpret-2.0.16-remaining10.log/.exit;All17 selected source revisions complete,12,610 production observations; final remaining10 native batch exit0. Browser3D handoff complete. QEO2 final axis-caption update2.0.17 is deploying separately. Next commit this completed Dewey capability ledger; QEO owns final browser and Linear handoff. No purge, original-QEO changes, tests/CI/PR/merge, local builds or secondary probes. Earlier actual failures remain documented below.

@@ -134,6 +134,6 @@ if __name__ == '__main__':
     parser.add_argument('--commit', required=True)
     parser.add_argument('--work-dir', required=True, type=Path)
     args = parser.parse_args()
-    if args.tag != '12.0.33' or not re.fullmatch(r'[0-9a-f]{40}', args.commit) or not args.work_dir.is_absolute():
-        parser.error('Provide the coordinator-authorized final 12.0.33 commit and explicit absolute work directory')
+    if args.tag != '12.0.34' or not re.fullmatch(r'[0-9a-f]{40}', args.commit) or not args.work_dir.is_absolute():
+        parser.error('Provide the coordinator-authorized final 12.0.34 commit and explicit absolute work directory')
     raise SystemExit({'build': build, 'credential': credential, 'deploy': deploy}[args.phase](args))

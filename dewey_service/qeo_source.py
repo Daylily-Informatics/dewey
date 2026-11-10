@@ -1,6 +1,7 @@
 """QEO2-only MultiQC registration and internal webshare capability.
 
-The credential is accepted by one route, never by the general registry or human
+The credential is accepted by the report-source and report-evidence routes,
+never by the general registry or human
 sharing routes. The target scope exists only while this server-owned operation
 runs. Existing private target/ancestor policies and native share lifecycle apply.
 """
@@ -12,6 +13,7 @@ import os
 from pathlib import Path
 import secrets
 from typing import Literal
+from uuid import UUID
 from urllib.parse import urlsplit
 
 from fastapi import Depends, HTTPException
@@ -20,12 +22,64 @@ from pydantic import BaseModel, ConfigDict, Field
 
 SUBJECT = "qeo2:multiqc-source"
 _TARGET = ContextVar("qeo_source_target", default=None)
+_REFERENCE_TARGET = ContextVar("qeo_evidence_reference_target", default=None)
 
 
 class QeoSourceRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     kind: Literal["artifact", "source"]
     value: str = Field(min_length=1)
+
+
+class QeoEvidenceReferenceRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    report_artifact_euid: str = Field(min_length=1)
+    evidence_euid: str = Field(min_length=1)
+    tenant_id: UUID
+    canonical_uri: str = Field(min_length=1)
+
+
+def current_reference_target():
+    from dewey_service.registry_access import current_principal
+    actor = current_principal()
+    return _REFERENCE_TARGET.get() if actor and actor.service and actor.subject == SUBJECT else None
+
+
+def require_allowed_source(settings, uri):
+    location = urlsplit(uri)
+    if location.scheme != "s3" or not location.netloc or not location.path or location.query or location.fragment:
+        raise ValueError("QEO source must name an exact S3 report object")
+    if not any(root.endswith("/") and uri.startswith(root) for root in settings.qeo_source_s3_roots):
+        raise HTTPException(403, "Report is outside the configured QEO production source roots")
+
+
+def link_evidence(service, settings, body):
+    """Accept the authenticated QEO2 owner's persisted evidence identity.
+
+    This capability can only attach a QEO2 evidence reference to one source
+    report; it cannot edit report content, policy, or arbitrary relationships.
+    """
+    artifact = service.get_artifact(body.report_artifact_euid)
+    require_allowed_source(settings, artifact["storage_uri"])
+    location = urlsplit(body.canonical_uri)
+    if location.scheme != "https" or not location.netloc or location.username or location.password:
+        raise ValueError("QEO2 evidence URL must use HTTPS")
+    token = _REFERENCE_TARGET.set(body.report_artifact_euid)
+    try:
+        _, external = service.create_external_object(
+            external_system="qeo2", external_object_type="evidence",
+            external_object_id=body.evidence_euid, external_uri=body.canonical_uri,
+            metadata={"assertion_authority": "qeo2.persisted_evidence_receipt"},
+            reference_target={"kind": "tapdb_object", "target_tenant_id": str(body.tenant_id)},
+            idempotency_key="qeo2-evidence:" + body.evidence_euid)
+        _, relation = service.attach_external_object_relation(
+            target_type="artifact", target_euid=body.report_artifact_euid,
+            external_object_euid=external["external_object_euid"], relation_type="qeo2_evidence",
+            metadata={"assertion_authority": "qeo2.persisted_evidence_receipt"},
+            idempotency_key="qeo2-report-evidence:" + body.report_artifact_euid + ":" + body.evidence_euid)
+        return {"external_object": external, "relation": relation}
+    finally:
+        _REFERENCE_TARGET.reset(token)
 
 
 def issue_source_credential(path: Path, *, lifetime_days: int):
@@ -91,11 +145,7 @@ def ensure_source(service, settings, body):
     from dewey_service.registry_access import require_record
     from dewey_service.services.share_policy import expiry
     def allowed(uri):
-        location=urlsplit(uri)
-        if location.scheme!="s3" or not location.netloc or not location.path or location.query or location.fragment:
-            raise ValueError("QEO source must name an exact S3 report object")
-        if not any(root.endswith("/") and uri.startswith(root) for root in settings.qeo_source_s3_roots):
-            raise HTTPException(403,"Report is outside the configured QEO production source roots")
+        require_allowed_source(settings, uri)
     if body.kind=="source":
         allowed(body.value)
         from daylily_tapdb import generic_instance

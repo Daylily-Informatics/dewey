@@ -151,6 +151,13 @@ def direct_record_clause(session, model, action: str = "metadata"):
             allowed=or_(allowed,and_(model.euid==target,
                 data["explicit_restriction"].astext=="false",
                 data["download"]["scope"].astext=="internal"))
+    if action == "edit":
+        from dewey_service.qeo_source import current_reference_target
+        target = current_reference_target()
+        if target:
+            allowed = or_(allowed, and_(model.euid == target,
+                data["explicit_restriction"].astext == "false",
+                data["download"]["scope"].astext == "internal"))
     policy_grant = exists(
         select(literal(1))
         .select_from(edge)
