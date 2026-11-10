@@ -21,3 +21,7 @@ The repair honors the explicit artifact role during automatic registration. Coll
 ## Predeployment source review
 
 12.0.35 was tagged and its final-candidate build started before source review found that the detached registry path also needs the same classification before it creates an inspection inventory.12.0.36 supersedes35 before deployment and moves the collateral decision into the shared HTML candidate selector, covering both paths without adding checks. No35 deployment or runtime retry occurred. No tests run.
+
+## Build interruption
+
+Final36 build failed ResourceExhausted during runtime COPY because the EC2 root968G filesystem filled. Native Docker unused-cache cleanup reclaimed61.74GB and returned0. Same immutable36 tag retried through native release builder at /home/ubuntu/dewey-multiqc-collateral-12.0.36-retry1, SSM52f8a8ba-e1be-4356-b745-6b3876107985. No runtime images, volumes, or AWS resources deleted. Scoped deployment helper preserves existing service credentials/config and changes only the selected Dewey image/source identity. Native deployment and same-import delivery acceptance pending.
