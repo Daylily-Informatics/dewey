@@ -1,0 +1,41 @@
+{
+  "release": "12.0.37",
+  "source_commit": "23e1009d6c6cb10bdde5471474d180d539b9244c",
+  "instance_id": "i-07df3a933e4839f52",
+  "region": "us-west-2",
+  "tests_run": false,
+  "runtime_acceptance": "Pending matching Ursa release and native directory manifest registration",
+  "initial_invocation": {
+    "command_id": "2fd0606f-2664-4a8b-b21d-d3ca800a0232",
+    "status": "Failed",
+    "response_code": 2,
+    "reason": "Short commit argument rejected before build; corrected to full published commit in next invocation"
+  },
+  "build": {
+    "command_id": "2031e043-f6fe-425a-86b4-311c6d987feb",
+    "status": "Success",
+    "response_code": 0,
+    "native_result": {
+      "phase": "build",
+      "exit_code": 0,
+      "service": "dewey",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:3fbff34ad286aec782be07d69db6676756a1de8c0efb3e7578bead25b47ecc9a",
+      "source_tag": "12.0.37",
+      "source_commit": "23e1009d6c6cb10bdde5471474d180d539b9244c",
+      "started_at": "2026-11-10T19:19:34.270282+00:00",
+      "finished_at": "2026-11-10T19:22:20.324156+00:00"
+    }
+  },
+  "deployment": {
+    "command_id": "1813292f-ee75-4db2-8838-5822ba1e77b9",
+    "status": "Success",
+    "response_code": 0,
+    "native_result": {
+      "source_tag": "12.0.37",
+      "source_commit": "23e1009d6c6cb10bdde5471474d180d539b9244c",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:3fbff34ad286aec782be07d69db6676756a1de8c0efb3e7578bead25b47ecc9a",
+      "exit_code": 0,
+      "completed_at": "2026-11-10T19:23:11.582318+00:00"
+    }
+  }
+}
