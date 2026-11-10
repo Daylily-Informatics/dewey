@@ -112,7 +112,7 @@ The QEO consumer supporting `files[].version_id` must be deployed before this re
 
 ## Native Ursa Analysis Results
 
-The existing `POST /api/v1/analysis-results/register` requires new requests to include `metadata.registration_contract=analysis_results.v1`, the complete `artifact_manifest_rows` including exclusions, explicit `entity_owner_systems`, and exact `artifact_lineage` entries `{path,entity_type,entity_euid,relationship,source}`. Requested file artifacts must equal all and only importable rows and lie at their exact paths under `result_root_uri`. Sample/library projections must reconcile with the full plural typed associations.
+The existing `POST /api/v1/analysis-results/register` requires new requests to include `metadata.registration_contract=analysis_results.v1`, the complete `artifact_manifest_rows` including exclusions, explicit `entity_owner_systems`, and exact `artifact_lineage` entries `{path,entity_type,entity_euid,relationship,source}`. Requested object and explicitly declared prefix artifacts must equal all and only importable rows and lie at their exact paths under `result_root_uri`. Sample/library projections must reconcile with the full plural typed associations.
 
 Dewey persists prefix/file hierarchy and typed external-reference lineage to the owning Ursa execution and declared biological entities. Intermediate prefix records remain outside the exact API receipt/result-set member list: the returned manifest and receipt cover the root and requested files only. No reference implies scientific or customer acceptance.
 
@@ -140,3 +140,7 @@ The analysis artifact-set and native analysis-result registrations return receip
 ## Immutable Semantics
 
 An existing artifact can be reused only when `storage_uri`, exact `version_id`, `sha256`, `size_bytes`, and `artifact_role` match exactly for native analysis results. Conflicting existing records return `409`. Dewey never rewrites an existing artifact record to satisfy a new registration manifest.
+
+### Declared analysis package prefixes
+
+The analysis-results endpoint accepts `storage_kind: "prefix"` on an artifact and its manifest row. Both retain the exact slash-terminated path. Native folder, hierarchy, artifact-set membership, execution ownership and declared biological lineage are registered without converting the directory to an S3 object or enumerating descendants. File-only request serialization remains unchanged. MultiQC package members continue to be explicit files; this addition does not turn a directory into a MultiQC data package.

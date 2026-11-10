@@ -62,6 +62,11 @@ Required fields:
 
 Result artifacts are linked under an analysis-result artifact set. Artifacts with explicit SHA256 and version evidence are marked `verified`; otherwise they are marked `observed`.
 
+A declared manifest directory uses `storage_kind: "prefix"` on its artifact and matching `metadata.artifact_manifest_rows` entry. Its exact analysis-relative path and S3 URI end in `/`. Dewey registers a native folder record, links it into the prefix hierarchy and terminal artifact set, includes it in the registration receipt, and attaches the same declared execution and biological lineage as a file artifact. The prefix has no object version, file size or checksum. It is registered from the explicit producer declaration without HEADing an S3 marker object, listing descendants or reading/hashing child files. Individually declared child files retain their ordinary object registration.
+
+Ordinary artifacts use `storage_kind: "object"`; omitting that default preserves the established file-only request identity. A filename or source label never supplies an undeclared prefix kind. Registration identifies the declared folder and lineage; it does not claim a recursive content inventory.
+
+
 ## Idempotency
 
 Both endpoints compute deterministic idempotency keys from canonical request JSON. If an `Idempotency-Key` header is supplied, it must match the computed key. Missing headers are accepted on these two deterministic endpoints.

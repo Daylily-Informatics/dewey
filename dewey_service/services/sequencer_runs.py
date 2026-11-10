@@ -137,10 +137,15 @@ class SequencerRunRegistrationServiceMixin:
             if not isinstance(row, dict):
                 raise ValueError("artifact_manifest_rows entries must be objects")
             path = cls._exact_native_text(row.get("relative_path"), "manifest relative_path")
+            storage_kind = row.get("storage_kind", "object")
+            if storage_kind not in {"object", "prefix"}:
+                raise ValueError("manifest storage_kind must be object or prefix")
+            member_path = path[:-1] if storage_kind == "prefix" and path.endswith("/") else path
             if (
                 path.startswith("/")
                 or "\\" in path
-                or any(part in {"", ".", ".."} for part in path.split("/"))
+                or (storage_kind == "prefix" and not path.endswith("/"))
+                or any(part in {"", ".", ".."} for part in member_path.split("/"))
             ):
                 raise ValueError("manifest relative_path must be a safe exact member path")
             if path in rows_by_path:
@@ -213,6 +218,8 @@ class SequencerRunRegistrationServiceMixin:
 
         for path, artifact in artifacts_by_path.items():
             row = rows_by_path[path]
+            if artifact.storage_kind != row.get("storage_kind", "object"):
+                raise ValueError(f"request artifact storage_kind disagrees with its manifest row: {path}")
             artifact_payload = artifact.model_dump(mode="json")
             expected = {
                 "logical_name": path,
@@ -272,7 +279,8 @@ class SequencerRunRegistrationServiceMixin:
             for path in importable_paths
             for index in range(1, len(path.split("/")))
         }
-        if importable_paths.intersection(directory_paths):
+        file_paths = {path for path, artifact in artifacts_by_path.items() if artifact.storage_kind == "object"}
+        if file_paths.intersection(directory_paths):
             raise ValueError("a declared file cannot also be an artifact hierarchy directory")
         return normalized_edges
 
@@ -921,11 +929,16 @@ class SequencerRunRegistrationServiceMixin:
                     "native artifact must name its exact member path under the result root"
                 )
         storage = self._require_storage()
-        preflight: list[tuple[Any, StorageObject, str, str]] = []
+        preflight: list[tuple[Any, StorageObject | None, str, str]] = []
         for artifact in request_body.artifacts:
             item_bucket, item_key, normalized_uri = self._parse_s3_uri_strict(
                 artifact.storage_uri, field_name="storage_uri"
             )
+            if artifact.storage_kind == "prefix":
+                # The manifest declares a directory, not an S3 marker object.
+                # Register that exact prefix without HEAD or listing its contents.
+                preflight.append((artifact, None, normalized_uri, artifact.relative_path))
+                continue
             obj = storage.head_object(
                 bucket=item_bucket, key=item_key, version_id=artifact.version_id
             )
@@ -1020,9 +1033,14 @@ class SequencerRunRegistrationServiceMixin:
             if root_instance is None:
                 raise DeweyNotFoundError("Analysis result root disappeared during registration")
             artifact_instances_by_path: dict[str, Any] = {}
-            # Prefix records preserve the exact declared path hierarchy, while the
-            # public receipt and artifact set remain root plus requested files only.
+            # Prefix records preserve hierarchy; explicitly declared prefixes also
+            # belong to the receipt, artifact set and declared biological lineage.
             directory_artifacts = {"": root_artifact}
+            declared_directories = {
+                relative[:-1]: artifact
+                for artifact, _obj, _uri, relative in preflight
+                if artifact.storage_kind == "prefix"
+            }
             directory_paths = sorted(
                 {
                     "/".join(relative.split("/")[:index])
@@ -1033,6 +1051,21 @@ class SequencerRunRegistrationServiceMixin:
             )
             for relative in directory_paths:
                 prefix_key = root_prefix + relative + "/"
+                declared = declared_directories.get(relative)
+                directory_metadata = {
+                    "artifact_role": declared.artifact_role if declared else "analysis_result_directory",
+                    "relative_path": relative + "/",
+                    "analysis_euid": request_body.analysis_euid,
+                    "registration_contract": "analysis_results.v1",
+                }
+                if declared is not None:
+                    directory_metadata.update(
+                        logical_name=declared.logical_name,
+                        command_id=request_body.command_id,
+                        result_status=request_body.result_status,
+                        sample_identifiers=[item.model_dump(mode="json", exclude_none=True)
+                                            for item in declared.sample_identifiers],
+                    )
                 directory_payload = self._artifact_payload(
                     artifact_type="folder",
                     storage_backend="s3",
@@ -1047,12 +1080,7 @@ class SequencerRunRegistrationServiceMixin:
                     producer_object_euid=request_body.analysis_euid,
                     storage_class=None,
                     availability_status="available",
-                    metadata={
-                        "artifact_role": "analysis_result_directory",
-                        "relative_path": relative + "/",
-                        "analysis_euid": request_body.analysis_euid,
-                        "registration_contract": "analysis_results.v1",
-                    },
+                    metadata=directory_metadata,
                     source_uri=f"s3://{bucket}/{prefix_key}",
                     import_mode="register",
                     storage_status="registered",
@@ -1063,6 +1091,7 @@ class SequencerRunRegistrationServiceMixin:
                 directory_artifact = self._assert_no_conflicting_artifact(
                     session, payload=directory_payload
                 )
+                directory_existed = directory_artifact is not None
                 if directory_artifact is None:
                     _status, directory_artifact = self._upsert_artifact_record(
                         session,
@@ -1086,6 +1115,12 @@ class SequencerRunRegistrationServiceMixin:
                     raise DeweyNotFoundError(
                         "Analysis result directory disappeared during registration"
                     )
+                if declared is not None:
+                    (skipped if directory_existed else registered).append(directory_artifact)
+                    artifact_members[directory_artifact["artifact_euid"]] = directory_artifact
+                    artifact_instances_by_path[relative + "/"] = directory_instance
+                    # The common declared-artifact pass below owns execution linkage.
+                    continue
                 self._attach_native_owner_reference(
                     session,
                     artifact_instance=directory_instance,
@@ -1098,6 +1133,8 @@ class SequencerRunRegistrationServiceMixin:
                 )
 
             for artifact, obj, _normalized_uri, relative_path in preflight:
+                if artifact.storage_kind == "prefix":
+                    continue
                 checksums = {"sha256": artifact.sha256} if artifact.sha256 else {}
                 storage_status = (
                     "verified"

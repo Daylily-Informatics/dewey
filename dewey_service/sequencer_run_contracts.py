@@ -6,7 +6,7 @@ import hashlib
 import json
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_serializer, model_validator
 
 SequencerPlatform = Literal["ILMN", "ONT", "ULTIMA", "HYBRID_ILMN_ONT"]
 TriggerPolicy = Literal["register_only", "trigger_ursa"]
@@ -115,6 +115,7 @@ class AnalysisResultArtifact(BaseModel):
 
     logical_name: str
     artifact_role: str
+    storage_kind: Literal["object", "prefix"] = "object"
     relative_path: str | None = None
     storage_uri: str | None = None
     sha256: str | None = None
@@ -124,6 +125,14 @@ class AnalysisResultArtifact(BaseModel):
     required: bool = True
     parser_hint: str | None = None
     sample_identifiers: list[SampleIdentifier] = Field(default_factory=list)
+
+    @model_serializer(mode="wrap")
+    def _declared_storage_kind(self, handler):
+        payload = handler(self)
+        # Ordinary file requests keep their exact established request identity.
+        if self.storage_kind == "object":
+            payload.pop("storage_kind", None)
+        return payload
 
     @field_validator("logical_name", "artifact_role")
     @classmethod
