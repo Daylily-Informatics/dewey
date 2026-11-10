@@ -17,3 +17,7 @@ The repair honors the explicit artifact role during automatic registration. Coll
 | Dewey | Honor declared collateral role | Implemented | dewey_service/services/report_bundles.py |
 | Coordinator | Tagged release / EC2 build / scoped deployment | Pending | Native receipts to follow |
 | Ursa | Same import retry and delivered webshare | Pending | M-RGX-3PX03 |
+
+## Predeployment source review
+
+12.0.35 was tagged and its final-candidate build started before source review found that the detached registry path also needs the same classification before it creates an inspection inventory.12.0.36 supersedes35 before deployment and moves the collateral decision into the shared HTML candidate selector, covering both paths without adding checks. No35 deployment or runtime retry occurred. No tests run.

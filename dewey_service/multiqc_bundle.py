@@ -21,7 +21,10 @@ class NotMultiQCReport(ValueError):
 
 
 def html_candidate(payload):
-    return (payload.get("storage_kind") == "object"
+    # Declared collateral is registered as a bundle member, not an independent
+    # report. Use the same classification in transactional and detached paths.
+    return (payload.get("metadata", {}).get("artifact_role") != "multiqc_report_asset"
+            and payload.get("storage_kind") == "object"
             and payload.get("storage_backend") == "s3"
             and str(payload.get("key", "")).lower().endswith((".html", ".htm")))
 

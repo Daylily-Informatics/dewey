@@ -48,11 +48,6 @@ class ReportBundleServiceMixin:
         """
         if not html_candidate(payload):
             return payload
-        if payload.get("metadata", {}).get("artifact_role") == "multiqc_report_asset":
-            # Declared collateral (including the unsplit original HTML) is a
-            # member of the report bundle, not another report entrypoint.
-            # The actual report still owns dependency inspection and sharing.
-            return payload
         storage = self._require_storage()
         bucket = payload["bucket"]
 
