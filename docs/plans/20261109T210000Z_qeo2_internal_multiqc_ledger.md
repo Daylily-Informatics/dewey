@@ -2,6 +2,9 @@
 
 ## Current continuation state
 
+November10 08:06Z: Dewey12.0.34/c00b2d3aac4df019fe5b82c01c3ee42e64d37c67 published and deployed. Native final EC2 build returned0 (SSM02215a3d-8d8b-42b3-8114-69119bd4c124); native Compose deployment returned0 and Healthy07:55:40Z (SSM63750af3-4cc7-4d85-935a-04ecaa3c2444). Image sha256:fea5f2178bbfc4a9be9aa8ffa0a28b07d2ba73acabfffb44f7d3915632d75ee8. Existing QEO credential reused; no new credential issued. This supersedes the pending-build/deployment statement below. Ursa/QEO2 report-delivery acceptance remains pending; no tests/lint/secondary QC.
+
+
 November10 extension IN_PROGRESS: final Dewey12.0.34 adds the requested typed report → QEO2 persisted evidence reference. The existing dedicated QEO2 credential is accepted by one additional exact endpoint, /api/v1/qeo/report-evidence, with the same trusted ingress and allowed source roots. The exact report context permits only the native external-reference/lineage write; it does not change report content, broad registry access or sharing policy. Existing credential and native service deployment identity retained. Source publication, EC2 build, deployment and Ursa runtime acceptance tracked separately in the controlling Ursa ledger. No tests/lint, new credential issuance, migrations or local container builds.
 
 ### Prior completed source capability
