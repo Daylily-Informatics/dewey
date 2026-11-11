@@ -1,0 +1,17 @@
+{
+  "ssm_command_id": "7f6bac6f-ebfc-4afd-b58a-f6603df9e64a",
+  "native_status": "Success",
+  "exit_code": 0,
+  "receipt": [
+    {
+      "phase": "build",
+      "exit_code": 0,
+      "service": "dewey",
+      "image": "108782052779.dkr.ecr.us-west-2.amazonaws.com/dayhoff/day/dewey@sha256:c8526a134c399dc8e98573f6a6f2f0cff263688caba1d610b990e273891da5b0",
+      "source_tag": "12.0.39",
+      "source_commit": "533c55eeeed4a966d317d796ec5a234e378db0d5",
+      "started_at": "2026-11-11T19:41:30.960250+00:00",
+      "finished_at": "2026-11-11T19:44:28.479737+00:00"
+    }
+  ]
+}
