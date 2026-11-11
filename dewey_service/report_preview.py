@@ -22,6 +22,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from starlette.concurrency import run_in_threadpool
 
 from dewey_service.audit import authenticated_user_email_context
+from dewey_service.multiqc_bundle import GOOGLE_FONTS_CSS, GOOGLE_FONTS_FILES
 from dewey_service.preview_sessions import (
     binding_principal,
     current_session_binding,
@@ -187,8 +188,9 @@ def _report_csp(settings, *, nonce=None):
     # navigation remains blocked by form-action below.
     return (
         "sandbox allow-scripts allow-same-origin allow-forms allow-downloads; default-src 'none'; "
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; "
-        "img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; "
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+        f"style-src 'self' 'unsafe-inline' {GOOGLE_FONTS_CSS}/css {GOOGLE_FONTS_CSS}/css2; "
+        f"img-src 'self' data: blob:; font-src 'self' data: {GOOGLE_FONTS_FILES}; connect-src 'self'; "
         "worker-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; "
         "navigate-to 'self'; "
         f"frame-ancestors {settings.share_application_origin}"

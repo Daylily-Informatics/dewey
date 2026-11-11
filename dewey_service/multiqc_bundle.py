@@ -8,6 +8,14 @@ from urllib.parse import unquote, urlsplit
 
 MAX_DOCUMENT_BYTES = 64 * 1024 * 1024
 MAX_DEPENDENCIES = 10000
+GOOGLE_FONTS_CSS = "https://fonts.googleapis.com"
+GOOGLE_FONTS_FILES = "https://fonts.gstatic.com/s/"
+
+
+def _google_fonts_stylesheet(reference):
+    parsed = urlsplit(reference.strip())
+    return (parsed.scheme == "https" and parsed.netloc == "fonts.googleapis.com"
+            and parsed.path in {"/css", "/css2"})
 
 
 class RequiredExternalAssets(ValueError):
@@ -57,6 +65,10 @@ class _References(HTMLParser):
             self.multiqc |= (name in {"generator", "author"} and "multiqc" in content) or (name == "description" and content.startswith("multiqc:"))
         for attribute in ("src", "href"):
             if attrs.get(attribute):
+                if (tag == "link" and attribute == "href"
+                        and "stylesheet" in (attrs.get("rel") or "").lower().split()
+                        and _google_fonts_stylesheet(attrs[attribute])):
+                    continue
                 required = tag != "a" and not (tag == "link" and "stylesheet" not in attrs.get("rel", ""))
                 self.references.append((attrs[attribute], required))
         if attrs.get("srcset"):
@@ -207,8 +219,9 @@ def inspect_bundle(key, read_document, require_asset, registered_bundle=None, *,
                 if parser.errors:
                     raise ValueError(parser.errors[0])
             else:
-                references = [(a or b or c, True) for a, b, c in re.findall(
-                    r"url\(\s*(?:'([^']*)'|\"([^\"]*)\"|([^)'\"]+))\s*\)", text)]
+                references = [(a or b or c, True) for directive, a, b, c in re.findall(
+                    r"(@import\s+)?url\(\s*(?:'([^']*)'|\"([^\"]*)\"|([^)'\"]+))\s*\)", text)
+                    if not (directive and _google_fonts_stylesheet(a or b or c))]
             for reference, necessary in references:
                 asset = relative_asset(document, reference, required=necessary)
                 if asset is None or asset == entrypoint or asset in required:
