@@ -87,7 +87,10 @@ class ReportBundleServiceMixin:
         def consume_document(value, key):
             body = value["Body"]
             try:
-                content = body.read(MAX_DOCUMENT_BYTES + 1)
+                from dewey_service.performance import measure
+
+                with measure("s3_ms"):
+                    content = body.read(MAX_DOCUMENT_BYTES + 1)
             finally:
                 body.close()
             # Reject a large dependency before retaining its bytes. The original

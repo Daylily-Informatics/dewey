@@ -4,6 +4,9 @@ from collections import deque
 from contextlib import contextmanager
 from contextvars import ContextVar
 from datetime import datetime, timezone
+from hashlib import sha256
+import json
+import logging
 from threading import Lock
 from time import monotonic
 from uuid import uuid4
@@ -17,6 +20,13 @@ _active = {}
 _recent = deque(maxlen=200)
 _started = 0
 _completed = 0
+_REGISTRATION_ROUTES = {
+    "/api/v1/records",
+    "/api/v1/analysis-results/register",
+    "/api/v1/artifact-sets/analysis/register",
+    "/api/v1/artifact-sets/multiqc/register",
+}
+_SQL_KINDS = {"SELECT", "WITH", "INSERT", "UPDATE", "DELETE", "SET", "SAVEPOINT", "RELEASE", "ROLLBACK"}
 
 
 def instrument_engine(engine):
@@ -60,6 +70,10 @@ def before_query(conn, cursor, statement, parameters, context, executemany):
     if state is None:
         return
     context._dewey_query_started = monotonic()
+    if state["registration"]:
+        words = statement.split(maxsplit=1)
+        kind = words[0].upper() if words else ""
+        context._dewey_sql_kind = kind if kind in _SQL_KINDS else "OTHER"
     if state["interactive_read"]:
         milliseconds = max(1, min(10000, int(remaining_seconds() * 1000)))
         cursor.execute(
@@ -69,17 +83,33 @@ def before_query(conn, cursor, statement, parameters, context, executemany):
     metric("query_count", 1)
 
 
-def after_query(conn, cursor, statement, parameters, context, executemany):
+def _record_sql(context):
     started = getattr(context, "_dewey_query_started", None)
-    if started is not None:
-        metric("sql_ms", (monotonic() - started) * 1000)
+    state = _current.get()
+    if started is None or state is None:
+        return
+    elapsed = (monotonic() - started) * 1000
+    metric("sql_ms", elapsed)
+    if state["registration"]:
+        kind = context._dewey_sql_kind
+        by_kind = state["sql_by_kind"].setdefault(kind, {"count": 0, "duration_ms": 0.0})
+        by_kind["count"] += 1
+        by_kind["duration_ms"] += elapsed
+        if elapsed > state["slowest_sql_ms"]:
+            state["slowest_sql_ms"] = elapsed
+            state["slowest_sql_kind"] = kind
+            compiled = getattr(context, "compiled", None)
+            state["slowest_sql_fingerprint"] = (
+                sha256(compiled.string.encode()).hexdigest() if compiled is not None else None
+            )
+
+
+def after_query(conn, cursor, statement, parameters, context, executemany):
+    _record_sql(context)
 
 
 def query_error(exception_context):
-    context = exception_context.execution_context
-    started = getattr(context, "_dewey_query_started", None)
-    if started is not None:
-        metric("sql_ms", (monotonic() - started) * 1000)
+    _record_sql(exception_context.execution_context)
     metric("query_failures", 1)
 
 
@@ -129,15 +159,20 @@ class PerformanceMiddleware:
             "route": route,
             "method": scope["method"],
             "interactive_read": read,
+            "registration": scope["method"] == "POST" and path in _REGISTRATION_ROUTES,
             "query_count": 0,
             "sql_ms": 0,
             "s3_ms": 0,
+            "db_session_ms": 0,
             "cache_hits": 0,
             "cache_misses": 0,
             "response_bytes": 0,
             "status": 500,
             "response_complete": False,
         }
+        if state["registration"]:
+            state.update(sql_by_kind={}, slowest_sql_ms=0.0, slowest_sql_kind=None,
+                         slowest_sql_fingerprint=None, storage_authorization_ms=0.0)
         token = _current.set(state)
         with _lock:
             _started += 1
@@ -163,7 +198,7 @@ class PerformanceMiddleware:
             record = {
                 key: value
                 for key, value in state.items()
-                if key not in {"started", "interactive_read"}
+                if key not in {"started", "interactive_read", "registration"}
             }
             record.update(
                 request_id=request_id,
@@ -176,3 +211,8 @@ class PerformanceMiddleware:
                 _recent.appendleft(record)
                 _completed += 1
             _current.reset(token)
+            if state["registration"]:
+                logging.getLogger("uvicorn.error").info(
+                    json.dumps({"event": "dewey_registration_performance", **record},
+                               separators=(",", ":"))
+                )

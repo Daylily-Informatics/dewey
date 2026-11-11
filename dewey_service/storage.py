@@ -8,6 +8,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
+from dewey_service.performance import measure
+
 _STORAGE_AUTHORIZATION: ContextVar[Any] = ContextVar("dewey_storage_authorization", default=None)
 
 
@@ -125,7 +127,8 @@ class S3StorageClient:
         if str(request_payer or "").strip():
             params["RequestPayer"] = str(request_payer).strip()
         try:
-            response = self._listing_client.head_object(**params)
+            with measure("s3_ms"):
+                response = self._listing_client.head_object(**params)
         except self._client_error as exc:
             raise self._translate_error(exc, bucket=bucket, key=key) from exc
         return self._to_storage_object(bucket=bucket, key=key, response=response)
@@ -201,7 +204,8 @@ class S3StorageClient:
             if value is not None:
                 params[name] = value
         try:
-            return (self._client.head_object if head else self._client.get_object)(**params)
+            with measure("s3_ms"):
+                return (self._client.head_object if head else self._client.get_object)(**params)
         except self._client_error as exc:
             code = str(exc.response.get("Error", {}).get("Code", ""))
             from fastapi import HTTPException

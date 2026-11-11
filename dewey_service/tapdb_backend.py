@@ -28,6 +28,7 @@ from sqlalchemy.orm import Session
 
 from dewey_service.audit import creation_audit_fields, transaction_attribution, update_audit_fields
 from dewey_service.integrations.tapdb_runtime import ensure_tapdb_version, load_runtime_config
+from dewey_service.performance import instrument_engine, measure
 from dewey_service.registry_access import (
     OPERATION_TEMPLATE,
     POLICY_TEMPLATE,
@@ -160,18 +161,17 @@ class TapDBBackend:
     def session_scope(self, commit: bool = False) -> Generator[Session, None, None]:
         started = monotonic()
         success = False
+        operation = self._operation_label()
         try:
             connection = get_db(self.config_path)
             connection.app_username = self.connection.app_username
             connection.attribution = transaction_attribution(
-                self.settings, self._operation_label(), commit=commit
+                self.settings, operation, commit=commit
             )
-            with connection.session_scope(commit=commit) as session:
-                from dewey_service.performance import instrument_engine
-
+            with measure("db_session_ms"), connection.session_scope(commit=commit) as session:
                 instrument_engine(session.get_bind())
                 yield session
-                success = True
+            success = True
         except RevisionConflict as exc:
             raise HTTPException(
                 409, "TapDB revision conflict; reread and explicitly reconcile the change"
@@ -179,7 +179,7 @@ class TapDBBackend:
         finally:
             if self.observability is not None:
                 self.observability.record_db_operation(
-                    label=self._operation_label(),
+                    label=operation,
                     duration_ms=(monotonic() - started) * 1000,
                     success=success,
                 )
@@ -192,14 +192,20 @@ class TapDBBackend:
         session.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": value})
 
     def _operation_label(self) -> str:
-        for frame_info in inspect.stack(context=0):
-            filename = str(frame_info.filename or "")
-            if "/dewey_service/services/" in filename and filename.endswith(".py"):
-                return f"service:{frame_info.function}"
-            if filename.endswith("/dewey_service/service.py"):
-                return f"service:{frame_info.function}"
-            if filename.endswith("/dewey_service/app.py"):
-                return f"app:{frame_info.function}"
+        frame = inspect.currentframe()
+        try:
+            while frame is not None:
+                code = frame.f_code
+                filename = code.co_filename
+                if (
+                    "/dewey_service/services/" in filename and filename.endswith(".py")
+                ) or filename.endswith("/dewey_service/service.py"):
+                    return f"service:{code.co_name}"
+                if filename.endswith("/dewey_service/app.py"):
+                    return f"app:{code.co_name}"
+                frame = frame.f_back
+        finally:
+            del frame
         return "tapdb_session"
 
     def ensure_templates(

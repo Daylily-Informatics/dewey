@@ -11,6 +11,7 @@ from sqlalchemy import and_, exists, func, literal, or_, select
 from sqlalchemy.orm import aliased
 
 from dewey_service.deletion_policy import reject_deletion
+from dewey_service.performance import measure
 from dewey_service.registry_access import (
     OPERATION_TEMPLATE,
     direct_record_clause,
@@ -56,8 +57,13 @@ class RegistryStorageServiceMixin:
             generic_instance.json_addl["key"].astext.label("key"),
         ).cte("storage_access_targets").prefix_with("MATERIALIZED")
         key = generic_instance.json_addl["key"].astext
-        relevant_to_target = exists(
-            select(literal(1)).select_from(targets).where(
+        # Keep the exact targets even when their coordinates contain NULL.
+        # Match other candidates with a join so PostgreSQL can use the
+        # coordinate equality predicates before evaluating the prefix rule.
+        related_uids = select(generic_instance.uid).join_from(
+            generic_instance,
+            targets,
+            and_(
                 targets.c.domain_code == generic_instance.domain_code,
                 targets.c.issuer_app_code == generic_instance.issuer_app_code,
                 targets.c.bucket == generic_instance.json_addl["bucket"].astext,
@@ -68,18 +74,15 @@ class RegistryStorageServiceMixin:
                         func.left(targets.c.key, func.length(key)) == key,
                     ),
                 ),
-            )
-        ).correlate(generic_instance)
+            ),
+        ).where(
+            generic_instance.type == "artifact",
+            generic_instance.is_deleted.is_(False),
+            generic_instance.json_addl["storage_backend"].astext == "s3",
+        )
+        relevant_uids = select(targets.c.uid).union(related_uids)
         relevant = session.query(generic_instance).filter(
-            or_(
-                generic_instance.uid.in_(select(targets.c.uid)),
-                and_(
-                    generic_instance.type == "artifact",
-                    generic_instance.is_deleted.is_(False),
-                    generic_instance.json_addl["storage_backend"].astext == "s3",
-                    relevant_to_target,
-                ),
-            )
+            generic_instance.uid.in_(relevant_uids)
         ).cte("storage_access_relevant").prefix_with("MATERIALIZED")
         record = aliased(generic_instance, relevant)
         policy = aliased(generic_instance)
@@ -149,6 +152,7 @@ class RegistryStorageServiceMixin:
             results.append((row[0], bool(allowed and not denied)))
         return results
 
+    @measure("storage_authorization_ms")
     def _storage_locations_batch(self, session, locations, *, action="metadata"):
         """Evaluate each relevant registered ancestor once, preserving the SQL policy contract."""
         actor = principal()
